@@ -3,7 +3,7 @@
 Singleplayer psychological horror mod for Minecraft (Fabric, Kotlin), set in the
 abandoned underground "Noname Complex". You are the new night-shift security guard.
 
-Current state: **Phase 0** (project skeleton only, no gameplay).
+Current state: **Phase 1** (data foundation: gameplay config and level definitions, no gameplay yet).
 
 ## Versions
 
@@ -35,7 +35,10 @@ Versions live in `gradle.properties` (plus Loom/Kotlin plugin versions in
 ```
 src/main/kotlin/daio7771/everytunnel/     common code (server + client)
     EveryTunnel.kt                        main entrypoint (ModInitializer)
-    core/        LevelManager, PlayerState                    (later phases)
+    config/      GameplayConfig, parser, ConfigManager (gameplay.json)
+    core/        LevelManager; level/ = level model + parser; PlayerState later
+    platform/    Minecraft-version-dependent glue (datapack loading)
+    util/        JsonFields (forgiving typed JSON reader)
     systems/     ResourceSystem, NoiseSystem, LookDetection   (later phases)
     entities/    Pale man, ...                                (later phases)
     audio/       SoundManager                                 (later phases)
@@ -49,7 +52,12 @@ src/client/kotlin/daio7771/everytunnel/client/   client-only code
     effects/     client visual/audio effects                  (later phases)
 src/client/resources/
     every_tunnel.client.mixins.json
+src/test/kotlin/                          unit tests (./gradlew test)
+examples/dev_flat_datapack/               example level datapack for the dev world
 ```
+
+Only `platform/` uses Minecraft APIs that change between versions; config, level
+model, parsers and managers use plain Kotlin types, which keeps ports small.
 
 Each planned package contains a `Package.kt` file that only documents what will
 go there. Main and client code are in separate source sets (Loom
@@ -104,3 +112,70 @@ world, delete `run/saves/dev_flat/` and repeat the setup.
 
 The real hand-built map (Noname Complex) will later be another save in
 `run/saves/`; the same quick-play mechanism works for it.
+
+## Gameplay config (`gameplay.json`)
+
+All gameplay values live in `config/every_tunnel/gameplay.json` (in dev:
+`run/config/every_tunnel/gameplay.json`). The file is created with defaults on
+first launch and read at game start (restart after editing).
+
+- Invalid value (wrong type, out of range): warning in the log, default used for
+  that value only.
+- Unknown key: warning (usually a typo), ignored.
+- File is not valid JSON: error in the log, all defaults, file left untouched.
+- Missing keys (e.g. new values added by a mod update): added to the file with
+  their default, unless the file has other problems.
+
+The current values are placeholders until playtesting. Defaults and the meaning of
+each value: `src/main/kotlin/daio7771/everytunnel/config/GameplayConfig.kt`.
+
+## Level definitions (datapack in the world save)
+
+Levels belong to the map, so they ship inside its save as a datapack:
+
+```
+<world>/datapacks/every_tunnel_levels/
+    pack.mcmeta                              {"pack": {"pack_format": 15, ...}}  (15 = 1.20.1)
+    data/every_tunnel/levels/level_1.json    one file per level; file name = level id
+```
+
+They load when the world opens and again on `/reload`, so zones can be edited
+without restarting. The log shows `Loaded N level(s): ...` and a warning for every
+problem (with file and JSON path). A broken zone or spawn point is skipped; a level
+is skipped only if it has no `order` or no valid zone.
+
+```json
+{
+  "name": "Level 1 - Parking Garage",
+  "order": 1,
+  "dimension": "minecraft:overworld",
+  "zones": [
+    { "id": "garage", "from": [0, -60, 0], "to": [31, -55, 31] },
+    { "id": "ramp_down", "from": [28, -60, 28], "to": [31, -57, 31], "tags": ["exit"] }
+  ],
+  "spawn_points": [
+    { "id": "player_start", "pos": [4.5, -60, 4.5], "yaw": -45, "tags": ["player"] }
+  ]
+}
+```
+
+| Key | Required | Meaning |
+|---|---|---|
+| `name` | no (default: file name) | readable name for logs |
+| `order` | yes | progression order (1, 2, ...) |
+| `dimension` | no (default: overworld) | dimension id |
+| `zones[].id` | yes | `a-z`, `0-9`, `_`; unique inside the level |
+| `zones[].from` / `to` | yes | opposite block corners, both included (like `/fill`) |
+| `zones[].tags` | no | markers for later systems (e.g. `exit`) |
+| `spawn_points[].id` | yes | unique inside the level |
+| `spawn_points[].pos` | yes | `[x, y, z]`, decimals allowed (4.5 = block center) |
+| `spawn_points[].yaw` / `pitch` | no (default 0) | facing direction |
+| `spawn_points[].tags` | no | what spawns there (e.g. `player`, `pale_man`) |
+
+Tip: press F3 in game and read "Targeted Block" to get coordinates for `from`/`to`.
+
+### Trying it in the dev world
+
+Copy `examples/dev_flat_datapack/every_tunnel_levels` into
+`run/saves/dev_flat/datapacks/`, then open the world (or run `/reload` if it is
+already open). The log should show `Loaded 2 level(s): level_1 ..., level_2 ...`.

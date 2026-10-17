@@ -1,0 +1,12 @@
+{
+  "name": "Level 1 - Parking Garage (dev example)",
+  "order": 1,
+  "dimension": "minecraft:overworld",
+  "zones": [
+    { "id": "garage", "from": [0, -60, 0], "to": [31, -55, 31] },
+    { "id": "ramp_down", "from": [28, -60, 28], "to": [31, -57, 31], "tags": ["exit"] }
+  ],
+  "spawn_points": [
+    { "id": "player_start", "pos": [4.5, -60, 4.5], "yaw": -45, "tags": ["player"] }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "name": "Level 2 - Parking Garage, lower floor (dev example)",
+  "order": 2,
+  "dimension": "minecraft:overworld",
+  "zones": [
+    { "id": "garage", "from": [32, -60, 0], "to": [63, -55, 31] }
+  ],
+  "spawn_points": [
+    { "id": "player_entry", "pos": [34.5, -60, 2.5], "tags": ["player"] },
+    { "id": "pale_man_start", "pos": [60.5, -60, 28.5], "yaw": 135, "tags": ["pale_man"] }
+  ]
+}

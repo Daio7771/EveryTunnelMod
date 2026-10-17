@@ -81,6 +81,15 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:${prop("kotlin_loader_version")}")
 
     modImplementation("net.fabricmc.fabric-api:fabric-api:${prop("fabric_version")}")
+
+    // Unit tests for the pure Kotlin parts (config and level parsing).
+    testImplementation(kotlin("test"))
+    testImplementation(platform("org.junit:junit-bom:5.13.4"))
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.test {
+    useJUnitPlatform()
 }
 
 tasks.processResources {
