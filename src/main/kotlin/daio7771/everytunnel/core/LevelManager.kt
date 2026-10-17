@@ -10,7 +10,7 @@ import daio7771.everytunnel.core.level.Zone
  * world loads or `/reload` runs; empty when the world has no level files.
  * Lookups are safe from any thread: the whole set is swapped at once.
  *
- * Later phases add tracking of which level/zone the player is currently in.
+ * Which level/zone each player is in is tracked by [PlayerLocationTracker].
  */
 object LevelManager {
 
@@ -46,6 +46,21 @@ object LevelManager {
     /** The first level (by order) with a zone containing the position, or null. */
     fun levelAt(dimension: String, x: Double, y: Double, z: Double): LevelDefinition? =
         zoneAt(dimension, x, y, z)?.level
+
+    /**
+     * Every zone containing the position, from all levels (levels by order, then
+     * zones in file order). Zones may overlap, e.g. an `exit` zone inside a larger one.
+     */
+    fun zonesAt(dimension: String, x: Double, y: Double, z: Double): List<ZoneHit> {
+        val hits = mutableListOf<ZoneHit>()
+        for (level in snapshot.ordered) {
+            if (level.dimension != dimension) continue
+            for (zone in level.zones) {
+                if (zone.box.contains(x, y, z)) hits += ZoneHit(level, zone)
+            }
+        }
+        return hits
+    }
 
     /** The first zone (levels by order, then zones in file order) containing the position, or null. */
     fun zoneAt(dimension: String, x: Double, y: Double, z: Double): ZoneHit? {

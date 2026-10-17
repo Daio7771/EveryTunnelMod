@@ -1,7 +1,10 @@
 package daio7771.everytunnel
 
 import daio7771.everytunnel.config.ConfigManager
+import daio7771.everytunnel.platform.DebugCommands
 import daio7771.everytunnel.platform.LevelReloadListener
+import daio7771.everytunnel.platform.LevelTrackingHooks
+import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
 import org.slf4j.Logger
@@ -10,9 +13,9 @@ import org.slf4j.LoggerFactory
 /**
  * Common (server + client) entrypoint for Every Tunnel.
  *
- * Loads the gameplay config and registers the level data loader. Gameplay
- * systems (`systems`, `entities`, `audio`, `world`) are registered here in
- * later phases.
+ * Loads the gameplay config and registers the level data loader, the world
+ * rules, player level/zone tracking and the debug commands. Later gameplay
+ * systems (`systems`, `entities`, `audio`) are registered here too.
  */
 object EveryTunnel : ModInitializer {
 
@@ -29,6 +32,9 @@ object EveryTunnel : ModInitializer {
     override fun onInitialize() {
         ConfigManager.load(FabricLoader.getInstance().configDir)
         LevelReloadListener.register()
+        WorldRulesHooks.register()
+        LevelTrackingHooks.register()
+        DebugCommands.register()
         LOGGER.info("$MOD_NAME loaded")
     }
 }

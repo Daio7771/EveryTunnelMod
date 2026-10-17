@@ -37,6 +37,12 @@ loom {
     }
 
     runs {
+        // Fixed dev username: otherwise every launch gets a random "PlayerNNN" name and
+        // UUID, so worlds forget the player's inventory, position and game mode.
+        named("client") {
+            programArgs("--username", "Dev")
+        }
+
         // Development shortcut: launches the client straight into the singleplayer
         // world saved as "dev_flat" in run/saves/ (a vanilla superflat world, see README).
         // Gradle task: ./gradlew runClientDevWorld
@@ -45,7 +51,7 @@ loom {
             configName = "Minecraft Client (dev_flat world)"
             source("client")
             ideConfigGenerated(true)
-            programArgs("--quickPlaySingleplayer", "dev_flat")
+            programArgs("--username", "Dev", "--quickPlaySingleplayer", "dev_flat")
         }
     }
 }

@@ -3,7 +3,7 @@
 Singleplayer psychological horror mod for Minecraft (Fabric, Kotlin), set in the
 abandoned underground "Noname Complex". You are the new night-shift security guard.
 
-Current state: **Phase 1** (data foundation: gameplay config and level definitions, no gameplay yet).
+Current state: **Phase 2** (gameplay config, level definitions, world rules, player level/zone tracking).
 
 ## Versions
 
@@ -36,13 +36,13 @@ Versions live in `gradle.properties` (plus Loom/Kotlin plugin versions in
 src/main/kotlin/daio7771/everytunnel/     common code (server + client)
     EveryTunnel.kt                        main entrypoint (ModInitializer)
     config/      GameplayConfig, parser, ConfigManager (gameplay.json)
-    core/        LevelManager; level/ = level model + parser; PlayerState later
+    core/        LevelManager, PlayerLocationTracker; level/ = level model + parser
     platform/    Minecraft-version-dependent glue (datapack loading)
     util/        JsonFields (forgiving typed JSON reader)
     systems/     ResourceSystem, NoiseSystem, LookDetection   (later phases)
     entities/    Pale man, ...                                (later phases)
     audio/       SoundManager                                 (later phases)
-    world/       LevelTriggers, LootTables                    (later phases)
+    world/       WorldRules, LevelTriggers; LootTables later
 src/main/resources/
     fabric.mod.json, every_tunnel.mixins.json
 src/client/kotlin/daio7771/everytunnel/client/   client-only code
@@ -80,7 +80,8 @@ The log should contain:
 [Render thread/INFO] (Every Tunnel) Every Tunnel loaded (client)
 ```
 
-The game directory for dev runs is `run/` (git-ignored).
+The game directory for dev runs is `run/` (git-ignored). Client runs use the fixed
+offline username `Dev`, so worlds remember your player between launches.
 
 ## Superflat development world
 
@@ -179,3 +180,40 @@ Tip: press F3 in game and read "Targeted Block" to get coordinates for `from`/`t
 Copy `examples/dev_flat_datapack/every_tunnel_levels` into
 `run/saves/dev_flat/datapacks/`, then open the world (or run `/reload` if it is
 already open). The log should show `Loaded 2 level(s): level_1 ..., level_2 ...`.
+
+## World rules
+
+Active only in worlds whose datapacks define Every Tunnel levels (other worlds
+stay vanilla):
+
+- **No breaking or placing blocks** for Survival/Adventure players: mining is
+  cancelled, and using items on blocks (placing blocks, buckets, flint and steel,
+  bone meal, ...) is disabled the same way Adventure mode does it. Doors, buttons
+  and levers still work. **Creative and Spectator are exempt**, so the map is
+  built and edited in Creative.
+- **No vanilla mob spawning**: when the world starts and after `/reload`, the mod
+  sets `doMobSpawning`, `doPatrolSpawning`, `doTraderSpawning`, `doInsomnia` and
+  `doWardenSpawning` to false (logged). Mod enemies are spawned by code and are
+  not affected. The gamerules are not restored if the levels are removed.
+
+## Level and zone tracking
+
+Every server tick the mod checks which level and zones each player is in. Zones
+may overlap (e.g. an `exit` zone inside a larger zone); the player is in all of
+them, and the current level is the first level by `order` that contains the
+player. Every change is logged, e.g.:
+
+```
+Player149: level none -> level_1; entered level_1/garage
+```
+
+Gameplay systems subscribe to these changes through `world.LevelTriggers`.
+
+## Debug commands
+
+Need operator level 2 ("Allow Commands" in singleplayer):
+
+| Command | Shows |
+|---|---|
+| `/everytunnel levels` | loaded levels with zones (corners, tags) and spawn points |
+| `/everytunnel where` | your position, current level and zones, whether world rules are active |
