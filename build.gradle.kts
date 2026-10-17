@@ -52,10 +52,13 @@ loom {
 
 // The project is Kotlin-only, so build/classes/java/* is never created, but Loom still
 // puts those folders on the run classpath and Fabric Loader warns that they are missing.
-// Creating them before every run keeps the dev log clean.
-tasks.withType<net.fabricmc.loom.task.AbstractRunTask>().configureEach {
-    doFirst {
-        sourceSets.forEach { it.java.destinationDirectory.get().asFile.mkdirs() }
+// Creating them whenever classes are built keeps the dev log clean, both for the
+// Gradle run tasks and for the IntelliJ run configurations (which build through Gradle).
+listOf("classes", "clientClasses").forEach { name ->
+    tasks.named(name) {
+        doLast {
+            sourceSets.forEach { it.java.destinationDirectory.get().asFile.mkdirs() }
+        }
     }
 }
 
