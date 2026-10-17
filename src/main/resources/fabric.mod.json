@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "id": "every_tunnel",
+  "version": "${version}",
+  "name": "Every Tunnel",
+  "description": "A singleplayer psychological horror experience set in the abandoned Noname Complex. You are the new night-shift security guard.",
+  "authors": ["Daio7771"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      {
+        "adapter": "kotlin",
+        "value": "daio7771.everytunnel.EveryTunnel"
+      }
+    ],
+    "client": [
+      {
+        "adapter": "kotlin",
+        "value": "daio7771.everytunnel.client.EveryTunnelClient"
+      }
+    ],
+    "fabric-datagen": [
+      {
+        "adapter": "kotlin",
+        "value": "daio7771.everytunnel.client.EveryTunnelDataGenerator"
+      }
+    ]
+  },
+  "mixins": [
+    "every_tunnel.mixins.json",
+    {
+      "config": "every_tunnel.client.mixins.json",
+      "environment": "client"
+    }
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric-language-kotlin": ">=${kotlin_loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${minecraft_version}",
+    "java": ">=17"
+  }
+}

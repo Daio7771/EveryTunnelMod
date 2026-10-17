@@ -1,0 +1,138 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    kotlin("jvm") version "2.4.21"
+    id("fabric-loom") version "1.17.21"
+    id("maven-publish")
+}
+
+/** Reads a required value from gradle.properties as a non-null String. */
+fun prop(name: String): String = project.property(name) as String
+
+version = prop("mod_version")
+group = prop("maven_group")
+
+base {
+    archivesName.set(prop("archives_base_name"))
+}
+
+val targetJavaVersion = 17
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
+    // if it is present.
+    // If you remove this line, sources will not be generated.
+    withSourcesJar()
+}
+
+loom {
+    splitEnvironmentSourceSets()
+
+    mods {
+        register("every_tunnel") {
+            sourceSet("main")
+            sourceSet("client")
+        }
+    }
+
+    runs {
+        // Development shortcut: launches the client straight into the singleplayer
+        // world saved as "dev_flat" in run/saves/ (a vanilla superflat world, see README).
+        // Gradle task: ./gradlew runClientDevWorld
+        register("clientDevWorld") {
+            client()
+            configName = "Minecraft Client (dev_flat world)"
+            source("client")
+            ideConfigGenerated(true)
+            programArgs("--quickPlaySingleplayer", "dev_flat")
+        }
+    }
+}
+
+// The project is Kotlin-only, so build/classes/java/* is never created, but Loom still
+// puts those folders on the run classpath and Fabric Loader warns that they are missing.
+// Creating them before every run keeps the dev log clean.
+tasks.withType<net.fabricmc.loom.task.AbstractRunTask>().configureEach {
+    doFirst {
+        sourceSets.forEach { it.java.destinationDirectory.get().asFile.mkdirs() }
+    }
+}
+
+fabricApi {
+    configureDataGeneration {
+        client = true
+    }
+}
+
+repositories {
+    // Add repositories to retrieve artifacts from in here.
+    // You should only use this when depending on other mods because
+    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
+    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
+    // for more information about repositories.
+}
+
+dependencies {
+    // To change the versions see the gradle.properties file
+    minecraft("com.mojang:minecraft:${prop("minecraft_version")}")
+    mappings("net.fabricmc:yarn:${prop("yarn_mappings")}:v2")
+    modImplementation("net.fabricmc:fabric-loader:${prop("loader_version")}")
+    modImplementation("net.fabricmc:fabric-language-kotlin:${prop("kotlin_loader_version")}")
+
+    modImplementation("net.fabricmc.fabric-api:fabric-api:${prop("fabric_version")}")
+}
+
+tasks.processResources {
+    inputs.property("version", project.version)
+    inputs.property("minecraft_version", prop("minecraft_version"))
+    inputs.property("loader_version", prop("loader_version"))
+    inputs.property("kotlin_loader_version", prop("kotlin_loader_version"))
+    filteringCharset = "UTF-8"
+
+    filesMatching("fabric.mod.json") {
+        expand(
+            "version" to project.version,
+            "minecraft_version" to prop("minecraft_version"),
+            "loader_version" to prop("loader_version"),
+            "kotlin_loader_version" to prop("kotlin_loader_version")
+        )
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    // ensure that the encoding is set to UTF-8, no matter what the system default is
+    // this fixes some edge cases with special characters not displaying correctly
+    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+    // If Javadoc is generated, this must be specified in that task too.
+    options.encoding = "UTF-8"
+    options.release.set(targetJavaVersion)
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions.jvmTarget.set(JvmTarget.fromTarget(targetJavaVersion.toString()))
+}
+
+tasks.jar {
+    from("LICENSE.txt") {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
+}
+
+// configure the maven publication
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            artifactId = prop("archives_base_name")
+            from(components["java"])
+        }
+    }
+
+    // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+    repositories {
+        // Add repositories to publish to here.
+        // Notice: This block does NOT have the same function as the block in the top level.
+        // The repositories here will be used for publishing your artifact, not for
+        // retrieving dependencies.
+    }
+}
