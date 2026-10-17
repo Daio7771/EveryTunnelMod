@@ -3,7 +3,7 @@
 Singleplayer psychological horror mod for Minecraft (Fabric, Kotlin), set in the
 abandoned underground "Noname Complex". You are the new night-shift security guard.
 
-Current state: **Phase 2** (gameplay config, level definitions, world rules, player level/zone tracking).
+Current state: **Phase 3** (gameplay config, level definitions, world rules, player level/zone tracking, stamina and thirst).
 
 ## Versions
 
@@ -39,7 +39,7 @@ src/main/kotlin/daio7771/everytunnel/     common code (server + client)
     core/        LevelManager, PlayerLocationTracker; level/ = level model + parser
     platform/    Minecraft-version-dependent glue (datapack loading)
     util/        JsonFields (forgiving typed JSON reader)
-    systems/     ResourceSystem, NoiseSystem, LookDetection   (later phases)
+    systems/     ResourceSystem (stamina, thirst); NoiseSystem, LookDetection later
     entities/    Pale man, ...                                (later phases)
     audio/       SoundManager                                 (later phases)
     world/       WorldRules, LevelTriggers; LootTables later
@@ -47,9 +47,11 @@ src/main/resources/
     fabric.mod.json, every_tunnel.mixins.json
 src/client/kotlin/daio7771/everytunnel/client/   client-only code
     EveryTunnelClient.kt                  client entrypoint (ClientModInitializer)
+    ClientResources.kt                    stamina/thirst received from the server
     EveryTunnelDataGenerator.kt           datagen entrypoint (empty)
     hud/         custom HUD                                   (later phases)
     effects/     client visual/audio effects                  (later phases)
+src/client/java/daio7771/everytunnel/mixin/client/   client mixins (Java)
 src/client/resources/
     every_tunnel.client.mixins.json
 src/test/kotlin/                          unit tests (./gradlew test)
@@ -209,6 +211,24 @@ Player149: level none -> level_1; entered level_1/garage
 
 Gameplay systems subscribe to these changes through `world.LevelTriggers`.
 
+## Stamina and thirst
+
+Apply to Survival/Adventure players while the world rules are active (values in
+`gameplay.json`, sections `stamina` and `thirst`):
+
+- **Stamina** drains while sprinting and per jump, and regenerates after
+  `regen_delay_seconds` without use. At 0 you are **exhausted**: no sprinting until
+  stamina is back to `exhausted_recover_percent` of the maximum.
+- **Thirst** drains slowly all the time (`sprint_drain_multiplier` faster while
+  sprinting). When empty you take `damage_when_empty` every
+  `damage_interval_seconds` ("died from dehydration").
+- Vanilla hunger is held full: thirst replaces it. Health still regenerates
+  slowly the vanilla way (turn off with `/gamerule naturalRegeneration false`).
+- Dying resets both to full. Values are saved with the world
+  (`<world>/data/every_tunnel_resources.dat`).
+
+There is no HUD yet; check the values with `/everytunnel resources`.
+
 ## Debug commands
 
 Need operator level 2 ("Allow Commands" in singleplayer):
@@ -217,3 +237,5 @@ Need operator level 2 ("Allow Commands" in singleplayer):
 |---|---|
 | `/everytunnel levels` | loaded levels with zones (corners, tags) and spawn points |
 | `/everytunnel where` | your position, current level and zones, whether world rules are active |
+| `/everytunnel resources` | your stamina (and whether you are exhausted) and thirst |
+| `/everytunnel resources set stamina\|thirst <value>` | sets one of them, for testing |

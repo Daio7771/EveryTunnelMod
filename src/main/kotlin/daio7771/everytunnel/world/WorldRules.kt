@@ -15,7 +15,11 @@ object WorldRules {
     val active: Boolean
         get() = LevelManager.all().isNotEmpty()
 
+    /** True if the rules (and survival systems such as stamina and thirst) apply to a player in this game mode. */
+    fun appliesTo(isCreative: Boolean, isSpectator: Boolean): Boolean =
+        active && !isCreative && !isSpectator
+
     /** True if a player in this game mode may not break or place blocks right now. */
     fun blocksRestrictedFor(isCreative: Boolean, isSpectator: Boolean): Boolean =
-        active && !isCreative && !isSpectator
+        appliesTo(isCreative, isSpectator)
 }

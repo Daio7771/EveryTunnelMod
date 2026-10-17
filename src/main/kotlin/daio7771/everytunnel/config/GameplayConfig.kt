@@ -35,6 +35,11 @@ data class StaminaConfig(
     val regenPerSecond: Double = 15.0,
     /** Seconds after the last stamina use before regeneration starts. */
     val regenDelaySeconds: Double = 1.5,
+    /**
+     * When stamina runs out the player is exhausted and cannot sprint until stamina
+     * has regenerated to this percentage of [max].
+     */
+    val exhaustedRecoverPercent: Double = 30.0,
 )
 
 data class ThirstConfig(

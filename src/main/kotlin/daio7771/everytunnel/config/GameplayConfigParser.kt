@@ -70,6 +70,7 @@ object GameplayConfigParser {
         jumpCost = f.double("jump_cost", d.jumpCost, min = 0.0),
         regenPerSecond = f.double("regen_per_second", d.regenPerSecond, min = 0.0),
         regenDelaySeconds = f.double("regen_delay_seconds", d.regenDelaySeconds, min = 0.0),
+        exhaustedRecoverPercent = f.double("exhausted_recover_percent", d.exhaustedRecoverPercent, min = 0.0, max = 100.0),
     ).also { f.reportUnknownKeys() }
 
     private fun thirst(f: JsonFields, d: ThirstConfig) = ThirstConfig(

@@ -9,12 +9,14 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
  * Client-only entrypoint for Every Tunnel.
  *
  * Keeps the client player's block abilities in line with the world rules (so the
- * client predicts what the server allows). The custom HUD (`client.hud`) and
+ * client predicts what the server allows) and receives the player's stamina and
+ * thirst from the server ([ClientResources]). The custom HUD (`client.hud`) and
  * screen/audio effects (`client.effects`) are registered here in later phases.
  */
 object EveryTunnelClient : ClientModInitializer {
 
     override fun onInitializeClient() {
+        ClientResources.register()
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val player = client.player ?: return@register
             WorldRulesHooks.syncAbilities(player, client.interactionManager?.currentGameMode)
