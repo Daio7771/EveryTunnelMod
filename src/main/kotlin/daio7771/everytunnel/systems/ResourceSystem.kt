@@ -4,10 +4,14 @@ import daio7771.everytunnel.config.GameplayConfig
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-/** A player's stamina and thirst. */
+/** A player's stamina, thirst and flashlight battery. */
 data class ResourceState(
     val stamina: Double,
     val thirst: Double,
+    /** Seconds of flashlight light left in the battery. */
+    val battery: Double,
+    /** True while the flashlight is switched on. */
+    val flashlightOn: Boolean = false,
     /** Out of stamina: no sprinting until stamina recovers (see `StaminaConfig.exhaustedRecoverPercent`). */
     val exhausted: Boolean = false,
     /** Seconds left before stamina starts regenerating. */
@@ -16,29 +20,42 @@ data class ResourceState(
     val thirstDamageTimer: Double = 0.0,
 ) {
     companion object {
-        fun full(config: GameplayConfig) = ResourceState(config.stamina.max, config.thirst.max)
+        fun full(config: GameplayConfig) =
+            ResourceState(config.stamina.max, config.thirst.max, config.flashlight.batteryMaxSeconds)
     }
 }
 
-/** What the player did during one tick. */
-data class ResourceInput(val sprinting: Boolean, val jumps: Int)
-
-/** The state after one tick, and the health damage to deal (0 if none). */
-data class ResourceStep(val state: ResourceState, val damage: Double)
+/** What the player did during one tick, and whether a flashlight is anywhere in their inventory. */
+data class ResourceInput(val sprinting: Boolean, val jumps: Int, val hasFlashlight: Boolean = false)
 
 /**
- * Stamina and thirst simulation.
+ * The state after one tick, the health damage to deal (0 if none), and whether the
+ * flashlight switched itself off this tick because the battery ran out.
+ */
+data class ResourceStep(val state: ResourceState, val damage: Double, val batteryDied: Boolean = false)
+
+/** Result of pressing the flashlight key. */
+enum class FlashlightToggle { TURNED_ON, TURNED_OFF, NO_FLASHLIGHT, BATTERY_EMPTY }
+
+/** Result of using a battery item. */
+enum class BatteryInsert { REFILLED, ALREADY_FULL, NO_FLASHLIGHT }
+
+/**
+ * Stamina, thirst and flashlight battery simulation.
  *
  * - Stamina drains while sprinting and per jump, and regenerates after a short
  *   delay without use. At 0 the player is exhausted and cannot sprint until it
  *   recovers to a configured percentage.
  * - Thirst drains slowly all the time (faster while sprinting). When empty, the
  *   player takes damage at a fixed interval.
+ * - The flashlight battery drains one second per second while the flashlight is
+ *   on. At 0 the flashlight switches off; a battery item refills it. The
+ *   flashlight also switches off when the player no longer carries one.
  *
- * [step] is a pure function of the state, input and config; the per-player states
- * live here too. Plain Kotlin types only, so it is unit tested without Minecraft.
- * Driven every server tick by `platform.ResourceHooks`, which also saves the
- * states with the world. The flashlight battery is added with the flashlight item.
+ * [step], [toggleFlashlight], [insertBattery] and [withoutDrain] are pure functions
+ * of the state, input and config; the per-player states live here too. Plain Kotlin
+ * types only, so it is unit tested without Minecraft. Driven every server tick by
+ * `platform.ResourceHooks`, which also saves the states with the world.
  */
 object ResourceSystem {
 
@@ -81,6 +98,7 @@ object ResourceSystem {
     fun step(state: ResourceState, input: ResourceInput, dtSeconds: Double, config: GameplayConfig): ResourceStep {
         val s = config.stamina
         val t = config.thirst
+        val f = config.flashlight
 
         // Stamina
         var stamina = state.stamina.coerceAtMost(s.max)
@@ -117,6 +135,53 @@ object ResourceSystem {
             }
         }
 
-        return ResourceStep(ResourceState(stamina, thirst, exhausted, cooldown, damageTimer), damage)
+        // Flashlight battery
+        var battery = state.battery.coerceIn(0.0, f.batteryMaxSeconds)
+        var flashlightOn = state.flashlightOn && input.hasFlashlight
+        var batteryDied = false
+        if (flashlightOn) {
+            battery = (battery - dtSeconds).coerceAtLeast(0.0)
+            if (battery <= 0.0) {
+                flashlightOn = false
+                batteryDied = true
+            }
+        }
+
+        val next = ResourceState(stamina, thirst, battery, flashlightOn, exhausted, cooldown, damageTimer)
+        return ResourceStep(next, damage, batteryDied)
+    }
+
+    /**
+     * The flashlight part of a tick for players the survival rules do not apply to
+     * (Creative, worlds without levels): no drain, but it still switches off when the
+     * player stops carrying a flashlight.
+     */
+    fun withoutDrain(state: ResourceState, hasFlashlight: Boolean): ResourceState =
+        if (state.flashlightOn && !hasFlashlight) state.copy(flashlightOn = false) else state
+
+    /** Flashlight key pressed: switches the flashlight on or off if possible. */
+    fun toggleFlashlight(state: ResourceState, hasFlashlight: Boolean): Pair<ResourceState, FlashlightToggle> = when {
+        state.flashlightOn -> state.copy(flashlightOn = false) to FlashlightToggle.TURNED_OFF
+        !hasFlashlight -> state to FlashlightToggle.NO_FLASHLIGHT
+        state.battery <= 0.0 -> state to FlashlightToggle.BATTERY_EMPTY
+        else -> state.copy(flashlightOn = true) to FlashlightToggle.TURNED_ON
+    }
+
+    /** True if a battery item would add charge (the player carries a flashlight and the battery is not full). */
+    fun canInsertBattery(state: ResourceState, hasFlashlight: Boolean, config: GameplayConfig): Boolean =
+        hasFlashlight && state.battery < config.flashlight.batteryMaxSeconds
+
+    /** Battery item used: refills the battery by `FlashlightConfig.batteryRefillPercent`. */
+    fun insertBattery(state: ResourceState, hasFlashlight: Boolean, config: GameplayConfig): Pair<ResourceState, BatteryInsert> {
+        val f = config.flashlight
+        return when {
+            !hasFlashlight -> state to BatteryInsert.NO_FLASHLIGHT
+            state.battery >= f.batteryMaxSeconds -> state to BatteryInsert.ALREADY_FULL
+            else -> {
+                val battery = (state.battery + f.batteryMaxSeconds * f.batteryRefillPercent / 100.0)
+                    .coerceAtMost(f.batteryMaxSeconds)
+                state.copy(battery = battery) to BatteryInsert.REFILLED
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package daio7771.everytunnel.systems
 
+import daio7771.everytunnel.config.FlashlightConfig
 import daio7771.everytunnel.config.GameplayConfig
 import daio7771.everytunnel.config.StaminaConfig
 import daio7771.everytunnel.config.ThirstConfig
@@ -19,6 +20,7 @@ class ResourceSystemTest {
             max = 100.0, drainPerMinute = 60.0, sprintDrainMultiplier = 2.0,
             damageWhenEmpty = 2.0, damageIntervalSeconds = 5.0,
         ),
+        flashlight = FlashlightConfig(batteryMaxSeconds = 10.0, batteryRefillPercent = 50.0),
     )
     private val idle = ResourceInput(sprinting = false, jumps = 0)
     private val sprint = ResourceInput(sprinting = true, jumps = 0)
@@ -61,7 +63,7 @@ class ResourceSystemTest {
         assertEquals(90.0, run(ResourceState.full(config), idle, 10).thirst, 1e-9)
         assertEquals(80.0, run(ResourceState.full(config), sprint, 10).thirst, 1e-9)
 
-        var state = ResourceState(stamina = 100.0, thirst = 0.0)
+        var state = ResourceState(stamina = 100.0, thirst = 0.0, battery = 10.0)
         val damage = mutableListOf<Double>()
         repeat(12) {
             val step = ResourceSystem.step(state, idle, 1.0, config)
@@ -73,9 +75,75 @@ class ResourceSystemTest {
 
     @Test
     fun `values above a lowered max are clamped`() {
-        val state = ResourceState(stamina = 500.0, thirst = 500.0)
+        val state = ResourceState(stamina = 500.0, thirst = 500.0, battery = 500.0)
         val step = ResourceSystem.step(state, idle, 0.0, config)
         assertEquals(100.0, step.state.stamina)
         assertEquals(100.0, step.state.thirst)
+        assertEquals(10.0, step.state.battery)
+    }
+
+    private val carrying = ResourceInput(sprinting = false, jumps = 0, hasFlashlight = true)
+
+    @Test
+    fun `the flashlight toggles only with a flashlight and charge`() {
+        val full = ResourceState.full(config)
+        assertEquals(FlashlightToggle.NO_FLASHLIGHT, ResourceSystem.toggleFlashlight(full, hasFlashlight = false).second)
+
+        val (on, turnedOn) = ResourceSystem.toggleFlashlight(full, hasFlashlight = true)
+        assertEquals(FlashlightToggle.TURNED_ON, turnedOn)
+        assertTrue(on.flashlightOn)
+
+        val (off, turnedOff) = ResourceSystem.toggleFlashlight(on, hasFlashlight = true)
+        assertEquals(FlashlightToggle.TURNED_OFF, turnedOff)
+        assertFalse(off.flashlightOn)
+
+        val (stillOff, result) = ResourceSystem.toggleFlashlight(full.copy(battery = 0.0), hasFlashlight = true)
+        assertEquals(FlashlightToggle.BATTERY_EMPTY, result)
+        assertFalse(stillOff.flashlightOn)
+    }
+
+    @Test
+    fun `the battery drains only while on and switches the flashlight off when empty`() {
+        val on = ResourceState.full(config).copy(flashlightOn = true)
+        assertEquals(10.0, run(on.copy(flashlightOn = false), carrying, 5).battery, 1e-9, "no drain while off")
+
+        val drained = run(on, carrying, 4)
+        assertEquals(6.0, drained.battery, 1e-9)
+        assertTrue(drained.flashlightOn)
+
+        var state = drained
+        val died = mutableListOf<Boolean>()
+        repeat(7) {
+            val step = ResourceSystem.step(state, carrying, 1.0, config)
+            state = step.state
+            died += step.batteryDied
+        }
+        // 6 s left: empty during the 6th second, already off in the 7th.
+        assertEquals(listOf(false, false, false, false, false, true, false), died)
+        assertEquals(0.0, state.battery)
+        assertFalse(state.flashlightOn)
+    }
+
+    @Test
+    fun `dropping the flashlight switches it off`() {
+        val on = ResourceState.full(config).copy(flashlightOn = true)
+        assertFalse(ResourceSystem.step(on, idle, 1.0, config).state.flashlightOn)
+        assertFalse(ResourceSystem.withoutDrain(on, hasFlashlight = false).flashlightOn)
+        assertEquals(on, ResourceSystem.withoutDrain(on, hasFlashlight = true), "no drain outside the survival rules")
+    }
+
+    @Test
+    fun `a battery item refills by the configured percentage up to full`() {
+        val empty = ResourceState.full(config).copy(battery = 0.0)
+        assertEquals(BatteryInsert.NO_FLASHLIGHT, ResourceSystem.insertBattery(empty, hasFlashlight = false, config).second)
+
+        val (half, refilled) = ResourceSystem.insertBattery(empty, hasFlashlight = true, config)
+        assertEquals(BatteryInsert.REFILLED, refilled)
+        assertEquals(5.0, half.battery, 1e-9)
+
+        val (full, _) = ResourceSystem.insertBattery(half.copy(battery = 8.0), hasFlashlight = true, config)
+        assertEquals(10.0, full.battery, 1e-9, "capped at max")
+        assertFalse(ResourceSystem.canInsertBattery(full, hasFlashlight = true, config))
+        assertEquals(BatteryInsert.ALREADY_FULL, ResourceSystem.insertBattery(full, hasFlashlight = true, config).second)
     }
 }

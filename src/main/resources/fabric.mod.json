@@ -26,6 +26,12 @@
         "adapter": "kotlin",
         "value": "daio7771.everytunnel.client.EveryTunnelDataGenerator"
       }
+    ],
+    "lambdynlights:initializer": [
+      {
+        "adapter": "kotlin",
+        "value": "daio7771.everytunnel.client.compat.LambDynamicLightsCompat"
+      }
     ]
   },
   "mixins": [
@@ -41,5 +47,8 @@
     "fabric-api": "*",
     "minecraft": "${minecraft_version}",
     "java": ">=17"
+  },
+  "recommends": {
+    "lambdynlights": ">=4.4.0"
   }
 }

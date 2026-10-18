@@ -75,11 +75,19 @@ fabricApi {
 }
 
 repositories {
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
+    // Loom adds the repositories for Minecraft, Fabric and Maven Central by itself.
+
+    // LambDynamicLights (the flashlight's light) and its libraries, published by its
+    // author. Separate artifacts instead of the Modrinth jar: dev runs do not load the
+    // libraries nested inside a mod jar. Its yumi-commons libraries come from Maven Central.
+    maven("https://maven.gegy.dev/releases/") {
+        name = "Gegy"
+        content {
+            includeGroup("dev.lambdaurora.lambdynamiclights")
+            includeGroup("dev.lambdaurora")
+            includeGroup("io.github.queerbric")
+        }
+    }
 }
 
 dependencies {
@@ -90,6 +98,12 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:${prop("kotlin_loader_version")}")
 
     modImplementation("net.fabricmc.fabric-api:fabric-api:${prop("fabric_version")}")
+
+    // LambDynamicLights (client): compiled against its API only, so the jar does not
+    // bundle or require it; fabric.mod.json "recommends" it. Dev runs get the full mod
+    // with its libraries (modLocalRuntime is not exposed to anything depending on this mod).
+    modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${prop("lambdynamiclights_version")}")
+    modLocalRuntime("dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:${prop("lambdynamiclights_version")}")
 
     // Unit tests for the pure Kotlin parts (config and level parsing).
     testImplementation(kotlin("test"))

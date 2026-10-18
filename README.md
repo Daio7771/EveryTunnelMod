@@ -3,7 +3,7 @@
 Singleplayer psychological horror mod for Minecraft (Fabric, Kotlin), set in the
 abandoned underground "Noname Complex". You are the new night-shift security guard.
 
-Current state: **Phase 3** (gameplay config, level definitions, world rules, player level/zone tracking, stamina and thirst).
+Current state: **Phase 3** (gameplay config, level definitions, world rules, player level/zone tracking, stamina, thirst, flashlight with battery, custom HUD).
 
 ## Versions
 
@@ -13,6 +13,7 @@ Current state: **Phase 3** (gameplay config, level definitions, world rules, pla
 | Fabric Loader          | 0.19.5                     |
 | Fabric API             | 0.92.12+1.20.1             |
 | Fabric Language Kotlin | 1.14.2+kotlin.2.4.21       |
+| LambDynamicLights      | 4.4.0+1.20.1 (recommended) |
 | Kotlin                 | 2.4.21                     |
 | Mappings               | Yarn 1.20.1+build.10       |
 | Fabric Loom            | 1.17.21                    |
@@ -37,21 +38,25 @@ src/main/kotlin/daio7771/everytunnel/     common code (server + client)
     EveryTunnel.kt                        main entrypoint (ModInitializer)
     config/      GameplayConfig, parser, ConfigManager (gameplay.json)
     core/        LevelManager, PlayerLocationTracker; level/ = level model + parser
-    platform/    Minecraft-version-dependent glue (datapack loading)
+    platform/    Minecraft-version-dependent glue (datapack loading, items, hooks, packets)
     util/        JsonFields (forgiving typed JSON reader)
-    systems/     ResourceSystem (stamina, thirst); NoiseSystem, LookDetection later
+    systems/     ResourceSystem (stamina, thirst, battery), FlashlightBeam (light cone math);
+                 NoiseSystem, LookDetection later
     entities/    Pale man, ...                                (later phases)
     audio/       SoundManager                                 (later phases)
     world/       WorldRules, LevelTriggers; LootTables later
 src/main/resources/
     fabric.mod.json, every_tunnel.mixins.json
+    assets/every_tunnel/                  lang, item models, textures (placeholder art)
 src/client/kotlin/daio7771/everytunnel/client/   client-only code
     EveryTunnelClient.kt                  client entrypoint (ClientModInitializer)
-    ClientResources.kt                    stamina/thirst received from the server
+    ClientResources.kt                    stamina/thirst/flashlight received from the server
+    FlashlightControls.kt                 the Flashlight key
     EveryTunnelDataGenerator.kt           datagen entrypoint (empty)
-    hud/         custom HUD                                   (later phases)
-    effects/     client visual/audio effects                  (later phases)
-src/client/java/daio7771/everytunnel/mixin/client/   client mixins (Java)
+    hud/         StatusHud (health, stamina, thirst, battery bars)
+    effects/     FlashlightEffect (beam per tick, low battery flicker)
+    compat/      LambDynamicLightsCompat (only loaded when LambDynamicLights is installed)
+src/client/java/daio7771/everytunnel/mixin/client/   client mixins (Java): sprint block, vanilla bars
 src/client/resources/
     every_tunnel.client.mixins.json
 src/test/kotlin/                          unit tests (./gradlew test)
@@ -227,7 +232,63 @@ Apply to Survival/Adventure players while the world rules are active (values in
 - Dying resets both to full. Values are saved with the world
   (`<world>/data/every_tunnel_resources.dat`).
 
-There is no HUD yet; check the values with `/everytunnel resources`.
+## Flashlight and batteries
+
+Items (Tools creative tab, or `/give @s every_tunnel:flashlight` and
+`/give @s every_tunnel:battery`):
+
+- **Flashlight**: works from anywhere in the inventory. The **Flashlight key**
+  (default **F**, in Options -> Controls -> Every Tunnel) switches it on and off.
+  F is also vanilla's "Swap Item With Offhand": while both are on the same key the
+  mod unbinds the vanilla one (logged once); rebind it to another key if you want it.
+- **Battery charge** belongs to the player, not the item: `battery_max_seconds` of
+  light, drained only while on and only where the survival resources apply (the
+  flashlight also works in Creative, without drain). At 0 it switches off ("The
+  flashlight battery is dead"); dropping your last flashlight also switches it off.
+- **Battery item**: hold use for `battery_change_seconds` to refill
+  `battery_refill_percent` of the battery. Needs a flashlight and a battery that is
+  not full; consumed outside Creative.
+- **Low battery** (below `low_battery_warning_percent`): the HUD battery row blinks
+  red and the light flickers now and then, more often as it runs out.
+- Sounds are vanilla placeholders (button clicks) until the audio phase.
+
+### The light (LambDynamicLights)
+
+Minecraft 1.20.1 has no moving light, so the beam is drawn by the
+[LambDynamicLights](https://modrinth.com/mod/lambdynamiclights) mod (client only,
+4.4.0+1.20.1 or newer). It is **recommended, not required**: without it the game
+runs and the flashlight works (battery, HUD, sounds), but gives no light; the
+player gets a chat message the first time they switch it on. Dev runs
+(`runClient`, `runClientDevWorld`) include it automatically.
+
+The light is a cone from your eyes in the look direction (`beam_range` blocks long,
+`beam_width_degrees` wide, `beam_brightness` at the lens, dimming to 0 at the end)
+plus a faint glow around you (`glow_brightness`). It stops just past the first block
+you look at, so it lights the wall in front of you but not the room behind it. Light
+levels are 0-15 like torches (15). The beam values are read on the client.
+
+LambDynamicLights' own settings (Options -> Video Settings -> Dynamic Lights, or
+`config/lambdynlights.toml`) still apply; with dynamic lights set to Off there is no
+beam.
+
+## HUD
+
+While the survival resources apply (Survival/Adventure in a world with levels),
+the vanilla health, hunger, armor, air and experience bars are hidden and replaced by
+Minecraft-style rows of 10 icons above the hotbar:
+
+```
+stamina (top left)            battery (top right, only while carrying a flashlight)
+health  (bottom left)         thirst  (bottom right)
+[                       hotbar                       ]
+```
+
+Health uses the vanilla hearts (shaking when low). Stamina icons turn grey while
+exhausted; the battery row blinks red when low. Hotbar, crosshair and the rest of the
+vanilla HUD stay; other worlds and game modes keep the vanilla HUD. The icons are
+placeholder art in `assets/every_tunnel/textures/gui/hud_icons.png` (the layout of
+that file is documented in `client/hud/StatusHud.kt`); replacing the PNG changes the
+look without code changes. Item textures are placeholders as well.
 
 ## Debug commands
 
@@ -237,5 +298,5 @@ Need operator level 2 ("Allow Commands" in singleplayer):
 |---|---|
 | `/everytunnel levels` | loaded levels with zones (corners, tags) and spawn points |
 | `/everytunnel where` | your position, current level and zones, whether world rules are active |
-| `/everytunnel resources` | your stamina (and whether you are exhausted) and thirst |
-| `/everytunnel resources set stamina\|thirst <value>` | sets one of them, for testing |
+| `/everytunnel resources` | your stamina (and whether you are exhausted), thirst and flashlight battery |
+| `/everytunnel resources set stamina\|thirst\|battery <value>` | sets one of them, for testing (battery in seconds) |

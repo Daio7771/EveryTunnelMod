@@ -84,6 +84,12 @@ object GameplayConfigParser {
     private fun flashlight(f: JsonFields, d: FlashlightConfig) = FlashlightConfig(
         batteryMaxSeconds = f.double("battery_max_seconds", d.batteryMaxSeconds, min = 1.0),
         lowBatteryWarningPercent = f.double("low_battery_warning_percent", d.lowBatteryWarningPercent, min = 0.0, max = 100.0),
+        batteryRefillPercent = f.double("battery_refill_percent", d.batteryRefillPercent, min = 0.0, max = 100.0),
+        batteryChangeSeconds = f.double("battery_change_seconds", d.batteryChangeSeconds, min = 0.0, max = 10.0),
+        beamRange = f.double("beam_range", d.beamRange, min = 1.0, max = 64.0),
+        beamWidthDegrees = f.double("beam_width_degrees", d.beamWidthDegrees, min = 1.0, max = 120.0),
+        beamBrightness = f.double("beam_brightness", d.beamBrightness, min = 0.0, max = 15.0),
+        glowBrightness = f.double("glow_brightness", d.glowBrightness, min = 0.0, max = 15.0),
     ).also { f.reportUnknownKeys() }
 
     private fun noise(f: JsonFields, d: NoiseConfig) = NoiseConfig(

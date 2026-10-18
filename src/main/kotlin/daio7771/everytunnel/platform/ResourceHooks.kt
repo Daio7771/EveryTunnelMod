@@ -1,6 +1,7 @@
 package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.config.ConfigManager
+import daio7771.everytunnel.config.GameplayConfig
 import daio7771.everytunnel.systems.ResourceInput
 import daio7771.everytunnel.systems.ResourceState
 import daio7771.everytunnel.systems.ResourceSystem
@@ -21,13 +22,15 @@ import java.util.UUID
 /**
  * Drives [ResourceSystem] from the server tick.
  *
- * - Applies to Survival/Adventure players while the [WorldRules] are active.
+ * - Stamina, thirst and battery drain apply to Survival/Adventure players while the
+ *   [WorldRules] are active. The flashlight can be switched on in any game mode
+ *   except Spectator, but only drains the battery where the rules apply.
  * - Sprinting comes from the player's sprint flag; jumps from the vanilla jump
  *   statistic, which the server increments for every jump.
  * - Empty thirst deals "dehydration" damage (vanilla `dryOut` damage source).
  * - Vanilla hunger is held full: thirst replaces it, and a low food level would
  *   otherwise block sprinting without the player seeing why.
- * - Death resets resources to full.
+ * - Death resets resources to full (full battery, flashlight off).
  * - States are saved with the world (`data/every_tunnel_resources.dat` in the
  *   save folder) and synced to the client with [ResourceSyncPacket].
  */
@@ -64,20 +67,34 @@ object ResourceHooks {
         val save = saveData(server)
         for (player in server.playerManager.playerList) {
             val jumps = jumpsSinceLastTick(player)
+            val hasFlashlight = FlashlightHooks.hasFlashlight(player)
             if (!appliesTo(player)) {
-                sync(player, ResourceSyncPacket.INACTIVE)
+                val state = ResourceSystem.stateOf(player.uuid, config)
+                val updated = ResourceSystem.withoutDrain(state, hasFlashlight && !player.isSpectator)
+                if (updated != state) {
+                    ResourceSystem.set(player.uuid, updated)
+                    save.markDirty()
+                }
+                sync(player, packetOf(false, updated, hasFlashlight, config))
                 continue
             }
-            val step = ResourceSystem.tick(player.uuid, ResourceInput(player.isSprinting, jumps), TICK_SECONDS, config)
+            val input = ResourceInput(player.isSprinting, jumps, hasFlashlight)
+            val step = ResourceSystem.tick(player.uuid, input, TICK_SECONDS, config)
             save.markDirty()
 
             player.hungerManager.foodLevel = 20
             if (step.damage > 0.0) player.damage(player.damageSources.dryOut(), step.damage.toFloat())
+            if (step.batteryDied) FlashlightHooks.batteryDied(player)
 
-            val s = step.state
-            sync(player, ResourceSyncPacket.of(s.stamina, config.stamina.max, s.thirst, config.thirst.max, s.exhausted))
+            sync(player, packetOf(true, step.state, hasFlashlight, config))
         }
     }
+
+    private fun packetOf(active: Boolean, s: ResourceState, hasFlashlight: Boolean, config: GameplayConfig) =
+        ResourceSyncPacket.of(
+            active, s.stamina, config.stamina.max, s.thirst, config.thirst.max, s.exhausted,
+            hasFlashlight, s.flashlightOn, s.battery, config.flashlight.batteryMaxSeconds,
+        )
 
     private fun jumpsSinceLastTick(player: ServerPlayerEntity): Int {
         val count = player.statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.JUMP))
@@ -108,6 +125,8 @@ object ResourceHooks {
                     putDouble("stamina", state.stamina)
                     putDouble("thirst", state.thirst)
                     putBoolean("exhausted", state.exhausted)
+                    putDouble("battery", state.battery)
+                    putBoolean("flashlight_on", state.flashlightOn)
                 })
             }
             nbt.put("players", players)
@@ -117,11 +136,19 @@ object ResourceHooks {
         companion object {
             fun read(nbt: NbtCompound): SaveData {
                 val players = nbt.getCompound("players")
+                val fullBattery = ConfigManager.gameplay.flashlight.batteryMaxSeconds
                 val loaded = HashMap<UUID, ResourceState>()
                 for (key in players.keys) {
                     val id = runCatching { UUID.fromString(key) }.getOrNull() ?: continue
                     val p = players.getCompound(key)
-                    loaded[id] = ResourceState(p.getDouble("stamina"), p.getDouble("thirst"), p.getBoolean("exhausted"))
+                    loaded[id] = ResourceState(
+                        stamina = p.getDouble("stamina"),
+                        thirst = p.getDouble("thirst"),
+                        // Saves from before the flashlight existed have no battery: start full.
+                        battery = if (p.contains("battery")) p.getDouble("battery") else fullBattery,
+                        flashlightOn = p.getBoolean("flashlight_on"),
+                        exhausted = p.getBoolean("exhausted"),
+                    )
                 }
                 ResourceSystem.replaceAll(loaded)
                 return SaveData()

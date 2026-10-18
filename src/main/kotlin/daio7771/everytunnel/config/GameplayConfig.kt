@@ -57,8 +57,23 @@ data class ThirstConfig(
 data class FlashlightConfig(
     /** Seconds of light from a full battery. */
     val batteryMaxSeconds: Double = 300.0,
-    /** Battery percentage below which the low battery warning starts. */
+    /**
+     * Battery percentage below which the low battery warning starts: the HUD battery
+     * row blinks and the beam flickers now and then.
+     */
     val lowBatteryWarningPercent: Double = 20.0,
+    /** Percentage of a full battery that one battery item restores. */
+    val batteryRefillPercent: Double = 100.0,
+    /** Seconds spent changing the battery (holding use with a battery item); 0 = instant. */
+    val batteryChangeSeconds: Double = 1.5,
+    /** How far the beam reaches, in blocks. */
+    val beamRange: Double = 20.0,
+    /** Width of the beam cone, in degrees (edge to edge, at most 120). */
+    val beamWidthDegrees: Double = 40.0,
+    /** Light level at the center of the beam, 0-15 (15 = torch). Dims along the beam. */
+    val beamBrightness: Double = 15.0,
+    /** Light level of the faint glow around the player while the flashlight is on, 0-15. */
+    val glowBrightness: Double = 5.0,
 )
 
 /** Radius in blocks at which each player action can be heard. */

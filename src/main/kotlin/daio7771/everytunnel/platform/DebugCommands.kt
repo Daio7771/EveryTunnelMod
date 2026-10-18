@@ -19,8 +19,9 @@ import net.minecraft.text.Text
  * - `/everytunnel levels`: loaded levels with their zones and spawn points.
  * - `/everytunnel where`: the level and zones you are standing in, and whether
  *   the world rules are active.
- * - `/everytunnel resources`: your stamina and thirst.
- * - `/everytunnel resources set (stamina|thirst) <value>`: changes one of them.
+ * - `/everytunnel resources`: your stamina, thirst and flashlight battery.
+ * - `/everytunnel resources set (stamina|thirst|battery) <value>`: changes one of
+ *   them (battery in seconds of light).
  */
 object DebugCommands {
 
@@ -36,7 +37,8 @@ object DebugCommands {
                             .then(
                                 CommandManager.literal("set")
                                     .then(setResource("stamina"))
-                                    .then(setResource("thirst")),
+                                    .then(setResource("thirst"))
+                                    .then(setResource("battery")),
                             ),
                     ),
             )
@@ -86,6 +88,12 @@ object DebugCommands {
         val state = ResourceSystem.stateOf(player.uuid, config)
         reply(context, "Stamina: %.1f / %.1f%s".format(state.stamina, config.stamina.max, if (state.exhausted) " (exhausted)" else ""))
         reply(context, "Thirst: %.1f / %.1f".format(state.thirst, config.thirst.max))
+        val flashlight = when {
+            !FlashlightHooks.hasFlashlight(player) -> "no flashlight in inventory"
+            state.flashlightOn -> "on"
+            else -> "off"
+        }
+        reply(context, "Battery: %.1f / %.1f s (flashlight %s)".format(state.battery, config.flashlight.batteryMaxSeconds, flashlight))
         if (!ResourceHooks.appliesTo(player)) {
             reply(context, "Resources are paused (no levels in this world, or Creative/Spectator).")
         }
@@ -102,7 +110,8 @@ object DebugCommands {
                 player.uuid,
                 when (name) {
                     "stamina" -> state.copy(stamina = value.coerceAtMost(config.stamina.max))
-                    else -> state.copy(thirst = value.coerceAtMost(config.thirst.max))
+                    "thirst" -> state.copy(thirst = value.coerceAtMost(config.thirst.max))
+                    else -> state.copy(battery = value.coerceAtMost(config.flashlight.batteryMaxSeconds))
                 },
             )
             resources(context)

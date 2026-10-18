@@ -1,17 +1,18 @@
 package daio7771.everytunnel.client
 
+import daio7771.everytunnel.platform.FlashlightHooks
 import daio7771.everytunnel.platform.ResourceSyncPacket
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 
 /**
- * The local player's stamina and thirst as last sent by the server
- * ([ResourceSyncPacket]). Read by the sprint mixin and, later, the HUD.
+ * The local player's stamina, thirst and flashlight as last sent by the server
+ * ([ResourceSyncPacket]). Read by the sprint mixin, the HUD and the flashlight effect.
  */
 object ClientResources {
 
     @Volatile
-    var current: ResourceSyncPacket = ResourceSyncPacket.INACTIVE
+    var current: ResourceSyncPacket = ResourceSyncPacket.NONE
         private set
 
     fun register() {
@@ -19,7 +20,9 @@ object ClientResources {
             val packet = ResourceSyncPacket.read(buf)
             client.execute { current = packet }
         }
-        ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> current = ResourceSyncPacket.INACTIVE }
+        ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> current = ResourceSyncPacket.NONE }
+        // Lets the battery item predict on the client whether it can be used.
+        FlashlightHooks.clientBatteryNotFull = { current.battery < current.batteryMax }
     }
 
     /** True while the player is exhausted and must not sprint. Called from `ClientPlayerEntityMixin`. */
