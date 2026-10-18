@@ -12,6 +12,11 @@ to the mod's `.ogg` files happen in the Python pipeline, so edits can be redone.
 |---|---|---|---|---|---|
 | `footsteps_boots_stone.wav` | Six hiking boot steps on stone, ~250 ms apart (mono, 48 kHz, 24-bit, 3.5 s) | [Freesound 521590](https://freesound.org/people/Fission9/sounds/521590/) "Hiking Boot Footsteps on Stone" | Fission9 | CC0 | 2026-10-18 |
 | `metal_pipe_drop.mp3` | A metal pipe dropped on the floor (stereo, 320 kbps MP3, under 2 s) | [Freesound 680841](https://freesound.org/people/gamer500/sounds/680841/) "Metal pipe drop" | gamer500 | CC0 | 2026-10-18 |
+| `metal_pipe_hits.wav` | Many pipe bangs and metal hits in one file, for knock variations (stereo, 48 kHz, 18.2 s) | [Freesound 687242](https://freesound.org/people/DanJFilms/sounds/687242/) "Multiple Pipe Banging Metal Hit Sound Effects" | DanJFilms | CC0 | 2026-10-18 |
+| `metal_creak_slow.mp3` | Slowed-down metal squeal: a huge metal structure under stress (stereo, 128 kbps MP3) | [Freesound 172411](https://freesound.org/people/EagleStealthTeam/sounds/172411/) "Creaking Metal - Slow" | EagleStealthTeam | CC0 | 2026-10-18 |
+| `breathing_heavy_exhausted.wav` | Heavy, exhausted breathing; planned for the player out of stamina (stereo, 96 kHz, 24-bit, 36.8 s) | [Freesound 514224](https://freesound.org/people/skyfarmer/sounds/514224/) "Heavy Breathing" | skyfarmer | CC0 | 2026-10-18 |
+| `breathing_creepy.wav` | Creepy, labored breathing; planned for the Pale man (mono, 44.1 kHz, 16-bit, 23.5 s) | [Freesound 369294](https://freesound.org/people/georgisound/sounds/369294/) "Creepy_Breathing.wav" | georgisound | CC0 | 2026-10-18 |
+| `drinking_gulps.mp3` | Five gulps of water; planned for drinking (thirst) (stereo, 192 kbps MP3) | [Freesound 693251](https://freesound.org/people/UnderASpell/sounds/693251/) "Swallowing Liquid 4.mp3" | UnderASpell | CC0 | 2026-10-18 |
 
 ## Checked and rejected (not CC0)
 
@@ -26,7 +31,7 @@ Do not use these without changing the CC0-only rule:
 
 ## Still needed (CC0)
 
-- Breathing: the player when exhausted, and the Pale man
-- Drinking (thirst)
-- Pale man footsteps and voice, if the boot steps above are not used for him
-- More metal: pipe knocks and creaks for the garage ambience
+- Pale man footsteps (barefoot candidates, both CC0, checked 2026-10-18:
+  [197404](https://freesound.org/people/SpliceSound/sounds/197404/) male barefoot scuffs on tile,
+  [338106](https://freesound.org/people/SpliceSound/sounds/338106/) barefoot on wet tile)
+- Pale man voice, if he gets one
