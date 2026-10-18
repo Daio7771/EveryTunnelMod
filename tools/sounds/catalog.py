@@ -8,7 +8,7 @@ every run produces the same files. Sound ids follow the planned Minecraft sound 
 """
 
 from dataclasses import dataclass
-from typing import Callable
+from typing import Callable, Optional
 
 import numpy as np
 
@@ -30,6 +30,9 @@ class Sound:
     generate: Callable
     peak_db: float = -1.0  # preview loudness; in game volumes are set in sounds.json
     notes: str = ""
+    # Streamed from disk in game? None = by length (see export.py). Minecraft plays only a few
+    # streamed sounds at once, so sounds that play many times at once must not stream.
+    stream: Optional[bool] = None
 
 
 # ===========================================================================
@@ -669,7 +672,8 @@ def death(rng, variant):
 
 SOUNDS = [
     Sound("ambient.garage.drone", "Garage ambience", "Background tone of the whole garage", "stereo", True, 1, garage_drone, -3.0),
-    Sound("block.fluorescent.hum", "Garage ambience", "Every working light", "mono", True, 1, fluorescent_hum, -6.0),
+    Sound("block.fluorescent.hum", "Garage ambience", "Every working light", "mono", True, 1, fluorescent_hum, -6.0,
+          stream=False),
     Sound("block.fluorescent.flicker", "Garage ambience", "Failing lights", "mono", False, 6, fluorescent_flicker, -3.0),
     Sound("block.fluorescent.start", "Garage ambience", "A light turning on", "mono", False, 2, fluorescent_start, -3.0),
     Sound("block.fluorescent.off", "Garage ambience", "Power cut", "mono", False, 2, fluorescent_off, -3.0),

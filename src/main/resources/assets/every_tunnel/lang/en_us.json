@@ -6,5 +6,9 @@
   "message.every_tunnel.battery_empty": "The flashlight battery is dead",
   "message.every_tunnel.battery_full": "The flashlight battery is already full",
   "message.every_tunnel.battery_replaced": "Battery replaced",
-  "message.every_tunnel.dynamic_lights_missing": "Every Tunnel: install LambDynamicLights to see the flashlight's light."
+  "message.every_tunnel.dynamic_lights_missing": "Every Tunnel: install LambDynamicLights to see the flashlight's light.",
+  "block.every_tunnel.fluorescent_light": "Fluorescent Light",
+  "message.every_tunnel.light_mode.on": "Fluorescent light: on",
+  "message.every_tunnel.light_mode.flicker": "Fluorescent light: flickering",
+  "message.every_tunnel.light_mode.off": "Fluorescent light: off"
 }

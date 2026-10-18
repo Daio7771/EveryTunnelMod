@@ -19,6 +19,8 @@ data class LevelDefinition(
     val dimension: String,
     val zones: List<Zone>,
     val spawnPoints: List<SpawnPoint>,
+    /** Background sound while a player is in this level. */
+    val ambience: Ambience = Ambience.NONE,
 ) {
     fun zone(id: String): Zone? = zones.firstOrNull { it.id == id }
 
@@ -48,6 +50,32 @@ data class SpawnPoint(
 )
 
 data class Position(val x: Double, val y: Double, val z: Double)
+
+/**
+ * A level's background sound: a loop heard everywhere in the level (not positioned)
+ * and sounds played now and then at random spots around the player. Sound ids are
+ * Minecraft sound events, e.g. `every_tunnel:ambient.drip`.
+ */
+data class Ambience(
+    /** Looped while the player is in the level, or null for none. */
+    val loop: String?,
+    val loopVolume: Double,
+    val randomSounds: List<RandomSound>,
+) {
+    companion object {
+        val NONE = Ambience(null, 1.0, emptyList())
+    }
+}
+
+/** A sound played every [minInterval]-[maxInterval] seconds, [minDistance]-[maxDistance] blocks from the player. */
+data class RandomSound(
+    val sound: String,
+    val minInterval: Double,
+    val maxInterval: Double,
+    val minDistance: Double,
+    val maxDistance: Double,
+    val volume: Double,
+)
 
 /**
  * Box of whole blocks with both corners included, the same convention as `/fill`:

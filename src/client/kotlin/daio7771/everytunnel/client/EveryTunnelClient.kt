@@ -1,8 +1,10 @@
 package daio7771.everytunnel.client
 
 import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.client.effects.AmbiencePlayer
 import daio7771.everytunnel.client.effects.BreathingEffect
 import daio7771.everytunnel.client.effects.FlashlightEffect
+import daio7771.everytunnel.client.effects.FluorescentHum
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ClientModInitializer
@@ -16,7 +18,8 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
  * server ([ClientResources]), and registers the Flashlight key
  * ([FlashlightControls]), the flashlight's beam ([FlashlightEffect]; drawn by
  * `client.compat.LambDynamicLightsCompat` when LambDynamicLights is installed), the
- * exhausted breathing ([BreathingEffect]) and the status bars ([StatusHud]).
+ * exhausted breathing ([BreathingEffect]), the level ambience ([AmbiencePlayer]), the
+ * hum of fluorescent lights ([FluorescentHum]) and the status bars ([StatusHud]).
  */
 object EveryTunnelClient : ClientModInitializer {
 
@@ -25,6 +28,8 @@ object EveryTunnelClient : ClientModInitializer {
         FlashlightControls.register()
         FlashlightEffect.register()
         BreathingEffect.register()
+        AmbiencePlayer.register()
+        FluorescentHum.register()
         StatusHud.register()
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val player = client.player ?: return@register

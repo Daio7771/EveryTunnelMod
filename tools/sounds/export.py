@@ -50,7 +50,7 @@ def main():
     events = {}
     written = skipped = 0
 
-    def export(sound_id, relative, x):
+    def export(sound_id, relative, x, stream=None):
         nonlocal written, skipped
         path = SOUNDS_DIR / f"{relative}.ogg"
         digest = audio_hash(x)
@@ -62,13 +62,15 @@ def main():
             audio_io.write_ogg(path, x, SR, QUALITY)
             written += 1
         name = f"{NAMESPACE}:{relative}"
-        entry = {"name": name, "stream": True} if x.shape[0] / SR > STREAM_SECONDS else name
+        if stream is None:
+            stream = x.shape[0] / SR > STREAM_SECONDS
+        entry = {"name": name, "stream": True} if stream else name
         events.setdefault(sound_id, {"sounds": []})["sounds"].append(entry)
 
     for sound in SOUNDS:
         for v in range(sound.variants):
             x, _ = render_variant(sound, v)
-            export(sound.id, file_name(sound.id, v)[:-len(".wav")], x)
+            export(sound.id, file_name(sound.id, v)[:-len(".wav")], x, sound.stream)
 
     cut_titles = {}
     (OUT / "cuts").mkdir(parents=True, exist_ok=True)

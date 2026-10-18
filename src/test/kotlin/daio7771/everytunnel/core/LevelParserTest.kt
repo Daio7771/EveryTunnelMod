@@ -1,7 +1,9 @@
 package daio7771.everytunnel.core
 
+import daio7771.everytunnel.core.level.Ambience
 import daio7771.everytunnel.core.level.BlockBox
 import daio7771.everytunnel.core.level.LevelParser
+import daio7771.everytunnel.core.level.RandomSound
 import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.test.Test
@@ -73,5 +75,29 @@ class LevelParserTest {
         assertNull(LevelManager.zoneAt("minecraft:the_nether", 15.0, 1.0, 1.0))
         assertNull(LevelManager.levelAt("minecraft:overworld", 25.0, 1.0, 1.0))
         LevelManager.replaceAll(emptyList())
+    }
+
+    @Test
+    fun `ambience is optional and broken random sounds are skipped`() {
+        val zones = """"order": 1, "zones": [{ "id": "a", "from": [0, 0, 0], "to": [1, 1, 1] }]"""
+        assertEquals(Ambience.NONE, LevelParser.parse("plain", "{ $zones }").level?.ambience)
+
+        val result = LevelParser.parse(
+            "sounds",
+            """{ $zones, "ambience": {
+                "loop": "every_tunnel:ambient.garage.drone", "loop_volume": 0.6,
+                "random": [
+                    { "sound": "every_tunnel:ambient.drip", "interval": [6, 18], "distance": [3, 12], "volume": 0.5 },
+                    { "sound": "every_tunnel:ambient.rumble", "interval": [20, 10], "distance": [3, 12] },
+                    { "sound": "Not A Sound", "interval": [1, 2], "distance": [1, 2] },
+                    { "sound": "every_tunnel:ambient.relay", "interval": [5, 9], "distance": [10, 40] }
+                ] } }""",
+        )
+        val ambience = assertNotNull(result.level).ambience
+        assertEquals("every_tunnel:ambient.garage.drone", ambience.loop)
+        assertEquals(0.6, ambience.loopVolume)
+        assertEquals(listOf(RandomSound("every_tunnel:ambient.drip", 6.0, 18.0, 3.0, 12.0, 0.5)), ambience.randomSounds)
+        // min > max, a malformed id, and a distance beyond what Minecraft plays: each skipped.
+        assertEquals(3, result.problems.count { it.endsWith("random sound skipped") }, result.problems.toString())
     }
 }

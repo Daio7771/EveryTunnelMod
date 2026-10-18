@@ -30,6 +30,12 @@ object ModSounds {
     /** Stereo, played in the player's head (not positioned). */
     val BREATHING_EXHAUSTED = event("player.breathing_exhausted")
 
+    /** Fluorescent light: loop for lit lights (client), burst, switching on (starter ticks), power down. */
+    val FLUORESCENT_HUM = event("block.fluorescent.hum")
+    val FLUORESCENT_FLICKER = event("block.fluorescent.flicker")
+    val FLUORESCENT_START = event("block.fluorescent.start")
+    val FLUORESCENT_OFF = event("block.fluorescent.off")
+
     private fun event(path: String): SoundEvent =
         SoundEvent.of(Identifier(EveryTunnel.MOD_ID, path)).also { all += it }
 

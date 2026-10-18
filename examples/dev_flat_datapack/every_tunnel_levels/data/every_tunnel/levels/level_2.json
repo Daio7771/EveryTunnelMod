@@ -8,5 +8,14 @@
   "spawn_points": [
     { "id": "player_entry", "pos": [34.5, -60, 2.5], "tags": ["player"] },
     { "id": "pale_man_start", "pos": [60.5, -60, 28.5], "yaw": 135, "tags": ["pale_man"] }
-  ]
+  ],
+  "ambience": {
+    "loop": "every_tunnel:ambient.garage.drone",
+    "loop_volume": 0.75,
+    "random": [
+      { "sound": "every_tunnel:ambient.drip", "interval": [5, 15], "distance": [3, 12], "volume": 0.5 },
+      { "sound": "every_tunnel:ambient.rumble", "interval": [25, 70], "distance": [8, 16], "volume": 1.0 },
+      { "sound": "every_tunnel:ambient.relay", "interval": [30, 80], "distance": [4, 14], "volume": 0.6 }
+    ]
+  }
 }

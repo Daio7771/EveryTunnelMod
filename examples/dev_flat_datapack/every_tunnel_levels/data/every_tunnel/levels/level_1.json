@@ -8,5 +8,15 @@
   ],
   "spawn_points": [
     { "id": "player_start", "pos": [4.5, -60, 4.5], "yaw": -45, "tags": ["player"] }
-  ]
+  ],
+  "ambience": {
+    "loop": "every_tunnel:ambient.garage.drone",
+    "loop_volume": 0.6,
+    "random": [
+      { "sound": "every_tunnel:ambient.drip", "interval": [6, 18], "distance": [3, 12], "volume": 0.5 },
+      { "sound": "every_tunnel:ambient.rumble", "interval": [30, 90], "distance": [8, 16], "volume": 0.9 },
+      { "sound": "every_tunnel:ambient.relay", "interval": [25, 70], "distance": [4, 14], "volume": 0.6 },
+      { "sound": "every_tunnel:ambient.sparks", "interval": [40, 100], "distance": [4, 12], "volume": 0.5 }
+    ]
+  }
 }

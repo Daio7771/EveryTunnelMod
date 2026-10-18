@@ -59,10 +59,7 @@
   },
   "block.fluorescent.hum": {
     "sounds": [
-      {
-        "name": "every_tunnel:block/fluorescent/hum_1",
-        "stream": true
-      }
+      "every_tunnel:block/fluorescent/hum_1"
     ]
   },
   "block.fluorescent.off": {

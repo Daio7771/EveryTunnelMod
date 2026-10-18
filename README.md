@@ -181,14 +181,53 @@ is skipped only if it has no `order` or no valid zone.
 | `spawn_points[].pos` | yes | `[x, y, z]`, decimals allowed (4.5 = block center) |
 | `spawn_points[].yaw` / `pitch` | no (default 0) | facing direction |
 | `spawn_points[].tags` | no | what spawns there (e.g. `player`, `pale_man`) |
+| `ambience` | no | background sound of the level (see below) |
 
 Tip: press F3 in game and read "Targeted Block" to get coordinates for `from`/`to`.
+
+### Level ambience
+
+```json
+"ambience": {
+  "loop": "every_tunnel:ambient.garage.drone",
+  "loop_volume": 0.6,
+  "random": [
+    { "sound": "every_tunnel:ambient.drip", "interval": [6, 18], "distance": [3, 12], "volume": 0.5 },
+    { "sound": "every_tunnel:ambient.rumble", "interval": [30, 90], "distance": [8, 16], "volume": 0.9 }
+  ]
+}
+```
+
+- `loop` plays everywhere in the level, not positioned, and fades in/out (2 s) when
+  you enter or leave the level. `loop_volume` 0-1.
+- Each `random` sound plays every `interval` seconds (random between min and max) at a
+  random spot `distance` blocks away (max 16, Minecraft's hearing range), from 2 blocks
+  below to 3 above you. Spots inside walls are fine: Sound Physics Remastered muffles
+  them. `volume` 0-1.
+- Any sound event works, including vanilla ones (`minecraft:...`); the mod's are listed
+  on the sound preview page. Volumes are in the Ambient/Environment slider.
+- Changes apply with `/reload`.
 
 ### Trying it in the dev world
 
 Copy `examples/dev_flat_datapack/every_tunnel_levels` into
 `run/saves/dev_flat/datapacks/`, then open the world (or run `/reload` if it is
 already open). The log should show `Loaded 2 level(s): level_1 ..., level_2 ...`.
+
+## Fluorescent light
+
+`every_tunnel:fluorescent_light` (Functional Blocks tab) is a ceiling light panel for
+building the map (placeholder model and textures). It sticks to the face you place it
+against: ceilings, walls or floors.
+
+- **Modes**: on (light 15 and a hum), flickering, off. In Creative, right-click cycles
+  them (sneak + right-click to place a block against the light instead).
+- **Flickering** lights stay lit most of the time; every few seconds they go through a
+  burst of rapid off/on switching with the flicker sound, and the light around them
+  really goes out.
+- Switching on plays the starter ticks; switching off the power-down.
+- You hear the hum of the 8 nearest lights within 16 blocks, each at a slightly
+  different pitch.
 
 ## World rules
 
@@ -325,8 +364,8 @@ Audio is read and written with the system's libsndfile (no Python packages neede
 Every sound can be tried in game, with the garage's reverb:
 `/playsound every_tunnel:ambient.drip master @s ~ ~ ~` (sound ids as on the preview page,
 e.g. `block.fluorescent.hum`, `music.tension`). Played from code so far: flashlight and
-battery sounds, and `player.breathing_exhausted` when you run out of stamina (in your
-head, not positioned).
+battery sounds, `player.breathing_exhausted` when you run out of stamina (in your head,
+not positioned), fluorescent lights, and whatever the level files' `ambience` lists.
 
 ### Sound Physics Remastered
 

@@ -20,14 +20,22 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  *   ],
  *   "spawn_points": [
  *     { "id": "player_start", "pos": [4.5, -60, 4.5], "yaw": 180, "tags": ["player"] }
- *   ]
+ *   ],
+ *   "ambience": {
+ *     "loop": "every_tunnel:ambient.garage.drone",
+ *     "loop_volume": 0.6,
+ *     "random": [
+ *       { "sound": "every_tunnel:ambient.drip", "interval": [6, 18], "distance": [3, 12], "volume": 0.5 }
+ *     ]
+ *   }
  * }
  * ```
  *
  * `name` (defaults to the id), `dimension` (defaults to the overworld), `tags`,
- * `yaw`, `pitch` and `spawn_points` are optional. `order` and at least one valid
- * zone are required. A broken zone or spawn point is skipped with a problem; the
- * level is rejected only when it cannot be used at all.
+ * `yaw`, `pitch`, `spawn_points` and `ambience` (and everything inside it) are
+ * optional. `order` and at least one valid zone are required. A broken zone, spawn
+ * point or random sound is skipped with a problem; the level is rejected only when
+ * it cannot be used at all.
  */
 object LevelParser {
 
@@ -39,6 +47,10 @@ object LevelParser {
 
     private val ID_PATTERN = Regex("[a-z0-9_]+")
     private val DIMENSION_PATTERN = Regex("[a-z0-9_.-]+:[a-z0-9_./-]+")
+    private val SOUND_PATTERN = Regex("[a-z0-9_.-]+:[a-z0-9_./-]+")
+
+    /** Minecraft does not play positioned sounds farther away than this (at volume 1 or less). */
+    const val MAX_SOUND_DISTANCE: Double = 16.0
 
     fun parse(levelId: String, text: String): Result {
         val root = try {
@@ -64,6 +76,7 @@ object LevelParser {
 
         val zones = parseZones(fields, problems)
         val spawnPoints = parseSpawnPoints(fields, problems)
+        val ambience = parseAmbience(fields, problems)
         fields.reportUnknownKeys()
 
         if (!hasOrder || zones.isEmpty()) {
@@ -71,7 +84,73 @@ object LevelParser {
             problems += "level skipped"
             return Result(null, problems.toList())
         }
-        return Result(LevelDefinition(levelId, name, order, dimension, zones, spawnPoints), problems.toList())
+        return Result(LevelDefinition(levelId, name, order, dimension, zones, spawnPoints, ambience), problems.toList())
+    }
+
+    private fun parseAmbience(fields: JsonFields, problems: MutableList<String>): Ambience {
+        if (!fields.has("ambience")) {
+            fields.stringList("ambience") // marks the key as read; absent is fine
+            return Ambience.NONE
+        }
+        val ambience = fields.child("ambience")
+        val loop = if (ambience.has("loop")) {
+            soundId(ambience, "loop", problems)
+        } else {
+            ambience.stringList("loop") // marks the key as read; absent is fine
+            null
+        }
+        val loopVolume = ambience.double("loop_volume", 1.0, min = 0.0, max = 1.0)
+        val random = mutableListOf<RandomSound>()
+        if (ambience.has("random")) {
+            ambience.array("random")?.let { array ->
+                forEachObject(array, ambience.pathOf("random"), problems) { entry ->
+                    val sound = soundId(entry, "sound", problems)
+                    val interval = range(entry, "interval", 0.5, 3600.0, problems)
+                    val distance = range(entry, "distance", 0.0, MAX_SOUND_DISTANCE, problems)
+                    val volume = entry.double("volume", 1.0, min = 0.0, max = 1.0)
+                    entry.reportUnknownKeys()
+                    if (sound == null || interval == null || distance == null) {
+                        problems += "${entry.pathOf("sound")}: random sound skipped"
+                    } else {
+                        random += RandomSound(sound, interval.first, interval.second, distance.first, distance.second, volume)
+                    }
+                }
+            }
+        } else {
+            ambience.stringList("random")
+        }
+        ambience.reportUnknownKeys()
+        return Ambience(loop, loopVolume, random)
+    }
+
+    private fun soundId(entry: JsonFields, key: String, problems: MutableList<String>): String? {
+        val id = entry.requiredString(key) ?: return null
+        if (!SOUND_PATTERN.matches(id)) {
+            problems += "${entry.pathOf(key)}: \"$id\" is not a sound id like every_tunnel:ambient.drip"
+            return null
+        }
+        return id
+    }
+
+    /** `[min, max]` with min <= max inside [lowest, highest]. */
+    private fun range(entry: JsonFields, key: String, lowest: Double, highest: Double, problems: MutableList<String>): Pair<Double, Double>? {
+        if (!entry.has(key)) {
+            entry.array(key)
+            problems += "${entry.pathOf(key)}: missing required value [min, max]"
+            return null
+        }
+        val array = entry.array(key) ?: return null
+        val values = array.mapNotNull { it.numberOrNull()?.takeIf(Double::isFinite) }
+        if (array.size() != 2 || values.size != 2) {
+            problems += "${entry.pathOf(key)}: expected [min, max] with 2 numbers but got $array"
+            return null
+        }
+        val (low, high) = values
+        if (low > high || low < lowest || high > highest) {
+            problems += "${entry.pathOf(key)}: expected $lowest <= min <= max <= $highest but got $array"
+            return null
+        }
+        return low to high
     }
 
     private fun parseZones(fields: JsonFields, problems: MutableList<String>): List<Zone> {
