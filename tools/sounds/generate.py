@@ -16,6 +16,8 @@ gives the same sounds. Converting to .ogg for the mod is a later step.
 
 import html
 import json
+import re
+import shutil
 import sys
 import zlib
 from pathlib import Path
@@ -28,6 +30,7 @@ from catalog import SOUNDS  # noqa: E402
 from dsp import SR, loop_seam, normalize, pan, place, samples, stereo, write_wav  # noqa: E402
 
 OUT = Path(__file__).resolve().parent / "out"
+CC0 = Path(__file__).resolve().parent / "cc0"
 
 
 def seed_for(sound_id, variant):
@@ -140,6 +143,33 @@ def versioned(relative):
     return f"{relative}?v={stamp}"
 
 
+def copy_cc0():
+    """
+    Copies the CC0 source recordings next to the page (the server only serves out/) and
+    returns (file, content, source html, author) per file, from the table in SOURCES.md.
+    """
+    rows = {}
+    sources = CC0 / "SOURCES.md"
+    if sources.exists():
+        for line in sources.read_text(encoding="utf-8").splitlines():
+            cells = [c.strip() for c in line.strip().strip("|").split("|")]
+            if len(cells) >= 4 and cells[0].startswith("`"):
+                link = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"<a href='\2' target='_blank' rel='noopener'>\1</a>",
+                              html.escape(cells[2], quote=False))
+                rows[cells[0].strip("`")] = (cells[1], link, cells[3])
+    found = []
+    for path in sorted(CC0.glob("*")):
+        if path.suffix.lower() not in (".wav", ".mp3", ".ogg", ".flac"):
+            continue
+        target = OUT / "cc0" / path.name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if not target.exists() or target.stat().st_size != path.stat().st_size or target.stat().st_mtime < path.stat().st_mtime:
+            shutil.copy2(path, target)
+        content, link, author = rows.get(path.name, ("(not in SOURCES.md)", "", ""))
+        found.append((path.name, content, link, author))
+    return found
+
+
 def write_index():
     titles_file = OUT / "extras" / "titles.json"
     extra_titles = json.loads(titles_file.read_text(encoding="utf-8")) if titles_file.exists() else {}
@@ -187,6 +217,16 @@ def write_index():
                 parts.append(f"<div>#{v + 1}<audio controls preload='none'{loop_attr} "
                              f"src='{versioned(file_name(sound.id, v))}'></audio></div>")
             parts.append("</div></div>")
+    recordings = copy_cc0()
+    if recordings:
+        parts.append("<h2>CC0 recordings (originals, not yet cut or processed)</h2>")
+        parts.append("<p class='intro'>Real recordings for the sounds Python cannot make. They will be cut, "
+                     "cleaned up and converted later; sources and licenses are in tools/sounds/cc0/SOURCES.md.</p>")
+        for name, content, link, author in recordings:
+            parts.append(f"<div class='sound'><span class='id'>{html.escape(name)}</span><span class='tag'>CC0</span>"
+                         f"<div class='use'>{html.escape(content)}</div>"
+                         f"<div class='note'>{link}{' by ' + html.escape(author) if author else ''}</div>"
+                         f"<div class='players'><audio controls preload='none' src='{versioned('cc0/' + name)}'></audio></div></div>")
     parts.append("</main></body></html>")
     (OUT / "index.html").write_text("\n".join(parts), encoding="utf-8")
 
