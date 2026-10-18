@@ -41,13 +41,14 @@ src/main/kotlin/daio7771/everytunnel/     common code (server + client)
     core/        LevelManager, PlayerLocationTracker; level/ = level model + parser
     platform/    Minecraft-version-dependent glue (datapack loading, items, hooks, packets)
     util/        JsonFields (forgiving typed JSON reader)
-    systems/     ResourceSystem (stamina, thirst, battery), FlashlightBeam (light cone math);
-                 NoiseSystem, LookDetection later
+    systems/     ResourceSystem (stamina, thirst, battery), FlashlightBeam (light cone math),
+                 NoiseSystem (what enemies can hear); LookDetection later
     entities/    Pale man, ...                                (later phases)
     audio/       SoundManager                                 (later phases)
     world/       WorldRules, LevelTriggers; LootTables later
 src/main/resources/
     fabric.mod.json, every_tunnel.mixins.json
+src/main/java/daio7771/everytunnel/mixin/        common mixins (Java): game events -> noise
     assets/every_tunnel/                  lang, item models, textures (placeholder art)
 src/client/kotlin/daio7771/everytunnel/client/   client-only code
     EveryTunnelClient.kt                  client entrypoint (ClientModInitializer)
@@ -213,6 +214,27 @@ Tip: press F3 in game and read "Targeted Block" to get coordinates for `from`/`t
 Copy `examples/dev_flat_datapack/every_tunnel_levels` into
 `run/saves/dev_flat/datapacks/`, then open the world (or run `/reload` if it is
 already open). The log should show `Loaded 2 level(s): level_1 ..., level_2 ...`.
+
+## Noise
+
+What players do makes noise that enemies can hear (the Pale man, Phase 5). Each noise
+has a position and a radius in blocks; values in `gameplay.json`, section `noise`
+(0 makes an action silent):
+
+| Action | Key | Default |
+|---|---|---|
+| Footstep (about one per block) sneaking / walking / sprinting | `sneak_radius` / `walk_radius` / `sprint_radius` | 2 / 6 / 14 |
+| Jump | `jump_radius` | 8 |
+| Landing (2-block fall; half for small drops, up to twice for long falls) | `land_radius` | 10 |
+| Doors, trapdoors, fence gates, levers, buttons, chests, note blocks | `interact_radius` | 8 |
+| Flashlight clicks, battery change | `equipment_radius` | 4 |
+| Panting while out of stamina (once per second) | `exhausted_breathing_radius` | 5 |
+
+Only Survival/Adventure players in worlds with levels make noise. Noises are remembered
+for 5 seconds and travel through walls (whether walls muffle them is up to the
+listener). Doors and levers are detected through vanilla's game events, the same
+"vibrations" sculk sensors hear. Check them with `/everytunnel noise` and
+`/everytunnel noise watch`.
 
 ## Fluorescent light
 
@@ -384,3 +406,5 @@ Need operator level 2 ("Allow Commands" in singleplayer):
 | `/everytunnel where` | your position, current level and zones, whether world rules are active |
 | `/everytunnel resources` | your stamina (and whether you are exhausted), thirst and flashlight battery |
 | `/everytunnel resources set stamina\|thirst\|battery <value>` | sets one of them, for testing (battery in seconds) |
+| `/everytunnel noise` | the noises of the last 5 seconds within 32 blocks |
+| `/everytunnel noise watch` | shows each noise you make in the action bar (run again to turn off) |

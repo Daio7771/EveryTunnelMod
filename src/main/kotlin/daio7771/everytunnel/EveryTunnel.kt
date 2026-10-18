@@ -9,6 +9,7 @@ import daio7771.everytunnel.platform.LevelTrackingHooks
 import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.ModItems
 import daio7771.everytunnel.platform.ModSounds
+import daio7771.everytunnel.platform.NoiseHooks
 import daio7771.everytunnel.platform.ResourceHooks
 import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ModInitializer
@@ -21,7 +22,8 @@ import org.slf4j.LoggerFactory
  *
  * Loads the gameplay config and registers the items (battery), blocks (fluorescent
  * light), sounds, the level data loader, the world rules, player level/zone tracking,
- * level ambience, stamina, thirst and the flashlight battery, and the debug commands.
+ * level ambience, stamina, thirst and the flashlight battery, player noise (what
+ * enemies can hear), and the debug commands.
  * Later gameplay systems (`systems`, `entities`, `audio`) are registered here too.
  */
 object EveryTunnel : ModInitializer {
@@ -47,6 +49,7 @@ object EveryTunnel : ModInitializer {
         AmbienceHooks.register()
         ResourceHooks.register()
         FlashlightHooks.register()
+        NoiseHooks.register()
         DebugCommands.register()
         LOGGER.info("$MOD_NAME loaded")
     }

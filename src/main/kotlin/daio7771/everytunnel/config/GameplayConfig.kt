@@ -76,11 +76,22 @@ data class FlashlightConfig(
     val glowBrightness: Double = 5.0,
 )
 
-/** Radius in blocks at which each player action can be heard. */
+/**
+ * Radius in blocks at which each player action can be heard (see `systems.NoiseSystem`).
+ * 0 makes that action silent.
+ */
 data class NoiseConfig(
+    /** Per step (about one per block) while sneaking, walking or sprinting. */
     val sneakRadius: Double = 2.0,
     val walkRadius: Double = 6.0,
     val sprintRadius: Double = 14.0,
     val jumpRadius: Double = 8.0,
+    /** Landing after a 2-block fall; half of it for tiny drops, up to twice for long falls. */
     val landRadius: Double = 10.0,
+    /** Doors, trapdoors, fence gates, levers, buttons, chests and other containers. */
+    val interactRadius: Double = 8.0,
+    /** Flashlight clicks and changing the battery. */
+    val equipmentRadius: Double = 4.0,
+    /** Panting while out of stamina, once per second. */
+    val exhaustedBreathingRadius: Double = 5.0,
 )

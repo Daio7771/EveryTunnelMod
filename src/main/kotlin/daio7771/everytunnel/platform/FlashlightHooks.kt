@@ -54,6 +54,7 @@ object FlashlightHooks {
         val config = ConfigManager.gameplay
         val (state, result) = ResourceSystem.toggleFlashlight(ResourceSystem.stateOf(player.uuid, config))
         ResourceSystem.set(player.uuid, state)
+        NoiseHooks.equipment(player)
         when (result) {
             FlashlightToggle.TURNED_ON -> play(player, ModSounds.FLASHLIGHT_ON, 0.6f)
             FlashlightToggle.TURNED_OFF -> play(player, ModSounds.FLASHLIGHT_OFF, 0.6f)
@@ -90,6 +91,7 @@ object FlashlightHooks {
         ResourceSystem.set(player.uuid, state)
         if (!player.abilities.creativeMode) stack.decrement(1)
         play(player, ModSounds.BATTERY_CLOSE, 0.6f)
+        NoiseHooks.equipment(player)
         actionBar(player, "message.every_tunnel.battery_replaced")
     }
 
@@ -101,6 +103,7 @@ object FlashlightHooks {
     /** Battery change started (the cap is being unscrewed). */
     fun batteryChangeStarted(player: ServerPlayerEntity) {
         play(player, ModSounds.BATTERY_OPEN, 0.6f)
+        NoiseHooks.equipment(player)
     }
 
     private fun play(player: ServerPlayerEntity, sound: SoundEvent, volume: Float) {

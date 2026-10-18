@@ -98,5 +98,8 @@ object GameplayConfigParser {
         sprintRadius = f.double("sprint_radius", d.sprintRadius, min = 0.0),
         jumpRadius = f.double("jump_radius", d.jumpRadius, min = 0.0),
         landRadius = f.double("land_radius", d.landRadius, min = 0.0),
+        interactRadius = f.double("interact_radius", d.interactRadius, min = 0.0),
+        equipmentRadius = f.double("equipment_radius", d.equipmentRadius, min = 0.0),
+        exhaustedBreathingRadius = f.double("exhausted_breathing_radius", d.exhaustedBreathingRadius, min = 0.0),
     ).also { f.reportUnknownKeys() }
 }

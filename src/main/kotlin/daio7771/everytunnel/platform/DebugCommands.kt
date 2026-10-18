@@ -5,6 +5,7 @@ import com.mojang.brigadier.context.CommandContext
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.PlayerLocationTracker
+import daio7771.everytunnel.systems.NoiseSystem
 import daio7771.everytunnel.systems.ResourceSystem
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
@@ -22,6 +23,8 @@ import net.minecraft.text.Text
  * - `/everytunnel resources`: your stamina, thirst and flashlight battery.
  * - `/everytunnel resources set (stamina|thirst|battery) <value>`: changes one of
  *   them (battery in seconds of light).
+ * - `/everytunnel noise`: the noises of the last 5 seconds near you.
+ * - `/everytunnel noise watch`: shows each noise you make in the action bar (toggle).
  */
 object DebugCommands {
 
@@ -40,6 +43,10 @@ object DebugCommands {
                                     .then(setResource("thirst"))
                                     .then(setResource("battery")),
                             ),
+                    )
+                    .then(
+                        CommandManager.literal("noise").executes(::noise)
+                            .then(CommandManager.literal("watch").executes(::watchNoise)),
                     ),
             )
         }
@@ -117,6 +124,34 @@ object DebugCommands {
             resources(context)
         },
     )
+
+    private fun noise(context: CommandContext<ServerCommandSource>): Int {
+        val player = context.source.playerOrThrow
+        val now = player.server.ticks.toLong()
+        val dimension = LevelTrackingHooks.dimensionOf(player)
+        val near = NoiseSystem.recent().filter {
+            it.dimension == dimension && it.distanceSqTo(player.x, player.y, player.z) <= NOISE_LIST_RANGE * NOISE_LIST_RANGE
+        }
+        if (near.isEmpty()) reply(context, "No noise within $NOISE_LIST_RANGE blocks in the last 5 seconds.")
+        for (event in near.take(15)) {
+            reply(
+                context,
+                "%s %.1f blocks at [%.0f, %.0f, %.0f], %.1f s ago".format(
+                    event.source.id, event.radius, event.x, event.y, event.z, (now - event.tick) / 20.0,
+                ),
+            )
+        }
+        if (!NoiseHooks.makesNoise(player)) reply(context, "You make no noise (no levels in this world, or Creative/Spectator).")
+        return near.size
+    }
+
+    private fun watchNoise(context: CommandContext<ServerCommandSource>): Int {
+        val on = NoiseHooks.toggleWatch(context.source.playerOrThrow)
+        reply(context, "Noise readout in the action bar: ${if (on) "on" else "off"}")
+        return 1
+    }
+
+    private const val NOISE_LIST_RANGE = 32
 
     private fun reply(context: CommandContext<ServerCommandSource>, message: String) {
         context.source.sendFeedback({ Text.literal(message) }, false)

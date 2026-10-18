@@ -15,7 +15,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
-import net.minecraft.stat.Stats
 import net.minecraft.world.PersistentState
 import java.util.UUID
 
@@ -41,7 +40,7 @@ object ResourceHooks {
     private const val SAVE_ID = "every_tunnel_resources"
 
     // Server thread only.
-    private val lastJumpStat = HashMap<UUID, Int>()
+    private val jumps = JumpCounter()
     private val lastSent = HashMap<UUID, ResourceSyncPacket>()
 
     fun register() {
@@ -50,11 +49,11 @@ object ResourceHooks {
             if (!alive) ResourceSystem.reset(newPlayer.uuid)
         }
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->
-            lastJumpStat.remove(handler.player.uuid)
+            jumps.forget(handler.player.uuid)
             lastSent.remove(handler.player.uuid)
         }
         ServerLifecycleEvents.SERVER_STOPPED.register {
-            lastJumpStat.clear()
+            jumps.clear()
             lastSent.clear()
             ResourceSystem.clear()
         }
@@ -67,7 +66,7 @@ object ResourceHooks {
         val config = ConfigManager.gameplay
         val save = saveData(server)
         for (player in server.playerManager.playerList) {
-            val jumps = jumpsSinceLastTick(player)
+            val jumpCount = jumps.jumpsSince(player)
             if (!appliesTo(player)) {
                 var state = ResourceSystem.stateOf(player.uuid, config)
                 if (state.flashlightOn && !FlashlightHooks.available(player)) {
@@ -78,7 +77,7 @@ object ResourceHooks {
                 sync(player, packetOf(false, state, config))
                 continue
             }
-            val input = ResourceInput(player.isSprinting, jumps)
+            val input = ResourceInput(player.isSprinting, jumpCount)
             val step = ResourceSystem.tick(player.uuid, input, TICK_SECONDS, config)
             save.markDirty()
 
@@ -95,12 +94,6 @@ object ResourceHooks {
             active, s.stamina, config.stamina.max, s.thirst, config.thirst.max, s.exhausted,
             s.flashlightOn, s.battery, config.flashlight.batteryMaxSeconds,
         )
-
-    private fun jumpsSinceLastTick(player: ServerPlayerEntity): Int {
-        val count = player.statHandler.getStat(Stats.CUSTOM.getOrCreateStat(Stats.JUMP))
-        val previous = lastJumpStat.put(player.uuid, count) ?: return 0
-        return (count - previous).coerceAtLeast(0)
-    }
 
     private fun sync(player: ServerPlayerEntity, packet: ResourceSyncPacket) {
         if (lastSent[player.uuid] == packet) return
