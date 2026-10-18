@@ -1,14 +1,10 @@
 {
-  "item.every_tunnel.flashlight": "Flashlight",
-  "item.every_tunnel.flashlight.tooltip": "Switch it on and off with the Flashlight key (F by default)",
   "item.every_tunnel.battery": "Battery",
   "item.every_tunnel.battery.tooltip": "Hold use to put it in your flashlight",
   "key.categories.every_tunnel": "Every Tunnel",
   "key.every_tunnel.flashlight": "Flashlight",
-  "message.every_tunnel.no_flashlight": "You don't have a flashlight",
   "message.every_tunnel.battery_empty": "The flashlight battery is dead",
   "message.every_tunnel.battery_full": "The flashlight battery is already full",
-  "message.every_tunnel.battery_needs_flashlight": "You need a flashlight to use batteries",
   "message.every_tunnel.battery_replaced": "Battery replaced",
   "message.every_tunnel.dynamic_lights_missing": "Every Tunnel: install LambDynamicLights to see the flashlight's light."
 }

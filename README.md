@@ -3,7 +3,7 @@
 Singleplayer psychological horror mod for Minecraft (Fabric, Kotlin), set in the
 abandoned underground "Noname Complex". You are the new night-shift security guard.
 
-Current state: **Phase 3** (gameplay config, level definitions, world rules, player level/zone tracking, stamina, thirst, flashlight with battery, custom HUD).
+Current state: **Phase 4 in progress** (Phases 1-3: gameplay config, levels, world rules, zone tracking, stamina, thirst, flashlight with battery, custom HUD; Phase 4 so far: sound generator, CC0 recordings, sounds in game, Sound Physics Remastered).
 
 ## Versions
 
@@ -14,6 +14,7 @@ Current state: **Phase 3** (gameplay config, level definitions, world rules, pla
 | Fabric API             | 0.92.12+1.20.1             |
 | Fabric Language Kotlin | 1.14.2+kotlin.2.4.21       |
 | LambDynamicLights      | 4.4.0+1.20.1 (recommended) |
+| Sound Physics Remastered | 1.20.1-1.5.1 (recommended) |
 | Kotlin                 | 2.4.21                     |
 | Mappings               | Yarn 1.20.1+build.10       |
 | Fabric Loom            | 1.17.21                    |
@@ -235,23 +236,22 @@ Apply to Survival/Adventure players while the world rules are active (values in
 
 ## Flashlight and batteries
 
-Items (Tools creative tab, or `/give @s every_tunnel:flashlight` and
-`/give @s every_tunnel:battery`):
-
-- **Flashlight**: works from anywhere in the inventory. The **Flashlight key**
-  (default **F**, in Options -> Controls -> Every Tunnel) switches it on and off.
-  F is also vanilla's "Swap Item With Offhand": while both are on the same key the
-  mod unbinds the vanilla one (logged once); rebind it to another key if you want it.
-- **Battery charge** belongs to the player, not the item: `battery_max_seconds` of
-  light, drained only while on and only where the survival resources apply (the
-  flashlight also works in Creative, without drain). At 0 it switches off ("The
-  flashlight battery is dead"); dropping your last flashlight also switches it off.
-- **Battery item**: hold use for `battery_change_seconds` to refill
-  `battery_refill_percent` of the battery. Needs a flashlight and a battery that is
-  not full; consumed outside Creative.
+- **The flashlight is built-in equipment**, not an item: every player always has it
+  and nothing is shown in the hand. It exists only in worlds with levels (other
+  worlds stay vanilla) and not in Spectator. The **Flashlight key** (default **F**,
+  in Options -> Controls -> Every Tunnel) switches it on and off. F is also vanilla's
+  "Swap Item With Offhand": while both are on the same key the mod unbinds the
+  vanilla one (logged once); rebind it to another key if you want it.
+- **Battery charge**: `battery_max_seconds` of light, drained only while on and only
+  where the survival resources apply (in Creative it works without drain). At 0 it
+  switches off ("The flashlight battery is dead").
+- **Battery item** (Tools creative tab, or `/give @s every_tunnel:battery`): hold use
+  for `battery_change_seconds` to refill `battery_refill_percent` of the battery. Only
+  when the battery is not full; consumed outside Creative.
 - **Low battery** (below `low_battery_warning_percent`): the HUD battery row blinks
   red and the light flickers now and then, more often as it runs out.
-- Sounds are vanilla placeholders (button clicks) until the audio phase.
+- Sounds: switch clicks, a failing-contact "bzzt" when it flickers or dies, the tail
+  cap unscrewed at the start of a battery change and screwed back on at the end.
 
 ### The light (LambDynamicLights)
 
@@ -279,7 +279,7 @@ the vanilla health, hunger, armor, air and experience bars are hidden and replac
 Minecraft-style rows of 10 icons above the hotbar:
 
 ```
-stamina (top left)            battery (top right, only while carrying a flashlight)
+stamina (top left)            battery (top right)
 health  (bottom left)         thirst  (bottom right)
 [                       hotbar                       ]
 ```
@@ -289,7 +289,7 @@ exhausted; the battery row blinks red when low. Hotbar, crosshair and the rest o
 vanilla HUD stay; other worlds and game modes keep the vanilla HUD. The icons are
 placeholder art in `assets/every_tunnel/textures/gui/hud_icons.png` (the layout of
 that file is documented in `client/hud/StatusHud.kt`); replacing the PNG changes the
-look without code changes. Item textures are placeholders as well.
+look without code changes. The battery item texture is a placeholder as well.
 
 ## Sounds (`tools/sounds/`)
 
@@ -308,7 +308,32 @@ Every file comes from a fixed seed, so the same code always gives the same sound
 `tools/sounds/out/index.html` lists them all with players and a few preview mixes; in
 Claude Code the `sound-preview` entry of `.claude/launch.json` serves that page. The
 files are dry (no reverb) because Sound Physics Remastered adds the echo in game.
-Converting them to `.ogg` and registering them in the mod comes next.
+
+### Into the mod
+
+```bash
+python3 tools/sounds/export.py
+```
+
+writes every generated sound and every CC0 cut (`cc0_cuts.py`: which part of which
+recording, mono or stereo) as Ogg Vorbis to `src/main/resources/assets/every_tunnel/sounds/`
+and generates `assets/every_tunnel/sounds.json`. Run it after changing a sound and commit
+the result. Files whose audio did not change are not rewritten (`export_manifest.json`).
+Audio is read and written with the system's libsndfile (no Python packages needed; the
+`soundfile` package is used instead when installed).
+
+Every sound can be tried in game, with the garage's reverb:
+`/playsound every_tunnel:ambient.drip master @s ~ ~ ~` (sound ids as on the preview page,
+e.g. `block.fluorescent.hum`, `music.tension`). Played from code so far: flashlight and
+battery sounds, and `player.breathing_exhausted` when you run out of stamina (in your
+head, not positioned).
+
+### Sound Physics Remastered
+
+[Sound Physics Remastered](https://modrinth.com/mod/sound-physics-remastered) adds reverb,
+echo and muffling through blocks, which is a large part of the garage's atmosphere. Like
+LambDynamicLights it is **recommended, not required**, and dev runs include it, so sounds
+are always judged with it.
 
 ## Debug commands
 

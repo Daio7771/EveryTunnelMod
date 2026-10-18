@@ -89,7 +89,7 @@ object DebugCommands {
         reply(context, "Stamina: %.1f / %.1f%s".format(state.stamina, config.stamina.max, if (state.exhausted) " (exhausted)" else ""))
         reply(context, "Thirst: %.1f / %.1f".format(state.thirst, config.thirst.max))
         val flashlight = when {
-            !FlashlightHooks.hasFlashlight(player) -> "no flashlight in inventory"
+            !FlashlightHooks.available(player) -> "not available here"
             state.flashlightOn -> "on"
             else -> "off"
         }

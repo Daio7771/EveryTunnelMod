@@ -21,34 +21,22 @@ import net.minecraft.util.UseAction
 import net.minecraft.world.World
 
 /**
- * The mod's items. Both are listed in the Tools creative tab for map building and
- * can be given with `/give @s every_tunnel:flashlight` and `every_tunnel:battery`.
+ * The mod's items, listed in the Tools creative tab for map building.
  *
- * - Flashlight: works from anywhere in the inventory and is switched on and off
- *   with the Flashlight key (see [FlashlightHooks]). The battery charge belongs to
- *   the player (`systems.ResourceSystem`), not to the item.
- * - Battery: hold use for `flashlight.battery_change_seconds` to refill the
- *   flashlight battery; consumed outside Creative.
+ * - Battery (`/give @s every_tunnel:battery`): hold use for
+ *   `flashlight.battery_change_seconds` to refill the flashlight battery; consumed
+ *   outside Creative. The flashlight itself is not an item: every player has it,
+ *   invisible (see [FlashlightHooks]).
  */
 object ModItems {
 
-    val FLASHLIGHT: Item = FlashlightItem(Item.Settings().maxCount(1))
     val BATTERY: Item = BatteryItem(Item.Settings().maxCount(16))
 
     fun register() {
-        Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "flashlight"), FLASHLIGHT)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "battery"), BATTERY)
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register { entries ->
-            entries.add(FLASHLIGHT)
             entries.add(BATTERY)
         }
-    }
-}
-
-private class FlashlightItem(settings: Settings) : Item(settings) {
-
-    override fun appendTooltip(stack: ItemStack, world: World?, tooltip: MutableList<Text>, context: TooltipContext) {
-        tooltip += Text.translatable("item.every_tunnel.flashlight.tooltip").formatted(Formatting.GRAY)
     }
 }
 
@@ -68,6 +56,7 @@ private class BatteryItem(settings: Settings) : Item(settings) {
             return TypedActionResult.success(stack, world.isClient)
         }
         user.setCurrentHand(hand)
+        if (user is ServerPlayerEntity) FlashlightHooks.batteryChangeStarted(user)
         return TypedActionResult.consume(stack)
     }
 

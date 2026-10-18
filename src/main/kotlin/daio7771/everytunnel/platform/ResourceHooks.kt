@@ -23,8 +23,9 @@ import java.util.UUID
  * Drives [ResourceSystem] from the server tick.
  *
  * - Stamina, thirst and battery drain apply to Survival/Adventure players while the
- *   [WorldRules] are active. The flashlight can be switched on in any game mode
- *   except Spectator, but only drains the battery where the rules apply.
+ *   [WorldRules] are active. The flashlight works in any game mode except Spectator
+ *   in worlds with levels (see [FlashlightHooks.available]), but only drains the
+ *   battery where the rules apply.
  * - Sprinting comes from the player's sprint flag; jumps from the vanilla jump
  *   statistic, which the server increments for every jump.
  * - Empty thirst deals "dehydration" damage (vanilla `dryOut` damage source).
@@ -67,18 +68,17 @@ object ResourceHooks {
         val save = saveData(server)
         for (player in server.playerManager.playerList) {
             val jumps = jumpsSinceLastTick(player)
-            val hasFlashlight = FlashlightHooks.hasFlashlight(player)
             if (!appliesTo(player)) {
-                val state = ResourceSystem.stateOf(player.uuid, config)
-                val updated = ResourceSystem.withoutDrain(state, hasFlashlight && !player.isSpectator)
-                if (updated != state) {
-                    ResourceSystem.set(player.uuid, updated)
+                var state = ResourceSystem.stateOf(player.uuid, config)
+                if (state.flashlightOn && !FlashlightHooks.available(player)) {
+                    state = ResourceSystem.switchOff(state)
+                    ResourceSystem.set(player.uuid, state)
                     save.markDirty()
                 }
-                sync(player, packetOf(false, updated, hasFlashlight, config))
+                sync(player, packetOf(false, state, config))
                 continue
             }
-            val input = ResourceInput(player.isSprinting, jumps, hasFlashlight)
+            val input = ResourceInput(player.isSprinting, jumps)
             val step = ResourceSystem.tick(player.uuid, input, TICK_SECONDS, config)
             save.markDirty()
 
@@ -86,14 +86,14 @@ object ResourceHooks {
             if (step.damage > 0.0) player.damage(player.damageSources.dryOut(), step.damage.toFloat())
             if (step.batteryDied) FlashlightHooks.batteryDied(player)
 
-            sync(player, packetOf(true, step.state, hasFlashlight, config))
+            sync(player, packetOf(true, step.state, config))
         }
     }
 
-    private fun packetOf(active: Boolean, s: ResourceState, hasFlashlight: Boolean, config: GameplayConfig) =
+    private fun packetOf(active: Boolean, s: ResourceState, config: GameplayConfig) =
         ResourceSyncPacket.of(
             active, s.stamina, config.stamina.max, s.thirst, config.thirst.max, s.exhausted,
-            hasFlashlight, s.flashlightOn, s.battery, config.flashlight.batteryMaxSeconds,
+            s.flashlightOn, s.battery, config.flashlight.batteryMaxSeconds,
         )
 
     private fun jumpsSinceLastTick(player: ServerPlayerEntity): Int {

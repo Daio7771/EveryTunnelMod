@@ -88,6 +88,11 @@ repositories {
             includeGroup("io.github.queerbric")
         }
     }
+    // Sound Physics Remastered (reverb and occlusion), only for dev runs.
+    exclusiveContent {
+        forRepository { maven("https://api.modrinth.com/maven") { name = "Modrinth" } }
+        filter { includeGroup("maven.modrinth") }
+    }
 }
 
 dependencies {
@@ -104,6 +109,11 @@ dependencies {
     // with its libraries (modLocalRuntime is not exposed to anything depending on this mod).
     modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${prop("lambdynamiclights_version")}")
     modLocalRuntime("dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:${prop("lambdynamiclights_version")}")
+
+    // Sound Physics Remastered: no code depends on it (it changes how every sound is
+    // heard: reverb, absorption through blocks); "recommends" in fabric.mod.json, and
+    // dev runs include it so sounds are always judged with it.
+    modLocalRuntime("maven.modrinth:sound-physics-remastered:${prop("sound_physics_remastered_version")}")
 
     // Unit tests for the pure Kotlin parts (config and level parsing).
     testImplementation(kotlin("test"))

@@ -13,7 +13,7 @@ import net.minecraft.util.Identifier
  * [active] is false when the survival resources do not apply (no levels,
  * Creative/Spectator); the stamina and thirst values are meaningless then. The
  * flashlight fields are always valid: the flashlight also works in Creative, it just
- * does not drain the battery there.
+ * does not drain the battery there (and it is always off in worlds without levels).
  */
 data class ResourceSyncPacket(
     val active: Boolean,
@@ -22,8 +22,6 @@ data class ResourceSyncPacket(
     val thirst: Float,
     val thirstMax: Float,
     val exhausted: Boolean,
-    /** True if a flashlight is anywhere in the player's inventory. */
-    val hasFlashlight: Boolean,
     val flashlightOn: Boolean,
     /** Seconds of light left. */
     val battery: Float,
@@ -36,7 +34,6 @@ data class ResourceSyncPacket(
         buf.writeFloat(thirst)
         buf.writeFloat(thirstMax)
         buf.writeBoolean(exhausted)
-        buf.writeBoolean(hasFlashlight)
         buf.writeBoolean(flashlightOn)
         buf.writeFloat(battery)
         buf.writeFloat(batteryMax)
@@ -48,7 +45,7 @@ data class ResourceSyncPacket(
 
     companion object {
         val ID = Identifier(EveryTunnel.MOD_ID, "resources")
-        val NONE = ResourceSyncPacket(false, 0f, 0f, 0f, 0f, false, false, false, 0f, 0f)
+        val NONE = ResourceSyncPacket(false, 0f, 0f, 0f, 0f, false, false, 0f, 0f)
 
         fun of(
             active: Boolean,
@@ -57,7 +54,6 @@ data class ResourceSyncPacket(
             thirst: Double,
             thirstMax: Double,
             exhausted: Boolean,
-            hasFlashlight: Boolean,
             flashlightOn: Boolean,
             battery: Double,
             batteryMax: Double,
@@ -68,7 +64,6 @@ data class ResourceSyncPacket(
             if (active) round(thirst) else 0f,
             if (active) round(thirstMax) else 0f,
             active && exhausted,
-            hasFlashlight,
             flashlightOn,
             round(battery),
             round(batteryMax),
@@ -81,7 +76,6 @@ data class ResourceSyncPacket(
             thirst = buf.readFloat(),
             thirstMax = buf.readFloat(),
             exhausted = buf.readBoolean(),
-            hasFlashlight = buf.readBoolean(),
             flashlightOn = buf.readBoolean(),
             battery = buf.readFloat(),
             batteryMax = buf.readFloat(),

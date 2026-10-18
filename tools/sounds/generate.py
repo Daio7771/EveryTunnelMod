@@ -52,18 +52,23 @@ def check(x, is_loop):
     return problems
 
 
+def render_variant(sound, variant):
+    """The final samples of one variation (same seed, same result) and its generator."""
+    rng = np.random.default_rng(seed_for(sound.id, variant))
+    x = sound.generate(rng, variant)
+    if sound.channels == "mono" and x.ndim != 1:
+        raise ValueError(f"{sound.id} should be mono")
+    if sound.channels == "stereo" and x.ndim != 2:
+        raise ValueError(f"{sound.id} should be stereo")
+    return normalize(x, sound.peak_db), rng
+
+
 def render(selected):
     rendered = {}
     report = []
     for sound in selected:
         for v in range(sound.variants):
-            rng = np.random.default_rng(seed_for(sound.id, v))
-            x = sound.generate(rng, v)
-            if sound.channels == "mono" and x.ndim != 1:
-                raise ValueError(f"{sound.id} should be mono")
-            if sound.channels == "stereo" and x.ndim != 2:
-                raise ValueError(f"{sound.id} should be stereo")
-            x = normalize(x, sound.peak_db)
+            x, rng = render_variant(sound, v)
             path = OUT / file_name(sound.id, v)
             path.parent.mkdir(parents=True, exist_ok=True)
             write_wav(path, x, rng)
@@ -216,6 +221,20 @@ def write_index():
                 loop_attr = " loop" if sound.loop else ""
                 parts.append(f"<div>#{v + 1}<audio controls preload='none'{loop_attr} "
                              f"src='{versioned(file_name(sound.id, v))}'></audio></div>")
+            parts.append("</div></div>")
+    cuts_file = OUT / "cuts" / "titles.json"
+    if cuts_file.exists():
+        cuts = json.loads(cuts_file.read_text(encoding="utf-8"))
+        parts.append("<h2>CC0 cuts used in game</h2>")
+        parts.append("<p class='intro'>Pieces cut automatically from the CC0 recordings by export.py, "
+                     "as they go into the mod.</p>")
+        for sound_id, info in cuts.items():
+            parts.append(f"<div class='sound'><span class='id'>{html.escape(sound_id)}</span>"
+                         f"<span class='tag'>{info['channels']}</span><span class='tag'>CC0 cut</span>"
+                         f"<div class='use'>{html.escape(info['use'])}</div>"
+                         f"<div class='note'>from {html.escape(info['source'])}</div><div class='players'>")
+            for i, name in enumerate(info["files"]):
+                parts.append(f"<div>#{i + 1}<audio controls preload='none' src='{versioned('cuts/' + name)}'></audio></div>")
             parts.append("</div></div>")
     recordings = copy_cc0()
     if recordings:

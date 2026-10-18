@@ -1,0 +1,181 @@
+{
+  "ambient.drip": {
+    "sounds": [
+      "every_tunnel:ambient/drip_1",
+      "every_tunnel:ambient/drip_2",
+      "every_tunnel:ambient/drip_3",
+      "every_tunnel:ambient/drip_4",
+      "every_tunnel:ambient/drip_5",
+      "every_tunnel:ambient/drip_6"
+    ]
+  },
+  "ambient.garage.drone": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/garage/drone_1",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.relay": {
+    "sounds": [
+      "every_tunnel:ambient/relay_1",
+      "every_tunnel:ambient/relay_2",
+      "every_tunnel:ambient/relay_3"
+    ]
+  },
+  "ambient.rumble": {
+    "sounds": [
+      "every_tunnel:ambient/rumble_1",
+      "every_tunnel:ambient/rumble_2",
+      "every_tunnel:ambient/rumble_3"
+    ]
+  },
+  "ambient.sparks": {
+    "sounds": [
+      "every_tunnel:ambient/sparks_1",
+      "every_tunnel:ambient/sparks_2",
+      "every_tunnel:ambient/sparks_3",
+      "every_tunnel:ambient/sparks_4"
+    ]
+  },
+  "ambient.vent": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/vent_1",
+        "stream": true
+      }
+    ]
+  },
+  "block.fluorescent.flicker": {
+    "sounds": [
+      "every_tunnel:block/fluorescent/flicker_1",
+      "every_tunnel:block/fluorescent/flicker_2",
+      "every_tunnel:block/fluorescent/flicker_3",
+      "every_tunnel:block/fluorescent/flicker_4",
+      "every_tunnel:block/fluorescent/flicker_5",
+      "every_tunnel:block/fluorescent/flicker_6"
+    ]
+  },
+  "block.fluorescent.hum": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/fluorescent/hum_1",
+        "stream": true
+      }
+    ]
+  },
+  "block.fluorescent.off": {
+    "sounds": [
+      "every_tunnel:block/fluorescent/off_1",
+      "every_tunnel:block/fluorescent/off_2"
+    ]
+  },
+  "block.fluorescent.start": {
+    "sounds": [
+      "every_tunnel:block/fluorescent/start_1",
+      "every_tunnel:block/fluorescent/start_2"
+    ]
+  },
+  "event.death": {
+    "sounds": [
+      "every_tunnel:event/death_1",
+      "every_tunnel:event/death_2"
+    ]
+  },
+  "event.level_transition": {
+    "sounds": [
+      "every_tunnel:event/level_transition_1"
+    ]
+  },
+  "item.battery.close": {
+    "sounds": [
+      "every_tunnel:item/battery/close_1",
+      "every_tunnel:item/battery/close_2"
+    ]
+  },
+  "item.battery.open": {
+    "sounds": [
+      "every_tunnel:item/battery/open_1",
+      "every_tunnel:item/battery/open_2"
+    ]
+  },
+  "item.flashlight.dead": {
+    "sounds": [
+      "every_tunnel:item/flashlight/dead_1",
+      "every_tunnel:item/flashlight/dead_2"
+    ]
+  },
+  "item.flashlight.flicker": {
+    "sounds": [
+      "every_tunnel:item/flashlight/flicker_1",
+      "every_tunnel:item/flashlight/flicker_2",
+      "every_tunnel:item/flashlight/flicker_3",
+      "every_tunnel:item/flashlight/flicker_4"
+    ]
+  },
+  "item.flashlight.off": {
+    "sounds": [
+      "every_tunnel:item/flashlight/off_1",
+      "every_tunnel:item/flashlight/off_2",
+      "every_tunnel:item/flashlight/off_3"
+    ]
+  },
+  "item.flashlight.on": {
+    "sounds": [
+      "every_tunnel:item/flashlight/on_1",
+      "every_tunnel:item/flashlight/on_2",
+      "every_tunnel:item/flashlight/on_3"
+    ]
+  },
+  "music.chase": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/chase_1",
+        "stream": true
+      }
+    ]
+  },
+  "music.stinger.heard": {
+    "sounds": [
+      "every_tunnel:music/stinger/heard_1",
+      "every_tunnel:music/stinger/heard_2",
+      "every_tunnel:music/stinger/heard_3"
+    ]
+  },
+  "music.tension": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/tension_1",
+        "stream": true
+      },
+      {
+        "name": "every_tunnel:music/tension_2",
+        "stream": true
+      },
+      {
+        "name": "every_tunnel:music/tension_3",
+        "stream": true
+      }
+    ]
+  },
+  "player.breathing_exhausted": {
+    "sounds": [
+      "every_tunnel:player/breathing_exhausted_1",
+      "every_tunnel:player/breathing_exhausted_2"
+    ]
+  },
+  "player.heartbeat": {
+    "sounds": [
+      "every_tunnel:player/heartbeat_1",
+      "every_tunnel:player/heartbeat_2",
+      "every_tunnel:player/heartbeat_3",
+      "every_tunnel:player/heartbeat_4"
+    ]
+  },
+  "player.tinnitus": {
+    "sounds": [
+      "every_tunnel:player/tinnitus_1"
+    ]
+  }
+}

@@ -82,22 +82,18 @@ class ResourceSystemTest {
         assertEquals(10.0, step.state.battery)
     }
 
-    private val carrying = ResourceInput(sprinting = false, jumps = 0, hasFlashlight = true)
-
     @Test
-    fun `the flashlight toggles only with a flashlight and charge`() {
+    fun `the flashlight toggles while there is charge`() {
         val full = ResourceState.full(config)
-        assertEquals(FlashlightToggle.NO_FLASHLIGHT, ResourceSystem.toggleFlashlight(full, hasFlashlight = false).second)
-
-        val (on, turnedOn) = ResourceSystem.toggleFlashlight(full, hasFlashlight = true)
+        val (on, turnedOn) = ResourceSystem.toggleFlashlight(full)
         assertEquals(FlashlightToggle.TURNED_ON, turnedOn)
         assertTrue(on.flashlightOn)
 
-        val (off, turnedOff) = ResourceSystem.toggleFlashlight(on, hasFlashlight = true)
+        val (off, turnedOff) = ResourceSystem.toggleFlashlight(on)
         assertEquals(FlashlightToggle.TURNED_OFF, turnedOff)
         assertFalse(off.flashlightOn)
 
-        val (stillOff, result) = ResourceSystem.toggleFlashlight(full.copy(battery = 0.0), hasFlashlight = true)
+        val (stillOff, result) = ResourceSystem.toggleFlashlight(full.copy(battery = 0.0))
         assertEquals(FlashlightToggle.BATTERY_EMPTY, result)
         assertFalse(stillOff.flashlightOn)
     }
@@ -105,16 +101,16 @@ class ResourceSystemTest {
     @Test
     fun `the battery drains only while on and switches the flashlight off when empty`() {
         val on = ResourceState.full(config).copy(flashlightOn = true)
-        assertEquals(10.0, run(on.copy(flashlightOn = false), carrying, 5).battery, 1e-9, "no drain while off")
+        assertEquals(10.0, run(on.copy(flashlightOn = false), idle, 5).battery, 1e-9, "no drain while off")
 
-        val drained = run(on, carrying, 4)
+        val drained = run(on, idle, 4)
         assertEquals(6.0, drained.battery, 1e-9)
         assertTrue(drained.flashlightOn)
 
         var state = drained
         val died = mutableListOf<Boolean>()
         repeat(7) {
-            val step = ResourceSystem.step(state, carrying, 1.0, config)
+            val step = ResourceSystem.step(state, idle, 1.0, config)
             state = step.state
             died += step.batteryDied
         }
@@ -125,25 +121,24 @@ class ResourceSystemTest {
     }
 
     @Test
-    fun `dropping the flashlight switches it off`() {
-        val on = ResourceState.full(config).copy(flashlightOn = true)
-        assertFalse(ResourceSystem.step(on, idle, 1.0, config).state.flashlightOn)
-        assertFalse(ResourceSystem.withoutDrain(on, hasFlashlight = false).flashlightOn)
-        assertEquals(on, ResourceSystem.withoutDrain(on, hasFlashlight = true), "no drain outside the survival rules")
+    fun `switching off from outside keeps the charge`() {
+        val on = ResourceState.full(config).copy(flashlightOn = true, battery = 7.0)
+        val off = ResourceSystem.switchOff(on)
+        assertFalse(off.flashlightOn)
+        assertEquals(7.0, off.battery)
+        assertEquals(off, ResourceSystem.switchOff(off))
     }
 
     @Test
     fun `a battery item refills by the configured percentage up to full`() {
         val empty = ResourceState.full(config).copy(battery = 0.0)
-        assertEquals(BatteryInsert.NO_FLASHLIGHT, ResourceSystem.insertBattery(empty, hasFlashlight = false, config).second)
-
-        val (half, refilled) = ResourceSystem.insertBattery(empty, hasFlashlight = true, config)
+        val (half, refilled) = ResourceSystem.insertBattery(empty, config)
         assertEquals(BatteryInsert.REFILLED, refilled)
         assertEquals(5.0, half.battery, 1e-9)
 
-        val (full, _) = ResourceSystem.insertBattery(half.copy(battery = 8.0), hasFlashlight = true, config)
+        val (full, _) = ResourceSystem.insertBattery(half.copy(battery = 8.0), config)
         assertEquals(10.0, full.battery, 1e-9, "capped at max")
-        assertFalse(ResourceSystem.canInsertBattery(full, hasFlashlight = true, config))
-        assertEquals(BatteryInsert.ALREADY_FULL, ResourceSystem.insertBattery(full, hasFlashlight = true, config).second)
+        assertFalse(ResourceSystem.canInsertBattery(full, config))
+        assertEquals(BatteryInsert.ALREADY_FULL, ResourceSystem.insertBattery(full, config).second)
     }
 }

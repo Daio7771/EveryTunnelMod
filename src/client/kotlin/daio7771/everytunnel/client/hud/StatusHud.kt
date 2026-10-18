@@ -15,7 +15,7 @@ import kotlin.math.ceil
  * 10 icons per bar, each icon full or half):
  *
  * ```
- *  stamina (top left)                battery (top right, only with a flashlight)
+ *  stamina (top left)                battery (top right)
  *  health  (bottom left)             thirst  (bottom right)
  *  [                        hotbar                        ]
  * ```
@@ -87,11 +87,9 @@ object StatusHud {
         drawBar(context, right, bottomRow, fraction(resources.thirst, resources.thirstMax), THIRST_V, alternate = false, rightToLeft = true)
 
         // Flashlight battery, top right.
-        if (resources.hasFlashlight) {
-            val low = resources.batteryLow(ConfigManager.gameplay.flashlight.lowBatteryWarningPercent)
-            val blinkOn = (time / 8) % 2 == 0
-            drawBar(context, right, topRow, fraction(resources.battery, resources.batteryMax), BATTERY_V, alternate = low && blinkOn, rightToLeft = true)
-        }
+        val low = resources.batteryLow(ConfigManager.gameplay.flashlight.lowBatteryWarningPercent)
+        val blinkOn = (time / 8) % 2 == 0
+        drawBar(context, right, topRow, fraction(resources.battery, resources.batteryMax), BATTERY_V, alternate = low && blinkOn, rightToLeft = true)
 
         RenderSystem.disableBlend()
     }
