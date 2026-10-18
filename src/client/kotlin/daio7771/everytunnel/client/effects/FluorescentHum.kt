@@ -18,16 +18,18 @@ import net.minecraft.util.math.BlockPos
  *
  * Twice a second the blocks within [RADIUS] of the player are scanned for lights that
  * are not off; the [MAX_SOUNDS] nearest get a looping hum at their position (more would
- * only add noise and use up sound channels). A flickering light's hum drops out while
- * it is dark. Each light hums at a slightly different pitch, like real ballasts, so
- * nearby lights do not sound like one.
+ * only add noise and use up sound channels). The hum fades out within about 8 blocks
+ * (`attenuation_distance` in sounds.json), so only lights close by are heard. A
+ * flickering light's hum drops out while it is dark. Each light hums at a slightly
+ * different pitch, like real ballasts, so nearby lights do not sound like one.
  */
 object FluorescentHum {
 
-    private const val RADIUS = 16
-    private const val MAX_SOUNDS = 8
+    private const val RADIUS = 10
+    private const val MAX_SOUNDS = 4
     private const val SCAN_TICKS = 10
-    private const val VOLUME = 0.35f
+    /** Multiplied by the hum's base volume in sounds.json (0.5). */
+    private const val VOLUME = 0.6f
 
     private val playing = HashMap<BlockPos, HumSound>()
     private var ticks = 0

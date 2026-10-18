@@ -13,7 +13,8 @@
     "sounds": [
       {
         "name": "every_tunnel:ambient/garage/drone_1",
-        "stream": true
+        "stream": true,
+        "volume": 0.35
       }
     ]
   },
@@ -59,7 +60,11 @@
   },
   "block.fluorescent.hum": {
     "sounds": [
-      "every_tunnel:block/fluorescent/hum_1"
+      {
+        "name": "every_tunnel:block/fluorescent/hum_1",
+        "volume": 0.5,
+        "attenuation_distance": 8
+      }
     ]
   },
   "block.fluorescent.off": {

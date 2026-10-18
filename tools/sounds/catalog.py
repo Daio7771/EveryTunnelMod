@@ -33,6 +33,10 @@ class Sound:
     # Streamed from disk in game? None = by length (see export.py). Minecraft plays only a few
     # streamed sounds at once, so sounds that play many times at once must not stream.
     stream: Optional[bool] = None
+    # In-game balance, written to sounds.json: base volume (code and level files multiply it)
+    # and the distance in blocks at which a positioned sound fades out (None = Minecraft's 16).
+    game_volume: float = 1.0
+    attenuation: Optional[int] = None
 
 
 # ===========================================================================
@@ -671,9 +675,10 @@ def death(rng, variant):
 # ===========================================================================
 
 SOUNDS = [
-    Sound("ambient.garage.drone", "Garage ambience", "Background tone of the whole garage", "stereo", True, 1, garage_drone, -3.0),
+    Sound("ambient.garage.drone", "Garage ambience", "Background tone of the whole garage", "stereo", True, 1, garage_drone, -3.0,
+          game_volume=0.35),
     Sound("block.fluorescent.hum", "Garage ambience", "Every working light", "mono", True, 1, fluorescent_hum, -6.0,
-          stream=False),
+          stream=False, game_volume=0.5, attenuation=8),
     Sound("block.fluorescent.flicker", "Garage ambience", "Failing lights", "mono", False, 6, fluorescent_flicker, -3.0),
     Sound("block.fluorescent.start", "Garage ambience", "A light turning on", "mono", False, 2, fluorescent_start, -3.0),
     Sound("block.fluorescent.off", "Garage ambience", "Power cut", "mono", False, 2, fluorescent_off, -3.0),

@@ -53,6 +53,16 @@ loom {
             ideConfigGenerated(true)
             programArgs("--username", "Dev", "--quickPlaySingleplayer", "dev_flat")
         }
+
+        // Same shortcut for "garage_test": a copy of dev_flat holding the generated parking
+        // garage (see the garage generator test). Gradle task: ./gradlew runClientGarageWorld
+        register("clientGarageWorld") {
+            client()
+            configName = "Minecraft Client (garage_test world)"
+            source("client")
+            ideConfigGenerated(true)
+            programArgs("--username", "Dev", "--quickPlaySingleplayer", "garage_test")
+        }
     }
 }
 

@@ -50,7 +50,7 @@ def main():
     events = {}
     written = skipped = 0
 
-    def export(sound_id, relative, x, stream=None):
+    def export(sound_id, relative, x, stream=None, volume=1.0, attenuation=None):
         nonlocal written, skipped
         path = SOUNDS_DIR / f"{relative}.ogg"
         digest = audio_hash(x)
@@ -64,13 +64,21 @@ def main():
         name = f"{NAMESPACE}:{relative}"
         if stream is None:
             stream = x.shape[0] / SR > STREAM_SECONDS
-        entry = {"name": name, "stream": True} if stream else name
+        entry = {"name": name}
+        if stream:
+            entry["stream"] = True
+        if volume != 1.0:
+            entry["volume"] = volume
+        if attenuation is not None:
+            entry["attenuation_distance"] = attenuation
+        if len(entry) == 1:
+            entry = name
         events.setdefault(sound_id, {"sounds": []})["sounds"].append(entry)
 
     for sound in SOUNDS:
         for v in range(sound.variants):
             x, _ = render_variant(sound, v)
-            export(sound.id, file_name(sound.id, v)[:-len(".wav")], x, sound.stream)
+            export(sound.id, file_name(sound.id, v)[:-len(".wav")], x, sound.stream, sound.game_volume, sound.attenuation)
 
     cut_titles = {}
     (OUT / "cuts").mkdir(parents=True, exist_ok=True)

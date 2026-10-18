@@ -248,8 +248,8 @@ against: ceilings, walls or floors.
   burst of rapid off/on switching with the flicker sound, and the light around them
   really goes out.
 - Switching on plays the starter ticks; switching off the power-down.
-- You hear the hum of the 8 nearest lights within 16 blocks, each at a slightly
-  different pitch.
+- You hear the hum of the 4 nearest lights, fading out within about 8 blocks, each at a
+  slightly different pitch.
 
 ## World rules
 
