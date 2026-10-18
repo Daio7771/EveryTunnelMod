@@ -54,14 +54,14 @@ loom {
             programArgs("--username", "Dev", "--quickPlaySingleplayer", "dev_flat")
         }
 
-        // Same shortcut for "garage_test": a copy of dev_flat holding the generated parking
-        // garage (see the garage generator test). Gradle task: ./gradlew runClientGarageWorld
-        register("clientGarageWorld") {
+        // Same shortcut for "noname_complex": the map world, which tools/map/map_generator.py
+        // fills with the generated levels. Gradle task: ./gradlew runClientMapWorld
+        register("clientMapWorld") {
             client()
-            configName = "Minecraft Client (garage_test world)"
+            configName = "Minecraft Client (noname_complex world)"
             source("client")
             ideConfigGenerated(true)
-            programArgs("--username", "Dev", "--quickPlaySingleplayer", "garage_test")
+            programArgs("--username", "Dev", "--quickPlaySingleplayer", "noname_complex")
         }
     }
 }
