@@ -137,7 +137,6 @@ STAND_INS = {
 REPO = Path(__file__).resolve().parents[2]
 INSTALL = [
     {"world": str(REPO / "run" / "saves" / "noname_complex"), "pack": "mod"},
-    {"world": "/home/super/.sklauncher/instances/every-tunnel-test/saves/New World", "pack": "vanilla"},
 ]
 
 # =====================================================================================
