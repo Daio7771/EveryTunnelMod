@@ -6,11 +6,14 @@ import daio7771.everytunnel.client.effects.BreathingEffect
 import daio7771.everytunnel.client.effects.FlashlightEffect
 import daio7771.everytunnel.client.effects.FluorescentHum
 import daio7771.everytunnel.client.hud.StatusHud
+import daio7771.everytunnel.client.render.PaleManRenderer
 import daio7771.everytunnel.platform.ModBlocks
+import daio7771.everytunnel.platform.ModEntities
 import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import net.minecraft.client.render.RenderLayer
 
 /**
@@ -23,7 +26,8 @@ import net.minecraft.client.render.RenderLayer
  * `client.compat.LambDynamicLightsCompat` when LambDynamicLights is installed), the
  * exhausted breathing ([BreathingEffect]), the level ambience ([AmbiencePlayer]), the
  * hum of fluorescent lights ([FluorescentHum]) and the status bars ([StatusHud]).
- * Blocks whose textures have see-through pixels are drawn in the cutout layer.
+ * Blocks whose textures have see-through pixels are drawn in the cutout layer, and the
+ * Pale man by GeckoLib ([PaleManRenderer]).
  */
 object EveryTunnelClient : ClientModInitializer {
 
@@ -35,6 +39,7 @@ object EveryTunnelClient : ClientModInitializer {
         AmbiencePlayer.register()
         FluorescentHum.register()
         StatusHud.register()
+        EntityRendererRegistry.register(ModEntities.PALE_MAN, ::PaleManRenderer)
         BlockRenderLayerMap.INSTANCE.putBlocks(
             RenderLayer.getCutout(),
             ModBlocks.SHOPPING_CART, ModBlocks.CABLE_TRAY, ModBlocks.HANGING_CABLE, ModBlocks.STAIN, ModBlocks.PUDDLE,

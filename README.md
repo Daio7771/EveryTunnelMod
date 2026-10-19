@@ -295,6 +295,24 @@ The blocks themselves are registered in `platform/ModBlocks.kt`; the tool stops 
 two lists of ids differ. Each material's footstep and impact sounds are generated with the
 other sounds (group "Materials" in `tools/sounds/catalog.py`).
 
+## The Pale man (`tools/entity/`)
+
+`every_tunnel:pale_man` is the Level 2 enemy: about 2.75 blocks tall (hitbox 0.6 x 2.8),
+very thin, blind, hunting by hearing; the rags of a night-guard uniform say he was the
+guard before you. Nothing the player does can hurt him (only `/kill` and the void), and
+he never despawns. His hearing-based AI comes next (Phase 5); for now he just wanders.
+
+- **Spawning:** every spawn point tagged `pale_man` in a level's JSON gets one Pale man the
+  first time a player enters that level. The world remembers it
+  (`data/every_tunnel_pale_men.dat`), so he is never doubled; if he is killed, the spawn
+  point spawns him again on the next entry. For testing: the spawn egg in the
+  **Every Tunnel** tab, or `/summon every_tunnel:pale_man`.
+- **Model:** GeckoLib (4.8.4, bundled inside the mod's jar). `python3 tools/entity/pale_man.py`
+  writes the model, animations (idle, listen, walk, run, attack), the texture (2 pixels per
+  unit) and the glowmask of his faintly glowing eyes, plus previews and a painting template
+  in `tools/entity/output/`. The look follows `tools/entity/reference/pale_man_concept.png`
+  (AI concept art, used as reference only).
+
 ## World rules
 
 Active only in worlds whose datapacks define Every Tunnel levels (other worlds

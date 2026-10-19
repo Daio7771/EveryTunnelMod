@@ -1,9 +1,8 @@
 /**
- * Custom entities and their AI.
+ * The enemies' AI as plain Kotlin (no Minecraft types), so it can be unit tested.
  *
- * Planned contents (later phases): the Pale man (Level 2) and, after the
- * demo, the Observant guard and the Distortion cloud.
- *
- * Empty in Phase 0.
+ * The Pale man's entity itself (Minecraft side) is `platform.PaleManEntity`; his
+ * hearing-based behaviour comes here in Phase 5. After the demo: the Observant guard
+ * and the Distortion cloud.
  */
 package daio7771.everytunnel.entities

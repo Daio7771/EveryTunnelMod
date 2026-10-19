@@ -7,9 +7,11 @@ import daio7771.everytunnel.platform.FlashlightHooks
 import daio7771.everytunnel.platform.LevelReloadListener
 import daio7771.everytunnel.platform.LevelTrackingHooks
 import daio7771.everytunnel.platform.ModBlocks
+import daio7771.everytunnel.platform.ModEntities
 import daio7771.everytunnel.platform.ModItems
 import daio7771.everytunnel.platform.ModSounds
 import daio7771.everytunnel.platform.NoiseHooks
+import daio7771.everytunnel.platform.PaleManSpawner
 import daio7771.everytunnel.platform.ResourceHooks
 import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ModInitializer
@@ -21,7 +23,7 @@ import org.slf4j.LoggerFactory
  * Common (server + client) entrypoint for Every Tunnel.
  *
  * Loads the gameplay config and registers the items (battery), blocks (fluorescent
- * light), sounds, the level data loader, the world rules, player level/zone tracking,
+ * light, props), entities (the Pale man, and his spawning at level spawn points), sounds, the level data loader, the world rules, player level/zone tracking,
  * level ambience, stamina, thirst and the flashlight battery, player noise (what
  * enemies can hear), and the debug commands.
  * Later gameplay systems (`systems`, `entities`, `audio`) are registered here too.
@@ -42,6 +44,7 @@ object EveryTunnel : ModInitializer {
         ConfigManager.load(FabricLoader.getInstance().configDir)
         ModItems.register()
         ModBlocks.register()
+        ModEntities.register()
         ModSounds.register()
         LevelReloadListener.register()
         WorldRulesHooks.register()
@@ -50,6 +53,7 @@ object EveryTunnel : ModInitializer {
         ResourceHooks.register()
         FlashlightHooks.register()
         NoiseHooks.register()
+        PaleManSpawner.register()
         DebugCommands.register()
         LOGGER.info("$MOD_NAME loaded")
     }

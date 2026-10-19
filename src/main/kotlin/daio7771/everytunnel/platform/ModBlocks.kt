@@ -142,7 +142,10 @@ object ModBlocks {
         val tab: ItemGroup = FabricItemGroup.builder()
             .icon { ItemStack(FLUORESCENT_LIGHT) }
             .displayName(Text.translatable("itemGroup.every_tunnel"))
-            .entries { _, entries -> items.forEach { entries.add(it) } }
+            .entries { _, entries ->
+                items.forEach { entries.add(it) }
+                entries.add(ModEntities.PALE_MAN_SPAWN_EGG)
+            }
             .build()
         Registry.register(Registries.ITEM_GROUP, Identifier(EveryTunnel.MOD_ID, "blocks"), tab)
     }

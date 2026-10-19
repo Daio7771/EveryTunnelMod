@@ -124,6 +124,15 @@ repositories {
             includeGroup("io.github.queerbric")
         }
     }
+    // GeckoLib (animated entity models), published by its authors. Its mclib library comes
+    // from the same repository.
+    maven("https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/") {
+        name = "GeckoLib"
+        content {
+            includeGroup("software.bernie.geckolib")
+            includeGroup("com.eliotlash.mclib")
+        }
+    }
     // Sound Physics Remastered (reverb and occlusion), only for dev runs.
     exclusiveContent {
         forRepository { maven("https://api.modrinth.com/maven") { name = "Modrinth" } }
@@ -139,6 +148,11 @@ dependencies {
     modImplementation("net.fabricmc:fabric-language-kotlin:${prop("kotlin_loader_version")}")
 
     modImplementation("net.fabricmc.fabric-api:fabric-api:${prop("fabric_version")}")
+
+    // GeckoLib: models and animations of the Pale man. Required, so it is bundled inside
+    // the mod's jar (jar-in-jar, MIT licence): players do not install it separately.
+    modImplementation("software.bernie.geckolib:geckolib-fabric-1.20.1:${prop("geckolib_version")}")
+    include("software.bernie.geckolib:geckolib-fabric-1.20.1:${prop("geckolib_version")}")
 
     // LambDynamicLights (client): compiled against its API only, so the jar does not
     // bundle or require it; fabric.mod.json "recommends" it. Dev runs get the full mod

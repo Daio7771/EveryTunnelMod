@@ -27,5 +27,7 @@
   "block.every_tunnel.metal_panel": "Metal Panel",
   "block.every_tunnel.sign_tile": "Sign Tile",
   "block.every_tunnel.stain": "Stain",
-  "block.every_tunnel.puddle": "Puddle"
+  "block.every_tunnel.puddle": "Puddle",
+  "entity.every_tunnel.pale_man": "Pale Man",
+  "item.every_tunnel.pale_man_spawn_egg": "Pale Man Spawn Egg"
 }
