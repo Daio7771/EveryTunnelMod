@@ -4,7 +4,8 @@ Every Tunnel map generator: Level 1, the parking garage (Minecraft 1.20.1).
 One command regenerates everything:   python3 tools/map/map_generator.py
 
 Out (tools/map/output/, not in git):
-  every_tunnel_level1_vanilla/   datapack for plain Minecraft  (/function garage:build, garage:clear)
+  every_tunnel_level1_vanilla/   datapack for plain Minecraft  (builds itself when the world opens;
+                                 by hand: /function garage:build, garage:clear)
   every_tunnel_level1_mod/       datapack for the mod: its fluorescent lights + the level file
                                  (zones, start in the elevator, exit at the ramp, ambience)
   level_resources.zip            resource pack; worlds carry it as <world>/resources.zip
@@ -24,6 +25,7 @@ import json
 import shutil
 import sys
 import zipfile
+import zlib
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -145,6 +147,7 @@ PACKS = {"vanilla": "every_tunnel_level1_vanilla", "mod": "every_tunnel_level1_m
 OLD_PACKS = ["every_tunnel_garage_test", "every_tunnel_garage_mod"]      # earlier tests, removed on install
 OLD_BOXES = [(-1, 64, -1, 40, 70, 20)]      # what the earlier garage test built, cleared by every build
 FILL_LIMIT = 32768
+SCORE = "garage_build"      # scoreboard objective that remembers which version of the level is built
 
 
 def fills(x1, y1, z1, x2, y2, z2, block):
@@ -235,7 +238,24 @@ def write_pack(name, cmds, box, level=None, offset=None):
     (functions / "build.mcfunction").write_text("\n".join(
         [f"execute {loaded} run function garage:build_now"]
         + [f"execute unless loaded {x} {y} {z} run tellraw @s {msg}" for x, y, z in corners]) + "\n")
-    (functions / "build_now.mcfunction").write_text("\n".join(cmds) + "\n")
+    # Auto build: the first time a player is in the world with this version of the level
+    # (a fingerprint of its commands, kept in a scoreboard), build it once. A new version
+    # (other parameters) builds again; the same one never does, even after garage:clear.
+    version = zlib.crc32("\n".join(cmds).encode()) & 0x7FFFFFFF
+    built = f"score #level {SCORE} matches {version}"
+    wait = '{"text":"The level will build when its area is loaded (stand closer to world spawn).","color":"red"}'
+    (functions / "build_now.mcfunction").write_text("\n".join(cmds + [f"scoreboard players set #level {SCORE} {version}"]) + "\n")
+    (functions / "load.mcfunction").write_text(f"scoreboard objectives add {SCORE} dummy\n")
+    (functions / "tick.mcfunction").write_text(f"execute if entity @a unless {built} run function garage:auto_build\n")
+    (functions / "auto_build.mcfunction").write_text("\n".join([
+        f"execute {loaded} as @a[limit=1] run function garage:build_now",
+        f"execute unless {built} unless score #waiting {SCORE} matches {version} run tellraw @a {wait}",
+        f"execute unless {built} run scoreboard players set #waiting {SCORE} {version}",
+    ]) + "\n")
+    tags = pack / "data" / "minecraft" / "tags" / "functions"
+    tags.mkdir(parents=True)
+    for tag in ("load", "tick"):
+        (tags / f"{tag}.json").write_text(json.dumps({"values": [f"garage:{tag}"]}, indent=2) + "\n")
     (functions / "clear.mcfunction").write_text("\n".join(fills(*box, "minecraft:air") + ['tellraw @s {"text":"Level cleared.","color":"gray"}']) + "\n")
     if level:
         levels = pack / "data" / "every_tunnel" / "levels"

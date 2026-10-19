@@ -405,8 +405,9 @@ Level 1 (B1, the parking garage) from the parameters at the top of the file:
 
 - 5 parking halls chained in a zigzag by corridors and a half-level ramp; each hall can
   override any value, and they get worse as you go (wear, dead lights, oddities).
-- Start: a lobby with a service elevator (building the level puts the player in the
-  cabin). End: a ramp down to a dark "B2" landing (zone tagged `exit`).
+- Start: a lobby with a service elevator (the level builds itself when the world opens
+  and puts the player in the cabin). End: a ramp down to a dark "B2" landing (zone
+  tagged `exit`).
 - Side rooms (storage, electrical room, a locked door marked EXIT, a dead end), props
   (cars, pallets, drums, bins, cones, extinguishers, a cart), ceiling beams, ducts, pipes,
   cable trays, sign codes on walls and pillars, stains and cracks, and oddities.
@@ -425,15 +426,21 @@ python3 tools/map/map_generator.py
 writes `tools/map/output/` (git-ignored: datapacks, resource pack, `level_preview.png`,
 `texture_sheet.png`) and installs the mod datapack (with the level file: 17 zones, the
 start in the elevator, ambience) and `resources.zip` into `run/saves/noname_complex`.
-Then, in game (`./gradlew runClientMapWorld`): `/reload` if it was open, and
-`/function garage:build`, which clears the previous build (and the area of the earlier
-40x20 garage test, `OLD_BOXES`) and teleports you into the elevator. Same seeds give the
-same level.
+Then open the world (`./gradlew runClientMapWorld`, or `/reload` if it was open): the
+level builds itself as soon as a player is in the world. Building clears the previous
+build (and the area of the earlier 40x20 garage test, `OLD_BOXES`) and teleports you into
+the elevator. Same seeds give the same level.
 
-Installing only adds the datapack: until you run `/function garage:build` the world has no
-level blocks, and opening it puts you wherever your player was saved. The level ambience
-(drone, drips, rumbles...) plays only inside the level's zones, so outside them, or before
-building, the level is silent; `/everytunnel where` shows which zone you are in.
+The datapack remembers which version of the level it built (a fingerprint of the build
+commands, in the scoreboard `garage_build`), so it builds once per version: reopening the
+world keeps your position and whatever changed in the level, and only a regenerated level
+with other parameters builds again (and puts you back in the elevator). If the level area
+is not loaded, it says so once in chat and builds when it is. By hand:
+`/function garage:build` rebuilds now, `/function garage:clear` removes the level (it is
+not rebuilt until a new version).
+
+The level ambience (drone, drips, rumbles...) plays only inside the level's zones, so
+outside them the level is silent; `/everytunnel where` shows which zone you are in.
 
 ## Debug commands
 
