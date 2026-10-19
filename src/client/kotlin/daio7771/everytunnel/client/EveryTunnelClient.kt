@@ -4,10 +4,12 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.effects.AmbiencePlayer
 import daio7771.everytunnel.client.effects.BreathingEffect
 import daio7771.everytunnel.client.effects.FlashlightEffect
+import daio7771.everytunnel.client.effects.HeartbeatEffect
 import daio7771.everytunnel.client.effects.FluorescentHum
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.PaleManRenderer
 import daio7771.everytunnel.platform.ModBlocks
+import daio7771.everytunnel.platform.DevWorlds
 import daio7771.everytunnel.platform.ModEntities
 import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ClientModInitializer
@@ -24,7 +26,8 @@ import net.minecraft.client.render.RenderLayer
  * server ([ClientResources]), and registers the Flashlight key
  * ([FlashlightControls]), the flashlight's beam ([FlashlightEffect]; drawn by
  * `client.compat.LambDynamicLightsCompat` when LambDynamicLights is installed), the
- * exhausted breathing ([BreathingEffect]), the level ambience ([AmbiencePlayer]), the
+ * exhausted breathing ([BreathingEffect]), the heartbeat near the Pale man
+ * ([HeartbeatEffect]), the level ambience ([AmbiencePlayer]), the
  * hum of fluorescent lights ([FluorescentHum]) and the status bars ([StatusHud]).
  * Blocks whose textures have see-through pixels are drawn in the cutout layer, and the
  * Pale man by GeckoLib ([PaleManRenderer]).
@@ -32,10 +35,13 @@ import net.minecraft.client.render.RenderLayer
 object EveryTunnelClient : ClientModInitializer {
 
     override fun onInitializeClient() {
+        // Before quick play opens a world: dev worlds with a template start over.
+        DevWorlds.restoreAll()
         ClientResources.register()
         FlashlightControls.register()
         FlashlightEffect.register()
         BreathingEffect.register()
+        HeartbeatEffect.register()
         AmbiencePlayer.register()
         FluorescentHum.register()
         StatusHud.register()

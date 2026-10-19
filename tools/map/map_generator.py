@@ -75,6 +75,9 @@ SIDE_ROOMS = [
     dict(hall=4, type="dead_end", depth=8),
 ]
 LOBBY_LENGTH = 6          # lobby between the elevator and hall 1
+# Halls (1 = first) with a Pale man spawn point in the middle of the aisle. Level 1 has
+# none in the real game; this is for testing him in the map until Level 2 exists.
+PALE_MAN_HALLS = [2]
 EXIT_DROP = 5             # how far the exit ramp goes down
 LANDING_LENGTH = 7        # dark landing at the bottom of the exit ramp
 
@@ -173,10 +176,13 @@ MOD_BLOCKS = {
     "elevator_wall": "every_tunnel:metal_panel",
 }
 
-# Worlds that get the result after each run (skipped, with a warning, when there is no world there).
+# Worlds that get the result after each run (skipped, with a warning, when there is no world
+# there; "optional" ones silently). The dev template of the map world (see DevWorlds in the
+# mod) gets it too, or the next launch would put the old level back.
 REPO = Path(__file__).resolve().parents[2]
 INSTALL = [
     {"world": str(REPO / "run" / "saves" / "noname_complex"), "pack": "mod"},
+    {"world": str(REPO / "run" / "dev_templates" / "noname_complex"), "pack": "mod", "optional": True},
 ]
 
 # =====================================================================================
@@ -275,6 +281,25 @@ def commands(level, offset, box, previous_box, summary):
     return c
 
 
+def pale_man_spawns(level):
+    """(id, (x, y, z)) for each hall in PALE_MAN_HALLS: the aisle's centre line, the free
+    spot (3 blocks of headroom, he is 2.8 tall) closest to the middle of the hall."""
+    out = []
+    for n in PALE_MAN_HALLS:
+        if not 1 <= n <= len(level.halls):
+            raise SystemExit(f"PALE_MAN_HALLS: there is no hall {n}")
+        f = level.halls[n - 1]["frame"]
+        hp, g = f["hp"], f["g"]
+        y, z, mid = f["hy"] + 1, f["hz"] + g.center_z, f["hx"] + hp.LENGTH // 2
+        for x in sorted(range(f["hx"] + 2, f["hx"] + hp.LENGTH - 2), key=lambda x: abs(x - mid)):
+            if all(level.world.free(x, y + dy, z) for dy in range(3)):
+                out.append((f"pale_man_hall_{n}", (x + 0.5, y, z + 0.5)))
+                break
+        else:
+            raise SystemExit(f"PALE_MAN_HALLS: no free spot in the aisle of hall {n}")
+    return out
+
+
 def level_json(level, offset):
     ox, oy, oz = offset
     sx, sy, sz, yaw = level.spawn
@@ -285,7 +310,9 @@ def level_json(level, offset):
         "order": 1,
         "dimension": "minecraft:overworld",
         "zones": zones,
-        "spawn_points": [{"id": "player_start", "pos": [ox + sx, oy + sy, oz + sz], "yaw": yaw, "tags": ["player"]}],
+        "spawn_points": [{"id": "player_start", "pos": [ox + sx, oy + sy, oz + sz], "yaw": yaw, "tags": ["player"]}]
+        + [{"id": pid, "pos": [ox + x, oy + y, oz + z], "yaw": 0, "tags": ["pale_man"]}
+           for pid, (x, y, z) in pale_man_spawns(level)],
         "ambience": {
             "loop": "every_tunnel:ambient.garage.drone", "loop_volume": 0.7,
             "random": [
@@ -346,6 +373,8 @@ def install(resource_zip):
     for target in INSTALL:
         world = Path(target["world"])
         if not (world / "level.dat").is_file():
+            if target.get("optional"):
+                continue
             print(f"WARNING: no world at {world}, nothing installed there (create the world first, see README)")
             continue
         datapacks = world / "datapacks"

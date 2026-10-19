@@ -18,6 +18,7 @@ data class GameplayConfig(
     val thirst: ThirstConfig = ThirstConfig(),
     val flashlight: FlashlightConfig = FlashlightConfig(),
     val noise: NoiseConfig = NoiseConfig(),
+    val paleMan: PaleManConfig = PaleManConfig(),
 ) {
     companion object {
         const val CURRENT_VERSION: Int = 1
@@ -94,4 +95,32 @@ data class NoiseConfig(
     val equipmentRadius: Double = 4.0,
     /** Panting while out of stamina, once per second. */
     val exhaustedBreathingRadius: Double = 5.0,
+)
+
+/** The Pale man's hearing, speeds and attack (see `entities.PaleManBrain`). */
+data class PaleManConfig(
+    /** Multiplies every noise radius when he listens (2 = hears everything twice as far). */
+    val hearing: Double = 1.0,
+    /** Each solid block between a noise and him multiplies its radius by this (1 = walls don't muffle). */
+    val wallMuffle: Double = 0.6,
+    /**
+     * How loud a single noise must be to make him charge at once: 1 at its source, 0 at
+     * the edge of its radius. 0.5 = sprinting within 7 blocks.
+     */
+    val chaseLoudness: Double = 0.5,
+    /** Seconds he stands still listening after a first noise, and searching after losing you. */
+    val listenSeconds: Double = 2.0,
+    val searchSeconds: Double = 4.0,
+    /** Seconds he keeps walking towards a noise before giving up. */
+    val investigateSeconds: Double = 20.0,
+    /** Speed multipliers (1 = about 3 blocks/s): wandering, walking to a noise, chasing. */
+    val roamSpeed: Double = 0.6,
+    val investigateSpeed: Double = 0.8,
+    val chaseSpeed: Double = 1.6,
+    /** Damage per hit (a player has 20 health) and seconds between hits. */
+    val attackDamage: Double = 20.0,
+    val attackCooldownSeconds: Double = 1.0,
+    /** Blocks within which he grabs a player while hunting; closer than [touchRange] he grabs anyone he bumps into. */
+    val attackRange: Double = 2.0,
+    val touchRange: Double = 1.0,
 )

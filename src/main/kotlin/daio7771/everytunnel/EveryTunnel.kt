@@ -3,6 +3,7 @@ package daio7771.everytunnel
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.platform.AmbienceHooks
 import daio7771.everytunnel.platform.DebugCommands
+import daio7771.everytunnel.platform.DevWorlds
 import daio7771.everytunnel.platform.FlashlightHooks
 import daio7771.everytunnel.platform.LevelReloadListener
 import daio7771.everytunnel.platform.LevelTrackingHooks
@@ -12,6 +13,7 @@ import daio7771.everytunnel.platform.ModItems
 import daio7771.everytunnel.platform.ModSounds
 import daio7771.everytunnel.platform.NoiseHooks
 import daio7771.everytunnel.platform.PaleManSpawner
+import daio7771.everytunnel.platform.RespawnHooks
 import daio7771.everytunnel.platform.ResourceHooks
 import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ModInitializer
@@ -54,7 +56,9 @@ object EveryTunnel : ModInitializer {
         FlashlightHooks.register()
         NoiseHooks.register()
         PaleManSpawner.register()
+        RespawnHooks.register()
         DebugCommands.register()
+        DevWorlds.register()
         LOGGER.info("$MOD_NAME loaded")
     }
 }

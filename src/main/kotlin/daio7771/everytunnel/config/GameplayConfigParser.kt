@@ -59,6 +59,7 @@ object GameplayConfigParser {
             thirst = thirst(fields.child("thirst"), defaults.thirst),
             flashlight = flashlight(fields.child("flashlight"), defaults.flashlight),
             noise = noise(fields.child("noise"), defaults.noise),
+            paleMan = paleMan(fields.child("pale_man"), defaults.paleMan),
         )
         fields.reportUnknownKeys()
         return Result(config, fields.problems.toList(), fields.missingKeys.toList())
@@ -101,5 +102,21 @@ object GameplayConfigParser {
         interactRadius = f.double("interact_radius", d.interactRadius, min = 0.0),
         equipmentRadius = f.double("equipment_radius", d.equipmentRadius, min = 0.0),
         exhaustedBreathingRadius = f.double("exhausted_breathing_radius", d.exhaustedBreathingRadius, min = 0.0),
+    ).also { f.reportUnknownKeys() }
+
+    private fun paleMan(f: JsonFields, d: PaleManConfig) = PaleManConfig(
+        hearing = f.double("hearing", d.hearing, min = 0.0, max = 10.0),
+        wallMuffle = f.double("wall_muffle", d.wallMuffle, min = 0.0, max = 1.0),
+        chaseLoudness = f.double("chase_loudness", d.chaseLoudness, min = 0.0, max = 1.0),
+        listenSeconds = f.double("listen_seconds", d.listenSeconds, min = 0.0, max = 30.0),
+        searchSeconds = f.double("search_seconds", d.searchSeconds, min = 0.0, max = 60.0),
+        investigateSeconds = f.double("investigate_seconds", d.investigateSeconds, min = 1.0, max = 300.0),
+        roamSpeed = f.double("roam_speed", d.roamSpeed, min = 0.0, max = 5.0),
+        investigateSpeed = f.double("investigate_speed", d.investigateSpeed, min = 0.0, max = 5.0),
+        chaseSpeed = f.double("chase_speed", d.chaseSpeed, min = 0.0, max = 5.0),
+        attackDamage = f.double("attack_damage", d.attackDamage, min = 0.0),
+        attackCooldownSeconds = f.double("attack_cooldown_seconds", d.attackCooldownSeconds, min = 0.05),
+        attackRange = f.double("attack_range", d.attackRange, min = 0.5, max = 6.0),
+        touchRange = f.double("touch_range", d.touchRange, min = 0.0, max = 6.0),
     ).also { f.reportUnknownKeys() }
 }

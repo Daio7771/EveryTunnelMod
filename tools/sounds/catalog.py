@@ -88,6 +88,8 @@ def heartbeat_beat(rng, length=0.65):
     One heartbeat as heard from inside: S1 ("lub", longer and lower, two close parts) and
     S2 ("dub", shorter and crisper), a fleshy low thump under both and a faint pulse of
     blood after S1. Muffled like through the body, saturated so small speakers play it.
+    Each sound also has a knock and harmonics between about 150 and 700 Hz: the thump
+    alone is almost all below 150 Hz, which laptop and monitor speakers barely play.
     """
     n = samples(length)
     t = time_axis(n)
@@ -103,15 +105,17 @@ def heartbeat_beat(rng, length=0.65):
     for start, f_hi, f_lo, tau, amp in parts:
         s0 = samples(start)
         tt = t[:n - s0]
-        tone = glide_tone(pitch * (f_lo + (f_hi - f_lo) * np.exp(-tt / 0.035)), (1.0, 0.35, 0.1))
+        tone = glide_tone(pitch * (f_lo + (f_hi - f_lo) * np.exp(-tt / 0.035)), (1.0, 0.6, 0.4, 0.25, 0.12))
         y[s0:] += amp * tone * (1.0 - np.exp(-tt / 0.007)) * np.exp(-tt / tau)
     y += burst(n, rng, 0.0, 0.14, hi=180.0, tau=0.045, amp=0.4)
     y += burst(n, rng, s2, 0.1, hi=260.0, tau=0.03, amp=0.25)
     y += burst(n, rng, s2, 0.015, lo=120.0, hi=500.0, tau=0.006, amp=0.12)
+    y += burst(n, rng, 0.0, 0.05, lo=150.0, hi=650.0, tau=0.018, amp=0.5)       # S1 knock
+    y += burst(n, rng, s2, 0.04, lo=200.0, hi=750.0, tau=0.014, amp=0.4)       # S2 knock
     flow = lowpass(rng.standard_normal(n), 220.0, order=2)
     y += 0.06 * flow * envelope(n, [(0.0, 0.0), (0.06, 0.0), (0.12, 1.0), (0.24, 0.0), (length, 0.0)])
-    y = lowpass(y, 900.0, order=2)
-    return fade(drive(y * 1.4, 2.2), 0.002, 0.04)
+    y = lowpass(y, 1400.0, order=2)
+    return fade(drive(y * 1.4, 2.6), 0.002, 0.04)
 
 
 def ring(n, rng, freq, start, tau, amp, detune=12.0):

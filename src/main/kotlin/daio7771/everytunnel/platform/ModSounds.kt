@@ -29,6 +29,11 @@ object ModSounds {
     val BATTERY_CLOSE = event("item.battery.close")
     /** Stereo, played in the player's head (not positioned). */
     val BREATHING_EXHAUSTED = event("player.breathing_exhausted")
+    /** One beat (4 variations), repeated by the client faster as the Pale man gets closer. */
+    val HEARTBEAT = event("player.heartbeat")
+
+    /** "He heard you": stereo, played to the player whose noise started a Pale man chase. */
+    val STINGER_HEARD = event("music.stinger.heard")
 
     /** Fluorescent light: loop for lit lights (client), burst, switching on (starter ticks), power down. */
     val FLUORESCENT_HUM = event("block.fluorescent.hum")

@@ -25,31 +25,53 @@ import net.minecraft.text.Text
  *   them (battery in seconds of light).
  * - `/everytunnel noise`: the noises of the last 5 seconds near you.
  * - `/everytunnel noise watch`: shows each noise you make in the action bar (toggle).
+ * - `/everytunnel paleman`: the Pale men near you, what they are doing and where they are going.
+ * - `/everytunnel devworld save|forget` (development only): make this world start from
+ *   how it is when you quit, on every launch, or stop doing that (see [DevWorlds]).
  */
 object DebugCommands {
 
     fun register() {
         CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
-            dispatcher.register(
-                CommandManager.literal("everytunnel")
-                    .requires { it.hasPermissionLevel(2) }
-                    .then(CommandManager.literal("levels").executes(::levels))
-                    .then(CommandManager.literal("where").executes(::where))
-                    .then(
-                        CommandManager.literal("resources").executes(::resources)
-                            .then(
-                                CommandManager.literal("set")
-                                    .then(setResource("stamina"))
-                                    .then(setResource("thirst"))
-                                    .then(setResource("battery")),
-                            ),
-                    )
-                    .then(
-                        CommandManager.literal("noise").executes(::noise)
-                            .then(CommandManager.literal("watch").executes(::watchNoise)),
-                    ),
-            )
+            val root = CommandManager.literal("everytunnel")
+                .requires { it.hasPermissionLevel(2) }
+                .then(CommandManager.literal("levels").executes(::levels))
+                .then(CommandManager.literal("where").executes(::where))
+                .then(
+                    CommandManager.literal("resources").executes(::resources)
+                        .then(
+                            CommandManager.literal("set")
+                                .then(setResource("stamina"))
+                                .then(setResource("thirst"))
+                                .then(setResource("battery")),
+                        ),
+                )
+                .then(
+                    CommandManager.literal("noise").executes(::noise)
+                        .then(CommandManager.literal("watch").executes(::watchNoise)),
+                )
+                .then(CommandManager.literal("paleman").executes(::paleMen))
+            if (DevWorlds.enabled) {
+                root.then(
+                    CommandManager.literal("devworld")
+                        .then(CommandManager.literal("save").executes(::saveDevWorld))
+                        .then(CommandManager.literal("forget").executes(::forgetDevWorld)),
+                )
+            }
+            dispatcher.register(root)
         }
+    }
+
+    private fun saveDevWorld(context: CommandContext<ServerCommandSource>): Int {
+        val name = DevWorlds.saveOnStop(context.source.server)
+        reply(context, "When you quit, \"$name\" is saved as it is then, and every launch starts from there.")
+        return 1
+    }
+
+    private fun forgetDevWorld(context: CommandContext<ServerCommandSource>): Int {
+        val had = DevWorlds.forget(context.source.server)
+        reply(context, if (had) "Template deleted: this world is kept between launches again." else "This world has no template.")
+        return if (had) 1 else 0
     }
 
     private fun levels(context: CommandContext<ServerCommandSource>): Int {
@@ -152,6 +174,26 @@ object DebugCommands {
     }
 
     private const val NOISE_LIST_RANGE = 32
+
+    private fun paleMen(context: CommandContext<ServerCommandSource>): Int {
+        val player = context.source.playerOrThrow
+        val near = player.serverWorld.getEntitiesByClass(
+            PaleManEntity::class.java, player.boundingBox.expand(PALE_MAN_LIST_RANGE.toDouble()),
+        ) { true }
+        if (near.isEmpty()) reply(context, "No Pale man within $PALE_MAN_LIST_RANGE blocks.")
+        for (paleMan in near) {
+            val target = paleMan.brain.target?.let { "%.0f, %.0f, %.0f".format(it.x, it.y, it.z) } ?: "-"
+            reply(
+                context,
+                "%s at [%.0f, %.0f, %.0f], %.0f blocks away, target [%s]".format(
+                    paleMan.brain.state.name.lowercase(), paleMan.x, paleMan.y, paleMan.z, paleMan.distanceTo(player), target,
+                ),
+            )
+        }
+        return near.size
+    }
+
+    private const val PALE_MAN_LIST_RANGE = 128
 
     private fun reply(context: CommandContext<ServerCommandSource>, message: String) {
         context.source.sendFeedback({ Text.literal(message) }, false)

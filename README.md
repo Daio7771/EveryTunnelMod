@@ -7,8 +7,8 @@ teaches you to listen. Level 2 adds the Pale man, who is blind and finds you by 
 Most of the work goes into the sound.
 
 Where it stands: player systems, sound, the generated Level 1 map and its props are done.
-The Pale man exists and has a model, but his AI is the next thing to write. Level 2,
-death/restart and loot come after that.
+The Pale man hunts by sound. Next: the chase music and tension layers, then Level 2,
+death/restart and loot.
 
 ## Running it
 
@@ -33,6 +33,12 @@ After that:
   the level builds itself the first time you open the world;
 - the test world: copy `examples/dev_flat_datapack/every_tunnel_levels` into
   `run/saves/dev_flat/datapacks/`. Its `level_2` has a Pale man spawn point.
+
+To start every launch from the same point instead of keeping what you did, open the
+world, stand where you want to start, run `/everytunnel devworld save` and quit. The
+world is copied to `run/dev_templates/`, and each launch of the dev client puts it back
+before opening it (the map generator installs into that copy too).
+`/everytunnel devworld forget` turns it off. This only exists in the dev environment.
 
 ### Optional mods
 
@@ -65,7 +71,8 @@ other systems listen to that through `world.LevelTriggers`.
 
 **World rules.** In Survival and Adventure you can't break or place blocks, but doors and
 buttons still work. Creative is free, for building. Vanilla mob spawning is turned off
-with gamerules.
+with gamerules. Entering a level makes its start (the spawn point tagged `player`)
+your respawn point, so you don't come back on the roof.
 
 **The player.** Stamina drains when you sprint or jump. Run it dry and you're exhausted
 until it's back to 30%, breathing hard. Thirst replaces hunger and hurts when it's empty.
@@ -85,10 +92,20 @@ material has its own footsteps and impacts, and puddles splash.
 **The Pale man** (`every_tunnel:pale_man`) is about 2.75 blocks tall. Nothing hurts him
 except `/kill` and he never despawns. The first time a player enters a level, each
 `pale_man` spawn point gets one, and the world remembers it, so he's never doubled and
-comes back if he's killed. For now he just wanders. You can test him with the spawn egg
-in the Every Tunnel tab.
+comes back if he's killed. You can test him with the spawn egg in the Every Tunnel tab.
 
-All the numbers above (stamina, thirst, battery, flashlight, noise radii) are in
+He hears every noise within its radius, and each solid block in between shrinks that
+radius (`wall_muffle`). He wanders until he hears something. A quiet noise makes him stop
+and listen for 2 s, then walk to where it came from. A loud one (sprinting within about
+7 blocks), or a second noise while he listens, makes him run at it, and you hear the "he
+heard you" stinger. While chasing, each new noise moves his target, so if you stop
+making noise he reaches the last place he heard you, searches for 4 s (any noise there
+and he charges again) and goes back to wandering. He hits you if you're within 2 blocks
+while he hunts, or bump into him at any time. By default one hit kills. Within 24 blocks of him you hear your heartbeat, from 60 bpm
+up to 140 right next to him, and never under 120 while he's chasing.
+
+All the numbers above (stamina, thirst, battery, flashlight, noise radii, the Pale man's
+hearing, speeds and attack) are in
 `run/config/every_tunnel/gameplay.json`. It's created with defaults and read at startup.
 Bad values fall back to their default with a warning.
 
@@ -102,7 +119,8 @@ Previews go into each tool's `output/` folder, which isn't in git. Whatever ends
 `tools/map/map_generator.py` builds Level 1: an elevator, five parking halls that get
 worse as you go (wear, dead lights, oddities like stairs into the ceiling), side rooms and
 a ramp down to B2. The parameters are at the top of the file and the same seed gives the
-same level. It writes two datapacks:
+same level. `PALE_MAN_HALLS` puts a Pale man spawn point in the middle of
+those halls, for testing him in the map until Level 2 exists (`[]` for none). It writes two datapacks:
 
 - the mod one, using the mod's blocks;
 - a vanilla one, using re-skinned vanilla blocks.
@@ -151,3 +169,5 @@ These need commands enabled.
 - `/everytunnel where`: your level and zones, and whether the rules are active.
 - `/everytunnel resources [set stamina|thirst|battery <value>]`: read or set them.
 - `/everytunnel noise [watch]`: recent noises, or yours live in the action bar.
+- `/everytunnel paleman`: nearby Pale men, what each is doing and where he's going.
+- `/everytunnel devworld save|forget`: dev runs only, see "Running it".
