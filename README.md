@@ -123,8 +123,8 @@ The world is saved as `run/saves/dev_flat/`. From then on:
 Both pass `--quickPlaySingleplayer dev_flat` and skip the menus. To reset the
 world, delete `run/saves/dev_flat/` and repeat the setup.
 
-The real hand-built map (Noname Complex) will later be another save in
-`run/saves/`; the same quick-play mechanism works for it.
+The map (Noname Complex) is another save, `run/saves/noname_complex`, filled by the map
+generator; the same quick-play mechanism opens it (see "Map generator").
 
 ## Gameplay config (`gameplay.json`)
 
@@ -405,13 +405,18 @@ Level 1 (B1, the parking garage) from the parameters at the top of the file:
 
 - 5 parking halls chained in a zigzag by corridors and a half-level ramp; each hall can
   override any value, and they get worse as you go (wear, dead lights, oddities).
-- Start: a lobby with a service elevator (the player spawns in the cabin). End: a ramp
-  down to a dark "B2" landing (zone tagged `exit`).
+- Start: a lobby with a service elevator (building the level puts the player in the
+  cabin). End: a ramp down to a dark "B2" landing (zone tagged `exit`).
 - Side rooms (storage, electrical room, a locked door marked EXIT, a dead end), props
   (cars, pallets, drums, bins, cones, extinguishers, a cart), ceiling beams, ducts, pipes,
   cable trays, sign codes on walls and pillars, stains and cracks, and oddities.
 - A world resource pack with procedural 16x16 textures, applied only in worlds that carry
   it as `resources.zip` (it re-skins a few stand-in blocks, listed in `STAND_INS`).
+
+One-time setup: the generator only installs into a world that already exists. Create it
+like `dev_flat` (`./gradlew runClient`, Create New World, name **`noname_complex`**,
+Superflat, Allow Commands ON, then quit). Without it the generator prints a warning and
+`runClientMapWorld` stops with an error instead of leaving you on the title screen.
 
 ```bash
 python3 tools/map/map_generator.py
@@ -421,8 +426,14 @@ writes `tools/map/output/` (git-ignored: datapacks, resource pack, `level_previe
 `texture_sheet.png`) and installs the mod datapack (with the level file: 17 zones, the
 start in the elevator, ambience) and `resources.zip` into `run/saves/noname_complex`.
 Then, in game (`./gradlew runClientMapWorld`): `/reload` if it was open, and
-`/function garage:build`, which clears the previous build and teleports you into the
-elevator. Same seeds give the same level.
+`/function garage:build`, which clears the previous build (and the area of the earlier
+40x20 garage test, `OLD_BOXES`) and teleports you into the elevator. Same seeds give the
+same level.
+
+Installing only adds the datapack: until you run `/function garage:build` the world has no
+level blocks, and opening it puts you wherever your player was saved. The level ambience
+(drone, drips, rumbles...) plays only inside the level's zones, so outside them, or before
+building, the level is silent; `/everytunnel where` shows which zone you are in.
 
 ## Debug commands
 

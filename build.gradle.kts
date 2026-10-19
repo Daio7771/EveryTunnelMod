@@ -78,6 +78,20 @@ listOf("classes", "clientClasses").forEach { name ->
     }
 }
 
+// --quickPlaySingleplayer with a missing world just leaves the client on the title screen,
+// with nothing in the log, so check the map world and its datapack before launching.
+tasks.named("runClientMapWorld") {
+    doFirst {
+        val world = file("run/saves/noname_complex")
+        if (!world.resolve("level.dat").isFile) {
+            throw GradleException("No world at $world: create it first (README, \"Map generator\").")
+        }
+        if (!world.resolve("datapacks/every_tunnel_level1_mod").isDirectory) {
+            throw GradleException("$world has no level datapack: run python3 tools/map/map_generator.py")
+        }
+    }
+}
+
 fabricApi {
     configureDataGeneration {
         client = true
