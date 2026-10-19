@@ -48,15 +48,15 @@ PLACE_AT = (0, 64, 0)     # the level is centred on this x, z (keep it near worl
 # Halls in the order they are walked (each can override any general value below). They
 # get worse as you go: more wear, fewer cars, more dead lights, more oddities.
 HALLS = [
-    dict(LENGTH=44, WIDTH=20, WEAR=0.25, CAR_DENSITY=0.45, DEAD_LIGHT_SHARE=0.0, GAP_SHARE=0.0, DARK_ZONES=0,
+    dict(LENGTH=44, WIDTH=20, WEAR=0.25, DEAD_LIGHT_SHARE=0.0, GAP_SHARE=0.0, DARK_ZONES=0,
          ODDITIES=0, HANGING_CABLES=2, CARTS=1),
-    dict(LENGTH=48, WIDTH=22, WEAR=0.4, CAR_DENSITY=0.35, DEAD_LIGHT_SHARE=0.05, GAP_SHARE=0.03, DARK_ZONES=0,
+    dict(LENGTH=48, WIDTH=22, WEAR=0.4, DEAD_LIGHT_SHARE=0.05, GAP_SHARE=0.03, DARK_ZONES=0,
          ODDITIES=1, ODDITY_TYPES=["wrong_sign", "extra_pillar"]),
-    dict(LENGTH=40, WIDTH=20, WEAR=0.55, CAR_DENSITY=0.25, DEAD_LIGHT_SHARE=0.12, GAP_SHARE=0.06, DARK_ZONES=1,
+    dict(LENGTH=40, WIDTH=20, WEAR=0.55, DEAD_LIGHT_SHARE=0.12, GAP_SHARE=0.06, DARK_ZONES=1,
          ODDITIES=2, ODDITY_TYPES=["walled_off", "odd_door", "blocked_lane"]),
-    dict(LENGTH=52, WIDTH=22, WEAR=0.7, CAR_DENSITY=0.2, DEAD_LIGHT_SHARE=0.2, GAP_SHARE=0.1, DARK_ZONES=2,
+    dict(LENGTH=52, WIDTH=22, WEAR=0.7, DEAD_LIGHT_SHARE=0.2, GAP_SHARE=0.1, DARK_ZONES=2,
          ODDITIES=2, ODDITY_TYPES=["collapse", "stairs_to_ceiling", "walled_off"]),
-    dict(LENGTH=44, WIDTH=20, WEAR=0.85, CAR_DENSITY=0.1, DEAD_LIGHT_SHARE=0.3, GAP_SHARE=0.12, DARK_ZONES=2,
+    dict(LENGTH=44, WIDTH=20, WEAR=0.85, DEAD_LIGHT_SHARE=0.3, GAP_SHARE=0.12, DARK_ZONES=2,
          ODDITIES=3, ODDITY_TYPES=["collapse", "odd_door", "extra_pillar", "wrong_sign"], HANGING_CABLES=10),
 ]
 # Between hall i and i+1: a corridor ("length" blocks) or a ramp that also drops "drop"
@@ -87,7 +87,6 @@ SEED = 7
 TEXTURE_SEED = 3
 WEAR = 0.5
 DECALS = True
-CAR_DENSITY = 0.35
 CLUTTER_DENSITY = 0.15
 WHEEL_STOPS = True
 CONES = 2
@@ -107,7 +106,7 @@ DEAD_LIGHT_SHARE = 0.08
 GAP_SHARE = 0.06
 DARK_ZONES = 1
 DARK_ZONE_LENGTH = 10
-MOD_LIGHT = "every_tunnel:fluorescent_light[facing=down,mode=%s,lit=%s]"
+MOD_LIGHT = "every_tunnel:fluorescent_light[facing=down,axis=x,mode=%s,lit=%s]"
 WALL_STRIPE_HEIGHT = 2
 RESOURCE_PACK_FORMAT = 15
 # LabPBR maps for shader packs (garage/pbr.py; tuned for Complementary Reimagined). Glows
@@ -137,9 +136,41 @@ STAND_INS = {
     "decal": "minecraft:sculk_vein",
     "glyph": "minecraft:chiseled_bookshelf",
     "box": "minecraft:dried_kelp_block",
-    "cone": "minecraft:pointed_dripstone",
-    "extinguisher": "minecraft:red_candle",
+    "cone": "minecraft:pointed_dripstone[thickness=tip,vertical_direction=up]",
+    "extinguisher": "minecraft:red_candle[candles=1,lit=false]",
     "cart": "minecraft:hopper",
+}
+
+# Other things the level places, as plain vanilla blocks (not re-skinned).
+BLOCKS = {
+    "wheel_stop": "minecraft:smooth_stone_slab[type=bottom]",
+    "pipe": "minecraft:lightning_rod[facing=east,powered=false]",
+    "tray": "minecraft:iron_trapdoor[facing=north,half=top,open=false]",
+    "cable": "minecraft:chain[axis=y]",
+    "pallet": "minecraft:spruce_trapdoor[facing=north,half=bottom,open=false]",
+    "drum": "minecraft:barrel[facing=up,open=false]",
+    "bin": "minecraft:cauldron",
+    "elevator_wall": "minecraft:iron_block",
+}
+
+# The mod version uses the mod's own blocks instead (tools/blocks/generate.py makes their
+# assets). Their orientation, connections and patterns are set by garage/mod_blocks.py.
+MOD_BLOCKS = {
+    "duct": "every_tunnel:duct",
+    "decal": "every_tunnel:stain",
+    "glyph": "every_tunnel:sign_tile",
+    "box": "every_tunnel:cardboard_box",
+    "cone": "every_tunnel:traffic_cone",
+    "extinguisher": "every_tunnel:fire_extinguisher",
+    "cart": "every_tunnel:shopping_cart",
+    "wheel_stop": "every_tunnel:wheel_stop",
+    "pipe": "every_tunnel:pipe",
+    "tray": "every_tunnel:cable_tray",
+    "cable": "every_tunnel:hanging_cable",
+    "pallet": "every_tunnel:pallet",
+    "drum": "every_tunnel:oil_drum",
+    "bin": "every_tunnel:trash_bin",
+    "elevator_wall": "every_tunnel:metal_panel",
 }
 
 # Worlds that get the result after each run (skipped, with a warning, when there is no world there).

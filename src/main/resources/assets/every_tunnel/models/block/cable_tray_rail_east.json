@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "b": "every_tunnel:block/cable_tray_bottom",
+    "r": "every_tunnel:block/cable_tray_rail",
+    "c": "every_tunnel:block/cable_tray_cables",
+    "particle": "every_tunnel:block/cable_tray_bottom"
+  },
+  "elements": [
+    {
+      "from": [
+        14,
+        9,
+        2
+      ],
+      "to": [
+        15,
+        13,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#r"
+        },
+        "east": {
+          "texture": "#r"
+        },
+        "south": {
+          "texture": "#r"
+        },
+        "west": {
+          "texture": "#r"
+        },
+        "up": {
+          "texture": "#r"
+        },
+        "down": {
+          "texture": "#r"
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

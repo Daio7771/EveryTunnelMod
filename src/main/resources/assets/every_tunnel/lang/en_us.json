@@ -10,5 +10,22 @@
   "block.every_tunnel.fluorescent_light": "Fluorescent Light",
   "message.every_tunnel.light_mode.on": "Fluorescent light: on",
   "message.every_tunnel.light_mode.flicker": "Fluorescent light: flickering",
-  "message.every_tunnel.light_mode.off": "Fluorescent light: off"
+  "message.every_tunnel.light_mode.off": "Fluorescent light: off",
+  "itemGroup.every_tunnel": "Every Tunnel",
+  "block.every_tunnel.cardboard_box": "Cardboard Box",
+  "block.every_tunnel.traffic_cone": "Traffic Cone",
+  "block.every_tunnel.fire_extinguisher": "Fire Extinguisher",
+  "block.every_tunnel.shopping_cart": "Shopping Cart",
+  "block.every_tunnel.pallet": "Pallet",
+  "block.every_tunnel.oil_drum": "Oil Drum",
+  "block.every_tunnel.trash_bin": "Trash Bin",
+  "block.every_tunnel.wheel_stop": "Wheel Stop",
+  "block.every_tunnel.pipe": "Pipe",
+  "block.every_tunnel.duct": "Air Duct",
+  "block.every_tunnel.cable_tray": "Cable Tray",
+  "block.every_tunnel.hanging_cable": "Hanging Cable",
+  "block.every_tunnel.metal_panel": "Metal Panel",
+  "block.every_tunnel.sign_tile": "Sign Tile",
+  "block.every_tunnel.stain": "Stain",
+  "block.every_tunnel.puddle": "Puddle"
 }

@@ -5,7 +5,7 @@ import io
 from PIL import Image, ImageDraw, ImageFont
 
 TAG_COLORS = {
-    "car": (150, 160, 175), "box": (168, 130, 80), "bin": (110, 110, 110), "cart": (90, 140, 200),
+    "box": (168, 130, 80), "bin": (110, 110, 110), "cart": (90, 140, 200),
     "cone": (235, 110, 30), "extinguisher": (210, 30, 30), "barrier": (190, 190, 180),
 }
 ODDITY_TAGS = {"collapse", "walled_off", "stairs", "door", "wrong_sign", "extra_pillar"}

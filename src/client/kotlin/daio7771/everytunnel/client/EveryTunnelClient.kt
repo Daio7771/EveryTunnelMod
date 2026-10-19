@@ -6,9 +6,12 @@ import daio7771.everytunnel.client.effects.BreathingEffect
 import daio7771.everytunnel.client.effects.FlashlightEffect
 import daio7771.everytunnel.client.effects.FluorescentHum
 import daio7771.everytunnel.client.hud.StatusHud
+import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ClientModInitializer
+import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.minecraft.client.render.RenderLayer
 
 /**
  * Client-only entrypoint for Every Tunnel.
@@ -20,6 +23,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
  * `client.compat.LambDynamicLightsCompat` when LambDynamicLights is installed), the
  * exhausted breathing ([BreathingEffect]), the level ambience ([AmbiencePlayer]), the
  * hum of fluorescent lights ([FluorescentHum]) and the status bars ([StatusHud]).
+ * Blocks whose textures have see-through pixels are drawn in the cutout layer.
  */
 object EveryTunnelClient : ClientModInitializer {
 
@@ -31,6 +35,10 @@ object EveryTunnelClient : ClientModInitializer {
         AmbiencePlayer.register()
         FluorescentHum.register()
         StatusHud.register()
+        BlockRenderLayerMap.INSTANCE.putBlocks(
+            RenderLayer.getCutout(),
+            ModBlocks.SHOPPING_CART, ModBlocks.CABLE_TRAY, ModBlocks.HANGING_CABLE, ModBlocks.STAIN, ModBlocks.PUDDLE,
+        )
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val player = client.player ?: return@register
             WorldRulesHooks.syncAbilities(player, client.interactionManager?.currentGameMode)

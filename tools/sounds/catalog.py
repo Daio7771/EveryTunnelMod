@@ -674,6 +674,125 @@ def death(rng, variant):
 
 # ===========================================================================
 
+# ===========================================================================
+# Materials: footsteps and impacts on the props (block sound groups in the mod)
+#
+# Minecraft plays footsteps quietly by itself (the block's volume x 0.15) and impacts
+# louder, so both are normalized like the other sounds and balanced by game_volume.
+
+def knock(n, rng, start, base, ratios, amps, taus, click=0.6, click_hi=7000.0):
+    """A struck object: a short noise click for the contact plus its ringing modes."""
+    y = burst(n, rng, start, 0.003, lo=600.0, hi=click_hi, tau=0.001, amp=click)
+    y += damped_partials(n, [base * r for r in ratios], amps, taus, rng, start)
+    return y
+
+
+def cardboard(rng, variant, impact):
+    n = samples(0.4)
+    hit = 1.0 if impact else 0.5
+    y = burst(n, rng, 0.01, 0.06, hi=420.0, tau=0.018, amp=1.2 * hit)                     # the box's dull thump
+    y += damped_partials(n, [rng.uniform(120, 190), rng.uniform(260, 330)], [0.5 * hit, 0.2 * hit], [0.035, 0.02], rng, 0.01)
+    for _ in range(int(rng.integers(2, 5 if impact else 3))):                                # paper crinkle
+        y += burst(n, rng, rng.uniform(0.01, 0.08), rng.uniform(0.004, 0.012), lo=2500.0, hi=9000.0, tau=0.004,
+                   amp=rng.uniform(0.08, 0.2))
+    return fade(y, 0.0, 0.05)
+
+
+def plastic(rng, variant, impact):
+    n = samples(0.4)
+    base = rng.uniform(300, 380) if impact else rng.uniform(420, 560)
+    y = knock(n, rng, 0.01, base, [1.0, 2.31, 3.86, 5.1], [1.0, 0.5, 0.3, 0.15], [0.05, 0.03, 0.02, 0.012], click=0.5)
+    y += burst(n, rng, 0.01, 0.02, hi=900.0, tau=0.008, amp=0.6)                            # hollow body
+    if impact and rng.random() < 0.7:                                                        # a small bounce
+        t2 = rng.uniform(0.07, 0.12)
+        y += 0.35 * knock(n, rng, t2, base * rng.uniform(0.97, 1.03), [1.0, 2.31, 3.86], [1.0, 0.5, 0.3], [0.04, 0.025, 0.015])
+    return fade(y, 0.0, 0.05)
+
+
+def hollow_metal(rng, variant, impact):
+    """A big empty steel body (oil drum, extinguisher): a low bong that rings on."""
+    n = samples(1.2 if impact else 0.6)
+    base = rng.uniform(150, 210)
+    taus = [0.45, 0.25, 0.15, 0.09] if impact else [0.12, 0.08, 0.05, 0.03]
+    y = knock(n, rng, 0.01, base, [1.0, 1.59, 2.71, 4.13], [1.0, 0.6, 0.4, 0.25], taus, click=0.8)
+    y += burst(n, rng, 0.01, 0.03, hi=600.0, tau=0.01, amp=0.9 if impact else 0.5)
+    return fade(y, 0.0, 0.1)
+
+
+def metal_pipe(rng, variant, impact):
+    """A steel pipe: free-bar modes (1, 2.76, 5.40, 8.93) ring a long time when struck."""
+    n = samples(1.5 if impact else 0.5)
+    base = rng.uniform(280, 420)
+    taus = [0.8, 0.45, 0.25, 0.14] if impact else [0.09, 0.05, 0.03, 0.02]
+    y = knock(n, rng, 0.01, base, [1.0, 2.756, 5.404, 8.933], [1.0, 0.7, 0.45, 0.25], taus, click=1.0, click_hi=9000.0)
+    return fade(y, 0.0, 0.1)
+
+
+def sheet_metal(rng, variant, impact):
+    """Thin galvanized sheet (ducts, trays, panels): a dense, wobbling, slightly buzzy boom."""
+    n = samples(0.9 if impact else 0.45)
+    base = rng.uniform(85, 130)
+    ratios = sorted(rng.uniform(1.0, 9.0, 10))
+    amps = [0.8 / (1 + i * 0.4) for i in range(10)]
+    taus = [(0.35 if impact else 0.1) / (1 + i * 0.25) for i in range(10)]
+    y = knock(n, rng, 0.01, base, ratios, amps, taus, click=0.7)
+    t = time_axis(n)
+    y *= 1.0 + 0.35 * np.sin(TAU * rng.uniform(5, 9) * t)                                   # the sheet flexing
+    for _ in range(int(rng.integers(2, 6 if impact else 3))):                               # loose screws rattling
+        y += burst(n, rng, rng.uniform(0.02, 0.15), 0.004, lo=2000.0, hi=7000.0, tau=0.0015, amp=rng.uniform(0.1, 0.25))
+    return fade(drive(y, 1.5), 0.0, 0.08)
+
+
+def wire_mesh(rng, variant, impact):
+    """Shopping cart: the wire basket rattles."""
+    n = samples(0.5)
+    y = burst(n, rng, 0.01, 0.02, hi=700.0, tau=0.008, amp=0.5)
+    for _ in range(int(rng.integers(6, 12) if impact else rng.integers(3, 6))):
+        y += tink(n, rng, rng.uniform(0.01, 0.18), amp=rng.uniform(0.15, 0.5))
+    return fade(y, 0.0, 0.05)
+
+
+def wood(rng, variant, impact):
+    """Pallet boards: a dry knock, with a short creak when stepped on."""
+    n = samples(0.5)
+    base = rng.uniform(190, 260)
+    y = knock(n, rng, 0.01, base, [1.0, 2.43, 4.1, 6.3], [1.0, 0.45, 0.25, 0.12],
+              [0.05, 0.03, 0.018, 0.01] if impact else [0.03, 0.02, 0.012, 0.008], click=0.7)
+    if not impact and rng.random() < 0.6:
+        start = rng.uniform(0.04, 0.09)
+        for i in range(int(rng.integers(8, 16))):                                            # creak: fast stick-slip ticks
+            y += burst(n, rng, start + i * rng.uniform(0.004, 0.007), 0.002, lo=800.0, hi=3000.0, tau=0.001,
+                       amp=0.12 * (1 - i / 16))
+    return fade(y, 0.0, 0.05)
+
+
+def puddle(rng, variant, impact):
+    """Splashing through standing water: a wet slap, then a few drops and bubbles."""
+    n = samples(0.6)
+    amp = 1.0 if impact else 0.7
+    y = burst(n, rng, 0.01, 0.09, lo=700.0, hi=7000.0, tau=0.03, amp=amp)
+    y += burst(n, rng, 0.01, 0.04, hi=600.0, tau=0.012, amp=0.5 * amp)
+    for _ in range(int(rng.integers(3, 7))):
+        y += drop(n, rng, rng.uniform(0.04, 0.25), rng.uniform(1.2, 2.6), amp=rng.uniform(0.1, 0.3))
+    return fade(y, 0.0, 0.08)
+
+
+def material(fn, impact):
+    return lambda rng, variant: fn(rng, variant, impact)
+
+
+MATERIALS = [
+    ("cardboard", cardboard, "Cardboard boxes"),
+    ("plastic", plastic, "Traffic cones, bins, cables"),
+    ("hollow_metal", hollow_metal, "Oil drums, extinguishers"),
+    ("metal_pipe", metal_pipe, "Pipes"),
+    ("sheet_metal", sheet_metal, "Air ducts, cable trays, the elevator's metal panels"),
+    ("wire_mesh", wire_mesh, "The shopping cart"),
+    ("wood", wood, "Pallets"),
+    ("puddle", puddle, "Puddles (the splash plays together with the floor's own step)"),
+]
+
+
 SOUNDS = [
     Sound("ambient.garage.drone", "Garage ambience", "Background tone of the whole garage", "stereo", True, 1, garage_drone, -3.0,
           game_volume=0.35),
@@ -702,4 +821,12 @@ SOUNDS = [
     Sound("music.chase", "Level 2 / Pale man", "During a chase (120 bpm, 8 bars)", "stereo", True, 1, chase, -1.0),
     Sound("event.level_transition", "Level progress", "Going from Level 1 to Level 2", "stereo", False, 1, level_transition, -1.0),
     Sound("event.death", "Level progress", "Death (1: short, 2: with collapse)", "stereo", False, 2, death, -1.0),
+] + [
+    sound
+    for name, fn, use in MATERIALS
+    for sound in (
+        Sound(f"block.{name}.step", "Materials", f"Walking on it: {use}", "mono", False, 4, material(fn, False), -3.0),
+        Sound(f"block.{name}.impact", "Materials", f"Hit, placed, broken, landed on: {use}", "mono", False, 3,
+              material(fn, True), -1.0, game_volume=0.8),
+    )
 ]

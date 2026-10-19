@@ -1,0 +1,420 @@
+{
+  "variants": {
+    "facing=up,pattern=0": {
+      "model": "every_tunnel:block/stain_floor_oil_0"
+    },
+    "facing=up,pattern=1": {
+      "model": "every_tunnel:block/stain_floor_oil_1"
+    },
+    "facing=up,pattern=2": {
+      "model": "every_tunnel:block/stain_floor_stain_0"
+    },
+    "facing=up,pattern=3": {
+      "model": "every_tunnel:block/stain_floor_stain_1"
+    },
+    "facing=up,pattern=4": {
+      "model": "every_tunnel:block/stain_floor_dirt_0"
+    },
+    "facing=up,pattern=5": {
+      "model": "every_tunnel:block/stain_floor_dirt_1"
+    },
+    "facing=up,pattern=6": {
+      "model": "every_tunnel:block/stain_floor_paper_0"
+    },
+    "facing=up,pattern=7": {
+      "model": "every_tunnel:block/stain_floor_paper_1"
+    },
+    "facing=up,pattern=8": {
+      "model": "every_tunnel:block/stain_floor_tire_0"
+    },
+    "facing=up,pattern=9": {
+      "model": "every_tunnel:block/stain_floor_tire_1"
+    },
+    "facing=up,pattern=10": {
+      "model": "every_tunnel:block/stain_floor_crack_0"
+    },
+    "facing=up,pattern=11": {
+      "model": "every_tunnel:block/stain_floor_crack_1"
+    },
+    "facing=up,pattern=12": {
+      "model": "every_tunnel:block/stain_floor_drain_0"
+    },
+    "facing=up,pattern=13": {
+      "model": "every_tunnel:block/stain_floor_drain_1"
+    },
+    "facing=up,pattern=14": {
+      "model": "every_tunnel:block/stain_floor_oil_0"
+    },
+    "facing=up,pattern=15": {
+      "model": "every_tunnel:block/stain_floor_oil_1"
+    },
+    "facing=down,pattern=0": {
+      "model": "every_tunnel:block/stain_ceiling_ring_0",
+      "x": 180
+    },
+    "facing=down,pattern=1": {
+      "model": "every_tunnel:block/stain_ceiling_ring_1",
+      "x": 180
+    },
+    "facing=down,pattern=2": {
+      "model": "every_tunnel:block/stain_ceiling_mold_0",
+      "x": 180
+    },
+    "facing=down,pattern=3": {
+      "model": "every_tunnel:block/stain_ceiling_mold_1",
+      "x": 180
+    },
+    "facing=down,pattern=4": {
+      "model": "every_tunnel:block/stain_ceiling_crack_0",
+      "x": 180
+    },
+    "facing=down,pattern=5": {
+      "model": "every_tunnel:block/stain_ceiling_crack_1",
+      "x": 180
+    },
+    "facing=down,pattern=6": {
+      "model": "every_tunnel:block/stain_ceiling_ring_0",
+      "x": 180
+    },
+    "facing=down,pattern=7": {
+      "model": "every_tunnel:block/stain_ceiling_ring_1",
+      "x": 180
+    },
+    "facing=down,pattern=8": {
+      "model": "every_tunnel:block/stain_ceiling_mold_0",
+      "x": 180
+    },
+    "facing=down,pattern=9": {
+      "model": "every_tunnel:block/stain_ceiling_mold_1",
+      "x": 180
+    },
+    "facing=down,pattern=10": {
+      "model": "every_tunnel:block/stain_ceiling_crack_0",
+      "x": 180
+    },
+    "facing=down,pattern=11": {
+      "model": "every_tunnel:block/stain_ceiling_crack_1",
+      "x": 180
+    },
+    "facing=down,pattern=12": {
+      "model": "every_tunnel:block/stain_ceiling_ring_0",
+      "x": 180
+    },
+    "facing=down,pattern=13": {
+      "model": "every_tunnel:block/stain_ceiling_ring_1",
+      "x": 180
+    },
+    "facing=down,pattern=14": {
+      "model": "every_tunnel:block/stain_ceiling_mold_0",
+      "x": 180
+    },
+    "facing=down,pattern=15": {
+      "model": "every_tunnel:block/stain_ceiling_mold_1",
+      "x": 180
+    },
+    "facing=north,pattern=0": {
+      "model": "every_tunnel:block/stain_wall_damp_0",
+      "x": 90
+    },
+    "facing=north,pattern=1": {
+      "model": "every_tunnel:block/stain_wall_damp_1",
+      "x": 90
+    },
+    "facing=north,pattern=2": {
+      "model": "every_tunnel:block/stain_wall_rust_0",
+      "x": 90
+    },
+    "facing=north,pattern=3": {
+      "model": "every_tunnel:block/stain_wall_rust_1",
+      "x": 90
+    },
+    "facing=north,pattern=4": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_0",
+      "x": 90
+    },
+    "facing=north,pattern=5": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_1",
+      "x": 90
+    },
+    "facing=north,pattern=6": {
+      "model": "every_tunnel:block/stain_wall_tally_0",
+      "x": 90
+    },
+    "facing=north,pattern=7": {
+      "model": "every_tunnel:block/stain_wall_tally_1",
+      "x": 90
+    },
+    "facing=north,pattern=8": {
+      "model": "every_tunnel:block/stain_wall_hand_0",
+      "x": 90
+    },
+    "facing=north,pattern=9": {
+      "model": "every_tunnel:block/stain_wall_hand_1",
+      "x": 90
+    },
+    "facing=north,pattern=10": {
+      "model": "every_tunnel:block/stain_wall_damp_0",
+      "x": 90
+    },
+    "facing=north,pattern=11": {
+      "model": "every_tunnel:block/stain_wall_damp_1",
+      "x": 90
+    },
+    "facing=north,pattern=12": {
+      "model": "every_tunnel:block/stain_wall_rust_0",
+      "x": 90
+    },
+    "facing=north,pattern=13": {
+      "model": "every_tunnel:block/stain_wall_rust_1",
+      "x": 90
+    },
+    "facing=north,pattern=14": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_0",
+      "x": 90
+    },
+    "facing=north,pattern=15": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_1",
+      "x": 90
+    },
+    "facing=east,pattern=0": {
+      "model": "every_tunnel:block/stain_wall_damp_0",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=1": {
+      "model": "every_tunnel:block/stain_wall_damp_1",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=2": {
+      "model": "every_tunnel:block/stain_wall_rust_0",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=3": {
+      "model": "every_tunnel:block/stain_wall_rust_1",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=4": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_0",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=5": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_1",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=6": {
+      "model": "every_tunnel:block/stain_wall_tally_0",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=7": {
+      "model": "every_tunnel:block/stain_wall_tally_1",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=8": {
+      "model": "every_tunnel:block/stain_wall_hand_0",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=9": {
+      "model": "every_tunnel:block/stain_wall_hand_1",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=10": {
+      "model": "every_tunnel:block/stain_wall_damp_0",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=11": {
+      "model": "every_tunnel:block/stain_wall_damp_1",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=12": {
+      "model": "every_tunnel:block/stain_wall_rust_0",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=13": {
+      "model": "every_tunnel:block/stain_wall_rust_1",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=14": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_0",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=15": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_1",
+      "x": 90,
+      "y": 90
+    },
+    "facing=south,pattern=0": {
+      "model": "every_tunnel:block/stain_wall_damp_0",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=1": {
+      "model": "every_tunnel:block/stain_wall_damp_1",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=2": {
+      "model": "every_tunnel:block/stain_wall_rust_0",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=3": {
+      "model": "every_tunnel:block/stain_wall_rust_1",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=4": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_0",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=5": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_1",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=6": {
+      "model": "every_tunnel:block/stain_wall_tally_0",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=7": {
+      "model": "every_tunnel:block/stain_wall_tally_1",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=8": {
+      "model": "every_tunnel:block/stain_wall_hand_0",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=9": {
+      "model": "every_tunnel:block/stain_wall_hand_1",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=10": {
+      "model": "every_tunnel:block/stain_wall_damp_0",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=11": {
+      "model": "every_tunnel:block/stain_wall_damp_1",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=12": {
+      "model": "every_tunnel:block/stain_wall_rust_0",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=13": {
+      "model": "every_tunnel:block/stain_wall_rust_1",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=14": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_0",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=15": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_1",
+      "x": 90,
+      "y": 180
+    },
+    "facing=west,pattern=0": {
+      "model": "every_tunnel:block/stain_wall_damp_0",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=1": {
+      "model": "every_tunnel:block/stain_wall_damp_1",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=2": {
+      "model": "every_tunnel:block/stain_wall_rust_0",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=3": {
+      "model": "every_tunnel:block/stain_wall_rust_1",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=4": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_0",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=5": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_1",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=6": {
+      "model": "every_tunnel:block/stain_wall_tally_0",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=7": {
+      "model": "every_tunnel:block/stain_wall_tally_1",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=8": {
+      "model": "every_tunnel:block/stain_wall_hand_0",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=9": {
+      "model": "every_tunnel:block/stain_wall_hand_1",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=10": {
+      "model": "every_tunnel:block/stain_wall_damp_0",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=11": {
+      "model": "every_tunnel:block/stain_wall_damp_1",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=12": {
+      "model": "every_tunnel:block/stain_wall_rust_0",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=13": {
+      "model": "every_tunnel:block/stain_wall_rust_1",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=14": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_0",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=15": {
+      "model": "every_tunnel:block/stain_wall_wallcrack_1",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

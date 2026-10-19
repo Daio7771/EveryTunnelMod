@@ -36,6 +36,23 @@ object ModSounds {
     val FLUORESCENT_START = event("block.fluorescent.start")
     val FLUORESCENT_OFF = event("block.fluorescent.off")
 
+    /**
+     * The props' materials ([ModSoundGroups]): footsteps, and one impact sound for hitting,
+     * placing, breaking and landing on them. `block.<material>.step` / `.impact`.
+     */
+    val CARDBOARD = material("cardboard")
+    val PLASTIC = material("plastic")
+    val HOLLOW_METAL = material("hollow_metal")
+    val METAL_PIPE = material("metal_pipe")
+    val SHEET_METAL = material("sheet_metal")
+    val WIRE_MESH = material("wire_mesh")
+    val WOOD = material("wood")
+    val PUDDLE = material("puddle")
+
+    class MaterialSounds(val step: SoundEvent, val impact: SoundEvent)
+
+    private fun material(name: String) = MaterialSounds(event("block.$name.step"), event("block.$name.impact"))
+
     private fun event(path: String): SoundEvent =
         SoundEvent.of(Identifier(EveryTunnel.MOD_ID, path)).also { all += it }
 

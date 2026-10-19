@@ -1,53 +1,109 @@
 {
   "variants": {
-    "facing=down,lit=true": {
+    "facing=down,axis=x,lit=true": {
       "model": "every_tunnel:block/fluorescent_light_on"
     },
-    "facing=down,lit=false": {
+    "facing=down,axis=x,lit=false": {
       "model": "every_tunnel:block/fluorescent_light_off"
     },
-    "facing=up,lit=true": {
+    "facing=down,axis=z,lit=true": {
+      "model": "every_tunnel:block/fluorescent_light_on",
+      "y": 90
+    },
+    "facing=down,axis=z,lit=false": {
+      "model": "every_tunnel:block/fluorescent_light_off",
+      "y": 90
+    },
+    "facing=up,axis=x,lit=true": {
       "model": "every_tunnel:block/fluorescent_light_on",
       "x": 180
     },
-    "facing=up,lit=false": {
+    "facing=up,axis=x,lit=false": {
       "model": "every_tunnel:block/fluorescent_light_off",
       "x": 180
     },
-    "facing=north,lit=true": {
+    "facing=up,axis=z,lit=true": {
+      "model": "every_tunnel:block/fluorescent_light_on",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,axis=z,lit=false": {
+      "model": "every_tunnel:block/fluorescent_light_off",
+      "x": 180,
+      "y": 90
+    },
+    "facing=north,axis=x,lit=true": {
       "model": "every_tunnel:block/fluorescent_light_on",
       "x": 270
     },
-    "facing=north,lit=false": {
+    "facing=north,axis=x,lit=false": {
       "model": "every_tunnel:block/fluorescent_light_off",
       "x": 270
     },
-    "facing=south,lit=true": {
+    "facing=north,axis=z,lit=true": {
       "model": "every_tunnel:block/fluorescent_light_on",
-      "x": 270,
-      "y": 180
+      "x": 270
     },
-    "facing=south,lit=false": {
+    "facing=north,axis=z,lit=false": {
       "model": "every_tunnel:block/fluorescent_light_off",
-      "x": 270,
-      "y": 180
+      "x": 270
     },
-    "facing=east,lit=true": {
+    "facing=east,axis=x,lit=true": {
       "model": "every_tunnel:block/fluorescent_light_on",
       "x": 270,
       "y": 90
     },
-    "facing=east,lit=false": {
+    "facing=east,axis=x,lit=false": {
       "model": "every_tunnel:block/fluorescent_light_off",
       "x": 270,
       "y": 90
     },
-    "facing=west,lit=true": {
+    "facing=east,axis=z,lit=true": {
+      "model": "every_tunnel:block/fluorescent_light_on",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=z,lit=false": {
+      "model": "every_tunnel:block/fluorescent_light_off",
+      "x": 270,
+      "y": 90
+    },
+    "facing=south,axis=x,lit=true": {
+      "model": "every_tunnel:block/fluorescent_light_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=x,lit=false": {
+      "model": "every_tunnel:block/fluorescent_light_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=true": {
+      "model": "every_tunnel:block/fluorescent_light_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=false": {
+      "model": "every_tunnel:block/fluorescent_light_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=west,axis=x,lit=true": {
       "model": "every_tunnel:block/fluorescent_light_on",
       "x": 270,
       "y": 270
     },
-    "facing=west,lit=false": {
+    "facing=west,axis=x,lit=false": {
+      "model": "every_tunnel:block/fluorescent_light_off",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=true": {
+      "model": "every_tunnel:block/fluorescent_light_on",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=false": {
       "model": "every_tunnel:block/fluorescent_light_off",
       "x": 270,
       "y": 270

@@ -214,7 +214,7 @@ def build(p, variant, glyphs, openings=(), zone_letters="AB"):
         if placed:
             report["oddities"].append(placed)
 
-    # --- Stalls: cars, wheel stops, small props -----------------------------------------------
+    # --- Stalls (no cars: empty, or something left behind): wheel stops, small props -----------------------------------------------
     for s in g.stalls:
         side, x0, x1, z0, z1, wall_z = s
         if s in used_stalls:
@@ -222,12 +222,8 @@ def build(p, variant, glyphs, openings=(), zone_letters="AB"):
         if p.WHEEL_STOPS:
             for x in range(x0, x1 + 1):
                 if x1 - x0 < 3 or x not in (x0, x1):
-                    w.set(x, 1, wall_z, "minecraft:smooth_stone_slab[type=bottom]")
-        r = rng.random()
-        if r < p.CAR_DENSITY and x1 - x0 + 1 >= 3 and z1 - z0 + 1 >= 6:
-            P_.car(w, g, p, rng, s)
-            count("car")
-        elif r < p.CAR_DENSITY + p.CLUTTER_DENSITY:
+                    w.set(x, 1, wall_z, S["wheel_stop"])
+        if rng.random() < p.CLUTTER_DENSITY:
             P_.clutter(w, g, p, rng, s, count)
 
     P_.small_props(w, g, p, rng, count)

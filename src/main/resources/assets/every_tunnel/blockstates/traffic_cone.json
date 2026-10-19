@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/traffic_cone"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/traffic_cone",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/traffic_cone",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/traffic_cone",
+      "y": 270
+    }
+  }
+}

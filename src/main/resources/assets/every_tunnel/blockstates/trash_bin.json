@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/trash_bin"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/trash_bin",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/trash_bin",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/trash_bin",
+      "y": 270
+    }
+  }
+}

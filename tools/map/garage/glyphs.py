@@ -1,5 +1,6 @@
 """
-Sign texts carried by the glyph stand-in block (chiseled bookshelf).
+Sign texts carried by the glyph stand-in block (chiseled bookshelf), or in the mod
+version by every_tunnel:sign_tile (same facings and 64 slots, numbered).
 
 The block has 4 facings x 64 slot combinations. Wall signs need the facing to point the
 text into the room, so a wall text takes a whole slot (all four facings show it, rotated).
@@ -19,6 +20,8 @@ class Glyphs:
         self._next_pillar = 0
 
     def _state(self, facing, slot):
+        if self.block.startswith("every_tunnel:"):           # the mod's sign tile numbers its slots
+            return f"{self.block}[facing={facing},slot={slot}]"
         bits = ",".join(f"slot_{b}_occupied={'true' if slot >> b & 1 else 'false'}" for b in range(6))
         return f"{self.block}[facing={facing},{bits}]"
 

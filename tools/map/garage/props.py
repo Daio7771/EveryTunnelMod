@@ -4,8 +4,6 @@ into the World and tags its cells for the preview. Nothing is ever placed in the
 rows at body height (y 1-2) except thin floor decals, so the line of sight stays clear.
 """
 
-CAR_COLORS = ["white", "light_gray", "gray", "black", "cyan", "blue", "red"]
-
 
 def _tag(w, x, z, label):
     w.tags[(x, z)] = label
@@ -20,28 +18,6 @@ def _stall_front_back(g, s):
 
 # --- Stall props -------------------------------------------------------------------
 
-def car(w, g, p, rng, s):
-    """3 x 5 x 2 block car: body blocks, carpet hood and trunk, dark glass cabin."""
-    side, x0, x1, z0, z1, wall_z = s
-    cx = x0 + (x1 - x0 + 1 - 3) // 2
-    front, back, step = _stall_front_back(g, s)
-    # Leave the wheel stop row free: the car spans the 5 rows in front of it.
-    rows = [z for z in (back - step * k for k in range(1, 6)) if z0 <= z <= z1]
-    color = rng.choice(CAR_COLORS)
-    body = f"minecraft:{color}_concrete"
-    carpet = f"minecraft:{color}_carpet"
-    glass = "minecraft:black_stained_glass"
-    broken = rng.random() < 0.3
-    for i, z in enumerate(rows):
-        for x in range(cx, cx + 3):
-            w.set(x, 1, z, body)
-            if i in (0, len(rows) - 1):
-                w.set(x, 2, z, carpet)
-            elif not (broken and rng.random() < 0.35):
-                w.set(x, 2, z, glass)
-            _tag(w, x, z, "car")
-
-
 def clutter(w, g, p, rng, s, count):
     """Something left in an empty stall: a pallet with boxes, drums or a bin."""
     side, x0, x1, z0, z1, wall_z = s
@@ -51,7 +27,7 @@ def clutter(w, g, p, rng, s, count):
     if kind == "pallet":
         for x in range(x0, min(x1, x0 + 1) + 1):
             for dz in (0, -step):
-                w.set(x, 1, z + dz, "minecraft:spruce_trapdoor[facing=north,half=bottom,open=false]")
+                w.set(x, 1, z + dz, p.STAND_INS["pallet"])
                 _tag(w, x, z + dz, "box")
         for x in range(x0, min(x1, x0 + 1) + 1):
             if rng.random() < 0.7:
@@ -61,11 +37,11 @@ def clutter(w, g, p, rng, s, count):
         count("pallet with boxes")
     elif kind == "drums":
         for x in range(x0, min(x1, x0 + rng.randrange(1, 3)) + 1):
-            w.set(x, 1, z, "minecraft:barrel[facing=up,open=false]")
+            w.set(x, 1, z, p.STAND_INS["drum"])
             _tag(w, x, z, "box")
         count("drums")
     else:
-        w.set(x1, 1, z, "minecraft:cauldron")
+        w.set(x1, 1, z, p.STAND_INS["bin"])
         _tag(w, x1, z, "bin")
         count("bin")
 
@@ -85,7 +61,7 @@ def small_props(w, g, p, rng, count):
                 spots.append((x + 1, z))
     for x, z in spots:
         if free_cell(x, z) and rng.random() < 0.8:
-            w.set(x, 1, z, S["extinguisher"] + "[candles=1,lit=false]")
+            w.set(x, 1, z, S["extinguisher"])
             _tag(w, x, z, "extinguisher")
             count("extinguisher")
 
@@ -97,7 +73,7 @@ def small_props(w, g, p, rng, count):
         if cones >= p.CONES:
             break
         if free_cell(x, z):
-            w.set(x, 1, z, S["cone"] + "[thickness=tip,vertical_direction=up]")
+            w.set(x, 1, z, S["cone"])
             _tag(w, x, z, "cone")
             cones += 1
     count("cone", cones)
@@ -127,10 +103,10 @@ def ceiling_services(w, g, p, rng, beam_xs):
             w.set(x, H - 1, duct_z, S["duct"])
         for z in pipe_zs:
             if 1 <= z <= W - 2 and w.free(x, H - 1, z) and (x, z) not in w.dark:
-                w.set(x, H - 1, z, "minecraft:lightning_rod[facing=east,powered=false]")
+                w.set(x, H - 1, z, S["pipe"])
         for z in (g.aisle_z0, g.aisle_z1):
             if x not in beam_xs and w.free(x, H, z):
-                w.set(x, H, z, "minecraft:iron_trapdoor[facing=north,half=top,open=false]")
+                w.set(x, H, z, S["tray"])
     # Duct hangers: chains from the ceiling to the duct every few blocks.
     for x in range(2, L - 2, 4):
         if x not in beam_xs and w.free(x, H, duct_z):
@@ -141,9 +117,9 @@ def ceiling_services(w, g, p, rng, beam_xs):
             break
         x, z = rng.randrange(2, L - 2), rng.randrange(1, W - 1)
         if w.free(x, H, z) and not w.free(x, H + 1, z):
-            w.set(x, H, z, "minecraft:chain[axis=y]")
+            w.set(x, H, z, S["cable"])
             if not g.in_aisle(z) and rng.random() < 0.4 and w.free(x, H - 1, z):
-                w.set(x, H - 1, z, "minecraft:chain[axis=y]")
+                w.set(x, H - 1, z, S["cable"])
             hanging += 1
 
 
@@ -234,7 +210,7 @@ def place_oddity(kind, w, g, p, rng, take_stall, glyphs):
                 w.set(x, 1, front, "minecraft:andesite_wall")
                 _tag(w, x, front, "barrier")
         for x in range(x0, x1 + 1, 2):
-            w.set(x, 1, front + step, S["cone"] + "[thickness=tip,vertical_direction=up]")
+            w.set(x, 1, front + step, S["cone"])
             _tag(w, x, front + step, "cone")
         for x in range(x0, x1 + 1):
             for z in range(min(front, back), max(front, back) + 1):

@@ -38,8 +38,10 @@ enum class LightMode(private val id: String) : StringIdentifiable {
 }
 
 /**
- * Fluorescent ceiling light (placeholder model: a thin panel on the face it was placed
- * against; it can go on ceilings, walls and floors).
+ * Fluorescent light: a shallow fixture with two tubes, on the face it was placed against
+ * (ceilings, walls or floors). It fills the block's width along [AXIS], so a row of
+ * lights placed end to end reads as one long fixture; placed by hand, the tubes run the
+ * way the player looks.
  *
  * - [MODE] `on`: light level 15 and a hum. `off`: dark and silent.
  *   `flicker`: mostly lit, but every few seconds it goes through a burst of rapid
@@ -56,22 +58,23 @@ class FluorescentLightBlock(settings: Settings) : Block(settings) {
     init {
         defaultState = stateManager.defaultState
             .with(FACING, Direction.DOWN)
+            .with(AXIS, Direction.Axis.X)
             .with(MODE, LightMode.ON)
             .with(LIT, true)
             .with(BURST, false)
     }
 
     override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
-        builder.add(FACING, MODE, LIT, BURST)
+        builder.add(FACING, AXIS, MODE, LIT, BURST)
     }
 
     /** Points away from the face it was placed against (placed under a ceiling it points down). */
     override fun getPlacementState(ctx: ItemPlacementContext): BlockState =
-        defaultState.with(FACING, ctx.side)
+        defaultState.with(FACING, ctx.side).with(AXIS, ctx.horizontalPlayerFacing.axis)
 
     @Deprecated("Deprecated in Java")
     override fun getOutlineShape(state: BlockState, world: BlockView, pos: BlockPos, context: ShapeContext): VoxelShape =
-        SHAPES.getValue(state.get(FACING))
+        SHAPES.getValue(state.get(FACING) to state.get(AXIS))
 
     @Deprecated("Deprecated in Java")
     override fun onUse(
@@ -122,8 +125,12 @@ class FluorescentLightBlock(settings: Settings) : Block(settings) {
     }
 
     @Deprecated("Deprecated in Java")
-    override fun rotate(state: BlockState, rotation: BlockRotation): BlockState =
-        state.with(FACING, rotation.rotate(state.get(FACING)))
+    override fun rotate(state: BlockState, rotation: BlockRotation): BlockState {
+        val turned = state.with(FACING, rotation.rotate(state.get(FACING)))
+        val quarter = rotation == BlockRotation.CLOCKWISE_90 || rotation == BlockRotation.COUNTERCLOCKWISE_90
+        if (!quarter) return turned
+        return turned.with(AXIS, if (state.get(AXIS) == Direction.Axis.X) Direction.Axis.Z else Direction.Axis.X)
+    }
 
     @Deprecated("Deprecated in Java")
     override fun mirror(state: BlockState, mirror: BlockMirror): BlockState =
@@ -135,6 +142,8 @@ class FluorescentLightBlock(settings: Settings) : Block(settings) {
 
     companion object {
         val FACING: net.minecraft.state.property.DirectionProperty = Properties.FACING
+        /** The way the tubes run, for lights on a ceiling or floor (wall lights always run along the wall). */
+        val AXIS: EnumProperty<Direction.Axis> = Properties.HORIZONTAL_AXIS
         val MODE: EnumProperty<LightMode> = EnumProperty.of("mode", LightMode::class.java)
         val LIT: BooleanProperty = Properties.LIT
         val BURST: BooleanProperty = BooleanProperty.of("burst")
@@ -150,14 +159,25 @@ class FluorescentLightBlock(settings: Settings) : Block(settings) {
         fun withMode(state: BlockState, mode: LightMode): BlockState =
             state.with(MODE, mode).with(LIT, mode != LightMode.OFF).with(BURST, false)
 
-        /** 12x12 panel, 2 pixels thick, against the face opposite to where it points. */
-        private val SHAPES: Map<Direction, VoxelShape> = mapOf(
-            Direction.DOWN to createCuboidShape(2.0, 14.0, 2.0, 14.0, 16.0, 14.0),
-            Direction.UP to createCuboidShape(2.0, 0.0, 2.0, 14.0, 2.0, 14.0),
-            Direction.NORTH to createCuboidShape(2.0, 2.0, 14.0, 14.0, 14.0, 16.0),
-            Direction.SOUTH to createCuboidShape(2.0, 2.0, 0.0, 14.0, 14.0, 2.0),
-            Direction.EAST to createCuboidShape(0.0, 2.0, 2.0, 2.0, 14.0, 14.0),
-            Direction.WEST to createCuboidShape(14.0, 2.0, 2.0, 16.0, 14.0, 14.0),
-        )
+        /**
+         * Model rotations (x, y) per facing and axis, the same as in the blockstate written by
+         * `tools/blocks/generate.py`. The base model hangs from a ceiling (facing down), tubes along x.
+         */
+        fun modelRotation(facing: Direction, axis: Direction.Axis): Pair<Int, Int> = when (facing) {
+            Direction.DOWN -> 0 to (if (axis == Direction.Axis.X) 0 else 90)
+            Direction.UP -> 180 to (if (axis == Direction.Axis.X) 0 else 90)
+            Direction.NORTH -> 270 to 0
+            Direction.EAST -> 270 to 90
+            Direction.SOUTH -> 270 to 180
+            Direction.WEST -> 270 to 270
+        }
+
+        /** The fixture's housing: full length along the tubes, 10 pixels wide, 3 deep. */
+        private val SHAPES: Map<Pair<Direction, Direction.Axis>, VoxelShape> =
+            Direction.entries.flatMap { facing -> listOf(Direction.Axis.X, Direction.Axis.Z).map { facing to it } }
+                .associateWith { (facing, axis) ->
+                    val (x, y) = modelRotation(facing, axis)
+                    BlockShapes.rotated(listOf(BlockShapes.box(0, 13, 3, 16, 16, 13)), x, y)
+                }
     }
 }

@@ -20,6 +20,7 @@ import random
 from types import SimpleNamespace
 
 from garage import build as B
+from garage import mod_blocks
 from garage.glyphs import Glyphs
 
 ZONE_LETTERS = ["AB", "CD", "EF", "GH", "JK", "LM", "NP", "RS"]
@@ -27,7 +28,10 @@ ZONE_LETTERS = ["AB", "CD", "EF", "GH", "JK", "LM", "NP", "RS"]
 
 class Level:
     def __init__(self, p, variant):
-        self.p = p
+        # The blocks for each role (STAND_INS + BLOCKS), with the mod's own in the mod version.
+        blocks = {**p.STAND_INS, **p.BLOCKS, **(p.MOD_BLOCKS if variant == "mod" else {})}
+        self.p = SimpleNamespace(**dict(vars(p), STAND_INS=blocks))
+        p = self.p
         self.variant = variant
         self.S = p.STAND_INS
         self.world = B.World()
@@ -197,6 +201,9 @@ class Level:
 
         # Exit ramp down to the next level
         self.exit_ramp(frames[-1])
+
+        if self.variant == "mod":
+            mod_blocks.finish(self.world, p, random.Random(f"{p.SEED}-mod-blocks"))
         return self
 
     def merge_hall(self, w, f, report, lights, i):
@@ -235,16 +242,16 @@ class Level:
         # Elevator cabin behind the lobby's west wall, doors open.
         cx1 = x0 - 2
         cx0 = cx1 - 2
-        self.room(cx0, cx1, cz - 1, cz + 1, y, 3, wall=S["duct"])
+        self.room(cx0, cx1, cz - 1, cz + 1, y, 3, wall=S["elevator_wall"])
         for zz in (cz - 1, cz, cz + 1):
             for yy in range(y + 1, y + 4):
                 self.world.remove(x0 - 1, yy, zz)
         for zz, hinge in ((cz - 1, "left"), (cz, "right")):
             self.set(x0 - 1, y + 1, zz, f"minecraft:iron_door[facing=east,half=lower,hinge={hinge},open=true,powered=false]")
             self.set(x0 - 1, y + 2, zz, f"minecraft:iron_door[facing=east,half=upper,hinge={hinge},open=true,powered=false]")
-        self.set(x0 - 1, y + 1, cz + 1, S["duct"])
-        self.set(x0 - 1, y + 2, cz + 1, S["duct"])
-        self.set(x0 - 1, y + 3, cz + 1, S["duct"])
+        self.set(x0 - 1, y + 1, cz + 1, S["elevator_wall"])
+        self.set(x0 - 1, y + 2, cz + 1, S["elevator_wall"])
+        self.set(x0 - 1, y + 3, cz + 1, S["elevator_wall"])
         self.set(x0, y + 2, cz + 2, "minecraft:stone_button[face=wall,facing=east,powered=false]")   # call button
         self.set(cx0, y + 2, cz + 1, "minecraft:polished_blackstone_button[face=wall,facing=east,powered=false]")  # cabin panel
         self.wall_sign(list(p.LEVEL_SIGN), x0 - 1, y + 3, cz + 4, "east", (0, -1))
@@ -324,10 +331,10 @@ class Level:
             self.set(dx, y + 2, wall_z, f"minecraft:spruce_door[facing={facing_out},half=upper,hinge=left,open=false,powered=false]")
             for x in range(xa, xb + 1):
                 for z in (z_far,):
-                    self.set(x, y + 1, z, "minecraft:barrel[facing=up,open=false]" if (x + z) % 2 else S["box"])
+                    self.set(x, y + 1, z, S["drum"] if (x + z) % 2 else S["box"])
                     if self.rng.random() < 0.5:
                         self.set(x, y + 2, z, S["box"])
-            self.set(xa, y + 1, z_near + step, "minecraft:spruce_trapdoor[facing=north,half=bottom,open=false]")
+            self.set(xa, y + 1, z_near + step, S["pallet"])
             self.fixture(dx, z_near + step * 2, y + 4, "dead")
             label = "storage room"
         elif kind == "electrical":
@@ -337,7 +344,7 @@ class Level:
             for x in range(xa, xb + 1):                         # switch panels on the far wall
                 self.set(x, y + 2, z_far, f"minecraft:iron_trapdoor[facing={far_facing},half=top,open=true]")
             for yy in (y + 1, y + 2, y + 3):
-                self.set(xb, yy, (za + zb) // 2, "minecraft:chain[axis=y]")
+                self.set(xb, yy, (za + zb) // 2, S["cable"])
             self.fixture(dx, (za + zb) // 2, y + 4, "dim")
             label = "electrical room"
         elif kind == "stairwell":

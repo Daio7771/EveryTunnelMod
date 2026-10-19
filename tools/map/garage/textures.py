@@ -771,7 +771,10 @@ def build_pack(params, glyphs):
         name = f"code_{facing}_{slot}"
         tex(name, glyph_tex(text, pillar_bg, params.SIGN_PAINT))
         model(name, cube_model(north=name, south=name, east=name, west=name, all_="pillar_0"))
+    # The same texts on the mod's sign tile (every_tunnel:sign_tile, numbered slots): this
+    # pack replaces the mod's own blockstate, which shows bare concrete.
     variants = {}
+    mod_variants = {}
     for facing, rot in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
         for slot in range(64):
             key = f"facing={facing}," + ",".join(f"slot_{b}_occupied={'true' if slot >> b & 1 else 'false'}" for b in range(6))
@@ -784,7 +787,9 @@ def build_pack(params, glyphs):
             else:
                 v = {"model": f"{NS}:block/wall_0"}
             variants[key] = v
+            mod_variants[f"facing={facing},slot={slot}"] = v
     blockstate(S["glyph"], {"variants": variants})
+    files["assets/every_tunnel/blockstates/sign_tile.json"] = json.dumps({"variants": mod_variants}, indent=1)
 
     files["pack.mcmeta"] = json.dumps({"pack": {
         "pack_format": params.RESOURCE_PACK_FORMAT,

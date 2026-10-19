@@ -48,6 +48,30 @@
       }
     ]
   },
+  "block.cardboard.impact": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/cardboard/impact_1",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/cardboard/impact_2",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/cardboard/impact_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "block.cardboard.step": {
+    "sounds": [
+      "every_tunnel:block/cardboard/step_1",
+      "every_tunnel:block/cardboard/step_2",
+      "every_tunnel:block/cardboard/step_3",
+      "every_tunnel:block/cardboard/step_4"
+    ]
+  },
   "block.fluorescent.flicker": {
     "sounds": [
       "every_tunnel:block/fluorescent/flicker_1",
@@ -77,6 +101,174 @@
     "sounds": [
       "every_tunnel:block/fluorescent/start_1",
       "every_tunnel:block/fluorescent/start_2"
+    ]
+  },
+  "block.hollow_metal.impact": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/hollow_metal/impact_1",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/hollow_metal/impact_2",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/hollow_metal/impact_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "block.hollow_metal.step": {
+    "sounds": [
+      "every_tunnel:block/hollow_metal/step_1",
+      "every_tunnel:block/hollow_metal/step_2",
+      "every_tunnel:block/hollow_metal/step_3",
+      "every_tunnel:block/hollow_metal/step_4"
+    ]
+  },
+  "block.metal_pipe.impact": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/metal_pipe/impact_1",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/metal_pipe/impact_2",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/metal_pipe/impact_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "block.metal_pipe.step": {
+    "sounds": [
+      "every_tunnel:block/metal_pipe/step_1",
+      "every_tunnel:block/metal_pipe/step_2",
+      "every_tunnel:block/metal_pipe/step_3",
+      "every_tunnel:block/metal_pipe/step_4"
+    ]
+  },
+  "block.plastic.impact": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/plastic/impact_1",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/plastic/impact_2",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/plastic/impact_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "block.plastic.step": {
+    "sounds": [
+      "every_tunnel:block/plastic/step_1",
+      "every_tunnel:block/plastic/step_2",
+      "every_tunnel:block/plastic/step_3",
+      "every_tunnel:block/plastic/step_4"
+    ]
+  },
+  "block.puddle.impact": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/puddle/impact_1",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/puddle/impact_2",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/puddle/impact_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "block.puddle.step": {
+    "sounds": [
+      "every_tunnel:block/puddle/step_1",
+      "every_tunnel:block/puddle/step_2",
+      "every_tunnel:block/puddle/step_3",
+      "every_tunnel:block/puddle/step_4"
+    ]
+  },
+  "block.sheet_metal.impact": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/sheet_metal/impact_1",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/sheet_metal/impact_2",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/sheet_metal/impact_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "block.sheet_metal.step": {
+    "sounds": [
+      "every_tunnel:block/sheet_metal/step_1",
+      "every_tunnel:block/sheet_metal/step_2",
+      "every_tunnel:block/sheet_metal/step_3",
+      "every_tunnel:block/sheet_metal/step_4"
+    ]
+  },
+  "block.wire_mesh.impact": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/wire_mesh/impact_1",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/wire_mesh/impact_2",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/wire_mesh/impact_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "block.wire_mesh.step": {
+    "sounds": [
+      "every_tunnel:block/wire_mesh/step_1",
+      "every_tunnel:block/wire_mesh/step_2",
+      "every_tunnel:block/wire_mesh/step_3",
+      "every_tunnel:block/wire_mesh/step_4"
+    ]
+  },
+  "block.wood.impact": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/wood/impact_1",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/wood/impact_2",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:block/wood/impact_3",
+        "volume": 0.8
+      }
+    ]
+  },
+  "block.wood.step": {
+    "sounds": [
+      "every_tunnel:block/wood/step_1",
+      "every_tunnel:block/wood/step_2",
+      "every_tunnel:block/wood/step_3",
+      "every_tunnel:block/wood/step_4"
     ]
   },
   "event.death": {

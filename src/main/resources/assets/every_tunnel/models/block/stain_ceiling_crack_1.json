@@ -1,0 +1,27 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "t": "every_tunnel:block/stain_ceiling_crack_1",
+    "particle": "every_tunnel:block/stain_ceiling_crack_1"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0.1,
+        0
+      ],
+      "to": [
+        16,
+        0.1,
+        16
+      ],
+      "faces": {
+        "up": {
+          "texture": "#t"
+        }
+      }
+    }
+  ]
+}
