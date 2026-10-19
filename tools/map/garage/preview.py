@@ -109,8 +109,12 @@ def write_level(path, level, stats):
     img.save(path)
 
 
+def is_pbr_map(name):
+    return name.endswith("_n") or name.endswith("_s")
+
+
 def write_texture_sheet(path, textures):
-    names = sorted(textures)
+    names = sorted(n for n in textures if not is_pbr_map(n))
     cols, cell = 12, 72
     sheet = Image.new("RGB", (cols * cell + 20, ((len(names) + cols - 1) // cols) * (cell + 14) + 20), (22, 23, 26))
     sd = ImageDraw.Draw(sheet)
@@ -127,4 +131,39 @@ def write_texture_sheet(path, textures):
         bg.alpha_composite(t)
         sheet.paste(bg.convert("RGB"), (x, y))
         sd.text((x, y + 65), name[:12], fill=(170, 170, 170), font=font)
+    sheet.save(path)
+
+
+def write_pbr_sheet(path, textures):
+    """Each texture as albedo | normal | specular (R smoothness, G F0/metal, B porosity) | emission."""
+    names = sorted(n for n in textures if not is_pbr_map(n))
+    cols, size, gap = 3, 48, 4
+    group = 4 * size + 3 * gap + 16
+    rows = (len(names) + cols - 1) // cols
+    sheet = Image.new("RGB", (cols * group + 20, rows * (size + 14) + 20), (22, 23, 26))
+    sd = ImageDraw.Draw(sheet)
+    font = ImageFont.load_default(size=9)
+
+    def tile(data, mode):
+        t = Image.open(io.BytesIO(data)).convert("RGBA")
+        if mode == "albedo":
+            bg = Image.new("RGBA", t.size, (60, 60, 64, 255))
+            bg.alpha_composite(t)
+            t = bg
+        elif mode == "normal":
+            t = Image.merge("RGB", t.split()[:3])
+        elif mode == "specular":
+            t = Image.merge("RGB", t.split()[:3])
+        elif mode == "emission":
+            a = t.split()[3]
+            t = Image.merge("RGB", (a, a, a))
+        return t.convert("RGB").resize((size, size), Image.NEAREST)
+
+    for i, name in enumerate(names):
+        x, y = 10 + (i % cols) * group, 10 + (i // cols) * (size + 14)
+        s_map = textures[name + "_s"]
+        for j, (data, mode) in enumerate(((textures[name], "albedo"), (textures[name + "_n"], "normal"),
+                                          (s_map, "specular"), (s_map, "emission"))):
+            sheet.paste(tile(data, mode), (x + j * (size + gap), y))
+        sd.text((x, y + size + 1), name[:30], fill=(170, 170, 170), font=font)
     sheet.save(path)

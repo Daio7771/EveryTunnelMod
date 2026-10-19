@@ -50,6 +50,9 @@
   },
   "recommends": {
     "lambdynlights": ">=4.4.0",
-    "sound_physics_remastered": "*"
+    "sound_physics_remastered": "*",
+    "sodium": "0.5.x",
+    "iris": "1.7.x",
+    "indium": "*"
   }
 }

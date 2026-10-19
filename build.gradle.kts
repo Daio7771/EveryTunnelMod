@@ -92,6 +92,18 @@ tasks.named("runClientMapWorld") {
     }
 }
 
+// Loom puts LWJGL 3.3.2 on the run classpath, but Sodium 0.5.x refuses to start with
+// anything other than 3.3.1 (the version Minecraft 1.20.1 ships with, so players have
+// it anyway). Pin the runtime classpaths back to it.
+configurations.matching { it.name.endsWith("RuntimeClasspath", ignoreCase = true) }.configureEach {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.lwjgl") {
+            useVersion("3.3.1")
+            because("Sodium 0.5.x requires exactly LWJGL 3.3.1")
+        }
+    }
+}
+
 fabricApi {
     configureDataGeneration {
         client = true
@@ -138,6 +150,19 @@ dependencies {
     // heard: reverb, absorption through blocks); "recommends" in fabric.mod.json, and
     // dev runs include it so sounds are always judged with it.
     modLocalRuntime("maven.modrinth:sound-physics-remastered:${prop("sound_physics_remastered_version")}")
+
+    // Sodium + Iris + Indium: shader packs, which the LabPBR maps (normal, specular,
+    // emissive) next to the textures are made for. No code depends on them; "recommends"
+    // in fabric.mod.json. Iris nests its shader-transforming libraries inside its jar,
+    // which dev runs do not load, so they are listed here as well (versions as in the
+    // Iris jar's META-INF/jars,
+    // and without their own dependencies, which Iris does not ship either).
+    modLocalRuntime("maven.modrinth:sodium:${prop("sodium_version")}")
+    modLocalRuntime("maven.modrinth:iris:${prop("iris_version")}")
+    modLocalRuntime("maven.modrinth:indium:${prop("indium_version")}")
+    localRuntime("org.antlr:antlr4-runtime:4.13.1") { isTransitive = false }
+    localRuntime("io.github.douira:glsl-transformer:2.0.1") { isTransitive = false }
+    localRuntime("org.anarres:jcpp:1.4.14") { isTransitive = false }
 
     // Unit tests for the pure Kotlin parts (config and level parsing).
     testImplementation(kotlin("test"))

@@ -11,6 +11,7 @@ Out (tools/map/output/, not in git):
   level_resources.zip            resource pack; worlds carry it as <world>/resources.zip
   level_preview.png              top-down plan of the whole level
   texture_sheet.png              every generated texture, enlarged
+  pbr_sheet.png                  each texture's LabPBR maps: albedo | normal | specular | emission
 Every world in INSTALL that exists gets its datapack and resources.zip after each run
 (a missing one is reported and skipped; create run/saves/noname_complex first, see README).
 
@@ -109,6 +110,14 @@ DARK_ZONE_LENGTH = 10
 MOD_LIGHT = "every_tunnel:fluorescent_light[facing=down,mode=%s,lit=%s]"
 WALL_STRIPE_HEIGHT = 2
 RESOURCE_PACK_FORMAT = 15
+# LabPBR maps for shader packs (garage/pbr.py; tuned for Complementary Reimagined). Glows
+# are 0..1 of full emission: kept low so the flashlight stays the main light.
+PBR = dict(
+    RELIEF=1.0,            # strength of the surface relief from the textures' brightness
+    TUBE_GLOW=0.5,         # lit ceiling fixtures: the tubes
+    DIFFUSER_GLOW=0.2,     # lit ceiling fixtures: the diffuser around them
+    DIM_PANEL_GLOW=0.15,   # dim yellowed panels
+)
 
 # Stand-in blocks re-skinned by the resource pack (only in worlds that carry it).
 STAND_INS = {
@@ -330,6 +339,7 @@ def main():
     ] + [f"Hall {i + 1} oddity: {o['what']}" for i, r in enumerate(reports) for o in r["oddities"]]
     V.write_level(OUT / "level_preview.png", v, stats)
     V.write_texture_sheet(OUT / "texture_sheet.png", textures)
+    V.write_pbr_sheet(OUT / "pbr_sheet.png", textures)
     state_file.write_text(json.dumps({"box": box}) + "\n")
 
     for line in stats:

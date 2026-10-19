@@ -6,6 +6,9 @@ pack never replaces a vanilla texture file: it overrides the *blockstates* of th
 stand-in blocks listed in STAND_INS (garage_generator.py) and points them at its own
 models and textures (namespace `etg`). Only those blocks change, and only in worlds
 that carry the pack (as resources.zip in the world folder).
+
+Every texture also gets LabPBR maps (`_n`, `_s`, see pbr.py) for shader packs, from the
+material that `material_for` gives its name.
 """
 
 import io
@@ -15,6 +18,9 @@ import random
 import zipfile
 
 from PIL import Image, ImageDraw, ImageFont
+
+from . import pbr
+from .pbr import Material
 
 NS = "etg"
 
@@ -435,6 +441,111 @@ def mesh_tex(rng):
     return img
 
 
+# ---------------------------------------------------------------------------
+# Materials for the LabPBR maps (pbr.py). Dark, flashlight-led: surfaces stay matte
+# unless wet, and the lights glow softly instead of blooming.
+
+CONCRETE_FLOOR = Material(0.22, porosity=0.75)
+CONCRETE_WALL = Material(0.12, porosity=0.85, relief=0.8)
+CONCRETE_CEILING = Material(0.10, porosity=0.8, relief=0.8)
+CONCRETE_PILLAR = Material(0.18, porosity=0.7, relief=0.6)
+FLOOR_PAINT = Material(0.38, porosity=0.15, relief=0.3)
+WALL_PAINT = Material(0.35, porosity=0.2, relief=0.6)
+SIGN_LETTERS = Material(0.40, porosity=0.1, relief=0.2)
+WET = Material(0.55, porosity=0.0, relief=0.0)
+WATER = Material(0.96, f0=0.02, relief=0.0)
+OIL_FILM = Material(0.85, relief=0.0)
+STEEL = Material(0.50, metal=230, relief=0.5)
+CHROME = Material(0.65, metal=233, relief=0.4)
+RUST_FLAKE = Material(0.12, porosity=0.3, relief=0.4)
+PAINTED_METAL = Material(0.45, relief=0.3)
+PLASTIC = Material(0.45, relief=0.2)
+CARDBOARD = Material(0.05, porosity=1.0, relief=0.6)
+PAPER = Material(0.18, porosity=0.6, relief=0.4)
+
+DECAL_MATERIALS = {
+    "oil": OIL_FILM, "puddle": WATER, "stain": Material(0.30, porosity=0.5, relief=0.3),
+    "dirt": Material(0.08, porosity=0.6), "paper": PAPER, "tire": Material(0.25, relief=0.3),
+    "crack": Material(0.05, porosity=0.8, relief=1.5), "drain": STEEL.but(smoothness=0.35, relief=1.2),
+    "damp": WET, "rust": RUST_FLAKE, "wallcrack": Material(0.05, porosity=0.8, relief=1.5),
+    "tally": Material(0.30, relief=0.0), "hand": Material(0.35, relief=0.0),
+    "ring": Material(0.20, porosity=0.6, relief=0.0), "mold": Material(0.05, porosity=0.9, relief=0.8),
+}
+SURFACE_LUMINANCE = {"floor": pbr.luminance(FLOOR), "wall": pbr.luminance(WALL),
+                     "ceiling": pbr.luminance(CEILING), "pillar": pbr.luminance(PILLAR)}
+
+
+def near(color, target, within=40):
+    return pbr.distance(color, target) < within
+
+
+def material_for(name, params):
+    """(material or per-pixel rule, reference luminance or None, tiles) for a texture name."""
+    glow = params.PBR
+
+    def concrete_or_paint(concrete, paint, paint_color):
+        return lambda x, y, c: paint if near(c, paint_color) else concrete
+
+    if name.startswith("floor_") or name.startswith("patch_"):
+        return CONCRETE_FLOOR, None, True
+    if name.startswith("wallbase_"):
+        # Rising damp: wetter, so smoother, towards the floor.
+        return (lambda x, y, c: CONCRETE_WALL.but(smoothness=0.12 + 0.30 * y / 15)), None, True
+    if name.startswith("wall_"):
+        # Damp streaks are the pixels where green beats red (DAMP); in the wall concrete they
+        # are equal, and the per-pixel noise shifts all three channels alike.
+        return (lambda x, y, c: WET.but(relief=0.3) if c[1] - c[0] >= 1 else CONCRETE_WALL), None, True
+    if name.startswith("band_"):
+        return (lambda x, y, c: CONCRETE_WALL if near(c, WALL, 24) else WALL_PAINT), None, True
+    if name.startswith("ceiling_"):
+        return CONCRETE_CEILING, None, True
+    if name.startswith("pillar_"):
+        return CONCRETE_PILLAR, None, True
+    # Paint and letters are measured from the bare surface, or the bright paint would lift
+    # the average and sink all the concrete around it.
+    if name.startswith("line_white_"):
+        return concrete_or_paint(CONCRETE_FLOOR, FLOOR_PAINT, PAINT_WHITE), SURFACE_LUMINANCE["floor"], True
+    if name.startswith("line_yellow_"):
+        return concrete_or_paint(CONCRETE_FLOOR, FLOOR_PAINT, PAINT_YELLOW), SURFACE_LUMINANCE["floor"], True
+    if name.startswith("duct_"):
+        return (lambda x, y, c: RUST_FLAKE if near(c, (120, 110, 96), 16) else STEEL), None, True
+    if name == "troffer_lit":
+        def lit(x, y, c):
+            if pbr.luminance(c) > 0.97:                       # the tubes
+                return PLASTIC.but(smoothness=0.6, relief=0.0, emission=glow["TUBE_GLOW"])
+            if pbr.luminance(c) > 0.85:                       # diffuser and louvres
+                return PLASTIC.but(relief=0.0, emission=glow["DIFFUSER_GLOW"])
+            return PAINTED_METAL
+        return lit, None, True
+    if name == "troffer_dead":
+        return PLASTIC.but(relief=0.5), None, True
+    if name == "dim_panel":
+        return (lambda x, y, c: PLASTIC.but(relief=0.0, emission=glow["DIM_PANEL_GLOW"])
+                if pbr.luminance(c) > 0.6 else PAINTED_METAL), None, False
+    if name.startswith("decal_"):
+        _, surface, kind, _ = name.split("_")
+        return DECAL_MATERIALS[kind], SURFACE_LUMINANCE[surface], False
+    if name.startswith("box_"):
+        return (lambda x, y, c: PAPER if near(c, (220, 216, 204), 20) else CARDBOARD), None, True
+    if name == "cone":
+        return (lambda x, y, c: PLASTIC.but(smoothness=0.8) if near(c, (236, 236, 228), 24) else PLASTIC), None, True
+    if name == "extinguisher":
+        def extinguisher(x, y, c):
+            if y <= 1:
+                return STEEL
+            return PAPER if near(c, (230, 226, 210), 24) else PAINTED_METAL.but(smoothness=0.75, relief=0.1)
+        return extinguisher, None, True
+    if name == "mesh":
+        return CHROME, None, False
+    if name == "cart_dark":
+        return PLASTIC.but(smoothness=0.35, relief=0.0), None, True
+    if name.startswith("sign_"):
+        return concrete_or_paint(CONCRETE_WALL, SIGN_LETTERS, params.SIGN_PAINT), SURFACE_LUMINANCE["wall"], True
+    if name.startswith("code_"):
+        return concrete_or_paint(CONCRETE_PILLAR, SIGN_LETTERS, params.SIGN_PAINT), SURFACE_LUMINANCE["pillar"], True
+    raise ValueError(f"no PBR material for texture {name!r}: add it to material_for")
+
+
 # 3x5 stencil pixel font (crisp at 16 px; a scaled-down TrueType font is not).
 FONT = {
     "A": ["###", "#.#", "###", "#.#", "#.#"], "B": ["##.", "#.#", "##.", "#.#", "##."],
@@ -527,14 +638,24 @@ FACE_ROT = {"north": {}, "east": {"y": 90}, "south": {"y": 180}, "west": {"y": 2
 
 
 def build_pack(params, glyphs):
-    """Returns (resource pack zip bytes, {texture name: png bytes}). `glyphs` is the level's Glyphs registry."""
+    """Returns (resource pack zip bytes, {texture name: png bytes}), the dict including the
+    `_n` and `_s` maps. `glyphs` is the level's Glyphs registry."""
     rng_root = random.Random(f"tex-{params.TEXTURE_SEED}")
     files = {}
 
-    def tex(name, img):
+    def png(img):
         buf = io.BytesIO()
         img.save(buf, "PNG")
-        files[f"assets/{NS}/textures/block/{name}.png"] = buf.getvalue()
+        return buf.getvalue()
+
+    def tex(name, img):
+        """The texture plus its LabPBR normal (_n) and specular (_s) maps."""
+        material, reference, tiles = material_for(name, params)
+        normal, specular = pbr.maps(img, material, params.PBR["RELIEF"], reference, tiles)
+        path = f"assets/{NS}/textures/block/{name}"
+        files[f"{path}.png"] = png(img)
+        files[f"{path}_n.png"] = png(normal)
+        files[f"{path}_s.png"] = png(specular)
 
     def model(name, data):
         files[f"assets/{NS}/models/block/{name}.json"] = json.dumps(data, indent=1)
