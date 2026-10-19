@@ -71,7 +71,8 @@ other systems listen to that through `world.LevelTriggers`.
 
 **World rules.** In Survival and Adventure you can't break or place blocks, but doors and
 buttons still work. Creative is free, for building. Vanilla mob spawning is turned off
-with gamerules. Entering a level makes its start (the spawn point tagged `player`)
+with gamerules, and the difficulty is locked on Normal (Peaceful would delete the Pale
+man as soon as he spawns). Entering a level makes its start (the spawn point tagged `player`)
 your respawn point, so you don't come back on the roof.
 
 **The player.** Stamina drains when you sprint or jump. Run it dry and you're exhausted

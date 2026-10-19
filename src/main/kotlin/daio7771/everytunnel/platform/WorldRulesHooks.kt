@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.MinecraftServer
 import net.minecraft.util.ActionResult
+import net.minecraft.world.Difficulty
 import net.minecraft.world.GameMode
 import net.minecraft.world.GameRules
 
@@ -24,6 +25,10 @@ import net.minecraft.world.GameRules
  * - Mob spawning: spawn related gamerules are set to false when a world with
  *   levels starts and after `/reload`. They are not restored automatically if the
  *   levels are removed (change them with /gamerule).
+ * - Difficulty: set to Normal and locked at the same moments. On Peaceful vanilla
+ *   discards hostile mobs (the Pale man) the tick they spawn, mob hits deal no damage
+ *   and health regenerates, so the levels are only balanced for one difficulty. The
+ *   lock stays if the levels are removed.
  */
 object WorldRulesHooks {
 
@@ -34,6 +39,8 @@ object WorldRulesHooks {
         GameRules.DO_INSOMNIA,
         GameRules.DO_WARDEN_SPAWNING,
     )
+
+    private val DIFFICULTY = Difficulty.NORMAL
 
     fun register() {
         // Fires on both client and server, so the client does not even start mining.
@@ -82,6 +89,11 @@ object WorldRulesHooks {
         }
         if (changed.isNotEmpty()) {
             EveryTunnel.LOGGER.info("World rules active: set gamerule(s) {} to false", changed.joinToString())
+        }
+        if (server.saveProperties.difficulty != DIFFICULTY || !server.saveProperties.isDifficultyLocked) {
+            EveryTunnel.LOGGER.info("World rules active: difficulty {} -> {}, locked", server.saveProperties.difficulty.getName(), DIFFICULTY.getName())
+            server.setDifficulty(DIFFICULTY, true)
+            server.setDifficultyLocked(true)
         }
     }
 }
