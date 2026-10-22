@@ -33,6 +33,10 @@ class Cut:
     fade_out: float = 0.5
     peak_db: float = -3.0
     notes: str = field(default="")
+    # In-game balance, written to sounds.json like catalog.Sound's: base volume and the
+    # distance in blocks at which a positioned sound fades out (None = Minecraft's 16).
+    game_volume: float = 1.0
+    attenuation: Optional[int] = None
 
 
 def loudest_windows(length_seconds):
@@ -81,4 +85,8 @@ CUTS = [
     Cut("player.breathing_exhausted", "breathing_heavy_exhausted.wav",
         "The player out of stamina (plays in the player's head, not positioned)",
         "stereo", auto=loudest_windows(8.0), count=2, fade_in=0.05, fade_out=2.5),
+    # Three of the recording's calmer breaths; 7.3-11.3 s (louder, rasping) is not used.
+    Cut("entity.pale_man.breathing", "breathing_creepy.wav",
+        "The Pale man breathing; heard within 8 blocks, and he holds his breath while he listens",
+        "mono", segments=[(2.8, 6.6), (11.8, 15.4), (16.9, 20.6)], fade_in=0.15, fade_out=0.6, attenuation=8),
 ]

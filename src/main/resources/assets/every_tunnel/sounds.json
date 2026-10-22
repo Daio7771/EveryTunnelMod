@@ -271,6 +271,78 @@
       "every_tunnel:block/wood/step_4"
     ]
   },
+  "entity.pale_man.breathing": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/pale_man/breathing_1",
+        "attenuation_distance": 8
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/breathing_2",
+        "attenuation_distance": 8
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/breathing_3",
+        "attenuation_distance": 8
+      }
+    ]
+  },
+  "entity.pale_man.step": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/pale_man/step_1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/step_2",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/step_3",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/step_4",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/step_5",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/step_6",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "entity.pale_man.step_run": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/pale_man/step_run_1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/step_run_2",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/step_run_3",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/step_run_4",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/step_run_5",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:entity/pale_man/step_run_6",
+        "attenuation_distance": 24
+      }
+    ]
+  },
   "event.death": {
     "sounds": [
       "every_tunnel:event/death_1",
@@ -337,18 +409,26 @@
       "every_tunnel:music/stinger/heard_3"
     ]
   },
-  "music.tension": {
+  "music.tension.pulse": {
     "sounds": [
       {
-        "name": "every_tunnel:music/tension_1",
+        "name": "every_tunnel:music/tension/pulse_1",
         "stream": true
-      },
+      }
+    ]
+  },
+  "music.tension.rising": {
+    "sounds": [
       {
-        "name": "every_tunnel:music/tension_2",
+        "name": "every_tunnel:music/tension/rising_1",
         "stream": true
-      },
+      }
+    ]
+  },
+  "music.tension.strings": {
+    "sounds": [
       {
-        "name": "every_tunnel:music/tension_3",
+        "name": "every_tunnel:music/tension/strings_1",
         "stream": true
       }
     ]

@@ -87,7 +87,7 @@ def main():
         files = []
         for i, (x, (start, end)) in enumerate(zip(pieces, segments)):
             relative = file_name(cut.id, i)[:-len(".wav")]
-            export(cut.id, relative, x)
+            export(cut.id, relative, x, volume=cut.game_volume, attenuation=cut.attenuation)
             preview = relative.replace("/", "_") + ".wav"
             write_wav(OUT / "cuts" / preview, x, np.random.default_rng(0))
             files.append(preview)

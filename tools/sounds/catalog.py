@@ -37,6 +37,9 @@ class Sound:
     # and the distance in blocks at which a positioned sound fades out (None = Minecraft's 16).
     game_volume: float = 1.0
     attenuation: Optional[int] = None
+    # Random seed as (sound id, variant) instead of this sound's own: keeps the audio of a
+    # sound that was renamed or split out of another one.
+    seed: Optional[tuple] = None
 
 
 # ===========================================================================
@@ -597,8 +600,29 @@ def tension_pulse(rng, seconds=60.0):
     return y + 0.2 * stereo(sub, sub)
 
 
-def tension(rng, variant):
-    return (tension_strings, tension_rising, tension_pulse)[variant](rng)
+def pale_man_step(rng, variant, run):
+    """
+    A long bare foot on concrete: the heel's dull thud, then the flat sole slapping down,
+    then the skin peeling off the dusty floor. Running he lands harder and faster, a
+    heavy body on long legs.
+    """
+    n = samples(0.45)
+    heel = rng.uniform(0.008, 0.015)
+    slap = heel + (rng.uniform(0.035, 0.05) if run else rng.uniform(0.07, 0.1))
+    weight = 1.0 if run else 0.55
+    y = burst(n, rng, heel, 0.04, hi=rng.uniform(260, 340), tau=0.014, amp=1.4 * weight)            # heel thud
+    y += damped_partials(n, [rng.uniform(70, 95), rng.uniform(150, 190)], [0.6 * weight, 0.25 * weight],
+                         [0.05, 0.025], rng, heel)                                                       # body weight
+    y += burst(n, rng, slap, 0.025, lo=900.0, hi=rng.uniform(5000, 7000), tau=0.005,
+               amp=(1.1 if run else 0.6) * rng.uniform(0.85, 1.15))                                     # skin slap
+    y += burst(n, rng, slap, 0.03, lo=250.0, hi=900.0, tau=0.012, amp=0.5 * weight)                    # sole body
+    peel = slap + rng.uniform(0.06, 0.1)
+    for i in range(int(rng.integers(5, 10))):                                                           # sticky lift-off
+        y += burst(n, rng, peel + i * rng.uniform(0.006, 0.014), 0.003, lo=2500.0, hi=9000.0, tau=0.0012,
+                   amp=rng.uniform(0.03, 0.08) * (1.0 - i / 10))
+    if run:
+        y += burst(n, rng, heel, 0.12, lo=300.0, hi=2500.0, tau=0.04, amp=0.12)                         # grit scraped along
+    return fade(y, 0.0, 0.06)
 
 
 def chase(rng, variant):
@@ -820,8 +844,17 @@ SOUNDS = [
     Sound("player.tinnitus", "Player feedback", "Ear ringing after a loud event or near death", "stereo", False, 1, tinnitus, -16.0,
           "Played quietly on purpose: high pure tones are harsh."),
     Sound("music.stinger.heard", "Level 2 / Pale man", "\"He heard you\" (1: swell, 2: hit, 3: riser + hit)", "stereo", False, 3, stinger_heard, -1.0),
-    Sound("music.tension", "Level 2 / Pale man", "Tension layers for different moments: 1 dissonant strings, 2 endless rising tone, 3 low pulse", "stereo", True, 3, tension, -3.0,
-          "All three are kept; the game picks one per situation (e.g. pulse when far, rising tone while he approaches, strings when close)."),
+    # The tension layers were variations 1-3 of one "music.tension" event; their seeds keep that audio.
+    Sound("music.tension.strings", "Level 2 / Pale man", "Tension: dissonant strings (he is close, listening or searching)", "stereo", True, 1,
+          lambda rng, variant: tension_strings(rng), -3.0, stream=True, seed=("music.tension", 0)),
+    Sound("music.tension.rising", "Level 2 / Pale man", "Tension: endless rising tone (he walks towards a noise)", "stereo", True, 1,
+          lambda rng, variant: tension_rising(rng), -3.0, stream=True, seed=("music.tension", 1)),
+    Sound("music.tension.pulse", "Level 2 / Pale man", "Tension: low pulse (he is around, wandering)", "stereo", True, 1,
+          lambda rng, variant: tension_pulse(rng), -3.0, stream=True, seed=("music.tension", 2)),
+    Sound("entity.pale_man.step", "Level 2 / Pale man", "His bare feet on concrete, walking (6 variations)", "mono", False, 6,
+          lambda rng, variant: pale_man_step(rng, variant, run=False), -3.0, stream=False, attenuation=16),
+    Sound("entity.pale_man.step_run", "Level 2 / Pale man", "His bare feet on concrete, running (6 variations)", "mono", False, 6,
+          lambda rng, variant: pale_man_step(rng, variant, run=True), -1.0, stream=False, attenuation=24),
     Sound("music.chase", "Level 2 / Pale man", "During a chase (120 bpm, 8 bars)", "stereo", True, 1, chase, -1.0),
     Sound("event.level_transition", "Level progress", "Going from Level 1 to Level 2", "stereo", False, 1, level_transition, -1.0),
     Sound("event.death", "Level progress", "Death (1: short, 2: with collapse)", "stereo", False, 2, death, -1.0),

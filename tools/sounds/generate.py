@@ -54,7 +54,7 @@ def check(x, is_loop):
 
 def render_variant(sound, variant):
     """The final samples of one variation (same seed, same result) and its generator."""
-    rng = np.random.default_rng(seed_for(sound.id, variant))
+    rng = np.random.default_rng(seed_for(*sound.seed) if sound.seed else seed_for(sound.id, variant))
     x = sound.generate(rng, variant)
     if sound.channels == "mono" and x.ndim != 1:
         raise ValueError(f"{sound.id} should be mono")

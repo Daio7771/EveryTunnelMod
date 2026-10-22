@@ -32,8 +32,24 @@ object ModSounds {
     /** One beat (4 variations), repeated by the client faster as the Pale man gets closer. */
     val HEARTBEAT = event("player.heartbeat")
 
+    /** Ear ringing, stereo: played to a player who survives a hit from the Pale man. */
+    val TINNITUS = event("player.tinnitus")
+
     /** "He heard you": stereo, played to the player whose noise started a Pale man chase. */
     val STINGER_HEARD = event("music.stinger.heard")
+    /** Music layers (stereo loops) picked by the client from what the Pale man does (`client.effects.TensionMusic`). */
+    val TENSION_PULSE = event("music.tension.pulse")
+    val TENSION_RISING = event("music.tension.rising")
+    val TENSION_STRINGS = event("music.tension.strings")
+    val CHASE = event("music.chase")
+
+    /**
+     * The Pale man: bare feet walking (heard up to 16 blocks away) and running (24, so the
+     * server sends it that far), and his breathing (8, follows him).
+     */
+    val PALE_MAN_STEP = event("entity.pale_man.step")
+    val PALE_MAN_STEP_RUN = event("entity.pale_man.step_run", range = 24f)
+    val PALE_MAN_BREATHING = event("entity.pale_man.breathing")
 
     /** Fluorescent light: loop for lit lights (client), burst, switching on (starter ticks), power down. */
     val FLUORESCENT_HUM = event("block.fluorescent.hum")
@@ -58,8 +74,11 @@ object ModSounds {
 
     private fun material(name: String) = MaterialSounds(event("block.$name.step"), event("block.$name.impact"))
 
-    private fun event(path: String): SoundEvent =
-        SoundEvent.of(Identifier(EveryTunnel.MOD_ID, path)).also { all += it }
+    /** [range]: fixed distance in blocks the server sends it (default: 16, more for volumes over 1). */
+    private fun event(path: String, range: Float? = null): SoundEvent {
+        val id = Identifier(EveryTunnel.MOD_ID, path)
+        return (if (range == null) SoundEvent.of(id) else SoundEvent.of(id, range)).also { all += it }
+    }
 
     fun register() {
         for (sound in all) Registry.register(Registries.SOUND_EVENT, sound.id, sound)

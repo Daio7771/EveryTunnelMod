@@ -6,6 +6,7 @@ import daio7771.everytunnel.client.effects.BreathingEffect
 import daio7771.everytunnel.client.effects.FlashlightEffect
 import daio7771.everytunnel.client.effects.HeartbeatEffect
 import daio7771.everytunnel.client.effects.FluorescentHum
+import daio7771.everytunnel.client.effects.TensionMusic
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.PaleManRenderer
 import daio7771.everytunnel.platform.ModBlocks
@@ -42,6 +43,7 @@ object EveryTunnelClient : ClientModInitializer {
         FlashlightEffect.register()
         BreathingEffect.register()
         HeartbeatEffect.register()
+        TensionMusic.register()
         AmbiencePlayer.register()
         FluorescentHum.register()
         StatusHud.register()

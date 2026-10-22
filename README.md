@@ -7,7 +7,7 @@ teaches you to listen. Level 2 adds the Pale man, who is blind and finds you by 
 Most of the work goes into the sound.
 
 Where it stands: player systems, sound, the generated Level 1 map and its props are done.
-The Pale man hunts by sound. Next: the chase music and tension layers, then Level 2,
+The Pale man hunts by sound, and the music follows what he does. Next: Level 2,
 death/restart and loot.
 
 ## Running it
@@ -104,6 +104,16 @@ making noise he reaches the last place he heard you, searches for 4 s (any noise
 and he charges again) and goes back to wandering. He hits you if you're within 2 blocks
 while he hunts, or bump into him at any time. By default one hit kills. Within 24 blocks of him you hear your heartbeat, from 60 bpm
 up to 140 right next to him, and never under 120 while he's chasing.
+
+You hear him too: his bare feet (walking up to 16 blocks away, running up to 24) and his
+breathing within 8 blocks. He holds his breath while he listens or searches. Surviving
+his hit leaves your ears ringing.
+
+The music comes from what he does (`client/effects/TensionMusic.kt`): silence while he's
+more than 48 blocks away, a low pulse while he wanders nearer, a rising tone while he
+walks to a noise, dissonant strings within 12 blocks, and the chase music while he
+chases. It crossfades, and a chase fades out without telling you he lost you. It's in
+the Music volume slider, and vanilla's music is off in level worlds.
 
 All the numbers above (stamina, thirst, battery, flashlight, noise radii, the Pale man's
 hearing, speeds and attack) are in

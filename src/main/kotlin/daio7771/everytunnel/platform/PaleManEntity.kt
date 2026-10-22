@@ -5,6 +5,7 @@ import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.core.level.Position
 import daio7771.everytunnel.entities.PaleManBrain
 import daio7771.everytunnel.systems.NoiseSystem
+import net.minecraft.block.BlockState
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.ai.goal.SwimGoal
 import net.minecraft.entity.ai.goal.WanderAroundFarGoal
@@ -30,7 +31,7 @@ import software.bernie.geckolib.core.animation.AnimationController
 import software.bernie.geckolib.core.animation.RawAnimation
 import software.bernie.geckolib.util.GeckoLibUtil
 
-/** What the Pale man is doing, as far as his animations care (synced to clients). */
+/** What the Pale man is doing, as far as his animations care. */
 enum class PaleManMode { ROAM, LISTEN, CHASE }
 
 /**
@@ -44,7 +45,13 @@ enum class PaleManMode { ROAM, LISTEN, CHASE }
  * the solid blocks between him and them, and [PaleManBrain] decides what he does
  * (roam, listen, walk to a noise, chase, search, hit). Settings: `pale_man` in the
  * gameplay config. A player whose noise starts a chase hears the "he heard you"
- * stinger (at most once every [STINGER_COOLDOWN_TICKS]).
+ * stinger (at most once every [STINGER_COOLDOWN_TICKS]), and one who survives his hit
+ * hears ear ringing. His state is synced to clients ([brainState]), which pick the
+ * music from it (`client.effects.TensionMusic`).
+ *
+ * His own sounds come from here: bare footsteps in time with his walk and run
+ * animations (not vanilla's distance-based block steps), and breathing, one breath
+ * after another, except while he listens or searches: then he holds his breath.
  *
  * Model, animations and texture: `tools/entity/pale_man.py` (GeckoLib). Which animation
  * plays follows [mode] and his movement: listen, run (chasing), walk, or idle.
@@ -61,13 +68,27 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
     private var pathTarget: Position? = null
     private val stingerTicks = HashMap<java.util.UUID, Long>()
 
-    var mode: PaleManMode
-        get() = PaleManMode.entries.getOrElse(dataTracker.get(MODE)) { PaleManMode.ROAM }
-        set(value) = dataTracker.set(MODE, value.ordinal)
+    /** Sound timers, server side: ticks into the current step, ticks until the next breath. */
+    private var stepClock = 0.0
+    private var untilBreath = 0
+    private var lastX = 0.0
+    private var lastZ = 0.0
+
+    /** What his brain is doing; set on the server, synced to clients. */
+    var brainState: PaleManBrain.State
+        get() = PaleManBrain.State.entries.getOrElse(dataTracker.get(STATE)) { PaleManBrain.State.ROAM }
+        private set(value) = dataTracker.set(STATE, value.ordinal)
+
+    val mode: PaleManMode
+        get() = when (brainState) {
+            PaleManBrain.State.LISTEN, PaleManBrain.State.SEARCH -> PaleManMode.LISTEN
+            PaleManBrain.State.CHASE -> PaleManMode.CHASE
+            else -> PaleManMode.ROAM
+        }
 
     override fun initDataTracker() {
         super.initDataTracker()
-        dataTracker.startTracking(MODE, PaleManMode.ROAM.ordinal)
+        dataTracker.startTracking(STATE, PaleManBrain.State.ROAM.ordinal)
     }
 
     override fun initGoals() {
@@ -110,11 +131,7 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
             )
         }
 
-        mode = when (decision.state) {
-            PaleManBrain.State.LISTEN, PaleManBrain.State.SEARCH -> PaleManMode.LISTEN
-            PaleManBrain.State.CHASE -> PaleManMode.CHASE
-            else -> PaleManMode.ROAM
-        }
+        brainState = decision.state
         val target = decision.target
         when {
             decision.state == PaleManBrain.State.ROAM -> pathTarget = null
@@ -131,13 +148,55 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
         }
         decision.attack?.let { id -> (world.getPlayerByUuid(id) as? ServerPlayerEntity)?.let(::hit) }
         decision.alerted?.let { id -> (world.getPlayerByUuid(id) as? ServerPlayerEntity)?.let { sting(it, now) } }
+        footsteps()
+        breathe()
     }
 
     private fun hit(player: ServerPlayerEntity) {
         lookControl.lookAt(player)
         triggerAnim("main", "attack")
-        player.damage(damageSources.mobAttack(this), ConfigManager.gameplay.paleMan.attackDamage.toFloat())
+        val hurt = player.damage(damageSources.mobAttack(this), ConfigManager.gameplay.paleMan.attackDamage.toFloat())
+        if (hurt && player.isAlive) player.playSound(ModSounds.TINNITUS, SoundCategory.PLAYERS, 1f, 1f)
     }
+
+    /**
+     * One bare footstep every half walk or run cycle while he moves (two per cycle of the
+     * animations in `tools/entity/pale_man.py`). Running steps are heavier and carry further.
+     */
+    private fun footsteps() {
+        val moved = Math.hypot(x - lastX, z - lastZ)
+        lastX = x
+        lastZ = z
+        if (!isOnGround || moved < MOVING_PER_TICK) {
+            stepClock = 0.0
+            return
+        }
+        val running = brainState == PaleManBrain.State.CHASE
+        val interval = if (running) RUN_STEP_TICKS else WALK_STEP_TICKS
+        // The first step lands half a step after he sets off.
+        if (stepClock == 0.0) stepClock = interval / 2.0
+        stepClock += 1.0
+        if (stepClock < interval) return
+        stepClock -= interval
+        world.playSound(
+            null, x, y, z, if (running) ModSounds.PALE_MAN_STEP_RUN else ModSounds.PALE_MAN_STEP, SoundCategory.HOSTILE,
+            if (running) 1.0f else 0.8f, 0.9f + random.nextFloat() * 0.2f,
+        )
+    }
+
+    /** A breath (3 to 4 s), a short pause, the next one; none start while he listens or searches. */
+    private fun breathe() {
+        if (--untilBreath > 0) return
+        if (mode == PaleManMode.LISTEN) {
+            untilBreath = 10
+            return
+        }
+        world.playSoundFromEntity(null, this, ModSounds.PALE_MAN_BREATHING, SoundCategory.HOSTILE, 1.0f, 0.95f + random.nextFloat() * 0.1f)
+        untilBreath = BREATH_TICKS + random.nextInt(BREATH_PAUSE_TICKS)
+    }
+
+    // His steps are played by footsteps(), in time with his animations.
+    override fun playStepSound(pos: BlockPos, state: BlockState) = Unit
 
     private fun sting(player: ServerPlayerEntity, now: Long) {
         val last = stingerTicks[player.uuid]
@@ -203,13 +262,22 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
     }
 
     companion object {
-        private val MODE: TrackedData<Int> = DataTracker.registerData(PaleManEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
+        private val STATE: TrackedData<Int> = DataTracker.registerData(PaleManEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
         private const val HOME_KEY = "EveryTunnelHome"
 
         /** Noises are looked at for a couple of ticks; the brain uses each one once. */
         private const val HEARING_WINDOW_TICKS = 2L
         private const val MAX_WALLS = 4
         const val STINGER_COOLDOWN_TICKS = 30 * 20L
+
+        /** Half a walk cycle (1.6 s) and half a run cycle (0.55 s), in ticks. */
+        private const val WALK_STEP_TICKS = 16.0
+        private const val RUN_STEP_TICKS = 5.5
+        /** Horizontal blocks per tick below which he counts as standing still. */
+        private const val MOVING_PER_TICK = 0.02
+        /** The longest breath recording is 3.8 s; then a pause of up to 1.5 s. */
+        private const val BREATH_TICKS = 78
+        private const val BREATH_PAUSE_TICKS = 30
 
         val IDLE: RawAnimation = RawAnimation.begin().thenLoop("animation.pale_man.idle")
         val LISTEN: RawAnimation = RawAnimation.begin().thenLoop("animation.pale_man.listen")
