@@ -1,0 +1,50 @@
+package daio7771.everytunnel.platform
+
+import daio7771.everytunnel.config.ConfigManager
+import daio7771.everytunnel.systems.ResourceSystem
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.item.ItemStack
+import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.sound.SoundCategory
+import net.minecraft.text.Text
+
+/**
+ * Drinking a water bottle (`ModItems.WATER_BOTTLE`): thirst goes up by
+ * `thirst.drink_restore`, a gulp is heard about every half second while drinking, and the
+ * drink is a noise for the Pale man (`noise.drink_radius`). Only where the flashlight and
+ * thirst exist (worlds with levels); a full player cannot drink.
+ */
+object DrinkHooks {
+
+    /** Set by the client: whether the local player's thirst is below full (for prediction). */
+    var clientThirstNotFull: () -> Boolean = { true }
+
+    fun canDrink(player: PlayerEntity): Boolean {
+        if (!FlashlightHooks.available(player)) return false
+        if (player.world.isClient) return clientThirstNotFull()
+        val config = ConfigManager.gameplay
+        return ResourceSystem.canDrink(ResourceSystem.stateOf(player.uuid, config), config)
+    }
+
+    fun explainRefused(player: ServerPlayerEntity) {
+        if (FlashlightHooks.available(player)) player.sendMessage(Text.translatable("message.every_tunnel.not_thirsty"), true)
+    }
+
+    fun gulp(player: ServerPlayerEntity) {
+        player.world.playSoundFromEntity(
+            null, player, ModSounds.DRINK, SoundCategory.PLAYERS, 1f, 0.95f + player.random.nextFloat() * 0.1f,
+        )
+    }
+
+    /** Drinks [stack] (one water bottle, kept in Creative). */
+    fun drink(player: ServerPlayerEntity, stack: ItemStack) {
+        if (!canDrink(player)) {
+            explainRefused(player)
+            return
+        }
+        val config = ConfigManager.gameplay
+        ResourceSystem.set(player.uuid, ResourceSystem.drink(ResourceSystem.stateOf(player.uuid, config), config))
+        if (!player.abilities.creativeMode) stack.decrement(1)
+        NoiseHooks.drink(player)
+    }
+}

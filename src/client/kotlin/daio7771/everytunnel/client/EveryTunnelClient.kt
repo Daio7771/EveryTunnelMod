@@ -10,7 +10,9 @@ import daio7771.everytunnel.client.effects.FluorescentHum
 import daio7771.everytunnel.client.effects.ScreenFade
 import daio7771.everytunnel.client.effects.TensionMusic
 import daio7771.everytunnel.client.hud.StatusHud
+import daio7771.everytunnel.client.render.LootRenderer
 import daio7771.everytunnel.client.render.PaleManRenderer
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactories
 import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.DevWorlds
 import daio7771.everytunnel.platform.ModEntities
@@ -52,6 +54,7 @@ object EveryTunnelClient : ClientModInitializer {
         StatusHud.register()
         ScreenFade.register() // after the HUD, so the black covers it
         EntityRendererRegistry.register(ModEntities.PALE_MAN, ::PaleManRenderer)
+        BlockEntityRendererFactories.register(ModBlocks.LOOT_ENTITY, ::LootRenderer)
         BlockRenderLayerMap.INSTANCE.putBlocks(
             RenderLayer.getCutout(),
             ModBlocks.SHOPPING_CART, ModBlocks.CABLE_TRAY, ModBlocks.HANGING_CABLE, ModBlocks.STAIN, ModBlocks.PUDDLE,

@@ -465,6 +465,26 @@
       "every_tunnel:player/breathing_exhausted_2"
     ]
   },
+  "player.drink": {
+    "sounds": [
+      {
+        "name": "every_tunnel:player/drink_1",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:player/drink_2",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:player/drink_3",
+        "volume": 0.8
+      },
+      {
+        "name": "every_tunnel:player/drink_4",
+        "volume": 0.8
+      }
+    ]
+  },
   "player.heartbeat": {
     "sounds": [
       "every_tunnel:player/heartbeat_1",

@@ -3,9 +3,11 @@ package daio7771.everytunnel.platform
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.platform.BlockShapes.box
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup
+import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.minecraft.block.AbstractBlock
 import net.minecraft.block.Block
 import net.minecraft.block.MapColor
+import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.item.BlockItem
 import net.minecraft.item.Item
@@ -124,6 +126,17 @@ object ModBlocks {
         "elevator_door",
         ElevatorDoorBlock(solid(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL).nonOpaque().pistonBehavior(PistonBehavior.BLOCK)),
     )
+    /** Loot lying around, picked up with right-click (LootBlock, placed by LootSpawner). */
+    val LOOT_BATTERY: Block = register("loot_battery", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.BATTERY })
+    val LOOT_WATER_BOTTLE: Block = register(
+        "loot_water_bottle",
+        LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.WATER_BOTTLE },
+    )
+
+    /** Shared by the loot blocks; registered in [register]. */
+    lateinit var LOOT_ENTITY: BlockEntityType<LootBlockEntity>
+        private set
+
     /** Rolling shutter curtain; closed behind the player when they walk into the next level (LevelEntryHooks). */
     val SHUTTER: Block = register(
         "shutter",
@@ -149,6 +162,10 @@ object ModBlocks {
             Registry.register(Registries.BLOCK, identifier, block)
             Registry.register(Registries.ITEM, identifier, BlockItem(block, Item.Settings()))
         }
+        LOOT_ENTITY = Registry.register(
+            Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "loot"),
+            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE).build(),
+        )
         val tab: ItemGroup = FabricItemGroup.builder()
             .icon { ItemStack(FLUORESCENT_LIGHT) }
             .displayName(Text.translatable("itemGroup.every_tunnel"))

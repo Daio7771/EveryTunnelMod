@@ -29,6 +29,8 @@ object ModSounds {
     val BATTERY_CLOSE = event("item.battery.close")
     /** Stereo, played in the player's head (not positioned). */
     val BREATHING_EXHAUSTED = event("player.breathing_exhausted")
+    /** One gulp (4 variations), played on the player while they drink a water bottle. */
+    val DRINK = event("player.drink")
     /** One beat (4 variations), repeated by the client faster as the Pale man gets closer. */
     val HEARTBEAT = event("player.heartbeat")
 

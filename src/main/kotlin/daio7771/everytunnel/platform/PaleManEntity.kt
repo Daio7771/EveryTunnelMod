@@ -68,6 +68,9 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
     /** "<level id>/<spawn point id>" of the spawn point he belongs to, or null if summoned by hand. */
     var homeKey: String? = null
 
+    /** The world's new-game count he has seen ([PaleManSpawner.newGames]); -1 = not yet. */
+    private var newGamesSeen = -1
+
     /** Server side only. */
     val brain = PaleManBrain()
     private var pathTarget: Position? = null
@@ -115,6 +118,12 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
     override fun mobTick() {
         super.mobTick()
         val world = world as? ServerWorld ?: return
+        val newGames = PaleManSpawner.newGames(world.server)
+        if (newGames != newGamesSeen) {
+            // A new game started since he last looked (or he was just spawned): back home.
+            if (newGamesSeen >= 0) goHome()
+            newGamesSeen = newGames
+        }
         val config = ConfigManager.gameplay.paleMan
         val now = world.server.ticks.toLong()
         val ears = Vec3d(x, eyeY, z)
@@ -179,6 +188,13 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
         if (level.dimension != world.registryKey.value.toString()) return null
         val zoneId = level.spawnPoint(key.substringAfter('/'))?.zone ?: return null
         return level.zone(zoneId)?.box
+    }
+
+    /** [returnHome] to his spawn point, if he has one. */
+    private fun goHome() {
+        val key = homeKey ?: return
+        val point = LevelManager.get(key.substringBefore('/'))?.spawnPoint(key.substringAfter('/')) ?: return
+        returnHome(point.position.x, point.position.y, point.position.z, point.yaw)
     }
 
     /** Back at his spawn point, wandering, as if just spawned (a player died and restarts the level). */
@@ -290,11 +306,13 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
     override fun writeCustomDataToNbt(nbt: NbtCompound) {
         super.writeCustomDataToNbt(nbt)
         homeKey?.let { nbt.putString(HOME_KEY, it) }
+        nbt.putInt(NEW_GAMES_KEY, newGamesSeen)
     }
 
     override fun readCustomDataFromNbt(nbt: NbtCompound) {
         super.readCustomDataFromNbt(nbt)
         homeKey = if (nbt.contains(HOME_KEY)) nbt.getString(HOME_KEY) else null
+        newGamesSeen = if (nbt.contains(NEW_GAMES_KEY)) nbt.getInt(NEW_GAMES_KEY) else -1
     }
 
     override fun remove(reason: RemovalReason) {
@@ -308,6 +326,7 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
     companion object {
         private val STATE: TrackedData<Int> = DataTracker.registerData(PaleManEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
         private const val HOME_KEY = "EveryTunnelHome"
+        private const val NEW_GAMES_KEY = "EveryTunnelNewGames"
 
         /** Noises are looked at for a couple of ticks; the brain uses each one once. */
         private const val HEARING_WINDOW_TICKS = 2L

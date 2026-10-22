@@ -8,6 +8,7 @@ import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+import net.minecraft.block.Blocks
 import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket
 import net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket
@@ -98,6 +99,21 @@ object LevelEntryHooks {
                 EveryTunnel.LOGGER.warn("Level {}: entry sound {} is not a registered sound event", level.id, id)
             } else {
                 player.playSound(sound, SoundCategory.PLAYERS, 1f, 1f)
+            }
+        }
+    }
+
+    /** Opens every shutter of every level and forgets the ones waiting or closing (a new game). */
+    fun openAll(server: MinecraftServer) {
+        pending.clear()
+        closing.clear()
+        for (level in LevelManager.all()) {
+            val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: continue
+            for (zone in level.zones.filter { SHUTTER_TAG in it.tags }) {
+                for (x in zone.box.minX..zone.box.maxX) for (y in zone.box.minY..zone.box.maxY) for (z in zone.box.minZ..zone.box.maxZ) {
+                    val pos = BlockPos(x, y, z)
+                    if (world.getBlockState(pos).isOf(ModBlocks.SHUTTER)) world.setBlockState(pos, Blocks.AIR.defaultState)
+                }
             }
         }
     }

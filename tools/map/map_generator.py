@@ -23,6 +23,7 @@ loaded; the stand-in blocks' states and render layers.
 """
 
 import json
+import random
 import shutil
 import sys
 import zipfile
@@ -84,6 +85,15 @@ LOBBY_LENGTH = 6          # lobby between the elevator and hall 1
 # his hall (the spawn point's "zone"). Level 1 has none: it is the level without enemies.
 # Only for testing him in this map until Level 2 exists, e.g. [2].
 PALE_MAN_HALLS = []
+# Loot lying around (mod version): (item, zone id), item "battery" or "water". It lies on
+# the floor against a wall or a prop somewhere in that zone; the same seed gives the same spot.
+# The game puts it there the first time the level is entered (LootSpawner).
+LOOT = [
+    ("battery", "storage_hall_2"),
+    ("water", "electrical_hall_3"),
+    ("water", "hall_4"),
+    ("battery", "dead_end_hall_5"),
+]
 EXIT_DROP = 5             # how far the exit ramp goes down
 LANDING_LENGTH = 7        # dark landing at the bottom of the exit ramp
 
@@ -321,6 +331,38 @@ AMBIENCE = {
 }
 
 
+def loot_spots(level):
+    """(id, (x, y, z), item, yaw) for each entry of LOOT: a free floor cell of its zone, with
+    headroom, next to a wall or a prop, picked with the seed."""
+    rng = random.Random(f"loot-{SEED}")
+    zones = {zid: box for zid, box, _ in level.zones}
+    w = level.world
+    out, used = [], set()
+    for i, (item, zid) in enumerate(LOOT):
+        if item not in ("battery", "water"):
+            raise SystemExit(f"LOOT: unknown item {item!r} (battery or water)")
+        if zid not in zones:
+            raise SystemExit(f"LOOT: no zone {zid!r}; zones: {', '.join(sorted(zones))}")
+        x0, y0, z0, x1, y1, z1 = zones[zid]
+        cells = []
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1):
+                fy = level.floor.get((x, z))
+                if fy is None or not y0 <= fy + 1 <= y1:
+                    continue
+                y = fy + 1
+                if w.get(x, fy, z) is None or not w.free(x, y, z) or not w.free(x, y + 1, z) or (x, y, z) in used:
+                    continue
+                if any(not w.free(x + dx, y, z + dz) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                    cells.append((x, y, z))
+        if not cells:
+            raise SystemExit(f"LOOT: no free floor cell against a wall or prop in {zid}")
+        x, y, z = rng.choice(sorted(cells))
+        used.add((x, y, z))
+        out.append((f"{item}_{i + 1}", (x + 0.5, y, z + 0.5), item, rng.choice([0, 90, 180, 270])))
+    return out
+
+
 def level_json(level, offset):
     ox, oy, oz = offset
     sx, sy, sz, yaw = level.spawn
@@ -333,7 +375,9 @@ def level_json(level, offset):
         "zones": zones,
         "spawn_points": [{"id": "player_start", "pos": [ox + sx, oy + sy, oz + sz], "yaw": yaw, "tags": ["player"]}]
         + [{"id": pid, "pos": [ox + x, oy + y, oz + z], "yaw": 0, "tags": ["pale_man"], "zone": zone}
-           for pid, (x, y, z), zone in pale_man_spawns(level)],
+           for pid, (x, y, z), zone in pale_man_spawns(level)]
+        + [{"id": lid, "pos": [ox + x, oy + y, oz + z], "yaw": yaw, "tags": [item]}
+           for lid, (x, y, z), item, yaw in loot_spots(level)],
         "ambience": AMBIENCE,
         "entry": {"title": LEVEL_TITLE},
         "intro": {"seconds": INTRO_SECONDS, "music": INTRO_MUSIC},

@@ -46,13 +46,17 @@ data class StaminaConfig(
 data class ThirstConfig(
     /** Maximum thirst points (full = not thirsty). */
     val max: Double = 100.0,
-    /** Thirst lost per minute at normal activity. */
-    val drainPerMinute: Double = 2.0,
+    /** Thirst lost per minute at normal activity (5: full lasts 20 minutes). */
+    val drainPerMinute: Double = 5.0,
     /** Multiplier applied to the drain while sprinting. */
     val sprintDrainMultiplier: Double = 2.0,
     /** Health damage dealt when thirst is empty, once per [damageIntervalSeconds]. */
     val damageWhenEmpty: Double = 1.0,
     val damageIntervalSeconds: Double = 10.0,
+    /** Thirst points one water bottle gives back. */
+    val drinkRestore: Double = 40.0,
+    /** Seconds spent drinking a water bottle (holding use). */
+    val drinkSeconds: Double = 1.5,
 )
 
 data class FlashlightConfig(
@@ -95,6 +99,8 @@ data class NoiseConfig(
     val equipmentRadius: Double = 4.0,
     /** Panting while out of stamina, once per second. */
     val exhaustedBreathingRadius: Double = 5.0,
+    /** Gulping a water bottle, once per drink. */
+    val drinkRadius: Double = 4.0,
 )
 
 /** The Pale man's hearing, speeds and attack (see `entities.PaleManBrain`). */

@@ -4,6 +4,7 @@
   "package": "daio7771.everytunnel.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "LivingEntityMixin",
     "ServerWorldMixin"
   ],
   "injectors": {

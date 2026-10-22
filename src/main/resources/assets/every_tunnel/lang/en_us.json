@@ -31,5 +31,10 @@
   "entity.every_tunnel.pale_man": "Pale Man",
   "item.every_tunnel.pale_man_spawn_egg": "Pale Man Spawn Egg",
   "block.every_tunnel.shutter": "Rolling Shutter",
-  "block.every_tunnel.elevator_door": "Elevator Door"
+  "block.every_tunnel.elevator_door": "Elevator Door",
+  "item.every_tunnel.water_bottle": "Water Bottle",
+  "item.every_tunnel.water_bottle.tooltip": "Hold use to drink",
+  "message.every_tunnel.not_thirsty": "You are not thirsty",
+  "block.every_tunnel.loot_battery": "Battery (Loot)",
+  "block.every_tunnel.loot_water_bottle": "Water Bottle (Loot)"
 }

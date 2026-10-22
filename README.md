@@ -7,9 +7,9 @@ teaches you to listen. Level 2 adds the Pale man, who is blind and finds you by 
 Most of the work goes into the sound.
 
 Where it stands: player systems, sound, the generated Level 1 map and its props are done.
-The Pale man hunts by sound, and the music follows what he does. Dying restarts the
-level, and walking into the next one closes a shutter behind you. Next: loot and
-drinking, then the Level 2 map.
+The Pale man hunts by sound, and the music follows what he does. A new game starts in the
+elevator; dying restarts the level, and walking into the next one closes a shutter behind
+you. Batteries and water bottles lie around to be picked up. Next: the Level 2 map.
 
 ## Running it
 
@@ -93,10 +93,17 @@ every shutter in its zones tagged `shutter` once you're past it: a rolling shutt
 down and slams, and there's no way back.
 
 **The player.** Stamina drains when you sprint or jump. Run it dry and you're exhausted
-until it's back to 30%, breathing hard. Thirst replaces hunger and hurts when it's empty.
-Nothing refills it yet. The flashlight is built in (key F) and runs on a battery; battery
-items refill it if you hold use for 1.5 s. The HUD swaps the vanilla bars for four rows:
-health, stamina, thirst, battery.
+until it's back to 30%, breathing hard. Thirst replaces hunger (full lasts 20 minutes) and
+hurts when it's empty; a water bottle gives back 40 of its 100 if you hold use for 1.5 s,
+with a gulp about every half second (a noise for the Pale man). The flashlight is built in
+(key F) and runs on a battery; battery items refill it if you hold use for 1.5 s. The HUD
+swaps the vanilla bars for four rows: health, stamina, thirst, battery. A new game starts
+with nothing but the flashlight, full.
+
+**Loot.** Batteries and water bottles lie on the floor against walls and props, drawn as
+the item itself; right-click picks one up. A level places them at its spawn points tagged
+`battery` or `water` the first time you enter it, and what you pick up stays picked up,
+also after dying. `/everytunnel newgame` puts it all back.
 
 **Noise.** Everything you do makes a noise with a radius: footsteps 2, 6 or 14 (sneaking,
 walking, sprinting), jumps, landings, doors and chests, the flashlight, panting. Noises
@@ -150,7 +157,8 @@ Previews go into each tool's `output/` folder, which isn't in git. Whatever ends
 worse as you go (wear, dead lights, oddities like stairs into the ceiling), side rooms and
 a ramp down to B2. A shutter closes at the foot of that ramp behind you, and the dark
 landing past it is all of Level 2 so far (`level_2.json`, its start and title). The parameters are at the top of the file and the same seed gives the
-same level. Level 1 has no Pale man; `PALE_MAN_HALLS` (empty) can put one in the middle
+same level. `LOOT` lists the batteries and water bottles and the zone each one lies in
+(Level 1: two of each, mostly in the side rooms). Level 1 has no Pale man; `PALE_MAN_HALLS` (empty) can put one in the middle
 of chosen halls, each kept inside his hall, for testing him in this map until Level 2
 exists. Rebuilding the level removes the Pale men in it. It writes two datapacks:
 
@@ -204,6 +212,9 @@ These need commands enabled.
 - `/everytunnel noise [watch]`: recent noises, or yours live in the action bar.
 - `/everytunnel paleman`: nearby Pale men, what each is doing and where he's going.
 - `/everytunnel intro`: the elevator intro again (in Survival or Adventure).
+- `/everytunnel newgame`: start over in the same world: shutters open, all the loot back,
+  every Pale man at his spawn point, empty inventory, everything full, Survival, and the
+  elevator intro.
 - `/everytunnel devworld save|forget`: dev runs only, see "Running it".
 
 ## Credits

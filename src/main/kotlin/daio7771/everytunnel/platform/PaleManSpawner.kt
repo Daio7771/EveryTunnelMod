@@ -62,6 +62,19 @@ object PaleManSpawner {
         }
     }
 
+    /**
+     * How many new games this world has had (`/everytunnel newgame`). A Pale man that has
+     * seen fewer goes back to his spawn point ([PaleManEntity]), also one that was in an
+     * unloaded chunk when the new game started.
+     */
+    fun newGames(server: MinecraftServer): Int = state(server).newGames
+
+    fun startNewGame(server: MinecraftServer) {
+        val state = state(server)
+        state.newGames++
+        state.markDirty()
+    }
+
     /** The spawn point [key] has no Pale man any more. */
     fun forget(key: String) {
         val state = state(server ?: return)
@@ -74,15 +87,18 @@ object PaleManSpawner {
     /** Spawn points ("level/point") that already have their Pale man in this world. */
     class SpawnedState : PersistentState() {
         val spawned: MutableSet<String> = linkedSetOf()
+        var newGames = 0
 
         override fun writeNbt(nbt: NbtCompound): NbtCompound {
             nbt.put("spawned", NbtList().apply { spawned.forEach { add(NbtString.of(it)) } })
+            nbt.putInt("new_games", newGames)
             return nbt
         }
 
         companion object {
             fun read(nbt: NbtCompound): SpawnedState = SpawnedState().apply {
                 nbt.getList("spawned", NbtElement.STRING_TYPE.toInt()).forEach { spawned += it.asString() }
+                newGames = nbt.getInt("new_games")
             }
         }
     }

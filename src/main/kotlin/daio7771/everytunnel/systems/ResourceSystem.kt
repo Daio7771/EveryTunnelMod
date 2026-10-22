@@ -162,6 +162,15 @@ object ResourceSystem {
         else -> state.copy(flashlightOn = true) to FlashlightToggle.TURNED_ON
     }
 
+    /** True if a water bottle would help (thirst is not full). */
+    fun canDrink(state: ResourceState, config: GameplayConfig): Boolean = state.thirst < config.thirst.max
+
+    /** A water bottle drunk: thirst up by `ThirstConfig.drinkRestore`, up to full. */
+    fun drink(state: ResourceState, config: GameplayConfig): ResourceState = state.copy(
+        thirst = (state.thirst + config.thirst.drinkRestore).coerceAtMost(config.thirst.max),
+        thirstDamageTimer = 0.0,
+    )
+
     /** True if a battery item would add charge (the battery is not full). */
     fun canInsertBattery(state: ResourceState, config: GameplayConfig): Boolean =
         state.battery < config.flashlight.batteryMaxSeconds

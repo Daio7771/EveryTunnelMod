@@ -5,6 +5,7 @@ import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.PlayerLocationTracker
 import daio7771.everytunnel.core.level.BlockBox
 import daio7771.everytunnel.core.level.LevelDefinition
+import daio7771.everytunnel.systems.ResourceSystem
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
@@ -35,7 +36,8 @@ import java.util.UUID
  *
  * A player who has not had it yet in this world, and is in the start zone (tagged
  * [START_TAG]) of a level with an `intro` while the world rules apply, is put at the level
- * start; the elevator doors (zones tagged [DOOR_TAG]) close and the intro's song plays.
+ * start with what a new game starts with (only the built-in flashlight, full: empty
+ * inventory, full health and resources); the elevator doors (zones tagged [DOOR_TAG]) close and the intro's song plays.
  * After the intro's seconds the bell rings, the song distorts and fades
  * (`client.effects.IntroMusic`), the doors slide open and the level's title shows
  * ([LevelEntryHooks.announce]).
@@ -132,6 +134,9 @@ object IntroHooks {
         val intro = level.intro ?: return
         val world = worldOf(player.server, level) ?: return
         teleportToStart(player, level)
+        player.inventory.clear()
+        player.health = player.maxHealth
+        ResourceSystem.reset(player.uuid)
         for (box in doors(level)) {
             forEachBlock(box) { pos ->
                 val state = world.getBlockState(pos)

@@ -92,6 +92,10 @@ CUTS = [
     Cut("entity.pale_man.breathing", "breathing_creepy.wav",
         "The Pale man breathing; heard within 8 blocks, and he holds his breath while he listens",
         "mono", segments=[(2.8, 6.6), (11.8, 15.4), (16.9, 20.6)], fade_in=0.15, fade_out=0.6, attenuation=8),
+    # Four single gulps (the fifth, 6.3 s, is louder and different); the game plays one about
+    # every half second while the player drinks a water bottle.
+    Cut("player.drink", "drinking_gulps.mp3", "One gulp while drinking a water bottle", "mono",
+        segments=[(0.05, 0.6), (1.5, 2.0), (3.15, 3.65), (4.75, 5.3)], fade_in=0.02, fade_out=0.12, game_volume=0.8),
     # CC BY 4.0, credited in CREDITS.md. The intro waits 25 s and then distorts and fades it
     # over 3 s, so only the first 30 s are needed.
     Cut("music.elevator", "local_forecast_elevator.mp3",

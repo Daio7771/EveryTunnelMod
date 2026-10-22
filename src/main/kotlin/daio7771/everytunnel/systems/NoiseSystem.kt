@@ -14,6 +14,7 @@ enum class NoiseSource(val id: String) {
     INTERACT("interact"),
     EQUIPMENT("equipment"),
     BREATHING("breathing"),
+    DRINK("drink"),
 }
 
 /**
@@ -120,6 +121,7 @@ object NoiseSystem {
         NoiseSource.INTERACT -> config.interactRadius
         NoiseSource.EQUIPMENT -> config.equipmentRadius
         NoiseSource.BREATHING -> config.exhaustedBreathingRadius
+        NoiseSource.DRINK -> config.drinkRadius
     }
 
     fun movementRadius(config: NoiseConfig, sneaking: Boolean, sprinting: Boolean): Double =

@@ -27,6 +27,7 @@ import net.minecraft.text.Text
  * - `/everytunnel noise watch`: shows each noise you make in the action bar (toggle).
  * - `/everytunnel paleman`: the Pale men near you, what they are doing and where they are going.
  * - `/everytunnel intro`: plays the new-game intro (the elevator) again for you (see [IntroHooks]).
+ * - `/everytunnel newgame`: starts the game over in this world (see [NewGame]).
  * - `/everytunnel devworld save|forget` (development only): make this world start from
  *   how it is when you quit, on every launch, or stop doing that (see [DevWorlds]).
  */
@@ -53,6 +54,7 @@ object DebugCommands {
                 )
                 .then(CommandManager.literal("paleman").executes(::paleMen))
                 .then(CommandManager.literal("intro").executes(::intro))
+                .then(CommandManager.literal("newgame").executes(::newGame))
             if (DevWorlds.enabled) {
                 root.then(
                     CommandManager.literal("devworld")
@@ -208,6 +210,16 @@ object DebugCommands {
             return 0
         }
         reply(context, "Intro of ${level.id} again: it starts in the elevator (in Survival or Adventure).")
+        return 1
+    }
+
+    private fun newGame(context: CommandContext<ServerCommandSource>): Int {
+        val level = NewGame.start(context.source.playerOrThrow)
+        if (level == null) {
+            reply(context, "No level with a start in this world.")
+            return 0
+        }
+        reply(context, "New game: shutters open, Pale men home, inventory cleared, back at the start of ${level.id}.")
         return 1
     }
 

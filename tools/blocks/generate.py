@@ -207,6 +207,37 @@ def elevator_door_tex(rng):
     return img
 
 
+def water_bottle_tex(rng):
+    """Item: a small clear plastic water bottle, blue cap, white label with a blue stripe,
+    about three quarters full. Transparent around it."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    clear, edge = (200, 214, 224, 120), (140, 160, 176, 230)
+    water, surface = (86, 146, 208, 210), (150, 198, 232, 230)
+    shape = {1: (6, 9), 2: (6, 9), 3: (7, 8), 4: (6, 9), 5: (5, 10)}
+    shape.update({y: (5, 10) for y in range(6, 15)})
+    shape[15] = (6, 9)
+    for y, (x0, x1) in shape.items():
+        for x in range(x0, x1 + 1):
+            if y <= 2:
+                c = (44, 92, 196, 255) if y == 1 else (30, 68, 160, 255)            # cap
+            elif x in (x0, x1) or y == 15:
+                c = edge
+            elif y == 7:
+                c = surface
+            elif y >= 8:
+                c = water
+            else:
+                c = clear
+            if 9 <= y <= 11:
+                c = (60, 110, 200, 255) if y == 10 else (228, 233, 238, 255)       # label
+            img.putpixel((x, y), c)
+    for y in range(6, 15):                                                           # highlight
+        if not 9 <= y <= 11:
+            r, g, b, a = img.getpixel((6, y))
+            img.putpixel((6, y), (min(255, r + 40), min(255, g + 40), min(255, b + 30), a))
+    return img
+
+
 def shutter_tex(rng):
     """Rolling shutter curtain: four galvanized steel slats, each lit on its rounded top and
     shaded into the groove below, with rust creeping from the joints and grime."""
@@ -532,6 +563,13 @@ def build():
                 variants[f"axis={axis},positive={positive},stage={stage}"] = v
     a.block("elevator_door", "Elevator Door", {"variants": variants}, {"parent": f"{NS}:block/elevator_door_pos_0"})
 
+    # Loot lying around: the client draws the item itself (LootRenderer), so the model is empty
+    # (only a particle texture); the block item looks like the item.
+    for block_id, name, item in (("loot_battery", "Battery (Loot)", "battery"),
+                                 ("loot_water_bottle", "Water Bottle (Loot)", "water_bottle")):
+        a.models[block_id] = {"textures": {"particle": f"{NS}:item/{item}"}}
+        a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:item/{item}"})
+
     # Rolling shutter: a 2-pixel steel sheet through the middle of the block; axis = the way it runs.
     a.texture("shutter", shutter_tex(r("shutter")), T.STEEL.but(smoothness=0.45, metal=255, relief=0.7))
     a.models["shutter"] = model({"t": "shutter"}, [element((0, 0, 7), (16, 16, 9), "t")])
@@ -622,6 +660,13 @@ def main():
         write_json(LOOT / f"{block_id}.json", {"type": "minecraft:block", "pools": [{
             "rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{NS}:{block_id}"}],
             "conditions": [{"condition": "minecraft:survives_explosion"}]}]})
+
+    # Item textures and models that belong to no block.
+    item_dir = ASSETS / "textures" / "item"
+    item_dir.mkdir(parents=True, exist_ok=True)
+    (item_dir / "water_bottle.png").write_bytes(png(water_bottle_tex(rng_for("water_bottle"))))
+    write_json(ASSETS / "models" / "item" / "water_bottle.json",
+               {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/water_bottle"}})
 
     lang_path = ASSETS / "lang" / "en_us.json"
     lang = json.loads(lang_path.read_text(encoding="utf-8"))

@@ -80,6 +80,8 @@ object GameplayConfigParser {
         sprintDrainMultiplier = f.double("sprint_drain_multiplier", d.sprintDrainMultiplier, min = 0.0),
         damageWhenEmpty = f.double("damage_when_empty", d.damageWhenEmpty, min = 0.0),
         damageIntervalSeconds = f.double("damage_interval_seconds", d.damageIntervalSeconds, min = 0.1),
+        drinkRestore = f.double("drink_restore", d.drinkRestore, min = 0.0),
+        drinkSeconds = f.double("drink_seconds", d.drinkSeconds, min = 0.05, max = 10.0),
     ).also { f.reportUnknownKeys() }
 
     private fun flashlight(f: JsonFields, d: FlashlightConfig) = FlashlightConfig(
@@ -102,6 +104,7 @@ object GameplayConfigParser {
         interactRadius = f.double("interact_radius", d.interactRadius, min = 0.0),
         equipmentRadius = f.double("equipment_radius", d.equipmentRadius, min = 0.0),
         exhaustedBreathingRadius = f.double("exhausted_breathing_radius", d.exhaustedBreathingRadius, min = 0.0),
+        drinkRadius = f.double("drink_radius", d.drinkRadius, min = 0.0),
     ).also { f.reportUnknownKeys() }
 
     private fun paleMan(f: JsonFields, d: PaleManConfig) = PaleManConfig(

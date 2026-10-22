@@ -141,4 +141,16 @@ class ResourceSystemTest {
         assertFalse(ResourceSystem.canInsertBattery(full, config))
         assertEquals(BatteryInsert.ALREADY_FULL, ResourceSystem.insertBattery(full, config).second)
     }
+
+    @Test
+    fun `a water bottle gives thirst back up to full and resets the damage timer`() {
+        val full = ResourceState.full(config)
+        assertFalse(ResourceSystem.canDrink(full, config))
+        val thirsty = full.copy(thirst = 10.0, thirstDamageTimer = 3.0)
+        assertTrue(ResourceSystem.canDrink(thirsty, config))
+        val drunk = ResourceSystem.drink(thirsty, config)
+        assertEquals(10.0 + config.thirst.drinkRestore, drunk.thirst)
+        assertEquals(0.0, drunk.thirstDamageTimer)
+        assertEquals(config.thirst.max, ResourceSystem.drink(full.copy(thirst = 90.0), config).thirst)
+    }
 }

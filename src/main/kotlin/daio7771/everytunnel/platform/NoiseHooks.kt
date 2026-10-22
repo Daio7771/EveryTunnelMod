@@ -124,6 +124,10 @@ object NoiseHooks {
     }
 
     /** Flashlight click or battery change (called by [FlashlightHooks]). */
+    fun drink(player: ServerPlayerEntity) {
+        if (makesNoise(player)) emit(player, NoiseSource.DRINK)
+    }
+
     fun equipment(player: ServerPlayerEntity) {
         if (makesNoise(player)) emit(player, NoiseSource.EQUIPMENT)
     }

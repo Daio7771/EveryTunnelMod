@@ -10,6 +10,7 @@ import daio7771.everytunnel.platform.IntroHooks
 import daio7771.everytunnel.platform.LevelEntryHooks
 import daio7771.everytunnel.platform.LevelReloadListener
 import daio7771.everytunnel.platform.LevelTrackingHooks
+import daio7771.everytunnel.platform.LootSpawner
 import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.ModEntities
 import daio7771.everytunnel.platform.ModItems
@@ -59,6 +60,7 @@ object EveryTunnel : ModInitializer {
         FlashlightHooks.register()
         NoiseHooks.register()
         PaleManSpawner.register()
+        LootSpawner.register()
         RespawnHooks.register()
         DeathHooks.register()
         LevelEntryHooks.register()
