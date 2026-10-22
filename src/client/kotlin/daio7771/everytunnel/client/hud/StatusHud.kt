@@ -24,13 +24,13 @@ import kotlin.math.ceil
  * levels); then `InGameHudMixin` hides vanilla health, hunger, armor, air and the
  * experience bar. Elsewhere the vanilla HUD is untouched.
  *
- * - Health uses the vanilla heart sprites; hearts shake when health is low.
- * - Stamina icons turn grey while exhausted.
+ * - Hearts shake when health is low.
+ * - Stamina (lungs) turns grey while exhausted.
  * - The battery row blinks red below `flashlight.low_battery_warning_percent`.
  *
- * Icons come from `textures/gui/hud_icons.png` (placeholder art). Layout of that
- * file, 9x9 icons at (u, v):
- * - v=0 stamina, v=9 thirst, v=18 battery
+ * Icons come from `textures/gui/hud_icons.png`, painted by `tools/gui/hud_icons.py`.
+ * Layout of that file, 9x9 icons at (u, v):
+ * - v=0 stamina (lungs), v=9 thirst (water drop), v=18 battery, v=27 health (heart)
  * - u=0 empty container, u=9 full, u=18 half (left half only, drawn over the container)
  * - u=27/36/45: the same three as an alternate state (stamina: exhausted, battery: low)
  * Full and half icons only contain the filled pixels; the container is drawn first.
@@ -39,9 +39,7 @@ object StatusHud {
 
     private val ICONS = Identifier(EveryTunnel.MOD_ID, "textures/gui/hud_icons.png")
     private const val ICONS_WIDTH = 64
-    private const val ICONS_HEIGHT = 32
-
-    private val VANILLA_ICONS = Identifier("textures/gui/icons.png")
+    private const val ICONS_HEIGHT = 36
 
     private const val ICON_SIZE = 9
     private const val ICON_SPACING = 8
@@ -50,6 +48,7 @@ object StatusHud {
     private const val STAMINA_V = 0
     private const val THIRST_V = 9
     private const val BATTERY_V = 18
+    private const val HEALTH_V = 27
     private const val ALTERNATE_U = 27
 
     fun register() {
@@ -76,7 +75,7 @@ object StatusHud {
 
         // Health (vanilla hearts), bottom left.
         val lowHealth = player.health <= 4f
-        drawHearts(context, left, bottomRow, player.health / player.maxHealth, client.world?.levelProperties?.isHardcore == true) { i ->
+        drawBar(context, left, bottomRow, fraction(player.health, player.maxHealth), HEALTH_V, alternate = false, rightToLeft = false) { i ->
             if (lowHealth && shake(time, i)) 1 else 0
         }
 
@@ -98,30 +97,19 @@ object StatusHud {
      * Draws one bar of 10 icons. Left bars start at [x] and grow to the right; right bars
      * end at [x] and grow to the left, like vanilla hunger.
      */
-    private fun drawBar(context: DrawContext, x: Int, y: Int, fraction: Double, v: Int, alternate: Boolean, rightToLeft: Boolean) {
+    private fun drawBar(
+        context: DrawContext, x: Int, y: Int, fraction: Double, v: Int, alternate: Boolean, rightToLeft: Boolean,
+        yOffset: (Int) -> Int = { 0 },
+    ) {
         val halves = halvesOf(fraction)
         val uBase = if (alternate) ALTERNATE_U else 0
         for (i in 0 until ICONS_PER_BAR) {
             val iconX = if (rightToLeft) x - i * ICON_SPACING - ICON_SIZE else x + i * ICON_SPACING
-            icon(context, iconX, y, uBase, v)
-            when {
-                halves >= 2 * i + 2 -> icon(context, iconX, y, uBase + ICON_SIZE, v)
-                halves == 2 * i + 1 -> icon(context, iconX, y, uBase + 2 * ICON_SIZE, v)
-            }
-        }
-    }
-
-    /** Vanilla hearts: container at u=16, full at u=52, half at u=61; hardcore hearts are 45 pixels lower. */
-    private fun drawHearts(context: DrawContext, x: Int, y: Int, fraction: Float, hardcore: Boolean, yOffset: (Int) -> Int) {
-        val halves = halvesOf(fraction.toDouble())
-        val v = if (hardcore) 45 else 0
-        for (i in 0 until ICONS_PER_BAR) {
-            val iconX = x + i * ICON_SPACING
             val iconY = y + yOffset(i)
-            context.drawTexture(VANILLA_ICONS, iconX, iconY, 16, v, ICON_SIZE, ICON_SIZE)
+            icon(context, iconX, iconY, uBase, v)
             when {
-                halves >= 2 * i + 2 -> context.drawTexture(VANILLA_ICONS, iconX, iconY, 52, v, ICON_SIZE, ICON_SIZE)
-                halves == 2 * i + 1 -> context.drawTexture(VANILLA_ICONS, iconX, iconY, 61, v, ICON_SIZE, ICON_SIZE)
+                halves >= 2 * i + 2 -> icon(context, iconX, iconY, uBase + ICON_SIZE, v)
+                halves == 2 * i + 1 -> icon(context, iconX, iconY, uBase + 2 * ICON_SIZE, v)
             }
         }
     }

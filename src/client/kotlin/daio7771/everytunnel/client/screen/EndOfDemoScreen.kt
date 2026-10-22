@@ -11,10 +11,12 @@ import net.minecraft.text.Text
 import net.minecraft.util.Util
 
 /**
- * "End of demo" on black, then the credits line by line (the music's CC BY credit among
- * them). Any key or click after [SKIP_AFTER_MS], Esc, or [AUTO_QUIT_MS] saves the world and
- * goes back to the title screen; entering the world again starts a new game
- * (`platform.EndingHooks`). Opened by the server at the end of Level 2.
+ * The end of the demo, like a film's: "End of demo" fades in on black, then the credits
+ * roll up slowly from the bottom (the music's CC BY credit among them) until "Thank you
+ * for playing." stops in the middle. Any key or click after [SKIP_AFTER_MS], Esc, or
+ * [AUTO_QUIT_AFTER_END_MS] after the roll ends saves the world and goes back to the title
+ * screen; entering the world again starts a new game (`platform.EndingHooks`). Opened by
+ * the server at the end of Level 2.
  */
 class EndOfDemoScreen : Screen(Text.translatable("screen.every_tunnel.end.title")) {
 
@@ -23,32 +25,42 @@ class EndOfDemoScreen : Screen(Text.translatable("screen.every_tunnel.end.title"
 
     private fun elapsed(): Long = Util.getMeasuringTimeMs() - openedAt
 
+    /** Pixels the roll has moved up after [ms]; it stops once the last line is in the middle. */
+    private fun scroll(ms: Long): Float {
+        val moving = ((ms - ROLL_START_MS).coerceAtLeast(0L) / 1000f) * ROLL_SPEED
+        return moving.coerceAtMost(rollLength())
+    }
+
+    /** From the title's place to the last line reaching the middle of the screen. */
+    private fun rollLength(): Float = (TITLE_GAP + CREDITS.sumOf { it.height }).toFloat()
+
+    private fun rollEndMs(): Long = ROLL_START_MS + (rollLength() / ROLL_SPEED * 1000f).toLong()
+
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
         context.fill(0, 0, width, height, 0xFF000000.toInt())
         val ms = elapsed()
+        val top = height / 2f - scroll(ms)
 
         alpha(ms, 0L, 2000L)?.let { a ->
             context.matrices.push()
             context.matrices.scale(TITLE_SCALE, TITLE_SCALE, 1f)
             context.drawCenteredTextWithShadow(
-                textRenderer, title, (width / 2f / TITLE_SCALE).toInt(), (height / 5f / TITLE_SCALE).toInt(), a shl 24 or 0xE0E0E0,
+                textRenderer, title, (width / 2f / TITLE_SCALE).toInt(), ((top - 12f) / TITLE_SCALE).toInt(), a shl 24 or 0xE0E0E0,
             )
             context.matrices.pop()
         }
 
-        var y = height / 5 + 50
-        CREDITS.forEachIndexed { i, key ->
-            if (key == null) {
-                y += 8
-                return@forEachIndexed
+        var y = top + TITLE_GAP
+        for (line in CREDITS) {
+            if (line.key != null && y > -20f && y < height + 20f) {
+                val colour = if (line.header) 0x8A9098 else 0xD8DCE0
+                context.drawCenteredTextWithShadow(textRenderer, Text.translatable(line.key), width / 2, y.toInt(), 0xFF000000.toInt() or colour)
             }
-            alpha(ms, CREDITS_START_MS + i * CREDIT_LINE_MS, 1200L)?.let { a ->
-                context.drawCenteredTextWithShadow(textRenderer, Text.translatable(key), width / 2, y, a shl 24 or 0xA0A0A0)
-            }
-            y += 12
+            y += line.height
         }
-        if (ms > SKIP_AFTER_MS) {
-            alpha(ms, SKIP_AFTER_MS, 1000L)?.let { a ->
+
+        if (ms > maxOf(SKIP_AFTER_MS, rollEndMs())) {
+            alpha(ms, maxOf(SKIP_AFTER_MS, rollEndMs()), 1000L)?.let { a ->
                 context.drawCenteredTextWithShadow(
                     textRenderer, Text.translatable("screen.every_tunnel.end.continue"), width / 2, height - 20, a shl 24 or 0x606060,
                 )
@@ -63,7 +75,7 @@ class EndOfDemoScreen : Screen(Text.translatable("screen.every_tunnel.end.title"
     }
 
     override fun tick() {
-        if (elapsed() > AUTO_QUIT_MS) quitToTitle()
+        if (elapsed() > rollEndMs() + AUTO_QUIT_AFTER_END_MS) quitToTitle()
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
@@ -91,20 +103,32 @@ class EndOfDemoScreen : Screen(Text.translatable("screen.every_tunnel.end.title"
         client.setScreen(TitleScreen())
     }
 
+    /** One line of the credits: a lang key (null = a gap), a header (dimmer) or a name. */
+    private class Line(val key: String?, val header: Boolean = false, val height: Int = 12)
+
     companion object {
         private const val TITLE_SCALE = 3f
-        private const val CREDITS_START_MS = 2500L
-        private const val CREDIT_LINE_MS = 500L
+        /** The roll starts after the title has been alone on screen for a moment. */
+        private const val ROLL_START_MS = 4500L
+        private const val ROLL_SPEED = 16f
+        /** From the title down to the first credit line. */
+        private const val TITLE_GAP = 50
         private const val SKIP_AFTER_MS = 6000L
-        private const val AUTO_QUIT_MS = 30000L
+        private const val AUTO_QUIT_AFTER_END_MS = 10000L
 
-        /** Lang keys of the credit lines; null = a gap. */
+        private fun header(key: String) = Line(key, header = true)
+        private fun name(key: String) = Line(key)
+        private fun gap(height: Int = 18) = Line(null, height = height)
+
         private val CREDITS = listOf(
-            "screen.every_tunnel.end.game", "screen.every_tunnel.end.by", null,
-            "screen.every_tunnel.end.music", "screen.every_tunnel.end.music_author",
-            "screen.every_tunnel.end.music_license", "screen.every_tunnel.end.music_link", null,
-            "screen.every_tunnel.end.sounds", null,
-            "screen.every_tunnel.end.thanks",
+            name("screen.every_tunnel.end.game"), gap(30),
+            header("screen.every_tunnel.end.by_header"), name("screen.every_tunnel.end.by"), gap(),
+            header("screen.every_tunnel.end.music"), name("screen.every_tunnel.end.music_author"),
+            name("screen.every_tunnel.end.music_license"), name("screen.every_tunnel.end.music_link"), gap(),
+            header("screen.every_tunnel.end.sounds_header"), name("screen.every_tunnel.end.sounds"), gap(),
+            header("screen.every_tunnel.end.built_with"), name("screen.every_tunnel.end.libraries"), gap(),
+            header("screen.every_tunnel.end.recommended"), name("screen.every_tunnel.end.mods"), gap(60),
+            name("screen.every_tunnel.end.thanks"),
         )
 
         fun register() {

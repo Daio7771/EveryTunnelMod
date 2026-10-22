@@ -4,6 +4,7 @@
   "package": "daio7771.everytunnel.mixin.client",
   "compatibilityLevel": "JAVA_17",
   "client": [
+    "AbstractClientPlayerEntityMixin",
     "ClientPlayerEntityMixin",
     "InGameHudMixin"
   ],

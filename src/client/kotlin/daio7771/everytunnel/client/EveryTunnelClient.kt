@@ -9,6 +9,7 @@ import daio7771.everytunnel.client.effects.IntroMusic
 import daio7771.everytunnel.client.effects.FluorescentHum
 import daio7771.everytunnel.client.effects.ScreenFade
 import daio7771.everytunnel.client.effects.TensionMusic
+import daio7771.everytunnel.client.hud.ExhaustionVignette
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.LootRenderer
 import daio7771.everytunnel.client.screen.EndOfDemoScreen
@@ -52,6 +53,7 @@ object EveryTunnelClient : ClientModInitializer {
         IntroMusic.register()
         AmbiencePlayer.register()
         FluorescentHum.register()
+        ExhaustionVignette.register() // before the HUD, so the icons stay on top
         StatusHud.register()
         ScreenFade.register() // after the HUD, so the black covers it
         EndOfDemoScreen.register()

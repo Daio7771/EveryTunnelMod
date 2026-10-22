@@ -43,14 +43,20 @@
   "message.every_tunnel.needs_keycard": "It needs a keycard",
   "screen.every_tunnel.end.title": "End of demo",
   "screen.every_tunnel.end.game": "Every Tunnel",
-  "screen.every_tunnel.end.by": "A demo by Daio7771",
+  "screen.every_tunnel.end.by": "Daio7771",
   "screen.every_tunnel.end.music": "Music: \"Local Forecast - Elevator\"",
   "screen.every_tunnel.end.music_author": "Kevin MacLeod (incompetech.com)",
   "screen.every_tunnel.end.music_license": "Licensed under Creative Commons: By Attribution 4.0 License",
   "screen.every_tunnel.end.music_link": "http://creativecommons.org/licenses/by/4.0/",
-  "screen.every_tunnel.end.sounds": "Sounds synthesized for the mod, and CC0 recordings from Freesound",
+  "screen.every_tunnel.end.sounds": "Synthesized for the game, and CC0 recordings from Freesound",
   "screen.every_tunnel.end.thanks": "Thank you for playing.",
   "screen.every_tunnel.end.continue": "Press any key",
   "block.every_tunnel.loot_keycard": "Keycard (Loot)",
-  "block.every_tunnel.card_reader": "Card Reader"
+  "block.every_tunnel.card_reader": "Card Reader",
+  "screen.every_tunnel.end.by_header": "Design, code, sound and art",
+  "screen.every_tunnel.end.sounds_header": "Sounds",
+  "screen.every_tunnel.end.built_with": "Built with",
+  "screen.every_tunnel.end.libraries": "Fabric, Fabric Language Kotlin, GeckoLib",
+  "screen.every_tunnel.end.recommended": "Best with",
+  "screen.every_tunnel.end.mods": "LambDynamicLights, Sound Physics Remastered, Sodium, Iris"
 }

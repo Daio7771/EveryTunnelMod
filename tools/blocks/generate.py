@@ -207,54 +207,107 @@ def elevator_door_tex(rng):
     return img
 
 
-def water_bottle_tex(rng):
-    """Item: a small clear plastic water bottle, blue cap, white label with a blue stripe,
-    about three quarters full. Transparent around it."""
+def battery_tex(rng):
+    """Item: a big flashlight battery lying diagonally, like vanilla's tools: a black
+    cylinder lit along its upper edge, a cold teal brand band, a steel cap and terminal at
+    the top end. Outlined in a darker shade of whatever each edge pixel is."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    clear, edge = (200, 214, 224, 120), (140, 160, 176, 230)
-    water, surface = (86, 146, 208, 210), (150, 198, 232, 230)
-    shape = {1: (6, 9), 2: (6, 9), 3: (7, 8), 4: (6, 9), 5: (5, 10)}
+    ax, ay, bx, by = 3.0, 12.5, 12.0, 3.5                   # axis: bottom end to terminal end
+    dx, dy = bx - ax, by - ay
+    length = (dx * dx + dy * dy) ** 0.5
+    radius = 2.9
+    cells = {}
+    for y in range(16):
+        for x in range(16):
+            px_, py_ = x + 0.5, y + 0.5
+            t = ((px_ - ax) * dx + (py_ - ay) * dy) / (length * length)
+            across = ((px_ - ax) * dy - (py_ - ay) * dx) / length        # < 0: upper left side
+            if -0.04 <= t <= 1.04 and abs(across) <= radius:
+                cells[(x, y)] = (t, across)
+    for (x, y), (t, across) in cells.items():
+        light = 0 if across < -1.0 else 2 if across > 1.0 else 1
+        if t > 0.84:
+            c = ((196, 202, 210), (150, 156, 164), (104, 110, 118))[light]     # steel cap
+        elif 0.5 < t < 0.68:
+            c = ((96, 196, 194), (58, 150, 150), (36, 104, 108))[light]        # brand band
+        else:
+            c = ((70, 74, 82), (36, 38, 44), (22, 23, 27))[light]             # black body
+        outline = any((x + ox, y + oy) not in cells for ox, oy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+        if outline:
+            c = tuple(int(v * 0.5) for v in c)
+        img.putpixel((x, y), (*c, 255))
+    img.putpixel((13, 2), (176, 182, 190, 255))                 # the terminal nub
+    img.putpixel((14, 2), (96, 100, 108, 255))
+    img.putpixel((13, 1), (96, 100, 108, 255))
+    return img
+
+
+def water_bottle_tex(rng):
+    """Item: a small clear plastic water bottle, three quarters full: a ridged blue cap and
+    neck ring, white label with a blue wave, cold reflections on the plastic."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    edge, plastic, glint = (118, 140, 156, 235), (196, 212, 222, 110), (236, 246, 252, 230)
+    water, deep, surface = (88, 150, 200, 215), (64, 118, 172, 225), (156, 204, 232, 235)
+    shape = {0: (6, 9), 1: (6, 9), 2: (7, 8), 3: (6, 9), 4: (5, 10), 5: (5, 10)}
     shape.update({y: (5, 10) for y in range(6, 15)})
     shape[15] = (6, 9)
     for y, (x0, x1) in shape.items():
         for x in range(x0, x1 + 1):
-            if y <= 2:
-                c = (44, 92, 196, 255) if y == 1 else (30, 68, 160, 255)            # cap
+            if y <= 1:                                          # cap, ridged
+                c = (40, 84, 186, 255) if (x + y) % 2 else (64, 112, 210, 255)
+                if x in (x0, x1):
+                    c = (26, 52, 128, 255)
+            elif y == 3:
+                c = (40, 84, 186, 255) if x in (x0, x1) else (60, 104, 200, 255)   # neck ring
             elif x in (x0, x1) or y == 15:
                 c = edge
-            elif y == 7:
+            elif y == 6:
                 c = surface
-            elif y >= 8:
-                c = water
+            elif y >= 7:
+                c = deep if x >= x1 - 1 else water
             else:
-                c = clear
-            if 9 <= y <= 11:
-                c = (60, 110, 200, 255) if y == 10 else (228, 233, 238, 255)       # label
+                c = plastic
+            if 9 <= y <= 11 and x0 < x < x1:                    # label with a blue stripe
+                c = (60, 110, 200, 255) if y == 10 else (228, 233, 238, 255)
             img.putpixel((x, y), c)
-    for y in range(6, 15):                                                           # highlight
-        if not 9 <= y <= 11:
-            r, g, b, a = img.getpixel((6, y))
-            img.putpixel((6, y), (min(255, r + 40), min(255, g + 40), min(255, b + 30), a))
+    for y in (4, 5, 7, 8, 12, 13):                              # reflections down the left side
+        img.putpixel((6, y), glint)
+    img.putpixel((9, 13), (236, 246, 252, 160))
     return img
 
 
 def keycard_tex(rng):
-    """Item: the guard's white plastic keycard: blue band, a photo, a gold chip. Transparent around."""
+    """Item: the guard's keycard on a black lanyard clip: a white plastic card with a
+    blue-grey band, a photo, name lines and a gold chip."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
-    for y in range(4, 12):
+    white, edge = (230, 233, 236, 255), (150, 156, 164, 255)
+    for y in range(5, 14):
         for x in range(2, 14):
-            if (x, y) in ((2, 4), (13, 4), (2, 11), (13, 11)):
-                continue                                                         # rounded corners
-            img.putpixel((x, y), (232, 234, 236, 255) if y > 5 else (52, 96, 178, 255))
-    for y in range(7, 11):
+            if (x, y) in ((2, 5), (13, 5), (2, 13), (13, 13)):
+                continue                                        # rounded corners
+            c = white
+            if y in (5, 6):
+                c = (66, 96, 140, 255)                          # band
+            if x in (2, 13) or y == 13:
+                c = edge if y > 6 else (44, 66, 100, 255)
+            img.putpixel((x, y), c)
+    img.putpixel((7, 6), (24, 26, 30, 255))                     # slot for the clip
+    img.putpixel((8, 6), (24, 26, 30, 255))
+    for y in (1, 2, 3, 4, 5):                                   # lanyard clip and strap
+        img.putpixel((7, y), (34, 36, 40, 255))
+        img.putpixel((8, y), (52, 56, 62, 255) if y > 2 else (34, 36, 40, 255))
+    img.putpixel((6, 1), (34, 36, 40, 255))
+    img.putpixel((9, 1), (34, 36, 40, 255))
+    for y in range(8, 12):                                      # photo: hair, face, shirt
         for x in range(3, 6):
-            img.putpixel((x, y), (150, 132, 118, 255) if y < 9 else (70, 74, 86, 255))   # photo: face, shirt
+            img.putpixel((x, y), (40, 34, 32, 255) if y == 8 else (178, 148, 130, 255) if y < 10 else (30, 32, 37, 255))
     for x in range(7, 13):
-        img.putpixel((x, 7), (120, 124, 130, 255))                                # name lines
+        img.putpixel((x, 8), (110, 116, 124, 255))              # name
         if x < 11:
-            img.putpixel((x, 9), (160, 164, 170, 255))
-    for x, y in ((11, 9), (12, 9), (11, 10), (12, 10)):
-        img.putpixel((x, y), (204, 166, 72, 255))                                 # chip
+            img.putpixel((x, 10), (160, 166, 174, 255))         # number
+    for x, y in ((10, 11), (11, 11), (10, 12), (11, 12)):
+        img.putpixel((x, y), (204, 166, 72, 255))               # chip
+    img.putpixel((11, 12), (168, 132, 52, 255))
     return img
 
 
@@ -724,7 +777,7 @@ def main():
     # Item textures and models that belong to no block.
     item_dir = ASSETS / "textures" / "item"
     item_dir.mkdir(parents=True, exist_ok=True)
-    for item, painter in (("water_bottle", water_bottle_tex), ("keycard", keycard_tex)):
+    for item, painter in (("battery", battery_tex), ("water_bottle", water_bottle_tex), ("keycard", keycard_tex)):
         (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))
         write_json(ASSETS / "models" / "item" / f"{item}.json",
                    {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{item}"}})
