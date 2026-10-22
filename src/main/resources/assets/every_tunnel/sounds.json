@@ -48,6 +48,16 @@
       }
     ]
   },
+  "block.card_reader.accept": {
+    "sounds": [
+      "every_tunnel:block/card_reader/accept_1"
+    ]
+  },
+  "block.card_reader.deny": {
+    "sounds": [
+      "every_tunnel:block/card_reader/deny_1"
+    ]
+  },
   "block.cardboard.impact": {
     "sounds": [
       {

@@ -6,6 +6,7 @@ import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.systems.ResourceSystem
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
+import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Identifier
 import net.minecraft.world.GameMode
@@ -14,7 +15,8 @@ import net.minecraft.world.GameMode
  * Starts the game over for a player, in the same world (`/everytunnel newgame`):
  *
  * - The world: every shutter opens ([LevelEntryHooks.openAll]), all the loot is back
- *   ([LootSpawner.restock]) and every Pale man goes back to his spawn point (also the ones in unloaded chunks, when they load:
+ *   ([LootSpawner.restock]), the lights the keycard put out are back and the card readers
+ *   locked ([KeycardHooks]), and every Pale man goes back to his spawn point (also the ones in unloaded chunks, when they load:
  *   [PaleManSpawner.startNewGame]).
  * - The player: empty inventory, full health and resources, Survival, and back at the
  *   start of the first level with an intro, which plays again ([IntroHooks.replay]); without
@@ -22,11 +24,28 @@ import net.minecraft.world.GameMode
  */
 object NewGame {
 
+    /**
+     * The levels' blocks were just rebuilt (`/everytunnel rebuilt`, run by the map's
+     * `garage:build`): the rebuild wiped the loot and put the lights back, so the world's
+     * memory of them starts over. The loot is put back at once, the lights the keycard put
+     * out are forgotten (they are on again), and shutters closing or waiting are dropped.
+     * Players are not touched.
+     */
+    fun levelsRebuilt(server: MinecraftServer) {
+        LevelEntryHooks.openAll(server)
+        KeycardHooks.forgetLights(server)
+        LootSpawner.restock(server)
+        PaleManSpawner.startNewGame(server)
+        EveryTunnel.LOGGER.info("Levels rebuilt: loot back, keycard lights forgotten")
+    }
+
     /** The level the new game starts in, or null if the world has no level with a start. */
     fun start(player: ServerPlayerEntity): LevelDefinition? {
         val server = player.server
         LevelEntryHooks.openAll(server)
         LootSpawner.restock(server)
+        KeycardHooks.restoreLights(server)
+        KeycardHooks.resetReaders(server)
         PaleManSpawner.startNewGame(server)
 
         player.inventory.clear()

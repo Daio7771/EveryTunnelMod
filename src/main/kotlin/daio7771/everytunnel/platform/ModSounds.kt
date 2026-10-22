@@ -45,6 +45,10 @@ object ModSounds {
     val ELEVATOR_DING = event("block.elevator.ding")
     val ELEVATOR_DOORS = event("block.elevator.doors")
 
+    /** The exit's card reader: card accepted (beeps, lock opens), or refused (buzz). */
+    val CARD_READER_ACCEPT = event("block.card_reader.accept")
+    val CARD_READER_DENY = event("block.card_reader.deny")
+
     /** A rolling shutter coming down and slamming shut (heard up to 32 blocks away). */
     val SHUTTER_CLOSE = event("block.shutter.close", range = 32f)
 

@@ -834,6 +834,36 @@ def elevator_doors(rng, variant):
     return fade(y, 0.0, 0.2)
 
 
+def beep(n, start, freq, length, amp=1.0):
+    """A small electronic beep: a soft square-ish tone with a 3 ms ramp each end."""
+    y = np.zeros(n)
+    s0, m = samples(start), samples(length)
+    tt = time_axis(m)
+    ramp = np.clip(np.minimum(tt, length - tt) / 0.003, 0, 1)
+    tone = np.tanh(3.0 * np.sin(TAU * freq * tt)) * ramp * amp
+    y[s0:s0 + m] += tone[:max(0, min(m, n - s0))]
+    return y
+
+
+def card_reader_accept(rng, variant):
+    """The exit's card reader taking the card: two rising beeps, then the lock's solenoid
+    pulls back with a clunk and the door's latch clicks free."""
+    n = samples(1.0)
+    y = beep(n, 0.0, 2093.0, 0.07, 0.5) + beep(n, 0.11, 2794.0, 0.11, 0.5)
+    y = lowpass(y, 6000.0)
+    y += relay_clunk(n, rng, 0.3, heavy=True)
+    y += knock(n, rng, 0.42, rng.uniform(380, 450), [1.0, 2.4, 4.1], [0.5, 0.3, 0.15], [0.05, 0.03, 0.02], click=0.6)
+    return fade(y, 0.0, 0.1)
+
+
+def card_reader_deny(rng, variant):
+    """The card reader refusing: two low, harsh buzzes."""
+    n = samples(0.5)
+    y = beep(n, 0.0, 330.0, 0.13, 0.6) + beep(n, 0.19, 330.0, 0.13, 0.6)
+    y += 0.3 * (beep(n, 0.0, 660.0, 0.13) + beep(n, 0.19, 660.0, 0.13))
+    return fade(lowpass(y, 4000.0), 0.0, 0.05)
+
+
 def shutter_close(rng, variant):
     """
     A rolling shutter dropping shut: the slats clatter down the guide rails faster and
@@ -919,6 +949,9 @@ SOUNDS = [
     Sound("block.elevator.ding", "Level progress", "The elevator's bell when it arrives", "mono", False, 1, elevator_ding, -3.0),
     Sound("block.elevator.doors", "Level progress", "The elevator doors sliding open (motor, rollers, stop)", "mono", False, 1,
           elevator_doors, -3.0),
+    Sound("block.card_reader.accept", "Level progress", "The exit's card reader taking the keycard (beeps, lock opens)", "mono", False, 1,
+          card_reader_accept, -3.0),
+    Sound("block.card_reader.deny", "Level progress", "The card reader refusing (no keycard)", "mono", False, 1, card_reader_deny, -6.0),
     Sound("block.shutter.close", "Level progress", "The rolling shutter closing behind the player (rattle down, slam)", "mono", False, 1,
           shutter_close, -1.0, attenuation=32),
     Sound("event.level_transition", "Level progress", "Going from Level 1 to Level 2", "stereo", False, 1, level_transition, -1.0),

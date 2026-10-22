@@ -238,6 +238,48 @@ def water_bottle_tex(rng):
     return img
 
 
+def keycard_tex(rng):
+    """Item: the guard's white plastic keycard: blue band, a photo, a gold chip. Transparent around."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(4, 12):
+        for x in range(2, 14):
+            if (x, y) in ((2, 4), (13, 4), (2, 11), (13, 11)):
+                continue                                                         # rounded corners
+            img.putpixel((x, y), (232, 234, 236, 255) if y > 5 else (52, 96, 178, 255))
+    for y in range(7, 11):
+        for x in range(3, 6):
+            img.putpixel((x, y), (150, 132, 118, 255) if y < 9 else (70, 74, 86, 255))   # photo: face, shirt
+    for x in range(7, 13):
+        img.putpixel((x, 7), (120, 124, 130, 255))                                # name lines
+        if x < 11:
+            img.putpixel((x, 9), (160, 164, 170, 255))
+    for x, y in ((11, 9), (12, 9), (11, 10), (12, 10)):
+        img.putpixel((x, y), (204, 166, 72, 255))                                 # chip
+    return img
+
+
+def card_reader_tex(rng, part):
+    """Card reader: dark plastic body (side), or its face: an LED (red locked, green open),
+    a card slot and a few keys, in the pixels the model's front shows (x 5-10, y 4-11)."""
+    img = new((40, 42, 46))
+    speckle(img, rng, 30, (52, 54, 58), 0.5)
+    if part == "side":
+        return img
+    rect(img, 5, 4, 10, 11, (30, 31, 34))
+    led = (226, 52, 44) if part == "locked" else (64, 220, 96)
+    rect(img, 7, 5, 8, 5, led)
+    rect(img, 6, 7, 9, 7, (12, 12, 14))                                           # card slot
+    for x, y in ((6, 9), (8, 9), (6, 10), (8, 10)):
+        px(img, x, y, (90, 92, 98))
+    return img
+
+
+def led_glow(x, y, c):
+    if max(c) > 200 and min(c) < 120:
+        return T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["TUBE_GLOW"])
+    return T.PLASTIC.but(smoothness=0.5, relief=0.3)
+
+
 def shutter_tex(rng):
     """Rolling shutter curtain: four galvanized steel slats, each lit on its rounded top and
     shaded into the groove below, with rust creeping from the joints and grime."""
@@ -566,9 +608,27 @@ def build():
     # Loot lying around: the client draws the item itself (LootRenderer), so the model is empty
     # (only a particle texture); the block item looks like the item.
     for block_id, name, item in (("loot_battery", "Battery (Loot)", "battery"),
-                                 ("loot_water_bottle", "Water Bottle (Loot)", "water_bottle")):
+                                 ("loot_water_bottle", "Water Bottle (Loot)", "water_bottle"),
+                                 ("loot_keycard", "Keycard (Loot)", "keycard")):
         a.models[block_id] = {"textures": {"particle": f"{NS}:item/{item}"}}
         a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:item/{item}"})
+
+    # Card reader: a small box on the wall (CardReaderBlock's shape), red light locked, green open.
+    a.texture("card_reader_side", card_reader_tex(r("reader_side"), "side"), T.PLASTIC.but(smoothness=0.5, relief=0.3))
+    variants = {}
+    for unlocked, part in (("false", "locked"), ("true", "open")):
+        a.texture(f"card_reader_{part}", card_reader_tex(r("reader"), part), led_glow)
+        a.models[f"card_reader_{part}"] = model(
+            {"front": f"card_reader_{part}", "side": "card_reader_side"},
+            [{"from": [5, 4, 14.5], "to": [11, 12, 16], "faces": {
+                "north": {"texture": "#front"}, "south": {"texture": "#side"}, "east": {"texture": "#side"},
+                "west": {"texture": "#side"}, "up": {"texture": "#side"}, "down": {"texture": "#side"}}}])
+        for facing, y in HORIZONTAL.items():
+            v = {"model": f"{NS}:block/card_reader_{part}"}
+            if y:
+                v["y"] = y
+            variants[f"facing={facing},unlocked={unlocked}"] = v
+    a.block("card_reader", "Card Reader", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
 
     # Rolling shutter: a 2-pixel steel sheet through the middle of the block; axis = the way it runs.
     a.texture("shutter", shutter_tex(r("shutter")), T.STEEL.but(smoothness=0.45, metal=255, relief=0.7))
@@ -664,9 +724,10 @@ def main():
     # Item textures and models that belong to no block.
     item_dir = ASSETS / "textures" / "item"
     item_dir.mkdir(parents=True, exist_ok=True)
-    (item_dir / "water_bottle.png").write_bytes(png(water_bottle_tex(rng_for("water_bottle"))))
-    write_json(ASSETS / "models" / "item" / "water_bottle.json",
-               {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/water_bottle"}})
+    for item, painter in (("water_bottle", water_bottle_tex), ("keycard", keycard_tex)):
+        (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))
+        write_json(ASSETS / "models" / "item" / f"{item}.json",
+                   {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{item}"}})
 
     lang_path = ASSETS / "lang" / "en_us.json"
     lang = json.loads(lang_path.read_text(encoding="utf-8"))

@@ -28,6 +28,8 @@ import net.minecraft.text.Text
  * - `/everytunnel paleman`: the Pale men near you, what they are doing and where they are going.
  * - `/everytunnel intro`: plays the new-game intro (the elevator) again for you (see [IntroHooks]).
  * - `/everytunnel newgame`: starts the game over in this world (see [NewGame]).
+ * - `/everytunnel rebuilt`: run by the map's `garage:build` after rebuilding the levels:
+ *   puts the loot back ([NewGame.levelsRebuilt]).
  * - `/everytunnel devworld save|forget` (development only): make this world start from
  *   how it is when you quit, on every launch, or stop doing that (see [DevWorlds]).
  */
@@ -55,6 +57,7 @@ object DebugCommands {
                 .then(CommandManager.literal("paleman").executes(::paleMen))
                 .then(CommandManager.literal("intro").executes(::intro))
                 .then(CommandManager.literal("newgame").executes(::newGame))
+                .then(CommandManager.literal("rebuilt").executes(::rebuilt))
             if (DevWorlds.enabled) {
                 root.then(
                     CommandManager.literal("devworld")
@@ -220,6 +223,12 @@ object DebugCommands {
             return 0
         }
         reply(context, "New game: shutters open, Pale men home, inventory cleared, back at the start of ${level.id}.")
+        return 1
+    }
+
+    private fun rebuilt(context: CommandContext<ServerCommandSource>): Int {
+        NewGame.levelsRebuilt(context.source.server)
+        reply(context, "Levels rebuilt: loot back in place.")
         return 1
     }
 

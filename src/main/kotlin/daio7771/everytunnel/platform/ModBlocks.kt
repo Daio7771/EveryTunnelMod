@@ -133,6 +133,17 @@ object ModBlocks {
         LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.WATER_BOTTLE },
     )
 
+    val LOOT_KEYCARD: Block = register(
+        "loot_keycard",
+        LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.KEYCARD },
+    )
+
+    /** A keycard reader on a wall: opens the iron doors next to it for a player with the keycard. */
+    val CARD_READER: Block = register(
+        "card_reader",
+        CardReaderBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 2 }.noCollision()),
+    )
+
     /** Shared by the loot blocks; registered in [register]. */
     lateinit var LOOT_ENTITY: BlockEntityType<LootBlockEntity>
         private set
@@ -164,7 +175,7 @@ object ModBlocks {
         }
         LOOT_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "loot"),
-            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE).build(),
+            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD).build(),
         )
         val tab: ItemGroup = FabricItemGroup.builder()
             .icon { ItemStack(FLUORESCENT_LIGHT) }

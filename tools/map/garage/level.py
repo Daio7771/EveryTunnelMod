@@ -1,6 +1,9 @@
 """
-A whole level: parking halls chained by corridors and ramps, an elevator lobby at the
-start, side rooms, and an exit ramp down to the next level.
+A whole level: parking halls chained by corridors and ramps, an elevator lobby (START
+"elevator") or an entry corridor from the previous level (START "entry") at the start, side
+rooms, and an exit ramp down to the next level (END "ramp") or no exit at the end (END
+"none": Level 2 leaves through a keycard door by hall 3). KEYCARD_HALL puts a glass parking
+booth with the keycard in the middle of that hall.
 
 Layout (top view, Minecraft directions: east = +x, south = +z):
 
@@ -27,7 +30,7 @@ ZONE_LETTERS = ["AB", "CD", "EF", "GH", "JK", "LM", "NP", "RS"]
 
 
 class Level:
-    def __init__(self, p, variant):
+    def __init__(self, p, variant, glyphs=None):
         # The blocks for each role (STAND_INS + BLOCKS), with the mod's own in the mod version.
         blocks = {**p.STAND_INS, **p.BLOCKS, **(p.MOD_BLOCKS if variant == "mod" else {})}
         self.p = SimpleNamespace(**dict(vars(p), STAND_INS=blocks))
@@ -35,7 +38,7 @@ class Level:
         self.variant = variant
         self.S = p.STAND_INS
         self.world = B.World()
-        self.glyphs = Glyphs(self.S["glyph"])
+        self.glyphs = glyphs or Glyphs(self.S["glyph"])     # shared by the levels of one world
         self.zones = []          # (id, (x0, y0, z0, x1, y1, z1), tags)
         self.floor = {}          # (x, z) -> floor y, for the preview
         self.labels = []         # (x, z, text) for the preview
@@ -44,6 +47,9 @@ class Level:
         self.spawn = None        # (x, y, z, yaw)
         self.next_zones = []     # the next level's first zones (the landing past the exit shutter)
         self.next_spawn = None   # the next level's start, (x, y, z, yaw)
+        self.landing = None      # END "ramp": the dark landing (far wall x, floor y, centre z, east)
+        self.entry = None        # START "entry": (x, y, z) of the entry corridor's first cell (west end, centre)
+        self.keycard = None      # KEYCARD_HALL: (x, y, z) where the keycard lies
         self.rng = random.Random(f"{p.SEED}-level")
 
     # --- small builders --------------------------------------------------------------
@@ -151,8 +157,9 @@ class Level:
                 openings.append({"side": "south", "a": xa, "b": xa + 3, "height": 3})
                 exit_x = (xa, xa + 3)
             else:
-                end = "east" if east else "west"
-                openings.append({"side": end, "a": g.center_z - 2, "b": g.center_z + 1, "height": 3})
+                if p.END == "ramp":
+                    end = "east" if east else "west"
+                    openings.append({"side": end, "a": g.center_z - 2, "b": g.center_z + 1, "height": 3})
                 exit_x = None
             frames.append({"hx": hx, "hy": hy, "hz": hz, "east": east, "openings": openings,
                            "exit_x": exit_x, "hp": hp, "g": g})
@@ -190,8 +197,11 @@ class Level:
             w, g, report, lights = B.build(hp, self.variant, self.glyphs, f["openings"], ZONE_LETTERS[i % len(ZONE_LETTERS)])
             self.merge_hall(w, f, report, lights, i)
 
-        # Lobby and elevator in front of hall 1's west end
-        self.lobby(frames[0])
+        # Lobby and elevator, or the corridor in from the previous level, at hall 1's west end
+        if p.START == "elevator":
+            self.lobby(frames[0])
+        else:
+            self.entry_corridor(frames[0])
 
         # Connectors
         for i in range(n - 1):
@@ -201,8 +211,13 @@ class Level:
         for spec, i, wall, door_x in rooms:
             self.side_room(spec, frames[i], wall, door_x, len(frames))
 
+        # The keycard's booth
+        if p.KEYCARD_HALL:
+            self.booth(frames[p.KEYCARD_HALL - 1])
+
         # Exit ramp down to the next level
-        self.exit_ramp(frames[-1])
+        if p.END == "ramp":
+            self.exit_ramp(frames[-1])
 
         if self.variant == "mod":
             mod_blocks.finish(self.world, p, random.Random(f"{p.SEED}-mod-blocks"))
@@ -330,6 +345,9 @@ class Level:
         xa, xb = dx - width // 2, dx - width // 2 + width - 1
         if kind == "dead_end":
             xa, xb = dx - 1, dx + 1
+        if kind == "keycard_exit":
+            self.keycard_exit(spec, f, wall, dx, wall_z, step, facing_out)
+            return
         self.room(xa, xb, za, zb, y, 3 if kind != "dead_end" else H)
         # doorway through both walls (the hall's and the room's)
         self.carve(dx, dx, min(wall_z, z_near), max(wall_z, z_near), y + 1, y + 2)
@@ -373,6 +391,155 @@ class Level:
         self.wear([(x, z) for x in range(xa, xb + 1) for z in range(za, zb + 1)], 0.7)
         self.zone(f"{kind}_hall_{spec['hall'] + 1}", xa, y, za, xb, y + H + 1, zb)
         self.labels.append((xa, za - 1 if north else zb + 2, label))
+
+    def keycard_exit(self, spec, f, wall, dx, wall_z, step, facing_out):
+        """
+        Level 2's way out: an iron door marked EXIT in the hall wall, a card reader beside it on
+        the hall side (zone tagged keycard_door), and behind it emergency stairs going down,
+        EXIT_STEPS steps, enclosed and dark, to a wall marked with the next level's sign. A few
+        steps down is the zone tagged end, where the demo ends.
+        """
+        p, S = self.p, self.S
+        y = f["hy"]
+        xa, xb = dx - 1, dx + 1
+        steps = p.EXIT_STEPS
+        stair_facing = "south" if step < 0 else "north"          # stairs face back up, towards the door
+        hall_side = wall_z - step
+        # Cell k from the door: 0 is flat (floor y), 1..steps are stairs one lower each (the
+        # first one level with the floor), steps + 1 is the flat bottom.
+        def floor_of(k):
+            return y if k == 0 else y - (k - 1) if k <= steps else y - steps
+
+        # Every cell the stairwell takes must be free (it digs under the neighbouring hall).
+        cells = []
+        for k in range(0, steps + 2):
+            z = wall_z + step * (k + 1)
+            floor_y = floor_of(k)
+            for x in range(xa - 1, xb + 2):
+                for yy in range(floor_y - 1, floor_y + 5):
+                    cells.append((x, yy, z))
+        bottom = wall_z + step * (steps + 2)
+        cells += [(x, yy, bottom) for x in range(xa - 1, xb + 2) for yy in range(y - steps - 1, y - steps + 5)]
+        taken = [c for c in cells if not self.world.free(*c)]
+        if taken:
+            raise SystemExit(f"keycard_exit by hall {spec['hall'] + 1}: the stairwell runs into other blocks, e.g. {taken[:3]}")
+        for k in range(0, steps + 2):
+            z = wall_z + step * (k + 1)
+            last = k == steps + 1
+            floor_y = floor_of(k)
+            for x in range(xa - 1, xb + 2):
+                side = x in (xa - 1, xb + 1)
+                self.set(x, floor_y - 1, z, S["floor"])
+                if k == 0 or last or side:
+                    self.set(x, floor_y, z, S["floor"])
+                else:
+                    self.set(x, floor_y, z, f"minecraft:andesite_stairs[facing={stair_facing},half=bottom,shape=straight]")
+                self.set(x, floor_y + 4, z, S["ceiling"])
+                if side:
+                    for yy in range(floor_y + 1, floor_y + 4):
+                        self.set(x, yy, z, S["wall"])
+        # The sign at the bottom, on the end wall.
+        bottom_z = wall_z + step * (steps + 2)
+        for x in range(xa - 1, xb + 2):
+            for yy in range(y - steps - 1, y - steps + 5):
+                self.set(x, yy, bottom_z, S["wall"])
+        inside = "south" if step < 0 else "north"
+        self.wall_sign(list(p.NEXT_LEVEL_SIGN), dx - 1 if step < 0 else dx + 1, y - steps + 2, bottom_z,
+                       inside, (1, 0) if step < 0 else (-1, 0))
+        # Door through the hall wall, EXIT over it, the reader on the hall side.
+        self.carve(dx, dx, wall_z, wall_z, y + 1, y + 2)
+        self.set(dx, y + 1, wall_z, f"minecraft:iron_door[facing={facing_out},half=lower,hinge=left,open=false,powered=false]")
+        self.set(dx, y + 2, wall_z, f"minecraft:iron_door[facing={facing_out},half=upper,hinge=left,open=false,powered=false]")
+        self.wall_sign(["EX", "IT"], dx - 1 if step < 0 else dx + 1, y + 3, wall_z,
+                       "south" if step < 0 else "north", (1, 0) if step < 0 else (-1, 0))
+        for x in range(dx - 1, dx + 2):                          # a clear spot in front of the door
+            for z in (hall_side, hall_side - step):
+                for yy in range(y + 1, y + 4):
+                    self.world.remove(x, yy, z)
+        reader_facing = "south" if step < 0 else "north"
+        if self.variant == "mod":
+            reader = f"every_tunnel:card_reader[facing={reader_facing},unlocked=false]"
+        else:
+            reader = f"minecraft:polished_blackstone_button[face=wall,facing={reader_facing},powered=false]"
+        self.set(dx + 1, y + 2, hall_side, reader)
+        self.zone("keycard_door", dx - 1, y + 1, min(wall_z, hall_side), dx + 1, y + 2, max(wall_z, hall_side), ["keycard_door"])
+        za, zb = sorted((wall_z + step, wall_z + step * (steps + 1)))
+        self.zone(f"keycard_exit_hall_{spec['hall'] + 1}", xa, y - steps, za, xb, y + 4, zb)
+        e0, e1 = sorted((wall_z + step * 4, wall_z + step * 6))
+        self.zone("end", xa, y - 7, e0, xb, y, e1, ["end"])
+        self.labels.append((xa, za - 1 if step < 0 else zb + 2, f"EXIT (keycard): stairs down to {p.NEXT_LEVEL_SIGN}"))
+
+    def booth(self, f):
+        """
+        A glass parking booth in the middle of the hall's aisle: a metal frame, glass from waist
+        height up, a door towards the north wall, a counter with the keycard on it and a
+        flickering light above. Whatever stood there is cleared first.
+        """
+        p, S = self.p, self.S
+        hp, g = f["hp"], f["g"]
+        y = f["hy"]
+        cx, cz = f["hx"] + hp.LENGTH // 2, f["hz"] + g.center_z
+        x0, x1, z0, z1 = cx - 2, cx + 2, cz - 2, cz + 1
+        for x in range(x0 - 1, x1 + 2):
+            for z in range(z0 - 1, z1 + 2):
+                for yy in range(y + 1, y + p.CEILING_HEIGHT + 1):
+                    self.world.remove(x, yy, z)
+        metal = S["elevator_wall"]
+        for x in range(x0, x1 + 1):
+            for z in range(z0, z1 + 1):
+                edge_x, edge_z = x in (x0, x1), z in (z0, z1)
+                self.set(x, y + 4, z, metal)                                   # roof
+                if not (edge_x or edge_z):
+                    continue
+                if x == cx and z == z0:                                         # the door
+                    self.set(x, y + 3, z, metal)
+                    continue
+                if edge_x and edge_z:                                           # corner posts
+                    for yy in (y + 1, y + 2, y + 3):
+                        self.set(x, yy, z, metal)
+                    continue
+                self.set(x, y + 1, z, metal)
+                pane = "minecraft:glass_pane[east=true,west=true,north=false,south=false,waterlogged=false]" if edge_z else \
+                    "minecraft:glass_pane[east=false,west=false,north=true,south=true,waterlogged=false]"
+                self.set(x, y + 2, z, pane)
+                self.set(x, y + 3, z, pane)
+        for x in range(cx - 1, cx + 2):                                          # the counter
+            self.set(x, y + 1, z1 - 1, metal)
+        self.fixture(cx, z1 - 1, y + 4, "dim")
+        self.keycard = (cx + 0.5, y + 2, z1 - 1 + 0.5)
+        self.labels.append((cx, z1 + 3, "booth (keycard)"))
+
+    def entry_corridor(self, f):
+        """
+        START "entry": a corridor ENTRY_LENGTH long from hall 1's west opening, open at its west
+        end, where the previous level's landing joins it (see attach in map_generator.py).
+        """
+        p, S = self.p, self.S
+        H = p.CEILING_HEIGHT
+        g = f["g"]
+        cz = f["hz"] + g.center_z
+        y = f["hy"]
+        x1 = f["hx"] - 1
+        x0 = x1 - p.ENTRY_LENGTH + 1
+        z0, z1 = cz - 2, cz + 1
+        self.room(x0, x1, z0, z1, y, H, open_sides=("west", "east"))
+        # The column west of the corridor is the previous level's (its landing's far wall with the
+        # doorway): leave it out, so nothing of this level lands on it.
+        for z in range(z0 - 1, z1 + 2):
+            for yy in range(y, y + H + 2):
+                self.world.remove(x0 - 1, yy, z)
+        self.fixture((x0 + x1) // 2, cz, y + H + 1, "dim")
+        self.wear([(x, z) for x in range(x0, x1 + 1) for z in range(z0, z1 + 1)], 0.8)
+        self.zone("entry", x0, y, z0, x1, y + H + 1, z1)
+        self.entry = (x0, y, cz)
+        self.labels.append((x0 + 1, z0 - 2, f"from {p.PREVIOUS_LEVEL_SIGN}"))
+
+    def open_landing(self):
+        """A doorway, 3 wide and 2 high, in the landing's far wall under the next level's sign."""
+        land = self.landing
+        for z in range(land["cz"] - 1, land["cz"] + 2):
+            for yy in (land["ly"] + 1, land["ly"] + 2):
+                self.world.remove(land["far"], yy, z)
 
     def exit_ramp(self, f):
         p, S = self.p, self.S
@@ -420,6 +587,7 @@ class Level:
                 for yy in range(ly + 1, ly + H + 1):
                     self.set(lx0 - d, yy, z, S["wall"])
         far = xb + 1 if east else xa - 1
+        self.landing = {"far": far, "ly": ly, "cz": cz, "east": east}
         self.wall_sign(list(p.NEXT_LEVEL_SIGN), far, ly + 3, cz - 1 if east else cz + 1,
                        "west" if east else "east", (0, 1) if east else (0, -1))
         self.wear([(x, z) for x in range(xa, xb + 1) for z in range(cz - 3, cz + 4)], 0.9)

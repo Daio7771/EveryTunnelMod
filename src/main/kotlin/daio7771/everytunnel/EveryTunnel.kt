@@ -11,6 +11,8 @@ import daio7771.everytunnel.platform.LevelEntryHooks
 import daio7771.everytunnel.platform.LevelReloadListener
 import daio7771.everytunnel.platform.LevelTrackingHooks
 import daio7771.everytunnel.platform.LootSpawner
+import daio7771.everytunnel.platform.KeycardHooks
+import daio7771.everytunnel.platform.EndingHooks
 import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.ModEntities
 import daio7771.everytunnel.platform.ModItems
@@ -61,6 +63,8 @@ object EveryTunnel : ModInitializer {
         NoiseHooks.register()
         PaleManSpawner.register()
         LootSpawner.register()
+        KeycardHooks.register()
+        EndingHooks.register()
         RespawnHooks.register()
         DeathHooks.register()
         LevelEntryHooks.register()

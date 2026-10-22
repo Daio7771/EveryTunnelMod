@@ -30,7 +30,10 @@ import net.minecraft.world.World
  * - Water bottle (`/give @s every_tunnel:water_bottle`): hold use for
  *   `thirst.drink_seconds` to drink it (see [DrinkHooks]); consumed outside Creative.
  *
- * In the levels both are found lying around ([LootSpawner]).
+ * - Keycard: the night guard's security card. Lost in Level 2; the exit's card reader
+ *   ([CardReaderBlock]) only opens for a player carrying it.
+ *
+ * In the levels they are found lying around ([LootSpawner]).
  */
 object ModItems {
 
@@ -38,13 +41,17 @@ object ModItems {
     val BATTERY: Item = BatteryItem(Item.Settings().maxCount(16))
     @JvmField
     val WATER_BOTTLE: Item = WaterBottleItem(Item.Settings().maxCount(16))
+    @JvmField
+    val KEYCARD: Item = KeycardItem(Item.Settings().maxCount(1))
 
     fun register() {
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "battery"), BATTERY)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "water_bottle"), WATER_BOTTLE)
+        Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "keycard"), KEYCARD)
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register { entries ->
             entries.add(BATTERY)
             entries.add(WATER_BOTTLE)
+            entries.add(KEYCARD)
         }
     }
 }
@@ -120,5 +127,11 @@ private class WaterBottleItem(settings: Settings) : Item(settings) {
     private companion object {
         const val FIRST_GULP_TICK = 3
         const val GULP_TICKS = 11
+    }
+}
+
+private class KeycardItem(settings: Settings) : Item(settings) {
+    override fun appendTooltip(stack: ItemStack, world: World?, tooltip: MutableList<Text>, context: TooltipContext) {
+        tooltip += Text.translatable("item.every_tunnel.keycard.tooltip").formatted(Formatting.GRAY)
     }
 }

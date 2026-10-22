@@ -9,7 +9,7 @@ Most of the work goes into the sound.
 Where it stands: player systems, sound, the generated Level 1 map and its props are done.
 The Pale man hunts by sound, and the music follows what he does. A new game starts in the
 elevator; dying restarts the level, and walking into the next one closes a shutter behind
-you. Batteries and water bottles lie around to be picked up. Next: the Level 2 map.
+you. Batteries and water bottles lie around to be picked up. Level 2 is built, with its keycard, lights out and the end of the demo. Next: playtesting, tuning and the release.
 
 ## Running it
 
@@ -87,7 +87,15 @@ elevator with the doors open. `/everytunnel intro` plays it again.
 **Dying and moving on.** There's no death screen. When you'd die, you hear it, the screen
 fades to black and you can't move; in the dark you're taken back to the start of the level
 you were in, with full health and resources, and its Pale men go back to their spawn
-points. Then the screen fades back in. You keep what you picked up. Walking into a level
+points. Then the screen fades back in. You keep what you picked up.
+
+**Level 2's way out.** The EXIT door by hall 3 opens only with your keycard: its reader
+buzzes "It needs a keycard" until you have it. The keycard lies on the counter of a glass
+booth in hall 5. Picking it up puts out every light still on in Level 2, in a wave
+spreading from you. Behind the EXIT door, stairs go down to B3: a few steps down you hear
+bare feet coming down behind you, the screen fades, and "End of demo" and the credits
+show. Then the game saves and goes back to the title screen; entering the world again
+starts a new game. Walking into a level
 with a higher `order` shows its title ("Level 2"), plays its sound, and closes
 every shutter in its zones tagged `shutter` once you're past it: a rolling shutter rattles
 down and slams, and there's no way back.
@@ -153,22 +161,29 @@ Python 3 with Pillow, and the sounds also need numpy, scipy and the system's lib
 Previews go into each tool's `output/` folder, which isn't in git. Whatever ends up in
 `src/` gets committed.
 
-`tools/map/map_generator.py` builds Level 1: an elevator, five parking halls that get
-worse as you go (wear, dead lights, oddities like stairs into the ceiling), side rooms and
-a ramp down to B2. A shutter closes at the foot of that ramp behind you, and the dark
-landing past it is all of Level 2 so far (`level_2.json`, its start and title). The parameters are at the top of the file and the same seed gives the
-same level. `LOOT` lists the batteries and water bottles and the zone each one lies in
-(Level 1: two of each, mostly in the side rooms). Level 1 has no Pale man; `PALE_MAN_HALLS` (empty) can put one in the middle
-of chosen halls, each kept inside his hall, for testing him in this map until Level 2
-exists. Rebuilding the level removes the Pale men in it. It writes two datapacks:
+`tools/map/map_generator.py` builds both levels. Level 1 (B1): an elevator, five parking
+halls that get worse as you go (wear, dead lights, oddities like stairs into the ceiling),
+side rooms and a ramp down. A shutter closes at the foot of that ramp behind you; the dark
+landing past it is where Level 2 starts. Level 2 (B2, `LEVEL_2`) continues through a
+doorway under the landing's "B2" sign: five darker, more worn halls, one Pale man in each
+and two in the bigger last one, each kept in his hall. Your keycard lies in a glass booth
+in hall 5; the way out is the EXIT door with a card reader by hall 3, stairs down to B3,
+where the demo ends. The parameters are at the top of the file and the same seed gives
+the same level. `LOOT` lists the batteries and water bottles and the zone each lies in
+(two of each per level, mostly in side rooms). Level 1 has no Pale man; `PALE_MAN_HALLS`
+can put one in chosen halls for testing. Rebuilding the level removes the Pale men in it.
+It writes two datapacks:
 
 - the mod one, using the mod's blocks;
 - a vanilla one, using re-skinned vanilla blocks.
 
 It also writes a world resource pack (`resources.zip`) with the textures and their LabPBR
 maps, and installs it all into `noname_complex`. In game, the level rebuilds only when the
-generated commands change. Building turns off block drops and clears loose items, and
-`/function garage:build` forces a rebuild.
+generated commands change. The map is bigger than what is loaded around a player, so
+building force-loads its chunks first, waits until they are loaded, then builds. Building
+turns off block drops and clears loose items, removes the Pale men and then tells the mod
+(`/everytunnel rebuilt`), which puts all the loot back. `/function garage:build` forces a
+rebuild.
 
 `tools/blocks/generate.py` makes the models, textures, LabPBR maps, names and loot tables
 of the mod's blocks: the fluorescent light and the props (boxes, cones, extinguishers,

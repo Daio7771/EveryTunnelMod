@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,unlocked=false": {
+      "model": "every_tunnel:block/card_reader_locked"
+    },
+    "facing=east,unlocked=false": {
+      "model": "every_tunnel:block/card_reader_locked",
+      "y": 90
+    },
+    "facing=south,unlocked=false": {
+      "model": "every_tunnel:block/card_reader_locked",
+      "y": 180
+    },
+    "facing=west,unlocked=false": {
+      "model": "every_tunnel:block/card_reader_locked",
+      "y": 270
+    },
+    "facing=north,unlocked=true": {
+      "model": "every_tunnel:block/card_reader_open"
+    },
+    "facing=east,unlocked=true": {
+      "model": "every_tunnel:block/card_reader_open",
+      "y": 90
+    },
+    "facing=south,unlocked=true": {
+      "model": "every_tunnel:block/card_reader_open",
+      "y": 180
+    },
+    "facing=west,unlocked=true": {
+      "model": "every_tunnel:block/card_reader_open",
+      "y": 270
+    }
+  }
+}

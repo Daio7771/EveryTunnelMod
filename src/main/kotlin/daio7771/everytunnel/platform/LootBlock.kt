@@ -10,6 +10,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.Item
 import net.minecraft.item.ItemPlacementContext
 import net.minecraft.item.ItemStack
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvents
 import net.minecraft.state.StateManager
@@ -61,6 +62,7 @@ class LootBlock(settings: Settings, private val itemOf: () -> Item) : BlockWithE
             if (!player.inventory.insertStack(stack)) player.dropItem(stack, false)
             world.removeBlock(pos, false)
             world.playSound(null, pos, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.3f, 1.2f + world.random.nextFloat() * 0.4f)
+            if (item == ModItems.KEYCARD && player is ServerPlayerEntity) KeycardHooks.pickedUp(player, pos)
         }
         return ActionResult.success(world.isClient)
     }

@@ -20,7 +20,7 @@ import net.minecraft.world.PersistentState
 
 /**
  * Puts the loot of a level in place: a [LootBlock] at every spawn point tagged with a key
- * of [LOOT] (`battery`, `water`), the first time a player enters that level.
+ * of [LOOT] (`battery`, `water`, `keycard`), the first time a player enters that level.
  *
  * Each spot is filled once per world: the world remembers it
  * (`data/every_tunnel_loot.dat`), so what was picked up stays picked up, also after
@@ -32,6 +32,7 @@ object LootSpawner {
     val LOOT: Map<String, () -> Block> = mapOf(
         "battery" to { ModBlocks.LOOT_BATTERY },
         "water" to { ModBlocks.LOOT_WATER_BOTTLE },
+        "keycard" to { ModBlocks.LOOT_KEYCARD },
     )
 
     private var server: MinecraftServer? = null
