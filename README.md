@@ -78,7 +78,7 @@ man as soon as he spawns). Entering a level makes its start (the spawn point tag
 your respawn point, so you don't come back on the roof.
 
 **The start.** A new game begins in the elevator with its doors shut while a song plays
-(`music.elevator`, a synthesized placeholder for now). After 25 seconds the bell rings,
+(`music.elevator`: Kevin MacLeod's "Local Forecast - Elevator", CC BY 4.0, see below). After 25 seconds the bell rings,
 the song distorts and fades like a tape running down, the doors slide open and "Level 1"
 shows. It happens once per world and player (the level's `intro`, its start zone tagged
 `start` and the door zone tagged `elevator_door`); dying later brings you back to the
@@ -174,7 +174,8 @@ on `tools/entity/reference/pale_man_concept.png`, which is AI concept art used o
 reference. The tool also writes a painting template for repainting the texture by hand.
 
 `tools/sounds/` synthesizes the sounds (`catalog.py`, one function per sound) and cuts the
-CC0 recordings (`cc0/`, with sources and licences in `SOURCES.md`; CC0 only). `generate.py`
+CC0 recordings (`cc0/`, with sources and licences in `SOURCES.md`; CC0 only), plus the one
+credited exception, the elevator song (`licensed/`, credited in `CREDITS.md`). `generate.py`
 renders previews with a listening page. `export.py` writes the `.ogg` files and
 `sounds.json` into the mod, rewriting only the ones that changed. Any sound can be tried
 with `/playsound every_tunnel:<id> master @s`.
@@ -204,3 +205,11 @@ These need commands enabled.
 - `/everytunnel paleman`: nearby Pale men, what each is doing and where he's going.
 - `/everytunnel intro`: the elevator intro again (in Survival or Adventure).
 - `/everytunnel devworld save|forget`: dev runs only, see "Running it".
+
+## Credits
+
+"Local Forecast - Elevator" Kevin MacLeod (incompetech.com)
+Licensed under Creative Commons: By Attribution 4.0 License
+http://creativecommons.org/licenses/by/4.0/
+
+Everything else is the project's own (MIT) or CC0; see `CREDITS.md`.

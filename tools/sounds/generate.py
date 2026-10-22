@@ -225,7 +225,7 @@ def write_index():
     cuts_file = OUT / "cuts" / "titles.json"
     if cuts_file.exists():
         cuts = json.loads(cuts_file.read_text(encoding="utf-8"))
-        parts.append("<h2>CC0 cuts used in game</h2>")
+        parts.append("<h2>Recording cuts used in game (CC0, and credited ones from licensed/)</h2>")
         parts.append("<p class='intro'>Pieces cut automatically from the CC0 recordings by export.py, "
                      "as they go into the mod.</p>")
         for sound_id, info in cuts.items():

@@ -834,55 +834,6 @@ def elevator_doors(rng, variant):
     return fade(y, 0.0, 0.2)
 
 
-def elevator_music_placeholder(rng, variant):
-    """
-    PLACEHOLDER until the real song: soft elevator music from a small cabin speaker. An
-    electric piano comps Cmaj7 - Am7 - Dm7 - G7 at 92 bpm over a round bass, with a lazy
-    vibraphone tune; band-limited like a ceiling speaker. 28 s, plays once.
-    """
-    bpm = 92.0
-    beat = 60.0 / bpm
-    seconds = 28.0
-    n = samples(seconds)
-    y = np.zeros((n, 2))
-    chords = [(48, [64, 67, 71, 74]), (45, [64, 67, 69, 72]), (50, [65, 69, 72, 74]), (43, [65, 67, 71, 74])]
-
-    def hz(note):
-        return 440.0 * 2 ** ((note - 69) / 12.0)
-
-    def piano(freq, length, amp):
-        m = samples(length)
-        tt = time_axis(m)
-        env = np.exp(-tt / 0.9) * np.clip(tt / 0.004, 0, 1)
-        tine = 0.08 * np.sin(TAU * freq * 7.1 * tt) * np.exp(-tt / 0.05)
-        return amp * env * (np.sin(TAU * freq * tt) + 0.3 * np.sin(TAU * 2 * freq * tt) + tine)
-
-    def vibes(freq, length, amp):
-        m = samples(length)
-        tt = time_axis(m)
-        env = np.exp(-tt / 1.1) * np.clip(tt / 0.003, 0, 1) * (1.0 - 0.35 * (0.5 + 0.5 * np.sin(TAU * 5.0 * tt)))
-        return amp * env * (np.sin(TAU * freq * tt) + 0.1 * np.sin(TAU * 4.0 * freq * tt))
-
-    tune = [76, None, 74, 72, 74, None, 76, 79, 77, None, 76, 74, 72, None, 71, 72]
-    bar = 0
-    while bar * 4 * beat < seconds:
-        root, notes = chords[bar % 4]
-        start = bar * 4 * beat
-        for b in (0, 2):
-            for note in notes:
-                place(y, pan(piano(hz(note), 2.0, 0.12), -0.3), start + b * beat + rng.uniform(0, 0.015))
-            bass = piano(hz(root if b == 0 else root + 7), 1.5, 0.35)
-            place(y, stereo(bass, bass), start + b * beat)
-        for i in range(4):
-            note = tune[(bar * 4 + i) % len(tune)]
-            if note is not None:
-                place(y, pan(vibes(hz(note), 2.5, 0.2), 0.3), start + i * beat + rng.uniform(0, 0.02))
-        bar += 1
-    y = y[:n]
-    y = fft_filter(y, 180.0, 4500.0, order=2)                                                  # a small ceiling speaker
-    return fade(y, 0.5, 2.5)
-
-
 def shutter_close(rng, variant):
     """
     A rolling shutter dropping shut: the slats clatter down the guide rails faster and
@@ -965,8 +916,6 @@ SOUNDS = [
     Sound("entity.pale_man.step_run", "Level 2 / Pale man", "His bare feet on concrete, running (6 variations)", "mono", False, 6,
           lambda rng, variant: pale_man_step(rng, variant, run=True), -1.0, stream=False, attenuation=24),
     Sound("music.chase", "Level 2 / Pale man", "During a chase (120 bpm, 8 bars)", "stereo", True, 1, chase, -1.0),
-    Sound("music.elevator", "Level progress", "PLACEHOLDER song for the elevator intro (until the real one)", "stereo", False, 1,
-          elevator_music_placeholder, -3.0, stream=True),
     Sound("block.elevator.ding", "Level progress", "The elevator's bell when it arrives", "mono", False, 1, elevator_ding, -3.0),
     Sound("block.elevator.doors", "Level progress", "The elevator doors sliding open (motor, rollers, stop)", "mono", False, 1,
           elevator_doors, -3.0),

@@ -1,5 +1,7 @@
 """
-Pieces of the CC0 recordings (cc0/) that go into the mod, and how they are cut.
+Pieces of the recordings that go into the mod, and how they are cut: the CC0 ones (cc0/)
+and the few under a license that needs credit (licensed/, see licensed/SOURCES.md and
+CREDITS.md at the repository root).
 
 Each Cut turns one source recording into one sound event with one or more variations:
 segments are chosen (by hand as (start, end) seconds, or automatically), resampled to
@@ -17,13 +19,13 @@ from scipy.signal import resample_poly
 import audio_io
 from dsp import SR, fade, normalize
 
-CC0 = Path(__file__).resolve().parent / "cc0"
+HERE = Path(__file__).resolve().parent
 
 
 @dataclass
 class Cut:
     id: str
-    source: str
+    source: str                                     # file name inside `folder`
     use: str
     channels: str                                   # "mono" or "stereo" (stereo only for non-positional sounds)
     segments: Optional[List[Tuple[float, float]]] = None
@@ -37,6 +39,7 @@ class Cut:
     # distance in blocks at which a positioned sound fades out (None = Minecraft's 16).
     game_volume: float = 1.0
     attenuation: Optional[int] = None
+    folder: str = "cc0"                             # "cc0" or "licensed" (credited in CREDITS.md)
 
 
 def loudest_windows(length_seconds):
@@ -59,7 +62,7 @@ def loudest_windows(length_seconds):
 
 def load(cut):
     """Source recording at 44.1 kHz in the cut's channel layout."""
-    x, sr = audio_io.read(CC0 / cut.source)
+    x, sr = audio_io.read(HERE / cut.folder / cut.source)
     if sr != SR:
         g = np.gcd(SR, sr)
         x = resample_poly(x, SR // g, sr // g, axis=0)
@@ -89,4 +92,9 @@ CUTS = [
     Cut("entity.pale_man.breathing", "breathing_creepy.wav",
         "The Pale man breathing; heard within 8 blocks, and he holds his breath while he listens",
         "mono", segments=[(2.8, 6.6), (11.8, 15.4), (16.9, 20.6)], fade_in=0.15, fade_out=0.6, attenuation=8),
+    # CC BY 4.0, credited in CREDITS.md. The intro waits 25 s and then distorts and fades it
+    # over 3 s, so only the first 30 s are needed.
+    Cut("music.elevator", "local_forecast_elevator.mp3",
+        "The song in the elevator at the start of a new game (Kevin MacLeod, \"Local Forecast - Elevator\")",
+        "stereo", segments=[(0.0, 30.0)], fade_in=0.0, fade_out=1.0, folder="licensed"),
 ]

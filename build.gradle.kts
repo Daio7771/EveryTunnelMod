@@ -222,6 +222,10 @@ tasks.jar {
     from("LICENSE.txt") {
         rename { "${it}_${project.base.archivesName.get()}" }
     }
+    // Third-party music and its license (CC BY needs the credit to travel with the mod).
+    from("CREDITS.md") {
+        rename { "${it}_${project.base.archivesName.get()}" }
+    }
 }
 
 // configure the maven publication

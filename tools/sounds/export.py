@@ -8,7 +8,7 @@ Writes Ogg Vorbis files to src/main/resources/assets/every_tunnel/sounds/ (same 
 layout as the sound ids: item.flashlight.on -> item/flashlight/on_1.ogg) and the
 sounds.json that declares every sound event and its variations. Sources:
 - every generated sound in catalog.SOUNDS (exactly what generate.py renders)
-- every CC0 cut in cc0_cuts.CUTS
+- every recording cut in cc0_cuts.CUTS (CC0, and the credited ones in licensed/)
 
 The Ogg encoder stamps each file with a random stream number, so re-encoding unchanged
 audio would still change the files. export_manifest.json keeps a hash of each file's
