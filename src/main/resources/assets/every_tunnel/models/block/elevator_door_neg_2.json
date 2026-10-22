@@ -1,0 +1,77 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "t": "every_tunnel:block/elevator_door",
+    "particle": "every_tunnel:block/elevator_door"
+  },
+  "elements": [
+    {
+      "from": [
+        -10,
+        0,
+        7
+      ],
+      "to": [
+        6,
+        16,
+        9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#t",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#t",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#t",
+          "uv": [
+            7,
+            0,
+            9,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#t",
+          "uv": [
+            7,
+            0,
+            9,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#t",
+          "uv": [
+            0,
+            7,
+            16,
+            9
+          ]
+        },
+        "down": {
+          "texture": "#t",
+          "uv": [
+            0,
+            7,
+            16,
+            9
+          ]
+        }
+      }
+    }
+  ]
+}

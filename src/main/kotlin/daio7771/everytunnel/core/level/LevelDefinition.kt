@@ -21,6 +21,10 @@ data class LevelDefinition(
     val spawnPoints: List<SpawnPoint>,
     /** Background sound while a player is in this level. */
     val ambience: Ambience = Ambience.NONE,
+    /** What a player gets on walking in from the previous level, or null for nothing. */
+    val entry: LevelEntry? = null,
+    /** The scene a new game starts with in this level (the elevator), or null for none. */
+    val intro: LevelIntro? = null,
 ) {
     fun zone(id: String): Zone? = zones.firstOrNull { it.id == id }
 
@@ -47,9 +51,38 @@ data class SpawnPoint(
     val yaw: Float,
     val pitch: Float,
     val tags: Set<String>,
+    /**
+     * Id of a zone of the same level that whatever spawns here stays in, or null. A Pale man
+     * never leaves it and ignores every noise and player outside it.
+     */
+    val zone: String? = null,
 )
 
 data class Position(val x: Double, val y: Double, val z: Double)
+
+/**
+ * The start of a new game in this level: the player waits [seconds] in the level's start
+ * (a zone tagged `start`) behind closed doors (zones tagged `elevator_door`) while [music]
+ * plays; then the doors open, the music distorts and fades, and the level's [LevelEntry]
+ * title shows.
+ */
+data class LevelIntro(
+    val seconds: Double,
+    /** Sound event id of the song, or null for none. */
+    val music: String?,
+)
+
+/**
+ * Arriving from an earlier level (by [LevelDefinition.order]): a title on screen
+ * ([title] large, [subtitle] under it; empty strings show nothing) and a sound in the
+ * player's head. Shutters in zones tagged `shutter` close behind the player.
+ */
+data class LevelEntry(
+    val title: String,
+    val subtitle: String,
+    /** Sound event id, e.g. `every_tunnel:event.level_transition`, or null for none. */
+    val sound: String?,
+)
 
 /**
  * A level's background sound: a loop heard everywhere in the level (not positioned)

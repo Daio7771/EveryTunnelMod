@@ -191,6 +191,43 @@ def metal_panel_tex(rng):
     return img
 
 
+def elevator_door_tex(rng):
+    """Sliding elevator door: brushed stainless steel with a vertical grain, worn darker
+    where hands push it, a thin rubber strip along both edges."""
+    img = new((156, 158, 160))
+    for x in range(16):
+        d = rng.uniform(-7, 7)
+        for y in range(16):
+            r, g, b, a = img.getpixel((x, y))
+            e = d + rng.uniform(-2, 2)
+            img.putpixel((x, y), (T.clamp(r + e), T.clamp(g + e), T.clamp(b + e), a))
+    rect(img, 0, 0, 0, 15, (58, 58, 60))
+    rect(img, 15, 0, 15, 15, (58, 58, 60))
+    T.blob(img, rng, (120, 118, 112), 4, 0.2)                    # smudges
+    return img
+
+
+def shutter_tex(rng):
+    """Rolling shutter curtain: four galvanized steel slats, each lit on its rounded top and
+    shaded into the groove below, with rust creeping from the joints and grime."""
+    img = new((138, 142, 145))
+    for slat in range(4):
+        y0 = slat * 4
+        shades = (24, 10, -4, -34)                                  # top edge, face, lower face, groove
+        for dy, shade in enumerate(shades):
+            for x in range(16):
+                e = shade + rng.uniform(-4, 4)
+                r, g, b, a = img.getpixel((x, y0 + dy))
+                img.putpixel((x, y0 + dy), (T.clamp(r + e), T.clamp(g + e), T.clamp(b + e), a))
+        for _ in range(rng.randint(1, 3)):                           # rust bleeding out of the joint
+            x = rng.randint(0, 15)
+            px(img, x, y0 + 3, (112, 70, 44))
+            if rng.random() < 0.6:
+                px(img, x, (y0 + 4) % 16, (126, 86, 58))
+    T.blob(img, rng, (96, 92, 84), 4, 0.3)                           # grime
+    return img
+
+
 def light_tex(rng, part):
     if part == "housing":
         img = new((196, 196, 190))
@@ -473,6 +510,35 @@ def build():
     a.models["metal_panel"] = cube_all("metal_panel")
     a.block("metal_panel", "Metal Panel", {"variants": {"": {"model": f"{NS}:block/metal_panel"}}},
             {"parent": f"{NS}:block/metal_panel"})
+
+    # Elevator door: a 2-pixel sheet that slides 5 pixels per stage into the wall beside it
+    # (ElevatorDoorBlock.SLIDE_PIXELS); open is air. axis = the way it runs, positive = opens to +x/+z.
+    a.texture("elevator_door", elevator_door_tex(r("elevator_door")), T.STEEL.but(smoothness=0.65, metal=255, relief=0.2))
+    variants = {}
+    for positive, sign in (("true", 1), ("false", -1)):
+        for stage in range(3):
+            name = f"elevator_door_{'pos' if sign > 0 else 'neg'}_{stage}"
+            dx = sign * stage * 5
+            # Explicit UVs: the sheet reaches outside the block, where automatic UVs would leave the texture.
+            uvs = {"north": [0, 0, 16, 16], "south": [0, 0, 16, 16], "east": [7, 0, 9, 16], "west": [7, 0, 9, 16],
+                   "up": [0, 7, 16, 9], "down": [0, 7, 16, 9]}
+            a.models[name] = model({"t": "elevator_door"}, [{
+                "from": [dx, 0, 7], "to": [16 + dx, 16, 9],
+                "faces": {f: {"texture": "#t", "uv": uv} for f, uv in uvs.items()}}])
+            for axis, y in (("x", 0), ("z", 90)):
+                v = {"model": f"{NS}:block/{name}"}
+                if y:
+                    v["y"] = y
+                variants[f"axis={axis},positive={positive},stage={stage}"] = v
+    a.block("elevator_door", "Elevator Door", {"variants": variants}, {"parent": f"{NS}:block/elevator_door_pos_0"})
+
+    # Rolling shutter: a 2-pixel steel sheet through the middle of the block; axis = the way it runs.
+    a.texture("shutter", shutter_tex(r("shutter")), T.STEEL.but(smoothness=0.45, metal=255, relief=0.7))
+    a.models["shutter"] = model({"t": "shutter"}, [element((0, 0, 7), (16, 16, 9), "t")])
+    a.block("shutter", "Rolling Shutter", {"variants": {
+        "axis=x": {"model": f"{NS}:block/shutter"},
+        "axis=z": {"model": f"{NS}:block/shutter", "y": 90}}},
+        {"parent": f"{NS}:block/shutter"})
 
     a.texture("sign_tile", T.wall_tex(r("sign_tile"), "plain"), T.CONCRETE_WALL)
     a.models["sign_tile"] = cube_all("sign_tile")

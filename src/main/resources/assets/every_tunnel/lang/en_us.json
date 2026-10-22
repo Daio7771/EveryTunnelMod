@@ -29,5 +29,7 @@
   "block.every_tunnel.stain": "Stain",
   "block.every_tunnel.puddle": "Puddle",
   "entity.every_tunnel.pale_man": "Pale Man",
-  "item.every_tunnel.pale_man_spawn_egg": "Pale Man Spawn Egg"
+  "item.every_tunnel.pale_man_spawn_egg": "Pale Man Spawn Egg",
+  "block.every_tunnel.shutter": "Rolling Shutter",
+  "block.every_tunnel.elevator_door": "Elevator Door"
 }

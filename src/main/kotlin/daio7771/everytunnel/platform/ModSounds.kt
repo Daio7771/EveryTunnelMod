@@ -35,6 +35,17 @@ object ModSounds {
     /** Ear ringing, stereo: played to a player who survives a hit from the Pale man. */
     val TINNITUS = event("player.tinnitus")
 
+    /** Stereo, in the player's head: dying (2 variations), and walking into the next level. */
+    val DEATH = event("event.death")
+    val LEVEL_TRANSITION = event("event.level_transition")
+
+    /** The elevator: its bell when it arrives, and its doors sliding open. */
+    val ELEVATOR_DING = event("block.elevator.ding")
+    val ELEVATOR_DOORS = event("block.elevator.doors")
+
+    /** A rolling shutter coming down and slamming shut (heard up to 32 blocks away). */
+    val SHUTTER_CLOSE = event("block.shutter.close", range = 32f)
+
     /** "He heard you": stereo, played to the player whose noise started a Pale man chase. */
     val STINGER_HEARD = event("music.stinger.heard")
     /** Music layers (stereo loops) picked by the client from what the Pale man does (`client.effects.TensionMusic`). */

@@ -42,6 +42,8 @@ class Level:
         self.fixtures = []       # (x, z, state) for the preview
         self.halls = []          # dicts with frame and report
         self.spawn = None        # (x, y, z, yaw)
+        self.next_zones = []     # the next level's first zones (the landing past the exit shutter)
+        self.next_spawn = None   # the next level's start, (x, y, z, yaw)
         self.rng = random.Random(f"{p.SEED}-level")
 
     # --- small builders --------------------------------------------------------------
@@ -239,7 +241,9 @@ class Level:
         self.fixture(x0 + 2, cz, y + H + 1, "lit")
         self.fixture(x0 + 2, cz - 1, y + H + 1, "lit")
         self.wear([(x, z) for x in range(x0, x1 + 1) for z in range(z0, z1 + 1)], 0.3)
-        # Elevator cabin behind the lobby's west wall, doors open.
+        # Elevator cabin behind the lobby's west wall: a doorway 2 wide and 2 high under a lintel.
+        # Mod version: left open; the game closes the sliding doors for the intro and opens them
+        # (zone tagged elevator_door). Vanilla version: two iron doors, open.
         cx1 = x0 - 2
         cx0 = cx1 - 2
         self.room(cx0, cx1, cz - 1, cz + 1, y, 3, wall=S["elevator_wall"])
@@ -247,8 +251,11 @@ class Level:
             for yy in range(y + 1, y + 4):
                 self.world.remove(x0 - 1, yy, zz)
         for zz, hinge in ((cz - 1, "left"), (cz, "right")):
-            self.set(x0 - 1, y + 1, zz, f"minecraft:iron_door[facing=east,half=lower,hinge={hinge},open=true,powered=false]")
-            self.set(x0 - 1, y + 2, zz, f"minecraft:iron_door[facing=east,half=upper,hinge={hinge},open=true,powered=false]")
+            self.set(x0 - 1, y + 3, zz, S["elevator_wall"])
+            if self.variant != "mod":
+                self.set(x0 - 1, y + 1, zz, f"minecraft:iron_door[facing=east,half=lower,hinge={hinge},open=true,powered=false]")
+                self.set(x0 - 1, y + 2, zz, f"minecraft:iron_door[facing=east,half=upper,hinge={hinge},open=true,powered=false]")
+        self.zone("elevator_door", x0 - 1, y + 1, cz - 1, x0 - 1, y + 2, cz, ["elevator_door"])
         self.set(x0 - 1, y + 1, cz + 1, S["elevator_wall"])
         self.set(x0 - 1, y + 2, cz + 1, S["elevator_wall"])
         self.set(x0 - 1, y + 3, cz + 1, S["elevator_wall"])
@@ -416,6 +423,17 @@ class Level:
         self.wall_sign(list(p.NEXT_LEVEL_SIGN), far, ly + 3, cz - 1 if east else cz + 1,
                        "west" if east else "east", (0, 1) if east else (0, -1))
         self.wear([(x, z) for x in range(xa, xb + 1) for z in range(cz - 3, cz + 4)], 0.9)
-        self.zone("exit_ramp", min(xs), ly, z0, max(xs), top + H + 1, z1)
-        self.zone("exit", xa, ly, cz - 3, xb, ly + H + 1, cz + 3, ["exit"])
+        self.zone("exit_ramp", min(xs), ly, z0, max(xs), top + H + 1, z1, ["exit"])
         self.labels.append((xa, cz + 5, f"exit ramp -> {p.NEXT_LEVEL_SIGN}"))
+
+        # The rolling shutter at the foot of the ramp (its last, flat column): the game fills the
+        # opening with the mod's shutter once the player is past it, so there is no way back.
+        # Its housing is a metal strip in the ceiling. The landing beyond is the next level's start.
+        sx = xs[-1]
+        for z in range(z0, z1 + 1):
+            self.set(sx, ly + H + 1, z, S["elevator_wall"])
+        self.next_zones = [
+            ("shutter", (sx, ly + 1, z0, sx, ly + H, z1), ["shutter"]),
+            ("landing", (xa, ly, cz - 3, xb, ly + H + 1, cz + 3), ["start"]),
+        ]
+        self.next_spawn = (lx0 + d * 3 + 0.5, ly + 1, cz + 0.5, -90 if east else 90)

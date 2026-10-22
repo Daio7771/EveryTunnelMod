@@ -1,0 +1,46 @@
+{
+  "variants": {
+    "axis=x,positive=true,stage=0": {
+      "model": "every_tunnel:block/elevator_door_pos_0"
+    },
+    "axis=z,positive=true,stage=0": {
+      "model": "every_tunnel:block/elevator_door_pos_0",
+      "y": 90
+    },
+    "axis=x,positive=true,stage=1": {
+      "model": "every_tunnel:block/elevator_door_pos_1"
+    },
+    "axis=z,positive=true,stage=1": {
+      "model": "every_tunnel:block/elevator_door_pos_1",
+      "y": 90
+    },
+    "axis=x,positive=true,stage=2": {
+      "model": "every_tunnel:block/elevator_door_pos_2"
+    },
+    "axis=z,positive=true,stage=2": {
+      "model": "every_tunnel:block/elevator_door_pos_2",
+      "y": 90
+    },
+    "axis=x,positive=false,stage=0": {
+      "model": "every_tunnel:block/elevator_door_neg_0"
+    },
+    "axis=z,positive=false,stage=0": {
+      "model": "every_tunnel:block/elevator_door_neg_0",
+      "y": 90
+    },
+    "axis=x,positive=false,stage=1": {
+      "model": "every_tunnel:block/elevator_door_neg_1"
+    },
+    "axis=z,positive=false,stage=1": {
+      "model": "every_tunnel:block/elevator_door_neg_1",
+      "y": 90
+    },
+    "axis=x,positive=false,stage=2": {
+      "model": "every_tunnel:block/elevator_door_neg_2"
+    },
+    "axis=z,positive=false,stage=2": {
+      "model": "every_tunnel:block/elevator_door_neg_2",
+      "y": 90
+    }
+  }
+}

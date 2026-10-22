@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "every_tunnel:block/shutter"
+    },
+    "axis=z": {
+      "model": "every_tunnel:block/shutter",
+      "y": 90
+    }
+  }
+}

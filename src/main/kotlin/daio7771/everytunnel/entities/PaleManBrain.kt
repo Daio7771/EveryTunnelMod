@@ -149,6 +149,17 @@ class PaleManBrain {
         return Decision(state, target, speed, victim?.id, alerted)
     }
 
+    /** Back to wandering, as if he had just been spawned (the player died and restarts the level). */
+    fun reset() {
+        state = State.ROAM
+        target = null
+        stateTicks = 0
+        stateLength = 0
+        noisesThisListen = 0
+        attackCooldown = 0
+        // lastNoiseTick is kept: noises he already used stay used.
+    }
+
     private fun enter(newState: State, length: Int) {
         state = newState
         stateTicks = 0

@@ -5,7 +5,9 @@ import daio7771.everytunnel.client.effects.AmbiencePlayer
 import daio7771.everytunnel.client.effects.BreathingEffect
 import daio7771.everytunnel.client.effects.FlashlightEffect
 import daio7771.everytunnel.client.effects.HeartbeatEffect
+import daio7771.everytunnel.client.effects.IntroMusic
 import daio7771.everytunnel.client.effects.FluorescentHum
+import daio7771.everytunnel.client.effects.ScreenFade
 import daio7771.everytunnel.client.effects.TensionMusic
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.PaleManRenderer
@@ -44,9 +46,11 @@ object EveryTunnelClient : ClientModInitializer {
         BreathingEffect.register()
         HeartbeatEffect.register()
         TensionMusic.register()
+        IntroMusic.register()
         AmbiencePlayer.register()
         FluorescentHum.register()
         StatusHud.register()
+        ScreenFade.register() // after the HUD, so the black covers it
         EntityRendererRegistry.register(ModEntities.PALE_MAN, ::PaleManRenderer)
         BlockRenderLayerMap.INSTANCE.putBlocks(
             RenderLayer.getCutout(),

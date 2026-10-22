@@ -805,6 +805,115 @@ def puddle(rng, variant, impact):
     return fade(y, 0.0, 0.08)
 
 
+def elevator_ding(rng, variant):
+    """The elevator's arrival bell: one soft struck chime (a little vibraphone-like) and its hum."""
+    n = samples(2.5)
+    f0 = 932.3
+    y = damped_partials(n, [f0, f0 * 2.0, f0 * 3.01, f0 * 4.2], [1.0, 0.22, 0.06, 0.1], [1.3, 0.55, 0.3, 0.18], rng, 0.005)
+    y += burst(n, rng, 0.005, 0.004, lo=1500.0, hi=6000.0, tau=0.0015, amp=0.15)                    # the striker
+    return fade(y, 0.0, 0.3)
+
+
+def elevator_doors(rng, variant):
+    """
+    The cabin doors sliding open, timed to the game: a relay clicks, the motor winds up,
+    0.5 s later the doors roll for 0.6 s and stop against their rubber with a soft thump.
+    """
+    n = samples(1.8)
+    t = time_axis(n)
+    y = relay_clunk(n, rng, 0.02)
+    moving = np.clip((t - 0.5) / 0.08, 0, 1) * np.clip((1.1 - t) / 0.1, 0, 1)
+    spin = np.clip((t - 0.05) / 0.45, 0, 1) * np.clip((1.25 - t) / 0.2, 0, 1)
+    motor = glide_tone(110.0 + 50.0 * spin) * spin
+    motor = fft_filter(motor + 0.5 * np.sign(motor) * np.abs(motor) ** 3, None, 900.0, order=2)
+    y += 0.25 * motor
+    y += 0.5 * shaped_noise(n, rng, 1.0, 60.0, 400.0) * moving                                   # rollers in the track
+    y += 0.12 * shaped_noise(n, rng, 0.0, 1500.0, 5000.0) * moving                               # the panels' edges brushing
+    y += burst(n, rng, 1.1, 0.06, hi=250.0, tau=0.03, amp=1.0)                                   # stopped on the rubber
+    y += knock(n, rng, 1.1, rng.uniform(140, 170), [1.0, 1.6, 2.7], [0.4, 0.25, 0.1], [0.08, 0.05, 0.03], click=0.2)
+    return fade(y, 0.0, 0.2)
+
+
+def elevator_music_placeholder(rng, variant):
+    """
+    PLACEHOLDER until the real song: soft elevator music from a small cabin speaker. An
+    electric piano comps Cmaj7 - Am7 - Dm7 - G7 at 92 bpm over a round bass, with a lazy
+    vibraphone tune; band-limited like a ceiling speaker. 28 s, plays once.
+    """
+    bpm = 92.0
+    beat = 60.0 / bpm
+    seconds = 28.0
+    n = samples(seconds)
+    y = np.zeros((n, 2))
+    chords = [(48, [64, 67, 71, 74]), (45, [64, 67, 69, 72]), (50, [65, 69, 72, 74]), (43, [65, 67, 71, 74])]
+
+    def hz(note):
+        return 440.0 * 2 ** ((note - 69) / 12.0)
+
+    def piano(freq, length, amp):
+        m = samples(length)
+        tt = time_axis(m)
+        env = np.exp(-tt / 0.9) * np.clip(tt / 0.004, 0, 1)
+        tine = 0.08 * np.sin(TAU * freq * 7.1 * tt) * np.exp(-tt / 0.05)
+        return amp * env * (np.sin(TAU * freq * tt) + 0.3 * np.sin(TAU * 2 * freq * tt) + tine)
+
+    def vibes(freq, length, amp):
+        m = samples(length)
+        tt = time_axis(m)
+        env = np.exp(-tt / 1.1) * np.clip(tt / 0.003, 0, 1) * (1.0 - 0.35 * (0.5 + 0.5 * np.sin(TAU * 5.0 * tt)))
+        return amp * env * (np.sin(TAU * freq * tt) + 0.1 * np.sin(TAU * 4.0 * freq * tt))
+
+    tune = [76, None, 74, 72, 74, None, 76, 79, 77, None, 76, 74, 72, None, 71, 72]
+    bar = 0
+    while bar * 4 * beat < seconds:
+        root, notes = chords[bar % 4]
+        start = bar * 4 * beat
+        for b in (0, 2):
+            for note in notes:
+                place(y, pan(piano(hz(note), 2.0, 0.12), -0.3), start + b * beat + rng.uniform(0, 0.015))
+            bass = piano(hz(root if b == 0 else root + 7), 1.5, 0.35)
+            place(y, stereo(bass, bass), start + b * beat)
+        for i in range(4):
+            note = tune[(bar * 4 + i) % len(tune)]
+            if note is not None:
+                place(y, pan(vibes(hz(note), 2.5, 0.2), 0.3), start + i * beat + rng.uniform(0, 0.02))
+        bar += 1
+    y = y[:n]
+    y = fft_filter(y, 180.0, 4500.0, order=2)                                                  # a small ceiling speaker
+    return fade(y, 0.5, 2.5)
+
+
+def shutter_close(rng, variant):
+    """
+    A rolling shutter dropping shut: the slats clatter down the guide rails faster and
+    faster (0.4 s, the time the game takes to fill the opening), then the bottom bar
+    slams on the concrete and the whole curtain booms and rattles out.
+    """
+    n = samples(2.6)
+    t = time_axis(n)
+    slam = 0.42
+    y = np.zeros(n)
+    # Rolling down: the curtain's body rumbles louder as it speeds up.
+    rumble = shaped_noise(n, rng, 1.0, 70.0, 450.0) * np.clip(t / slam, 0.0, 1.0) ** 1.5 * (t < slam)
+    y += 0.35 * fade(rumble, 0.0, 0.0)
+    at = 0.0
+    while at < slam - 0.01:                                                                  # slats knocking in the rails
+        progress = at / slam
+        y += knock(n, rng, at, rng.uniform(900, 1500), [1.0, 1.7, 2.9], [0.6, 0.35, 0.2], [0.012, 0.008, 0.005],
+                   click=0.4 + 0.4 * progress, click_hi=9000.0) * (0.25 + 0.5 * progress)
+        at += 1.0 / (25.0 + 45.0 * progress) * rng.uniform(0.6, 1.4)
+    # The slam: the bottom bar on the floor, then the sheet booming.
+    ratios = sorted(rng.uniform(1.0, 8.0, 12))
+    y += knock(n, rng, slam, rng.uniform(62, 75), ratios, [1.0 / (1 + i * 0.35) for i in range(12)],
+               [0.7 / (1 + i * 0.3) for i in range(12)], click=1.2)
+    y += burst(n, rng, slam, 0.08, hi=220.0, tau=0.04, amp=2.2)                             # thud
+    y *= 1.0 + 0.3 * np.sin(TAU * 6.5 * t) * (t > slam) * np.exp(-np.clip(t - slam, 0, None) / 0.5)
+    for _ in range(int(rng.integers(10, 16))):                                              # slats settling
+        y += burst(n, rng, slam + rng.uniform(0.02, 0.35) ** 1.5, 0.004, lo=2000.0, hi=8000.0, tau=0.0015,
+                   amp=rng.uniform(0.1, 0.35))
+    return fade(drive(y, 1.3), 0.0, 0.3)
+
+
 def material(fn, impact):
     return lambda rng, variant: fn(rng, variant, impact)
 
@@ -856,6 +965,13 @@ SOUNDS = [
     Sound("entity.pale_man.step_run", "Level 2 / Pale man", "His bare feet on concrete, running (6 variations)", "mono", False, 6,
           lambda rng, variant: pale_man_step(rng, variant, run=True), -1.0, stream=False, attenuation=24),
     Sound("music.chase", "Level 2 / Pale man", "During a chase (120 bpm, 8 bars)", "stereo", True, 1, chase, -1.0),
+    Sound("music.elevator", "Level progress", "PLACEHOLDER song for the elevator intro (until the real one)", "stereo", False, 1,
+          elevator_music_placeholder, -3.0, stream=True),
+    Sound("block.elevator.ding", "Level progress", "The elevator's bell when it arrives", "mono", False, 1, elevator_ding, -3.0),
+    Sound("block.elevator.doors", "Level progress", "The elevator doors sliding open (motor, rollers, stop)", "mono", False, 1,
+          elevator_doors, -3.0),
+    Sound("block.shutter.close", "Level progress", "The rolling shutter closing behind the player (rattle down, slam)", "mono", False, 1,
+          shutter_close, -1.0, attenuation=32),
     Sound("event.level_transition", "Level progress", "Going from Level 1 to Level 2", "stereo", False, 1, level_transition, -1.0),
     Sound("event.death", "Level progress", "Death (1: short, 2: with collapse)", "stereo", False, 2, death, -1.0),
 ] + [

@@ -7,8 +7,9 @@ teaches you to listen. Level 2 adds the Pale man, who is blind and finds you by 
 Most of the work goes into the sound.
 
 Where it stands: player systems, sound, the generated Level 1 map and its props are done.
-The Pale man hunts by sound, and the music follows what he does. Next: Level 2,
-death/restart and loot.
+The Pale man hunts by sound, and the music follows what he does. Dying restarts the
+level, and walking into the next one closes a shutter behind you. Next: loot and
+drinking, then the Level 2 map.
 
 ## Running it
 
@@ -63,7 +64,8 @@ stays vanilla.
 
 **Levels** are areas, not code. Each one is a JSON file in the world's datapack
 (`data/every_tunnel/levels/<id>.json`) with zones (block boxes, optionally tagged, e.g.
-`exit`), spawn points (tagged `player`, `pale_man`...) and an ambience. They reload with
+`exit`, `shutter`), spawn points (tagged `player`, `pale_man`...), an ambience and what
+happens when you walk in from the previous level (`entry`). They reload with
 `/reload`, and mistakes are logged with the file and the JSON path. The parser
 (`core/level/LevelParser.kt`) documents every key, and the generated `level_1.json` is a
 full example. Every tick the mod works out which level and zones each player is in, and
@@ -74,6 +76,21 @@ buttons still work. Creative is free, for building. Vanilla mob spawning is turn
 with gamerules, and the difficulty is locked on Normal (Peaceful would delete the Pale
 man as soon as he spawns). Entering a level makes its start (the spawn point tagged `player`)
 your respawn point, so you don't come back on the roof.
+
+**The start.** A new game begins in the elevator with its doors shut while a song plays
+(`music.elevator`, a synthesized placeholder for now). After 25 seconds the bell rings,
+the song distorts and fades like a tape running down, the doors slide open and "Level 1"
+shows. It happens once per world and player (the level's `intro`, its start zone tagged
+`start` and the door zone tagged `elevator_door`); dying later brings you back to the
+elevator with the doors open. `/everytunnel intro` plays it again.
+
+**Dying and moving on.** There's no death screen. When you'd die, you hear it, the screen
+fades to black and you can't move; in the dark you're taken back to the start of the level
+you were in, with full health and resources, and its Pale men go back to their spawn
+points. Then the screen fades back in. You keep what you picked up. Walking into a level
+with a higher `order` shows its title ("Level 2"), plays its sound, and closes
+every shutter in its zones tagged `shutter` once you're past it: a rolling shutter rattles
+down and slams, and there's no way back.
 
 **The player.** Stamina drains when you sprint or jump. Run it dry and you're exhausted
 until it's back to 30%, breathing hard. Thirst replaces hunger and hurts when it's empty.
@@ -93,7 +110,9 @@ material has its own footsteps and impacts, and puddles splash.
 **The Pale man** (`every_tunnel:pale_man`) is about 2.75 blocks tall. Nothing hurts him
 except `/kill` and he never despawns. The first time a player enters a level, each
 `pale_man` spawn point gets one, and the world remembers it, so he's never doubled and
-comes back if he's killed. You can test him with the spawn egg in the Every Tunnel tab.
+comes back if he's killed. A spawn point can name a `zone`: then he never leaves it and
+ignores every noise and player outside it. You can test him with the spawn egg in the
+Every Tunnel tab.
 
 He hears every noise within its radius, and each solid block in between shrinks that
 radius (`wall_muffle`). He wanders until he hears something. A quiet noise makes him stop
@@ -129,9 +148,11 @@ Previews go into each tool's `output/` folder, which isn't in git. Whatever ends
 
 `tools/map/map_generator.py` builds Level 1: an elevator, five parking halls that get
 worse as you go (wear, dead lights, oddities like stairs into the ceiling), side rooms and
-a ramp down to B2. The parameters are at the top of the file and the same seed gives the
-same level. `PALE_MAN_HALLS` puts a Pale man spawn point in the middle of
-those halls, for testing him in the map until Level 2 exists (`[]` for none). It writes two datapacks:
+a ramp down to B2. A shutter closes at the foot of that ramp behind you, and the dark
+landing past it is all of Level 2 so far (`level_2.json`, its start and title). The parameters are at the top of the file and the same seed gives the
+same level. Level 1 has no Pale man; `PALE_MAN_HALLS` (empty) can put one in the middle
+of chosen halls, each kept inside his hall, for testing him in this map until Level 2
+exists. Rebuilding the level removes the Pale men in it. It writes two datapacks:
 
 - the mod one, using the mod's blocks;
 - a vanilla one, using re-skinned vanilla blocks.
@@ -181,4 +202,5 @@ These need commands enabled.
 - `/everytunnel resources [set stamina|thirst|battery <value>]`: read or set them.
 - `/everytunnel noise [watch]`: recent noises, or yours live in the action bar.
 - `/everytunnel paleman`: nearby Pale men, what each is doing and where he's going.
+- `/everytunnel intro`: the elevator intro again (in Survival or Adventure).
 - `/everytunnel devworld save|forget`: dev runs only, see "Running it".

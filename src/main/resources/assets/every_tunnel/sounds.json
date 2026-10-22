@@ -72,6 +72,16 @@
       "every_tunnel:block/cardboard/step_4"
     ]
   },
+  "block.elevator.ding": {
+    "sounds": [
+      "every_tunnel:block/elevator/ding_1"
+    ]
+  },
+  "block.elevator.doors": {
+    "sounds": [
+      "every_tunnel:block/elevator/doors_1"
+    ]
+  },
   "block.fluorescent.flicker": {
     "sounds": [
       "every_tunnel:block/fluorescent/flicker_1",
@@ -221,6 +231,14 @@
       "every_tunnel:block/sheet_metal/step_2",
       "every_tunnel:block/sheet_metal/step_3",
       "every_tunnel:block/sheet_metal/step_4"
+    ]
+  },
+  "block.shutter.close": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/shutter/close_1",
+        "attenuation_distance": 32
+      }
     ]
   },
   "block.wire_mesh.impact": {
@@ -398,6 +416,14 @@
     "sounds": [
       {
         "name": "every_tunnel:music/chase_1",
+        "stream": true
+      }
+    ]
+  },
+  "music.elevator": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/elevator_1",
         "stream": true
       }
     ]

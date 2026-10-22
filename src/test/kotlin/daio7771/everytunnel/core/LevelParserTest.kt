@@ -2,6 +2,8 @@ package daio7771.everytunnel.core
 
 import daio7771.everytunnel.core.level.Ambience
 import daio7771.everytunnel.core.level.BlockBox
+import daio7771.everytunnel.core.level.LevelEntry
+import daio7771.everytunnel.core.level.LevelIntro
 import daio7771.everytunnel.core.level.LevelParser
 import daio7771.everytunnel.core.level.RandomSound
 import java.nio.file.Files
@@ -99,5 +101,47 @@ class LevelParserTest {
         assertEquals(listOf(RandomSound("every_tunnel:ambient.drip", 6.0, 18.0, 3.0, 12.0, 0.5)), ambience.randomSounds)
         // min > max, a malformed id, and a distance beyond what Minecraft plays: each skipped.
         assertEquals(3, result.problems.count { it.endsWith("random sound skipped") }, result.problems.toString())
+    }
+
+    @Test
+    fun `a spawn point's zone must be a zone of the level`() {
+        val result = LevelParser.parse(
+            "zones",
+            """{ "order": 2, "zones": [{ "id": "hall_1", "from": [0, 0, 0], "to": [9, 4, 9] }],
+                "spawn_points": [
+                    { "id": "a", "pos": [1, 1, 1], "tags": ["pale_man"], "zone": "hall_1" },
+                    { "id": "b", "pos": [2, 1, 2], "tags": ["pale_man"], "zone": "hall_9" },
+                    { "id": "c", "pos": [3, 1, 3], "tags": ["pale_man"] }
+                ] }""",
+        )
+        val level = assertNotNull(result.level)
+        assertEquals(listOf("hall_1", null, null), level.spawnPoints.map { it.zone })
+        assertEquals(1, result.problems.size, result.problems.toString())
+    }
+
+    @Test
+    fun `intro is optional and its seconds default to 25`() {
+        val zones = """"order": 1, "zones": [{ "id": "a", "from": [0, 0, 0], "to": [1, 1, 1] }]"""
+        assertNull(LevelParser.parse("plain", "{ $zones }").level?.intro)
+        val full = LevelParser.parse("full", """{ $zones, "intro": { "seconds": 12.5, "music": "every_tunnel:music.elevator" } }""")
+        assertEquals(LevelIntro(12.5, "every_tunnel:music.elevator"), full.level?.intro)
+        assertEquals(emptyList(), full.problems)
+        assertEquals(LevelIntro(25.0, null), LevelParser.parse("bare", """{ $zones, "intro": {} }""").level?.intro)
+    }
+
+    @Test
+    fun `entry is optional and its sound must be a sound id`() {
+        val zones = """"order": 2, "zones": [{ "id": "a", "from": [0, 0, 0], "to": [1, 1, 1] }]"""
+        assertNull(LevelParser.parse("plain", "{ $zones }").level?.entry)
+
+        val full = LevelParser.parse(
+            "full", """{ $zones, "entry": { "title": "B2", "subtitle": "Level 2", "sound": "every_tunnel:event.level_transition" } }""",
+        )
+        assertEquals(LevelEntry("B2", "Level 2", "every_tunnel:event.level_transition"), full.level?.entry)
+        assertEquals(emptyList(), full.problems)
+
+        val broken = LevelParser.parse("broken", """{ $zones, "entry": { "title": "B2", "sound": "Not A Sound", "music": 1 } }""")
+        assertEquals(LevelEntry("B2", "", null), broken.level?.entry)
+        assertEquals(2, broken.problems.size, broken.problems.toString())
     }
 }

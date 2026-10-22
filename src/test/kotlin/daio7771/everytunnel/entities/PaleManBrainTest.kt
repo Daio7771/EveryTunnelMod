@@ -119,4 +119,13 @@ class PaleManBrainTest {
         assertEquals(0.5, PaleManBrain.loudness(10.0, 10.0, 2.0, 0, 0.5))
         assertEquals(0.0, PaleManBrain.loudness(1.0, 10.0, 1.0, 3, 0.0))
     }
+
+    @Test
+    fun `reset sends him back to wandering`() {
+        assertEquals(State.CHASE, tick(listOf(noise(5.0, 0.9))).state)
+        brain.reset()
+        assertEquals(State.ROAM, brain.state)
+        assertNull(brain.target)
+        assertEquals(State.ROAM, tick().state)
+    }
 }

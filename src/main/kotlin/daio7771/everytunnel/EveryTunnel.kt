@@ -2,9 +2,12 @@ package daio7771.everytunnel
 
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.platform.AmbienceHooks
+import daio7771.everytunnel.platform.DeathHooks
 import daio7771.everytunnel.platform.DebugCommands
 import daio7771.everytunnel.platform.DevWorlds
 import daio7771.everytunnel.platform.FlashlightHooks
+import daio7771.everytunnel.platform.IntroHooks
+import daio7771.everytunnel.platform.LevelEntryHooks
 import daio7771.everytunnel.platform.LevelReloadListener
 import daio7771.everytunnel.platform.LevelTrackingHooks
 import daio7771.everytunnel.platform.ModBlocks
@@ -57,6 +60,9 @@ object EveryTunnel : ModInitializer {
         NoiseHooks.register()
         PaleManSpawner.register()
         RespawnHooks.register()
+        DeathHooks.register()
+        LevelEntryHooks.register()
+        IntroHooks.register()
         DebugCommands.register()
         DevWorlds.register()
         LOGGER.info("$MOD_NAME loaded")

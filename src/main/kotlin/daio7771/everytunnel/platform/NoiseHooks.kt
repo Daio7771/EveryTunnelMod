@@ -77,7 +77,7 @@ object NoiseHooks {
         }
     }
 
-    fun makesNoise(player: ServerPlayerEntity): Boolean = ResourceHooks.appliesTo(player)
+    fun makesNoise(player: ServerPlayerEntity): Boolean = ResourceHooks.appliesTo(player) && !DeathHooks.isDying(player)
 
     private fun tick(server: MinecraftServer) {
         NoiseSystem.prune(server.ticks.toLong())

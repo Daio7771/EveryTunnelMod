@@ -2,6 +2,8 @@ package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.config.ConfigManager
+import daio7771.everytunnel.core.LevelManager
+import daio7771.everytunnel.core.level.BlockBox
 import daio7771.everytunnel.core.level.Position
 import daio7771.everytunnel.entities.PaleManBrain
 import daio7771.everytunnel.systems.NoiseSystem
@@ -40,6 +42,9 @@ enum class PaleManMode { ROAM, LISTEN, CHASE }
  * He cannot be hurt by the player (only `/kill` and the void remove him) and never
  * despawns. He is spawned once per `pale_man` spawn point of a level by
  * [PaleManSpawner]; [homeKey] remembers which one, so a killed Pale man can come back.
+ *
+ * If his spawn point names a `zone`, that is his territory ([territory]): he wanders only
+ * inside it and ignores every noise and player outside it, so he never leaves it.
  *
  * He hunts by ear: every tick he hears the noises of `systems.NoiseSystem`, muffled by
  * the solid blocks between him and them, and [PaleManBrain] decides what he does
@@ -95,6 +100,15 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
         goalSelector.add(0, SwimGoal(this))
         goalSelector.add(5, object : WanderAroundFarGoal(this, ConfigManager.gameplay.paleMan.roamSpeed) {
             override fun canStart() = brain.state == PaleManBrain.State.ROAM && super.canStart()
+
+            override fun getWanderTarget(): Vec3d? {
+                val territory = territory() ?: return super.getWanderTarget()
+                repeat(WANDER_TRIES) {
+                    val target = super.getWanderTarget()
+                    if (target != null && territory.contains(target.x, target.y, target.z)) return target
+                }
+                return null
+            }
         })
     }
 
@@ -104,10 +118,11 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
         val config = ConfigManager.gameplay.paleMan
         val now = world.server.ticks.toLong()
         val ears = Vec3d(x, eyeY, z)
+        val territory = territory()
         val heard = NoiseSystem.audibleAt(
             world.registryKey.value.toString(), x, y, z, now,
             hearing = config.hearing, maxAgeTicks = HEARING_WINDOW_TICKS,
-        ).mapNotNull { noise ->
+        ).filter { territory == null || territory.contains(it.x, it.y, it.z) }.mapNotNull { noise ->
             val source = Vec3d(noise.x, noise.y + 1.0, noise.z)
             val loudness = PaleManBrain.loudness(
                 source.distanceTo(ears), noise.radius, config.hearing, wallsBetween(source, ears), config.wallMuffle,
@@ -116,6 +131,7 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
         }
         val nearest = world.players
             .filter { it is ServerPlayerEntity && NoiseHooks.makesNoise(it) && it.y - y in -2.0..3.0 }
+            .filter { territory == null || territory.contains(it.x, it.y, it.z) }
             .minByOrNull { squaredDistanceTo(it) }
             ?.let { PaleManBrain.NearbyPlayer(it.uuid, Math.sqrt(squaredDistanceTo(it))) }
 
@@ -150,6 +166,34 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
         decision.alerted?.let { id -> (world.getPlayerByUuid(id) as? ServerPlayerEntity)?.let { sting(it, now) } }
         footsteps()
         breathe()
+    }
+
+    /**
+     * His territory: the zone named by his spawn point (`zone` in the level file), or null
+     * if he has none (summoned by hand, or a spawn point without a zone). Looked up each
+     * time, so a `/reload` of the level files applies at once.
+     */
+    fun territory(): BlockBox? {
+        val key = homeKey ?: return null
+        val level = LevelManager.get(key.substringBefore('/')) ?: return null
+        if (level.dimension != world.registryKey.value.toString()) return null
+        val zoneId = level.spawnPoint(key.substringAfter('/'))?.zone ?: return null
+        return level.zone(zoneId)?.box
+    }
+
+    /** Back at his spawn point, wandering, as if just spawned (a player died and restarts the level). */
+    fun returnHome(x: Double, y: Double, z: Double, yaw: Float) {
+        navigation.stop()
+        pathTarget = null
+        brain.reset()
+        brainState = PaleManBrain.State.ROAM
+        refreshPositionAndAngles(x, y, z, yaw, 0f)
+        headYaw = yaw
+        velocity = Vec3d.ZERO
+        lastX = x
+        lastZ = z
+        stepClock = 0.0
+        EveryTunnel.LOGGER.info("Pale man {} back home at {} ({}, {}, {})", id, homeKey, x, y, z)
     }
 
     private fun hit(player: ServerPlayerEntity) {
@@ -268,6 +312,8 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
         /** Noises are looked at for a couple of ticks; the brain uses each one once. */
         private const val HEARING_WINDOW_TICKS = 2L
         private const val MAX_WALLS = 4
+        /** Random wander targets tried before giving up when none falls inside his territory. */
+        private const val WANDER_TRIES = 10
         const val STINGER_COOLDOWN_TICKS = 30 * 20L
 
         /** Half a walk cycle (1.6 s) and half a run cycle (0.55 s), in ticks. */

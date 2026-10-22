@@ -19,7 +19,8 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  *     { "id": "ramp_down", "from": [28, -60, 28], "to": [31, -57, 31], "tags": ["exit"] }
  *   ],
  *   "spawn_points": [
- *     { "id": "player_start", "pos": [4.5, -60, 4.5], "yaw": 180, "tags": ["player"] }
+ *     { "id": "player_start", "pos": [4.5, -60, 4.5], "yaw": 180, "tags": ["player"] },
+ *     { "id": "pale_man_1", "pos": [16.5, -60, 16.5], "tags": ["pale_man"], "zone": "garage" }
  *   ],
  *   "ambience": {
  *     "loop": "every_tunnel:ambient.garage.drone",
@@ -27,13 +28,16 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  *     "random": [
  *       { "sound": "every_tunnel:ambient.drip", "interval": [6, 18], "distance": [3, 12], "volume": 0.5 }
  *     ]
- *   }
+ *   },
+ *   "entry": { "title": "Level 1", "subtitle": "", "sound": "every_tunnel:event.level_transition" },
+ *   "intro": { "seconds": 25, "music": "every_tunnel:music.elevator" }
  * }
  * ```
  *
  * `name` (defaults to the id), `dimension` (defaults to the overworld), `tags`,
- * `yaw`, `pitch`, `spawn_points` and `ambience` (and everything inside it) are
- * optional. `order` and at least one valid zone are required. A broken zone, spawn
+ * `yaw`, `pitch`, a spawn point's `zone` (the zone what spawns there stays in),
+ * `spawn_points`, `ambience`, `entry` and `intro` (and everything inside them) are
+ * optional; `intro.seconds` defaults to 25. `order` and at least one valid zone are required. A broken zone, spawn
  * point or random sound is skipped with a problem; the level is rejected only when
  * it cannot be used at all.
  */
@@ -75,8 +79,10 @@ object LevelParser {
         }
 
         val zones = parseZones(fields, problems)
-        val spawnPoints = parseSpawnPoints(fields, problems)
+        val spawnPoints = parseSpawnPoints(fields, zones, problems)
         val ambience = parseAmbience(fields, problems)
+        val entry = parseEntry(fields, problems)
+        val intro = parseIntro(fields, problems)
         fields.reportUnknownKeys()
 
         if (!hasOrder || zones.isEmpty()) {
@@ -84,7 +90,42 @@ object LevelParser {
             problems += "level skipped"
             return Result(null, problems.toList())
         }
-        return Result(LevelDefinition(levelId, name, order, dimension, zones, spawnPoints, ambience), problems.toList())
+        return Result(LevelDefinition(levelId, name, order, dimension, zones, spawnPoints, ambience, entry, intro), problems.toList())
+    }
+
+    private fun parseIntro(fields: JsonFields, problems: MutableList<String>): LevelIntro? {
+        if (!fields.has("intro")) {
+            fields.stringList("intro") // marks the key as read; absent is fine
+            return null
+        }
+        val intro = fields.child("intro")
+        val seconds = intro.double("seconds", 25.0, min = 0.0, max = 600.0)
+        val music = if (intro.has("music")) {
+            soundId(intro, "music", problems)
+        } else {
+            intro.stringList("music") // marks the key as read; absent is fine
+            null
+        }
+        intro.reportUnknownKeys()
+        return LevelIntro(seconds, music)
+    }
+
+    private fun parseEntry(fields: JsonFields, problems: MutableList<String>): LevelEntry? {
+        if (!fields.has("entry")) {
+            fields.stringList("entry") // marks the key as read; absent is fine
+            return null
+        }
+        val entry = fields.child("entry")
+        val title = entry.string("title", "")
+        val subtitle = entry.string("subtitle", "")
+        val sound = if (entry.has("sound")) {
+            soundId(entry, "sound", problems)
+        } else {
+            entry.stringList("sound") // marks the key as read; absent is fine
+            null
+        }
+        entry.reportUnknownKeys()
+        return LevelEntry(title, subtitle, sound)
     }
 
     private fun parseAmbience(fields: JsonFields, problems: MutableList<String>): Ambience {
@@ -171,7 +212,7 @@ object LevelParser {
         return zones
     }
 
-    private fun parseSpawnPoints(fields: JsonFields, problems: MutableList<String>): List<SpawnPoint> {
+    private fun parseSpawnPoints(fields: JsonFields, zones: List<Zone>, problems: MutableList<String>): List<SpawnPoint> {
         if (!fields.has("spawn_points")) {
             fields.stringList("spawn_points") // marks the key as read; absent is fine
             return emptyList()
@@ -184,11 +225,16 @@ object LevelParser {
             val yaw = entry.double("yaw", 0.0, min = -360.0, max = 360.0).toFloat()
             val pitch = entry.double("pitch", 0.0, min = -90.0, max = 90.0).toFloat()
             val tags = entry.stringList("tags").toSet()
+            var zone = if (entry.has("zone")) entry.requiredString("zone") else null.also { entry.stringList("zone") }
+            if (zone != null && zones.none { it.id == zone }) {
+                problems += "${entry.pathOf("zone")}: no zone \"$zone\" in this level, ignored"
+                zone = null
+            }
             entry.reportUnknownKeys()
             when {
                 pos == null -> problems += "${entry.pathOf("id")} \"$id\": spawn point skipped"
                 spawnPoints.any { it.id == id } -> problems += "${entry.pathOf("id")}: duplicate spawn point id \"$id\", skipped"
-                else -> spawnPoints += SpawnPoint(id, Position(pos[0], pos[1], pos[2]), yaw, pitch, tags)
+                else -> spawnPoints += SpawnPoint(id, Position(pos[0], pos[1], pos[2]), yaw, pitch, tags, zone)
             }
         }
         return spawnPoints

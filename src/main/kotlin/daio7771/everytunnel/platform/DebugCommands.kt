@@ -26,6 +26,7 @@ import net.minecraft.text.Text
  * - `/everytunnel noise`: the noises of the last 5 seconds near you.
  * - `/everytunnel noise watch`: shows each noise you make in the action bar (toggle).
  * - `/everytunnel paleman`: the Pale men near you, what they are doing and where they are going.
+ * - `/everytunnel intro`: plays the new-game intro (the elevator) again for you (see [IntroHooks]).
  * - `/everytunnel devworld save|forget` (development only): make this world start from
  *   how it is when you quit, on every launch, or stop doing that (see [DevWorlds]).
  */
@@ -51,6 +52,7 @@ object DebugCommands {
                         .then(CommandManager.literal("watch").executes(::watchNoise)),
                 )
                 .then(CommandManager.literal("paleman").executes(::paleMen))
+                .then(CommandManager.literal("intro").executes(::intro))
             if (DevWorlds.enabled) {
                 root.then(
                     CommandManager.literal("devworld")
@@ -183,10 +185,13 @@ object DebugCommands {
         if (near.isEmpty()) reply(context, "No Pale man within $PALE_MAN_LIST_RANGE blocks.")
         for (paleMan in near) {
             val target = paleMan.brain.target?.let { "%.0f, %.0f, %.0f".format(it.x, it.y, it.z) } ?: "-"
+            val territory = paleMan.homeKey?.substringBefore('/')?.let(LevelManager::get)
+                ?.spawnPoint(paleMan.homeKey!!.substringAfter('/'))?.zone
+                ?.takeIf { paleMan.territory() != null } ?: "anywhere"
             reply(
                 context,
-                "%s at [%.0f, %.0f, %.0f], %.0f blocks away, target [%s]".format(
-                    paleMan.brain.state.name.lowercase(), paleMan.x, paleMan.y, paleMan.z, paleMan.distanceTo(player), target,
+                "%s at [%.0f, %.0f, %.0f], %.0f blocks away, target [%s], stays in %s".format(
+                    paleMan.brain.state.name.lowercase(), paleMan.x, paleMan.y, paleMan.z, paleMan.distanceTo(player), target, territory,
                 ),
             )
         }
@@ -194,6 +199,17 @@ object DebugCommands {
     }
 
     private const val PALE_MAN_LIST_RANGE = 128
+
+    private fun intro(context: CommandContext<ServerCommandSource>): Int {
+        val player = context.source.playerOrThrow
+        val level = IntroHooks.replay(player)
+        if (level == null) {
+            reply(context, "No level has an intro.")
+            return 0
+        }
+        reply(context, "Intro of ${level.id} again: it starts in the elevator (in Survival or Adventure).")
+        return 1
+    }
 
     private fun reply(context: CommandContext<ServerCommandSource>, message: String) {
         context.source.sendFeedback({ Text.literal(message) }, false)

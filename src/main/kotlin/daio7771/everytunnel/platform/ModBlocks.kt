@@ -119,6 +119,16 @@ object ModBlocks {
     // --- Surfaces -------------------------------------------------------------------------
 
     val METAL_PANEL: Block = register("metal_panel", Block(solid(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
+    /** Sliding elevator door; closed and opened by a level's intro (IntroHooks). */
+    val ELEVATOR_DOOR: Block = register(
+        "elevator_door",
+        ElevatorDoorBlock(solid(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL).nonOpaque().pistonBehavior(PistonBehavior.BLOCK)),
+    )
+    /** Rolling shutter curtain; closed behind the player when they walk into the next level (LevelEntryHooks). */
+    val SHUTTER: Block = register(
+        "shutter",
+        ShutterBlock(solid(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL).nonOpaque().pistonBehavior(PistonBehavior.BLOCK)),
+    )
     val SIGN_TILE: Block = register("sign_tile", SignTileBlock(solid(MapColor.LIGHT_GRAY, BlockSoundGroup.STONE)))
     val STAIN: Block = register("stain", StainBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()))
     val PUDDLE: Block = register("puddle", PuddleBlock(props(MapColor.WATER_BLUE, ModSoundGroups.PUDDLE).noCollision()))
