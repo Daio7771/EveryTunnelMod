@@ -44,6 +44,8 @@ from garage.level import Level         # noqa: E402
 # --- The level -----------------------------------------------------------------------
 LEVEL_SIGN = "B1"
 NEXT_LEVEL_SIGN = "B2"
+# The elevator's floor indicator counts these down during the intro (FloorIndicatorBlock.LABELS).
+ELEVATOR_FLOORS = ["3", "2", "1", "G", "B1"]
 LEVEL_TITLE = "Level 1"          # shown when the elevator doors open
 NEXT_LEVEL_TITLE = "Level 2"     # shown on walking into the next level
 # The new game's intro: seconds waiting in the closed elevator while the song plays.
@@ -229,6 +231,9 @@ BLOCKS = {
     "drum": "minecraft:barrel[facing=up,open=false]",
     "bin": "minecraft:cauldron",
     "elevator_wall": "minecraft:iron_block",
+    "storage_door": "minecraft:spruce_door",
+    "electrical_door": "minecraft:dark_oak_door",
+    "emergency_door": "minecraft:iron_door",
 }
 
 # The mod version uses the mod's own blocks instead (tools/blocks/generate.py makes their
@@ -249,6 +254,9 @@ MOD_BLOCKS = {
     "drum": "every_tunnel:oil_drum",
     "bin": "every_tunnel:trash_bin",
     "elevator_wall": "every_tunnel:metal_panel",
+    "storage_door": "every_tunnel:storage_door",
+    "electrical_door": "every_tunnel:electrical_door",
+    "emergency_door": "every_tunnel:emergency_door",
 }
 
 # Worlds that get the result after each run (skipped, with a warning, when there is no world

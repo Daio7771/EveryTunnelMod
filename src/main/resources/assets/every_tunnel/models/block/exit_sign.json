@@ -1,0 +1,79 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "t": "every_tunnel:block/exit_sign",
+    "particle": "every_tunnel:block/exit_sign"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        2,
+        14
+      ],
+      "to": [
+        14,
+        8,
+        16
+      ],
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#t",
+          "uv": [
+            0,
+            0,
+            12,
+            6
+          ]
+        },
+        "east": {
+          "texture": "#t",
+          "uv": [
+            12,
+            8,
+            14,
+            14
+          ]
+        },
+        "west": {
+          "texture": "#t",
+          "uv": [
+            12,
+            8,
+            14,
+            14
+          ]
+        },
+        "up": {
+          "texture": "#t",
+          "uv": [
+            0,
+            8,
+            12,
+            10
+          ]
+        },
+        "down": {
+          "texture": "#t",
+          "uv": [
+            0,
+            8,
+            12,
+            10
+          ]
+        },
+        "south": {
+          "texture": "#t",
+          "uv": [
+            0,
+            8,
+            12,
+            14
+          ]
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

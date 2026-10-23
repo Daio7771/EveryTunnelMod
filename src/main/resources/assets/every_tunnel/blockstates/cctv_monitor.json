@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/cctv_monitor"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/cctv_monitor",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/cctv_monitor",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/cctv_monitor",
+      "y": 270
+    }
+  }
+}

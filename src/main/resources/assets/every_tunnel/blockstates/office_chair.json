@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/office_chair"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/office_chair",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/office_chair",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/office_chair",
+      "y": 270
+    }
+  }
+}

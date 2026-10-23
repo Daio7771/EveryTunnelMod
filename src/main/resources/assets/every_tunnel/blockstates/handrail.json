@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/handrail"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/handrail",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/handrail",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/handrail",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/call_buttons"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/call_buttons",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/call_buttons",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/call_buttons",
+      "y": 270
+    }
+  }
+}

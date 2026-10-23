@@ -58,5 +58,20 @@
   "screen.every_tunnel.end.built_with": "Built with",
   "screen.every_tunnel.end.libraries": "Fabric, Fabric Language Kotlin, GeckoLib",
   "screen.every_tunnel.end.recommended": "Best with",
-  "screen.every_tunnel.end.mods": "LambDynamicLights, Sound Physics Remastered, Sodium, Iris"
+  "screen.every_tunnel.end.mods": "LambDynamicLights, Sound Physics Remastered, Sodium, Iris",
+  "block.every_tunnel.storage_door": "Storage Door",
+  "block.every_tunnel.electrical_door": "Electrical Room Door",
+  "block.every_tunnel.emergency_door": "Emergency Exit Door",
+  "block.every_tunnel.exit_sign": "Exit Sign",
+  "block.every_tunnel.checker_plate": "Checker Plate",
+  "block.every_tunnel.moving_pad": "Moving Blanket",
+  "block.every_tunnel.handrail": "Handrail",
+  "block.every_tunnel.elevator_buttons": "Elevator Buttons",
+  "block.every_tunnel.call_buttons": "Call Buttons",
+  "block.every_tunnel.floor_indicator": "Floor Indicator",
+  "block.every_tunnel.cctv_monitor": "CCTV Monitor",
+  "block.every_tunnel.desk_phone": "Desk Phone",
+  "block.every_tunnel.logbook": "Logbook",
+  "block.every_tunnel.office_chair": "Office Chair",
+  "block.every_tunnel.key_rack": "Key Rack"
 }

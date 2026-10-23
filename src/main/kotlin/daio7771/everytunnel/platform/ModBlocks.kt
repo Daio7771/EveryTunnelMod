@@ -4,8 +4,11 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.platform.BlockShapes.box
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
+import net.fabricmc.fabric.api.`object`.builder.v1.block.type.BlockSetTypeBuilder
 import net.minecraft.block.AbstractBlock
 import net.minecraft.block.Block
+import net.minecraft.block.BlockSetType
+import net.minecraft.block.DoorBlock
 import net.minecraft.block.MapColor
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.block.piston.PistonBehavior
@@ -148,6 +151,74 @@ object ModBlocks {
     lateinit var LOOT_ENTITY: BlockEntityType<LootBlockEntity>
         private set
 
+    // --- The service elevator ------------------------------------------------------------
+
+    /** Steel checker plate: the cabin's floor. */
+    val CHECKER_PLATE: Block = register("checker_plate", Block(solid(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
+    /** Quilted protection blanket hung on a wall of the cabin. */
+    val MOVING_PAD: Block = register(
+        "moving_pad", PropBlock(props(MapColor.GRAY, BlockSoundGroup.WOOL).noCollision(), listOf(box(0, 0, 14, 16, 16, 16))),
+    )
+    /** A steel handrail along a wall at waist height. */
+    val HANDRAIL: Block = register(
+        "handrail",
+        PropBlock(props(MapColor.IRON_GRAY, ModSoundGroups.METAL_PIPE).noCollision(), listOf(box(0, 8, 13, 16, 11, 16))),
+    )
+    /** The cabin's button panel (B1 lit). */
+    val ELEVATOR_BUTTONS: Block = register(
+        "elevator_buttons",
+        PropBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL).noCollision().luminance { 2 }, listOf(box(4, 1, 15, 12, 15, 16))),
+    )
+    /** The landing's call buttons, next to the doors. */
+    val CALL_BUTTONS: Block = register(
+        "call_buttons",
+        PropBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL).noCollision().luminance { 1 }, listOf(box(5, 3, 15, 11, 13, 16))),
+    )
+    /** Floor indicator over the doors, inside and out; counted down by the intro (FloorIndicatorBlock). */
+    val FLOOR_INDICATOR: Block = register(
+        "floor_indicator",
+        FloorIndicatorBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision().luminance { 3 }),
+    )
+
+    // --- The parking booth (hall 5 of Level 2): the guard's desk, left tidy -------------
+
+    /** An old CCTV monitor showing static (an animated texture); its screen glows faintly. */
+    val CCTV_MONITOR: Block = register(
+        "cctv_monitor",
+        PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 4 }, listOf(box(2, 0, 3, 14, 10, 13))),
+    )
+    val DESK_PHONE: Block = register(
+        "desk_phone", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision(), listOf(box(4, 0, 5, 12, 4, 11))),
+    )
+    /** The open logbook, a mug and an old flashlight. */
+    val LOGBOOK: Block = register(
+        "logbook", PropBlock(props(MapColor.WHITE, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(2, 0, 2, 14, 4, 12))),
+    )
+    val OFFICE_CHAIR: Block = register(
+        "office_chair",
+        PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC), listOf(box(3, 0, 3, 13, 8, 13), box(3, 8, 12, 13, 16, 14))),
+    )
+    /** A key rack on the wall, its hooks empty. */
+    val KEY_RACK: Block = register(
+        "key_rack", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(2, 4, 14, 14, 11, 16))),
+    )
+
+    // --- Doors and the exit sign ------------------------------------------------------
+
+    /** Grey steel service doors that open by hand, with iron door sounds; the plate says which room. */
+    private val SERVICE_DOOR: BlockSetType = BlockSetTypeBuilder.copyOf(BlockSetType.IRON)
+        .openableByHand(true)
+        .register(Identifier(EveryTunnel.MOD_ID, "service_door"))
+    val STORAGE_DOOR: Block = register("storage_door", DoorBlock(door(), SERVICE_DOOR))
+    val ELECTRICAL_DOOR: Block = register("electrical_door", DoorBlock(door(), SERVICE_DOOR))
+    /** Emergency exit: a push bar outside, no handle; like iron doors, hands cannot open it (a card reader can). */
+    val EMERGENCY_DOOR: Block = register("emergency_door", DoorBlock(door(), BlockSetType.IRON))
+    /** A lit green EXIT sign on the wall above an exit; it stays lit when the power goes (its own battery). */
+    val EXIT_SIGN: Block = register(
+        "exit_sign",
+        PropBlock(props(MapColor.GREEN, ModSoundGroups.PLASTIC).noCollision().luminance { 7 }, listOf(box(2, 2, 14, 14, 8, 16))),
+    )
+
     /** Rolling shutter curtain; closed behind the player when they walk into the next level (LevelEntryHooks). */
     val SHUTTER: Block = register(
         "shutter",
@@ -156,6 +227,11 @@ object ModBlocks {
     val SIGN_TILE: Block = register("sign_tile", SignTileBlock(solid(MapColor.LIGHT_GRAY, BlockSoundGroup.STONE)))
     val STAIN: Block = register("stain", StainBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()))
     val PUDDLE: Block = register("puddle", PuddleBlock(props(MapColor.WATER_BLUE, ModSoundGroups.PUDDLE).noCollision()))
+
+    /** Settings for a steel door (two blocks tall, not a full block). */
+    private fun door(): AbstractBlock.Settings =
+        AbstractBlock.Settings.create().mapColor(MapColor.IRON_GRAY).strength(5f).sounds(BlockSoundGroup.METAL)
+            .nonOpaque().pistonBehavior(PistonBehavior.DESTROY)
 
     /** Settings for a full, solid block. */
     private fun solid(color: MapColor, sounds: BlockSoundGroup): AbstractBlock.Settings =

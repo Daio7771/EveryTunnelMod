@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_top_left_open",
+  "textures": {
+    "bottom": "every_tunnel:block/storage_door_bottom",
+    "top": "every_tunnel:block/storage_door_top"
+  }
+}

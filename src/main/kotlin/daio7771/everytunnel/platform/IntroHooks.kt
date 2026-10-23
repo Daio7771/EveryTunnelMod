@@ -61,8 +61,10 @@ object IntroHooks {
     private const val DOORS_DELAY_TICKS = 10
     private const val DOOR_STAGE_TICKS = 4
     private const val MUSIC_FADE_SECONDS = 3f
+    /** How far from the elevator doors floor indicators are looked for. */
+    private const val INDICATOR_REACH = 3
 
-    private class Running(val levelId: String, var ticksLeft: Int)
+    private class Running(val levelId: String, var ticksLeft: Int, val totalTicks: Int, var shownFloor: Int = -1)
 
     /** Doors sliding open: [ticks] counts up from minus the delay; stages advance every [DOOR_STAGE_TICKS]. */
     private class Opening(val world: ServerWorld, val boxes: List<BlockBox>, var ticks: Int = -DOORS_DELAY_TICKS)
@@ -106,7 +108,16 @@ object IntroHooks {
         val iterator = running.entries.iterator()
         while (iterator.hasNext()) {
             val (id, intro) = iterator.next()
-            if (--intro.ticksLeft > 0) continue
+            if (--intro.ticksLeft > 0) {
+                // The floor indicators count down through the ride, one floor per equal stretch.
+                val labels = FloorIndicatorBlock.LABELS.size
+                val floor = ((intro.totalTicks - intro.ticksLeft) * labels / intro.totalTicks).coerceIn(0, labels - 1)
+                if (floor != intro.shownFloor) {
+                    intro.shownFloor = floor
+                    LevelManager.get(intro.levelId)?.let { level -> worldOf(server, level)?.let { setIndicators(it, level, floor, moving = true) } }
+                }
+                continue
+            }
             iterator.remove()
             val player = server.playerManager.getPlayer(id) ?: continue
             LevelManager.get(intro.levelId)?.let { finish(player, it) }
@@ -145,7 +156,8 @@ object IntroHooks {
         }
         opening.removeIf { it.world == world }
         intro.music?.let { sendMusic(player, MUSIC_START) { buf -> buf.writeString(it) } }
-        running[player.uuid] = Running(level.id, (intro.seconds * 20.0).toInt().coerceAtLeast(1))
+        val ticks = (intro.seconds * 20.0).toInt().coerceAtLeast(1)
+        running[player.uuid] = Running(level.id, ticks, ticks)
         EveryTunnel.LOGGER.info("{}: intro of {} ({} s)", player.name.string, level.id, intro.seconds)
     }
 
@@ -156,6 +168,7 @@ object IntroHooks {
         sendMusic(player, MUSIC_END) { it.writeFloat(MUSIC_FADE_SECONDS) }
         val world = worldOf(player.server, level)
         val boxes = doors(level)
+        world?.let { setIndicators(it, level, FloorIndicatorBlock.LABELS.lastIndex, moving = false) }
         if (world != null && boxes.isNotEmpty()) {
             val (x, y, z) = centre(boxes.first())
             world.playSound(null, x, y + 1.0, z, ModSounds.ELEVATOR_DING, SoundCategory.BLOCKS, 1f, 1f)
@@ -183,6 +196,19 @@ object IntroHooks {
     }
 
     private fun doors(level: LevelDefinition): List<BlockBox> = level.zones.filter { DOOR_TAG in it.tags }.map { it.box }
+
+    /** Every floor indicator within [INDICATOR_REACH] blocks of the elevator doors shows [floor]. */
+    private fun setIndicators(world: ServerWorld, level: LevelDefinition, floor: Int, moving: Boolean) {
+        for (box in doors(level)) {
+            val r = INDICATOR_REACH
+            for (pos in BlockPos.iterate(box.minX - r, box.minY - r, box.minZ - r, box.maxX + r, box.maxY + r, box.maxZ + r)) {
+                val state = world.getBlockState(pos)
+                if (state.isOf(ModBlocks.FLOOR_INDICATOR)) {
+                    world.setBlockState(pos, state.with(FloorIndicatorBlock.FLOOR, floor).with(FloorIndicatorBlock.MOVING, moving))
+                }
+            }
+        }
+    }
 
     private fun worldOf(server: MinecraftServer, level: LevelDefinition): ServerWorld? =
         server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension)))

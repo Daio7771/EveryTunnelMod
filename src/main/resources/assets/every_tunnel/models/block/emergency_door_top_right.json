@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/door_top_right",
+  "textures": {
+    "bottom": "every_tunnel:block/emergency_door_bottom",
+    "top": "every_tunnel:block/emergency_door_top"
+  }
+}

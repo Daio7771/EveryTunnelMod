@@ -111,6 +111,21 @@ class Level:
         for i, t in enumerate(tiles):
             self.set(x + step[0] * i, y, z + step[1] * i, self.glyphs.wall_state(t, facing))
 
+    def exit_marking(self, dx, y, wall_z, step):
+        """Over an exit door in a hall wall: the mod version mounts a lit EXIT sign on the hall
+        side; the vanilla version paints EXIT on the wall. Both register the painted texts, so
+        the two versions share one resource pack."""
+        hall_side = wall_z - step
+        facing = "south" if step < 0 else "north"
+        x0, dir_x = (dx - 1, 1) if step < 0 else (dx + 1, -1)
+        if self.variant == "mod":
+            for t in ("EX", "IT"):
+                self.glyphs.wall_state(t, facing)
+            self.world.remove(dx, y + 3, hall_side)
+            self.set(dx, y + 3, hall_side, f"every_tunnel:exit_sign[facing={facing}]")
+        else:
+            self.wall_sign(["EX", "IT"], x0, y + 3, wall_z, facing, (dir_x, 0))
+
     def wear(self, cells, amount):
         """Floor decals on some of the given (x, z) cells (not on ramp slabs)."""
         D = self.S["decal"]
@@ -274,8 +289,24 @@ class Level:
         self.set(x0 - 1, y + 1, cz + 1, S["elevator_wall"])
         self.set(x0 - 1, y + 2, cz + 1, S["elevator_wall"])
         self.set(x0 - 1, y + 3, cz + 1, S["elevator_wall"])
-        self.set(x0, y + 2, cz + 2, "minecraft:stone_button[face=wall,facing=east,powered=false]")   # call button
-        self.set(cx0, y + 2, cz + 1, "minecraft:polished_blackstone_button[face=wall,facing=east,powered=false]")  # cabin panel
+        if self.variant == "mod":
+            # The service cabin: checker plate floor, moving blankets hung on the north wall, a
+            # handrail along the south one, the button panel beside the doors, floor indicators
+            # over the doors inside and out (the intro counts them down), call buttons outside.
+            for x in range(cx0, cx1 + 1):
+                for z in range(cz - 1, cz + 2):
+                    self.set(x, y, z, "every_tunnel:checker_plate")
+                for yy in (y + 1, y + 2, y + 3):
+                    self.set(x, yy, cz - 1, "every_tunnel:moving_pad[facing=south]")
+                self.set(x, y + 1, cz + 1, "every_tunnel:handrail[facing=north]")
+            self.set(cx1, y + 2, cz + 1, "every_tunnel:elevator_buttons[facing=west]")
+            last = len(p.ELEVATOR_FLOORS) - 1
+            self.set(cx1, y + 3, cz, f"every_tunnel:floor_indicator[facing=west,floor={last},moving=false]")
+            self.set(x0, y + 3, cz, f"every_tunnel:floor_indicator[facing=east,floor={last},moving=false]")
+            self.set(x0, y + 2, cz + 1, "every_tunnel:call_buttons[facing=east]")
+        else:
+            self.set(x0, y + 2, cz + 2, "minecraft:stone_button[face=wall,facing=east,powered=false]")   # call button
+            self.set(cx0, y + 2, cz + 1, "minecraft:polished_blackstone_button[face=wall,facing=east,powered=false]")  # cabin panel
         self.wall_sign(list(p.LEVEL_SIGN), x0 - 1, y + 3, cz + 4, "east", (0, -1))
         self.fixture(cx0 + 1, cz, y + 4, "lit")
         self.spawn = (cx0 + 1.5, y + 1, cz + 0.5, -90)
@@ -352,8 +383,8 @@ class Level:
         # doorway through both walls (the hall's and the room's)
         self.carve(dx, dx, min(wall_z, z_near), max(wall_z, z_near), y + 1, y + 2)
         if kind == "storage":
-            self.set(dx, y + 1, wall_z, f"minecraft:spruce_door[facing={facing_out},half=lower,hinge=left,open=false,powered=false]")
-            self.set(dx, y + 2, wall_z, f"minecraft:spruce_door[facing={facing_out},half=upper,hinge=left,open=false,powered=false]")
+            self.set(dx, y + 1, wall_z, f"{S['storage_door']}[facing={facing_out},half=lower,hinge=left,open=false,powered=false]")
+            self.set(dx, y + 2, wall_z, f"{S['storage_door']}[facing={facing_out},half=upper,hinge=left,open=false,powered=false]")
             for x in range(xa, xb + 1):
                 for z in (z_far,):
                     self.set(x, y + 1, z, S["drum"] if (x + z) % 2 else S["box"])
@@ -363,8 +394,8 @@ class Level:
             self.fixture(dx, z_near + step * 2, y + 4, "dead")
             label = "storage room"
         elif kind == "electrical":
-            self.set(dx, y + 1, wall_z, f"minecraft:dark_oak_door[facing={facing_out},half=lower,hinge=right,open=true,powered=false]")
-            self.set(dx, y + 2, wall_z, f"minecraft:dark_oak_door[facing={facing_out},half=upper,hinge=right,open=true,powered=false]")
+            self.set(dx, y + 1, wall_z, f"{S['electrical_door']}[facing={facing_out},half=lower,hinge=right,open=true,powered=false]")
+            self.set(dx, y + 2, wall_z, f"{S['electrical_door']}[facing={facing_out},half=upper,hinge=right,open=true,powered=false]")
             far_facing = "south" if north else "north"
             for x in range(xa, xb + 1):                         # switch panels on the far wall
                 self.set(x, y + 2, z_far, f"minecraft:iron_trapdoor[facing={far_facing},half=top,open=true]")
@@ -373,11 +404,9 @@ class Level:
             self.fixture(dx, (za + zb) // 2, y + 4, "dim")
             label = "electrical room"
         elif kind == "stairwell":
-            self.set(dx, y + 1, wall_z, f"minecraft:iron_door[facing={facing_out},half=lower,hinge=left,open=false,powered=false]")
-            self.set(dx, y + 2, wall_z, f"minecraft:iron_door[facing={facing_out},half=upper,hinge=left,open=false,powered=false]")
-            inside = "south" if north else "north"
-            self.wall_sign(["EX", "IT"], dx - 1 if north else dx + 1, y + 3, wall_z,
-                           inside, (1, 0) if north else (-1, 0))
+            self.set(dx, y + 1, wall_z, f"{S['emergency_door']}[facing={facing_out},half=lower,hinge=left,open=false,powered=false]")
+            self.set(dx, y + 2, wall_z, f"{S['emergency_door']}[facing={facing_out},half=upper,hinge=left,open=false,powered=false]")
+            self.exit_marking(dx, y, wall_z, step)
             for k in range(min(3, depth - 1)):
                 z = z_near + step * (k + 1)
                 for x in range(xa, xb + 1):
@@ -448,14 +477,13 @@ class Level:
                        inside, (1, 0) if step < 0 else (-1, 0))
         # Door through the hall wall, EXIT over it, the reader on the hall side.
         self.carve(dx, dx, wall_z, wall_z, y + 1, y + 2)
-        self.set(dx, y + 1, wall_z, f"minecraft:iron_door[facing={facing_out},half=lower,hinge=left,open=false,powered=false]")
-        self.set(dx, y + 2, wall_z, f"minecraft:iron_door[facing={facing_out},half=upper,hinge=left,open=false,powered=false]")
-        self.wall_sign(["EX", "IT"], dx - 1 if step < 0 else dx + 1, y + 3, wall_z,
-                       "south" if step < 0 else "north", (1, 0) if step < 0 else (-1, 0))
+        self.set(dx, y + 1, wall_z, f"{S['emergency_door']}[facing={facing_out},half=lower,hinge=left,open=false,powered=false]")
+        self.set(dx, y + 2, wall_z, f"{S['emergency_door']}[facing={facing_out},half=upper,hinge=left,open=false,powered=false]")
         for x in range(dx - 1, dx + 2):                          # a clear spot in front of the door
             for z in (hall_side, hall_side - step):
                 for yy in range(y + 1, y + 4):
                     self.world.remove(x, yy, z)
+        self.exit_marking(dx, y, wall_z, step)
         reader_facing = "south" if step < 0 else "north"
         if self.variant == "mod":
             reader = f"every_tunnel:card_reader[facing={reader_facing},unlocked=false]"
@@ -471,15 +499,18 @@ class Level:
 
     def booth(self, f):
         """
-        A glass parking booth in the middle of the hall's aisle: a metal frame, glass from waist
-        height up, a door towards the north wall, a counter with the keycard on it and a
-        flickering light above. Whatever stood there is cleared first.
+        A glass parking booth in the middle of the hall's aisle, left tidy as if the guard will
+        be back: a metal frame, glass from waist height up, a door towards the north wall, a
+        counter along the back with (mod version) the CCTV monitor, the keycard, the logbook
+        with a mug and an old flashlight, and the phone; the chair tucked in, an empty key rack
+        on the wall, a flickering light over the keycard. Whatever stood there is cleared first.
         """
         p, S = self.p, self.S
         hp, g = f["hp"], f["g"]
         y = f["hy"]
         cx, cz = f["hx"] + hp.LENGTH // 2, f["hz"] + g.center_z
-        x0, x1, z0, z1 = cx - 2, cx + 2, cz - 2, cz + 1
+        x0, x1, z0, z1 = cx - 3, cx + 2, cz - 2, cz + 1
+        door_x = cx - 1
         for x in range(x0 - 1, x1 + 2):
             for z in range(z0 - 1, z1 + 2):
                 for yy in range(y + 1, y + p.CEILING_HEIGHT + 1):
@@ -491,7 +522,7 @@ class Level:
                 self.set(x, y + 4, z, metal)                                   # roof
                 if not (edge_x or edge_z):
                     continue
-                if x == cx and z == z0:                                         # the door
+                if x == door_x and z == z0:                                     # the door
                     self.set(x, y + 3, z, metal)
                     continue
                 if edge_x and edge_z:                                           # corner posts
@@ -503,10 +534,18 @@ class Level:
                     "minecraft:glass_pane[east=false,west=false,north=true,south=true,waterlogged=false]"
                 self.set(x, y + 2, z, pane)
                 self.set(x, y + 3, z, pane)
-        for x in range(cx - 1, cx + 2):                                          # the counter
-            self.set(x, y + 1, z1 - 1, metal)
-        self.fixture(cx, z1 - 1, y + 4, "dim")
-        self.keycard = (cx + 0.5, y + 2, z1 - 1 + 0.5)
+        counter_z = z1 - 1
+        for x in range(x0 + 1, x1):                                              # the counter
+            self.set(x, y + 1, counter_z, metal)
+        self.fixture(door_x, counter_z, y + 4, "dim")
+        self.keycard = (door_x + 0.5, y + 2, counter_z + 0.5)
+        if self.variant == "mod":
+            self.set(x0 + 1, y + 2, counter_z, "every_tunnel:cctv_monitor[facing=north]")
+            self.set(cx, y + 2, counter_z, "every_tunnel:logbook[facing=north]")
+            self.set(x1 - 1, y + 2, counter_z, "every_tunnel:desk_phone[facing=north]")
+            self.set(x1 - 1, y + 1, z0 + 1, "every_tunnel:office_chair[facing=south]")
+            self.set(x1, y + 3, z0 + 1, metal)                                   # a panel to hang the keys on
+            self.set(x1 - 1, y + 3, z0 + 1, "every_tunnel:key_rack[facing=west]")
         self.labels.append((cx, z1 + 3, "booth (keycard)"))
 
     def entry_corridor(self, f):

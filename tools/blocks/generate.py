@@ -46,6 +46,8 @@ OUT = Path(__file__).resolve().parent / "output"
 MOD_BLOCKS_KT = ROOT / "src" / "main" / "kotlin" / "daio7771" / "everytunnel" / "platform" / "ModBlocks.kt"
 
 HORIZONTAL = {"north": 0, "east": 90, "south": 180, "west": 270}
+# FloorIndicatorBlock.LABELS, top floor first.
+FLOOR_LABELS = ["3", "2", "1", "G", "B1"]
 SIDES = ["north", "east", "south", "west", "up", "down"]
 
 
@@ -188,7 +190,22 @@ def metal_panel_tex(rng):
         px(img, x, y, (186, 188, 190))
         px(img, x + 1, y + 1, (96, 98, 100))
     T.blob(img, rng, (110, 106, 96), 5, 0.25)                    # handprints and grime
+    dents(img, rng, 4)
     return img
+
+
+def dents(img, rng, count, scratches=3):
+    """Dents (a dark pixel with a lit one beside it) and fine light scratches on metal."""
+    for _ in range(count):
+        x, y = rng.randrange(1, 14), rng.randrange(1, 15)
+        px(img, x, y, (84, 86, 90), 0.55)
+        px(img, x + 1, y, (196, 198, 202), 0.45)
+        if rng.random() < 0.5:
+            px(img, x, y + 1, (96, 98, 102), 0.35)
+    for _ in range(scratches):
+        x, y = rng.randrange(0, 12), rng.randrange(0, 16)
+        for k in range(rng.randrange(3, 7)):
+            px(img, x + k, y + (k // 3) * (1 if rng.random() < 0.5 else -1), (206, 208, 212), 0.35)
 
 
 def elevator_door_tex(rng):
@@ -204,6 +221,11 @@ def elevator_door_tex(rng):
     rect(img, 0, 0, 0, 15, (58, 58, 60))
     rect(img, 15, 0, 15, 15, (58, 58, 60))
     T.blob(img, rng, (120, 118, 112), 4, 0.2)                    # smudges
+    for _ in range(2):                                            # handprints: a palm and finger smears
+        hx, hy = rng.randrange(3, 10), rng.randrange(2, 9)
+        for dx, dy in ((0, 0), (1, 0), (2, 0), (0, 1), (1, 1), (2, 1), (0, -1), (1, -2), (2, -1), (3, 1)):
+            px(img, hx + dx, hy + dy, (108, 110, 114), 0.35)
+    dents(img, rng, 5, scratches=4)
     return img
 
 
@@ -333,6 +355,306 @@ def led_glow(x, y, c):
     return T.PLASTIC.but(smoothness=0.5, relief=0.3)
 
 
+def steel_door_tex(rng, half, colour, kind):
+    """One half of a painted steel door (bottom or top), handle side on the right like vanilla's
+    doors (the models mirror it for the other hinge). kind: "storage" / "electrical" (service
+    doors: a wired-glass window and the room's plate on the top half, a lever handle) or
+    "emergency" (no window; a push bar across the bottom half's top)."""
+    img = new(colour)
+    noise(img, rng, 4)
+    dark = tuple(max(0, c - 34) for c in colour)
+    light = tuple(min(255, c + 22) for c in colour)
+    for i in range(16):                                           # frame edges
+        px(img, 0, i, dark, 0.7)
+        px(img, 15, i, dark, 0.7)
+    if half == "top":
+        for x in range(16):
+            px(img, x, 0, dark, 0.7)
+    else:
+        for x in range(16):
+            px(img, x, 15, dark, 0.8)
+    for _ in range(4):                                            # dents and scratches
+        x, y = rng.randrange(2, 14), rng.randrange(1, 15)
+        px(img, x, y, dark, 0.45)
+        px(img, x + 1, y, light, 0.35)
+    for _ in range(3):
+        y = rng.randrange(1, 15)
+        for x in range(rng.randrange(1, 6), rng.randrange(8, 15)):
+            px(img, x, y, light, 0.25)
+    if half == "bottom":
+        T.gradient(img, (40, 42, 46), 0.0, 0.35)                  # kicked and dirty at the bottom
+    if kind == "emergency":
+        if half == "bottom":
+            rect(img, 2, 1, 13, 2, (170, 176, 184))               # push bar
+            rect(img, 2, 3, 13, 3, (92, 96, 104))
+            rect(img, 2, 1, 2, 3, (60, 62, 68))
+            rect(img, 13, 1, 13, 3, (60, 62, 68))
+        else:
+            rect(img, 4, 6, 11, 9, (40, 150, 86))                 # green running-man plate
+            for x, y in ((7, 6), (6, 7), (7, 7), (8, 7), (7, 8), (6, 9), (8, 9)):
+                px(img, x, y, (236, 244, 238), 0.95)
+        return img
+    if half == "top":
+        rect(img, 4, 3, 11, 9, (54, 64, 74))                      # wired glass, dusty
+        for x in range(4, 12):
+            for y in range(3, 10):
+                if (x + y) % 3 == 0:
+                    px(img, x, y, (96, 104, 112), 0.7)
+        px(img, 4, 3, (120, 132, 144), 0.6)
+        rect(img, 3, 2, 12, 2, dark)
+        rect(img, 3, 10, 12, 10, light)
+        # The room's plate under the window.
+        rect(img, 5, 12, 10, 14, (214, 196, 60) if kind == "electrical" else (210, 214, 218))
+        if kind == "electrical":                                  # warning triangle with a bolt
+            for x, y in ((7, 12), (8, 12), (6, 13), (9, 13), (5, 14), (10, 14)):
+                px(img, x, y, (24, 24, 26), 0.9)
+            px(img, 8, 13, (24, 24, 26), 0.9)
+            px(img, 7, 14, (24, 24, 26), 0.9)
+        else:                                                     # a box: shelves
+            rect(img, 6, 12, 9, 14, (150, 116, 74))
+            rect(img, 6, 13, 9, 13, (110, 84, 52))
+    else:
+        rect(img, 12, 1, 14, 1, (178, 184, 192))                  # lever handle and its rose
+        px(img, 13, 2, (100, 104, 112), 1.0)
+        px(img, 13, 3, (60, 62, 68), 1.0)                         # keyhole
+    return img
+
+
+def door_item_tex(bottom, top):
+    """A door item: both halves shrunk into a 16x16 picture, like vanilla's door items."""
+    whole = Image.new("RGBA", (16, 32))
+    whole.paste(top, (0, 0))
+    whole.paste(bottom, (0, 16))
+    small = whole.resize((8, 16), Image.NEAREST)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    img.paste(small, (4, 0))
+    return img
+
+
+def exit_sign_tex(rng):
+    """The lit EXIT box: its face (12x6 at the top left) green with white letters and a running
+    man's arrow; the rest is the grey casing for its sides."""
+    img = new((150, 154, 160))
+    noise(img, rng, 3)
+    rect(img, 0, 0, 11, 5, (34, 168, 88))
+    letters = {"E": ["##", "#.", "##", "#.", "##"], "X": ["#.#", "#.#", ".#.", "#.#", "#.#"],
+               "I": ["#", "#", "#", "#", "#"], "T": ["###", ".#.", ".#.", ".#.", ".#."]}
+    x = 1
+    for ch in "EXIT":
+        rows = letters[ch]
+        for ry, row in enumerate(rows):
+            for rx, bit in enumerate(row):
+                if bit == "#":
+                    img.putpixel((x + rx, 0 + ry), (240, 250, 244, 255))
+        x += len(rows[0]) + 1
+    return img
+
+
+def exit_sign_glow(x, y, c):
+    if x < 12 and y < 6:
+        return T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["TUBE_GLOW"])
+    return T.PAINTED_METAL
+
+
+def checker_plate_tex(rng):
+    """Steel checker plate (the elevator's floor): staggered raised lozenges, worn bright on top,
+    dirt in the low parts."""
+    img = new((112, 118, 124))
+    noise(img, rng, 4)
+    for gy in range(0, 16, 4):
+        for gx in range(0, 16, 4):
+            ox = gx + (2 if (gy // 4) % 2 else 0)
+            diagonal = (gx // 4 + gy // 4) % 2 == 0
+            cells = [(ox, gy + 1), (ox + 1, gy + 2)] if diagonal else [(ox + 1, gy + 1), (ox, gy + 2)]
+            for i, (x, y) in enumerate(cells):
+                px(img, x, y, (170, 176, 182) if i == 0 else (78, 82, 88), 0.85)
+    T.blob(img, rng, (70, 72, 76), 5, 0.3)
+    speckle(img, rng, 8, (60, 62, 66), 0.5)
+    return img
+
+
+def moving_pad_tex(rng):
+    """A quilted moving blanket, faded blue-grey, diamond stitching (it joins across blocks)."""
+    img = new((74, 88, 104))
+    noise(img, rng, 4)
+    for y in range(16):
+        for x in range(16):
+            if (x + y) % 8 == 0 or (x - y) % 8 == 0:
+                px(img, x, y, (52, 62, 74), 0.8)                  # stitches
+            elif (x + y) % 8 in (1, 2) and (x - y) % 8 in (1, 2):
+                px(img, x, y, (98, 112, 128), 0.5)                # the padding bulging between them
+    T.blob(img, rng, (66, 70, 74), 4, 0.25)
+    return img
+
+
+def handrail_tex(rng):
+    img = new((168, 172, 178))
+    noise(img, rng, 4)
+    for x in range(16):
+        px(img, x, 0, (210, 214, 218), 0.6)
+        px(img, x, 15, (110, 114, 120), 0.6)
+    return img
+
+
+def elevator_buttons_tex(rng, call):
+    """The cabin's panel (two columns of round buttons, B1 lit amber, a speaker grille and a
+    keyhole; its face is 8x14 at x 4-11, y 1-14) or the landing's call panel (one lit down button
+    under a dark up button; 6x10 at x 5-10, y 3-12)."""
+    img = new((150, 154, 160))
+    noise(img, rng, 3)
+    dents(img, rng, 1, scratches=1)
+    ring, lit, dark = (70, 72, 78), (236, 164, 52), (104, 108, 114)
+    if call:
+        rect(img, 5, 3, 10, 12, (138, 142, 148))
+        for x in range(6, 10):                                    # up: a dark triangle
+            px(img, x, 6, dark)
+        px(img, 7, 5, dark)
+        px(img, 8, 5, dark)
+        for x in range(6, 10):                                    # down: a lit one
+            px(img, x, 9, lit)
+        px(img, 7, 10, lit)
+        px(img, 8, 10, lit)
+        return img
+    rect(img, 4, 1, 11, 14, (138, 142, 148))
+    for x in range(6, 10):                                        # speaker grille
+        for y in (2, 4):
+            px(img, x, y, (60, 62, 66), 0.9)
+    buttons = [(6, 6), (9, 6), (6, 8), (9, 8), (6, 10), (9, 10)]
+    for i, (x, y) in enumerate(buttons):
+        px(img, x, y, ring)
+        px(img, x + 1, y, lit if i == 5 else dark)
+    px(img, 8, 13, (40, 40, 44))                                  # keyhole
+    return img
+
+
+def floor_indicator_tex(label, moving):
+    """The floor indicator's LED display (12x5 at the top left): a down arrow, lit while the
+    car moves, then the floor; unlit segments glow faintly."""
+    img = new((150, 154, 160))
+    off, on, bg = (70, 20, 16), (255, 76, 44), (16, 12, 12)
+    rect(img, 0, 0, 11, 4, bg)
+    arrow = [".#.", ".#.", ".#.", "###", ".#."]
+    for y, row in enumerate(arrow):
+        for x, bit in enumerate(row):
+            if bit == "#":
+                px(img, x, y, on if moving else off)
+    width = len(label) * 4 - 1
+    x0 = 4 + (8 - width) // 2
+    for i, ch in enumerate(label):
+        for y, row in enumerate(T.FONT[ch]):
+            for x, bit in enumerate(row):
+                if bit == "#":
+                    px(img, x0 + i * 4 + x, y, on)
+    return img
+
+
+def led_and_metal(x, y, c):
+    if c[0] > 200 and c[2] < 120:
+        return T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["DIFFUSER_GLOW"])
+    return T.STEEL.but(smoothness=0.55, metal=255, relief=0.2)
+
+
+def static_frames(rng, frames=8):
+    """The CCTV monitor's screen: grey static with a slow rolling bar, over the faint shapes
+    of a dark parking aisle (the camera still works). The picture is 10x7 at the top left."""
+    out = []
+    for f in range(frames):
+        img = new((20, 22, 24))
+        bar = (f * 7 // frames) % 7
+        for y in range(7):
+            for x in range(10):
+                v = rng.randint(40, 130)
+                if y == bar:
+                    v += 50
+                if y >= 4 and x in (2, 3, 6, 7):                   # pillars down the aisle
+                    v -= 25
+                if y == 6 and 3 < x < 6:                          # the aisle's line
+                    v += 20
+                v = max(0, min(255, v))
+                img.putpixel((x, y), (v, v + 4 if v < 250 else v, v + 8 if v < 246 else v, 255))
+        out.append(img)
+    return out
+
+
+def monitor_tex(rng):
+    """The monitor's dark plastic casing, vents on top, a dim green power light."""
+    img = new((38, 40, 44))
+    noise(img, rng, 3)
+    for x in range(3, 13, 2):
+        px(img, x, 1, (22, 22, 24), 0.9)                          # vents
+    rect(img, 4, 12, 9, 12, (70, 72, 78))                         # brand strip under the screen
+    px(img, 12, 12, (90, 200, 110))                               # power light
+    return img
+
+
+def plastic_tex(rng, colour, kind=None):
+    """Plain moulded plastic or fabric, for small props; kind adds detail."""
+    img = new(colour)
+    noise(img, rng, 4 if kind == "fabric" else 2)
+    if kind == "fabric":
+        for y in range(0, 16, 2):
+            for x in range(16):
+                px(img, x, y, tuple(max(0, c - 10) for c in colour), 0.4)
+    if kind == "keypad":
+        for x in (6, 8, 10):
+            for y in (2, 4, 6):
+                px(img, x, y, (150, 154, 160), 0.9)
+    return img
+
+
+def logbook_tex(rng, part):
+    """The logbook: ruled pages with handwriting (pages) or its dark red cloth cover."""
+    if part == "cover":
+        img = new((92, 30, 32))
+        noise(img, rng, 4)
+        return img
+    img = new((224, 222, 212))
+    noise(img, rng, 2)
+    for y in range(1, 16, 2):
+        for x in range(16):
+            px(img, x, y, (170, 182, 196), 0.5)                   # ruled lines
+        if y < 13:
+            for x in range(1, rng.randrange(6, 15)):
+                if rng.random() < 0.6:
+                    px(img, x, y - 1, (40, 46, 70), 0.7)          # entries, in ink
+    for y in range(16):
+        px(img, 8, y, (180, 176, 166), 0.7)                       # the spine's fold
+    return img
+
+
+def mug_tex(rng, part):
+    if part == "coffee":
+        img = new((48, 30, 20))
+        noise(img, rng, 3)
+        return img
+    img = new((222, 224, 226))
+    noise(img, rng, 2)
+    for x in range(16):
+        px(img, x, 5, (60, 100, 170), 0.9)                        # a blue stripe
+    return img
+
+
+def torch_tex(rng):
+    """The old flashlight: a yellow body, a black rubber head."""
+    img = new((206, 170, 52))
+    noise(img, rng, 3)
+    rect(img, 0, 0, 4, 15, (30, 30, 32))
+    return img
+
+
+def key_rack_tex(rng):
+    """A dark wooden board with small numbered tags; the hooks are separate."""
+    img = new((70, 50, 36))
+    noise(img, rng, 4)
+    for y in range(16):
+        if y % 4 == 0:
+            for x in range(16):
+                px(img, x, y, (56, 40, 28), 0.5)                  # grain
+    for x in (3, 5, 7, 9, 11):
+        px(img, x, 9, (214, 208, 190), 0.9)                       # the tags under the hooks
+    return img
+
+
 def shutter_tex(rng):
     """Rolling shutter curtain: four galvanized steel slats, each lit on its rounded top and
     shaded into the groove below, with rust creeping from the joints and grime."""
@@ -425,6 +747,22 @@ PLANE_ROTATION = {"up": {}, "down": {"x": 180}, "north": {"x": 90}, "south": {"x
                   "east": {"x": 90, "y": 90}, "west": {"x": 90, "y": 270}}
 
 
+def door_variants(prefix):
+    """A door's blockstate variants, laid out like vanilla's (checked against iron_door.json)."""
+    base = {"east": 0, "south": 90, "west": 180, "north": 270}
+    out = {}
+    for facing, y in base.items():
+        for half, part in (("lower", "bottom"), ("upper", "top")):
+            for hinge in ("left", "right"):
+                for opened in ("false", "true"):
+                    rot = y + ((90 if hinge == "left" else 270) if opened == "true" else 0)
+                    v = {"model": f"{prefix}_{part}_{hinge}{'_open' if opened == 'true' else ''}"}
+                    if rot % 360:
+                        v["y"] = rot % 360
+                    out[f"facing={facing},half={half},hinge={hinge},open={opened}"] = v
+    return out
+
+
 def horizontal_blockstate(model_name):
     variants = {}
     for facing, y in HORIZONTAL.items():
@@ -466,6 +804,9 @@ class Assets:
         self.items = {}          # block id -> item model json
         self.blockstates = {}    # block id -> json
         self.names = {}          # block id -> English name
+        self.item_textures = {}  # item texture name -> image (textures/item/)
+        self.animated = {}       # block texture name -> ([16x16 frames], ticks per frame); no PBR maps
+        self.loot_doors = set()  # door block ids: they drop from their lower half only
 
     def texture(self, name, img, material, tiles=True):
         self.textures[name] = (img, material, tiles)
@@ -683,6 +1024,114 @@ def build():
             variants[f"facing={facing},unlocked={unlocked}"] = v
     a.block("card_reader", "Card Reader", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
 
+    # --- The service elevator ------------------------------------------------------------
+    a.texture("checker_plate", checker_plate_tex(r("checker_plate")), T.STEEL.but(smoothness=0.5, metal=255, relief=0.9))
+    a.models["checker_plate"] = cube_all("checker_plate")
+    a.block("checker_plate", "Checker Plate", {"variants": {"": {"model": f"{NS}:block/checker_plate"}}},
+            {"parent": f"{NS}:block/checker_plate"})
+
+    a.texture("moving_pad", moving_pad_tex(r("moving_pad")), T.Material(0.05, porosity=0.9, relief=0.7))
+    a.models["moving_pad"] = model({"t": "moving_pad"}, [element((0, 0, 14), (16, 16, 16), "t")])
+    a.block("moving_pad", "Moving Blanket", horizontal_blockstate("moving_pad"), {"parent": f"{NS}:block/moving_pad"})
+
+    a.texture("handrail", handrail_tex(r("handrail")), T.STEEL.but(smoothness=0.7, metal=255, relief=0.2))
+    a.models["handrail"] = model({"t": "handrail"}, [
+        element((0, 8.5, 13.5), (16, 10.5, 15.5), "t"), element((7, 9, 15.5), (9, 10, 16), "t")], ao=False)
+    a.block("handrail", "Handrail", horizontal_blockstate("handrail"), {"parent": f"{NS}:block/handrail"})
+
+    for block_id, name, call, box in (("elevator_buttons", "Elevator Buttons", False, ((4, 1, 15), (12, 15, 16))),
+                                      ("call_buttons", "Call Buttons", True, ((5, 3, 15), (11, 13, 16)))):
+        a.texture(block_id, elevator_buttons_tex(r(block_id), call), led_and_metal)
+        a.models[block_id] = model({"t": block_id}, [element(*box, "t")], ao=False)
+        a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:block/{block_id}"})
+
+    # Floor indicator: a 12x5 display (FloorIndicatorBlock's shape); one model per floor and arrow.
+    variants = {}
+    for floor, label in enumerate(FLOOR_LABELS):
+        for moving in ("false", "true"):
+            name = f"floor_indicator_{label.lower()}_{'moving' if moving == 'true' else 'still'}"
+            a.texture(name, floor_indicator_tex(label, moving == "true"), led_and_metal, tiles=False)
+            a.models[name] = model({"t": name}, [{
+                "from": [2, 8, 14.5], "to": [14, 13, 16], "faces": {
+                    "north": {"texture": "#t", "uv": [0, 0, 12, 5]},
+                    "east": {"texture": "#t", "uv": [12, 8, 14, 13]}, "west": {"texture": "#t", "uv": [12, 8, 14, 13]},
+                    "up": {"texture": "#t", "uv": [0, 8, 12, 10]}, "down": {"texture": "#t", "uv": [0, 8, 12, 10]},
+                    "south": {"texture": "#t", "uv": [0, 8, 12, 13]}}}], ao=False)
+            for facing, y in HORIZONTAL.items():
+                v = {"model": f"{NS}:block/{name}"}
+                if y:
+                    v["y"] = y
+                variants[f"facing={facing},floor={floor},moving={moving}"] = v
+    a.block("floor_indicator", "Floor Indicator", {"variants": variants}, {"parent": f"{NS}:block/floor_indicator_b1_still"})
+
+    # --- The parking booth -----------------------------------------------------------------
+    a.texture("monitor_body", monitor_tex(r("monitor")), T.PLASTIC.but(smoothness=0.4, relief=0.3))
+    a.animated["monitor_static"] = (static_frames(r("monitor_static")), 2)
+    a.models["cctv_monitor"] = model({"b": "monitor_body", "s": "monitor_static"}, [
+        element((2, 0, 3), (14, 10, 13), "b"),
+        {"from": [3, 2, 2.9], "to": [13, 9, 3], "shade": False, "faces": {"north": {"texture": "#s", "uv": [0, 0, 10, 7]}}}])
+    a.block("cctv_monitor", "CCTV Monitor", horizontal_blockstate("cctv_monitor"), {"parent": f"{NS}:block/cctv_monitor"})
+
+    a.texture("phone", plastic_tex(r("phone"), (34, 34, 38), "keypad"), T.PLASTIC.but(smoothness=0.55, relief=0.3))
+    a.models["desk_phone"] = model({"t": "phone"}, [
+        element((4, 0, 5), (12, 2, 11), "t"), element((4, 2, 5), (12, 3.5, 7.5), "t")])
+    a.block("desk_phone", "Desk Phone", horizontal_blockstate("desk_phone"), {"parent": f"{NS}:block/desk_phone"})
+
+    a.texture("logbook_pages", logbook_tex(r("logbook_pages"), "pages"), T.PAPER)
+    a.texture("logbook_cover", logbook_tex(r("logbook_cover"), "cover"), T.Material(0.1, porosity=0.6, relief=0.4))
+    a.texture("mug", mug_tex(r("mug"), "mug"), T.Material(0.7, relief=0.1))
+    a.texture("coffee", mug_tex(r("coffee"), "coffee"), T.Material(0.9, relief=0.0))
+    a.texture("old_flashlight", torch_tex(r("torch")), T.PLASTIC)
+    book = element((2, 0, 5), (10, 1, 12), "c")
+    book["faces"]["up"]["texture"] = "#p"
+    mug = element((11, 0, 6), (14, 4, 9), "m")
+    mug["faces"]["up"]["texture"] = "#k"
+    a.models["logbook"] = model({"p": "logbook_pages", "c": "logbook_cover", "m": "mug", "k": "coffee", "f": "old_flashlight"}, [
+        book, mug, element((3, 0, 2), (9, 1.5, 3.5), "f")])
+    a.block("logbook", "Logbook", horizontal_blockstate("logbook"), {"parent": f"{NS}:block/logbook"})
+
+    a.texture("chair_fabric", plastic_tex(r("chair_fabric"), (46, 48, 54), "fabric"), T.Material(0.05, porosity=0.9, relief=0.5))
+    a.texture("chair_plastic", plastic_tex(r("chair_plastic"), (22, 22, 24)), T.PLASTIC)
+    a.models["office_chair"] = model({"f": "chair_fabric", "p": "chair_plastic"}, [
+        element((3, 6, 3), (13, 8, 13), "f"), element((3, 8, 12), (13, 16, 14), "f"),
+        element((7, 2, 7), (9, 6, 9), "p"), element((2, 0, 7), (14, 1.5, 9), "p"), element((7, 0, 2), (9, 1.5, 14), "p")])
+    a.block("office_chair", "Office Chair", horizontal_blockstate("office_chair"), {"parent": f"{NS}:block/office_chair"})
+
+    a.texture("key_rack", key_rack_tex(r("key_rack")), T.Material(0.2, porosity=0.4, relief=0.5))
+    a.texture("brass", plastic_tex(r("brass"), (176, 146, 70)), T.STEEL.but(smoothness=0.6, metal=255))
+    a.models["key_rack"] = model({"w": "key_rack", "h": "brass"}, [element((2, 4, 15), (14, 11, 16), "w")] + [
+        element((x, 7, 14), (x + 1, 8, 15), "h") for x in (3, 5, 7, 9, 11)], ao=False)
+    a.block("key_rack", "Key Rack", horizontal_blockstate("key_rack"), {"parent": f"{NS}:block/key_rack"})
+
+    # Doors: painted steel, the models are vanilla's door shapes (door_bottom_left ...).
+    for door_id, name, colour, kind in (("storage_door", "Storage Door", (92, 100, 108), "storage"),
+                                        ("electrical_door", "Electrical Room Door", (92, 100, 108), "electrical"),
+                                        ("emergency_door", "Emergency Exit Door", (70, 82, 90), "emergency")):
+        halves = {}
+        for half in ("bottom", "top"):
+            halves[half] = steel_door_tex(r(f"{door_id}_{half}"), half, colour, kind)
+            a.texture(f"{door_id}_{half}", halves[half], T.PAINTED_METAL.but(smoothness=0.4, relief=0.4))
+        for part in ("bottom", "top"):
+            for hinge in ("left", "right"):
+                for opened in ("", "_open"):
+                    a.models[f"{door_id}_{part}_{hinge}{opened}"] = {
+                        "parent": f"minecraft:block/door_{part}_{hinge}{opened}",
+                        "textures": {"bottom": tex_ref(f"{door_id}_bottom"), "top": tex_ref(f"{door_id}_top")}}
+        a.block(door_id, name, {"variants": door_variants(f"{NS}:block/{door_id}")},
+                {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{door_id}"}})
+        a.item_textures[door_id] = door_item_tex(halves["bottom"], halves["top"])
+        a.loot_doors.add(door_id)
+
+    # The exit sign: a lit box against the wall (PropBlock's shape: 2..14 x 2..8, 2 deep).
+    a.texture("exit_sign", exit_sign_tex(r("exit_sign")), exit_sign_glow, tiles=False)
+    a.models["exit_sign"] = model({"t": "exit_sign"}, [{
+        "from": [2, 2, 14], "to": [14, 8, 16], "shade": False, "faces": {
+            "north": {"texture": "#t", "uv": [0, 0, 12, 6]},
+            "east": {"texture": "#t", "uv": [12, 8, 14, 14]}, "west": {"texture": "#t", "uv": [12, 8, 14, 14]},
+            "up": {"texture": "#t", "uv": [0, 8, 12, 10]}, "down": {"texture": "#t", "uv": [0, 8, 12, 10]},
+            "south": {"texture": "#t", "uv": [0, 8, 12, 14]}}}], ao=False)
+    a.block("exit_sign", "Exit Sign", horizontal_blockstate("exit_sign"), {"parent": f"{NS}:block/exit_sign"})
+
     # Rolling shutter: a 2-pixel steel sheet through the middle of the block; axis = the way it runs.
     a.texture("shutter", shutter_tex(r("shutter")), T.STEEL.but(smoothness=0.45, metal=255, relief=0.7))
     a.models["shutter"] = model({"t": "shutter"}, [element((0, 0, 7), (16, 16, 9), "t")])
@@ -764,19 +1213,31 @@ def main():
             data = png(image)
             (tex_dir / f"{name}{suffix}.png").write_bytes(data)
             sheet[name + suffix] = data
+    for name, (frames, frametime) in a.animated.items():
+        strip = Image.new("RGBA", (16, 16 * len(frames)))
+        for i, frame in enumerate(frames):
+            strip.paste(frame, (0, 16 * i))
+        (tex_dir / f"{name}.png").write_bytes(png(strip))
+        write_json(tex_dir / f"{name}.png.mcmeta", {"animation": {"frametime": frametime}})
     for name, data in a.models.items():
         write_json(ASSETS / "models" / "block" / f"{name}.json", data)
     for block_id, data in a.items.items():
         write_json(ASSETS / "models" / "item" / f"{block_id}.json", data)
     for block_id, data in a.blockstates.items():
         write_json(ASSETS / "blockstates" / f"{block_id}.json", data)
+        conditions = [{"condition": "minecraft:survives_explosion"}]
+        if block_id in a.loot_doors:                     # like vanilla doors: only the lower half drops
+            conditions.insert(0, {"condition": "minecraft:block_state_property", "block": f"{NS}:{block_id}",
+                                  "properties": {"half": "lower"}})
         write_json(LOOT / f"{block_id}.json", {"type": "minecraft:block", "pools": [{
             "rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{NS}:{block_id}"}],
-            "conditions": [{"condition": "minecraft:survives_explosion"}]}]})
+            "conditions": conditions}]})
 
     # Item textures and models that belong to no block.
     item_dir = ASSETS / "textures" / "item"
     item_dir.mkdir(parents=True, exist_ok=True)
+    for name, img in a.item_textures.items():
+        (item_dir / f"{name}.png").write_bytes(png(img))
     for item, painter in (("battery", battery_tex), ("water_bottle", water_bottle_tex), ("keycard", keycard_tex)):
         (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))
         write_json(ASSETS / "models" / "item" / f"{item}.json",
@@ -792,7 +1253,7 @@ def main():
     # Files of blocks or textures that no longer exist here.
     stale = [p for p in (ASSETS / "models" / "block").glob("*.json") if p.stem not in a.models]
     stale += [p for p in tex_dir.glob("*.png")
-              if re.sub(r"_[ns]$", "", p.stem) not in a.textures]
+              if re.sub(r"_[ns]$", "", p.stem) not in a.textures and p.stem not in a.animated]
     for p in stale:
         p.unlink()
 

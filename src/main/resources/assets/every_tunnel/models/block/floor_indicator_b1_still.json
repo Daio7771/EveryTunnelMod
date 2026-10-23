@@ -1,0 +1,78 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "t": "every_tunnel:block/floor_indicator_b1_still",
+    "particle": "every_tunnel:block/floor_indicator_b1_still"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        8,
+        14.5
+      ],
+      "to": [
+        14,
+        13,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#t",
+          "uv": [
+            0,
+            0,
+            12,
+            5
+          ]
+        },
+        "east": {
+          "texture": "#t",
+          "uv": [
+            12,
+            8,
+            14,
+            13
+          ]
+        },
+        "west": {
+          "texture": "#t",
+          "uv": [
+            12,
+            8,
+            14,
+            13
+          ]
+        },
+        "up": {
+          "texture": "#t",
+          "uv": [
+            0,
+            8,
+            12,
+            10
+          ]
+        },
+        "down": {
+          "texture": "#t",
+          "uv": [
+            0,
+            8,
+            12,
+            10
+          ]
+        },
+        "south": {
+          "texture": "#t",
+          "uv": [
+            0,
+            8,
+            12,
+            13
+          ]
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

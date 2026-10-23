@@ -192,7 +192,11 @@ rebuild.
 `tools/blocks/generate.py` makes the models, textures, LabPBR maps, names and loot tables
 of the mod's blocks: the fluorescent light and the props (boxes, cones, extinguishers,
 cart, pallets, drums, bins, wheel stops, pipes, ducts, cable trays, cables, stains,
-puddles, sign tiles). The blocks themselves are registered in `platform/ModBlocks.kt`, and
+puddles, sign tiles); the doors (grey steel service doors with a window and a plate for
+their room, the emergency exit door with a push bar) and the lit green EXIT sign; the
+service elevator's checker plate, moving blankets, handrail, button panels and floor
+indicators (the intro counts them down 3, 2, 1, G, B1); and the parking booth's CCTV
+monitor (animated static), phone, logbook, chair and key rack. The blocks themselves are registered in `platform/ModBlocks.kt`, and
 the tool stops if the two lists of ids disagree.
 
 `tools/entity/pale_man.py` makes the Pale man: GeckoLib geometry, animations (idle,

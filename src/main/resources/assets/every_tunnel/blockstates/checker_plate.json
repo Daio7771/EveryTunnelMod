@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "every_tunnel:block/checker_plate"
+    }
+  }
+}
