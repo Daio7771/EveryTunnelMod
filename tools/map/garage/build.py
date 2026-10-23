@@ -148,9 +148,29 @@ def build(p, variant, glyphs, openings=(), zone_letters="AB"):
                 w.remove(x, y, z)
     for side, a, b in driveways:
         zs = range(1, g.aisle_z0) if side == "A" else range(g.aisle_z1 + 1, W - 1)
+        edge = g.aisle_z0 - 1 if side == "A" else g.aisle_z1 + 1        # the row along the aisle
         for x in range(a, b + 1):
             for z in zs:
                 w.reserved.add((x, z))
+                if w.get(x, 0, z) in (S["floor"], S["floor_patch"], S["line_white"]):
+                    # Keep clear: yellow hatching, a red line along its aisle edge.
+                    w.set(x, 0, z, S["line_red"] if z == edge else S["hatch"])
+
+    # --- Direction arrows down the aisle, towards the way out of the hall ----------------
+    exit_ = next((o for o in openings if o["side"] == "south" and o["height"] >= 3), None)
+    flow = None
+    if exit_ is not None:
+        flow = "east" if exit_["a"] > L // 2 else "west"
+    elif any(o["side"] == "east" and o["height"] >= 3 for o in openings) and any(o["side"] == "north" for o in openings):
+        flow = "east"
+    elif any(o["side"] == "west" and o["height"] >= 3 for o in openings) and any(o["side"] == "north" for o in openings):
+        flow = "west"
+    if flow:
+        xs = range(6, L - 5, 12) if flow == "east" else range(L - 7, 4, -12)
+        for x in xs:
+            for z in (g.aisle_z0 + 1, g.aisle_z1 - 1):
+                if w.get(x, 0, z) in (S["floor"], S["floor_patch"]):
+                    w.set(x, 0, z, f"{S['arrow']}[facing={flow}]")
 
     # --- Pillars with painted base and zone code -----------------------------------
     for side_index, z in enumerate(g.pillar_zs):
@@ -158,7 +178,7 @@ def build(p, variant, glyphs, openings=(), zone_letters="AB"):
             if any(d[0] == "AB"[side_index] and d[1] < x < d[2] for d in driveways):
                 continue
             w.fill(x, 0, z, x, H, z, S["pillar"])
-            w.set(x, 1, z, S["paint_band"])
+            w.set(x, 1, z, S["hazard"])
             if p.SIGNS:
                 w.set(x, 2, z, glyphs.pillar_state(f"{zone_letters[side_index]}{i + 1}"))
             w.reserved.add((x, z))
@@ -181,18 +201,35 @@ def build(p, variant, glyphs, openings=(), zone_letters="AB"):
     def near_opening(side, a, b):
         return any(o["side"] == side and not (b < o["a"] - 2 or a > o["b"] + 2) for o in openings)
 
+    def big_sign(text, wall, cols=4, rows=3):
+        """`text` painted big over cols x rows blocks of an end wall, centred on the aisle,
+        from y = 1 up to y = rows."""
+        for col in range(cols):
+            z = g.center_z - cols // 2 + col if wall == "east" else g.center_z + cols // 2 - 1 - col
+            x = L - 1 if wall == "east" else 0
+            for row in range(rows):
+                pos = (x, rows - row, z)
+                if w.get(*pos) in (S["wall"], S["wall_base"], S["paint_band"]):
+                    w.set(*pos, glyphs.piece_state(text, cols, rows, col, row))
+
     if p.SIGNS and H >= 3:
         level = list(p.LEVEL_SIGN)
+        # At the ends of the aisle, the level painted big on the wall.
         if not near_opening("east", g.center_z - 3, g.center_z + 3):
-            wall_sign(level, "east", g.center_z - len(level) // 2)                  # at the end of the aisle
+            big_sign(p.LEVEL_SIGN, "east")
         if not near_opening("west", g.center_z - 3, g.center_z + 3):
-            wall_sign(level, "west", g.center_z + len(level) // 2)
+            big_sign(p.LEVEL_SIGN, "west")
         n = len(level) + 1
         for x in range(8, L - 8, p.SIGN_SPACING):
             if not near_opening("north", x, x + n):
                 wall_sign(level + ["<"], "north", x)
             if not near_opening("south", x, x + n):
                 wall_sign(level + [">"], "south", x + n - 1)
+        # Stall numbers on the wall behind each stall: row A left to right, then row B back.
+        numbered = sorted((s for s in g.stalls if s[0] == "A"), key=lambda s: s[1]) + \
+            sorted((s for s in g.stalls if s[0] == "B"), key=lambda s: -s[1])
+        for n, (side, x0, x1, _, _, _) in enumerate(numbered, start=1):
+            wall_sign([f"{n:02d}"], "north" if side == "A" else "south", (x0 + x1) // 2)
 
     # --- Oddities (reserve their space first) --------------------------------------------
     stalls = list(g.stalls)

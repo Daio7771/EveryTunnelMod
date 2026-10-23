@@ -213,6 +213,10 @@ STAND_INS = {
     "cone": "minecraft:pointed_dripstone[thickness=tip,vertical_direction=up]",
     "extinguisher": "minecraft:red_candle[candles=1,lit=false]",
     "cart": "minecraft:hopper",
+    "arrow": "minecraft:white_glazed_terracotta",     # floor arrow; its facing is where it points
+    "hatch": "minecraft:yellow_glazed_terracotta",    # keep-clear hatching
+    "line_red": "minecraft:red_concrete",             # red line along the edge of a keep-clear box
+    "hazard": "minecraft:black_glazed_terracotta",    # pillar base in black and yellow stripes
 }
 
 # Other things the level places, as plain vanilla blocks (not re-skinned).
@@ -612,7 +616,8 @@ def main():
         levels[v] = Level(p, v).compose()
         levels2[v] = Level(p2, v, glyphs=levels[v].glyphs).compose()
         joints[v] = attach(levels[v], levels2[v])
-    if levels["vanilla"].glyphs.wall != levels["mod"].glyphs.wall or levels["vanilla"].glyphs.pillar != levels["mod"].glyphs.pillar:
+    gv, gm = levels["vanilla"].glyphs, levels["mod"].glyphs
+    if gv.wall != gm.wall or gv.pillar != gm.pillar or gv.pieces != gm.pieces:
         raise SystemExit("internal error: sign texts differ between the vanilla and mod builds")
 
     # Centre the level on PLACE_AT (x, z); hall 1's floor goes to PLACE_AT's y.

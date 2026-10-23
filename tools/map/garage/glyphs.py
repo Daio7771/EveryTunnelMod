@@ -17,6 +17,7 @@ class Glyphs:
         self.block = block
         self.wall = {}      # slot -> text
         self.pillar = {}    # (facing, slot) -> text
+        self.pieces = {}    # (facing, slot) -> key of one tile of big wall lettering (see piece_state)
         self._next_pillar = 0
 
     def _state(self, facing, slot):
@@ -30,9 +31,25 @@ class Glyphs:
             if t == text:
                 return self._state(facing, slot)
         slot = len(self.wall)
-        if any(s == slot for _, s in self.pillar):
+        if any(s == slot for _, s in list(self.pillar) + list(self.pieces)):
             raise SystemExit("too many different sign texts")
         self.wall[slot] = text
+        return self._state(facing, slot)
+
+    def piece_state(self, text, cols, rows, col, row):
+        """One tile of `text` painted big over cols x rows wall blocks (row 0 at the top). Shares
+        the pillar codes' pool of (facing, slot) states: a tile shows its picture on every side,
+        so the facing it gets does not matter on a wall."""
+        key = (text, cols, rows, col, row)
+        for at, k in self.pieces.items():
+            if k == key:
+                return self._state(*at)
+        n = self._next_pillar
+        self._next_pillar += 1
+        facing, slot = FACINGS[n % 4], 63 - n // 4
+        if slot in self.wall:
+            raise SystemExit("too many different sign texts")
+        self.pieces[(facing, slot)] = key
         return self._state(facing, slot)
 
     def pillar_state(self, text):

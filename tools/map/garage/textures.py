@@ -127,93 +127,134 @@ def rect(img, x0, y0, x1, y1, color, t=1.0):
 # ---------------------------------------------------------------------------
 # Palette
 
-FLOOR = (84, 86, 89)
-WALL = (150, 150, 144)
-CEILING = (124, 124, 120)
-PILLAR = (142, 142, 137)
-PAINT_WHITE = (206, 206, 196)
-PAINT_YELLOW = (212, 166, 38)
-OIL = (24, 24, 28)
-RUST = (120, 74, 40)
-DAMP = (92, 96, 88)
-DIRT = (82, 66, 48)
+# The cold, sickly palette of the art direction: blue-grey concrete, greenish damp, shadows
+# that go towards blue-black.
+FLOOR = (76, 80, 86)
+WALL = (136, 142, 148)
+CEILING = (110, 115, 121)
+PILLAR = (128, 134, 140)
+PAINT_WHITE = (200, 206, 208)
+PAINT_YELLOW = (204, 166, 44)
+PAINT_RED = (164, 44, 46)
+HAZARD_BLACK = (30, 32, 36)
+OIL = (22, 24, 28)
+RUST = (112, 72, 44)
+DAMP = (76, 94, 86)
+DIRT = (64, 64, 60)
+GRIME = (48, 52, 58)
 
 
 # ---------------------------------------------------------------------------
 # Surfaces
 
+def pores(img, rng, count, color, t=0.7):
+    """Small dark pits in the concrete, some two pixels long."""
+    for _ in range(count):
+        x, y = rng.randrange(16), rng.randrange(16)
+        px(img, x, y, color, t)
+        if rng.random() < 0.3:
+            px(img, x + 1, y, color, t * 0.6)
+
+
 def floor_tex(rng, kind):
     img = new(FLOOR)
-    noise(img, rng, 6)
+    noise(img, rng, 5)
     noise(img, rng, 4, grain=2)
-    speckle(img, rng, 10, (120, 122, 124), 0.6)      # aggregate
-    speckle(img, rng, 8, (60, 62, 64), 0.6)
+    speckle(img, rng, 12, (104, 110, 116), 0.6)          # aggregate
+    speckle(img, rng, 10, (54, 58, 64), 0.6)
+    pores(img, rng, 6, (40, 43, 48))
+    blob(img, rng, GRIME, rng.uniform(3, 6), 0.25)        # ground-in dirt
     if kind == "stained":
-        blob(img, rng, (64, 62, 58), rng.uniform(4, 7), 0.5)
-        blob(img, rng, (70, 70, 74), rng.uniform(3, 5), 0.4)
+        blob(img, rng, (44, 46, 50), rng.uniform(4, 7), 0.55)
+        blob(img, rng, (58, 62, 66), rng.uniform(3, 5), 0.4)
     elif kind == "cracked":
-        crack(img, rng, (44, 45, 48), rng.randrange(10, 20))
+        crack(img, rng, (36, 38, 42), rng.randrange(10, 20))
     elif kind == "worn":
-        blob(img, rng, (104, 106, 108), rng.uniform(4, 7), 0.45)
-        speckle(img, rng, 6, (112, 112, 112), 0.7)
+        blob(img, rng, (98, 104, 110), rng.uniform(4, 7), 0.45)         # polished by tyres
+        speckle(img, rng, 6, (112, 118, 124), 0.7)
+    elif kind == "dusty":
+        blob(img, rng, (116, 120, 124), rng.uniform(5, 8), 0.35)        # pale dust, swept by nothing
+        speckle(img, rng, 14, (122, 126, 130), 0.45)
+    elif kind == "tyre":
+        y0 = rng.randrange(3, 9)                                        # two tyre scuffs
+        for y in (y0, y0 + rng.randrange(5, 7)):
+            for x in range(16):
+                if rng.random() < 0.8:
+                    px(img, x, y, (40, 42, 46), rng.uniform(0.3, 0.55))
+                    px(img, x, y + 1, (40, 42, 46), rng.uniform(0.15, 0.3))
     return img
 
 
 def patch_tex(rng):
-    img = new((96, 97, 99))
+    img = new((88, 92, 98))
     noise(img, rng, 5)
-    speckle(img, rng, 12, (118, 118, 118), 0.6)
+    speckle(img, rng, 12, (110, 114, 120), 0.6)
+    pores(img, rng, 5, (50, 54, 60))
     for i in range(16):                                   # saw-cut edges of a repaired slab
-        px(img, i, 0, (58, 58, 60), 0.6)
-        px(img, 0, i, (58, 58, 60), 0.6)
+        px(img, i, 0, (46, 48, 54), 0.7)
+        px(img, 0, i, (46, 48, 54), 0.7)
     return img
 
 
 def wall_tex(rng, kind):
     img = new(WALL)
     noise(img, rng, 5)
-    speckle(img, rng, 10, (126, 126, 120), 0.5)          # pores
+    speckle(img, rng, 12, (118, 124, 130), 0.5)           # pores
+    pores(img, rng, 5, (92, 98, 104), 0.6)
+    for x in range(16):                                    # formwork board seam
+        px(img, x, 9, (118, 124, 130), 0.45)
+    for x, y in ((11, 4), (12, 4), (11, 5), (12, 5)):      # tie-rod hole of the formwork
+        px(img, x, y, (70, 74, 80), 0.8 if (x, y) != (12, 4) else 0.5)
     if kind == "streaked":
-        streaks(img, rng, 4, DAMP, 0.35)
+        streaks(img, rng, 4, DAMP, 0.4)
     elif kind == "stained":
-        blob(img, rng, (150, 132, 100), rng.uniform(4, 7), 0.35)
-        streaks(img, rng, 2, (130, 112, 84), 0.3)
+        blob(img, rng, (112, 116, 112), rng.uniform(4, 7), 0.35)
+        streaks(img, rng, 2, GRIME, 0.35)
+    elif kind == "grimy":
+        gradient(img, GRIME, 0.0, 0.3)                     # dirt thrown up from the floor
+        for _ in range(3):                                 # scuffs at bumper height
+            y = rng.randrange(9, 15)
+            for x in range(rng.randrange(0, 6), rng.randrange(8, 16)):
+                px(img, x, y, (84, 88, 94), 0.4)
     return img
 
 
 def wall_base_tex(rng, kind):
     img = new(WALL)
     noise(img, rng, 5)
-    gradient(img, DAMP, 0.05, 0.55)                       # moisture rising from the floor
-    speckle(img, rng, 8, (196, 198, 190), 0.6)            # efflorescence
+    pores(img, rng, 6, (92, 98, 104), 0.6)
+    gradient(img, DAMP, 0.05, 0.6)                        # moisture rising from the floor
+    speckle(img, rng, 8, (190, 198, 200), 0.6)            # efflorescence
+    gradient(img, GRIME, 0.0, 0.25)
     if kind == "dirty":
-        gradient(img, (70, 66, 60), 0.0, 0.35)
-        blob(img, rng, (80, 80, 76), 5, 0.4, cy=15)
+        gradient(img, (54, 56, 58), 0.0, 0.4)
+        blob(img, rng, (64, 68, 72), 5, 0.45, cy=15)
     return img
 
 
 def paint_band_tex(rng):
     img = new(PAINT_YELLOW)
     noise(img, rng, 7)
-    for _ in range(5):                                    # chipped paint showing the concrete
+    for _ in range(6):                                    # chipped paint showing the concrete
         x, y = rng.randrange(16), rng.randrange(16)
         for dx, dy in [(0, 0), (1, 0), (0, 1)][: rng.randrange(1, 4)]:
             px(img, x + dx, y + dy, WALL, 0.9)
-    gradient(img, (90, 80, 50), 0.0, 0.25)
+    gradient(img, (74, 70, 52), 0.0, 0.3)
     return img
 
 
 def ceiling_tex(rng, kind):
     img = new(CEILING)
     noise(img, rng, 4)
-    for y in (0, 8):                                       # formwork board joints
+    for y in (0, 5, 10):                                   # formwork board joints
         for x in range(16):
-            px(img, x, y, (104, 104, 100), 0.6)
-    speckle(img, rng, 8, (106, 106, 102), 0.6)
+            px(img, x, y, (92, 97, 103), 0.55)
+    speckle(img, rng, 8, (94, 99, 105), 0.6)
+    pores(img, rng, 4, (80, 84, 90), 0.6)
     if kind == "stained":
-        blob(img, rng, (128, 112, 88), rng.uniform(4, 6), 0.4)
+        blob(img, rng, (96, 104, 98), rng.uniform(4, 6), 0.45)          # an old leak, greenish
     elif kind == "dark":
-        blob(img, rng, (96, 96, 92), rng.uniform(5, 8), 0.5)
+        blob(img, rng, (70, 74, 80), rng.uniform(5, 8), 0.5)            # soot from exhausts
     return img
 
 
@@ -221,26 +262,104 @@ def pillar_tex(rng, kind):
     img = new(PILLAR)
     noise(img, rng, 5)
     for i in range(16):                                    # chamfered edges catch the light
-        px(img, 0, i, (168, 168, 162), 0.6)
-        px(img, 15, i, (110, 110, 106), 0.6)
-    speckle(img, rng, 8, (120, 120, 116), 0.5)
+        px(img, 0, i, (156, 162, 168), 0.6)
+        px(img, 15, i, (98, 104, 110), 0.6)
+    speckle(img, rng, 8, (112, 118, 124), 0.5)
+    pores(img, rng, 4, (88, 94, 100), 0.6)
     if kind == "scuffed":
         for _ in range(3):
             y = rng.randrange(8, 16)
             for x in range(rng.randrange(0, 6), rng.randrange(9, 16)):
-                px(img, x, y, (96, 94, 90), 0.5)
+                px(img, x, y, (84, 88, 94), 0.5)
     return img
+
+
+def worn_paint(img, rng, cells, color):
+    """Paint on the floor, worn: some pixels missing, the rest at varying strength."""
+    for x, y in cells:
+        if rng.random() > 0.06:
+            px(img, x, y, color, rng.uniform(0.78, 0.95))
 
 
 def floor_line_tex(rng, color, axis):
     """Floor concrete with a painted line ~6 px wide (axis 'z' = north-south, 'x' = east-west)."""
     img = floor_tex(rng, "plain")
-    for a in range(16):
-        for b in range(5, 11):
-            x, y = (b, a) if axis == "z" else (a, b)
-            if rng.random() > 0.12:                         # worn spots
-                px(img, x, y, color, rng.uniform(0.75, 0.95))
+    worn_paint(img, rng, [((b, a) if axis == "z" else (a, b)) for a in range(16) for b in range(5, 11)], color)
     return img
+
+
+def floor_arrow_tex(rng):
+    """A white direction arrow painted on the floor, pointing north (up in the texture);
+    the blockstate turns it to its facing."""
+    img = floor_tex(rng, "plain")
+    shaft = [(x, y) for y in range(8, 16) for x in range(6, 10)]
+    head = [(x, y) for y in range(1, 8) for x in range(16) if abs(x - 7.5) <= (y - 0.5) * 0.85]
+    worn_paint(img, rng, shaft + head, PAINT_WHITE)
+    return img
+
+
+def hatch_tex(rng):
+    """Yellow diagonal hatching of a keep-clear box; the stripes join across blocks."""
+    img = floor_tex(rng, "plain")
+    worn_paint(img, rng, [(x, y) for y in range(16) for x in range(16) if (x + y) % 8 < 3], PAINT_YELLOW)
+    return img
+
+
+def hazard_tex(rng):
+    """The base of a pillar: black and yellow diagonal stripes, chipped and scuffed by bumpers."""
+    img = new(PAINT_YELLOW)
+    noise(img, rng, 6)
+    for y in range(16):
+        for x in range(16):
+            if (x + y) % 8 < 4:
+                px(img, x, y, HAZARD_BLACK, 0.92)
+    for _ in range(7):                                     # chips down to the concrete
+        x, y = rng.randrange(16), rng.randrange(16)
+        for dx, dy in [(0, 0), (1, 0), (0, 1), (1, 1)][: rng.randrange(1, 5)]:
+            px(img, x + dx, y + dy, PILLAR, 0.9)
+    for _ in range(2):                                     # tyre rubber near the floor
+        y = rng.randrange(11, 16)
+        for x in range(rng.randrange(0, 5), rng.randrange(8, 16)):
+            px(img, x, y, (24, 24, 26), 0.5)
+    gradient(img, GRIME, 0.0, 0.3)
+    return img
+
+
+def blend(img, x, y, color, t):
+    base = img.getpixel((x, y))
+    img.putpixel((x, y), tuple(int(base[k] * (1 - t) + color[k] * t) for k in range(3)) + (255,))
+
+
+def big_letters(text, cols, rows, background, color, rng):
+    """`text` painted in big stencil letters over cols x rows tiles: {(col, row): 16x16 image},
+    row 0 at the top. The letters are the 3x5 font, each font pixel a square of whole pixels."""
+    width = len(text) * 4 - 1                                    # font pixels, with 1 between letters
+    scale = min((cols * 16 - 4) // width, (rows * 16 - 4) // 5)
+    w, h = width * scale, 5 * scale
+    x0, y0 = (cols * 16 - w) // 2, (rows * 16 - h) // 2
+    big = Image.new("RGBA", (cols * 16, rows * 16))
+    for r in range(rows):
+        for c in range(cols):
+            big.paste(background, (c * 16, r * 16))
+    painted = set()
+    for i, ch in enumerate(text.upper()):
+        for fy, row in enumerate(FONT.get(ch, FONT["?"])):
+            for fx, bit in enumerate(row):
+                if bit != "#":
+                    continue
+                for sy in range(scale):
+                    for sx in range(scale):
+                        px_ = x0 + (i * 4 + fx) * scale + sx
+                        py_ = y0 + fy * scale + sy
+                        painted.add((px_, py_))
+                        if rng.random() > 0.08:                  # worn spots
+                            blend(big, px_, py_, color, rng.uniform(0.8, 0.95))
+    for x, y in sorted(painted):                                 # paint ran down from the lowest edges
+        if (x, y + 1) not in painted and rng.random() < 0.12:
+            for k in range(1, rng.randrange(2, scale + 2)):
+                if y + k < rows * 16:
+                    blend(big, x, y + k, color, 0.45 / k)
+    return {(c, r): big.crop((c * 16, r * 16, c * 16 + 16, r * 16 + 16)) for r in range(rows) for c in range(cols)}
 
 
 def duct_tex(rng):
@@ -492,9 +611,9 @@ def material_for(name, params):
         # Rising damp: wetter, so smoother, towards the floor.
         return (lambda x, y, c: CONCRETE_WALL.but(smoothness=0.12 + 0.30 * y / 15)), None, True
     if name.startswith("wall_"):
-        # Damp streaks are the pixels where green beats red (DAMP); in the wall concrete they
-        # are equal, and the per-pixel noise shifts all three channels alike.
-        return (lambda x, y, c: WET.but(relief=0.3) if c[1] - c[0] >= 1 else CONCRETE_WALL), None, True
+        # Damp streaks are the pixels where green beats blue (DAMP); the cold wall concrete is
+        # bluer than green, and the per-pixel noise shifts all three channels alike.
+        return (lambda x, y, c: WET.but(relief=0.3) if c[1] - c[2] >= 0 else CONCRETE_WALL), None, True
     if name.startswith("band_"):
         return (lambda x, y, c: CONCRETE_WALL if near(c, WALL, 24) else WALL_PAINT), None, True
     if name.startswith("ceiling_"):
@@ -505,8 +624,16 @@ def material_for(name, params):
     # the average and sink all the concrete around it.
     if name.startswith("line_white_"):
         return concrete_or_paint(CONCRETE_FLOOR, FLOOR_PAINT, PAINT_WHITE), SURFACE_LUMINANCE["floor"], True
-    if name.startswith("line_yellow_"):
+    if name.startswith("line_yellow_") or name.startswith("hatch_"):
         return concrete_or_paint(CONCRETE_FLOOR, FLOOR_PAINT, PAINT_YELLOW), SURFACE_LUMINANCE["floor"], True
+    if name.startswith("line_red_"):
+        return concrete_or_paint(CONCRETE_FLOOR, FLOOR_PAINT, PAINT_RED), SURFACE_LUMINANCE["floor"], True
+    if name.startswith("arrow_"):
+        return concrete_or_paint(CONCRETE_FLOOR, FLOOR_PAINT, PAINT_WHITE), SURFACE_LUMINANCE["floor"], True
+    if name.startswith("hazard_"):
+        return (lambda x, y, c: CONCRETE_PILLAR if near(c, PILLAR, 20) else WALL_PAINT), None, True
+    if name.startswith("big_"):
+        return concrete_or_paint(CONCRETE_WALL, SIGN_LETTERS, params.SIGN_PAINT), SURFACE_LUMINANCE["wall"], True
     if name.startswith("duct_"):
         return (lambda x, y, c: RUST_FLAKE if near(c, (120, 110, 96), 16) else STEEL), None, True
     if name == "troffer_lit":
@@ -680,17 +807,20 @@ def build_pack(params, glyphs):
         blockstate(block, {"variants": {"": variants}})
 
     S = params.STAND_INS
-    random_cube(S["floor"], "floor", ["plain", "plain", "stained", "cracked", "worn", "plain"], floor_tex)
+    random_cube(S["floor"], "floor", ["plain", "plain", "stained", "cracked", "worn", "plain", "dusty", "tyre"], floor_tex)
     random_cube(S["floor_patch"], "patch", ["p"], lambda g, k: patch_tex(g), rotate=False)
-    random_cube(S["wall"], "wall", ["plain", "plain", "streaked", "stained"], wall_tex, rotate=False)
+    random_cube(S["wall"], "wall", ["plain", "plain", "streaked", "stained", "grimy"], wall_tex, rotate=False)
     random_cube(S["wall_base"], "wallbase", ["plain", "dirty"], wall_base_tex, rotate=False)
     random_cube(S["paint_band"], "band", ["b"], lambda g, k: paint_band_tex(g), rotate=False)
     random_cube(S["ceiling"], "ceiling", ["plain", "plain", "stained", "dark"], ceiling_tex, rotate=False)
     random_cube(S["pillar"], "pillar", ["plain", "scuffed"], pillar_tex, rotate=False)
     random_cube(S["duct"], "duct", ["d"], lambda g, k: duct_tex(g), rotate=False)
+    # Painted signage: keep-clear hatching (joins across blocks), pillar bases in hazard stripes.
+    random_cube(S["hatch"], "hatch", ["h"], lambda g, k: hatch_tex(g), rotate=False)
+    random_cube(S["hazard"], "hazard", ["a", "b"], lambda g, k: hazard_tex(g), rotate=False)
 
     # Floor paint: the line is drawn as a ~6 px stripe in the right direction.
-    for key, color, axis in (("line_white", PAINT_WHITE, "z"), ("line_yellow", PAINT_YELLOW, "x")):
+    for key, color, axis in (("line_white", PAINT_WHITE, "z"), ("line_yellow", PAINT_YELLOW, "x"), ("line_red", PAINT_RED, "x")):
         names = []
         for i in range(2):
             name = f"{key}_{i}"
@@ -698,6 +828,17 @@ def build_pack(params, glyphs):
             model(name, cube_model(up=name, down="floor_0", north="floor_0", south="floor_0", east="floor_0", west="floor_0"))
             names.append({"model": f"{NS}:block/{name}"})
         blockstate(S[key], {"variants": {"": names}})
+
+    # Direction arrows painted on the floor: the block's facing is where the arrow points.
+    arrows = []
+    for i in range(2):
+        name = f"arrow_{i}"
+        tex(name, floor_arrow_tex(r(name)))
+        model(name, cube_model(up=name, all_="floor_0"))
+        arrows.append(name)
+    blockstate(S["arrow"], {"variants": {
+        f"facing={facing}": [dict({"model": f"{NS}:block/{name}"}, **({"y": rot} if rot else {})) for name in arrows]
+        for facing, rot in (("north", 0), ("east", 90), ("south", 180), ("west", 270))}})
 
     # Light fixtures in the ceiling: only the bottom face shows the fixture.
     tex("troffer_lit", troffer_tex(r("tl"), True))
@@ -771,6 +912,14 @@ def build_pack(params, glyphs):
         name = f"code_{facing}_{slot}"
         tex(name, glyph_tex(text, pillar_bg, params.SIGN_PAINT))
         model(name, cube_model(north=name, south=name, east=name, west=name, all_="pillar_0"))
+    # Big lettering: each tile is one piece of a text painted over several wall blocks.
+    lettering = {}
+    for (facing, slot), (text, cols, rows, col, row) in glyphs.pieces.items():
+        if (text, cols, rows) not in lettering:
+            lettering[(text, cols, rows)] = big_letters(text, cols, rows, wall_bg, params.SIGN_PAINT, r(f"big-{text}"))
+        name = f"big_{facing}_{slot}"
+        tex(name, lettering[(text, cols, rows)][(col, row)])
+        model(name, cube_model(north=name, south=name, east=name, west=name, all_="wall_0"))
     # The same texts on the mod's sign tile (every_tunnel:sign_tile, numbered slots): this
     # pack replaces the mod's own blockstate, which shows bare concrete.
     variants = {}
@@ -784,6 +933,8 @@ def build_pack(params, glyphs):
                     v["y"] = rot
             elif (facing, slot) in glyphs.pillar:
                 v = {"model": f"{NS}:block/code_{facing}_{slot}"}
+            elif (facing, slot) in glyphs.pieces:
+                v = {"model": f"{NS}:block/big_{facing}_{slot}"}
             else:
                 v = {"model": f"{NS}:block/wall_0"}
             variants[key] = v

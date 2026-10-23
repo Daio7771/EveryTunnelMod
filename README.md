@@ -177,8 +177,12 @@ It writes two datapacks:
 - the mod one, using the mod's blocks;
 - a vanilla one, using re-skinned vanilla blocks.
 
-It also writes a world resource pack (`resources.zip`) with the textures and their LabPBR
-maps, and installs it all into `noname_complex`. In game, the level rebuilds only when the
+The halls carry painted signage: white arrows down the aisle towards each hall's way out,
+yellow keep-clear hatching edged in red in front of exits and doors, pillar bases in black
+and yellow stripes, a number on the wall behind every stall, and the level ("B1", "B2")
+painted big on the walls at both ends of the aisle. It also writes a world resource pack
+(`resources.zip`) with the textures (cold, worn concrete, see `garage/textures.py`) and
+their LabPBR maps, and installs it all into `noname_complex`. In game, the level rebuilds only when the
 generated commands change. The map is bigger than what is loaded around a player, so
 building force-loads its chunks first, waits until they are loaded, then builds. Building
 turns off block drops and clears loose items, removes the Pale men and then tells the mod
