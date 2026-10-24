@@ -895,6 +895,226 @@ def shutter_close(rng, variant):
     return fade(drive(y, 1.3), 0.0, 0.3)
 
 
+# ===========================================================================
+# Main menu theme
+
+MENU_BAR = 3.5            # one bar of 5/4 at about 86 bpm
+MENU_BARS = 24
+MENU_SECONDS = MENU_BAR * MENU_BARS     # 84 s: the loop
+
+
+def midi_freq(note):
+    return 440.0 * 2 ** ((note - 69) / 12.0)
+
+
+def piano_note(freq, velocity, rng, seconds=9.0):
+    """
+    A soft (felt) piano note: three slightly detuned strings, each a stiff string with
+    inharmonic partials (f_n = n f sqrt(1 + B n^2)) that die away faster the higher they are,
+    in two stages (the quick drop after the hammer, then the long ring), plus a muffled thump.
+    """
+    n = samples(seconds)
+    t = time_axis(n)
+    inharm = 0.00025 * (freq / 261.6) ** 0.8
+    ring = 7.0 * (261.6 / freq) ** 0.5                     # long decay, shorter for high notes
+    brightness = 0.55 + 0.4 * velocity
+    y = np.zeros(n)
+    for cents in (-0.9, 0.0, 1.1):
+        f0 = freq * 2 ** (cents / 1200.0)
+        for k in range(1, 40):
+            fk = k * f0 * np.sqrt(1.0 + inharm * k * k)
+            if fk > 7000.0:
+                break
+            amp = k ** -1.1 * np.exp(-(k - 1) * (1.0 - brightness) * 0.55)
+            tau = ring / (1.0 + 0.45 * (k - 1))
+            env = 0.55 * np.exp(-t / (tau * 0.12)) + 0.45 * np.exp(-t / tau)
+            y += amp * env * np.sin(TAU * fk * t + rng.uniform(0, TAU))
+    y /= 3.0
+    attack = np.minimum(1.0, t / 0.004)
+    thump = shaped_noise(samples(0.06), rng, 1.0, 60.0, 1200.0) * np.exp(-np.arange(samples(0.06)) / samples(0.012))
+    y *= attack
+    y[:thump.shape[0]] += 0.08 * velocity * thump
+    y = lowpass(y, 3500.0 + 4500.0 * velocity, order=2)
+    return fade(y * velocity, 0.0, 1.5)
+
+
+def concrete_reverb(rng, seconds=7.0, rt60=6.0):
+    """Stereo impulse response of a big empty concrete space: the highs die out before the lows."""
+    n = samples(seconds)
+    t = time_axis(n)
+    out = []
+    for _ in range(2):
+        low = shaped_noise(n, rng, 0.0, None, 900.0) * np.exp(-t * 6.9 / rt60)
+        high = shaped_noise(n, rng, 0.0, 900.0, 6000.0) * np.exp(-t * 6.9 / (rt60 * 0.35))
+        ir = low + 0.5 * high
+        ir[:samples(0.035)] = 0.0                            # pre-delay
+        for delay, gain in ((0.041, 0.5), (0.067, 0.35), (0.103, 0.25)):   # first reflections
+            ir[samples(delay)] += gain * 40.0
+        out.append(ir / np.sqrt(np.sum(ir ** 2)))
+    return stereo(*out)
+
+
+def circular_reverb(dry, ir):
+    """Convolution that wraps the tail around the loop, so the reverb of the last notes rings into the first."""
+    n = dry.shape[0]
+    wet = np.zeros_like(dry)
+    for ch in range(2):
+        wet[:, ch] = np.fft.irfft(np.fft.rfft(dry[:, ch]) * np.fft.rfft(ir[:, ch], n), n)
+    return wet
+
+
+def distant_clang(rng, seconds=6.0):
+    """Something metal struck far away in the structure: low inharmonic ring, muffled."""
+    n = samples(seconds)
+    base = rng.uniform(70.0, 95.0)
+    y = damped_partials(n, [base, base * 2.76, base * 5.40, base * 8.93], [1.0, 0.6, 0.35, 0.2],
+                        [2.5, 1.4, 0.8, 0.4], rng, 0.0)
+    y += burst(n, rng, 0.0, 0.08, hi=1500.0, tau=0.02, amp=0.8)
+    return lowpass(y, 900.0, order=2)
+
+
+def menu_theme(rng):
+    """
+    The main menu: dark, restless piano in D minor over a drone, 24 bars of 5/4 (84 s), looping.
+
+    - A high piano ostinato in eighths (D A F A E A D A C A) runs through it, the limping 5/4
+      keeping it uneasy; it creeps in, carries the build, stops dead for a near-empty breath,
+      comes back harder, and thins out to the drone the loop began with.
+    - Over it a slower falling motif (D F E A) and its variations; under it a bass note each bar
+      and, in the strong parts, a low pulse like a heartbeat (beats 1 and 4).
+    - Bars 0-12 build, 12-14 are the break, 14-23 come back harder, 23-24 thin out to where
+      bar 0 begins. A low D drone and a dark pad (Dm - Bb - Gm - A, four bars each) underneath;
+      a string tremolo swells into the break; something metal rings far away; tape hiss.
+    - Mixed by measured loudness: ostinato and motif lead, drone and pad stay under.
+      Everything is built around the loop (whole cycles, circular noise, notes and reverb
+      wrapping round), so it has no seam.
+    """
+    seconds = MENU_SECONDS
+    n = samples(seconds)
+    t = time_axis(n)
+    bar = MENU_BAR
+    eighth = bar / 10.0
+    rms = lambda x: np.sqrt(np.mean(x ** 2)) + 1e-12
+    db = lambda level: 10 ** (level / 20.0)
+
+    def at_level(x, level):
+        return x * (db(level) / rms(x))
+
+    def section(bars, a, b, ramp_in=0.0, ramp_out=0.0):
+        """1 between bars a and b, with linear ramps (in bars) at both ends."""
+        x = np.asarray(bars, dtype=float)
+        up = np.clip((x - a) / ramp_in, 0, 1) if ramp_in > 0 else (x >= a).astype(float)
+        down = np.clip((b - x) / ramp_out, 0, 1) if ramp_out > 0 else (x < b).astype(float)
+        return up * down
+
+    bars_axis = t / bar
+
+    # Drone: D1 + D2, slightly driven, breathing; a fifth that comes and goes.
+    breath = 0.75 + 0.25 * np.sin(TAU * loop_frequency(1 / 14.0, seconds) * t)
+    d1 = np.sin(TAU * loop_frequency(36.71, seconds) * t)
+    d2 = np.sin(TAU * loop_frequency(73.42, seconds) * t + 0.7)
+    fifth = np.sin(TAU * loop_frequency(55.0, seconds) * t) * (0.5 - 0.5 * np.cos(TAU * t / (seconds / 3))) ** 2
+    drone = drive(0.6 * d1 + 0.35 * d2 + 0.25 * fifth, 1.4) * breath + 0.2 * shaped_noise(n, rng, 2.0, 20.0, 120.0)
+    drone = stereo(drone, drone)
+
+    # Pad: Dm, Bb, Gm, A, four bars each, round and round.
+    chords = [[50, 53, 57], [46, 50, 53], [43, 46, 50], [45, 49, 52]]
+    slots = MENU_BARS // 4
+    pad = np.zeros((n, 2))
+    for slot in range(slots):
+        chord = chords[slot % 4]
+        centre = (slot + 0.5) * 4 * bar
+        d = (t - centre + seconds / 2) % seconds - seconds / 2
+        env = np.clip(np.cos(np.pi * d / (4 * bar * 1.4)), 0, 1) ** 2
+        for j, note in enumerate(chord):
+            f = midi_freq(note)
+            voice = sum(np.sin(TAU * loop_frequency(f * 2 ** (c / 1200), seconds) * t + rng.uniform(0, TAU))
+                        for c in (-7, 0, 6))
+            pad += pan(voice * env, (j - 1) * 0.5)
+    pad = fft_filter(pad, 80.0, 1200.0, order=2)
+
+    # Piano notes are cached by (note, velocity step): the ostinato repeats the same ones.
+    cache = {}
+
+    def note_sound(note, velocity):
+        key = (note, round(velocity * 20))
+        if key not in cache:
+            cache[key] = piano_note(midi_freq(note), key[1] / 20.0, rng)
+        return cache[key]
+
+    def play(buffer, at_seconds, note, velocity, spread=0.5):
+        x = note_sound(note, velocity)
+        place(buffer, pan(x, np.clip((note - 62) / 24.0, -spread, spread)), at_seconds, circular=True)
+
+    # Ostinato: where it plays and how hard (bars).
+    pattern = [74, 69, 77, 69, 76, 69, 74, 69, 72, 69]          # D A F A E A D A C A
+    accents = [1.0, 0.7, 0.85, 0.7, 0.85, 0.7, 0.9, 0.7, 0.8, 0.7]
+    # Quiet at the loop point on both sides (bars 23 and 0), so the end flows into the start.
+    ostinato_level = lambda b: 0.15 + 0.4 * section(b, 0, 12, ramp_in=3) + 0.6 * section(b, 14, 23, ramp_out=2)
+    ostinato = np.zeros((n, 2))
+    for b in range(MENU_BARS):
+        level = float(ostinato_level(b))
+        if level <= 0.02:
+            continue
+        for k, (note, accent) in enumerate(zip(pattern, accents)):
+            velocity = level * accent * (0.92 + 0.16 * rng.random())
+            play(ostinato, b * bar + k * eighth + rng.normal(0, 0.006), note, velocity)
+
+    # Motif and its variations, mid register; bass notes each bar in the strong parts.
+    motif = [(0, 62), (3, 65), (5, 64), (8, 57)]                 # in eighths: D F E A
+    variation = [(0, 62), (3, 65), (5, 67), (8, 64)]
+    low = [(0, 50), (3, 53), (5, 52), (8, 45)]
+    phrases = [(4, motif), (6, variation), (8, motif), (10, variation),
+               (14, low), (16, motif), (18, variation), (20, low)]
+    melody = np.zeros((n, 2))
+    for b, phrase in phrases:
+        for k, note in phrase:
+            play(melody, b * bar + k * eighth, note, 0.75, spread=0.2)
+            play(melody, (b + 1) * bar + k * eighth, note - 12 if note > 55 else note, 0.5, spread=0.2)
+    bass_notes = [38, 34, 43, 45]                                # D Bb G A, following the pad
+    bass = np.zeros((n, 2))
+    for b in list(range(2, 12)) + list(range(14, 22)):
+        play(bass, b * bar, bass_notes[(b // 4) % 4], 0.6, spread=0.1)
+
+    # Low pulse on beats 1 and 4, in the strong parts.
+    pulse = np.zeros((n, 2))
+    thump_n = samples(0.5)
+    tt = np.arange(thump_n) / SR
+    thump = np.sin(TAU * (45.0 * tt + 30.0 * 0.04 * (1 - np.exp(-tt / 0.04)))) * np.exp(-tt / 0.12)
+    for b in list(range(6, 12)) + list(range(15, 22)):
+        for beat in (0, 3):
+            place(pulse, stereo(thump, thump), b * bar + beat * (bar / 5), circular=True)
+
+    # A string tremolo swells into the break (bars 10-12) and is cut with it.
+    swell = section(bars_axis, 10, 12, ramp_in=2) * (1.0 - 0.6 * (0.5 + 0.5 * np.sin(TAU * loop_frequency(9.0, seconds) * t)))
+    strings = sum(pan(string_voice(t, f, seconds, rng), position)
+                  for f, position in ((587.33, -0.4), (622.25, 0.4), (880.0, 0.0)))
+    strings = fft_filter(strings, 200.0, 4000.0, order=2) * swell[:, None]
+
+    # Something metal, far away.
+    far = np.zeros((n, 2))
+    for b, position in ((12.5, -0.7), (22.5, 0.6)):
+        place(far, pan(distant_clang(rng), position), b * bar, circular=True)
+
+    ir = concrete_reverb(rng, rt60=4.5)
+    def roomy(x, dry, wet):
+        return dry * x + wet * circular_reverb(x, ir)
+
+    y = (at_level(drone, -31.0) + at_level(pad, -37.0)
+         + at_level(roomy(ostinato, 0.8, 0.45), -24.0)
+         + at_level(roomy(melody, 0.75, 0.5), -24.0)
+         + at_level(roomy(bass, 0.8, 0.4), -29.0)
+         + at_level(pulse, -31.0)
+         + at_level(roomy(strings, 0.6, 0.6), -36.0)
+         + at_level(circular_reverb(far, ir), -38.0))
+
+    # Under it all: a faint fluorescent hum and tape hiss.
+    hum = 0.004 * bandpass(mains_hum(t, 100.0, rng), 90.0, 3000.0, order=2)
+    hiss = stereo(shaped_noise(n, rng, 0.5, 2000.0, 12000.0), shaped_noise(n, rng, 0.5, 2000.0, 12000.0))
+    y += stereo(hum, hum) + 0.003 * hiss
+    return fft_filter(y, 25.0, None, order=2)
+
+
 def material(fn, impact):
     return lambda rng, variant: fn(rng, variant, impact)
 
@@ -956,6 +1176,8 @@ SOUNDS = [
           shutter_close, -1.0, attenuation=32),
     Sound("event.level_transition", "Level progress", "Going from Level 1 to Level 2", "stereo", False, 1, level_transition, -1.0),
     Sound("event.death", "Level progress", "Death (1: short, 2: with collapse)", "stereo", False, 2, death, -1.0),
+    Sound("music.menu", "Menu", "Main menu theme: restless piano ostinato in 5/4, D minor, over a drone (loops, 1:24)", "stereo", True, 1,
+          lambda rng, variant: menu_theme(rng), -3.0, stream=True),
 ] + [
     sound
     for name, fn, use in MATERIALS

@@ -16,7 +16,8 @@ import net.minecraft.util.Identifier
  * menus (no world open, vanilla's title screen not asked for, not loading a world). Vanilla's
  * music never plays at all (`MusicTrackerMixin`).
  *
- * Until the song exists (no `music.menu` event in sounds.json) the menu is silent.
+ * The theme is synthesized by `tools/sounds/catalog.py` (`menu_theme`): built to loop with no
+ * seam. Without that event in sounds.json the menu is silent.
  */
 object MenuMusic {
 

@@ -438,6 +438,14 @@
       }
     ]
   },
+  "music.menu": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/menu_1",
+        "stream": true
+      }
+    ]
+  },
   "music.stinger.heard": {
     "sounds": [
       "every_tunnel:music/stinger/heard_1",

@@ -83,7 +83,8 @@ BEGIN opens Noname Complex; CREDITS rolls the end credits; OPTIONS and LANGUAGE 
 vanilla's. After 15 s without moving the mouse, the Pale man's silhouette slowly appears,
 faint, on the right, and vanishes as soon as the mouse moves (`tools/gui/menu_figure.py`
 draws it). Its music is the sound event
-`music.menu` (silent until the song is added). Ctrl+Shift+V swaps to vanilla's title
+`music.menu`: an 84 s loop of a restless piano ostinato in 5/4 over a drone, synthesized by
+`tools/sounds/catalog.py` like every other generated sound. Ctrl+Shift+V swaps to vanilla's title
 screen and back, for other worlds, mods and multiplayer. The logo (`textures/gui/logo.png`,
 worn serif capitals in pixel art) comes from `tools/gui/logo.py`. Vanilla's music never
 plays, in the menus or in a world.
