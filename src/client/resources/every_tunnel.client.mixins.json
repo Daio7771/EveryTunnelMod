@@ -6,7 +6,12 @@
   "client": [
     "AbstractClientPlayerEntityMixin",
     "ClientPlayerEntityMixin",
-    "InGameHudMixin"
+    "InGameHudMixin",
+    "QuickPlayMixin",
+    "ScreenMixin",
+    "SoundSystemMixin",
+    "SplashOverlayMixin",
+    "WorldListEntryMixin"
   ],
   "injectors": {
     "defaultRequire": 1

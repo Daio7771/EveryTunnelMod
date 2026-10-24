@@ -61,7 +61,7 @@ data class ThirstConfig(
 
 data class FlashlightConfig(
     /** Seconds of light from a full battery. */
-    val batteryMaxSeconds: Double = 300.0,
+    val batteryMaxSeconds: Double = 180.0,
     /**
      * Battery percentage below which the low battery warning starts: the HUD battery
      * row blinks and the beam flickers now and then.
@@ -111,7 +111,8 @@ data class PaleManConfig(
     val wallMuffle: Double = 0.6,
     /**
      * How loud a single noise must be to make him charge at once: 1 at its source, 0 at
-     * the edge of its radius. 0.5 = sprinting within 7 blocks.
+     * the edge of its radius. 0.5 = sprinting within 7 blocks. A second noise while he
+     * listens needs half of it to start a chase; a fainter one makes him walk there.
      */
     val chaseLoudness: Double = 0.5,
     /** Seconds he stands still listening after a first noise, and searching after losing you. */

@@ -43,8 +43,11 @@ object DrinkHooks {
             return
         }
         val config = ConfigManager.gameplay
-        ResourceSystem.set(player.uuid, ResourceSystem.drink(ResourceSystem.stateOf(player.uuid, config), config))
+        val before = ResourceSystem.stateOf(player.uuid, config)
+        val after = ResourceSystem.drink(before, config)
+        ResourceSystem.set(player.uuid, after)
         if (!player.abilities.creativeMode) stack.decrement(1)
+        PlaytestLog.drank(player, before, after)
         NoiseHooks.drink(player)
     }
 }

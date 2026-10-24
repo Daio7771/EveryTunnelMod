@@ -35,7 +35,8 @@ import java.util.UUID
  * The scene a new game starts with: waiting in the elevator.
  *
  * A player who has not had it yet in this world, and is in the start zone (tagged
- * [START_TAG]) of a level with an `intro` while the world rules apply, is put at the level
+ * [START_TAG]) of a level with an `intro` while the world rules apply (and the loading
+ * screen is gone, see [LoadingHooks]), is put at the level
  * start with what a new game starts with (only the built-in flashlight, full: empty
  * inventory, full health and resources); the elevator doors (zones tagged [DOOR_TAG]) close and the intro's song plays.
  * After the intro's seconds the bell rings, the song distorts and fades
@@ -83,13 +84,17 @@ object IntroHooks {
         }
     }
 
-    /** Forgets that [player] had the intro and takes them to the start of the first level with one. */
+    /**
+     * Forgets that [player] had the intro and takes them to the start of the first level with
+     * one, with the elevator doors closed: the intro starts there (once the loading screen is gone).
+     */
     fun replay(player: ServerPlayerEntity): LevelDefinition? {
         val level = LevelManager.all().filter { it.intro != null }.minByOrNull { it.order } ?: return null
         val state = state(player.server)
         if (state.done.remove(player.uuid)) state.markDirty()
         running.remove(player.uuid)
         teleportToStart(player, level)
+        worldOf(player.server, level)?.let { closeDoors(it, level) }
         return level
     }
 
@@ -98,6 +103,7 @@ object IntroHooks {
             checkTicks = 0
             for (player in server.playerManager.playerList) {
                 if (player.uuid in running || !WorldRules.appliesTo(player.isCreative, player.isSpectator)) continue
+                if (LoadingHooks.isLoading(player)) continue
                 val location = PlayerLocationTracker.locationOf(player.uuid)
                 val level = location.levelId?.let(LevelManager::get) ?: continue
                 if (level.intro == null || player.uuid in state(server).done) continue
@@ -148,13 +154,7 @@ object IntroHooks {
         player.inventory.clear()
         player.health = player.maxHealth
         ResourceSystem.reset(player.uuid)
-        for (box in doors(level)) {
-            forEachBlock(box) { pos ->
-                val state = world.getBlockState(pos)
-                if (state.isAir || state.isOf(ModBlocks.ELEVATOR_DOOR)) world.setBlockState(pos, closedDoor(box, pos))
-            }
-        }
-        opening.removeIf { it.world == world }
+        closeDoors(world, level)
         intro.music?.let { sendMusic(player, MUSIC_START) { buf -> buf.writeString(it) } }
         val ticks = (intro.seconds * 20.0).toInt().coerceAtLeast(1)
         running[player.uuid] = Running(level.id, ticks, ticks)
@@ -177,6 +177,17 @@ object IntroHooks {
         }
         LevelEntryHooks.announce(player, level)
         EveryTunnel.LOGGER.info("{}: intro of {} done, doors open", player.name.string, level.id)
+    }
+
+    /** Closes the elevator doors of [level] (zones tagged [DOOR_TAG]) and stops any that are opening. */
+    private fun closeDoors(world: ServerWorld, level: LevelDefinition) {
+        for (box in doors(level)) {
+            forEachBlock(box) { pos ->
+                val state = world.getBlockState(pos)
+                if (state.isAir || state.isOf(ModBlocks.ELEVATOR_DOOR)) world.setBlockState(pos, closedDoor(box, pos))
+            }
+        }
+        opening.removeIf { it.world == world }
     }
 
     /** A closed door for [pos] in the opening [box]: the low half slides to the low side, the rest the other way. */

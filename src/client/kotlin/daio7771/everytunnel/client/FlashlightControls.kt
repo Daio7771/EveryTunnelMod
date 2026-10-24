@@ -41,6 +41,9 @@ object FlashlightControls {
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> wasOn = false }
     }
 
+    /** The key the flashlight is bound to, as the game names it (e.g. "F"). */
+    fun keyName(): Text = toggleKey.boundKeyLocalizedText
+
     private fun tick(client: MinecraftClient) {
         while (toggleKey.wasPressed()) {
             if (client.player != null && ClientPlayNetworking.canSend(FlashlightHooks.TOGGLE_PACKET_ID)) {

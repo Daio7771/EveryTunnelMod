@@ -59,8 +59,9 @@ object ResourceHooks {
         }
     }
 
+    /** Survival or Adventure in a world with levels, alive, and not behind the loading screen ([LoadingHooks]). */
     fun appliesTo(player: ServerPlayerEntity): Boolean =
-        player.isAlive && WorldRules.appliesTo(player.isCreative, player.isSpectator)
+        player.isAlive && WorldRules.appliesTo(player.isCreative, player.isSpectator) && !LoadingHooks.isLoading(player)
 
     private fun tick(server: MinecraftServer) {
         val config = ConfigManager.gameplay

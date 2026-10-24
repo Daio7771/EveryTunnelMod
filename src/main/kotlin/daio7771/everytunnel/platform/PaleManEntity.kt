@@ -20,6 +20,7 @@ import net.minecraft.entity.data.TrackedData
 import net.minecraft.entity.data.TrackedDataHandlerRegistry
 import net.minecraft.entity.mob.HostileEntity
 import net.minecraft.nbt.NbtCompound
+import net.minecraft.registry.Registries
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
@@ -32,6 +33,7 @@ import software.bernie.geckolib.core.animation.AnimatableManager
 import software.bernie.geckolib.core.animation.AnimationController
 import software.bernie.geckolib.core.animation.RawAnimation
 import software.bernie.geckolib.util.GeckoLibUtil
+import java.util.Locale
 
 /** What the Pale man is doing, as far as his animations care. */
 enum class PaleManMode { ROAM, LISTEN, CHASE }
@@ -74,6 +76,8 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
     /** Server side only. */
     val brain = PaleManBrain()
     private var pathTarget: Position? = null
+    /** The state in which a path that falls short was last reported ([checkPath]), or null. */
+    private var pathProblemState: PaleManBrain.State? = null
     private val stingerTicks = HashMap<java.util.UUID, Long>()
 
     /** Sound timers, server side: ticks into the current step, ticks until the next breath. */
@@ -145,8 +149,10 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
             ?.let { PaleManBrain.NearbyPlayer(it.uuid, Math.sqrt(squaredDistanceTo(it))) }
 
         val before = brain.state
+        val targetBefore = brain.target
+        val navigationIdle = navigation.isIdle
         val decision = brain.tick(
-            PaleManBrain.Senses(now, Position(x, y, z), heard, nearest, navigation.isIdle), config,
+            PaleManBrain.Senses(now, Position(x, y, z), heard, nearest, navigationIdle), config,
         )
         if (decision.state != before) {
             EveryTunnel.LOGGER.info(
@@ -154,6 +160,12 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
                 blockX, blockY, blockZ, before, decision.state, decision.target,
                 heard.maxOfOrNull { it.loudness }?.let { "%.2f".format(it) } ?: "-",
             )
+            pathProblemState = null
+            if (decision.state == PaleManBrain.State.SEARCH && targetBefore != null &&
+                (before == PaleManBrain.State.CHASE || before == PaleManBrain.State.INVESTIGATE)
+            ) {
+                PlaytestLog.paleManGaveUp(this, before.name, whyStopped(targetBefore, navigationIdle))
+            }
         }
 
         brainState = decision.state
@@ -169,6 +181,7 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
             target != pathTarget -> {
                 navigation.startMovingTo(target.x, target.y, target.z, decision.speed)
                 pathTarget = target
+                checkPath(decision.state, target)
             }
         }
         decision.attack?.let { id -> (world.getPlayerByUuid(id) as? ServerPlayerEntity)?.let(::hit) }
@@ -188,6 +201,48 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
         if (level.dimension != world.registryKey.value.toString()) return null
         val zoneId = level.spawnPoint(key.substringAfter('/'))?.zone ?: return null
         return level.zone(zoneId)?.box
+    }
+
+    /**
+     * Playtest log, once per state: the path to [target] does not get there. Says where it
+     * ends and what stands in the next block towards the target, from the floor up to his
+     * head (he is 2.8 blocks tall, so he needs three free blocks).
+     */
+    private fun checkPath(state: PaleManBrain.State, target: Position) {
+        val path = navigation.currentPath
+        if (path != null && path.reachesTarget()) return
+        if (pathProblemState == state) return
+        pathProblemState = state
+        val end = path?.end?.blockPos ?: blockPos
+        val short = PaleManBrain.horizontalDistance(Position(end.x + 0.5, end.y.toDouble(), end.z + 0.5), target)
+        val problem = if (path == null) "no path at all" else "the path stops %.1f blocks short, at (%d, %d, %d)".format(
+            Locale.ROOT, short, end.x, end.y, end.z,
+        )
+        PlaytestLog.paleManPath(this, state.name, target, "$problem; next block towards it: ${blocksTowards(end, target)}")
+    }
+
+    /** The blocks from the floor (y - 1) up to y + 3 one step from [from] towards [target]. */
+    private fun blocksTowards(from: BlockPos, target: Position): String {
+        val dx = target.x - (from.x + 0.5)
+        val dz = target.z - (from.z + 0.5)
+        val step = if (Math.abs(dx) >= Math.abs(dz)) BlockPos(Math.signum(dx).toInt(), 0, 0) else BlockPos(0, 0, Math.signum(dz).toInt())
+        val next = from.add(step)
+        return (-1..3).joinToString(", ") { dy ->
+            val state = world.getBlockState(next.up(dy))
+            val name = Registries.BLOCK.getId(state.block).path
+            val label = if (dy < 0) "floor" else "y+$dy"
+            if (state.isAir) "$label air" else "$label $name"
+        }
+    }
+
+    /** Why a walk or a chase towards [target] ended in a search: there, stuck, or out of time. */
+    private fun whyStopped(target: Position, navigationIdle: Boolean): String {
+        val distance = PaleManBrain.horizontalDistance(Position(x, y, z), target)
+        return when {
+            distance <= PaleManBrain.ARRIVE_DISTANCE -> "reached the noise"
+            navigationIdle -> "stopped %.1f blocks short of the noise (no way on)".format(Locale.ROOT, distance)
+            else -> "ran out of time %.1f blocks from the noise".format(Locale.ROOT, distance)
+        }
     }
 
     /** [returnHome] to his spawn point, if he has one. */
@@ -215,7 +270,9 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
     private fun hit(player: ServerPlayerEntity) {
         lookControl.lookAt(player)
         triggerAnim("main", "attack")
-        val hurt = player.damage(damageSources.mobAttack(this), ConfigManager.gameplay.paleMan.attackDamage.toFloat())
+        val damage = ConfigManager.gameplay.paleMan.attackDamage
+        val hurt = player.damage(damageSources.mobAttack(this), damage.toFloat())
+        if (hurt) PlaytestLog.hitBy(player, this, damage, fatal = DeathHooks.isDying(player))
         if (hurt && player.isAlive) player.playSound(ModSounds.TINNITUS, SoundCategory.PLAYERS, 1f, 1f)
     }
 
@@ -263,6 +320,7 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
         if (last != null && now - last < STINGER_COOLDOWN_TICKS) return
         stingerTicks[player.uuid] = now
         player.playSound(ModSounds.STINGER_HEARD, SoundCategory.HOSTILE, 1f, 1f)
+        PlaytestLog.heardBy(player, this, brain.state.name)
     }
 
     /** Solid full blocks crossed by the straight line from [from] to [to], at most [MAX_WALLS]. */

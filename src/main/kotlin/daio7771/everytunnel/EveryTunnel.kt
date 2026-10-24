@@ -10,6 +10,7 @@ import daio7771.everytunnel.platform.IntroHooks
 import daio7771.everytunnel.platform.LevelEntryHooks
 import daio7771.everytunnel.platform.LevelReloadListener
 import daio7771.everytunnel.platform.LevelTrackingHooks
+import daio7771.everytunnel.platform.LoadingHooks
 import daio7771.everytunnel.platform.LootSpawner
 import daio7771.everytunnel.platform.KeycardHooks
 import daio7771.everytunnel.platform.EndingHooks
@@ -19,6 +20,7 @@ import daio7771.everytunnel.platform.ModItems
 import daio7771.everytunnel.platform.ModSounds
 import daio7771.everytunnel.platform.NoiseHooks
 import daio7771.everytunnel.platform.PaleManSpawner
+import daio7771.everytunnel.platform.PlaytestLog
 import daio7771.everytunnel.platform.RespawnHooks
 import daio7771.everytunnel.platform.ResourceHooks
 import daio7771.everytunnel.platform.WorldRulesHooks
@@ -33,7 +35,8 @@ import org.slf4j.LoggerFactory
  * Loads the gameplay config and registers the items (battery), blocks (fluorescent
  * light, props), entities (the Pale man, and his spawning at level spawn points), sounds, the level data loader, the world rules, player level/zone tracking,
  * level ambience, stamina, thirst and the flashlight battery, player noise (what
- * enemies can hear), and the debug commands.
+ * enemies can hear), opening a world (rebuild and new game behind the loading screen), the
+ * debug commands and the playtest log.
  * Later gameplay systems (`systems`, `entities`, `audio`) are registered here too.
  */
 object EveryTunnel : ModInitializer {
@@ -69,8 +72,10 @@ object EveryTunnel : ModInitializer {
         DeathHooks.register()
         LevelEntryHooks.register()
         IntroHooks.register()
+        LoadingHooks.register()
         DebugCommands.register()
         DevWorlds.register()
+        PlaytestLog.register()
         LOGGER.info("$MOD_NAME loaded")
     }
 }

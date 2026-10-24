@@ -30,13 +30,15 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  *     ]
  *   },
  *   "entry": { "title": "Level 1", "subtitle": "", "sound": "every_tunnel:event.level_transition" },
- *   "intro": { "seconds": 25, "music": "every_tunnel:music.elevator" }
+ *   "intro": { "seconds": 25, "music": "every_tunnel:music.elevator" },
+ *   "build": "garage:build"
  * }
  * ```
  *
  * `name` (defaults to the id), `dimension` (defaults to the overworld), `tags`,
  * `yaw`, `pitch`, a spawn point's `zone` (the zone what spawns there stays in),
- * `spawn_points`, `ambience`, `entry` and `intro` (and everything inside them) are
+ * `spawn_points`, `ambience`, `entry`, `intro` (and everything inside them) and `build`
+ * (the function that builds the level's blocks, run every time the world opens) are
  * optional; `intro.seconds` defaults to 25. `order` and at least one valid zone are required. A broken zone, spawn
  * point or random sound is skipped with a problem; the level is rejected only when
  * it cannot be used at all.
@@ -52,6 +54,7 @@ object LevelParser {
     private val ID_PATTERN = Regex("[a-z0-9_]+")
     private val DIMENSION_PATTERN = Regex("[a-z0-9_.-]+:[a-z0-9_./-]+")
     private val SOUND_PATTERN = Regex("[a-z0-9_.-]+:[a-z0-9_./-]+")
+    private val FUNCTION_PATTERN = Regex("[a-z0-9_.-]+:[a-z0-9_./-]+")
 
     /** Minecraft does not play positioned sounds farther away than this (at volume 1 or less). */
     const val MAX_SOUND_DISTANCE: Double = 16.0
@@ -83,6 +86,7 @@ object LevelParser {
         val ambience = parseAmbience(fields, problems)
         val entry = parseEntry(fields, problems)
         val intro = parseIntro(fields, problems)
+        val build = parseBuild(fields, problems)
         fields.reportUnknownKeys()
 
         if (!hasOrder || zones.isEmpty()) {
@@ -90,7 +94,20 @@ object LevelParser {
             problems += "level skipped"
             return Result(null, problems.toList())
         }
-        return Result(LevelDefinition(levelId, name, order, dimension, zones, spawnPoints, ambience, entry, intro), problems.toList())
+        return Result(LevelDefinition(levelId, name, order, dimension, zones, spawnPoints, ambience, entry, intro, build), problems.toList())
+    }
+
+    private fun parseBuild(fields: JsonFields, problems: MutableList<String>): String? {
+        if (!fields.has("build")) {
+            fields.stringList("build") // marks the key as read; absent is fine
+            return null
+        }
+        val id = fields.requiredString("build") ?: return null
+        if (!FUNCTION_PATTERN.matches(id)) {
+            problems += "${fields.pathOf("build")}: \"$id\" is not a function id like garage:build"
+            return null
+        }
+        return id
     }
 
     private fun parseIntro(fields: JsonFields, problems: MutableList<String>): LevelIntro? {

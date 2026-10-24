@@ -48,10 +48,10 @@
     "fabric-api": "*",
     "minecraft": "${minecraft_version}",
     "java": ">=17",
-    "geckolib": ">=4.8.4"
+    "geckolib": ">=4.8.4",
+    "lambdynlights": ">=4.4.0"
   },
   "recommends": {
-    "lambdynlights": ">=4.4.0",
     "sound_physics_remastered": "*",
     "sodium": "0.5.x",
     "iris": "1.7.x",

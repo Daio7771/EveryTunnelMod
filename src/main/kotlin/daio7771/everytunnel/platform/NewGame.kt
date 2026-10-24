@@ -12,7 +12,8 @@ import net.minecraft.util.Identifier
 import net.minecraft.world.GameMode
 
 /**
- * Starts the game over for a player, in the same world (`/everytunnel newgame`):
+ * Starts the game over for a player, in the same world: every time the world opens
+ * ([LoadingHooks]) and with `/everytunnel newgame`.
  *
  * - The world: every shutter opens ([LevelEntryHooks.openAll]), all the loot is back
  *   ([LootSpawner.restock]), the lights the keycard put out are back and the card readers
@@ -36,6 +37,7 @@ object NewGame {
         KeycardHooks.forgetLights(server)
         LootSpawner.restock(server)
         PaleManSpawner.startNewGame(server)
+        LoadingHooks.levelsRebuilt(server)
         EveryTunnel.LOGGER.info("Levels rebuilt: loot back, keycard lights forgotten")
     }
 
@@ -58,6 +60,7 @@ object NewGame {
         ResourceSystem.reset(player.uuid)
         player.changeGameMode(GameMode.SURVIVAL)
 
+        PlaytestLog.newGame(player)
         val level = IntroHooks.replay(player) ?: firstLevelStart(player)
         EveryTunnel.LOGGER.info("{}: new game in {}", player.name.string, level?.id)
         return level

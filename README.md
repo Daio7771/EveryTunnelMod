@@ -31,7 +31,7 @@ with commands allowed, named exactly `noname_complex` (the map) or `dev_flat` (t
 After that:
 
 - the map: `python3 tools/map/map_generator.py` installs Level 1 into `noname_complex`, and
-  the level builds itself the first time you open the world;
+  the mod rebuilds the level behind its loading screen every time you open the world;
 - the test world: copy `examples/dev_flat_datapack/every_tunnel_levels` into
   `run/saves/dev_flat/datapacks/`. Its `level_2` has a Pale man spawn point.
 
@@ -77,6 +77,16 @@ with gamerules, and the difficulty is locked on Normal (Peaceful would delete th
 man as soon as he spawns). Entering a level makes its start (the spawn point tagged `player`)
 your respawn point, so you don't come back on the roof.
 
+**Opening the world.** Every time a world with levels opens, one black loading screen
+covers everything from the click until the elevator, vanilla's own loading screens and
+the resource reload included. It shows a tip in the middle (`loading.every_tunnel.tip.*`
+in the language file, a new one every 7 seconds; `{flashlight}`, `{sneak}`, `{sprint}`,
+`{jump}` and `{use}` become the player's keys) and "Loading..." below, and the game is
+silent. Behind it the mod runs the levels' `build` function (the map's `garage:build`)
+and then starts a new game in Survival and Adventure, whether the last one was finished,
+halfway or never started; Creative and Spectator players stay where they were. Once the
+elevator is drawn, the screen and the sound fade in together, and the intro starts.
+
 **The start.** A new game begins in the elevator with its doors shut while a song plays
 (`music.elevator`: Kevin MacLeod's "Local Forecast - Elevator", CC BY 4.0, see below). After 25 seconds the bell rings,
 the song distorts and fades like a tape running down, the doors slide open and "Level 1"
@@ -94,8 +104,8 @@ buzzes "It needs a keycard" until you have it. The keycard lies on the counter o
 booth in hall 5. Picking it up puts out every light still on in Level 2, in a wave
 spreading from you. Behind the EXIT door, stairs go down to B3: a few steps down you hear
 bare feet coming down behind you, the screen fades, and "End of demo" and the credits
-show. Then the game saves and goes back to the title screen; entering the world again
-starts a new game. Walking into a level
+show. Then the game saves and goes back to the title screen; opening the world again
+starts a new game, as always. Walking into a level
 with a higher `order` shows its title ("Level 2"), plays its sound, and closes
 every shutter in its zones tagged `shutter` once you're past it: a rolling shutter rattles
 down and slams, and there's no way back.
@@ -131,9 +141,10 @@ Every Tunnel tab.
 
 He hears every noise within its radius, and each solid block in between shrinks that
 radius (`wall_muffle`). He wanders until he hears something. A quiet noise makes him stop
-and listen for 2 s, then walk to where it came from. A loud one (sprinting within about
-7 blocks), or a second noise while he listens, makes him run at it, and you hear the "he
-heard you" stinger. While chasing, each new noise moves his target, so if you stop
+and listen for 2 s, then walk to where it came from; a second faint one while he listens
+sends him walking there at once. A loud one (sprinting within about 7 blocks), or a
+second one at least half that loud while he listens, makes him run at it, and you hear
+the "he heard you" stinger. While chasing, each new noise moves his target, so if you stop
 making noise he reaches the last place he heard you, searches for 4 s (any noise there
 and he charges again) and goes back to wandering. He hits you if you're within 2 blocks
 while he hunts, or bump into him at any time. By default one hit kills. Within 24 blocks of him you hear your heartbeat, from 60 bpm
@@ -182,12 +193,13 @@ yellow keep-clear hatching edged in red in front of exits and doors, pillar base
 and yellow stripes, a number on the wall behind every stall, and the level ("B1", "B2")
 painted big on the walls at both ends of the aisle. It also writes a world resource pack
 (`resources.zip`) with the textures (cold, worn concrete, see `garage/textures.py`) and
-their LabPBR maps, and installs it all into `noname_complex`. In game, the level rebuilds only when the
-generated commands change. The map is bigger than what is loaded around a player, so
+their LabPBR maps, and installs it all into `noname_complex`. In game, the mod rebuilds the
+level every time the world opens, behind its loading screen, then starts a new game. The
+map is bigger than what is loaded around a player, so
 building force-loads its chunks first, waits until they are loaded, then builds. Building
 turns off block drops and clears loose items, removes the Pale men and then tells the mod
-(`/everytunnel rebuilt`), which puts all the loot back. `/function garage:build` forces a
-rebuild.
+(`/everytunnel rebuilt`), which puts all the loot back. `/function garage:build` rebuilds
+by hand.
 
 `tools/blocks/generate.py` makes the models, textures, LabPBR maps, names and loot tables
 of the mod's blocks: the fluorescent light and the props (boxes, cones, extinguishers,

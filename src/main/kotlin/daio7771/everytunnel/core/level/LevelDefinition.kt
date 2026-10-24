@@ -25,6 +25,12 @@ data class LevelDefinition(
     val entry: LevelEntry? = null,
     /** The scene a new game starts with in this level (the elevator), or null for none. */
     val intro: LevelIntro? = null,
+    /**
+     * Function id (e.g. `garage:build`) that builds this level's blocks, run every time the
+     * world opens, behind the loading screen; null if the level is built by hand. Levels
+     * built together name the same function, which runs once.
+     */
+    val build: String? = null,
 ) {
     fun zone(id: String): Zone? = zones.firstOrNull { it.id == id }
 

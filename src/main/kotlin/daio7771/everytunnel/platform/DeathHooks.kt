@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.entity.attribute.EntityAttributeModifier
 import net.minecraft.entity.attribute.EntityAttributes
+import net.minecraft.entity.damage.DamageSource
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
@@ -57,7 +58,7 @@ object DeathHooks {
 
     fun register() {
         LevelTriggers.register { change -> change.current.levelId?.let { lastLevel[change.playerId] = it } }
-        ServerLivingEntityEvents.ALLOW_DEATH.register { entity, _, _ ->
+        ServerLivingEntityEvents.ALLOW_DEATH.register { entity, source, _ ->
             val player = entity as? ServerPlayerEntity ?: return@register true
             if (player.uuid in dying) {
                 player.health = 1f
@@ -67,7 +68,7 @@ object DeathHooks {
             if (levelId == null || !WorldRules.appliesTo(player.isCreative, player.isSpectator) || startOf(levelId) == null) {
                 return@register true
             }
-            startDying(player, levelId)
+            startDying(player, levelId, source)
             false
         }
         ServerLivingEntityEvents.ALLOW_DAMAGE.register { entity, _, _ -> entity.uuid !in dying }
@@ -88,7 +89,7 @@ object DeathHooks {
     /** True from the fatal hit until the screen starts fading back in; a dying player makes no noise. */
     fun isDying(player: ServerPlayerEntity): Boolean = player.uuid in dying
 
-    private fun startDying(player: ServerPlayerEntity, levelId: String) {
+    private fun startDying(player: ServerPlayerEntity, levelId: String, source: DamageSource) {
         player.health = 1f
         player.isSprinting = false
         dying[player.uuid] = Dying(levelId)
@@ -102,6 +103,7 @@ object DeathHooks {
         player.playSound(ModSounds.DEATH, SoundCategory.PLAYERS, 1f, 1f)
         sendFade(player, 1f, FADE_OUT_TICKS / 20f)
         EveryTunnel.LOGGER.info("{} died in {}: restarting the level", player.name.string, levelId)
+        PlaytestLog.died(player, levelId, source)
     }
 
     private fun tick(server: MinecraftServer) {

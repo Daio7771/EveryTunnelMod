@@ -7,7 +7,9 @@ Out (tools/map/output/, not in git):
   every_tunnel_level1_vanilla/   datapack for plain Minecraft  (builds itself when the world opens;
                                  by hand: /function garage:build, garage:clear)
   every_tunnel_level1_mod/       datapack for the mod: its fluorescent lights + the level file
-                                 (zones, start in the elevator, exit at the ramp, ambience)
+                                 (zones, start in the elevator, exit at the ramp, ambience); the
+                                 mod runs garage:build every time the world opens, behind its
+                                 loading screen (the level files name it: "build")
   level_resources.zip            resource pack; worlds carry it as <world>/resources.zip
   level_preview.png              top-down plan of the whole level
   texture_sheet.png              every generated texture, enlarged
@@ -275,7 +277,8 @@ PACKS = {"vanilla": "every_tunnel_level1_vanilla", "mod": "every_tunnel_level1_m
 OLD_PACKS = ["every_tunnel_garage_test", "every_tunnel_garage_mod"]      # earlier tests, removed on install
 OLD_BOXES = [(-1, 64, -1, 40, 70, 20)]      # what the earlier garage test built, cleared by every build
 FILL_LIMIT = 32768
-SCORE = "garage_build"      # scoreboard objective that remembers which version of the level is built
+SCORE = "garage_build"      # scoreboard objective that remembers which version of the level is built (vanilla pack)
+BUILD_FUNCTION = "garage:build"     # what the mod runs when the world opens ("build" in the level files)
 
 
 def fills(x1, y1, z1, x2, y2, z2, block):
@@ -364,6 +367,8 @@ def commands(level, offset, box, previous_box, summary):
         for x1, y1, z1, x2, y2, z2 in boxes:
             c.append(f"kill @e[type=every_tunnel:pale_man,x={x1},y={y1},z={z1},dx={x2 - x1},dy={y2 - y1},dz={z2 - z1}]")
         c.append("everytunnel rebuilt")
+        # No player runs it: the mod builds when the world opens, then starts the new game.
+        return c
     sx, sy, sz, yaw = level.spawn
     c.append(f"tp @s {ox + sx} {oy + sy} {oz + sz} {yaw} 0")
     c.append('tellraw @s {"text":"%s","color":"gray"}' % summary)
@@ -454,6 +459,7 @@ def level_json(level, offset):
         "ambience": AMBIENCE,
         "entry": {"title": LEVEL_TITLE},
         "intro": {"seconds": INTRO_SECONDS, "music": INTRO_MUSIC},
+        "build": BUILD_FUNCTION,
     }, indent=1) + "\n"
 
 
@@ -490,6 +496,7 @@ def next_level_json(level, level2, offset, joint):
         + [{"id": "keycard", "pos": at(kx, ky, kz), "yaw": 0, "tags": ["keycard"]}],
         "ambience": AMBIENCE,
         "entry": {"title": NEXT_LEVEL_TITLE, "subtitle": "", "sound": "every_tunnel:event.level_transition"},
+        "build": BUILD_FUNCTION,
     }, indent=1) + "\n"
 
 
@@ -533,8 +540,10 @@ def write_pack(name, cmds, box, previous, level=None, offset=None, level2=None, 
         "pack_format": 15, "description": f"Every Tunnel {LEVEL_SIGN} (level 1){' for the mod' if level else ''}, seed {SEED}"}}, indent=2) + "\n")
     # The level is bigger than what is loaded around a player, so building and clearing first
     # force-load its chunks (and those of the previous build), wait until they are loaded,
-    # do the work and release them. Scheduled functions run without a player, so the build
-    # runs as the (single) player and the messages go to everyone.
+    # do the work and release them. Scheduled functions run without a player, so the vanilla
+    # build runs as the (single) player and the messages go to everyone. The mod's build runs
+    # with no player and says nothing: the mod runs it every time the world opens, behind its
+    # loading screen, and starts the new game when `/everytunnel rebuilt` (its last command) runs.
     area = box if previous is None else (min(box[0], previous[0]), 0, min(box[2], previous[2]),
                                          max(box[3], previous[3]), 0, max(box[5], previous[5]))
     chunks = (area[3] // 16 - area[0] // 16 + 1) * (area[5] // 16 - area[2] // 16 + 1)
@@ -546,25 +555,31 @@ def write_pack(name, cmds, box, previous, level=None, offset=None, level2=None, 
     loaded = " ".join(f"if loaded {x} {y} {z}" for x, y, z in corners)
     unloaded = " ".join(f"unless loaded {x} {y} {z}" for x, y, z in corners[:1])
     loading = '{"text":"Loading the level area...","color":"gray"}'
-    (functions / "build.mcfunction").write_text("\n".join([
-        forceload, f"tellraw @a {loading}", "schedule function garage:build_wait 5t replace"]) + "\n")
+    mod = level is not None
+    (functions / "build.mcfunction").write_text("\n".join(
+        [forceload] + ([] if mod else [f"tellraw @a {loading}"]) + ["schedule function garage:build_wait 5t replace"]) + "\n")
     (functions / "build_wait.mcfunction").write_text("\n".join([
-        f"execute {loaded} as @a[limit=1] run function garage:build_now",
+        f"execute {loaded} run function garage:build_now" if mod else f"execute {loaded} as @a[limit=1] run function garage:build_now",
         f"execute {loaded} run {release}",
         f"execute {unloaded} run schedule function garage:build_wait 5t replace",
     ]) + "\n")
-    # Auto build: the first time a player is in the world with this version of the level
-    # (a fingerprint of its commands, kept in a scoreboard), build it once. A new version
+    # Vanilla auto build: the first time a player is in the world with this version of the
+    # level (a fingerprint of its commands, kept in a scoreboard), build it once. A new version
     # (other parameters) builds again; the same one never does, even after garage:clear.
+    # The mod's pack has none of it but the objective (the build keeps doTileDrops in it): the
+    # mod builds every time the world opens.
     version = zlib.crc32("\n".join(cmds).encode()) & 0x7FFFFFFF
     built = f"score #level {SCORE} matches {version}"
-    (functions / "build_now.mcfunction").write_text("\n".join(cmds + [f"scoreboard players set #level {SCORE} {version}"]) + "\n")
     (functions / "load.mcfunction").write_text(f"scoreboard objectives add {SCORE} dummy\n")
-    (functions / "tick.mcfunction").write_text(f"execute if entity @a unless {built} unless score #waiting {SCORE} matches {version} run function garage:auto_build\n")
-    (functions / "auto_build.mcfunction").write_text("\n".join([
-        f"scoreboard players set #waiting {SCORE} {version}",
-        "function garage:build",
-    ]) + "\n")
+    if mod:
+        (functions / "build_now.mcfunction").write_text("\n".join(cmds) + "\n")
+    else:
+        (functions / "build_now.mcfunction").write_text("\n".join(cmds + [f"scoreboard players set #level {SCORE} {version}"]) + "\n")
+        (functions / "tick.mcfunction").write_text(f"execute if entity @a unless {built} unless score #waiting {SCORE} matches {version} run function garage:auto_build\n")
+        (functions / "auto_build.mcfunction").write_text("\n".join([
+            f"scoreboard players set #waiting {SCORE} {version}",
+            "function garage:build",
+        ]) + "\n")
     x1, y1, z1, x2, y2, z2 = box
     kill_pale_men = [f"kill @e[type=every_tunnel:pale_man,x={x1},y={y1},z={z1},dx={x2 - x1},dy={y2 - y1},dz={z2 - z1}]"] if level else []
     (functions / "clear.mcfunction").write_text("\n".join([
@@ -578,7 +593,7 @@ def write_pack(name, cmds, box, previous, level=None, offset=None, level2=None, 
         + [release, 'tellraw @a {"text":"Level cleared.","color":"gray"}']) + "\n")
     tags = pack / "data" / "minecraft" / "tags" / "functions"
     tags.mkdir(parents=True)
-    for tag in ("load", "tick"):
+    for tag in ("load",) if mod else ("load", "tick"):
         (tags / f"{tag}.json").write_text(json.dumps({"values": [f"garage:{tag}"]}, indent=2) + "\n")
     if level:
         levels = pack / "data" / "every_tunnel" / "levels"

@@ -154,11 +154,18 @@ dependencies {
     modImplementation("software.bernie.geckolib:geckolib-fabric-1.20.1:${prop("geckolib_version")}")
     include("software.bernie.geckolib:geckolib-fabric-1.20.1:${prop("geckolib_version")}")
 
-    // LambDynamicLights (client): compiled against its API only, so the jar does not
-    // bundle or require it; fabric.mod.json "recommends" it. Dev runs get the full mod
-    // with its libraries (modLocalRuntime is not exposed to anything depending on this mod).
+    // LambDynamicLights (client): compiled against its API only. Dev runs get the full mod
+    // with its libraries (modLocalRuntime is not exposed to anything depending on this mod);
+    // the jar bundles the Modrinth release, which carries its libraries inside.
     modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${prop("lambdynamiclights_version")}")
     modLocalRuntime("dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:${prop("lambdynamiclights_version")}")
+    include("maven.modrinth:lambdynamiclights:${prop("lambdynamiclights_version")}")
+
+    // Everything a player needs comes in the one jar (jar-in-jar; Apache 2.0 and MIT):
+    // Fabric API and Fabric Language Kotlin too. Fabric Loader uses a newer copy if the
+    // player also installed one.
+    include("net.fabricmc.fabric-api:fabric-api:${prop("fabric_version")}")
+    include("net.fabricmc:fabric-language-kotlin:${prop("kotlin_loader_version")}")
 
     // Sound Physics Remastered: no code depends on it (it changes how every sound is
     // heard: reverb, absorption through blocks); "recommends" in fabric.mod.json, and
@@ -188,7 +195,27 @@ tasks.test {
     useJUnitPlatform()
 }
 
+// The map world, packed into the jar: on first launch the client copies it into saves/
+// (client.MapWorldInstaller). Taken from run/saves/noname_complex without what belongs to
+// whoever played it (players, stats, the mod's game state) and the lock; the level is
+// rebuilt every time the world opens anyway. Skipped when that world does not exist.
+val mapWorld = file("run/saves/noname_complex")
+val mapWorldResources = layout.buildDirectory.dir("generated/mapWorld")
+val packMapWorld = tasks.register<Zip>("packMapWorld") {
+    description = "Packs run/saves/noname_complex into the mod's resources."
+    onlyIf { mapWorld.resolve("level.dat").isFile }
+    from(mapWorld) {
+        exclude("session.lock", "level.dat_old", "playerdata/**", "stats/**", "advancements/**")
+        exclude("data/every_tunnel_*", "data/chunks.dat")
+    }
+    destinationDirectory.set(mapWorldResources.map { it.dir("every_tunnel/world") })
+    archiveFileName.set("noname_complex.zip")
+}
+sourceSets.main { resources.srcDir(mapWorldResources) }
+tasks.named<Jar>("sourcesJar") { exclude("every_tunnel/world/**") }
+
 tasks.processResources {
+    dependsOn(packMapWorld)
     inputs.property("version", project.version)
     inputs.property("minecraft_version", prop("minecraft_version"))
     inputs.property("loader_version", prop("loader_version"))
@@ -226,6 +253,16 @@ tasks.jar {
     from("CREDITS.md") {
         rename { "${it}_${project.base.archivesName.get()}" }
     }
+}
+
+// The jar to hand out: everything inside (map world, GeckoLib, Fabric API, Kotlin,
+// LambDynamicLights). ./gradlew everytunnerBuild -> build/libs/everytunner_build.jar
+tasks.register<Copy>("everytunnerBuild") {
+    description = "Builds the mod and copies it to build/libs/everytunner_build.jar."
+    dependsOn(tasks.named("build"))
+    from(tasks.named("remapJar"))
+    into(layout.buildDirectory.dir("libs"))
+    rename { "everytunner_build.jar" }
 }
 
 // configure the maven publication

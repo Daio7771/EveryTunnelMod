@@ -130,6 +130,18 @@ class LevelParserTest {
     }
 
     @Test
+    fun `build is optional and must be a function id`() {
+        val zones = """"order": 1, "zones": [{ "id": "a", "from": [0, 0, 0], "to": [1, 1, 1] }]"""
+        assertNull(LevelParser.parse("plain", "{ $zones }").level?.build)
+        val full = LevelParser.parse("full", """{ $zones, "build": "garage:build" }""")
+        assertEquals("garage:build", full.level?.build)
+        assertEquals(emptyList(), full.problems)
+        val broken = LevelParser.parse("broken", """{ $zones, "build": "Not A Function" }""")
+        assertNull(assertNotNull(broken.level).build)
+        assertEquals(1, broken.problems.size, broken.problems.toString())
+    }
+
+    @Test
     fun `entry is optional and its sound must be a sound id`() {
         val zones = """"order": 2, "zones": [{ "id": "a", "from": [0, 0, 0], "to": [1, 1, 1] }]"""
         assertNull(LevelParser.parse("plain", "{ $zones }").level?.entry)

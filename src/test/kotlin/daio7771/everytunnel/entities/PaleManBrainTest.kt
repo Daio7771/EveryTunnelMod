@@ -48,18 +48,32 @@ class PaleManBrainTest {
     }
 
     @Test
-    fun `a loud noise or a second one while listening starts a chase, with the stinger`() {
+    fun `a loud noise, or a fairly loud second one while listening, starts a chase with the stinger`() {
         val loud = tick(listOf(noise(3.0, 0.8)))
         assertEquals(State.CHASE, loud.state)
         assertEquals(player, loud.alerted)
         assertEquals(config.chaseSpeed, loud.speed)
 
+        // Half of chase_loudness (0.25) or more as the second noise: chase.
         val other = PaleManBrain()
-        other.tick(Senses(now, home, listOf(noise(10.0, 0.2))), config)
+        other.tick(Senses(now, home, listOf(noise(10.0, 0.1))), config)
         now++
-        val second = other.tick(Senses(now, home, listOf(noise(9.0, 0.2))), config)
+        val second = other.tick(Senses(now, home, listOf(noise(9.0, 0.3))), config)
         assertEquals(State.CHASE, second.state)
         assertEquals(at(9.0), second.target)
+        assertEquals(player, second.alerted)
+    }
+
+    @Test
+    fun `a faint second noise while listening sends him walking there at once`() {
+        tick(listOf(noise(10.0, 0.1)))
+        val walk = tick(listOf(noise(9.0, 0.2)))
+        assertEquals(State.INVESTIGATE, walk.state)
+        assertEquals(config.investigateSpeed, walk.speed)
+        assertEquals(at(9.0), walk.target)
+        assertNull(walk.alerted)
+        // Still walking, not running, with more faint noises on the way.
+        assertEquals(State.INVESTIGATE, tick(listOf(noise(8.0, 0.2))).state)
     }
 
     @Test

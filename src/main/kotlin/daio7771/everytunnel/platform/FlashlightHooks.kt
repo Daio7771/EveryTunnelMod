@@ -69,6 +69,7 @@ object FlashlightHooks {
     fun batteryDied(player: ServerPlayerEntity) {
         play(player, ModSounds.FLASHLIGHT_FLICKER, 0.5f)
         actionBar(player, "message.every_tunnel.battery_empty")
+        PlaytestLog.batteryRanOut(player)
     }
 
     /** True if using a battery item would add charge. Works on both sides (client: synced copy). */
@@ -83,13 +84,15 @@ object FlashlightHooks {
     fun insertBattery(player: ServerPlayerEntity, stack: ItemStack) {
         val config = ConfigManager.gameplay
         if (!available(player)) return
-        val (state, result) = ResourceSystem.insertBattery(ResourceSystem.stateOf(player.uuid, config), config)
+        val before = ResourceSystem.stateOf(player.uuid, config)
+        val (state, result) = ResourceSystem.insertBattery(before, config)
         if (result != BatteryInsert.REFILLED) {
             explainBatteryRefused(player)
             return
         }
         ResourceSystem.set(player.uuid, state)
         if (!player.abilities.creativeMode) stack.decrement(1)
+        PlaytestLog.batteryChanged(player, before, state)
         play(player, ModSounds.BATTERY_CLOSE, 0.6f)
         NoiseHooks.equipment(player)
         actionBar(player, "message.every_tunnel.battery_replaced")

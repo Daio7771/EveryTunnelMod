@@ -13,6 +13,7 @@ import daio7771.everytunnel.client.hud.ExhaustionVignette
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.LootRenderer
 import daio7771.everytunnel.client.screen.EndOfDemoScreen
+import daio7771.everytunnel.client.screen.LoadingCover
 import daio7771.everytunnel.client.render.PaleManRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories
 import daio7771.everytunnel.platform.ModBlocks
@@ -35,7 +36,8 @@ import net.minecraft.client.render.RenderLayer
  * `client.compat.LambDynamicLightsCompat` when LambDynamicLights is installed), the
  * exhausted breathing ([BreathingEffect]), the heartbeat near the Pale man
  * ([HeartbeatEffect]), the level ambience ([AmbiencePlayer]), the
- * hum of fluorescent lights ([FluorescentHum]) and the status bars ([StatusHud]).
+ * hum of fluorescent lights ([FluorescentHum]), the status bars ([StatusHud]) and the
+ * loading screen of worlds with levels ([LoadingCover]).
  * Blocks whose textures have see-through pixels are drawn in the cutout layer, and the
  * Pale man by GeckoLib ([PaleManRenderer]).
  */
@@ -44,6 +46,8 @@ object EveryTunnelClient : ClientModInitializer {
     override fun onInitializeClient() {
         // Before quick play opens a world: dev worlds with a template start over.
         DevWorlds.restoreAll()
+        // Also before quick play: the map world packed in the jar goes into saves/.
+        MapWorldInstaller.install()
         ClientResources.register()
         FlashlightControls.register()
         FlashlightEffect.register()
@@ -57,6 +61,7 @@ object EveryTunnelClient : ClientModInitializer {
         StatusHud.register()
         ScreenFade.register() // after the HUD, so the black covers it
         EndOfDemoScreen.register()
+        LoadingCover.register()
         EntityRendererRegistry.register(ModEntities.PALE_MAN, ::PaleManRenderer)
         BlockEntityRendererFactories.register(ModBlocks.LOOT_ENTITY, ::LootRenderer)
         BlockRenderLayerMap.INSTANCE.putBlocks(

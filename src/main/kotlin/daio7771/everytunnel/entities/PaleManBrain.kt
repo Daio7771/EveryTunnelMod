@@ -13,8 +13,9 @@ import kotlin.math.sqrt
  * - [State.ROAM]: wanders. A noise makes him stop and [State.LISTEN]; a loud one
  *   (loudness at least `chase_loudness`) makes him [State.CHASE] at once.
  * - [State.LISTEN]: stands still, head turned towards the noise, for `listen_seconds`.
- *   A loud noise or a second one in that time: chase. Otherwise he walks there
- *   ([State.INVESTIGATE]).
+ *   A loud noise in that time, or a second one at least half as loud as
+ *   `chase_loudness`: chase. A fainter second one sends him walking towards it at once
+ *   ([State.INVESTIGATE]); with nothing more, he walks there when the time is up.
  * - [State.INVESTIGATE]: walks to the last noise heard; new noises move the target, a
  *   loud one starts a chase. Once there (or after `investigate_seconds`): search.
  * - [State.CHASE]: runs to the last noise heard, each new noise moving the target. If
@@ -70,7 +71,6 @@ class PaleManBrain {
 
     private var stateTicks = 0
     private var stateLength = 0
-    private var noisesThisListen = 0
     private var lastNoiseTick = Long.MIN_VALUE
     private var attackCooldown = 0
 
@@ -101,12 +101,15 @@ class PaleManBrain {
                 else -> {
                     enter(State.LISTEN, ticks(config.listenSeconds))
                     target = noise.position
-                    noisesThisListen = 1
                 }
             }
+            // Any noise now is a second one: loud enough, he runs; fainter, he walks there.
             State.LISTEN -> when {
-                noise != null && (loud || ++noisesThisListen >= 2) -> chase(noise)
-                noise != null -> target = noise.position
+                noise != null && (loud || noise.loudness >= config.chaseLoudness * SECOND_NOISE_SHARE) -> chase(noise)
+                noise != null -> {
+                    enter(State.INVESTIGATE, ticks(config.investigateSeconds))
+                    target = noise.position
+                }
                 timeUp -> enter(State.INVESTIGATE, ticks(config.investigateSeconds))
             }
             State.INVESTIGATE -> when {
@@ -155,7 +158,6 @@ class PaleManBrain {
         target = null
         stateTicks = 0
         stateLength = 0
-        noisesThisListen = 0
         attackCooldown = 0
         // lastNoiseTick is kept: noises he already used stay used.
     }
@@ -169,6 +171,9 @@ class PaleManBrain {
     companion object {
         /** Close enough to where a noise came from (horizontally) to count as there. */
         const val ARRIVE_DISTANCE: Double = 1.5
+
+        /** A second noise while he listens starts a chase from this share of `chase_loudness` up. */
+        const val SECOND_NOISE_SHARE: Double = 0.5
 
         /** Ticks after a change of state before an idle pathfinder means "arrived". */
         const val NAVIGATION_GRACE_TICKS: Int = 10
