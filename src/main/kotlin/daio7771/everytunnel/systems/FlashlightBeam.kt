@@ -93,15 +93,20 @@ data class FlashlightBeam(
     /**
      * True if the light would look the same as [other]'s, so the lighting does not
      * need to be recomputed (recomputing rebuilds the chunk sections around the beam).
+     * [coarse]: without shaders, where block light shows its steps anyway, much bigger
+     * changes count as the same (fewer rebuilds, no stutter).
      */
-    fun looksLike(other: FlashlightBeam): Boolean {
+    fun looksLike(other: FlashlightBeam, coarse: Boolean = false): Boolean {
+        val samePosition = if (coarse) COARSE_SAME_POSITION else SAME_POSITION
+        val sameDirectionCos = if (coarse) COARSE_SAME_DIRECTION_COS else SAME_DIRECTION_COS
+        val sameLength = if (coarse) COARSE_SAME_LENGTH else SAME_LENGTH
         val dx = originX - other.originX
         val dy = originY - other.originY
         val dz = originZ - other.originZ
         val cosAngle = dirX * other.dirX + dirY * other.dirY + dirZ * other.dirZ
-        return dx * dx + dy * dy + dz * dz < SAME_POSITION * SAME_POSITION &&
-            cosAngle > SAME_DIRECTION_COS &&
-            abs(length - other.length) < SAME_LENGTH &&
+        return dx * dx + dy * dy + dz * dz < samePosition * samePosition &&
+            cosAngle > sameDirectionCos &&
+            abs(length - other.length) < sameLength &&
             abs(brightness - other.brightness) < SAME_LIGHT &&
             abs(glow - other.glow) < SAME_LIGHT &&
             range == other.range &&
@@ -121,6 +126,9 @@ data class FlashlightBeam(
         private val SAME_DIRECTION_COS = kotlin.math.cos(Math.toRadians(2.0))
         private const val SAME_LENGTH = 0.5
         private const val SAME_LIGHT = 0.25
+        private const val COARSE_SAME_POSITION = 0.6
+        private val COARSE_SAME_DIRECTION_COS = kotlin.math.cos(Math.toRadians(7.0))
+        private const val COARSE_SAME_LENGTH = 1.5
 
         /**
          * A beam from the eye position along the (not necessarily normalized) look

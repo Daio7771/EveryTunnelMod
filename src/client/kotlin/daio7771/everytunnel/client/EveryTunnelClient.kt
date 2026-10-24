@@ -10,10 +10,13 @@ import daio7771.everytunnel.client.effects.FluorescentHum
 import daio7771.everytunnel.client.effects.ScreenFade
 import daio7771.everytunnel.client.effects.TensionMusic
 import daio7771.everytunnel.client.hud.ExhaustionVignette
+import daio7771.everytunnel.client.hud.FlashlightOverlay
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.LootRenderer
 import daio7771.everytunnel.client.screen.EndOfDemoScreen
 import daio7771.everytunnel.client.screen.LoadingCover
+import daio7771.everytunnel.client.screen.MainMenuScreen
+import daio7771.everytunnel.client.effects.MenuMusic
 import daio7771.everytunnel.client.render.PaleManRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories
 import daio7771.everytunnel.platform.ModBlocks
@@ -37,7 +40,8 @@ import net.minecraft.client.render.RenderLayer
  * exhausted breathing ([BreathingEffect]), the heartbeat near the Pale man
  * ([HeartbeatEffect]), the level ambience ([AmbiencePlayer]), the
  * hum of fluorescent lights ([FluorescentHum]), the status bars ([StatusHud]) and the
- * loading screen of worlds with levels ([LoadingCover]).
+ * loading screen of worlds with levels ([LoadingCover]), and the main menu in place of
+ * vanilla's title screen ([MainMenuScreen], with its music: [MenuMusic]).
  * Blocks whose textures have see-through pixels are drawn in the cutout layer, and the
  * Pale man by GeckoLib ([PaleManRenderer]).
  */
@@ -57,11 +61,14 @@ object EveryTunnelClient : ClientModInitializer {
         IntroMusic.register()
         AmbiencePlayer.register()
         FluorescentHum.register()
+        FlashlightOverlay.register() // without shaders: the dark around the beam, under everything else
         ExhaustionVignette.register() // before the HUD, so the icons stay on top
         StatusHud.register()
         ScreenFade.register() // after the HUD, so the black covers it
         EndOfDemoScreen.register()
         LoadingCover.register()
+        MainMenuScreen.register()
+        MenuMusic.register()
         EntityRendererRegistry.register(ModEntities.PALE_MAN, ::PaleManRenderer)
         BlockEntityRendererFactories.register(ModBlocks.LOOT_ENTITY, ::LootRenderer)
         BlockRenderLayerMap.INSTANCE.putBlocks(

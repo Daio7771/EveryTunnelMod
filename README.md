@@ -77,6 +77,17 @@ with gamerules, and the difficulty is locked on Normal (Peaceful would delete th
 man as soon as he spawns). Entering a level makes its start (the spawn point tagged `player`)
 your respawn point, so you don't come back on the roof.
 
+**The main menu.** Vanilla's title screen is replaced by Every Tunnel's: black, the logo
+and BEGIN / OPTIONS / LANGUAGE / CREDITS / EXIT on the left, the version at the bottom.
+BEGIN opens Noname Complex; CREDITS rolls the end credits; OPTIONS and LANGUAGE are
+vanilla's. After 15 s without moving the mouse, the Pale man's silhouette slowly appears,
+faint, on the right, and vanishes as soon as the mouse moves (`tools/gui/menu_figure.py`
+draws it). Its music is the sound event
+`music.menu` (silent until the song is added). Ctrl+Shift+V swaps to vanilla's title
+screen and back, for other worlds, mods and multiplayer. The logo (`textures/gui/logo.png`,
+worn serif capitals in pixel art) comes from `tools/gui/logo.py`. Vanilla's music never
+plays, in the menus or in a world.
+
 **Opening the world.** Every time a world with levels opens, one black loading screen
 covers everything from the click until the elevator, vanilla's own loading screens and
 the resource reload included. It shows a tip in the middle (`loading.every_tunnel.tip.*`
@@ -117,6 +128,14 @@ with a gulp about every half second (a noise for the Pale man). The flashlight i
 (key F) and runs on a battery; battery items refill it if you hold use for 1.5 s. The HUD
 swaps the vanilla bars for four rows: health, stamina, thirst, battery. A new game starts
 with nothing but the flashlight, full.
+
+**With and without shaders.** The flashlight's light is block light (LambDynamicLights) in
+both. Without a shader pack (no Iris, or Iris with shaders off; checked live), where block
+light shows its steps, the light is recomputed at most 5 times a second and only for bigger
+changes (fewer chunk rebuilds, no stutter), and the screen goes dark around a round, warmer
+spot that sways a little behind the camera and follows the flicker
+(`tools/gui/flashlight_spot.py` draws its textures). In the levels the Brightness option
+counts as Moody, with or without shaders; the option itself is not changed.
 
 **Loot.** Batteries and water bottles lie on the floor against walls and props, drawn as
 the item itself; right-click picks one up. A level places them at its spawn points tagged

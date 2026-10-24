@@ -1,6 +1,7 @@
 package daio7771.everytunnel.client.compat
 
 import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.client.ShaderMode
 import daio7771.everytunnel.client.effects.FlashlightEffect
 import daio7771.everytunnel.systems.FlashlightBeam
 import dev.lambdaurora.lambdynlights.api.DynamicLightsContext
@@ -64,7 +65,9 @@ object LambDynamicLightsCompat : DynamicLightsInitializer {
  * LambDynamicLights may evaluate [lightAtPos] off the render thread, so it only reads
  * the immutable [applied] snapshot. [hasChanged] (called once per tick) takes the
  * latest beam only when it looks different, because every change rebuilds the chunk
- * sections around the beam.
+ * sections around the beam. Without shaders ([ShaderMode]) it is stricter: bigger changes
+ * count as the same, and at most one change every [NO_SHADER_MIN_TICKS] ticks (the
+ * on-screen spot follows the camera at once, so the light may lag a little).
  */
 private class FlashlightLightBehavior : DynamicLightBehavior {
 
@@ -87,11 +90,22 @@ private class FlashlightLightBehavior : DynamicLightBehavior {
         return DynamicLightBehavior.BoundingBox(b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ)
     }
 
+    /** Ticks since the light last changed (hasChanged runs once per tick). */
+    private var ticksSinceChange = 0
+
     override fun hasChanged(): Boolean {
+        ticksSinceChange++
         val latest = FlashlightEffect.beam ?: return false
         val current = applied
-        if (current != null && latest.looksLike(current)) return false
+        val coarse = !ShaderMode.shadersOn
+        if (current != null && (latest.looksLike(current, coarse) || (coarse && ticksSinceChange < NO_SHADER_MIN_TICKS))) return false
         applied = latest
+        ticksSinceChange = 0
         return true
+    }
+
+    private companion object {
+        /** Without shaders, at most 5 light changes a second. */
+        const val NO_SHADER_MIN_TICKS = 4
     }
 }

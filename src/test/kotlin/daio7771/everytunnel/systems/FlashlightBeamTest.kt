@@ -69,4 +69,15 @@ class FlashlightBeamTest {
         assertFalse(b.looksLike(beam(hit = 8.0)), "the wall moved closer")
         assertFalse(b.looksLike(beam(dimming = 0.25)), "flicker")
     }
+
+    @Test
+    fun `without shaders bigger changes count as the same, but not big turns or flicker`() {
+        val b = beam()
+        val turned5 = FlashlightBeam.create(0.0, 0.0, 0.0, 2.0, 0.175, 0.0, null, config)
+        assertFalse(b.looksLike(turned5), "about 5 degrees is a change with shaders")
+        assertTrue(b.looksLike(turned5, coarse = true), "but not without")
+        assertTrue(b.looksLike(FlashlightBeam.create(0.5, 0.0, 0.0, 2.0, 0.0, 0.0, null, config), coarse = true), "half a step")
+        assertFalse(b.looksLike(FlashlightBeam.create(0.0, 0.0, 0.0, 2.0, 0.5, 0.0, null, config), coarse = true), "turned about 14 degrees")
+        assertFalse(b.looksLike(beam(dimming = 0.25), coarse = true), "flicker")
+    }
 }

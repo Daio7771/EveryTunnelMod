@@ -17,8 +17,17 @@ import net.minecraft.util.Util
  * [AUTO_QUIT_AFTER_END_MS] after the roll ends saves the world and goes back to the title
  * screen; entering the world again starts a new game (`platform.EndingHooks`). Opened by
  * the server at the end of Level 2.
+ *
+ * From the main menu ([credits], with [parent] set) it is only the credits: no "End of
+ * demo", the roll starts at once, any key or click goes back to [parent].
  */
-class EndOfDemoScreen : Screen(Text.translatable("screen.every_tunnel.end.title")) {
+class EndOfDemoScreen private constructor(private val parent: Screen?) : Screen(Text.translatable("screen.every_tunnel.end.title")) {
+
+    constructor() : this(null)
+
+    private val creditsOnly get() = parent != null
+    private val rollStartMs get() = if (creditsOnly) CREDITS_ROLL_START_MS else ROLL_START_MS
+    private val skipAfterMs get() = if (creditsOnly) 0L else SKIP_AFTER_MS
 
     private val openedAt = Util.getMeasuringTimeMs()
     private var quitting = false
@@ -27,21 +36,21 @@ class EndOfDemoScreen : Screen(Text.translatable("screen.every_tunnel.end.title"
 
     /** Pixels the roll has moved up after [ms]; it stops once the last line is in the middle. */
     private fun scroll(ms: Long): Float {
-        val moving = ((ms - ROLL_START_MS).coerceAtLeast(0L) / 1000f) * ROLL_SPEED
+        val moving = ((ms - rollStartMs).coerceAtLeast(0L) / 1000f) * ROLL_SPEED
         return moving.coerceAtMost(rollLength())
     }
 
     /** From the title's place to the last line reaching the middle of the screen. */
     private fun rollLength(): Float = (TITLE_GAP + CREDITS.sumOf { it.height }).toFloat()
 
-    private fun rollEndMs(): Long = ROLL_START_MS + (rollLength() / ROLL_SPEED * 1000f).toLong()
+    private fun rollEndMs(): Long = rollStartMs + (rollLength() / ROLL_SPEED * 1000f).toLong()
 
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
         context.fill(0, 0, width, height, 0xFF000000.toInt())
         val ms = elapsed()
         val top = height / 2f - scroll(ms)
 
-        alpha(ms, 0L, 2000L)?.let { a ->
+        if (!creditsOnly) alpha(ms, 0L, 2000L)?.let { a ->
             context.matrices.push()
             context.matrices.scale(TITLE_SCALE, TITLE_SCALE, 1f)
             context.drawCenteredTextWithShadow(
@@ -59,8 +68,8 @@ class EndOfDemoScreen : Screen(Text.translatable("screen.every_tunnel.end.title"
             y += line.height
         }
 
-        if (ms > maxOf(SKIP_AFTER_MS, rollEndMs())) {
-            alpha(ms, maxOf(SKIP_AFTER_MS, rollEndMs()), 1000L)?.let { a ->
+        if (ms > maxOf(skipAfterMs, rollEndMs())) {
+            alpha(ms, maxOf(skipAfterMs, rollEndMs()), 1000L)?.let { a ->
                 context.drawCenteredTextWithShadow(
                     textRenderer, Text.translatable("screen.every_tunnel.end.continue"), width / 2, height - 20, a shl 24 or 0x606060,
                 )
@@ -79,12 +88,12 @@ class EndOfDemoScreen : Screen(Text.translatable("screen.every_tunnel.end.title"
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
-        if (elapsed() > SKIP_AFTER_MS || keyCode == 256) quitToTitle()
+        if (elapsed() > skipAfterMs || keyCode == 256) quitToTitle()
         return true
     }
 
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        if (elapsed() > SKIP_AFTER_MS) quitToTitle()
+        if (elapsed() > skipAfterMs) quitToTitle()
         return true
     }
 
@@ -92,11 +101,12 @@ class EndOfDemoScreen : Screen(Text.translatable("screen.every_tunnel.end.title"
 
     override fun shouldPause(): Boolean = false
 
-    /** Like the pause menu's "Save and Quit to Title". */
+    /** Like the pause menu's "Save and Quit to Title"; from the menu, just back to it. */
     private fun quitToTitle() {
         if (quitting) return
         quitting = true
         val client = client ?: MinecraftClient.getInstance()
+        if (parent != null) return client.setScreen(parent)
         val singleplayer = client.isInSingleplayer
         client.world?.disconnect()
         if (singleplayer) client.disconnect(MessageScreen(Text.translatable("menu.savingLevel"))) else client.disconnect()
@@ -110,6 +120,8 @@ class EndOfDemoScreen : Screen(Text.translatable("screen.every_tunnel.end.title"
         private const val TITLE_SCALE = 3f
         /** The roll starts after the title has been alone on screen for a moment. */
         private const val ROLL_START_MS = 4500L
+        /** From the menu there is no title to wait for. */
+        private const val CREDITS_ROLL_START_MS = 500L
         private const val ROLL_SPEED = 16f
         /** From the title down to the first credit line. */
         private const val TITLE_GAP = 50
@@ -130,6 +142,9 @@ class EndOfDemoScreen : Screen(Text.translatable("screen.every_tunnel.end.title"
             header("screen.every_tunnel.end.recommended"), name("screen.every_tunnel.end.mods"), gap(60),
             name("screen.every_tunnel.end.thanks"),
         )
+
+        /** Only the credits, opened from the main menu; any key goes back to [parent]. */
+        fun credits(parent: Screen): EndOfDemoScreen = EndOfDemoScreen(parent)
 
         fun register() {
             ClientPlayNetworking.registerGlobalReceiver(EndingHooks.ENDING_PACKET_ID) { client, _, _, _ ->

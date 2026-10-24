@@ -127,6 +127,9 @@ object LoadingCover {
         draw(context, context.scaledWindowWidth, context.scaledWindowHeight)
     }
 
+    /** True from picking a world with levels until the loading screen is gone. */
+    val active: Boolean get() = phase != Phase.OFF
+
     /** What every sound's volume is multiplied by: nearly silent while loading, back up during the fade. */
     @JvmStatic
     fun worldVolume(): Float = when (phase) {
