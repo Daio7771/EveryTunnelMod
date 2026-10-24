@@ -43,7 +43,7 @@ enum class LightMode(private val id: String) : StringIdentifiable {
  * lights placed end to end reads as one long fixture; placed by hand, the tubes run the
  * way the player looks.
  *
- * - [MODE] `on`: light level 15 and a hum. `off`: dark and silent.
+ * - [MODE] `on`: light level [LIGHT_LEVEL] and a hum. `off`: dark and silent.
  *   `flicker`: mostly lit, but every few seconds it goes through a burst of rapid
  *   off/on switching with the flicker sound; the light really goes out (block light
  *   updates), so the room around it flickers too.
@@ -154,7 +154,15 @@ class FluorescentLightBlock(settings: Settings) : Block(settings) {
         private const val BURST_END_CHANCE = 0.2f
 
         /** Light level by state; used in the block settings. */
-        fun luminance(state: BlockState): Int = if (state.get(LIT)) 15 else 0
+        /**
+         * Not 15: with a light every few blocks, 15 lit the whole garage evenly (the floor
+         * at 9 to 12 everywhere), so the lights cast no pools and the flashlight, which
+         * cannot go past 15, hardly showed. At 10 each light has its pool with dusk
+         * between, and the flashlight stands out, with or without shaders.
+         */
+        const val LIGHT_LEVEL = 10
+
+        fun luminance(state: BlockState): Int = if (state.get(LIT)) LIGHT_LEVEL else 0
 
         fun withMode(state: BlockState, mode: LightMode): BlockState =
             state.with(MODE, mode).with(LIT, mode != LightMode.OFF).with(BURST, false)

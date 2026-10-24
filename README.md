@@ -134,8 +134,16 @@ both. Without a shader pack (no Iris, or Iris with shaders off; checked live), w
 light shows its steps, the light is recomputed at most 5 times a second and only for bigger
 changes (fewer chunk rebuilds, no stutter), and the screen goes dark around a round, warmer
 spot that sways a little behind the camera and follows the flicker
-(`tools/gui/flashlight_spot.py` draws its textures). In the levels the Brightness option
-counts as Moody, with or without shaders; the option itself is not changed.
+(`tools/gui/flashlight_spot.py` draws its textures). With shaders the beam is narrower,
+brightest in the middle and with less glow around you, so it reads as a flashlight. In the
+levels the Brightness option counts as Moody, with or without shaders; the option itself is
+not changed.
+
+On start, the mod puts its recommended settings once into every Complementary pack in
+`shaderpacks/` (`client/ShaderSettings.kt`): colored lighting off, and world space
+reflections off with it (the pack refuses them without it). That mode lights the
+world from the pack's own list of glowing blocks, which has none of the mod's, so the
+fluorescent lights and the flashlight would light nothing. Changing it back later is kept.
 
 **Loot.** Batteries and water bottles lie on the floor against walls and props, drawn as
 the item itself; right-click picks one up. A level places them at its spawn points tagged

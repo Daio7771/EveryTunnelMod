@@ -71,6 +71,19 @@ class FlashlightBeamTest {
     }
 
     @Test
+    fun `with shaders the beam is narrower, brightest in the middle, with less glow`() {
+        val plain = beam()
+        val shaped = FlashlightBeam.create(0.0, 0.0, 0.0, 2.0, 0.0, 0.0, null, config, forShaders = true)
+        assertTrue(shaped.halfAngle < plain.halfAngle)
+        assertTrue(shaped.glow < plain.glow)
+        // On the axis the same; halfway to the cone's edge, dimmer.
+        assertEquals(plain.lightAt(5.0, 0.0, 0.0), shaped.lightAt(5.0, 0.0, 0.0), 1e-9)
+        val half = shaped.coneRadiusAt(5.0) / 2
+        assertTrue(shaped.lightAt(5.0, half, 0.0) < shaped.lightAt(5.0, 0.0, 0.0))
+        assertFalse(plain.looksLike(shaped, coarse = true), "switching shaders recomputes the light")
+    }
+
+    @Test
     fun `without shaders bigger changes count as the same, but not big turns or flicker`() {
         val b = beam()
         val turned5 = FlashlightBeam.create(0.0, 0.0, 0.0, 2.0, 0.175, 0.0, null, config)

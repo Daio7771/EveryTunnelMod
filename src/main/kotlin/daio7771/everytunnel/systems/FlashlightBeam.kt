@@ -23,6 +23,9 @@ import kotlin.math.tan
  * - The beam stops [PAST_HIT] blocks past [length], the distance to the first block
  *   it hits, so it lights the wall it points at but not the room behind it.
  * - The glow is a point light of [glow] around the eyes.
+ * - [hotSpot]: inside the cone the light also dims towards its edge, by up to that many
+ *   levels, so the middle reads as a flashlight's hot spot (used with shaders, which
+ *   smooth block light enough for it to show; 0 = the same across the cone).
  */
 data class FlashlightBeam(
     val originX: Double,
@@ -39,6 +42,7 @@ data class FlashlightBeam(
     val halfAngle: Double,
     val brightness: Double,
     val glow: Double,
+    val hotSpot: Double = 0.0,
 ) {
 
     /** Inclusive block box that contains every position [lightAt] can light. */
@@ -60,9 +64,11 @@ data class FlashlightBeam(
         val along = vx * dirX + vy * dirY + vz * dirZ
         if (along > 0.0 && along <= reach) {
             val fromAxis = sqrt(max(0.0, distanceSq - along * along))
-            val outside = max(0.0, fromAxis - coneRadiusAt(along))
+            val radius = coneRadiusAt(along)
+            val outside = max(0.0, fromAxis - radius)
             val center = brightness * sqrt(max(0.0, 1.0 - along / range))
-            beamLight = center - outside * EDGE_FALLOFF * falloff
+            val towardsEdge = (fromAxis / radius).coerceAtMost(1.0)
+            beamLight = center - hotSpot * towardsEdge * towardsEdge - outside * EDGE_FALLOFF * falloff
         }
         return max(glowLight, beamLight).coerceIn(0.0, MAX_LIGHT)
     }
@@ -110,7 +116,8 @@ data class FlashlightBeam(
             abs(brightness - other.brightness) < SAME_LIGHT &&
             abs(glow - other.glow) < SAME_LIGHT &&
             range == other.range &&
-            halfAngle == other.halfAngle
+            halfAngle == other.halfAngle &&
+            hotSpot == other.hotSpot
     }
 
     companion object {
@@ -121,6 +128,10 @@ data class FlashlightBeam(
         const val PAST_HIT: Double = 1.0
         /** Smallest cone radius, so the beam is not a needle right at the lens. */
         const val MIN_RADIUS: Double = 0.75
+        /** With shaders: the cone's width as a share of the configured one, the hot spot, the glow's share. */
+        const val SHADER_WIDTH: Double = 0.7
+        const val SHADER_HOT_SPOT: Double = 4.0
+        const val SHADER_GLOW: Double = 0.5
 
         private const val SAME_POSITION = 0.25
         private val SAME_DIRECTION_COS = kotlin.math.cos(Math.toRadians(2.0))
@@ -134,6 +145,9 @@ data class FlashlightBeam(
          * A beam from the eye position along the (not necessarily normalized) look
          * vector. [hitDistance] is the distance to the first block in the way, or null
          * if nothing is within range. [dimming] (0-1) scales the light, for flicker.
+         * [forShaders]: shaped for a shader pack, which smooths block light: a narrower
+         * cone ([SHADER_WIDTH]), a hot spot ([SHADER_HOT_SPOT]) and less glow
+         * ([SHADER_GLOW]), so it reads as a flashlight and not a blob of light.
          */
         fun create(
             eyeX: Double, eyeY: Double, eyeZ: Double,
@@ -141,6 +155,7 @@ data class FlashlightBeam(
             hitDistance: Double?,
             config: FlashlightConfig,
             dimming: Double = 1.0,
+            forShaders: Boolean = false,
         ): FlashlightBeam {
             val lookLength = sqrt(lookX * lookX + lookY * lookY + lookZ * lookZ)
             require(lookLength > 0.0) { "look vector must not be zero" }
@@ -150,9 +165,10 @@ data class FlashlightBeam(
                 dirX = lookX / lookLength, dirY = lookY / lookLength, dirZ = lookZ / lookLength,
                 length = (hitDistance ?: config.beamRange).coerceIn(0.0, config.beamRange),
                 range = config.beamRange,
-                halfAngle = Math.toRadians(config.beamWidthDegrees / 2.0),
+                halfAngle = Math.toRadians(config.beamWidthDegrees / 2.0) * (if (forShaders) SHADER_WIDTH else 1.0),
                 brightness = config.beamBrightness * scale,
-                glow = config.glowBrightness * scale,
+                glow = config.glowBrightness * scale * (if (forShaders) SHADER_GLOW else 1.0),
+                hotSpot = if (forShaders) SHADER_HOT_SPOT * scale else 0.0,
             )
         }
     }

@@ -52,6 +52,8 @@ object EveryTunnelClient : ClientModInitializer {
         DevWorlds.restoreAll()
         // Also before quick play: the map world packed in the jar goes into saves/.
         MapWorldInstaller.install()
+        // Before Iris reads its pack settings.
+        ShaderSettings.apply()
         ClientResources.register()
         FlashlightControls.register()
         FlashlightEffect.register()

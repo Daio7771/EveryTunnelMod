@@ -1,6 +1,7 @@
 package daio7771.everytunnel.client.effects
 
 import daio7771.everytunnel.client.ClientResources
+import daio7771.everytunnel.client.ShaderMode
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.config.FlashlightConfig
 import daio7771.everytunnel.platform.ModSounds
@@ -59,7 +60,10 @@ object FlashlightEffect {
         val look = player.getRotationVec(1.0f)
         val hit = player.raycast(config.beamRange, 1.0f, false)
         val hitDistance = if (hit.type == HitResult.Type.BLOCK) hit.pos.distanceTo(eye) else null
-        beam = FlashlightBeam.create(eye.x, eye.y, eye.z, look.x, look.y, look.z, hitDistance, config, dimming(client, resources, config))
+        beam = FlashlightBeam.create(
+            eye.x, eye.y, eye.z, look.x, look.y, look.z, hitDistance, config, dimming(client, resources, config),
+            forShaders = ShaderMode.shadersOn,
+        )
     }
 
     private fun dimming(client: MinecraftClient, resources: ResourceSyncPacket, config: FlashlightConfig): Double {
