@@ -31,7 +31,9 @@ install Every Tunnel from the CurseForge app, it does this for you.
 
 ## 2. Add Every Tunnel
 
-Put the Every Tunnel `.jar` file in your profile's `mods` folder:
+Download the Every Tunnel `.jar` from
+[Releases](https://github.com/Daio7771/EveryTunnelMod/releases) (or from CurseForge) and put it
+in your profile's `mods` folder:
 
 | Launcher | `mods` folder |
 |---|---|
@@ -120,5 +122,5 @@ Complementary's colored lighting was turned back on. Turn it off in the shader p
 Press **Ctrl+Shift+V** in the main menu. Press it again to come back.
 
 **Something else is wrong.**
-Report it on the page you downloaded the mod from, with your `logs/latest.log` (in the
-`logs` folder, next to `mods`).
+[Open an issue on GitHub](https://github.com/Daio7771/EveryTunnelMod/issues) with your
+`logs/latest.log` (in the `logs` folder, next to `mods`).

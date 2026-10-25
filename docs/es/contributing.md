@@ -18,9 +18,9 @@ asistente necesita saber.
 
 `README.md` (GitHub), `INSTALL.md` y `CURSEFORGE.md` (la descripción de CurseForge) son lo que
 ven los jugadores. Están solo en inglés, con tono directo, y sin nada técnico: eso va en
-`docs/`. La descripción de CurseForge no puede enlazar al repositorio (es privado), así que
-repite lo que un jugador necesita. Cuando cambie algo que ve el jugador (requisitos,
-características, mods recomendados, controles), actualiza las tres.
+`docs/`. La descripción de CurseForge repite lo que un jugador necesita y enlaza a GitHub con
+URLs completas (allí no funcionan los enlaces relativos). Cuando cambie algo que ve el jugador
+(requisitos, características, mods recomendados, controles), actualiza las tres.
 
 ## Código
 

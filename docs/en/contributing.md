@@ -17,9 +17,9 @@ the [last section](#notes-for-ai-assistants) adds what an assistant needs to kno
 
 `README.md` (GitHub), `INSTALL.md` and `CURSEFORGE.md` (the CurseForge description) are what
 players see. They are in English only, direct in tone, and keep everything technical out:
-that belongs in `docs/`. The CurseForge description cannot link into the repository (it is
-private), so it repeats what a player needs. When a player-facing fact changes (requirements,
-features, recommended mods, controls), update all three.
+that belongs in `docs/`. The CurseForge description repeats what a player needs and links to
+GitHub with full URLs (relative links do not work there). When a player-facing fact changes
+(requirements, features, recommended mods, controls), update all three.
 
 ## Code
 

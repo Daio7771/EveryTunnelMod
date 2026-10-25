@@ -47,7 +47,9 @@ you were.
 ## Installing
 
 1. Install Fabric Loader for Minecraft 1.20.1.
-2. Put the Every Tunnel `.jar` in your `mods` folder.
+2. Download the Every Tunnel `.jar` from
+   [Releases](https://github.com/Daio7771/EveryTunnelMod/releases) and put it in your `mods`
+   folder.
 3. Start the game and press **BEGIN**.
 
 Step-by-step instructions, recommended mods, shader setup and troubleshooting:
@@ -85,6 +87,9 @@ Licensed under Creative Commons: By Attribution 4.0 License
 http://creativecommons.org/licenses/by/4.0/
 
 Full credits: [CREDITS.md](CREDITS.md).
+
+Found a bug? [Open an issue](https://github.com/Daio7771/EveryTunnelMod/issues) with your
+`logs/latest.log`.
 
 ## For modders
 

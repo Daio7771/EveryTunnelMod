@@ -1,30 +1,36 @@
 # CurseForge page
 
 The text for Every Tunnel's CurseForge project page, kept here so it is versioned with the mod.
-The part between the two lines is the description: paste it into the project's description
-editor in **Markdown** mode. Keep it in step with [README.md](README.md).
-
-The repository is private, so the description links to nothing in it: everything a player
-needs is in the text itself.
+Keep it in step with [README.md](README.md) and [INSTALL.md](INSTALL.md).
 
 ## Upload checklist
 
-- **Summary** (the one line under the name): `Sound-driven horror demo. Don't make a noise.`
-- **Logo / project icon:** `docs/media/logo.png`. Images in the description must be uploaded
-  to the project's **Images** tab first and linked by their CurseForge URL.
-- **Game version:** 1.20.1. **Mod loader:** Fabric. **Java:** 17.
-- **Relations:** no required dependencies (Fabric API, Fabric Language Kotlin, GeckoLib and
-  LambDynamicLights are embedded). Optional: Sound Physics Remastered, Sodium, Iris, Indium.
-- **License:** MIT, with the CC BY 4.0 music credit in the description (it must stay there).
-- **File name and version:** to decide (open release question).
-- **Changelog for the file:** the first public demo, Levels 1 and 2.
+| Field | Value |
+|---|---|
+| Summary (the line under the name) | `Sound-driven horror demo. Don't make a noise.` |
+| Project icon | [`docs/media/logo.png`](docs/media/logo.png) (512×512) |
+| Game version | 1.20.1 |
+| Mod loader | Fabric |
+| Java | 17 |
+| Required dependencies | None: Fabric API, Fabric Language Kotlin, GeckoLib and LambDynamicLights are inside the jar |
+| Optional dependencies | Sound Physics Remastered, Sodium, Iris, Indium |
+| License | MIT. The CC BY 4.0 music credit must stay in the description |
+| Source | https://github.com/Daio7771/EveryTunnelMod |
+| Issues | https://github.com/Daio7771/EveryTunnelMod/issues |
+| File | The jar from [Releases](https://github.com/Daio7771/EveryTunnelMod/releases), release type **Beta** (it is a demo) |
+| File changelog | `First public demo: Levels 1 and 2.` |
 
----
+## Description
 
-# Every Tunnel
+Paste the block below into the project's description editor in **Markdown** mode (the copy
+button is at the top right of the block). CurseForge shows the project's name above it, so the
+description starts with the tagline, not a title.
 
+```markdown
 **A singleplayer psychological horror mod for Minecraft 1.20.1 (Fabric).**
 *Demo: Levels 1 and 2.*
+
+![Every Tunnel](https://raw.githubusercontent.com/Daio7771/EveryTunnelMod/main/docs/media/logo.png)
 
 You are the new night-shift security guard of the **Noname Complex**, an abandoned
 underground facility. Your shift starts in the service elevator and goes down through its
@@ -56,7 +62,7 @@ you were.
 
 - **Minecraft 1.20.1** with **Fabric Loader 0.19.5** or newer.
 - Nothing else. Fabric API, Fabric Language Kotlin, GeckoLib and LambDynamicLights come
-  inside the mod's file, and so does the map. Don't install them separately.
+  inside the mod's file, and so does the map. You don't need to install them separately.
 
 ## Installing
 
@@ -66,6 +72,9 @@ you were.
 3. Start the game and press **BEGIN**. New to the game? Open **GUIDE** first.
 
 The map appears in your worlds as **Noname Complex**. Opening it always starts a new shift.
+
+Step-by-step instructions, shader setup and troubleshooting:
+[installation guide](https://github.com/Daio7771/EveryTunnelMod/blob/main/INSTALL.md).
 
 ## Recommended mods
 
@@ -89,6 +98,12 @@ Play with headphones, and keep the Music volume on: the music tells you things.
   Minecraft's title screen and back (other worlds, multiplayer).
 - The mod only changes worlds that contain its levels. Your other worlds stay vanilla.
 
+## Bugs and source code
+
+Found a bug? Report it on [GitHub](https://github.com/Daio7771/EveryTunnelMod/issues) with
+your `logs/latest.log`. The source code is on
+[GitHub](https://github.com/Daio7771/EveryTunnelMod) too.
+
 ## Credits
 
 Made by **Daio7771**: design, code, sound and art. MIT license. The sounds are synthesized
@@ -97,5 +112,4 @@ for the game or come from CC0 recordings.
 Music: "Local Forecast - Elevator" Kevin MacLeod (incompetech.com)
 Licensed under Creative Commons: By Attribution 4.0 License
 http://creativecommons.org/licenses/by/4.0/
-
----
+```
