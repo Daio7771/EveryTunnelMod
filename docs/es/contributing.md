@@ -20,7 +20,9 @@ asistente necesita saber.
 ven los jugadores. Están solo en inglés, con tono directo, y sin nada técnico: eso va en
 `docs/`. La descripción de CurseForge repite lo que un jugador necesita y enlaza a GitHub con
 URLs completas (allí no funcionan los enlaces relativos). Cuando cambie algo que ve el jugador
-(requisitos, características, mods recomendados, controles), actualiza las tres.
+(requisitos, características, mods recomendados, controles), actualiza las tres. No llevan
+notas para quien mantiene el mod (cómo publicar, listas de comprobación): eso va en `docs/`,
+como [Publicar en CurseForge](building-and-release.md#publicar-en-curseforge).
 
 ## Código
 

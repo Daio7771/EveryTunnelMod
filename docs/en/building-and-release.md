@@ -78,6 +78,34 @@ On first launch `client.MapWorldInstaller` unpacks the world into `saves/noname_
 removes the stored player and makes it Survival. A later mod version only replaces the
 world's datapacks and `resources.zip`.
 
+## Publishing on CurseForge
+
+[`CURSEFORGE.md`](../../CURSEFORGE.md) at the repository root is the project's description,
+exactly as players see it. To update it on CurseForge, open the file on GitHub, use **Copy
+raw file**, and paste it into the description editor in **Markdown** mode. It links to GitHub
+with full URLs, because relative links do not work there.
+
+When uploading:
+
+| Field | Value |
+|---|---|
+| Summary (the line under the name) | `Sound-driven horror demo. Don't make a noise.` |
+| Project icon | `docs/media/logo.png` (512×512) |
+| Game version | 1.20.1 |
+| Mod loader | Fabric |
+| Java | 17 |
+| Required dependencies | None: Fabric API, Fabric Language Kotlin, GeckoLib and LambDynamicLights are inside the jar |
+| Optional dependencies | Sound Physics Remastered, Sodium, Iris, Indium |
+| License | MIT. The CC BY 4.0 music credit must stay in the description |
+| Source | https://github.com/Daio7771/EveryTunnelMod |
+| Issues | https://github.com/Daio7771/EveryTunnelMod/issues |
+| File | The release jar (`everytunnerBuild`), release type **Beta** while it is a demo |
+| File changelog | What changed in this version, for players |
+
+The same jar goes to the repository's
+[Releases](https://github.com/Daio7771/EveryTunnelMod/releases), which `README.md` and
+`INSTALL.md` link to.
+
 ## Versions
 
 All in `gradle.properties`:

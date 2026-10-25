@@ -78,6 +78,33 @@ En el primer arranque `client.MapWorldInstaller` desempaqueta el mundo en
 `saves/noname_complex`, quita el jugador guardado y lo pone en Supervivencia. Una versión
 posterior del mod solo sustituye los datapacks y el `resources.zip` del mundo.
 
+## Publicar en CurseForge
+
+[`CURSEFORGE.md`](../../CURSEFORGE.md), en la raíz del repositorio, es la descripción del
+proyecto tal como la ven los jugadores. Para actualizarla en CurseForge, abre el archivo en
+GitHub, usa **Copy raw file** y pégalo en el editor de la descripción en modo **Markdown**.
+Enlaza a GitHub con URLs completas, porque allí no funcionan los enlaces relativos.
+
+Al subir:
+
+| Campo | Valor |
+|---|---|
+| Summary (la línea bajo el nombre) | `Sound-driven horror demo. Don't make a noise.` |
+| Icono del proyecto | `docs/media/logo.png` (512×512) |
+| Versión del juego | 1.20.1 |
+| Mod loader | Fabric |
+| Java | 17 |
+| Dependencias obligatorias | Ninguna: Fabric API, Fabric Language Kotlin, GeckoLib y LambDynamicLights van dentro del jar |
+| Dependencias opcionales | Sound Physics Remastered, Sodium, Iris, Indium |
+| Licencia | MIT. El crédito CC BY 4.0 de la música debe seguir en la descripción |
+| Source | https://github.com/Daio7771/EveryTunnelMod |
+| Issues | https://github.com/Daio7771/EveryTunnelMod/issues |
+| Archivo | El jar de release (`everytunnerBuild`), tipo **Beta** mientras sea una demo |
+| Changelog del archivo | Qué cambió en esta versión, para jugadores |
+
+El mismo jar va a las [Releases](https://github.com/Daio7771/EveryTunnelMod/releases) del
+repositorio, a las que enlazan `README.md` e `INSTALL.md`.
+
 ## Versiones
 
 Todas en `gradle.properties`:

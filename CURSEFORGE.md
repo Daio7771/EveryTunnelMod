@@ -1,32 +1,3 @@
-# CurseForge page
-
-The text for Every Tunnel's CurseForge project page, kept here so it is versioned with the mod.
-Keep it in step with [README.md](README.md) and [INSTALL.md](INSTALL.md).
-
-## Upload checklist
-
-| Field | Value |
-|---|---|
-| Summary (the line under the name) | `Sound-driven horror demo. Don't make a noise.` |
-| Project icon | [`docs/media/logo.png`](docs/media/logo.png) (512×512) |
-| Game version | 1.20.1 |
-| Mod loader | Fabric |
-| Java | 17 |
-| Required dependencies | None: Fabric API, Fabric Language Kotlin, GeckoLib and LambDynamicLights are inside the jar |
-| Optional dependencies | Sound Physics Remastered, Sodium, Iris, Indium |
-| License | MIT. The CC BY 4.0 music credit must stay in the description |
-| Source | https://github.com/Daio7771/EveryTunnelMod |
-| Issues | https://github.com/Daio7771/EveryTunnelMod/issues |
-| File | The jar from [Releases](https://github.com/Daio7771/EveryTunnelMod/releases), release type **Beta** (it is a demo) |
-| File changelog | `First public demo: Levels 1 and 2.` |
-
-## Description
-
-Paste the block below into the project's description editor in **Markdown** mode (the copy
-button is at the top right of the block). CurseForge shows the project's name above it, so the
-description starts with the tagline, not a title.
-
-```markdown
 **A singleplayer psychological horror mod for Minecraft 1.20.1 (Fabric).**
 *Demo: Levels 1 and 2.*
 
@@ -112,4 +83,3 @@ for the game or come from CC0 recordings.
 Music: "Local Forecast - Elevator" Kevin MacLeod (incompetech.com)
 Licensed under Creative Commons: By Attribution 4.0 License
 http://creativecommons.org/licenses/by/4.0/
-```

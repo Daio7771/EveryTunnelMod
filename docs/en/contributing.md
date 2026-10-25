@@ -19,7 +19,9 @@ the [last section](#notes-for-ai-assistants) adds what an assistant needs to kno
 players see. They are in English only, direct in tone, and keep everything technical out:
 that belongs in `docs/`. The CurseForge description repeats what a player needs and links to
 GitHub with full URLs (relative links do not work there). When a player-facing fact changes
-(requirements, features, recommended mods, controls), update all three.
+(requirements, features, recommended mods, controls), update all three. They hold no notes
+for maintainers (how to publish, checklists): those go in `docs/`, such as
+[Publishing on CurseForge](building-and-release.md#publishing-on-curseforge).
 
 ## Code
 

@@ -39,4 +39,5 @@ is the core of the mod.
   page wrong, fix it in both languages in the same step. The player guide pages
   (`docs/*/guide/`) are shown in game and use a small Markdown subset (see contributing).
 - **Public pages** (`README.md`, `INSTALL.md`, `CURSEFORGE.md`): English only, for players;
-  keep the three in step when a player-facing fact changes.
+  keep the three in step when a player-facing fact changes. No maintainer notes in them
+  (those go in `docs/`).
