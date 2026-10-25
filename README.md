@@ -11,6 +11,10 @@ The Pale man hunts by sound, and the music follows what he does. A new game star
 elevator; dying restarts the level, and walking into the next one closes a shutter behind
 you. Batteries and water bottles lie around to be picked up. Level 2 is built, with its keycard, lights out and the end of the demo. Next: playtesting, tuning and the release.
 
+**Documentation:** [`docs/`](docs/README.md), in [English](docs/en/README.md) and
+[Spanish](docs/es/README.md): architecture, game flow, the level format, every system,
+the tools, recipes, a map of the code, and the player guide that the game shows too.
+
 ## Running it
 
 You need JDK 17 (the game) and JDK 21 (Gradle; `./gradlew` finds it on its own).
@@ -45,8 +49,6 @@ before opening it (the map generator installs into that copy too).
 
 None of them are required, and players get a hint where it matters.
 
-- LambDynamicLights: draws the flashlight's light. Without it the flashlight works but
-  doesn't light anything.
 - Sound Physics Remastered: reverb and muffling through walls. The sounds are made dry,
   expecting it.
 - Sodium + Iris + Indium: shader packs. It's tuned for Complementary Reimagined: put it in
@@ -54,7 +56,9 @@ None of them are required, and players get a hint where it matters.
   material maps. Dev runs pin LWJGL to 3.3.1 because Sodium 0.5 won't start on the 3.3.2
   Loom brings.
 
-GeckoLib (the Pale man's animations) is required, but it's packed inside the mod's jar.
+GeckoLib (the Pale man's animations) and LambDynamicLights (the flashlight's light) are
+required, but they're packed inside the mod's jar, with Fabric API and Fabric Language
+Kotlin.
 Versions are in `gradle.properties`.
 
 ## How the game side works
