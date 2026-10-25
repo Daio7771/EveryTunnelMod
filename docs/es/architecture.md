@@ -36,6 +36,7 @@ platform/                                           todo lo que toca Minecraft o
 | `config` | `GameplayConfig` (cada número ajustable), su parser y el archivo en disco |
 | `core` | `LevelManager` (niveles cargados), `PlayerLocationTracker` (quién está en qué zona) |
 | `core.level` | `LevelDefinition` y el parser del JSON de niveles |
+| `core.guide` | `GuideMarkdown`, el lector de las páginas de la guía del jugador |
 | `systems` | `ResourceSystem` (stamina, sed, batería), `NoiseSystem`, `FlashlightBeam` (matemática del haz) |
 | `entities` | `PaleManBrain`, las decisiones del Pale man |
 | `util` | `JsonFields`, un lector de JSON tolerante que usan ambos parsers |
@@ -58,7 +59,7 @@ o reproduce:
 | `client.effects` | Todo lo que se oye (ambiente, zumbido, latido, respiración, música) y el fundido de pantalla |
 | `client.hud` | Barras de estado, viñeta de agotamiento, el foco de la linterna sin shaders |
 | `client.render` | El renderizador del Pale man, el botín en el suelo, el uniforme del vigilante |
-| `client.screen` | Menú principal, pantalla de carga y consejos, fin de la demo y créditos, la figura del menú |
+| `client.screen` | Menú principal, guía del jugador, pantalla de carga y consejos, fin de la demo y créditos, la figura del menú |
 
 Las mixins están en Java: `src/main/java/.../mixin/` (comunes) y
 `src/client/java/.../mixin/client/` (cliente). Ver [Mixins](#mixins).

@@ -61,7 +61,8 @@ asistente necesita saber.
 
 ## Páginas de la guía del jugador
 
-Las páginas de `docs/<idioma>/guide/` las dibuja el juego (menú principal, GUIDE), así que
+Las páginas de `docs/<idioma>/guide/` las dibuja el juego (menú principal, GUIDE; la
+compilación las copia al jar y las dibuja `client.screen.GuideScreen`), así que
 usan un subconjunto pequeño de Markdown que se lee bien tanto en GitHub como en el juego:
 
 - `# Título`: uno por página, la primera línea.
@@ -71,7 +72,8 @@ usan un subconjunto pequeño de Markdown que se lee bien tanto en GitHub como en
 - `**negrita**` y `*cursiva*`.
 - `---` para una línea separadora.
 
-Nada más: sin enlaces, tablas, imágenes, código ni HTML. Nombra las teclas con su valor por
+Nada más: sin enlaces, tablas, imágenes, código ni HTML (`GuideMarkdownTest` hace fallar la
+compilación si una página los usa, o si los dos idiomas no tienen los mismos archivos). Nombra las teclas con su valor por
 defecto y el ajuste ("la tecla Linterna, F por defecto"), porque los jugadores pueden
 cambiarlas.
 

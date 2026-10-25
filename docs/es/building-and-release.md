@@ -54,6 +54,7 @@ con todo menos Fabric Loader:
 | El mod | `remapJar` |
 | Fabric API, Fabric Language Kotlin, GeckoLib, LambDynamicLights | jar-in-jar (`include`); Fabric Loader usa una copia más nueva si el jugador tiene una |
 | El mundo del mapa | `packMapWorld` comprime `run/saves/noname_complex` en `every_tunnel/world/noname_complex.zip` |
+| La guía del jugador | `copyGuide` copia `docs/<idioma>/guide/*.md` en `assets/every_tunnel/guide/<idioma>/` |
 | `LICENSE.txt`, `CREDITS.md` | Renombrados con el nombre del mod; el crédito CC BY tiene que viajar con el mod |
 
 `packMapWorld` deja fuera lo que pertenece a quien jugó el mundo: `playerdata/`, `stats/`,

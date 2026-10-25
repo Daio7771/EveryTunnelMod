@@ -34,6 +34,7 @@ platform/                                           everything that touches Mine
 | `config` | `GameplayConfig` (every tunable number), its parser and the file on disk |
 | `core` | `LevelManager` (loaded levels), `PlayerLocationTracker` (who is in which zone) |
 | `core.level` | `LevelDefinition` and the level JSON parser |
+| `core.guide` | `GuideMarkdown`, the reader of the player guide pages |
 | `systems` | `ResourceSystem` (stamina, thirst, battery), `NoiseSystem`, `FlashlightBeam` (beam math) |
 | `entities` | `PaleManBrain`, the Pale man's decisions |
 | `util` | `JsonFields`, a forgiving JSON reader shared by both parsers |
@@ -56,7 +57,7 @@ draws or plays:
 | `client.effects` | Everything heard (ambience, hum, heartbeat, breathing, music) and the screen fade |
 | `client.hud` | Status bars, exhaustion vignette, the no-shader flashlight spot |
 | `client.render` | The Pale man's renderer, loot on the floor, the guard uniform |
-| `client.screen` | Main menu, loading screen and tips, end of demo and credits, the menu figure |
+| `client.screen` | Main menu, player guide, loading screen and tips, end of demo and credits, the menu figure |
 
 Mixins live in Java: `src/main/java/.../mixin/` (common) and
 `src/client/java/.../mixin/client/` (client). See [Mixins](#mixins).

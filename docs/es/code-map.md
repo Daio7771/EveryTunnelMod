@@ -19,7 +19,7 @@ con un comentario KDoc que cuenta más.
 | `GameplayConfigParser.kt` | JSON ↔ configuración, rangos de valores, problemas y claves ausentes. Sin E/S de archivos |
 | `ConfigManager.kt` | Carga y escribe `config/every_tunnel/gameplay.json` de forma segura |
 
-### `core/` y `core/level/`
+### `core/`, `core/level/` y `core/guide/`
 
 | Archivo | Qué hace |
 |---|---|
@@ -27,6 +27,7 @@ con un comentario KDoc que cuenta más.
 | `PlayerLocationTracker.kt` | El nivel y las zonas de cada jugador; informa de los `LocationChange` |
 | `level/LevelDefinition.kt` | El modelo de nivel: zonas, puntos de aparición, ambiente, entrada, intro, build, `BlockBox` |
 | `level/LevelParser.kt` | Lee un archivo de nivel; documenta cada clave |
+| `guide/GuideMarkdown.kt` | Lee una página de la guía del jugador (el subconjunto de Markdown) en bloques |
 
 ### `systems/`
 
@@ -173,6 +174,7 @@ con un comentario KDoc que cuenta más.
 | Archivo | Qué hace |
 |---|---|
 | `MainMenuScreen.kt` | El menú principal |
+| `GuideScreen.kt` | La guía del jugador: una hoja de papel con scroll y pestañas |
 | `MenuFigure.kt` | La silueta que aparece con el ratón quieto |
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |
 | `LoadingTips.kt` | Consejos que van cambiando, con las teclas del jugador |
@@ -189,6 +191,8 @@ Ver [Arquitectura](architecture.md#mixins) para el objetivo y el motivo de cada 
 | `fabric.mod.json` | Metadatos del mod, entrypoints, dependencias |
 | `every_tunnel.mixins.json`, `client/resources/every_tunnel.client.mixins.json` | Listas de mixins |
 | `assets/every_tunnel/lang/en_us.json` | Todos los textos del juego |
+| `assets/every_tunnel/lang/es_*.json` | Solo las palabras propias de la pantalla de la guía en español; el resto vuelve al inglés |
+| `assets/every_tunnel/guide/` | No está en `src/`: lo copia de `docs/*/guide/` la compilación (`copyGuide`) |
 | `assets/every_tunnel/sounds.json`, `sounds/` | Eventos de sonido y archivos `.ogg` (de `tools/sounds/export.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | De `tools/blocks`, `tools/entity`, `tools/gui` |
 | `assets/every_tunnel/geo/`, `animations/` | Los archivos de GeckoLib del Pale man |

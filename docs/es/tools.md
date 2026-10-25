@@ -29,6 +29,7 @@ git).
 | `tools/gui/logo.py` | `logo.png` | el logo |
 | `tools/gui/menu_figure.py` | `menu_figure.png` | la silueta del menú |
 | `tools/gui/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | el foco sin shaders |
+| `tools/gui/guide_paper.py` | `guide_paper.png` (mosaico sin costuras), `guide_stains.png` | el papel de la guía |
 | `tools/sounds/generate.py` | WAV de prueba y una página para escucharlos (`tools/sounds/out/index.html`) | un sonido, para oírlo |
 | `tools/sounds/export.py` | Los `.ogg` y `sounds.json` en el mod | un sonido, para meterlo en el juego |
 

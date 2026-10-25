@@ -61,7 +61,7 @@ cuenta. Las partidas viven solo en memoria: reabrir el mundo empieza una nueva.
 
 ## Tests unitarios
 
-`./gradlew test` (también forma parte de `build`). 49 tests en `src/test/kotlin/`, que cubren
+`./gradlew test` (también forma parte de `build`). 55 tests en `src/test/kotlin/`, que cubren
 las capas de Kotlin puro:
 
 | Test | Cubre |
@@ -73,6 +73,7 @@ las capas de Kotlin puro:
 | `NoiseSystemTest` | Radios, memoria, audibilidad, pasos, aterrizajes |
 | `ResourceSystemTest` | Gasto, regeneración, agotamiento, daño por sed, batería |
 | `FlashlightBeamTest` | La luz del haz en puntos dentro y fuera del cono |
+| `GuideMarkdownTest` | El subconjunto de Markdown de la guía, y que cada página de `docs/*/guide/` lo cumple en los dos idiomas |
 
 Lo que toca Minecraft se prueba en el juego.
 

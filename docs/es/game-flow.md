@@ -47,8 +47,10 @@ créditos.
 - **BEGIN** abre Noname Complex. Si el mundo falta, dice "The map is missing. Reinstall the
   mod."
 - **OPTIONS** abre las opciones de vanilla.
-- **LANGUAGE** abre la pantalla de idioma de vanilla. *(Se sustituirá por GUIDE, que
-  muestra las páginas de la [guía del jugador](guide/01-how-to-play.md).)*
+- **GUIDE** abre la [guía del jugador](guide/01-how-to-play.md) (`GuideScreen`): una hoja de
+  papel blanco gastado que se desplaza con la rueda, con pestañas de papel para saltar entre
+  el índice y cada página. Sale en el idioma del juego (español para cualquier `es_*`, inglés
+  en los demás). El idioma en sí se cambia en OPTIONS.
 - **CREDITS** pasa los créditos (`EndOfDemoScreen.credits`) y vuelve.
 - **EXIT** cierra el juego.
 - Tras 15 s sin mover el ratón, la silueta del Pale man aparece poco a poco a la derecha

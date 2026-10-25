@@ -57,7 +57,8 @@ the [last section](#notes-for-ai-assistants) adds what an assistant needs to kno
 
 ## Player guide pages
 
-The pages in `docs/<lang>/guide/` are drawn by the game (main menu, GUIDE), so they use a
+The pages in `docs/<lang>/guide/` are drawn by the game (main menu, GUIDE; the build copies
+them into the jar, `client.screen.GuideScreen` draws them), so they use a
 small Markdown subset that reads well both on GitHub and in game:
 
 - `# Title`: one per page, the first line.
@@ -67,7 +68,8 @@ small Markdown subset that reads well both on GitHub and in game:
 - `**bold**` and `*italic*`.
 - `---` for a separator line.
 
-Nothing else: no links, tables, images, code or HTML. Name keys with their default and the
+Nothing else: no links, tables, images, code or HTML (`GuideMarkdownTest` fails the build
+if a page uses them, or if the two languages do not have the same files). Name keys with their default and the
 setting ("the Flashlight key, F by default"), since players can rebind them.
 
 Rules for the content:

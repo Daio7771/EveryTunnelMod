@@ -19,7 +19,7 @@ KDoc comment that says more.
 | `GameplayConfigParser.kt` | JSON ↔ config, value ranges, problems and missing keys. No file IO |
 | `ConfigManager.kt` | Loads and writes `config/every_tunnel/gameplay.json` safely |
 
-### `core/` and `core/level/`
+### `core/`, `core/level/` and `core/guide/`
 
 | File | What it does |
 |---|---|
@@ -27,6 +27,7 @@ KDoc comment that says more.
 | `PlayerLocationTracker.kt` | Each player's level and zones; reports `LocationChange`s |
 | `level/LevelDefinition.kt` | The level model: zones, spawn points, ambience, entry, intro, build, `BlockBox` |
 | `level/LevelParser.kt` | Parses one level file; documents every key |
+| `guide/GuideMarkdown.kt` | Reads a player guide page (the Markdown subset) into blocks |
 
 ### `systems/`
 
@@ -173,6 +174,7 @@ KDoc comment that says more.
 | File | What it does |
 |---|---|
 | `MainMenuScreen.kt` | The main menu |
+| `GuideScreen.kt` | The player guide: a scrolling paper sheet with tabs |
 | `MenuFigure.kt` | The silhouette that appears when the mouse is still |
 | `LoadingScreen.kt` | The loading screen and `LoadingCover`, which draws it over everything |
 | `LoadingTips.kt` | Rotating tips with the player's keys |
@@ -189,6 +191,8 @@ See [Architecture](architecture.md#mixins) for the target and reason of each.
 | `fabric.mod.json` | Mod metadata, entrypoints, dependencies |
 | `every_tunnel.mixins.json`, `client/resources/every_tunnel.client.mixins.json` | Mixin lists |
 | `assets/every_tunnel/lang/en_us.json` | Every in-game text |
+| `assets/every_tunnel/lang/es_*.json` | Only the guide screen's own words in Spanish; everything else falls back to English |
+| `assets/every_tunnel/guide/` | Not in `src/`: copied from `docs/*/guide/` by the build (`copyGuide`) |
 | `assets/every_tunnel/sounds.json`, `sounds/` | Sound events and `.ogg` files (from `tools/sounds/export.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | From `tools/blocks`, `tools/entity`, `tools/gui` |
 | `assets/every_tunnel/geo/`, `animations/` | The Pale man's GeckoLib files |

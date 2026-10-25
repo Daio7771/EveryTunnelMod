@@ -61,7 +61,7 @@ only: reopening the world starts a new one.
 
 ## Unit tests
 
-`./gradlew test` (also part of `build`). 49 tests in `src/test/kotlin/`, covering the plain
+`./gradlew test` (also part of `build`). 55 tests in `src/test/kotlin/`, covering the plain
 Kotlin layers:
 
 | Test | Covers |
@@ -73,6 +73,7 @@ Kotlin layers:
 | `NoiseSystemTest` | Radii, memory, audibility, steps, landings |
 | `ResourceSystemTest` | Drain, regeneration, exhaustion, thirst damage, battery |
 | `FlashlightBeamTest` | The beam's light at points in and out of the cone |
+| `GuideMarkdownTest` | The guide's Markdown subset, and that every page in `docs/*/guide/` follows it in both languages |
 
 Anything that touches Minecraft is tested in game.
 

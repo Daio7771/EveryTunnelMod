@@ -46,8 +46,10 @@ it (`MinecraftClientMixin`): at start-up, after leaving a world, after the credi
 - **BEGIN** opens Noname Complex. If the world is missing it says "The map is missing.
   Reinstall the mod."
 - **OPTIONS** opens vanilla's options.
-- **LANGUAGE** opens vanilla's language screen. *(To be replaced by GUIDE, which shows the
-  [player guide](guide/01-how-to-play.md) pages.)*
+- **GUIDE** opens the [player guide](guide/01-how-to-play.md) (`GuideScreen`): one sheet of
+  worn white paper, scrolled with the wheel, with paper tabs to jump between the contents and
+  each page. It is in the game's language (Spanish for any `es_*`, English otherwise). The
+  language itself is changed in OPTIONS.
 - **CREDITS** rolls the credits (`EndOfDemoScreen.credits`) and comes back.
 - **EXIT** closes the game.
 - After 15 s without moving the mouse, the Pale man's silhouette fades in on the right

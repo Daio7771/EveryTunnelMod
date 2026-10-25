@@ -82,9 +82,10 @@ man as soon as he spawns). Entering a level makes its start (the spawn point tag
 your respawn point, so you don't come back on the roof.
 
 **The main menu.** Vanilla's title screen is replaced by Every Tunnel's: black, the logo
-and BEGIN / OPTIONS / LANGUAGE / CREDITS / EXIT on the left, the version at the bottom.
-BEGIN opens Noname Complex; CREDITS rolls the end credits; OPTIONS and LANGUAGE are
-vanilla's. After 15 s without moving the mouse, the Pale man's silhouette slowly appears,
+and BEGIN / OPTIONS / GUIDE / CREDITS / EXIT on the left, the version at the bottom.
+BEGIN opens Noname Complex; GUIDE opens the player guide (`docs/*/guide/`, on a worn paper
+sheet, in English or Spanish after the game's language); CREDITS rolls the end credits;
+OPTIONS is vanilla's (the language is changed there). After 15 s without moving the mouse, the Pale man's silhouette slowly appears,
 faint, on the right, and vanishes as soon as the mouse moves (`tools/gui/menu_figure.py`
 draws it). Its music is the sound event
 `music.menu`: an 84 s loop of a restless piano ostinato in 5/4 over a drone, synthesized by

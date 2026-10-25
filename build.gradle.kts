@@ -212,6 +212,20 @@ val packMapWorld = tasks.register<Zip>("packMapWorld") {
     archiveFileName.set("noname_complex.zip")
 }
 sourceSets.main { resources.srcDir(mapWorldResources) }
+
+// The player guide: docs/<lang>/guide/*.md, shown by the main menu's GUIDE screen
+// (client.screen.GuideScreen), copied to assets/every_tunnel/guide/<lang>/. The docs are the
+// one source, so GitHub and the game always show the same pages.
+val copyGuide = tasks.register<Sync>("copyGuide") {
+    description = "Copies the player guide pages from docs/ into the mod's resources."
+    from("docs") {
+        include("*/guide/*.md")
+        eachFile { path = "assets/every_tunnel/guide/${relativePath.segments[0]}/$name" }
+    }
+    includeEmptyDirs = false
+    into(layout.buildDirectory.dir("generated/guide"))
+}
+sourceSets.main { resources.srcDir(copyGuide) }
 tasks.named<Jar>("sourcesJar") { exclude("every_tunnel/world/**") }
 
 tasks.processResources {

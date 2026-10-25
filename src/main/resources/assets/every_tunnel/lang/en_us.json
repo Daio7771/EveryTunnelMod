@@ -64,7 +64,7 @@
   "menu.every_tunnel.title": "Every Tunnel",
   "menu.every_tunnel.begin": "BEGIN",
   "menu.every_tunnel.options": "OPTIONS",
-  "menu.every_tunnel.language": "LANGUAGE",
+  "menu.every_tunnel.guide": "GUIDE",
   "menu.every_tunnel.credits": "CREDITS",
   "menu.every_tunnel.exit": "EXIT",
   "menu.every_tunnel.version": "v%s demo",
@@ -105,5 +105,9 @@
   "block.every_tunnel.desk_phone": "Desk Phone",
   "block.every_tunnel.logbook": "Logbook",
   "block.every_tunnel.office_chair": "Office Chair",
-  "block.every_tunnel.key_rack": "Key Rack"
+  "block.every_tunnel.key_rack": "Key Rack",
+  "screen.every_tunnel.guide.title": "Guide",
+  "screen.every_tunnel.guide.contents": "Contents",
+  "screen.every_tunnel.guide.back": "BACK",
+  "screen.every_tunnel.guide.empty": "No guide pages found."
 }
