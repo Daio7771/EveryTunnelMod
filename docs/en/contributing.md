@@ -13,6 +13,14 @@ the [last section](#notes-for-ai-assistants) adds what an assistant needs to kno
 - The game itself is English only for now (`en_us.json`); a Spanish translation is planned
   for later. The in-game guide is already in both.
 
+## Public pages
+
+`README.md` (GitHub), `INSTALL.md` and `CURSEFORGE.md` (the CurseForge description) are what
+players see. They are in English only, direct in tone, and keep everything technical out:
+that belongs in `docs/`. The CurseForge description cannot link into the repository (it is
+private), so it repeats what a player needs. When a player-facing fact changes (requirements,
+features, recommended mods, controls), update all three.
+
 ## Code
 
 - **Kotlin** for everything; Java only for mixins.

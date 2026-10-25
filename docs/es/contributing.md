@@ -14,6 +14,14 @@ asistente necesita saber.
 - El juego en sí está solo en inglés por ahora (`en_us.json`); hay prevista una traducción
   al español para más adelante. La guía del juego ya está en los dos.
 
+## Páginas públicas
+
+`README.md` (GitHub), `INSTALL.md` y `CURSEFORGE.md` (la descripción de CurseForge) son lo que
+ven los jugadores. Están solo en inglés, con tono directo, y sin nada técnico: eso va en
+`docs/`. La descripción de CurseForge no puede enlazar al repositorio (es privado), así que
+repite lo que un jugador necesita. Cuando cambie algo que ve el jugador (requisitos,
+características, mods recomendados, controles), actualiza las tres.
+
 ## Código
 
 - **Kotlin** para todo; Java solo para las mixins.
