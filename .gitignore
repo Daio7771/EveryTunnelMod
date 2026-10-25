@@ -32,3 +32,6 @@ tools/entity/output/
 
 # HUD icon preview (tools/gui/hud_icons.py)
 tools/gui/output/
+
+# Claude Code local settings
+.claude/
