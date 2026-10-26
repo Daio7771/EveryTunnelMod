@@ -19,6 +19,7 @@ Each hall is built by build.build() in its own frame and copied in; corridors, r
 rooms are built here directly. Coordinates are relative to hall 1's corner (floor y = 0).
 """
 
+import math
 import random
 from types import SimpleNamespace
 
@@ -424,58 +425,136 @@ class Level:
     def keycard_exit(self, spec, f, wall, dx, wall_z, step, facing_out):
         """
         Level 2's way out: an iron door marked EXIT in the hall wall, a card reader beside it on
-        the hall side (zone tagged keycard_door), and behind it emergency stairs going down,
-        EXIT_STEPS steps, enclosed and dark, to a wall marked with the next level's sign. A few
-        steps down is the zone tagged end, where the demo ends.
+        the hall side (zone tagged keycard_door), and behind it a round shaft of metal panels
+        with grating stairs spiralling down around an open well, railed with iron bars:
+        EXIT_TURNS turns of EXIT_TURN_DROP blocks each, half a block per step, clockwise seen
+        from above. Wall lamps every half turn stay on when the keycard puts the level's lights
+        out (the zone is tagged lights_stay). At the bottom, a landing with a closed door under
+        the next level's sign: the zone tagged end, where the demo ends.
+
+        Seen from above, from the hall's wall (z = wall_z) outwards (step):
+          +1, +2     the entry landing at the top, 3 wide; the bottom landing under it
+          +3 .. +13  the shaft, centred on (dx, wall_z + 8 step); by distance d from the centre:
+                     d < 1.5 the well (3 x 3), then the railing (the 5 x 5 square round it),
+                     up to d < 4.5 the stairs (about two blocks wide), then the wall
         """
         p, S = self.p, self.S
         y = f["hy"]
-        xa, xb = dx - 1, dx + 1
-        steps = p.EXIT_STEPS
-        stair_facing = "south" if step < 0 else "north"          # stairs face back up, towards the door
-        hall_side = wall_z - step
-        # Cell k from the door: 0 is flat (floor y), 1..steps are stairs one lower each (the
-        # first one level with the floor), steps + 1 is the flat bottom.
-        def floor_of(k):
-            return y if k == 0 else y - (k - 1) if k <= steps else y - steps
+        turns, drop = p.EXIT_TURNS, p.EXIT_TURN_DROP
+        metal = S["elevator_wall"]
+        cx, cz = dx, wall_z + step * 8
+        top = y + 1                              # the hall's floor surface
+        bottom = top - turns * drop              # the bottom landing's floor surface
 
-        # Every cell the stairwell takes must be free (it digs under the neighbouring hall).
-        cells = []
-        for k in range(0, steps + 2):
-            z = wall_z + step * (k + 1)
-            floor_y = floor_of(k)
-            for x in range(xa - 1, xb + 2):
-                for yy in range(floor_y - 1, floor_y + 5):
-                    cells.append((x, yy, z))
-        bottom = wall_z + step * (steps + 2)
-        cells += [(x, yy, bottom) for x in range(xa - 1, xb + 2) for yy in range(y - steps - 1, y - steps + 5)]
+        def dist(x, z):
+            return math.hypot(x - cx, z - cz)
+
+        inside = {(x, z) for x in range(cx - 5, cx + 6) for z in range(cz - 5, cz + 6) if dist(x, z) < 4.5}
+        well = {(x, z) for x, z in inside if abs(x - cx) <= 1 and abs(z - cz) <= 1}
+        railing = {(x, z) for x, z in inside if (x, z) not in well and max(abs(x - cx), abs(z - cz)) <= 2}
+        ring = inside - well
+        walls = {(x + ax, z + az) for x, z in inside for ax in (-1, 0, 1) for az in (-1, 0, 1)} - inside
+        landing_zs = (wall_z + step, wall_z + step * 2)
+        opening_z = wall_z + step * 3
+
+        # Every cell it takes must be free.
+        cells = [(x, yy, z) for x, z in inside | walls for yy in range(bottom - 1, top + 5)]
+        for base in (top, bottom):
+            cells += [(x, yy, z) for z in landing_zs for x in range(dx - 2, dx + 3) for yy in range(base - 1, base + 4)]
+        cells += [(x, yy, wall_z) for x in range(dx - 2, dx + 3) for yy in range(bottom - 1, bottom + 4)]
         taken = [c for c in cells if not self.world.free(*c)]
         if taken:
-            raise SystemExit(f"keycard_exit by hall {spec['hall'] + 1}: the stairwell runs into other blocks, e.g. {taken[:3]}")
-        for k in range(0, steps + 2):
-            z = wall_z + step * (k + 1)
-            last = k == steps + 1
-            floor_y = floor_of(k)
-            for x in range(xa - 1, xb + 2):
-                side = x in (xa - 1, xb + 1)
-                self.set(x, floor_y - 1, z, S["floor"])
-                if k == 0 or last or side:
-                    self.set(x, floor_y, z, S["floor"])
+            raise SystemExit(f"keycard_exit by hall {spec['hall'] + 1}: the stair shaft runs into other blocks, e.g. {taken[:3]}")
+
+        # Where along the spiral a cell is: its share of a turn from the start, which lies just
+        # before the entry, so the first steps are those by the door.
+        start = math.atan2(-step * 4, 0) - math.radians(20)
+
+        def share(x, z):
+            return ((math.atan2(z - cz, x - cx) - start) / (2 * math.pi)) % 1.0
+
+        def surface(s):
+            """The tread's surface s turns down, in half blocks."""
+            return 2 * top - round(s * drop * 2)
+
+        # The shell: walls, the floor of the well, the ceiling.
+        for x, z in walls:
+            for yy in range(bottom - 1, top + 5):
+                self.set(x, yy, z, metal)
+        for x, z in inside:
+            self.set(x, bottom - 1, z, S["plate"])
+            self.set(x, top + 4, z, metal)
+
+        # Treads: half slabs of grating, one per turn in each cell of the ring; iron bars two
+        # blocks high on the railing's treads.
+        bars = set()
+        for x, z in ring:
+            for t in range(turns):
+                h = surface(t + share(x, z))
+                if h <= 2 * bottom:
+                    continue                     # the last steps reach the floor
+                block_y, half = divmod(h, 2)
+                if half:
+                    self.set(x, block_y, z, f"{S['grating']}[type=bottom,waterlogged=false]")
                 else:
-                    self.set(x, floor_y, z, f"minecraft:andesite_stairs[facing={stair_facing},half=bottom,shape=straight]")
-                self.set(x, floor_y + 4, z, S["ceiling"])
-                if side:
-                    for yy in range(floor_y + 1, floor_y + 4):
-                        self.set(x, yy, z, S["wall"])
-        # The sign at the bottom, on the end wall.
-        bottom_z = wall_z + step * (steps + 2)
-        for x in range(xa - 1, xb + 2):
-            for yy in range(y - steps - 1, y - steps + 5):
-                self.set(x, yy, bottom_z, S["wall"])
-        inside = "south" if step < 0 else "north"
-        self.wall_sign(list(p.NEXT_LEVEL_SIGN), dx - 1 if step < 0 else dx + 1, y - steps + 2, bottom_z,
-                       inside, (1, 0) if step < 0 else (-1, 0))
+                    self.set(x, block_y - 1, z, f"{S['grating']}[type=top,waterlogged=false]")
+                if (x, z) in railing:
+                    bars |= {(x, block_y + half, z), (x, block_y + half + 1, z)}
+        # At the top, bars across the end of the first turn, which lies just behind the entry.
+        for x, z in ring:
+            if share(x, z) > 0.75:
+                bars |= {(x, top, z), (x, top + 1, z)}
+        offsets = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+        for x, yy, z in bars:
+            joined = {side: (x + ox, yy, z + oz) in bars or (x + ox, z + oz) in walls for side, (ox, oz) in offsets.items()}
+            self.set(x, yy, z, f"{S['railing']}[" + ",".join(
+                f"{side}={'true' if joined[side] else 'false'}" for side in ("east", "north", "south", "west")) + ",waterlogged=false]")
+
+        # Wall lamps, every half turn, two blocks over the tread, facing the well.
+        for k in range(1, 2 * turns):
+            s = k / 2
+            angle = start + 2 * math.pi * (s % 1.0)
+            best = None
+            for x, z in ring - railing:
+                vx, vz = cx - x, cz - z
+                facing = ("east" if vx > 0 else "west") if abs(vx) >= abs(vz) else ("south" if vz > 0 else "north")
+                behind = (x - offsets[facing][0], z - offsets[facing][1])
+                if behind not in walls:
+                    continue
+                off = abs(math.remainder(math.atan2(z - cz, x - cx) - angle, 2 * math.pi))
+                if best is None or off < best[0]:
+                    best = (off, x, z, facing, behind)
+            _, x, z, facing, behind = best
+            lamp_y = surface(s) // 2 + 2
+            if self.variant == "mod":
+                self.set(x, lamp_y, z, f"every_tunnel:fluorescent_light[facing={facing},axis=x,mode=on,lit=true]")
+            else:
+                self.set(behind[0], lamp_y, behind[1], S["fixture_lit"])
+            self.fixtures.append((x, z, "lit"))
+
+        # The landings: at the top from the door, at the bottom to the end wall; a way through
+        # the shaft's wall at both.
+        for base in (top, bottom):
+            for z in landing_zs:
+                for x in range(dx - 2, dx + 3):
+                    self.set(x, base - 1, z, S["plate"])
+                    self.set(x, base + (4 if base == top else 3), z, metal)
+                    if x in (dx - 2, dx + 2):
+                        for yy in range(base, base + 4):
+                            self.set(x, yy, z, metal)
+            for x in range(dx - 1, dx + 2):
+                for yy in range(base, base + 3):
+                    self.world.remove(x, yy, opening_z)
+        for x in range(dx - 2, dx + 3):
+            for yy in range(bottom - 1, bottom + 4):
+                self.set(x, yy, wall_z, metal)
+        self.set(dx, bottom, wall_z, f"{S['emergency_door']}[facing={facing_out},half=lower,hinge=left,open=false,powered=false]")
+        self.set(dx, bottom + 1, wall_z, f"{S['emergency_door']}[facing={facing_out},half=upper,hinge=left,open=false,powered=false]")
+        self.set(dx, bottom + 2, wall_z, self.glyphs.wall_state(p.NEXT_LEVEL_SIGN, facing_out))
+        self.fixture(dx, wall_z + step * 2, bottom + 3, "lit")
+
         # Door through the hall wall, EXIT over it, the reader on the hall side.
+        hall_side = wall_z - step
         self.carve(dx, dx, wall_z, wall_z, y + 1, y + 2)
         self.set(dx, y + 1, wall_z, f"{S['emergency_door']}[facing={facing_out},half=lower,hinge=left,open=false,powered=false]")
         self.set(dx, y + 2, wall_z, f"{S['emergency_door']}[facing={facing_out},half=upper,hinge=left,open=false,powered=false]")
@@ -491,11 +570,13 @@ class Level:
             reader = f"minecraft:polished_blackstone_button[face=wall,facing={reader_facing},powered=false]"
         self.set(dx + 1, y + 2, hall_side, reader)
         self.zone("keycard_door", dx - 1, y + 1, min(wall_z, hall_side), dx + 1, y + 2, max(wall_z, hall_side), ["keycard_door"])
-        za, zb = sorted((wall_z + step, wall_z + step * (steps + 1)))
-        self.zone(f"keycard_exit_hall_{spec['hall'] + 1}", xa, y - steps, za, xb, y + 4, zb)
-        e0, e1 = sorted((wall_z + step * 4, wall_z + step * 6))
-        self.zone("end", xa, y - 7, e0, xb, y, e1, ["end"])
-        self.labels.append((xa, za - 1 if step < 0 else zb + 2, f"EXIT (keycard): stairs down to {p.NEXT_LEVEL_SIGN}"))
+        xs = [x for x, _ in walls]
+        zs = [z for _, z in walls] + [wall_z + step]
+        self.zone(f"keycard_exit_hall_{spec['hall'] + 1}", min(xs), bottom - 1, min(zs), max(xs), top + 4, max(zs), ["lights_stay"])
+        e0, e1 = sorted(landing_zs)
+        self.zone("end", dx - 1, bottom, e0, dx + 1, bottom + 2, e1, ["end"])
+        self.labels.append((dx - 5, min(zs) - 1 if step < 0 else max(zs) + 2,
+                            f"EXIT (keycard): spiral stairs down to {p.NEXT_LEVEL_SIGN}"))
 
     def booth(self, f):
         """

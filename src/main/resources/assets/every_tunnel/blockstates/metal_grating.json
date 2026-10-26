@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "every_tunnel:block/metal_grating_bottom"
+    },
+    "type=top": {
+      "model": "every_tunnel:block/metal_grating_top"
+    },
+    "type=double": {
+      "model": "every_tunnel:block/metal_grating_double"
+    }
+  }
+}

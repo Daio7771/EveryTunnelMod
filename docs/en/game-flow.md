@@ -147,15 +147,20 @@ Reopening the world or respawning inside a level does not count as walking in.
 - **The keycard** lies on the counter of a glass booth in hall 5 (`LootBlock` at a spawn
   point tagged `keycard`). Picking it up (`KeycardHooks.pickedUp`) puts out every light
   still on in B2 in a wave spreading from the player, 0.75 blocks per tick, the nearest
-  ones heard powering down.
+  ones heard powering down; only the lamps of the stair shaft stay on (zone tagged
+  `lights_stay`).
 - **The exit:** an EXIT door by hall 3 with a `CardReaderBlock`. Without the card it
   buzzes "It needs a keycard"; with it, it beeps, turns green and opens the iron doors
   next to it (zone tagged `keycard_door`).
+- **The stairs to B3:** behind the door, a round shaft of metal panels with grating stairs
+  spiralling down 4 turns (32 blocks, half a block per step) around an open well, railed
+  with iron bars and lit by a wall lamp every half turn. At the bottom, a small landing
+  with a closed door under the "B3" sign.
 
 ## 9. The end
 
-`platform.EndingHooks`: a few steps down the stairs to B3 the player walks into a zone
-tagged `end`.
+`platform.EndingHooks`: at the bottom of the spiral stairs to B3 the player walks onto the
+landing, a zone tagged `end`.
 
 1. Five bare footsteps come down the stairs behind the player (the Pale man's own step
    sound).

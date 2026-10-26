@@ -473,6 +473,23 @@ def checker_plate_tex(rng):
     return img
 
 
+def grating_tex(rng):
+    """Steel bar grating, painted dark and worn bright along the bars: a grid of square holes
+    (see-through) with rust in the corners. The treads of the spiral stairs down to B3."""
+    img = new((84, 88, 92))
+    noise(img, rng, 5)
+    for y in range(16):
+        for x in range(16):
+            if x % 4 == 0 or y % 4 == 0:
+                px(img, x, y, (128, 132, 136), 0.35)              # bar tops, rubbed by boots
+    for y in range(1, 16, 4):
+        for x in range(1, 16, 4):
+            rect(img, x, y, x + 2, y + 2, (0, 0, 0, 0))
+    speckle(img, rng, 10, (112, 72, 44), 0.6)                    # rust
+    T.blob(img, rng, (60, 62, 64), 4, 0.25)
+    return img
+
+
 def moving_pad_tex(rng):
     """A quilted moving blanket, faded blue-grey, diamond stitching (it joins across blocks)."""
     img = new((74, 88, 104))
@@ -1029,6 +1046,16 @@ def build():
     a.models["checker_plate"] = cube_all("checker_plate")
     a.block("checker_plate", "Checker Plate", {"variants": {"": {"model": f"{NS}:block/checker_plate"}}},
             {"parent": f"{NS}:block/checker_plate"})
+
+    # --- Metal grating: a slab drawn as a thin see-through plate at its top -------------------
+    a.texture("metal_grating", grating_tex(r("grating")), T.STEEL.but(smoothness=0.35, metal=255, relief=0.7))
+    plates = {"bottom": [6], "top": [14], "double": [6, 14]}
+    for kind, tops in plates.items():
+        a.models[f"metal_grating_{kind}"] = model({"t": "metal_grating"}, [
+            element((0, top, 0), (16, top + 2, 16), "t") for top in tops], ao=False)
+    a.block("metal_grating", "Metal Grating",
+            {"variants": {f"type={kind}": {"model": f"{NS}:block/metal_grating_{kind}"} for kind in plates}},
+            {"parent": f"{NS}:block/metal_grating_bottom"})
 
     a.texture("moving_pad", moving_pad_tex(r("moving_pad")), T.Material(0.05, porosity=0.9, relief=0.7))
     a.models["moving_pad"] = model({"t": "moving_pad"}, [element((0, 0, 14), (16, 16, 16), "t")])

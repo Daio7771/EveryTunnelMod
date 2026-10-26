@@ -134,6 +134,7 @@ the server starts (levels built together name the same one). The function must e
 | `shutter` | `LevelEntryHooks` | The opening a rolling shutter closes behind the player who walks in from the previous level |
 | `keycard_door` | `KeycardHooks` | The iron doors a card reader opens; a new game closes them and locks the readers |
 | `end` | `EndingHooks` | Walking in ends the demo |
+| `lights_stay` | `KeycardHooks` | Its lights stay on when the keycard is taken (the stair shaft down to B3) |
 | `exit` | (none yet) | Marks a level's way out; kept for later systems |
 
 ### Spawn point tags

@@ -156,14 +156,19 @@ Reabrir el mundo o reaparecer dentro de un nivel no cuenta como entrar.
 - **La tarjeta** está en el mostrador de una cabina de cristal en la planta 5 (`LootBlock`
   en un punto con la etiqueta `keycard`). Recogerla (`KeycardHooks.pickedUp`) apaga todas
   las luces que quedan encendidas en B2 en una ola que se extiende desde el jugador, a 0,75
-  bloques por tick, y se oye cómo se apagan las más cercanas.
+  bloques por tick, y se oye cómo se apagan las más cercanas; solo siguen encendidas las
+  lámparas del pozo de escaleras (zona con la etiqueta `lights_stay`).
 - **La salida:** una puerta EXIT junto a la planta 3 con un `CardReaderBlock`. Sin la
   tarjeta zumba "It needs a keycard"; con ella pita, se pone verde y abre las puertas de
   hierro de al lado (zona con la etiqueta `keycard_door`).
+- **Las escaleras a B3:** tras la puerta, un pozo redondo de paneles metálicos con una
+  escalera de rejilla que baja en espiral 4 vueltas (32 bloques, medio bloque por escalón)
+  alrededor de un hueco abierto, con barandilla de barrotes de hierro y una lámpara de pared
+  cada media vuelta. Abajo, un rellano pequeño con una puerta cerrada bajo la señal "B3".
 
 ## 9. El final
 
-`platform.EndingHooks`: unos escalones más abajo en las escaleras a B3, el jugador entra en
+`platform.EndingHooks`: al pie de la escalera de caracol a B3 el jugador llega al rellano,
 una zona con la etiqueta `end`.
 
 1. Cinco pasos descalzos bajan las escaleras detrás del jugador (el sonido de paso del

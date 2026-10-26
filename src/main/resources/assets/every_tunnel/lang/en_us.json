@@ -109,5 +109,6 @@
   "screen.every_tunnel.guide.title": "Guide",
   "screen.every_tunnel.guide.contents": "Contents",
   "screen.every_tunnel.guide.back": "BACK",
-  "screen.every_tunnel.guide.empty": "No guide pages found."
+  "screen.every_tunnel.guide.empty": "No guide pages found.",
+  "block.every_tunnel.metal_grating": "Metal Grating"
 }

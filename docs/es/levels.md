@@ -135,6 +135,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `elevator_door` | `IntroHooks` | Los bloques de las puertas del ascensor, cerradas durante la intro y abiertas después |
 | `shutter` | `LevelEntryHooks` | La abertura que una persiana cierra tras el jugador que llega del nivel anterior |
 | `keycard_door` | `KeycardHooks` | Las puertas de hierro que abre un lector de tarjetas; una partida nueva las cierra y bloquea los lectores |
+| `lights_stay` | `KeycardHooks` | Sus luces siguen encendidas al coger la tarjeta (el pozo de escaleras a B3) |
 | `end` | `EndingHooks` | Entrar termina la demo |
 | `exit` | (nadie aún) | Marca la salida de un nivel; reservada para sistemas futuros |
 

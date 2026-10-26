@@ -105,7 +105,10 @@ LOOT = [
 START = "elevator"        # "elevator" (lobby and service elevator) or "entry" (a corridor in from the previous level)
 END = "ramp"              # "ramp" (exit ramp, shutter and landing down to the next level) or "none"
 KEYCARD_HALL = 0          # hall (1 = first) with the glass booth holding the keycard; 0 = none
-EXIT_STEPS = 12           # keycard_exit side room: steps down behind the EXIT door
+# keycard_exit side room: behind the EXIT door, a round shaft with metal stairs spiralling down
+# (EXIT_TURNS turns, EXIT_TURN_DROP blocks each) to a landing with the next level's sign.
+EXIT_TURNS = 4
+EXIT_TURN_DROP = 8
 ENTRY_LENGTH = 6          # START "entry": length of the corridor in
 PREVIOUS_LEVEL_SIGN = ""
 EXIT_DROP = 5             # how far the exit ramp goes down
@@ -251,6 +254,9 @@ BLOCKS = {
     "storage_door": "minecraft:spruce_door",
     "electrical_door": "minecraft:dark_oak_door",
     "emergency_door": "minecraft:iron_door",
+    "grating": "minecraft:smooth_stone_slab",       # the spiral stairs' treads (a slab: type is added)
+    "plate": "minecraft:iron_block",                # landing floors by the spiral stairs
+    "railing": "minecraft:iron_bars",
 }
 
 # The mod version uses the mod's own blocks instead (tools/blocks/generate.py makes their
@@ -274,6 +280,8 @@ MOD_BLOCKS = {
     "storage_door": "every_tunnel:storage_door",
     "electrical_door": "every_tunnel:electrical_door",
     "emergency_door": "every_tunnel:emergency_door",
+    "grating": "every_tunnel:metal_grating",
+    "plate": "every_tunnel:checker_plate",
 }
 
 # Worlds that get the result after each run (skipped, with a warning, when there is no world

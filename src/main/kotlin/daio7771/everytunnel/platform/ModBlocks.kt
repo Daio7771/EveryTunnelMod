@@ -10,6 +10,7 @@ import net.minecraft.block.Block
 import net.minecraft.block.BlockSetType
 import net.minecraft.block.DoorBlock
 import net.minecraft.block.MapColor
+import net.minecraft.block.SlabBlock
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.item.BlockItem
@@ -156,6 +157,8 @@ object ModBlocks {
 
     /** Steel checker plate: the cabin's floor. */
     val CHECKER_PLATE: Block = register("checker_plate", Block(solid(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
+    /** Steel bar grating, as a slab: the treads of the spiral stairs down to B3 (a thin see-through plate). */
+    val METAL_GRATING: Block = register("metal_grating", SlabBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
     /** Quilted protection blanket hung on a wall of the cabin. */
     val MOVING_PAD: Block = register(
         "moving_pad", PropBlock(props(MapColor.GRAY, BlockSoundGroup.WOOL).noCollision(), listOf(box(0, 0, 14, 16, 16, 16))),

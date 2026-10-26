@@ -78,6 +78,7 @@ object EveryTunnelClient : ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlocks(
             RenderLayer.getCutout(),
             ModBlocks.SHOPPING_CART, ModBlocks.CABLE_TRAY, ModBlocks.HANGING_CABLE, ModBlocks.STAIN, ModBlocks.PUDDLE,
+            ModBlocks.METAL_GRATING,
         )
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val player = client.player ?: return@register

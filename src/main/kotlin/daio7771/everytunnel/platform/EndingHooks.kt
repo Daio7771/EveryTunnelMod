@@ -16,8 +16,8 @@ import net.minecraft.util.math.Vec3d
 import java.util.UUID
 
 /**
- * The end of the demo: walking into a zone tagged [END_TAG] (a few steps down the stairs
- * behind Level 2's exit) while the world rules apply.
+ * The end of the demo: walking into a zone tagged [END_TAG] (the landing at the bottom of
+ * the spiral stairs behind Level 2's exit) while the world rules apply.
  *
  * Bare footsteps come down the stairs behind the player ([STEPS], the Pale man's own
  * sound), the screen fades to black, and the client shows "End of demo" with the credits

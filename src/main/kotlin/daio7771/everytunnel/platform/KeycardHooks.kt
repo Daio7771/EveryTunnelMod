@@ -23,15 +23,18 @@ import net.minecraft.world.PersistentState
 /**
  * The keycard of Level 2 and what it sets off.
  *
- * Picking it up ([pickedUp]) puts out every light still on in the level it lay in: they die
- * in a wave spreading from the player ([WAVE_BLOCKS_PER_TICK]), the near ones with their
- * power-down sound. The world remembers what each light was (`data/every_tunnel_lights.dat`)
+ * Picking it up ([pickedUp]) puts out every light still on in the level it lay in, except in
+ * zones tagged [KEEP_LIGHTS_TAG] (the stair shaft down to B3): they die in a wave spreading
+ * from the player ([WAVE_BLOCKS_PER_TICK]), the near ones with their power-down sound. The world remembers what each light was (`data/every_tunnel_lights.dat`)
  * so a new game turns them back on ([restoreLights]); a new game also locks the card
  * readers in zones tagged [DOOR_TAG] and closes their doors ([resetReaders]).
  */
 object KeycardHooks {
 
     const val DOOR_TAG = "keycard_door"
+
+    /** Zones whose lights stay on when the keycard is taken. */
+    const val KEEP_LIGHTS_TAG = "lights_stay"
 
     private const val WAVE_BLOCKS_PER_TICK = 0.75
     /** Lights within this distance of the player are heard going out (at most [MAX_SOUNDS]). */
@@ -58,6 +61,7 @@ object KeycardHooks {
     private fun lightsOut(world: ServerWorld, level: LevelDefinition, origin: Vec3d) {
         val state = state(world.server)
         val found = LinkedHashSet<BlockPos>()
+        val kept = level.zones.filter { KEEP_LIGHTS_TAG in it.tags }.map { it.box }
         for (zone in level.zones) {
             val box = zone.box
             for (pos in BlockPos.iterate(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ)) {
@@ -65,6 +69,7 @@ object KeycardHooks {
                 if (!block.isOf(ModBlocks.FLUORESCENT_LIGHT)) continue
                 val mode = block.get(FluorescentLightBlock.MODE)
                 if (mode == LightMode.OFF) continue
+                if (kept.any { it.contains(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5) }) continue
                 val immutable = pos.toImmutable()
                 if (found.add(immutable)) state.put(world, immutable, mode)
             }
