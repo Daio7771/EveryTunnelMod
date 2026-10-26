@@ -19,7 +19,7 @@ KDoc comment that says more.
 | `GameplayConfigParser.kt` | JSON ↔ config, value ranges, problems and missing keys. No file IO |
 | `ConfigManager.kt` | Loads and writes `config/every_tunnel/gameplay.json` safely |
 
-### `core/`, `core/level/` and `core/guide/`
+### `core/`, `core/level/`, `core/guide/` and `core/menu/`
 
 | File | What it does |
 |---|---|
@@ -28,6 +28,8 @@ KDoc comment that says more.
 | `level/LevelDefinition.kt` | The level model: zones, spawn points, ambience, entry, intro, build, `BlockBox` |
 | `level/LevelParser.kt` | Parses one level file; documents every key |
 | `guide/GuideMarkdown.kt` | Reads a player guide page (the Markdown subset) into blocks |
+| `menu/LampFlicker.kt` | When the menu scene's lamps flicker |
+| `menu/BlockLight.kt` | Block light for a box of blocks with no world (the menu scene) |
 
 ### `systems/`
 
@@ -170,13 +172,20 @@ KDoc comment that says more.
 | `LootRenderer.kt` | Draws loot items lying flat |
 | `GuardUniform.kt` | The uniform skin for every player |
 
+### `menu/`
+
+| File | What it does |
+|---|---|
+| `MenuScene.kt` | The parking hall behind the main menu: loads, lights, flickers and draws it |
+| `MenuSceneView.kt` | The scene's blocks and light as a world for the block renderer |
+| `RotatedModel.kt` | A baked model turned by quarter turns (the scene's turned blocks) |
+
 ### `screen/`
 
 | File | What it does |
 |---|---|
 | `MainMenuScreen.kt` | The main menu |
 | `GuideScreen.kt` | The player guide: a scrolling paper sheet with tabs |
-| `MenuFigure.kt` | The silhouette that appears when the mouse is still |
 | `LoadingScreen.kt` | The loading screen and `LoadingCover`, which draws it over everything |
 | `LoadingTips.kt` | Rotating tips with the player's keys |
 | `EndOfDemoScreen.kt` | "End of demo" and the rolling credits |
@@ -197,6 +206,7 @@ See [Architecture](architecture.md#mixins) for the target and reason of each.
 | `assets/every_tunnel/sounds.json`, `sounds/` | Sound events and `.ogg` files (from `tools/sounds/export.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | From `tools/blocks`, `tools/entity`, `tools/gui` |
 | `assets/every_tunnel/geo/`, `animations/` | The Pale man's GeckoLib files |
+| `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | The menu scene (from `tools/map/map_generator.py`) |
 | `data/every_tunnel/loot_tables/` | Block loot tables |
 
 ## Tests: `test/kotlin/daio7771/everytunnel/`

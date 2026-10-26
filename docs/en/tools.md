@@ -19,13 +19,12 @@ Run every tool **from the repository root**. Each writes its real output into `s
 
 | Tool | Writes | Run after changing... |
 |---|---|---|
-| `tools/map/map_generator.py` | Level datapacks, world resource pack, installs into `run/saves/noname_complex` | the map |
+| `tools/map/map_generator.py` | Level datapacks, world resource pack, installs into `run/saves/noname_complex`; the menu scene into the mod | the map or the menu scene |
 | `tools/blocks/generate.py` | Block/item models, blockstates, textures + LabPBR maps, names, loot tables | a mod block |
 | `tools/entity/pale_man.py` | Pale man geometry, animations, texture, glow mask, spawn egg model | the Pale man |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (the uniform skin) | the uniform |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png` | HUD icons |
 | `tools/gui/logo.py` | `logo.png` | the logo |
-| `tools/gui/menu_figure.py` | `menu_figure.png` | the menu silhouette |
 | `tools/gui/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | the no-shader spot |
 | `tools/gui/guide_paper.py` | `guide_paper.png` (seamless tile), `guide_stains.png` | the guide's paper |
 | `tools/sounds/generate.py` | WAV previews and a listening page (`tools/sounds/out/index.html`) | a sound, to listen |
@@ -38,6 +37,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 - **Parameters** are at the top of the file: Level 1's (`HALLS`, `SIDE_ROOMS`, `LOOT`,
   `SEED`, `WEAR`, lights, props, oddities...) and `LEVEL_2`, a dict of overrides for
   Level 2 (darker, more worn, `PALE_MEN` per hall, `KEYCARD_HALL`, `END = "none"`).
+  `MENU_SCENE` and `MENU_CAMERA` are the main menu's scene: one hall and the camera.
 - **Modules** in `tools/map/garage/`:
 
 | Module | Job |
@@ -50,10 +50,13 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `pbr.py` | LabPBR 1.3 maps for every texture |
 | `glyphs.py` | Sign texts mapped to `SignTileBlock` (facing, slot) pairs |
 | `preview.py` | Top-down plan of the level and texture sheets |
+| `menu_scene.py` | The main menu's scene: one hall, written into the mod with the models of its re-skinned blocks |
 
 - **Output** (`tools/map/output/`): the mod datapack `every_tunnel_level1_mod` (level JSON
   files and `garage:build`), the vanilla datapack `every_tunnel_level1_vanilla`,
-  `level_resources.zip`, `level_preview.png`, `texture_sheet.png`, `pbr_sheet.png`.
+  `level_resources.zip`, `level_preview.png`, `texture_sheet.png`, `pbr_sheet.png`. Into the
+  mod (in git): the menu scene, `assets/every_tunnel/menu/scene.json` and the models and
+  textures under `block/menu/`.
 - **Install:** into every world listed in `INSTALL` that exists: `run/saves/noname_complex`
   and, if present, its dev template `run/dev_templates/noname_complex`.
 

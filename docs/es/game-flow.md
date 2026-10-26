@@ -53,8 +53,10 @@ créditos.
   en los demás). El idioma en sí se cambia en OPTIONS.
 - **CREDITS** pasa los créditos (`EndOfDemoScreen.credits`) y vuelve.
 - **EXIT** cierra el juego.
-- Tras 15 s sin mover el ratón, la silueta del Pale man aparece poco a poco a la derecha
-  (`MenuFigure`); cualquier movimiento la hace desaparecer.
+- Detrás de todo, una planta del aparcamiento vista a lo largo de su pasillo desde una cámara
+  fija (`MenuScene`), con lámparas que parpadean de vez en cuando. El logo y las opciones van
+  sobre negro, que se difumina hacia la derecha para dejar ver la planta. Ver
+  [Gráficos](graphics.md#la-escena-del-menú).
 - **Ctrl+Shift+V** cambia a la pantalla de título de vanilla (otros mundos, multijugador,
   mods) y vuelve.
 - `MenuMusic` toca `music.menu`, luego 15 s de silencio, una y otra vez; `MusicTrackerMixin`

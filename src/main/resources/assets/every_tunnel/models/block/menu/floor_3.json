@@ -1,0 +1,12 @@
+{
+ "parent": "minecraft:block/cube",
+ "textures": {
+  "down": "every_tunnel:block/menu/floor_3",
+  "up": "every_tunnel:block/menu/floor_3",
+  "north": "every_tunnel:block/menu/floor_3",
+  "south": "every_tunnel:block/menu/floor_3",
+  "east": "every_tunnel:block/menu/floor_3",
+  "west": "every_tunnel:block/menu/floor_3",
+  "particle": "every_tunnel:block/menu/floor_3"
+ }
+}

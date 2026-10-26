@@ -2,6 +2,7 @@ package daio7771.everytunnel.client.screen
 
 import com.mojang.blaze3d.systems.RenderSystem
 import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.client.menu.MenuScene
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents
@@ -18,9 +19,10 @@ import net.minecraft.util.Util
 import org.lwjgl.glfw.GLFW
 
 /**
- * Every Tunnel's main menu, in place of vanilla's title screen (`MinecraftClientMixin`):
- * black, the logo and the options on the left, the version at the bottom, and, when the
- * mouse is left still, something in the dark on the right ([MenuFigure]). Its music is [MenuMusic].
+ * Every Tunnel's main menu, in place of vanilla's title screen (`MinecraftClientMixin`): the
+ * logo and the options on the left over black, the version at the bottom, and behind it all
+ * a parking hall whose lamps flicker now and then ([MenuScene]); the black fades out towards
+ * the right ([drawShade]) to show it. Its music is [MenuMusic].
  *
  * - BEGIN opens Noname Complex (installed by `client.MapWorldInstaller`), behind the loading
  *   screen ([LoadingCover]).
@@ -51,19 +53,15 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
 
     override fun shouldCloseOnEsc(): Boolean = false
 
-    // Opening the menu counts as activity: he never waits there already.
-    override fun init() {
-        figure.activity()
-    }
-
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
-        context.fill(0, 0, width, height, 0xFF000000.toInt())
-        figure.render(context, width, height)
+        val layout = layout()
+        // The scene first (it clears the depth buffer), or plain black without it.
+        if (MenuScene.render()) drawShade(context, layout) else context.fill(0, 0, width, height, 0xFF000000.toInt())
 
         // Everything fades in from black when the menu first opens.
         val fade = ((Util.getMeasuringTimeMs() - openedAtMs) / FADE_IN_MS.toFloat()).coerceIn(0f, 1f)
+        if (fade < 1f) context.fill(0, 0, width, height, ((1f - fade) * 255f).toInt() shl 24)
         if (fade * 255f < 4f) return
-        val layout = layout()
         val left = layout.left
         drawLogo(context, layout, fade)
 
@@ -106,6 +104,24 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
 
     private fun optionsHeight(): Int = (Option.entries.size - 1) * LINE_HEIGHT + (9 * OPTION_SCALE).toInt()
 
+    /**
+     * Black over the scene: solid behind the logo and the options (at least [SOLID_SHARE] of
+     * the width), then fading out (smoothly) until [CLEAR_SHARE] of the width, where the scene
+     * shows fully.
+     */
+    private fun drawShade(context: DrawContext, layout: Layout) {
+        val options = Option.entries.maxOf { (textRenderer.getWidth(Text.translatable(it.key)) * OPTION_SCALE).toInt() }
+        val menuRight = layout.left + maxOf(layout.logoHeight * 2, options) + SHADE_MARGIN
+        val solid = maxOf((width * SOLID_SHARE).toInt(), menuRight).coerceAtMost(width)
+        val clear = maxOf((width * CLEAR_SHARE).toInt(), solid + (width * MIN_FADE_SHARE).toInt()).coerceAtMost(width)
+        context.fill(0, 0, solid, height, 0xFF000000.toInt())
+        for (x in solid until clear) {
+            val t = 1f - (x - solid + 0.5f) / (clear - solid)
+            val alpha = t * t * (3f - 2f * t)
+            context.fill(x, 0, x + 1, height, (alpha * 255f).toInt() shl 24)
+        }
+    }
+
     private fun drawLogo(context: DrawContext, layout: Layout, fade: Float) {
         val client = client ?: return
         val left = layout.left
@@ -141,12 +157,7 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         return null
     }
 
-    override fun mouseMoved(mouseX: Double, mouseY: Double) {
-        figure.activity()
-    }
-
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
-        figure.activity()
         val index = hoveredOption(mouseX.toInt(), mouseY.toInt(), layout()) ?: return false
         selected = index
         choose(Option.entries[index])
@@ -202,6 +213,12 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         private const val WORLD_FOLDER = "noname_complex"
 
         private const val FADE_IN_MS = 1500L
+        /** The black over the scene ([drawShade]): solid to here at least, clear from here, as shares of the width. */
+        private const val SOLID_SHARE = 0.30f
+        private const val CLEAR_SHARE = 0.65f
+        private const val MIN_FADE_SHARE = 0.15f
+        /** Black kept past the logo's or the widest option's right edge. */
+        private const val SHADE_MARGIN = 4
         /** Left margin and the logo's top, as shares of the screen. */
         private const val LEFT = 0.08f
         private const val LOGO_TOP = 0.14f
@@ -224,9 +241,6 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         @JvmStatic
         var vanillaShown = false
             private set
-
-        /** Shared, so he does not stand in the same place again when the menu is reopened. */
-        private val figure = MenuFigure()
 
         private val versionText: Text by lazy {
             val version = FabricLoader.getInstance().getModContainer(EveryTunnel.MOD_ID)

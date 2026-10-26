@@ -96,6 +96,31 @@ Level 2 (`KeycardHooks`).
   (facing, slot) to that level's painted text.
 - **The Pale man** is a GeckoLib model with a glow mask for his eyes.
 
+## The menu scene
+
+Behind the main menu, a parking hall seen down its aisle from a fixed camera
+(`client.menu.MenuScene`), with no world loaded.
+
+- **Where it comes from:** `tools/map/map_generator.py` builds one hall with the level's own
+  code (`MENU_SCENE`, `MENU_CAMERA`; `garage/menu_scene.py`): a closed emergency door under a
+  lit EXIT sign at the far end. It writes `assets/every_tunnel/menu/scene.json` (camera,
+  palette, blocks) into the mod.
+- **Re-skinned blocks:** the world resource pack only applies inside the world, so for each
+  stand-in block the scene names the model the pack would pick, copied under
+  `every_tunnel:block/menu/` (nothing outside the menu changes). A model loading plugin loads
+  them; turned variants go through `RotatedModel`.
+- **Drawing:** Minecraft's block renderer draws the blocks from a stand-in world
+  (`MenuSceneView`) into one vertex buffer per render layer, drawn with a perspective camera
+  into the GUI. `vanish_x` shifts the picture so the far end sits right of the menu's black.
+  Fog fades the far end to black. Shaders do not apply in menus: it looks like vanilla.
+- **Light:** its own block light (`core.menu.BlockLight`) and its own lightmap: the levels'
+  Moody curve with vanilla's warm tint. Lit lamps are drawn at full brightness, as in game.
+- **Lamps:** each working lamp flickers every 20 to 40 s (`core.menu.LampFlicker`), the same
+  rhythm as a flickering light in the levels; dead ones stay dark. Each switch recomputes the
+  light and rebuilds the buffers. No sound.
+- **The black:** `MainMenuScreen.drawShade` keeps black solid behind the logo and options (at
+  least 30 % of the width), then fades it out smoothly until 65 %.
+
 ## Art direction
 
 - A cold, sickly palette: cold, worn concrete, stains of rust, oil, damp and mould.

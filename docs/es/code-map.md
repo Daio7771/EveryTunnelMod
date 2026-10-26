@@ -19,7 +19,7 @@ con un comentario KDoc que cuenta más.
 | `GameplayConfigParser.kt` | JSON ↔ configuración, rangos de valores, problemas y claves ausentes. Sin E/S de archivos |
 | `ConfigManager.kt` | Carga y escribe `config/every_tunnel/gameplay.json` de forma segura |
 
-### `core/`, `core/level/` y `core/guide/`
+### `core/`, `core/level/`, `core/guide/` y `core/menu/`
 
 | Archivo | Qué hace |
 |---|---|
@@ -28,6 +28,8 @@ con un comentario KDoc que cuenta más.
 | `level/LevelDefinition.kt` | El modelo de nivel: zonas, puntos de aparición, ambiente, entrada, intro, build, `BlockBox` |
 | `level/LevelParser.kt` | Lee un archivo de nivel; documenta cada clave |
 | `guide/GuideMarkdown.kt` | Lee una página de la guía del jugador (el subconjunto de Markdown) en bloques |
+| `menu/LampFlicker.kt` | Cuándo parpadean las lámparas de la escena del menú |
+| `menu/BlockLight.kt` | Luz de bloque para una caja de bloques sin mundo (la escena del menú) |
 
 ### `systems/`
 
@@ -170,13 +172,20 @@ con un comentario KDoc que cuenta más.
 | `LootRenderer.kt` | Dibuja el botín tumbado |
 | `GuardUniform.kt` | La skin del uniforme para todos los jugadores |
 
+### `menu/`
+
+| Archivo | Qué hace |
+|---|---|
+| `MenuScene.kt` | La planta del aparcamiento detrás del menú: la carga, la ilumina, la hace parpadear y la dibuja |
+| `MenuSceneView.kt` | Los bloques y la luz de la escena como un mundo para el renderizador de bloques |
+| `RotatedModel.kt` | Un modelo cocinado girado por cuartos de vuelta (los bloques girados de la escena) |
+
 ### `screen/`
 
 | Archivo | Qué hace |
 |---|---|
 | `MainMenuScreen.kt` | El menú principal |
 | `GuideScreen.kt` | La guía del jugador: una hoja de papel con scroll y pestañas |
-| `MenuFigure.kt` | La silueta que aparece con el ratón quieto |
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |
 | `LoadingTips.kt` | Consejos que van cambiando, con las teclas del jugador |
 | `EndOfDemoScreen.kt` | "End of demo" y los créditos que suben |
@@ -197,6 +206,7 @@ Ver [Arquitectura](architecture.md#mixins) para el objetivo y el motivo de cada 
 | `assets/every_tunnel/sounds.json`, `sounds/` | Eventos de sonido y archivos `.ogg` (de `tools/sounds/export.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | De `tools/blocks`, `tools/entity`, `tools/gui` |
 | `assets/every_tunnel/geo/`, `animations/` | Los archivos de GeckoLib del Pale man |
+| `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | La escena del menú (de `tools/map/map_generator.py`) |
 | `data/every_tunnel/loot_tables/` | Loot tables de los bloques |
 
 ## Tests: `test/kotlin/daio7771/everytunnel/`

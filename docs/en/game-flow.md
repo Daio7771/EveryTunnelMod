@@ -52,8 +52,9 @@ it (`MinecraftClientMixin`): at start-up, after leaving a world, after the credi
   language itself is changed in OPTIONS.
 - **CREDITS** rolls the credits (`EndOfDemoScreen.credits`) and comes back.
 - **EXIT** closes the game.
-- After 15 s without moving the mouse, the Pale man's silhouette fades in on the right
-  (`MenuFigure`); any movement makes it vanish.
+- Behind it all, a parking hall seen down its aisle from a fixed camera (`MenuScene`), its
+  lamps flickering now and then. The logo and options sit on black, which fades out towards
+  the right to show the hall. See [Graphics](graphics.md#the-menu-scene).
 - **Ctrl+Shift+V** swaps to vanilla's title screen (other worlds, multiplayer, mods) and
   back.
 - `MenuMusic` plays `music.menu`, then 15 s of silence, again and again; `MusicTrackerMixin` keeps vanilla music off everywhere.

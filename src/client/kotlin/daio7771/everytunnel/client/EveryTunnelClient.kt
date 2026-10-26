@@ -17,6 +17,7 @@ import daio7771.everytunnel.client.screen.EndOfDemoScreen
 import daio7771.everytunnel.client.screen.LoadingCover
 import daio7771.everytunnel.client.screen.MainMenuScreen
 import daio7771.everytunnel.client.effects.MenuMusic
+import daio7771.everytunnel.client.menu.MenuScene
 import daio7771.everytunnel.client.render.PaleManRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories
 import daio7771.everytunnel.platform.ModBlocks
@@ -71,6 +72,7 @@ object EveryTunnelClient : ClientModInitializer {
         LoadingCover.register()
         MainMenuScreen.register()
         MenuMusic.register()
+        MenuScene.register()
         EntityRendererRegistry.register(ModEntities.PALE_MAN, ::PaleManRenderer)
         BlockEntityRendererFactories.register(ModBlocks.LOOT_ENTITY, ::LootRenderer)
         BlockRenderLayerMap.INSTANCE.putBlocks(

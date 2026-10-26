@@ -103,6 +103,33 @@ tarjeta apaga todas las luces del Nivel 2 (`KeycardHooks`).
   cada (orientación, ranura) el texto pintado de ese nivel.
 - **El Pale man** es un modelo de GeckoLib con una máscara de brillo para los ojos.
 
+## La escena del menú
+
+Detrás del menú principal, una planta del aparcamiento vista a lo largo de su pasillo desde
+una cámara fija (`client.menu.MenuScene`), sin ningún mundo cargado.
+
+- **De dónde sale:** `tools/map/map_generator.py` construye una planta con el propio código
+  de los niveles (`MENU_SCENE`, `MENU_CAMERA`; `garage/menu_scene.py`): al fondo, una puerta
+  de emergencia cerrada bajo una señal EXIT encendida. Escribe
+  `assets/every_tunnel/menu/scene.json` (cámara, paleta, bloques) en el mod.
+- **Bloques re-texturizados:** el resource pack del mundo solo se aplica dentro del mundo,
+  así que para cada bloque sustituto la escena nombra el modelo que elegiría el pack, copiado
+  en `every_tunnel:block/menu/` (no cambia nada fuera del menú). Un plugin de carga de
+  modelos los carga; las variantes giradas pasan por `RotatedModel`.
+- **Dibujo:** el renderizador de bloques de Minecraft dibuja los bloques desde un mundo
+  sustituto (`MenuSceneView`) en un vertex buffer por capa de render, que se dibuja con una
+  cámara en perspectiva dentro de la GUI. `vanish_x` desplaza la imagen para que el fondo
+  quede a la derecha del negro del menú. La niebla funde el fondo a negro. Los shaders no se
+  aplican en los menús: se ve como vanilla.
+- **Luz:** su propia luz de bloque (`core.menu.BlockLight`) y su propio lightmap: la curva
+  Moody de los niveles con el tono cálido de vanilla. Las lámparas encendidas se dibujan a
+  brillo máximo, como en el juego.
+- **Lámparas:** cada lámpara que funciona parpadea cada 20 a 40 s (`core.menu.LampFlicker`),
+  al mismo ritmo que una luz parpadeante de los niveles; las fundidas siguen apagadas. Cada
+  cambio recalcula la luz y reconstruye los buffers. Sin sonido.
+- **El negro:** `MainMenuScreen.drawShade` mantiene el negro sólido detrás del logo y las
+  opciones (al menos el 30 % del ancho) y luego lo difumina suavemente hasta el 65 %.
+
 ## Dirección de arte
 
 - Una paleta fría y enfermiza: hormigón frío y gastado, manchas de óxido, aceite, humedad y

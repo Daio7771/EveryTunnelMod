@@ -14,6 +14,9 @@ Out (tools/map/output/, not in git):
   level_preview.png              top-down plan of the whole level
   texture_sheet.png              every generated texture, enlarged
   pbr_sheet.png                  each texture's LabPBR maps: albedo | normal | specular | emission
+Into the mod (src/main/resources/assets/every_tunnel/, in git): the main menu's scene, one hall
+seen from a fixed camera (menu/scene.json and the models and textures under block/menu/;
+see garage/menu_scene.py).
 Every world in INSTALL that exists gets its datapack and resources.zip after each run
 (a missing one is reported and skipped; create run/saves/noname_complex first, see README).
 
@@ -35,6 +38,7 @@ from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from garage import menu_scene as MS    # noqa: E402
 from garage import preview as V        # noqa: E402
 from garage import textures as T       # noqa: E402
 from garage.level import Level         # noqa: E402
@@ -155,6 +159,17 @@ LEVEL_2 = dict(
         ("battery", "dead_end_hall_5"),
     ],
 )
+
+# --- The main menu's scene -------------------------------------------------------------
+# One hall like the level's (these values over the general ones below), drawn behind the menu
+# from a fixed camera at the west end of its aisle, looking east to a closed emergency door
+# under a lit EXIT sign (garage/menu_scene.py). Its lamps flicker now and then in the menu.
+MENU_SCENE = dict(LENGTH=40, WIDTH=20, SEED=41, WEAR=0.5, DEAD_LIGHT_SHARE=0.1, GAP_SHARE=0.04,
+                  DARK_ZONES=0, ODDITIES=0, HANGING_CABLES=4, CARTS=0)
+# x: blocks from the west wall's outer face; eye: eye height over the floor; yaw/pitch in
+# Minecraft degrees (yaw -90 looks east, a positive pitch looks down); vanish_x: where the
+# aisle's far end is drawn, as a share of the screen width (the menu's left part is black).
+MENU_CAMERA = dict(x=1.6, eye=1.62, yaw=-90.0, pitch=4.0, fov=70.0, vanish_x=0.68)
 
 # --- General values (every hall, unless the hall overrides them) ---------------------
 CEILING_HEIGHT = 4
@@ -688,6 +703,8 @@ def main():
     V.write_texture_sheet(OUT / "texture_sheet.png", textures)
     V.write_pbr_sheet(OUT / "pbr_sheet.png", textures)
     state_file.write_text(json.dumps({"box": box}) + "\n")
+
+    stats.append(MS.write(p, REPO / "src" / "main" / "resources" / "assets" / "every_tunnel"))
 
     for line in stats:
         print(line)
