@@ -78,9 +78,13 @@ Server side (`platform.LoadingHooks`):
    intro. The client is sent state `0`.
 3. Once the build has reported back, a Survival or Adventure player gets a **new game**
    (`NewGame.start`). Creative and Spectator players are left where they are.
-4. The client is sent state `1` (ready). It waits until the terrain around the player is
+4. The light is sent again. The build runs while the player joins, so the chunks they
+   were sent can carry light from before it (the elevator once had sky light and no lamp).
+   After at least 1 s, once the light engine has no updates left (at most 10 s), the light
+   of every loaded chunk in the view distance is sent again (`resendLight`).
+5. The client is sent state `1` (ready). It waits until the terrain around the player is
    drawn, fades picture and sound in together, and answers `loading_done`.
-5. The player is free and the intro starts.
+6. The player is free and the intro starts.
 
 Safety nets: a build that never reports back is given up after 120 s; a client that
 never answers is let go after 30 s.

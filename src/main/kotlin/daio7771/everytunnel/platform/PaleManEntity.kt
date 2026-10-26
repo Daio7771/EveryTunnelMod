@@ -25,6 +25,8 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Box
+import net.minecraft.util.math.MathHelper
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import software.bernie.geckolib.animatable.GeoEntity
@@ -62,6 +64,11 @@ enum class PaleManMode { ROAM, LISTEN, CHASE }
  *
  * Model, animations and texture: `tools/entity/pale_man.py` (GeckoLib). Which animation
  * plays follows [mode] and his movement: listen, run (chasing), walk, or idle.
+ *
+ * His hitbox is only [HITBOX_HEIGHT] tall, so his paths fit wherever the player fits,
+ * but the model stands [STANDING_HEIGHT]. Where the space above him (or just ahead) is
+ * lower, the client bends the model into a stoop ([stoopAt], drawn by
+ * `client.render.PaleManModel`) over [STOOP_TICKS] ticks, and straightens it again after.
  */
 class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : HostileEntity(type, world), GeoEntity {
 
@@ -85,6 +92,10 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
     private var untilBreath = 0
     private var lastX = 0.0
     private var lastZ = 0.0
+
+    /** Client side: how far he stoops (0 upright, 1 fully), this tick and the last one. */
+    private var stoop = 0f
+    private var lastStoop = 0f
 
     /** What his brain is doing; set on the server, synced to clients. */
     var brainState: PaleManBrain.State
@@ -117,6 +128,30 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
                 return null
             }
         })
+    }
+
+    override fun tick() {
+        super.tick()
+        if (world.isClient) {
+            lastStoop = stoop
+            val target = if (lowCeiling()) 1f else 0f
+            stoop += (target - stoop).coerceIn(-1f / STOOP_TICKS, 1f / STOOP_TICKS)
+        }
+    }
+
+    /** How far he stoops in this frame, 0 (upright) to 1 (fully); client side. */
+    fun stoopAt(partialTick: Float): Float = MathHelper.lerp(partialTick, lastStoop, stoop)
+
+    /**
+     * Whether a block stands in the space his upright model fills above the hitbox, here or
+     * up to [STOOP_LOOK_AHEAD] blocks ahead (so he bends before he walks in).
+     */
+    private fun lowCeiling(): Boolean {
+        val box = boundingBox
+        val above = Box(box.minX, box.maxY, box.minZ, box.maxX, y + STANDING_HEIGHT, box.maxZ)
+        val yaw = Math.toRadians(bodyYaw.toDouble())
+        val ahead = above.offset(-Math.sin(yaw) * STOOP_LOOK_AHEAD, 0.0, Math.cos(yaw) * STOOP_LOOK_AHEAD)
+        return world.getBlockCollisions(this, above.union(ahead)).any()
     }
 
     override fun mobTick() {
@@ -205,8 +240,8 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
 
     /**
      * Playtest log, once per state: the path to [target] does not get there. Says where it
-     * ends and what stands in the next block towards the target, from the floor up to his
-     * head (he is 2.8 blocks tall, so he needs three free blocks).
+     * ends and what stands in the next block towards the target, from the floor up to the
+     * top of his hitbox (two free blocks).
      */
     private fun checkPath(state: PaleManBrain.State, target: Position) {
         val path = navigation.currentPath
@@ -221,13 +256,13 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
         PlaytestLog.paleManPath(this, state.name, target, "$problem; next block towards it: ${blocksTowards(end, target)}")
     }
 
-    /** The blocks from the floor (y - 1) up to y + 3 one step from [from] towards [target]. */
+    /** The blocks from the floor (y - 1) up to y + 2 one step from [from] towards [target]. */
     private fun blocksTowards(from: BlockPos, target: Position): String {
         val dx = target.x - (from.x + 0.5)
         val dz = target.z - (from.z + 0.5)
         val step = if (Math.abs(dx) >= Math.abs(dz)) BlockPos(Math.signum(dx).toInt(), 0, 0) else BlockPos(0, 0, Math.signum(dz).toInt())
         val next = from.add(step)
-        return (-1..3).joinToString(", ") { dy ->
+        return (-1..2).joinToString(", ") { dy ->
             val state = world.getBlockState(next.up(dy))
             val name = Registries.BLOCK.getId(state.block).path
             val label = if (dy < 0) "floor" else "y+$dy"
@@ -401,6 +436,14 @@ class PaleManEntity(type: EntityType<out HostileEntity>, world: World) : Hostile
         /** The longest breath recording is 3.8 s; then a pause of up to 1.5 s. */
         private const val BREATH_TICKS = 78
         private const val BREATH_PAUSE_TICKS = 30
+
+        /** His hitbox height ([ModEntities.PALE_MAN]): under two blocks, like the player. */
+        const val HITBOX_HEIGHT = 1.9f
+        /** How tall the upright model stands (`tools/entity/pale_man.py`). */
+        private const val STANDING_HEIGHT = 2.75
+        /** Blocks ahead of him checked for a low ceiling, and ticks to stoop or straighten fully. */
+        private const val STOOP_LOOK_AHEAD = 1.0
+        private const val STOOP_TICKS = 8f
 
         val IDLE: RawAnimation = RawAnimation.begin().thenLoop("animation.pale_man.idle")
         val LISTEN: RawAnimation = RawAnimation.begin().thenLoop("animation.pale_man.listen")

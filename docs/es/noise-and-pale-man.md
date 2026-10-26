@@ -102,7 +102,7 @@ tarde en el mismo tick.
 ## La entidad
 
 `platform.PaleManEntity` (`every_tunnel:pale_man`, una `HostileEntity` de GeckoLib, caja de
-0,6 × 2,8 bloques) es el lado de Minecraft:
+0,6 × 1,9 bloques) es el lado de Minecraft:
 
 - **El jugador no puede matarlo**: solo `/kill` y el vacío lo quitan. Nunca desaparece.
 - **Territorio:** si su punto de aparición nombra una `zone`, solo vaga dentro de ella e
@@ -111,9 +111,10 @@ tarde en el mismo tick.
 - **Cada tick:** oye los ruidos de los últimos 2 ticks dentro de su territorio, calcula su
   volumen con los muros, busca al jugador más cercano (entre -2 y +3 bloques de su altura),
   ejecuta el cerebro y aplica la decisión: ir al objetivo, pararse y mirar, o golpear.
-- **Navegación:** la navegación de mobs de vanilla. Mide 2,8 bloques y necesita tres
-  bloques libres de altura. Las rutas que se quedan cortas quedan en el `PlaytestLog` con
-  los bloques que estorban.
+- **Navegación:** la navegación de mobs de vanilla. Su caja mide 1,9 bloques de alto, así
+  que, como el jugador, necesita dos bloques libres de altura (el modelo erguido mide 2,75;
+  ver *Su modelo*). Las rutas que se quedan cortas quedan en el `PlaytestLog` con los
+  bloques que estorban.
 - **Partida nueva:** nota que empezó una partida nueva (un contador en `PaleManSpawner`) y
   vuelve a su punto de aparición.
 - **Sincronización:** el estado de su cerebro es un dato sincronizado de la entidad
@@ -133,6 +134,14 @@ siguiente entrada. El huevo de aparición (pestaña creativa Every Tunnel) es pa
 attack), la textura y una máscara de brillo para sus ojos lechosos.
 `client.render.PaleManRenderer` lo dibuja; la animación sigue su modo (listen, chase = run,
 roam = walk o idle).
+
+**La postura encorvada:** donde hay un bloque en el espacio de su modelo erguido (encima de
+la caja, donde está o un bloque más adelante), el cliente lo encorva en 8 ticks: la espalda
+se inclina al menos 75°, los brazos siguen colgando, la cabeza se levanta y las rodillas se
+doblan. Entonces mide unos 1,9 bloques, y se endereza otra vez al salir. La comprobación va
+en el cliente, en `PaleManEntity.tick` (`stoopAt`); `client.render.PaleManModel` dobla los
+huesos encima de la animación que suene. La postura son los `STOOP_*` de `pale_man.py`
+(dibujada en su vista previa) y los mismos números en `PaleManModel`.
 
 ## Lo que oye el jugador
 

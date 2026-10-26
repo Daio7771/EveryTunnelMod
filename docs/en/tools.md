@@ -71,10 +71,12 @@ props look like the level around them. It also writes the block names into
 
 ## Entity art
 
-- `tools/entity/pale_man.py`: about 2.6 blocks tall, long thin limbs, big hands, a long neck,
+- `tools/entity/pale_man.py`: about 2.75 blocks tall, long thin limbs, big hands, a long neck,
   milky eyes, big ears, a torn night-guard shirt. Based on
   `tools/entity/reference/pale_man_concept.png` (AI concept art, **reference only**, not
-  shipped). Also writes painting templates for repainting by hand.
+  shipped). Also writes painting templates for repainting by hand. Its `STOOP_*` numbers are
+  his stoop under low ceilings (drawn in the preview, about 1.9 blocks tall); the game
+  applies them in `client.render.PaleManModel`, which holds the same numbers.
 - `tools/entity/guard.py`: a standard 64×64 wide-arm skin. Black jacket with SECURITY in
   yellow, badge, radio, boots.
 

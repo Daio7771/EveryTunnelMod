@@ -83,10 +83,15 @@ Lado del servidor (`platform.LoadingHooks`):
 3. Cuando la construcción ha avisado, un jugador en Supervivencia o Aventura recibe una
    **partida nueva** (`NewGame.start`). Los jugadores en Creativo y Espectador se quedan
    donde están.
-4. Al cliente se le envía el estado `1` (listo). Espera a que el terreno alrededor del
+4. Se vuelve a enviar la luz. La construcción corre mientras el jugador entra, así que los
+   chunks que recibió pueden traer la luz de antes (el ascensor llegó a tener luz del cielo
+   y ninguna lámpara). Tras 1 s como mínimo, cuando el motor de luz ya no tiene
+   actualizaciones pendientes (10 s como máximo), se vuelve a enviar la luz de cada chunk
+   cargado dentro de la distancia de visión (`resendLight`).
+5. Al cliente se le envía el estado `1` (listo). Espera a que el terreno alrededor del
    jugador esté dibujado, hace el fundido de imagen y sonido a la vez y responde
    `loading_done`.
-5. El jugador queda libre y empieza la intro.
+6. El jugador queda libre y empieza la intro.
 
 Redes de seguridad: si la construcción no avisa nunca, se abandona a los 120 s; si el
 cliente no responde nunca, se le suelta a los 30 s.

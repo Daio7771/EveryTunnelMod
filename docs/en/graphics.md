@@ -69,8 +69,10 @@ changed; outside the levels it works as usual.
 
 `platform.FluorescentLightBlock`: a shallow two-tube fixture on any face.
 
-- Mode `on`: light level **10** (not 15: at 15 the garage was lit evenly, with no pools of
-  light, and the flashlight, capped at 15 like all block light, hardly showed). And a hum.
+- Mode `on`: light level **13** (not 15: at 15 the garage was lit evenly, with no pools of
+  light, and the flashlight, capped at 15 like all block light, hardly showed; not 10: with
+  Moody brightness the lights seemed off). And a hum. A lit fixture is drawn at full
+  brightness (the vanilla `emissiveLighting` of magma), so it always looks on.
 - Mode `flicker`: mostly lit, with bursts of rapid off/on switching every few seconds; the
   light really goes out, so the room flickers.
 - Mode `off`: dark and silent.

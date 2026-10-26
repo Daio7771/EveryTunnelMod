@@ -43,7 +43,8 @@ enum class LightMode(private val id: String) : StringIdentifiable {
  * lights placed end to end reads as one long fixture; placed by hand, the tubes run the
  * way the player looks.
  *
- * - [MODE] `on`: light level [LIGHT_LEVEL] and a hum. `off`: dark and silent.
+ * - [MODE] `on`: light level [LIGHT_LEVEL] and a hum, the fixture drawn at full brightness
+ *   ([glows]). `off`: dark and silent.
  *   `flicker`: mostly lit, but every few seconds it goes through a burst of rapid
  *   off/on switching with the flicker sound; the light really goes out (block light
  *   updates), so the room around it flickers too.
@@ -153,16 +154,24 @@ class FluorescentLightBlock(settings: Settings) : Block(settings) {
         /** Chance per switch-on that a burst ends (about 5 off/on cycles, ~1 s). */
         private const val BURST_END_CHANCE = 0.2f
 
-        /** Light level by state; used in the block settings. */
         /**
-         * Not 15: with a light every few blocks, 15 lit the whole garage evenly (the floor
-         * at 9 to 12 everywhere), so the lights cast no pools and the flashlight, which
-         * cannot go past 15, hardly showed. At 10 each light has its pool with dusk
-         * between, and the flashlight stands out, with or without shaders.
+         * Light level when lit. Not 15: with a light every few blocks, 15 lit the whole
+         * garage evenly (the floor at 9 to 12 everywhere), so the lights cast no pools and
+         * the flashlight, which cannot go past 15, hardly showed. Not 10 either: with the
+         * Moody brightness of the levels, the floor under a light was about a third as
+         * bright as at 15 and the lights seemed off. 13 keeps pools with dusk between.
          */
-        const val LIGHT_LEVEL = 10
+        const val LIGHT_LEVEL = 13
 
+        /** Light level by state; used in the block settings. */
         fun luminance(state: BlockState): Int = if (state.get(LIT)) LIGHT_LEVEL else 0
+
+        /**
+         * A lit fixture is drawn at full brightness (like magma), whatever its light level,
+         * so the tubes always look on; unlit (off, or in a flicker burst) it takes the
+         * light around it. Used in the block settings.
+         */
+        fun glows(state: BlockState): Boolean = state.get(LIT)
 
         fun withMode(state: BlockState, mode: LightMode): BlockState =
             state.with(MODE, mode).with(LIT, mode != LightMode.OFF).with(BURST, false)

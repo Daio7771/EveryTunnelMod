@@ -76,11 +76,13 @@ conservan). Vista previa: `tools/blocks/output/blocks_sheet.png`.
 
 ## Arte de entidades
 
-- `tools/entity/pale_man.py`: unos 2,6 bloques de alto, extremidades largas y finas, manos
+- `tools/entity/pale_man.py`: unos 2,75 bloques de alto, extremidades largas y finas, manos
   grandes, cuello largo, ojos lechosos, orejas grandes, una camisa de vigilante rota.
   Basado en `tools/entity/reference/pale_man_concept.png` (concept art hecho con IA,
   **solo como referencia**, no va en el juego). También escribe plantillas para repintar a
-  mano.
+  mano. Sus números `STOOP_*` son su postura encorvada bajo techos bajos (dibujada en la
+  vista previa, unos 1,9 bloques de alto); el juego los aplica en
+  `client.render.PaleManModel`, que tiene los mismos números.
 - `tools/entity/guard.py`: una skin estándar de 64×64 con brazos anchos. Chaqueta negra con
   SECURITY en amarillo, placa, radio, botas.
 

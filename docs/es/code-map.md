@@ -76,7 +76,7 @@ con un comentario KDoc que cuenta más.
 | `BlockShapes.kt` | Cajas de contorno y colisión en píxeles, giradas como los blockstates |
 | `PropBlock.kt` | Un prop de suelo orientado a uno de cuatro lados |
 | `ConnectingPropBlock.kt` | Tuberías, conductos y bandejas de cables que se conectan con sus vecinos |
-| `FluorescentLightBlock.kt` | La luz: encendida, parpadeante, apagada; nivel de luz 10 |
+| `FluorescentLightBlock.kt` | La luz: encendida, parpadeante, apagada; nivel de luz 13, dibujada a brillo máximo |
 | `SurfaceMarkBlocks.kt` | Manchas y charcos en cualquier cara |
 | `SignTileBlock.kt` | Textos pintados por ranura numerada (el pack del mundo los asigna) |
 | `ElevatorDoorBlock.kt` | Etapas de la puerta corredera del ascensor |
@@ -166,6 +166,7 @@ con un comentario KDoc que cuenta más.
 | Archivo | Qué hace |
 |---|---|
 | `PaleManRenderer.kt` | Renderizador de GeckoLib con la máscara de brillo de los ojos |
+| `PaleManModel.kt` | Su modelo de GeckoLib, más la postura encorvada bajo techos bajos |
 | `LootRenderer.kt` | Dibuja el botín tumbado |
 | `GuardUniform.kt` | La skin del uniforme para todos los jugadores |
 

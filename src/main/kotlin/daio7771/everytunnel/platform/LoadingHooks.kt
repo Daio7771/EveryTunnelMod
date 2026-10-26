@@ -11,9 +11,11 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.entity.attribute.EntityAttributeModifier
 import net.minecraft.entity.attribute.EntityAttributes
+import net.minecraft.network.packet.s2c.play.LightUpdateS2CPacket
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Identifier
+import net.minecraft.util.math.ChunkPos
 import java.util.Locale
 import java.util.UUID
 
@@ -30,7 +32,12 @@ import java.util.UUID
  *   resources do not drain, and no intro starts.
  * - Once the world is built, a Survival or Adventure player starts a new game
  *   ([NewGame.start]): every level is reset and they wait in the closed elevator. Creative
- *   and Spectator players stay where they are. The client is told ([STATE_READY]); it waits
+ *   and Spectator players stay where they are.
+ * - Then the light: the build runs while the player joins, so the chunks they were sent
+ *   can carry light from before the build (the elevator with sky light and no lamp). Once
+ *   the light engine has settled ([LIGHT_SETTLE_TICKS], at most [LIGHT_TIMEOUT_TICKS]),
+ *   the light of every loaded chunk in their view is sent again ([resendLight]).
+ * - The client is told ([STATE_READY]); it waits
  *   until the terrain around the player is drawn, fades the screen out and answers
  *   ([DONE_PACKET_ID]). Then the player is free and the intro starts ([IntroHooks]).
  * - Safety nets: a build that never reports back is given up after [BUILD_TIMEOUT_TICKS],
@@ -54,12 +61,18 @@ object LoadingHooks {
     private const val READY_TIMEOUT_TICKS = 20L * 30
     /** How long to wait for the client to register the loading channel before going on without it. */
     private const val CHANNEL_WAIT_TICKS = 20L * 5
+    /** Ticks after the new game before the light is sent again, and the most to wait for the light engine. */
+    private const val LIGHT_SETTLE_TICKS = 20L
+    private const val LIGHT_TIMEOUT_TICKS = 20L * 10
 
     private val FREEZE_ID: UUID = UUID.fromString("0f6c2d4a-7b1e-4f39-8c55-2a9e61d3b7c4")
 
     private class Loading(val joinedTick: Long) {
         var sentLoading = false
         var prepared = false
+        /** Server tick the new game started (or was skipped), or -1. */
+        var preparedTick = -1L
+        var lightSent = false
         /** Server tick [STATE_READY] was sent, or -1. */
         var readyTick = -1L
         var done = false
@@ -149,7 +162,16 @@ object LoadingHooks {
 
             if (!state.prepared) {
                 state.prepared = true
+                state.preparedTick = now
                 if (WorldRules.appliesTo(player.isCreative, player.isSpectator)) NewGame.start(player)
+            }
+            if (!state.lightSent) {
+                val waited = now - state.preparedTick
+                val settling = player.serverWorld.chunkManager.lightingProvider.hasUpdates()
+                if (waited < LIGHT_SETTLE_TICKS || (settling && waited < LIGHT_TIMEOUT_TICKS)) continue
+                if (settling) EveryTunnel.LOGGER.warn("{}: the light was still updating after {} s, sending it anyway", player.name.string, waited / 20)
+                state.lightSent = true
+                resendLight(player, server)
             }
             if (state.readyTick < 0) {
                 if (canSend) {
@@ -170,6 +192,24 @@ object LoadingHooks {
                 EveryTunnel.LOGGER.info("{}: loaded", player.name.string)
             }
         }
+    }
+
+    /** Sends the light of every loaded chunk within the view distance around [player] again. */
+    private fun resendLight(player: ServerPlayerEntity, server: MinecraftServer) {
+        val world = player.serverWorld
+        val lighting = world.chunkManager.lightingProvider
+        val centre = player.chunkPos
+        val radius = server.playerManager.viewDistance
+        var sent = 0
+        for (cx in centre.x - radius..centre.x + radius) {
+            for (cz in centre.z - radius..centre.z + radius) {
+                if (!world.chunkManager.isChunkLoaded(cx, cz)) continue
+                // Null bit sets: every section, sky and block light.
+                player.networkHandler.sendPacket(LightUpdateS2CPacket(ChunkPos(cx, cz), lighting, null, null))
+                sent++
+            }
+        }
+        EveryTunnel.LOGGER.info("{}: light of {} chunks sent again", player.name.string, sent)
     }
 
     private fun send(player: ServerPlayerEntity, state: Byte) {

@@ -18,9 +18,12 @@ import net.minecraft.util.Identifier
  */
 object ModEntities {
 
-    /** 0.6 wide, 2.8 tall: the model stands about 2.75 blocks, the head hanging forwards. */
+    /**
+     * 0.6 wide, 1.9 tall, so he fits wherever the player fits (two free blocks). The model
+     * stands about 2.75 blocks; under a lower ceiling it stoops ([PaleManEntity.stoopAt]).
+     */
     val PALE_MAN: EntityType<PaleManEntity> = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, ::PaleManEntity)
-        .dimensions(EntityDimensions.fixed(0.6f, 2.8f))
+        .dimensions(EntityDimensions.fixed(0.6f, PaleManEntity.HITBOX_HEIGHT))
         .trackRangeBlocks(64)
         .build()
 

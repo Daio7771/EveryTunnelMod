@@ -72,9 +72,11 @@ se cambia nunca; fuera de los niveles funciona como siempre.
 
 `platform.FluorescentLightBlock`: una pantalla plana de dos tubos en cualquier cara.
 
-- Modo `on`: nivel de luz **10** (no 15: a 15 el aparcamiento quedaba iluminado por igual,
+- Modo `on`: nivel de luz **13** (no 15: a 15 el aparcamiento quedaba iluminado por igual,
   sin charcos de luz, y la linterna, limitada a 15 como toda luz de bloque, apenas se
-  notaba). Y un zumbido.
+  notaba; no 10: con el brillo Moody las luces parecían apagadas). Y un zumbido. Una
+  lámpara encendida se dibuja a brillo máximo (el `emissiveLighting` de vanilla, como el
+  magma), así que siempre se ve encendida.
 - Modo `flicker`: casi siempre encendida, con ráfagas de apagado y encendido rápido cada
   pocos segundos; la luz se apaga de verdad, así que la sala parpadea.
 - Modo `off`: oscura y silenciosa.

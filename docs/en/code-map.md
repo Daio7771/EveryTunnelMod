@@ -76,7 +76,7 @@ KDoc comment that says more.
 | `BlockShapes.kt` | Outline and collision boxes in pixels, rotated like the blockstates |
 | `PropBlock.kt` | A floor prop facing one of four sides |
 | `ConnectingPropBlock.kt` | Pipes, ducts and cable trays that connect to neighbours |
-| `FluorescentLightBlock.kt` | The light: on, flicker, off; light level 10 |
+| `FluorescentLightBlock.kt` | The light: on, flicker, off; light level 13, drawn full bright |
 | `SurfaceMarkBlocks.kt` | Stains and puddles on any face |
 | `SignTileBlock.kt` | Painted texts by numbered slot (the world pack maps them) |
 | `ElevatorDoorBlock.kt` | Sliding elevator door stages |
@@ -166,6 +166,7 @@ KDoc comment that says more.
 | File | What it does |
 |---|---|
 | `PaleManRenderer.kt` | GeckoLib renderer with the eye glow mask |
+| `PaleManModel.kt` | His GeckoLib model, plus the stoop under low ceilings |
 | `LootRenderer.kt` | Draws loot items lying flat |
 | `GuardUniform.kt` | The uniform skin for every player |
 

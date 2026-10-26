@@ -99,7 +99,7 @@ is missed.
 ## The entity
 
 `platform.PaleManEntity` (`every_tunnel:pale_man`, a GeckoLib `HostileEntity`, hitbox
-0.6 × 2.8 blocks) is the Minecraft side:
+0.6 × 1.9 blocks) is the Minecraft side:
 
 - **Unkillable by the player**: only `/kill` and the void remove him. He never despawns.
 - **Territory:** if his spawn point names a `zone`, he wanders only inside it and ignores
@@ -107,9 +107,9 @@ is missed.
 - **Each tick:** hears the noises of the last 2 ticks inside his territory, works out their
   loudness with walls, finds the nearest player (within -2..+3 blocks of his height), runs
   the brain and applies the decision: path to the target, stop and look, or hit.
-- **Pathfinding:** vanilla mob navigation. He is 2.8 blocks tall and needs three free
-  blocks of height. Paths that fall short are logged by `PlaytestLog` with the blocks in
-  the way.
+- **Pathfinding:** vanilla mob navigation. His hitbox is 1.9 blocks tall, so like the
+  player he needs two free blocks of height (the upright model is 2.75; see *His model*).
+  Paths that fall short are logged by `PlaytestLog` with the blocks in the way.
 - **New game:** he notices that a new game started (a counter in `PaleManSpawner`) and goes
   home to his spawn point.
 - **State sync:** his brain state is tracked entity data (`brainState`), which clients use
@@ -128,6 +128,14 @@ again on the next entry. The spawn egg (Every Tunnel creative tab) is for testin
 `tools/entity/pale_man.py` writes the geometry, animations (idle, listen, walk, run,
 attack), texture and a glow mask for his milky eyes. `client.render.PaleManRenderer` draws
 him; the animation follows his mode (listen, chase = run, roam = walk or idle).
+
+**The stoop:** where a block stands in the space of his upright model (above the hitbox,
+here or one block ahead), the client bends him over 8 ticks: the back leans to at least
+75°, the arms keep hanging, the head lifts, the knees bend. He is then about 1.9 blocks
+tall, and he straightens again in the open. The test runs on the client in
+`PaleManEntity.tick` (`stoopAt`); `client.render.PaleManModel` bends the bones on top of
+whatever animation plays. The pose is `STOOP_*` in `pale_man.py` (drawn in its preview)
+and the same numbers in `PaleManModel`.
 
 ## What the player hears
 

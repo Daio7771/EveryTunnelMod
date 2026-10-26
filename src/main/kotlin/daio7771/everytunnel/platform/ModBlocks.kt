@@ -40,7 +40,8 @@ object ModBlocks {
     val FLUORESCENT_LIGHT: Block = register(
         "fluorescent_light",
         FluorescentLightBlock(
-            props(MapColor.WHITE_GRAY, BlockSoundGroup.GLASS).luminance { FluorescentLightBlock.luminance(it) },
+            props(MapColor.WHITE_GRAY, BlockSoundGroup.GLASS).luminance { FluorescentLightBlock.luminance(it) }
+                .emissiveLighting { state, _, _ -> FluorescentLightBlock.glows(state) },
         ),
     )
 

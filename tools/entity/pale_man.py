@@ -10,7 +10,7 @@ Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   textures/entity/pale_man_glowmask.png        what glows in the dark (his eyes)
   models/item/pale_man_spawn_egg.json, and the names in lang/en_us.json
 and, in tools/entity/output/ (git-ignored): pale_man_preview.png (the texture enlarged, plus
-front and side views of the model) and a painting template, pale_man_template.png (real
+front and side views of the model, and a side view stooped under a 2-block ceiling) and a painting template, pale_man_template.png (real
 size) and pale_man_template_big.png (enlarged, labelled): every face of every cube in its
 own colour, red = front (north), blue = back, green = east, yellow = west, white = top,
 grey = bottom.
@@ -65,6 +65,17 @@ DIRT = (120, 104, 92)
 TORSO_LEAN = 8                # the back is almost straight...
 NECK_DROOP = 45               # ...but the neck falls forwards
 HEAD_LIFT = -15               # and the head lifts a little to "look" ahead
+
+# The stoop under a low ceiling: his hitbox is 1.9 blocks (he goes wherever the player
+# goes), but he stands 2.74. Where the space above him is lower, the client bends him by
+# this much (client/render/PaleManModel.kt holds the same numbers; keep them in step).
+# The back leans to at least STOOP_TORSO degrees, the arms keep hanging, the head lifts,
+# the knees bend and the whole body sinks to keep the feet on the floor.
+STOOP_TORSO = 75              # degrees of lean, at least (the run already leans 30 more than idle)
+STOOP_HEAD = -45              # added to the head, so the face looks ahead, not at the floor
+STOOP_THIGH = -30             # added: thighs forwards...
+STOOP_SHIN = 50               # ...shins back
+STOOP_SINK = -1.0             # units the root sinks
 
 
 # =====================================================================================
@@ -455,22 +466,50 @@ def extent(bones):
     return {a: (min(q[i] for q in pts), max(q[i] for q in pts)) for i, a in enumerate("xyz")}
 
 
+def stooped():
+    """The skeleton in the stoop pose (the STOOP_* numbers, no animation playing)."""
+    b = skeleton()
+    extra = STOOP_TORSO - b["torso"].rotation[0]
+    b["torso"].rotation[0] = STOOP_TORSO
+    b["head"].rotation[0] += STOOP_HEAD
+    for side in ("left", "right"):
+        b[f"{side}_arm"].rotation[0] -= extra                  # the arms keep hanging straight down
+        b[f"{side}_thigh"].rotation[0] += STOOP_THIGH
+        b[f"{side}_shin"].rotation[0] += STOOP_SHIN
+    return b
+
+
+def hull(points):
+    """The convex hull of 2D points (monotone chain), for drawing a turned cube flat."""
+    pts = sorted(set(points))
+
+    def half(seq):
+        out = []
+        for q in seq:
+            while len(out) >= 2 and (out[-1][0] - out[-2][0]) * (q[1] - out[-2][1]) - (out[-1][1] - out[-2][1]) * (q[0] - out[-2][0]) <= 0:
+                out.pop()
+            out.append(q)
+        return out[:-1]
+    return half(pts) + half(pts[::-1])
+
+
 def write_preview(bones, img):
     shown = 3
-    sheet = Image.new("RGB", (PX * shown + 2 * 240 + 40, max(PX * shown, 480) + 20), (24, 25, 28))
+    views = (("front", bones, "front", 0, 110), ("side, front to the right", bones, "side", 0, 110),
+             ("side, stooped", stooped(), "side", STOOP_SINK, 40))
+    sheet = Image.new("RGB", (PX * shown + len(views) * 240 + 40, max(PX * shown, 480) + 20), (24, 25, 28))
     sheet.paste(img.resize((PX * shown, PX * shown), Image.NEAREST).convert("RGB"), (10, 10))
     d = ImageDraw.Draw(sheet)
-    for view, ox in (("front", PX * shown + 30), ("side, front to the right", PX * shown + 270)):
-        d.text((ox, 10), view, fill=(200, 200, 200))
+    for n, (label, pose, view, sink, centre) in enumerate(views):
+        ox = PX * shown + 30 + n * 240
+        d.text((ox, 10), label, fill=(200, 200, 200))
         d.line((ox, 470, ox + 220, 470), fill=(90, 90, 90))
-        for bn, bone in bones.items():
+        d.line((ox, 470 - 320, ox + 220, 470 - 320), fill=(70, 50, 50))     # 2 blocks up: a low ceiling
+        for bn, bone in pose.items():
             for origin, size, kind, inflate in bone.cubes:
-                pts = world_corners(bones, bn, origin, size)
-                hx = [q[0] for q in pts] if view == "front" else [-q[2] for q in pts]
-                hy = [q[1] for q in pts]
-                x0, x1 = ox + 110 + min(hx) * 10, ox + 110 + max(hx) * 10
-                y0, y1 = 470 - max(hy) * 10, 470 - min(hy) * 10
-                d.rectangle((x0, y0, x1, y1), outline=NAVY_LIGHT if inflate else SKIN)
+                pts = world_corners(pose, bn, origin, size)
+                flat = [(ox + centre + (q[0] if view == "front" else -q[2]) * 10, 470 - (q[1] + sink) * 10) for q in pts]
+                d.polygon(hull(flat), outline=NAVY_LIGHT if inflate else SKIN)
     OUT.mkdir(exist_ok=True)
     sheet.save(OUT / "pale_man_preview.png")
 
@@ -527,9 +566,11 @@ def main():
     lang["item.every_tunnel.pale_man_spawn_egg"] = "Pale Man Spawn Egg"
     write_json(lang_path, lang)
     e = extent(bones)
+    low = extent(stooped())
     cubes = sum(len(b.cubes) for b in bones.values())
     print(f"Pale man: {len(bones)} bones, {cubes} cubes, {len(animations()['animations'])} animations; "
-          f"{e['y'][1] / 16:.2f} blocks tall, {(e['z'][1] - e['z'][0]) / 16:.2f} deep")
+          f"{e['y'][1] / 16:.2f} blocks tall, {(e['z'][1] - e['z'][0]) / 16:.2f} deep; "
+          f"stooped {(low['y'][1] + STOOP_SINK) / 16:.2f} tall, feet at {(low['y'][0] + STOOP_SINK) / 16:+.2f}")
 
 
 if __name__ == "__main__":
