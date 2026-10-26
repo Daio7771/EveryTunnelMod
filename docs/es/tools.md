@@ -103,6 +103,8 @@ dsp.py: utilidades DSP · audio_io.py: leer/escribir audio
 - `catalog.py`: cada generador recibe `(rng, variant)` y devuelve un array mono o estéreo.
   Los ids siguen los eventos de sonido (`every_tunnel:<id>`). Mono para los sonidos con
   posición en el mundo, estéreo para la música y los sonidos en la cabeza.
+- `menu_piano.py`: el tema del menú, una pieza de piano del usuario, llamada desde
+  `catalog.py`. Tiene sus propias funciones y semilla para coincidir con el original.
 - `dsp.py`: 44,1 kHz, ruido con semilla, envolventes, filtros. Los bucles se construyen "en
   círculo" (ciclos completos, ruido moldeado por FFT) para que se repitan sin costura;
   `loop_seam()` lo comprueba.

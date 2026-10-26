@@ -62,7 +62,7 @@ Lado del cliente (`client.effects`), por jugador y sin posición salvo que se in
 | `BreathingEffect` | Respiración fuerte agotado | Jugadores |
 | `TensionMusic` | Las capas de música del Pale man, con fundido cruzado | Música |
 | `IntroMusic` | La canción del ascensor y luego su parada de cinta | Música |
-| `MenuMusic` | El tema del menú, en bucle, solo en los menús | Música |
+| `MenuMusic` | El tema del menú y luego 15 s de silencio, solo en los menús | Música |
 
 El ambiente del nivel lo envía el servidor (`platform.AmbienceHooks`) cuando el jugador
 cambia de nivel y tras `/reload`; el cliente hace el bucle y la colocación aleatoria, que no
@@ -74,10 +74,13 @@ en silencio y entra con fundido junto a la imagen (`SoundSystemMixin`).
 
 ## El tema del menú
 
-`music.menu`, `menu_theme` en `catalog.py`: 84 s, 24 compases de 5/4 en re menor, hecho
-para repetirse sin costura. Un ostinato agudo e inquieto de piano con un motivo
-descendente, una nota de bajo y un pulso como de latido, sobre un dron y un pad oscuro; una
-pausa y luego un regreso más duro.
+`music.menu`, sintetizado por `menu_piano.py` (compuesto por el usuario; `menu_theme` en
+`catalog.py` lo llama): unos 70 s de piano de fieltro lento e inquietante en 3/4 a 54 bpm,
+con rubato y dudas, dos pasadas sobre Dmaj7 - Dadd9 - Bbmaj7#11 - Gmaj7 y un final sin
+resolver en re maj7 con mi bemol encima. Usa su propia semilla (7), así que coincide con el
+original del compositor. No es un bucle: `MenuMusic` lo toca una vez, espera 15 s en
+silencio y lo vuelve a tocar. Se exporta con el pico a -2,9 dB, unos -16,8 LUFS como el tema
+anterior.
 
 ## Hacer y cambiar sonidos
 

@@ -59,7 +59,7 @@ Client side (`client.effects`), per player and not positioned unless noted:
 | `BreathingEffect` | Heavy breathing when exhausted | Players |
 | `TensionMusic` | The Pale man's music layers, crossfaded | Music |
 | `IntroMusic` | The elevator song, then its tape-stop fade | Music |
-| `MenuMusic` | The menu theme, looping, only in menus | Music |
+| `MenuMusic` | The menu theme, then 15 s of silence, only in menus | Music |
 
 The level ambience is sent by the server (`platform.AmbienceHooks`) when the player changes
 level and after `/reload`; the client does the looping and random placement, which needs
@@ -71,9 +71,12 @@ silent and fades in with the picture (`SoundSystemMixin`).
 
 ## The menu theme
 
-`music.menu`, `menu_theme` in `catalog.py`: 84 s, 24 bars of 5/4 in D minor, built to loop
-with no seam. A restless high piano ostinato with a falling motif, a bass note and a
-heartbeat-like pulse, over a drone and a dark pad; a break, then a harder return.
+`music.menu`, synthesized by `menu_piano.py` (composed by the user; `menu_theme` in
+`catalog.py` calls it): about 70 s of slow, uneasy felt piano in 3/4 at 54 bpm, with rubato
+and hesitations, two passes over Dmaj7 - Dadd9 - Bbmaj7#11 - Gmaj7 and an unresolved end on
+D maj7 with E flat on top. It keeps its own seed (7), so it matches the composer's original.
+It is not a loop: `MenuMusic` plays it once, waits 15 s in silence and plays it again.
+Exported with its peak at -2.9 dB, about -16.8 LUFS like the earlier theme.
 
 ## Making and changing sounds
 

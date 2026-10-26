@@ -57,8 +57,8 @@ créditos.
   (`MenuFigure`); cualquier movimiento la hace desaparecer.
 - **Ctrl+Shift+V** cambia a la pantalla de título de vanilla (otros mundos, multijugador,
   mods) y vuelve.
-- `MenuMusic` repite `music.menu`; `MusicTrackerMixin` mantiene la música de vanilla
-  apagada en todas partes.
+- `MenuMusic` toca `music.menu`, luego 15 s de silencio, una y otra vez; `MusicTrackerMixin`
+  mantiene la música de vanilla apagada en todas partes.
 
 ## 3. Abrir el mundo
 

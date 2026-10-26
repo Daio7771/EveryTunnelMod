@@ -97,6 +97,8 @@ dsp.py: the DSP toolkit · audio_io.py: reading/writing audio
 - `catalog.py`: each generator takes `(rng, variant)` and returns a mono or stereo array.
   Ids follow the sound events (`every_tunnel:<id>`). Mono for sounds positioned in the
   world, stereo for music and head sounds.
+- `menu_piano.py`: the menu theme, a piano piece by the user, called by `catalog.py`. It
+  has its own helpers and seed so it matches the original.
 - `dsp.py`: 44.1 kHz, seeded noise, envelopes, filters. Loops are built "circularly"
   (whole cycles, FFT-shaped noise) so they repeat with no seam; `loop_seam()` checks it.
 - `cc0_cuts.py`: a `Cut` turns one recording into one sound event: segments, resampling,

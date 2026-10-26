@@ -56,7 +56,7 @@ it (`MinecraftClientMixin`): at start-up, after leaving a world, after the credi
   (`MenuFigure`); any movement makes it vanish.
 - **Ctrl+Shift+V** swaps to vanilla's title screen (other worlds, multiplayer, mods) and
   back.
-- `MenuMusic` loops `music.menu`; `MusicTrackerMixin` keeps vanilla music off everywhere.
+- `MenuMusic` plays `music.menu`, then 15 s of silence, again and again; `MusicTrackerMixin` keeps vanilla music off everywhere.
 
 ## 3. Opening the world
 
