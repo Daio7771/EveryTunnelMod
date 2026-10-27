@@ -94,17 +94,18 @@ When uploading:
 
 | Field | Value |
 |---|---|
-| Summary (the line under the name) | `Sound-driven horror demo. Don't make a noise.` |
+| Summary (the line under the name) | `You are the new night-shift security guard of the Noname Complex, an abandoned underground facility. Your shift starts in the service elevator and goes down through its parking garage.` |
 | Project icon | `docs/media/logo.png` (512×512) |
 | Game version | 1.20.1 |
 | Mod loader | Fabric |
 | Java | 17 |
-| Required dependencies | LambDynamicLights (Fabric API, Fabric Language Kotlin and GeckoLib are inside the jar) |
-| Optional dependencies | Sound Physics Remastered, Sodium, Iris, Indium |
+| Relations: Required Dependency | LambDynamicLights |
+| Relations: Embedded Library | Fabric API, Fabric Language Kotlin, GeckoLib (inside the jar) |
+| Relations: Optional Dependency | Sound Physics Remastered, Sodium, Iris, Indium |
 | License | All Rights Reserved. The CC BY 4.0 music credit must stay in the description |
 | Source | https://github.com/Daio7771/EveryTunnelMod |
 | Issues | https://github.com/Daio7771/EveryTunnelMod/issues |
-| File | The release jar (`everytunnerBuild`), release type **Beta** while it is a demo |
+| File | The release jar (`everytunnerBuild`), display name `Every Tunnel <version>` (e.g. `Every Tunnel 0.2.1`), release type **Beta** while it is a demo |
 | File changelog | What changed in this version, for players |
 
 The same jar goes to the repository's

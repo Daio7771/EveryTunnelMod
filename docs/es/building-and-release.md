@@ -94,17 +94,18 @@ Al subir:
 
 | Campo | Valor |
 |---|---|
-| Summary (la línea bajo el nombre) | `Sound-driven horror demo. Don't make a noise.` |
+| Summary (la línea bajo el nombre) | `You are the new night-shift security guard of the Noname Complex, an abandoned underground facility. Your shift starts in the service elevator and goes down through its parking garage.` |
 | Icono del proyecto | `docs/media/logo.png` (512×512) |
 | Versión del juego | 1.20.1 |
 | Mod loader | Fabric |
 | Java | 17 |
-| Dependencias obligatorias | LambDynamicLights (Fabric API, Fabric Language Kotlin y GeckoLib van dentro del jar) |
-| Dependencias opcionales | Sound Physics Remastered, Sodium, Iris, Indium |
+| Relations: Required Dependency | LambDynamicLights |
+| Relations: Embedded Library | Fabric API, Fabric Language Kotlin, GeckoLib (van dentro del jar) |
+| Relations: Optional Dependency | Sound Physics Remastered, Sodium, Iris, Indium |
 | Licencia | All Rights Reserved. El crédito CC BY 4.0 de la música debe seguir en la descripción |
 | Source | https://github.com/Daio7771/EveryTunnelMod |
 | Issues | https://github.com/Daio7771/EveryTunnelMod/issues |
-| Archivo | El jar de release (`everytunnerBuild`), tipo **Beta** mientras sea una demo |
+| Archivo | El jar de release (`everytunnerBuild`), nombre visible `Every Tunnel <versión>` (p. ej. `Every Tunnel 0.2.1`), tipo **Beta** mientras sea una demo |
 | Changelog del archivo | Qué cambió en esta versión, para jugadores |
 
 El mismo jar va a las [Releases](https://github.com/Daio7771/EveryTunnelMod/releases) del
