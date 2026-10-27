@@ -124,7 +124,7 @@ Todas en `gradle.properties`:
 | LambDynamicLights | 4.4.0+1.20.1 |
 | Sound Physics Remastered (desarrollo) | fabric-1.20.1-1.5.1 |
 | Sodium / Iris / Indium (desarrollo) | 0.5.13 / 1.7.6 / 1.0.36 |
-| Versión del mod | `mod_version` (0.2.0) |
+| Versión del mod | `mod_version` (0.2.1) |
 
 ## Preguntas abiertas del release
 
