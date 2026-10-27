@@ -55,6 +55,7 @@ Estas páginas también se ven dentro del juego (menú principal, GUIDE):
 | Lenguaje | Kotlin 2.4 (y unas pocas mixins en Java), destino Java 17 |
 | Id del mod | `every_tunnel` |
 | Paquete | `daio7771.everytunnel` |
-| Requeridos (dentro del jar) | Fabric API, Fabric Language Kotlin, GeckoLib, LambDynamicLights |
+| Requeridos (dentro del jar) | Fabric API, Fabric Language Kotlin, GeckoLib |
+| Requeridos (los instala el jugador) | LambDynamicLights |
 | Recomendados | Sound Physics Remastered, Sodium + Iris + Indium |
-| Licencia | MIT (código y recursos propios), grabaciones CC0, una canción CC BY |
+| Licencia | Todos los derechos reservados (todo lo propio; MIT hasta la 0.2.0), grabaciones CC0, una canción CC BY |

@@ -155,15 +155,15 @@ dependencies {
     include("software.bernie.geckolib:geckolib-fabric-1.20.1:${prop("geckolib_version")}")
 
     // LambDynamicLights (client): compiled against its API only. Dev runs get the full mod
-    // with its libraries (modLocalRuntime is not exposed to anything depending on this mod);
-    // the jar bundles the Modrinth release, which carries its libraries inside.
+    // with its libraries (modLocalRuntime is not exposed to anything depending on this mod).
+    // Required, but not bundled: its licence (the Lambda License) does not allow sharing its
+    // jar without the author's written approval, so players install it themselves.
     modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${prop("lambdynamiclights_version")}")
     modLocalRuntime("dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:${prop("lambdynamiclights_version")}")
-    include("maven.modrinth:lambdynamiclights:${prop("lambdynamiclights_version")}")
 
-    // Everything a player needs comes in the one jar (jar-in-jar; Apache 2.0 and MIT):
-    // Fabric API and Fabric Language Kotlin too. Fabric Loader uses a newer copy if the
-    // player also installed one.
+    // The rest of what a player needs comes in the one jar (jar-in-jar; Apache 2.0): Fabric
+    // API and Fabric Language Kotlin. Fabric Loader uses a newer copy if the player also
+    // installed one.
     include("net.fabricmc.fabric-api:fabric-api:${prop("fabric_version")}")
     include("net.fabricmc:fabric-language-kotlin:${prop("kotlin_loader_version")}")
 
@@ -263,14 +263,15 @@ tasks.jar {
     from("LICENSE.txt") {
         rename { "${it}_${project.base.archivesName.get()}" }
     }
-    // Third-party music and its license (CC BY needs the credit to travel with the mod).
+    // The credits: third-party music and its licence (CC BY needs the credit to travel with
+    // the mod), and the bundled libraries.
     from("CREDITS.md") {
         rename { "${it}_${project.base.archivesName.get()}" }
     }
 }
 
-// The jar to hand out: everything inside (map world, GeckoLib, Fabric API, Kotlin,
-// LambDynamicLights). ./gradlew everytunnerBuild -> build/libs/everytunner_build.jar
+// The jar to hand out: everything inside but LambDynamicLights (map world, GeckoLib, Fabric
+// API, Kotlin). ./gradlew everytunnerBuild -> build/libs/everytunner_build.jar
 tasks.register<Copy>("everytunnerBuild") {
     description = "Builds the mod and copies it to build/libs/everytunner_build.jar."
     dependsOn(tasks.named("build"))

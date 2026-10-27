@@ -46,16 +46,16 @@ arriba; `python3 tools/map/map_generator.py`; `./gradlew runClientMapWorld`.
 
 ## El jar de release
 
-`./gradlew everytunnerBuild` → `build/libs/everytunner_build.jar` (unos 22 MB). Un solo jar
-con todo menos Fabric Loader:
+`./gradlew everytunnerBuild` → `build/libs/everytunner_build.jar` (unos 21 MB). Un solo jar
+con todo menos Fabric Loader y LambDynamicLights:
 
 | Dentro | Cómo |
 |---|---|
 | El mod | `remapJar` |
-| Fabric API, Fabric Language Kotlin, GeckoLib, LambDynamicLights | jar-in-jar (`include`); Fabric Loader usa una copia más nueva si el jugador tiene una |
+| Fabric API, Fabric Language Kotlin, GeckoLib | jar-in-jar (`include`); Fabric Loader usa una copia más nueva si el jugador tiene una |
 | El mundo del mapa | `packMapWorld` comprime `run/saves/noname_complex` en `every_tunnel/world/noname_complex.zip` |
 | La guía del jugador | `copyGuide` copia `docs/<idioma>/guide/*.md` en `assets/every_tunnel/guide/<idioma>/` |
-| `LICENSE.txt`, `CREDITS.md` | Renombrados con el nombre del mod; el crédito CC BY tiene que viajar con el mod |
+| `LICENSE.txt`, `CREDITS.md` | Renombrados con el nombre del mod; el crédito CC BY tiene que viajar con el mod, y los créditos listan las librerías incluidas |
 
 `packMapWorld` deja fuera lo que pertenece a quien jugó el mundo: `playerdata/`, `stats/`,
 `advancements/`, `session.lock`, `level.dat_old`, el estado guardado del mod
@@ -63,13 +63,18 @@ con todo menos Fabric Loader:
 está **en ese momento**, así que construye el mapa antes. Sin ese mundo (un clon nuevo del
 repositorio), el jar simplemente no lleva mapa.
 
-No van dentro, por licencias: Sodium, Iris, Indium, Sound Physics Remastered. Están en
-`recommends` en `fabric.mod.json`.
+No van dentro, por licencias:
+
+- **LambDynamicLights**, obligatorio (`depends`): desde la 3.0 usa la Lambda License, que no
+  permite compartir su jar sin permiso por escrito del autor. Lo instala el jugador; sin él,
+  Fabric Loader se para al arrancar y lo nombra. (La 0.1.0 y la 0.2.0 llevaban la 4.4.0
+  dentro; la 2.3.2, MIT, tiene otra API.)
+- Sodium, Iris, Indium, Sound Physics Remastered, en `recommends` en `fabric.mod.json`.
 
 ### Lo que hace un jugador
 
 1. Instalar Fabric Loader 0.19.5 o más nuevo para Minecraft 1.20.1.
-2. Poner `everytunner_build.jar` en `mods/`.
+2. Poner `everytunner_build.jar` y LambDynamicLights (4.4.0 o más nuevo) en `mods/`.
 3. Opcional: Sodium + Iris + Indium y un shader pack Complementary, y Sound Physics
    Remastered.
 4. Arrancar el juego y pulsar BEGIN.
@@ -94,9 +99,9 @@ Al subir:
 | Versión del juego | 1.20.1 |
 | Mod loader | Fabric |
 | Java | 17 |
-| Dependencias obligatorias | Ninguna: Fabric API, Fabric Language Kotlin, GeckoLib y LambDynamicLights van dentro del jar |
+| Dependencias obligatorias | LambDynamicLights (Fabric API, Fabric Language Kotlin y GeckoLib van dentro del jar) |
 | Dependencias opcionales | Sound Physics Remastered, Sodium, Iris, Indium |
-| Licencia | MIT. El crédito CC BY 4.0 de la música debe seguir en la descripción |
+| Licencia | All Rights Reserved. El crédito CC BY 4.0 de la música debe seguir en la descripción |
 | Source | https://github.com/Daio7771/EveryTunnelMod |
 | Issues | https://github.com/Daio7771/EveryTunnelMod/issues |
 | Archivo | El jar de release (`everytunnerBuild`), tipo **Beta** mientras sea una demo |

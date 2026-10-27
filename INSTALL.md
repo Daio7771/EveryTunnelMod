@@ -1,7 +1,7 @@
 # Installing Every Tunnel
 
-Every Tunnel is one file. It carries the map and every library it needs, so the only thing to
-install before it is Fabric Loader.
+Every Tunnel is one file. It carries the map and most libraries it needs, so the only things
+to install with it are Fabric Loader and LambDynamicLights.
 
 - [1. Install Fabric Loader](#1-install-fabric-loader)
 - [2. Add Every Tunnel](#2-add-every-tunnel)
@@ -42,8 +42,13 @@ in your profile's `mods` folder:
 | Official launcher, Linux | `~/.minecraft/mods` |
 | CurseForge, Modrinth App, Prism | Open the profile and use its "Open folder" or "Mods" button |
 
-Do **not** add Fabric API, Fabric Language Kotlin, GeckoLib or LambDynamicLights separately:
-they are inside Every Tunnel. If you already have newer copies of them, that is fine too.
+Then download **[LambDynamicLights](https://modrinth.com/mod/lambdynamiclights/versions?g=1.20.1)**
+(also on CurseForge), version 4.4.0 or newer for Minecraft 1.20.1, and put it in the same
+`mods` folder. It gives your flashlight its light. The CurseForge app installs it for you
+along with Every Tunnel.
+
+Do **not** add Fabric API, Fabric Language Kotlin or GeckoLib separately: they are inside
+Every Tunnel. If you already have newer copies of them, that is fine too.
 
 ## 3. Play
 
@@ -104,7 +109,8 @@ Other shader packs may work, but they are not tuned.
 
 **The game crashes on start, or the mod is not loaded.**
 Check that the profile is Minecraft **1.20.1** with **Fabric** (not Forge or NeoForge), and
-that Fabric Loader is 0.19.5 or newer. The crash report names the mod that failed.
+that Fabric Loader is 0.19.5 or newer. If the error says LambDynamicLights is missing,
+install it (step 2). The crash report names the mod that failed.
 
 **"The map is missing. Reinstall the mod."**
 The Noname Complex world was deleted or moved. Close the game; on the next start Every Tunnel

@@ -45,7 +45,10 @@ for maintainers (how to publish, checklists): those go in `docs/`, such as
 
 ## Assets and licences
 
-- Code and own assets: MIT.
+- Everything own (code, tools, assets, story, docs): all rights reserved (`LICENSE.txt`),
+  with videos, streams and modpacks allowed. Versions up to 0.2.0 were MIT.
+- Bundle a library in the jar only if its licence allows sharing it (LambDynamicLights'
+  does not); list each bundled one in `CREDITS.md`.
 - Recordings: **CC0 only**, with their source in `tools/sounds/cc0/SOURCES.md`.
 - Anything needing credit (only the elevator song today) goes into
   `tools/sounds/licensed/`, `CREDITS.md`, `fabric.mod.json` and the end credits.

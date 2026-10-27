@@ -41,8 +41,10 @@ you were.
 
 - **Minecraft 1.20.1**
 - **Fabric Loader 0.19.5** or newer
-- That's it. Fabric API, Fabric Language Kotlin, GeckoLib and LambDynamicLights come inside
-  the mod's file, and so does the map.
+- **[LambDynamicLights](https://modrinth.com/mod/lambdynamiclights)** 4.4.0 or newer for
+  1.20.1: it gives your flashlight its light.
+- That's it. Fabric API, Fabric Language Kotlin and GeckoLib come inside the mod's file, and
+  so does the map.
 
 ## Installing
 
@@ -50,7 +52,9 @@ you were.
 2. Download the Every Tunnel `.jar` from
    [Releases](https://github.com/Daio7771/EveryTunnelMod/releases) and put it in your `mods`
    folder.
-3. Start the game and press **BEGIN**.
+3. Download [LambDynamicLights](https://modrinth.com/mod/lambdynamiclights/versions?g=1.20.1)
+   for 1.20.1 and put it in the same folder.
+4. Start the game and press **BEGIN**.
 
 Step-by-step instructions, recommended mods, shader setup and troubleshooting:
 **[INSTALL.md](INSTALL.md)**.
@@ -78,9 +82,11 @@ Play with headphones.
 
 ## Credits and license
 
-Made by **Daio7771**: design, code, sound and art. The code and the mod's own assets are
-under the [MIT license](LICENSE.txt). The sounds are synthesized for the game or come from
-CC0 recordings.
+Made by **Daio7771**: design, code, sound and art. **All rights reserved**
+([LICENSE.txt](LICENSE.txt)): you may make and monetize videos and streams of the game and
+include it in modpacks that download it from CurseForge or GitHub, but not re-upload it or
+reuse its code, art or story. Versions 0.1.0 and 0.2.0 were released under MIT. The sounds
+are synthesized for the game or come from CC0 recordings.
 
 Music: "Local Forecast - Elevator" Kevin MacLeod (incompetech.com)
 Licensed under Creative Commons: By Attribution 4.0 License
@@ -98,7 +104,7 @@ Built with Kotlin on Fabric (Loom). You need JDK 17 and JDK 21.
 ```bash
 ./gradlew build              # the mod's jar and the unit tests
 ./gradlew runClient          # the game, at the main menu
-./gradlew everytunnerBuild   # the release jar, with the map and every dependency inside
+./gradlew everytunnerBuild   # the release jar, with the map and the bundled dependencies
 ```
 
 Everything else (setting up the dev worlds, the architecture, the level format, every system,

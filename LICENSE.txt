@@ -1,21 +1,29 @@
-The MIT License (MIT)
+Every Tunnel
+Copyright (c) 2026 Daio7771. All rights reserved.
 
-Copyright (c) 2026 
+This covers everything made for Every Tunnel, in this repository and in the mod's jar: the
+source code (the mod and the Python tools), the textures, models, sounds and music made for
+it, the map, the in-game text and guide, the documentation, and the story, setting and
+characters (the Noname Complex, the Pale man and the rest). Third-party work keeps its own
+licence; CREDITS.md lists it (the elevator music and the libraries bundled in the jar).
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+No part of it may be copied, modified, redistributed, re-uploaded or reused, in whole or in
+part, without written permission from Daio7771, except as allowed below.
 
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
+You may:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+1. Record and stream the game and publish those videos and streams, monetized or not.
+2. Include the mod in modpacks, as long as the pack gets it from its official pages
+   (CurseForge or the GitHub Releases of Daio7771/EveryTunnelMod) and does not upload the
+   jar anywhere itself.
+3. Look at the source code on GitHub and fork it there, as GitHub's Terms of Service allow.
+   A fork gives no further rights.
+
+Versions 0.1.0 and 0.2.0 were published under the MIT licence. Copies of those two
+versions keep it; everything after them is under this notice.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES
+OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

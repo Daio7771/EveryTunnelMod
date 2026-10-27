@@ -49,7 +49,11 @@ como [Publicar en CurseForge](building-and-release.md#publicar-en-curseforge).
 
 ## Recursos y licencias
 
-- Código y recursos propios: MIT.
+- Todo lo propio (código, herramientas, recursos, historia, documentación): todos los
+  derechos reservados (`LICENSE.txt`), con vídeos, directos y modpacks permitidos. Hasta la
+  0.2.0 era MIT.
+- Solo se mete una librería en el jar si su licencia permite compartirla (la de
+  LambDynamicLights no); cada una que vaya dentro se lista en `CREDITS.md`.
 - Grabaciones: **solo CC0**, con su fuente en `tools/sounds/cc0/SOURCES.md`.
 - Lo que necesite crédito (hoy solo la canción del ascensor) va en
   `tools/sounds/licensed/`, `CREDITS.md`, `fabric.mod.json` y los créditos finales.
