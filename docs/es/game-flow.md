@@ -42,7 +42,7 @@ flowchart TD
 
 `client.screen.MainMenuScreen` sustituye la pantalla de título de vanilla allí donde el
 juego la abriría (`MinecraftClientMixin`): al arrancar, al salir de un mundo, tras los
-créditos.
+créditos y al cerrarse una pantalla sin mundo abierto (Escape en las opciones).
 
 - **BEGIN** abre Noname Complex. Si el mundo falta, dice "The map is missing. Reinstall the
   mod."

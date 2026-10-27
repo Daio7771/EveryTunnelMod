@@ -15,6 +15,8 @@ import net.minecraft.util.Identifier
  * The main menu's music: `every_tunnel:music.menu`, in the Music volume, in the menus (no
  * world open, vanilla's title screen not asked for, not loading a world). It plays once,
  * then [SILENCE_TICKS] of silence, then again; coming back to the menus starts it at once.
+ * A sound engine restart cuts it ([soundsReloaded]); it starts again at once, not after a
+ * silence.
  * Vanilla's music never plays at all (`MusicTrackerMixin`).
  *
  * The theme is synthesized by `tools/sounds/menu_piano.py`: a piece that ends on a fade, not
@@ -32,6 +34,13 @@ object MenuMusic {
 
     fun register() {
         ClientTickEvents.END_CLIENT_TICK.register(::tick)
+    }
+
+    /** The sound engine restarted (a resource reload, from `SoundSystemMixin`): what played is gone, not ended. */
+    @JvmStatic
+    fun soundsReloaded() {
+        playing = null
+        silentTicks = 0
     }
 
     private fun tick(client: MinecraftClient) {

@@ -76,6 +76,8 @@ silent and fades in with the picture (`SoundSystemMixin`).
 and hesitations, two passes over Dmaj7 - Dadd9 - Bbmaj7#11 - Gmaj7 and an unresolved end on
 D maj7 with E flat on top. It keeps its own seed (7), so it matches the composer's original.
 It is not a loop: `MenuMusic` plays it once, waits 15 s in silence and plays it again.
+Leaving a world reloads the resources, which restarts the sound engine and cuts it; then it
+starts again at once (`SoundSystemMixin` tells `MenuMusic`).
 Exported with its peak at -2.9 dB, about -16.8 LUFS like the earlier theme.
 
 ## Making and changing sounds

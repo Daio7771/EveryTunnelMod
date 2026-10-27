@@ -79,7 +79,9 @@ en silencio y entra con fundido junto a la imagen (`SoundSystemMixin`).
 con rubato y dudas, dos pasadas sobre Dmaj7 - Dadd9 - Bbmaj7#11 - Gmaj7 y un final sin
 resolver en re maj7 con mi bemol encima. Usa su propia semilla (7), así que coincide con el
 original del compositor. No es un bucle: `MenuMusic` lo toca una vez, espera 15 s en
-silencio y lo vuelve a tocar. Se exporta con el pico a -2,9 dB, unos -16,8 LUFS como el tema
+silencio y lo vuelve a tocar. Al salir de un mundo se recargan los recursos, lo que reinicia
+el motor de sonido y lo corta; entonces vuelve a empezar al momento (`SoundSystemMixin`
+avisa a `MenuMusic`). Se exporta con el pico a -2,9 dB, unos -16,8 LUFS como el tema
 anterior.
 
 ## Hacer y cambiar sonidos

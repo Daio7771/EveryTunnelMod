@@ -17,7 +17,9 @@ import java.util.UUID
 
 /**
  * The end of the demo: walking into a zone tagged [END_TAG] (the landing at the bottom of
- * the spiral stairs behind Level 2's exit) while the world rules apply.
+ * the spiral stairs behind Level 2's exit) while the world rules apply. Not while loading
+ * ([LoadingHooks.isLoading]): a game saved after the end opens with the player still on that
+ * landing, until the new game takes them to the elevator.
  *
  * Bare footsteps come down the stairs behind the player ([STEPS], the Pale man's own
  * sound), the screen fades to black, and the client shows "End of demo" with the credits
@@ -57,7 +59,7 @@ object EndingHooks {
             }
             if (!reachedEnd || change.playerId in endings) return@register
             val player = server?.playerManager?.getPlayer(change.playerId) ?: return@register
-            if (!WorldRules.appliesTo(player.isCreative, player.isSpectator)) return@register
+            if (!WorldRules.appliesTo(player.isCreative, player.isSpectator) || LoadingHooks.isLoading(player)) return@register
             val look = player.rotationVector
             val behind = Vec3d(-look.x, 0.0, -look.z).let { if (it.lengthSquared() < 1e-4) Vec3d(0.0, 0.0, 1.0) else it.normalize() }
             endings[player.uuid] = Ending(behind)

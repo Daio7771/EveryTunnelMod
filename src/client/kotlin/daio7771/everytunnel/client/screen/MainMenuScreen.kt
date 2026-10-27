@@ -248,10 +248,16 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
             Text.translatable("menu.every_tunnel.version", version)
         }
 
-        /** What a screen being opened becomes (from `MinecraftClientMixin`): ours instead of vanilla's title screen. */
+        /**
+         * What a screen being opened becomes (from `MinecraftClientMixin`): ours instead of
+         * vanilla's title screen. No screen with no world open is the title screen too (vanilla
+         * makes one then, as when Escape closes the options).
+         */
         @JvmStatic
-        fun replace(screen: Screen?): Screen? =
-            if (screen is TitleScreen && !vanillaShown) MainMenuScreen() else screen
+        fun replace(screen: Screen?): Screen? {
+            val title = screen is TitleScreen || (screen == null && MinecraftClient.getInstance().world == null)
+            return if (title && !vanillaShown) MainMenuScreen() else screen
+        }
 
         fun register() {
             ClientPlayConnectionEvents.JOIN.register { _, _, _ -> vanillaShown = false }

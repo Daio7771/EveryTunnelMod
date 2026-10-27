@@ -41,7 +41,8 @@ flowchart TD
 ## 2. Main menu
 
 `client.screen.MainMenuScreen` replaces vanilla's title screen wherever the game would open
-it (`MinecraftClientMixin`): at start-up, after leaving a world, after the credits.
+it (`MinecraftClientMixin`): at start-up, after leaving a world, after the credits, and when a
+screen closes with no world open (Escape in the options).
 
 - **BEGIN** opens Noname Complex. If the world is missing it says "The map is missing.
   Reinstall the mod."

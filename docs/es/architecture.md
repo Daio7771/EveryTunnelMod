@@ -167,7 +167,7 @@ Las mínimas: una mixin solo donde Fabric API no tiene evento.
 | `SplashOverlayMixin` | `render` | Dibuja la pantalla de carga encima del splash de recarga de recursos |
 | `WorldListEntryMixin` | `openReadingWorldScreen` | Detecta que se abre un mundo con niveles desde la lista de mundos |
 | `QuickPlayMixin` | `startSingleplayer` | Lo mismo para quick play (ejecuciones de desarrollo, launchers) |
-| `SoundSystemMixin` | `getAdjustedVolume` | Silencio tras la pantalla de carga, con fundido junto a la imagen |
+| `SoundSystemMixin` | `getAdjustedVolume`, `reloadSounds` | Silencio tras la pantalla de carga, con fundido junto a la imagen; la música del menú vuelve tras recargar el sonido |
 
 ## Principios de diseño
 

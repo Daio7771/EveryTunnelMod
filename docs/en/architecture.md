@@ -162,7 +162,7 @@ Kept to the minimum: a mixin only where Fabric API has no event.
 | `SplashOverlayMixin` | `render` | Draws the loading screen over the resource reload splash |
 | `WorldListEntryMixin` | `openReadingWorldScreen` | Notices a world with levels opening from the world list |
 | `QuickPlayMixin` | `startSingleplayer` | The same for quick play (dev runs, launchers) |
-| `SoundSystemMixin` | `getAdjustedVolume` | Silence behind the loading screen, fading in with the picture |
+| `SoundSystemMixin` | `getAdjustedVolume`, `reloadSounds` | Silence behind the loading screen, fading in with the picture; menu music restarts after a sound reload |
 
 ## Design principles
 

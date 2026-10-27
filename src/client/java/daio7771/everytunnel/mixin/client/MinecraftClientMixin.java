@@ -9,7 +9,8 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 /**
  * Wherever the game opens vanilla's title screen (start-up, leaving a world, the end of the
- * demo), Every Tunnel's main menu opens instead ({@link MainMenuScreen#replace}).
+ * demo, closing a screen with no world open), Every Tunnel's main menu opens instead
+ * ({@link MainMenuScreen#replace}).
  */
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin {
