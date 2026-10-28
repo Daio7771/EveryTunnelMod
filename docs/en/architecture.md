@@ -35,6 +35,9 @@ platform/                                           everything that touches Mine
 | `core` | `LevelManager` (loaded levels), `PlayerLocationTracker` (who is in which zone) |
 | `core.level` | `LevelDefinition` and the level JSON parser |
 | `core.guide` | `GuideMarkdown`, the reader of the player guide pages |
+| `core.puzzle` | Level 3's valve code and the notes' text |
+| `core.achievement` | `Achievement`, the eight achievements |
+| `core.hiding` | `LookLimit`, how far the head turns in a locker |
 | `systems` | `ResourceSystem` (stamina, thirst, battery), `NoiseSystem`, `FlashlightBeam` (beam math) |
 | `entities` | `PaleManBrain`, the Pale man's decisions |
 | `util` | `JsonFields`, a forgiving JSON reader shared by both parsers |
@@ -52,12 +55,12 @@ draws or plays:
 
 | Package | What it holds |
 |---|---|
-| `client` | The client entrypoint, the flashlight key, the synced resources, shader detection and settings, the map world installer |
+| `client` | The client entrypoint, the flashlight key, the synced resources, shader detection and settings, the map world installer, the achievements earned |
 | `client.compat` | LambDynamicLights integration (the flashlight's light) |
 | `client.effects` | Everything heard (ambience, hum, heartbeat, breathing, music) and the screen fade |
-| `client.hud` | Status bars, exhaustion vignette, the no-shader flashlight spot |
+| `client.hud` | Status bars, exhaustion vignette, the no-shader flashlight spot, the locker view, the achievement toast |
 | `client.render` | The Pale man's renderer, loot on the floor, the guard uniform |
-| `client.screen` | Main menu, player guide, loading screen and tips, end of demo and credits, the menu figure |
+| `client.screen` | Main menu, player guide, achievements, loading screen and tips, end of demo and credits, the menu figure |
 
 Mixins live in Java: `src/main/java/.../mixin/` (common) and
 `src/client/java/.../mixin/client/` (client). See [Mixins](#mixins).

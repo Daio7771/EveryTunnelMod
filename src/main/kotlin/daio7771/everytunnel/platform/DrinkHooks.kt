@@ -1,6 +1,7 @@
 package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.config.ConfigManager
+import daio7771.everytunnel.core.achievement.Achievement
 import daio7771.everytunnel.systems.ResourceSystem
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.item.ItemStack
@@ -49,5 +50,6 @@ object DrinkHooks {
         if (!player.abilities.creativeMode) stack.decrement(1)
         PlaytestLog.drank(player, before, after)
         NoiseHooks.drink(player)
+        AchievementHooks.earned(player, Achievement.STAY_HYDRATED)
     }
 }

@@ -3,6 +3,7 @@ package daio7771.everytunnel.platform
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.level.LevelDefinition
+import daio7771.everytunnel.core.achievement.Achievement
 import daio7771.everytunnel.core.puzzle.ValveCode
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.minecraft.block.DoorBlock
@@ -21,8 +22,9 @@ import kotlin.random.Random
  * the level's spawn points tagged [VALVE_TAG], each lettered A to E ([ValveBlock.LETTER]). A new
  * game draws a digit for each ([newGame]); the electrician's note tells them ([values], read by
  * [NoteHooks]). Every turn ([turned]) checks them all: once each shows its digit, the pipes
- * settle (`block.valve.release`), the valves stay open (stems out; they no longer turn) and the
- * doors in the level's zones tagged [DOOR_TAG] open. Only a new game puts the valves back on 0
+ * settle (`block.valve.release`), the valves stay open (stems out; they no longer turn), the
+ * doors in the level's zones tagged [DOOR_TAG] open and everyone there earns "Under Pressure"
+ * ([AchievementHooks]). Only a new game puts the valves back on 0
  * and shuts the doors (as the map's rebuild also builds them).
  *
  * The digits live in memory: every opening of the world starts a new game ([LoadingHooks]); in
@@ -76,6 +78,7 @@ object ValveHooks {
             world.playSound(null, p, ModSounds.VALVE_RELEASE, SoundCategory.BLOCKS, 1f, 1f)
         }
         setDoors(world, level, open = true)
+        AchievementHooks.puzzleSolved(world, Achievement.VALVES)
         EveryTunnel.LOGGER.info("Valves of {} set right: the doors open", level.id)
     }
 

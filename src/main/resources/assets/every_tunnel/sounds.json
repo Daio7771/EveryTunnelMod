@@ -147,6 +147,13 @@
       "every_tunnel:block/hollow_metal/step_4"
     ]
   },
+  "block.locker.door": {
+    "sounds": [
+      "every_tunnel:block/locker/door_1",
+      "every_tunnel:block/locker/door_2",
+      "every_tunnel:block/locker/door_3"
+    ]
+  },
   "block.metal_pipe.impact": {
     "sounds": [
       {

@@ -30,8 +30,10 @@ con un comentario KDoc que cuenta más.
 | `guide/GuideMarkdown.kt` | Lee una página de la guía del jugador (el subconjunto de Markdown) en bloques |
 | `menu/LampFlicker.kt` | Cuándo parpadean las lámparas de la escena del menú |
 | `menu/BlockLight.kt` | Luz de bloque para una caja de bloques sin mundo (la escena del menú) |
+| `achievement/Achievement.kt` | Los ocho logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
+| `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
 
 ### `systems/`
 
@@ -68,7 +70,7 @@ con un comentario KDoc que cuenta más.
 |---|---|
 | `ModBlocks.kt` | Cada bloque: la luz, props, puertas, carteles, piezas del ascensor, botín, lector de tarjetas |
 | `ModItems.kt` | Batería, botella de agua, tarjeta; la pestaña creativa |
-| `ModEntities.kt` | El tipo de entidad del Pale man y su huevo |
+| `ModEntities.kt` | El tipo de entidad del Pale man y su huevo; el asiento de la taquilla |
 | `ModSounds.kt` | Eventos de sonido que reproduce el código |
 | `ModSoundGroups.kt` | Grupos de sonido de bloques por material de prop |
 | `Package.kt` | Documentación del paquete: el pegamento que depende de la versión de Minecraft |
@@ -88,6 +90,8 @@ con un comentario KDoc que cuenta más.
 | `ShutterBlock.kt` | Una pieza de una persiana metálica |
 | `CardReaderBlock.kt` | El lector de tarjetas que abre puertas de hierro |
 | `NoteBoardBlock.kt` | Un tablón de corcho con una nota: clic derecho para leerla |
+| `LockerBlock.kt` | Una taquilla (dos bloques apilados): clic derecho para esconderse |
+| `LockerSeatEntity.kt` | El asiento invisible en el que va el jugador escondido: límite de giro, salir por delante, el sonido de la puerta |
 | `FurnitureBlocks.kt` | Los muebles del nivel 3 que se unen a los de su clase: piezas en fila (mesas, barras, sofás) a izquierda y derecha, tableros de mesa por todos los lados, piezas apiladas (estanterías, racks, taquillas) arriba y abajo |
 | `ValveBlock.kt` | Una válvula de compuerta en línea en una tubería de pared: orientación, abierta, letra A a E (nivel 3) |
 | `LootBlock.kt` | Botín tirado en el suelo, se recoge con clic derecho |
@@ -123,6 +127,8 @@ con un comentario KDoc que cuenta más.
 | `KeycardHooks.kt` | Ola de apagado, restaurar luces, bloquear lectores |
 | `ValveHooks.kt` | El puzle de las válvulas del nivel 3: cifras por partida, comprobar giros, abrir la puerta, reiniciar |
 | `NoteHooks.kt` | Leer una nota clavada: busca su id y la envía con las cifras de las válvulas |
+| `HidingHooks.kt` | Esconderse en taquillas: entrar, salir, sin ruido dentro, salir en partida nueva |
+| `AchievementHooks.kt` | Conseguir logros: qué da cada uno, avisar al cliente |
 | `EndingHooks.kt` | El final de la demo: pasos, fundido, pantalla final |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
@@ -146,6 +152,8 @@ con un comentario KDoc que cuenta más.
 | `ShaderMode.kt` | Shaders sí o no, consultado en vivo con la API de Iris |
 | `ShaderSettings.kt` | Escribe una vez los ajustes recomendados de Complementary |
 | `MapWorldInstaller.kt` | Desempaqueta el mundo del mapa del jar en `saves/` |
+| `AchievementStore.kt` | Los logros conseguidos, guardados para siempre en `config/every_tunnel/achievements.json` |
+| `AchievementIcons.kt` | El icono de cada logro (un objeto o uno dibujado para el mod, o el "?" de bloqueado) |
 | `compat/LambDynamicLightsCompat.kt` | El haz como fuente de luz de LambDynamicLights |
 
 ### `effects/`
@@ -169,6 +177,8 @@ con un comentario KDoc que cuenta más.
 | `StatusHud.kt` | Filas de vida, stamina, sed y batería |
 | `ExhaustionVignette.kt` | Bordes oscuros de pantalla agotado o sediento |
 | `FlashlightOverlay.kt` | El foco en pantalla sin shaders |
+| `LockerView.kt` | El interior de la puerta de la taquilla sobre la pantalla mientras te escondes |
+| `AchievementToast.kt` | El aviso "Achievement Unlocked!"; recibe los logros conseguidos |
 
 ### `render/`
 
@@ -192,6 +202,8 @@ con un comentario KDoc que cuenta más.
 | Archivo | Qué hace |
 |---|---|
 | `MainMenuScreen.kt` | El menú principal |
+| `AchievementsScreen.kt` | La pantalla ACHIEVEMENTS: la lista en papel |
+| `Paper.kt` | Papel gastado (mosaico, manchas, bordes, tintas) para la guía y los logros |
 | `GuideScreen.kt` | La guía del jugador: una hoja de papel con scroll y pestañas |
 | `NoteScreen.kt` | Una nota leída en el papel de la guía sobre el juego, con los huecos rellenos |
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |

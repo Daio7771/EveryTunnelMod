@@ -30,8 +30,10 @@ KDoc comment that says more.
 | `guide/GuideMarkdown.kt` | Reads a player guide page (the Markdown subset) into blocks |
 | `menu/LampFlicker.kt` | When the menu scene's lamps flicker |
 | `menu/BlockLight.kt` | Block light for a box of blocks with no world (the menu scene) |
+| `achievement/Achievement.kt` | The eight achievements, in list order, by id |
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
+| `hiding/LookLimit.kt` | How far the head turns inside a locker |
 
 ### `systems/`
 
@@ -68,7 +70,7 @@ KDoc comment that says more.
 |---|---|
 | `ModBlocks.kt` | Every block: the light, props, doors, signs, elevator parts, loot, card reader |
 | `ModItems.kt` | Battery, water bottle, keycard; the creative tab |
-| `ModEntities.kt` | The Pale man entity type and spawn egg |
+| `ModEntities.kt` | The Pale man entity type and spawn egg; the locker seat |
 | `ModSounds.kt` | Sound events played from code |
 | `ModSoundGroups.kt` | Block sound groups per prop material |
 | `Package.kt` | Package doc: Minecraft-version-dependent glue |
@@ -88,6 +90,8 @@ KDoc comment that says more.
 | `ShutterBlock.kt` | A piece of a rolling shutter |
 | `CardReaderBlock.kt` | The keycard reader that opens iron doors |
 | `NoteBoardBlock.kt` | A cork board with a note: right-click reads it |
+| `LockerBlock.kt` | A locker (a two-block stack): right-click hides in it |
+| `LockerSeatEntity.kt` | The invisible seat a hiding player rides: look limit, getting out in front, the door's sound |
 | `FurnitureBlocks.kt` | Level 3's furniture that joins its own kind: row pieces (desks, counters, sofas) left and right, table tiles on all sides, stacks (bookshelves, racks, lockers) up and down |
 | `ValveBlock.kt` | A gate valve inline in a wall pipe: facing, open, letter A to E (Level 3) |
 | `LootBlock.kt` | Loot lying on the floor, picked up with right-click |
@@ -123,6 +127,8 @@ KDoc comment that says more.
 | `KeycardHooks.kt` | Lights-out wave, restoring lights, locking readers |
 | `ValveHooks.kt` | Level 3's valve puzzle: digits per new game, checking turns, opening the door, resetting |
 | `NoteHooks.kt` | Reading a pinned note: finds its id, sends it with the valve digits |
+| `HidingHooks.kt` | Hiding in lockers: in, out, no noise inside, out on a new game |
+| `AchievementHooks.kt` | Earning achievements: what earns each, telling the client |
 | `EndingHooks.kt` | The end of the demo: footsteps, fade, end screen |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
@@ -146,6 +152,8 @@ KDoc comment that says more.
 | `ShaderMode.kt` | Shaders on or off, asked live through Iris's API |
 | `ShaderSettings.kt` | Writes the recommended Complementary settings once |
 | `MapWorldInstaller.kt` | Unpacks the map world from the jar into `saves/` |
+| `AchievementStore.kt` | The achievements earned, kept for good in `config/every_tunnel/achievements.json` |
+| `AchievementIcons.kt` | Each achievement's icon (an item or one drawn for the mod, or the locked "?") |
 | `compat/LambDynamicLightsCompat.kt` | The beam as a LambDynamicLights light source |
 
 ### `effects/`
@@ -169,6 +177,8 @@ KDoc comment that says more.
 | `StatusHud.kt` | Health, stamina, thirst and battery rows |
 | `ExhaustionVignette.kt` | Dark screen edges when exhausted or parched |
 | `FlashlightOverlay.kt` | The on-screen spot without shaders |
+| `LockerView.kt` | The inside of a locker's door over the screen while hiding |
+| `AchievementToast.kt` | The "Achievement Unlocked!" toast; receives the earned achievements |
 
 ### `render/`
 
@@ -192,6 +202,8 @@ KDoc comment that says more.
 | File | What it does |
 |---|---|
 | `MainMenuScreen.kt` | The main menu |
+| `AchievementsScreen.kt` | The ACHIEVEMENTS screen: the list on paper |
+| `Paper.kt` | Worn paper (tile, stains, edges, inks) for the guide and the achievements |
 | `GuideScreen.kt` | The player guide: a scrolling paper sheet with tabs |
 | `NoteScreen.kt` | A note read on the guide's paper over the game, placeholders filled |
 | `LoadingScreen.kt` | The loading screen and `LoadingCover`, which draws it over everything |

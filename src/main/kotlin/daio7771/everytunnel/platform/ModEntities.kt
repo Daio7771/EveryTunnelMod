@@ -14,7 +14,7 @@ import net.minecraft.util.Identifier
 
 /**
  * The mod's entities: the Pale man, plus his spawn egg (in the "Every Tunnel" creative
- * tab, for testing; `/summon every_tunnel:pale_man` works too).
+ * tab, for testing; `/summon every_tunnel:pale_man` works too), and the locker seat.
  */
 object ModEntities {
 
@@ -27,11 +27,23 @@ object ModEntities {
         .trackRangeBlocks(64)
         .build()
 
+    /**
+     * The invisible seat a player hiding in a locker rides ([LockerSeatEntity], [HidingHooks]).
+     * Never saved and not summonable: it only exists while someone is inside.
+     */
+    val LOCKER_SEAT: EntityType<LockerSeatEntity> = FabricEntityTypeBuilder.create(SpawnGroup.MISC, ::LockerSeatEntity)
+        .dimensions(EntityDimensions.fixed(0.2f, 0.2f))
+        .disableSaving()
+        .disableSummon()
+        .trackRangeBlocks(16)
+        .build()
+
     val PALE_MAN_SPAWN_EGG: Item = SpawnEggItem(PALE_MAN, 0xCECCC4, 0x282E3E, Item.Settings())
 
     fun register() {
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "pale_man"), PALE_MAN)
         FabricDefaultAttributeRegistry.register(PALE_MAN, PaleManEntity.createAttributes())
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "pale_man_spawn_egg"), PALE_MAN_SPAWN_EGG)
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "locker_seat"), LOCKER_SEAT)
     }
 }

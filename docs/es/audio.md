@@ -34,7 +34,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | Ambiente | `ambient.garage.drone` (bucle), `ambient.drip`, `ambient.relay`, `ambient.rumble`, `ambient.sparks`, `ambient.vent` | síntesis |
 | Fluorescentes | `block.fluorescent.hum` (bucle), `.flicker`, `.start`, `.off` | síntesis |
 | Materiales (pasos e impactos de los props) | `block.cardboard`, `block.hollow_metal`, `block.metal_pipe`, `block.plastic`, `block.puddle`, `block.sheet_metal`, `block.wire_mesh`, `block.wood`, cada uno `.step` e `.impact` | síntesis |
-| Eventos del mapa | `block.elevator.ding`, `block.elevator.doors`, `block.shutter.close`, `block.card_reader.accept`, `block.card_reader.deny`, `block.valve.turn`, `block.valve.release` | síntesis |
+| Eventos del mapa | `block.elevator.ding`, `block.elevator.doors`, `block.shutter.close`, `block.card_reader.accept`, `block.card_reader.deny`, `block.valve.turn`, `block.valve.release`, `block.locker.door` | síntesis |
 | Linterna y batería | `item.flashlight.on`, `.off`, `.dead`, `.flicker`, `item.battery.open`, `.close` | síntesis |
 | Jugador | `player.heartbeat` (4 variaciones), `player.tinnitus`, `player.breathing_exhausted`, `player.drink` | síntesis / CC0 (respiración, tragos) |
 | El Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | síntesis / CC0 (respiración) |
@@ -46,7 +46,8 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 Lado del servidor (con posición en el mundo, lo oye todo el que esté cerca):
 
 - Sonidos de bloques: materiales de los props (`platform.ModSoundGroups`), luces que cambian
-  de modo, puertas, persianas, lectores de tarjetas.
+  de modo, puertas, persianas, lectores de tarjetas, puertas de taquilla (`LockerSeatEntity`,
+  `HidingHooks`).
 - Los pasos, la respiración, el golpe musical y el acúfeno del Pale man (`PaleManEntity`).
 - Los sonidos de linterna y batería en el jugador (`FlashlightHooks`), los tragos
   (`DrinkHooks`).

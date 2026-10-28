@@ -104,6 +104,7 @@ object DeathHooks {
         sendFade(player, 1f, FADE_OUT_TICKS / 20f)
         EveryTunnel.LOGGER.info("{} died in {}: restarting the level", player.name.string, levelId)
         PlaytestLog.died(player, levelId, source)
+        AchievementHooks.died(player, source)
     }
 
     private fun tick(server: MinecraftServer) {

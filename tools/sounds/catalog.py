@@ -901,6 +901,37 @@ def valve_release(rng, variant):
     return fade(y, 0.0, 0.3)
 
 
+def locker_door(rng, variant):
+    """A steel locker's door opened and pulled shut again: the latch lifting, the thin door's
+    hinge squeaking as it swings, then the sheet clanging home, its vents buzzing and the latch
+    catching. Played on the way into a locker and on the way out; it makes no noise for the
+    level's enemies (the game does not count it)."""
+    n = samples(1.3)
+    t = time_axis(n)
+    y = knock(n, rng, 0.02, rng.uniform(2600, 3100), [1.0, 1.8, 3.1], [0.4, 0.2, 0.1], [0.01, 0.006, 0.004],
+              click=0.5, click_hi=9000.0)                                                     # the latch lifting
+    # The hinge: a dry squeak gliding up as the door swings, rough from stick-slip.
+    swing0, swing1 = 0.08, rng.uniform(0.38, 0.5)
+    glide = np.clip((t - swing0) / (swing1 - swing0), 0.0, 1.0)
+    f0 = rng.uniform(700, 900)
+    squeak = glide_tone(f0 + f0 * 0.5 * glide + 25.0 * smooth_random(n, 30.0, rng), harmonics=(1.0, 0.5, 0.3, 0.15))
+    squeak *= envelope(n, [(0.0, 0.0), (swing0, 0.0), (swing0 + 0.04, 0.12), (swing1 - 0.05, 0.08), (swing1, 0.0)])
+    squeak *= 0.6 + 0.4 * np.abs(smooth_random(n, 60.0, rng))
+    y += bandpass(squeak, 500.0, 5000.0)
+    # The clang: a thin sheet booming with dense modes, wobbling as it flexes.
+    slam = swing1 + 0.02
+    ratios = sorted(rng.uniform(1.0, 9.0, 12))
+    clang = knock(n, rng, slam, rng.uniform(150, 190), ratios, [0.9 / (1 + i * 0.35) for i in range(12)],
+                  [0.3 / (1 + i * 0.25) for i in range(12)], click=0.9)
+    clang *= 1.0 + 0.3 * np.sin(TAU * rng.uniform(6, 9) * t)
+    y += clang + burst(n, rng, slam, 0.05, hi=400.0, tau=0.02, amp=0.9)                       # the frame's thud
+    for _ in range(int(rng.integers(4, 8))):                                                 # the vent slats buzzing
+        y += burst(n, rng, slam + rng.uniform(0.01, 0.2), 0.004, lo=2000.0, hi=7000.0, tau=0.0015, amp=rng.uniform(0.08, 0.22))
+    y += knock(n, rng, slam + rng.uniform(0.04, 0.07), rng.uniform(2200, 2600), [1.0, 1.7], [0.35, 0.15], [0.012, 0.006],
+               click=0.4)                                                                     # the latch catching
+    return fade(drive(lowpass(y, 8000.0), 1.3), 0.0, 0.2)
+
+
 def shutter_close(rng, variant):
     """
     A rolling shutter dropping shut: the slats clatter down the guide rails faster and
@@ -1005,6 +1036,8 @@ SOUNDS = [
           valve_turn, -4.0),
     Sound("block.valve.release", "Level progress", "Level 3's valves all right: water hammer, the pipe settles, the door unlocks", "mono",
           False, 1, valve_release, -2.0, attenuation=24),
+    Sound("block.locker.door", "Level progress", "A Level 3 locker's door, getting in or out (latch, hinge, clang); no noise for enemies",
+          "mono", False, 3, locker_door, -4.0),
     Sound("block.shutter.close", "Level progress", "The rolling shutter closing behind the player (rattle down, slam)", "mono", False, 1,
           shutter_close, -1.0, attenuation=32),
     Sound("event.level_transition", "Level progress", "Going from Level 1 to Level 2", "stereo", False, 1, level_transition, -1.0),

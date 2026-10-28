@@ -26,7 +26,8 @@ dropped.
 ### Where noises come from
 
 `platform.NoiseHooks` feeds the system every server tick, for Survival and Adventure
-players in worlds with levels (Creative and Spectator are silent):
+players in worlds with levels (Creative and Spectator are silent, and so is a player hiding
+in a locker, `HidingHooks`):
 
 | Noise | Radius (default) | How it is detected |
 |---|---|---|

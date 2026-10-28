@@ -1,7 +1,12 @@
 package daio7771.everytunnel.client.screen
 
-import com.mojang.blaze3d.systems.RenderSystem
 import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.client.screen.Paper.INK
+import daio7771.everytunnel.client.screen.Paper.INK_DARK
+import daio7771.everytunnel.client.screen.Paper.INK_SOFT
+import daio7771.everytunnel.client.screen.Paper.LINK_HOVER
+import daio7771.everytunnel.client.screen.Paper.RULE_COLOR
+import daio7771.everytunnel.client.screen.Paper.SHADOW_COLOR
 import daio7771.everytunnel.core.guide.GuideBlock
 import daio7771.everytunnel.core.guide.GuideMarkdown
 import daio7771.everytunnel.core.guide.GuidePage
@@ -15,12 +20,10 @@ import net.minecraft.text.MutableText
 import net.minecraft.text.OrderedText
 import net.minecraft.text.Style
 import net.minecraft.text.Text
-import net.minecraft.util.Identifier
 import net.minecraft.util.Language
 import net.minecraft.util.Util
 import org.lwjgl.glfw.GLFW
 import java.io.IOException
-import java.util.Random
 import kotlin.math.abs
 import kotlin.math.exp
 import kotlin.math.roundToInt
@@ -35,13 +38,13 @@ import kotlin.math.roundToInt
  *   [GuideMarkdown]. The language follows Minecraft's: Spanish for any `es_*`, English
  *   otherwise (and English when a language has no pages).
  * - The first section is the contents: the guide's title and every page's title, which open it
- *   when clicked. Each page's tab shows its title (its first `#` heading).
+ *   when clicked. Each page's tab shows its title (its first `#` heading). The last tab,
+ *   Credits, rolls the credits ([EndOfDemoScreen.credits]) and comes back here.
  * - Changing section turns the page (vanilla's book page sound) and goes back to the top.
  * - Keys: up/down and page up/down scroll, Home/End, left/right or Tab change section, Esc (or
  *   BACK at the top left) goes back to the menu. The menu's music keeps playing ([MenuMusic]).
  *
- * The paper and its stains are `textures/gui/guide_paper.png` and `guide_stains.png`, from
- * `tools/gui/guide_paper.py`; the paper is tiled, so the sheet can be any length.
+ * The paper is drawn by [Paper] (tiled, so the sheet can be any length).
  */
 class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("screen.every_tunnel.guide.title")) {
 
@@ -103,11 +106,17 @@ class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("scree
 
     // --- Layout ------------------------------------------------------------------------
 
-    private fun sectionLabel(index: Int): Text =
-        if (index == 0) Text.translatable("screen.every_tunnel.guide.contents") else Text.literal(pages[index - 1].title)
+    /** The last tab is not a section: it rolls the credits ([EndOfDemoScreen.credits]). */
+    private val creditsTab: Int get() = pages.size + 1
+
+    private fun sectionLabel(index: Int): Text = when (index) {
+        0 -> Text.translatable("screen.every_tunnel.guide.contents")
+        creditsTab -> Text.translatable("screen.every_tunnel.guide.credits")
+        else -> Text.literal(pages[index - 1].title)
+    }
 
     private fun layoutFor(): Layout {
-        val labelWidth = (0..pages.size).maxOfOrNull { textRenderer.getWidth(sectionLabel(it)) } ?: 0
+        val labelWidth = (0..creditsTab).maxOfOrNull { textRenderer.getWidth(sectionLabel(it)) } ?: 0
         val tabWidth = (labelWidth + TAB_PAD * 2 + TAB_OVERLAP).coerceIn(TAB_MIN, TAB_MAX)
         val backWidth = textRenderer.getWidth(backText) + MARGIN * 2
         val side = maxOf(backWidth, tabWidth + TAB_ACTIVE_OUT + MARGIN)
@@ -215,7 +224,7 @@ class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("scree
 
     private fun drawTabs(context: DrawContext, mouseX: Int, mouseY: Int) {
         val hovered = tabAt(mouseX, mouseY)
-        for (index in 0..pages.size) {
+        for (index in 0..creditsTab) {
             val (x, y, w) = tabRect(index)
             paper(context, x, y, w, TAB_HEIGHT, 0, index * TAB_HEIGHT)
             if (index != section) context.fill(x, y, x + w, y + TAB_HEIGHT, if (index == hovered) TAB_HOVER_SHADE else TAB_SHADE)
@@ -264,39 +273,15 @@ class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("scree
 
     private fun drawStains(context: DrawContext, top: Int, sheetHeight: Int) {
         // The same stains on the same page every time, a few per page.
-        val random = Random(if (section == 0) STAIN_SEED else pages[section - 1].id.hashCode().toLong() xor STAIN_SEED)
-        val count = 1 + random.nextInt(2)
-        RenderSystem.enableBlend()
-        context.setShaderColor(1f, 1f, 1f, STAIN_ALPHA)
-        repeat(count) {
-            val kind = random.nextInt(2)
-            val x = layout.sheetLeft + 4 + random.nextInt((layout.sheetWidth - STAIN_SIZE - 8).coerceAtLeast(1))
-            val y = top + 4 + random.nextInt((sheetHeight - STAIN_SIZE - 8).coerceAtLeast(1))
-            context.drawTexture(STAINS, x, y, STAIN_SIZE, STAIN_SIZE, (kind * STAIN_SIZE).toFloat(), 0f, STAIN_SIZE, STAIN_SIZE, STAIN_SIZE * 2, STAIN_SIZE)
-        }
-        context.setShaderColor(1f, 1f, 1f, 1f)
-        RenderSystem.disableBlend()
+        val seed = if (section == 0) STAIN_SEED else pages[section - 1].id.hashCode().toLong() xor STAIN_SEED
+        Paper.stains(context, seed, layout.sheetLeft, top, layout.sheetWidth, sheetHeight)
     }
 
-    /** The paper texture tiled over a rectangle, starting at ([u], [v]) in the tile. */
-    private fun paper(context: DrawContext, x: Int, y: Int, w: Int, h: Int, u: Int, v: Int) {
-        context.drawTexture(PAPER, x, y, u.toFloat(), v.toFloat(), w, h, PAPER_SIZE, PAPER_SIZE)
-    }
+    private fun paper(context: DrawContext, x: Int, y: Int, w: Int, h: Int, u: Int, v: Int) = Paper.tile(context, x, y, w, h, u, v)
 
-    /** Yellowed, slightly darker edges and a thin outline: old paper. */
-    private fun edges(context: DrawContext, x: Int, y: Int, w: Int, h: Int) {
-        EDGE_SHADES.forEachIndexed { i, shade ->
-            context.fill(x + i, y + i, x + w - i, y + i + 1, shade)
-            context.fill(x + i, y + h - i - 1, x + w - i, y + h - i, shade)
-            context.fill(x + i, y + i + 1, x + i + 1, y + h - i - 1, shade)
-            context.fill(x + w - i - 1, y + i + 1, x + w - i, y + h - i - 1, shade)
-        }
-        outline(context, x, y, w, h)
-    }
+    private fun edges(context: DrawContext, x: Int, y: Int, w: Int, h: Int) = Paper.edges(context, x, y, w, h)
 
-    private fun outline(context: DrawContext, x: Int, y: Int, w: Int, h: Int) {
-        context.drawBorder(x, y, w, h, OUTLINE)
-    }
+    private fun outline(context: DrawContext, x: Int, y: Int, w: Int, h: Int) = Paper.outline(context, x, y, w, h)
 
     private fun drawScrollBar(context: DrawContext) {
         val max = maxScroll()
@@ -315,7 +300,7 @@ class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("scree
     private fun overBack(mouseX: Int, mouseY: Int): Boolean =
         mouseX in (MARGIN - 4)..(MARGIN + textRenderer.getWidth(backText) + 4) && mouseY in MARGIN..(MARGIN + 13)
 
-    private fun tabAt(mouseX: Int, mouseY: Int): Int? = (0..pages.size).firstOrNull { index ->
+    private fun tabAt(mouseX: Int, mouseY: Int): Int? = (0..creditsTab).firstOrNull { index ->
         val (x, y, w) = tabRect(index)
         mouseX in (layout.sheetRight + 1)..(x + w) && mouseY in y until y + TAB_HEIGHT
     }
@@ -373,6 +358,10 @@ class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("scree
 
     /** Turns to a section, from its top. */
     private fun open(index: Int) {
+        if (index == creditsTab) {
+            client?.setScreen(EndOfDemoScreen.credits(this))
+            return
+        }
         if (index == section) return
         section = index
         laid = layOut(index)
@@ -382,11 +371,6 @@ class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("scree
     }
 
     companion object {
-        private val PAPER = Identifier(EveryTunnel.MOD_ID, "textures/gui/guide_paper.png")
-        private val STAINS = Identifier(EveryTunnel.MOD_ID, "textures/gui/guide_stains.png")
-        private const val PAPER_SIZE = 64
-        private const val STAIN_SIZE = 64
-        private const val STAIN_ALPHA = 0.8f
         private const val STAIN_SEED = 0x5EA1L
 
         private val backText: Text get() = Text.translatable("screen.every_tunnel.guide.back").let { Text.literal("< ").append(it) }
@@ -434,16 +418,6 @@ class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("scree
         private const val SCROLL_EASE = 18.0
         private const val FADE_IN_MS = 400L
 
-        // Ink on paper: dark, a little blue, never pure black. Links go red-brown when pointed at.
-        private const val INK = 0xFF2C2B30.toInt()
-        private const val INK_DARK = 0xFF1C1B20.toInt()
-        private const val INK_SOFT = 0xFF55535A.toInt()
-        private const val LINK_HOVER = 0xFF7A2A1E.toInt()
-        private const val RULE_COLOR = 0x50303038
-        private const val OUTLINE = 0xFF6F6A5E.toInt()
-        /** From the edge inwards: yellowed, fading into the paper. */
-        private val EDGE_SHADES = intArrayOf(0x40806838, 0x2A806838, 0x16806838)
-        private const val SHADOW_COLOR = 0x60000000
         private const val TAB_SHADE = 0x30000000
         private const val TAB_HOVER_SHADE = 0x18000000
         private const val BACK_COLOR = 0xFF6E737A.toInt()

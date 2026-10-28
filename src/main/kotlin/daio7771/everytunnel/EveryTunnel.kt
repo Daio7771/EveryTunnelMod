@@ -1,12 +1,14 @@
 package daio7771.everytunnel
 
 import daio7771.everytunnel.config.ConfigManager
+import daio7771.everytunnel.platform.AchievementHooks
 import daio7771.everytunnel.platform.AmbienceHooks
 import daio7771.everytunnel.platform.DeathHooks
 import daio7771.everytunnel.platform.DebugCommands
 import daio7771.everytunnel.platform.DevWorlds
 import daio7771.everytunnel.platform.EndingHooks
 import daio7771.everytunnel.platform.FlashlightHooks
+import daio7771.everytunnel.platform.HidingHooks
 import daio7771.everytunnel.platform.IntroHooks
 import daio7771.everytunnel.platform.KeycardHooks
 import daio7771.everytunnel.platform.LevelEntryHooks
@@ -69,6 +71,8 @@ object EveryTunnel : ModInitializer {
         LootSpawner.register()
         KeycardHooks.register()
         ValveHooks.register()
+        HidingHooks.register()
+        AchievementHooks.register()
         EndingHooks.register()
         RespawnHooks.register()
         DeathHooks.register()

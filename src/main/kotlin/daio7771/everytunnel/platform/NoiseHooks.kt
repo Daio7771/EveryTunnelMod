@@ -31,7 +31,8 @@ import kotlin.math.sqrt
  * - Flashlight clicks and battery changes, reported by [FlashlightHooks].
  *
  * Only Survival/Adventure players in worlds with levels make noise (Creative and
- * Spectator are silent, like vanilla mobs ignoring them).
+ * Spectator are silent, like vanilla mobs ignoring them), and none while hiding in a
+ * locker ([HidingHooks]).
  * `/everytunnel noise watch` shows each of your noises in the action bar.
  */
 object NoiseHooks {
@@ -77,7 +78,8 @@ object NoiseHooks {
         }
     }
 
-    fun makesNoise(player: ServerPlayerEntity): Boolean = ResourceHooks.appliesTo(player) && !DeathHooks.isDying(player)
+    fun makesNoise(player: ServerPlayerEntity): Boolean =
+        ResourceHooks.appliesTo(player) && !DeathHooks.isDying(player) && !HidingHooks.isHidden(player)
 
     private fun tick(server: MinecraftServer) {
         NoiseSystem.prune(server.ticks.toLong())

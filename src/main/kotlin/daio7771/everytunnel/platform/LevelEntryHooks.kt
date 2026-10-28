@@ -80,6 +80,7 @@ object LevelEntryHooks {
         if (level.entry == null) return
         EveryTunnel.LOGGER.info("{} walked into {}", player.name.string, level.id)
         announce(player, level)
+        AchievementHooks.levelEntered(player, level.id)
         for (zone in level.zones) {
             if (SHUTTER_TAG in zone.tags) pending += Pending(player.uuid, level.id, level.dimension, zone.box)
         }

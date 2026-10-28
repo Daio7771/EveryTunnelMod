@@ -227,7 +227,7 @@ object ModBlocks {
     val SERVER_RACK: Block = register("server_rack", StackFurnitureBlock(props(MapColor.BLACK, ModSoundGroups.SHEET_METAL).luminance { 2 }, listOf(box(1, 0, 1, 15, 16, 15))))
     val METAL_SHELF: Block = register("metal_shelf", StackFurnitureBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 2, 16, 16, 16))))
     val ELECTRICAL_PANEL: Block = register("electrical_panel", PropBlock(props(MapColor.LIGHT_GRAY, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(2, 2, 12, 14, 15, 16))))
-    val LOCKER: Block = register("locker", StackFurnitureBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(1, 0, 1, 15, 16, 16))))
+    val LOCKER: Block = register("locker", LockerBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(1, 0, 1, 15, 16, 16))))
     val BENCH: Block = register("bench", RowFurnitureBlock(props(MapColor.PALE_YELLOW, ModSoundGroups.WOOD), listOf(box(0, 0, 4, 16, 7, 12))))
     val CAFE_TABLE: Block = register("cafe_table", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC), listOf(box(1, 0, 1, 15, 12, 15))))
     val CAFE_CHAIR: Block = register("cafe_chair", PropBlock(props(MapColor.LIGHT_GRAY, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 13, 8, 13), box(3, 8, 12, 13, 15, 14))))

@@ -2,5 +2,6 @@
   "screen.every_tunnel.guide.title": "Guía",
   "screen.every_tunnel.guide.contents": "Índice",
   "screen.every_tunnel.guide.back": "VOLVER",
-  "screen.every_tunnel.guide.empty": "No se encontraron páginas de la guía."
+  "screen.every_tunnel.guide.empty": "No se encontraron páginas de la guía.",
+  "screen.every_tunnel.guide.credits": "Créditos"
 }

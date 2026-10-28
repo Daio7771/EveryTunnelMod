@@ -54,7 +54,9 @@ screen closes with no world open (Escape in the options).
   worn white paper, scrolled with the wheel, with paper tabs to jump between the contents and
   each page. It is in the game's language (Spanish for any `es_*`, English otherwise). The
   language itself is changed in OPTIONS.
-- **CREDITS** rolls the credits (`EndOfDemoScreen.credits`) and comes back.
+  Its last tab, **Credits**, rolls the credits (`EndOfDemoScreen.credits`) and comes back.
+- **ACHIEVEMENTS** lists the [achievements](#achievements) (`AchievementsScreen`) on the same
+  worn paper.
 - **EXIT** closes the game.
 - Behind it all, a parking hall seen down its aisle from a fixed camera (`MenuScene`), its
   lamps flickering now and then. The logo and options sit on black, which fades out towards
@@ -155,7 +157,8 @@ Reopening the world or respawning inside a level does not count as walking in.
   `lights_stay`).
 - **The exit:** an EXIT door by hall 3 with a `CardReaderBlock`. Without the card it
   buzzes "It needs a keycard"; with it, it beeps, turns green and opens the iron doors
-  next to it (zone tagged `keycard_door`).
+  next to it (zone tagged `keycard_door`), and everyone there earns "Employee of the Month"
+  (see [Achievements](#achievements)).
 - **The stairs to B3:** behind the door, a round shaft of metal panels with grating stairs
   spiralling down 4 turns (32 blocks, half a block per step) around an open well, railed
   with iron bars and lit by a wall lamp every half turn. At the bottom, a small landing
@@ -179,7 +182,8 @@ level file (see [Levels](levels.md#level-3-hooks)). The music is planned for las
   puts every valve on 0. A right-click turns a valve once more (from 9 back to 0), with a
   clunk and water in the pipe; the plate on each side shows its letter and its turns. When
   all five show their digits, a water hammer bangs through the pipe, the valves lock open
-  and the checkpoint's doors (zone tagged `valve_door`) open. Getting it wrong costs
+  and the checkpoint's doors (zone tagged `valve_door`) open, and "Under Pressure" is
+  earned. Getting it wrong costs
   nothing. Dying keeps what is solved; only a new game sets it back.
   `/everytunnel valves` shows the digits.
 - Past it, through the belt of 17 rooms, the **inner corridor**: a ring round the
@@ -189,6 +193,14 @@ level file (see [Levels](levels.md#level-3-hooks)). The music is planned for las
   chairs and phones, filing cabinets, server racks, lockers, the cafeteria's tables...); the
   library has rows of bookshelves four high, two blocks apart, round a clearing with reading
   tables, and the librarian's counter by the south door. Nobody is there.
+- **Lockers to hide in:** every room has at least one (the Lockers and Changing rooms are
+  full of them; the library has none). Right-clicking a locker from in front of its door
+  gets in (`HidingHooks`): the player rides an invisible seat on the locker's floor
+  (`LockerSeatEntity`), facing out, the head turning at most 30° to the sides and 15° up or
+  down (`core.hiding.LookLimit`), the screen covered by the inside of the door with its
+  vent's slits (`client.hud.LockerView`). Inside, the player makes no noise at all. Right-
+  clicking again or sneaking gets out in front of the door; both ways the door's sound plays
+  (`block.locker.door`, not a noise for enemies). A new game takes everyone out.
 - In the library's centre, the **bunker hatch**: iron trapdoors (shut) in a frame of checker
   plate. Under it a ladder goes down a shaft to a lit corridor that runs 32 blocks south to
   the door to B4, where the demo ends.
@@ -222,3 +234,33 @@ instead:
 The inventory is kept: what was picked up stays picked up. A player who never entered a
 level dies the vanilla way. `RespawnHooks` also sets the vanilla respawn point to the
 current level's start, as a fallback.
+
+## Achievements
+
+Eight achievements (`core.achievement.Achievement`, in list order). The server says when one
+is earned (`platform.AchievementHooks`, only in worlds with levels), once per game: earning
+it again in the same game (a second death to a Pale man) shows nothing, and a new game lets
+them all come again. The client shows the "Achievement Unlocked!" toast, drawn like vanilla's
+challenge toast with its fanfare
+(`client.hud.AchievementToast`), and remembers it for good in
+`config/every_tunnel/achievements.json` (`client.AchievementStore`), across games and worlds.
+The vanilla advancements are not touched.
+
+| Achievement | Earned when | Icon |
+|---|---|---|
+| First Day at Work | walking out of the elevator (the zone tagged `start` of a level with an intro) | the guard's badge |
+| Stay Hydrated | drinking a water bottle (`DrinkHooks`) | the water bottle |
+| Beware of Tall Men | walking into Level 2 (`AchievementHooks.LEVEL_ENTRIES`) | the Pale man's silhouette |
+| Ouch! | killed by a Pale man (`DeathHooks`) | a skull |
+| Employee of the Month | the keycard opens the exit's reader (everyone in the world) | the keycard |
+| Under Pressure | Level 3's valves are right (everyone in the world) | the valve |
+| Master of the Boxes | Level 3's boxes are on Storage's shelf (to come) | (to come) |
+| Shhh! | Level 3's books are back on the librarian's counter (to come) | (to come) |
+
+The ACHIEVEMENTS screen in the main menu (`client.screen.AchievementsScreen`) lists them on
+the guide's paper (`client.screen.Paper`) with how many are earned; one not earned yet shows a
+"?" and "Not yet unlocked". The texts are in the lang file (`achievement.every_tunnel.<id>`, its
+`.description`, `toast.every_tunnel.achievement_unlocked`); the badge, skull, silhouette and
+"?" icons come from `tools/gui/achievement_icons.py`, the others are the mod's items
+(`client.AchievementIcons`; the book is vanilla's until Level 3's books exist). An own sound
+in place of the fanfare is planned.

@@ -96,7 +96,11 @@ class Furnisher:
         x0, z0, x1, z1 = s.box
         self.reserved = {(x, z) for x in range(x0, x1) for z in range(z0, z1)
                          if any(abs(x - dx) <= c and abs(z - dz) <= c for cells in doors.values() for dx, dz in cells)}
-        return TEMPLATES[template](self, fr)
+        anchor = TEMPLATES[template](self, fr)
+        if not any(name == "locker" and y == 1 and x0 <= x < x1 and z0 <= z < z1 for (x, y, z), (name, _) in self.items.items()):
+            if not self.hiding_locker(fr):
+                raise SystemExit(f"LEVEL_3: no room for a locker to hide in, in {s.id}")
+        return anchor
 
     # --- helpers for the templates ---------------------------------------------------
 
@@ -123,6 +127,31 @@ class Furnisher:
                 self.at(fr, u, v + 2, "office_chair", "front")
                 if i % 2 == 1:
                     self.at(fr, u, v + 1, "desk_phone", "back", y=2)
+
+    def hiding_locker(self, fr):
+        """A locker to hide in (every room has one but the library; the Lockers and Changing
+        rooms are full of them): put in last, against a wall, facing into the room, with the
+        floor in front of its door free to step out onto. Tried along the side walls from the
+        front (the nearest to the way in), then along the back wall from the middle out."""
+        spots = [(0, v, "right") for v in range(fr.D)] + [(fr.W - 1, v, "left") for v in range(fr.D)]
+        spots.sort(key=lambda s: s[1])
+        mid = fr.W // 2
+        spots += [(u, fr.D - 1, "front") for u in sorted(range(fr.W), key=lambda u: abs(u - mid))]
+        step = {"right": (1, 0), "left": (-1, 0), "front": (0, -1)}
+        for u, v, facing in spots:
+            du, dv = step[facing]
+            fu, fv = u + du, v + dv
+            if not (0 <= fu < fr.W and 0 <= fv < fr.D):
+                continue
+            fx, fz = fr.cell(fu, fv)
+            x, z = fr.cell(u, v)
+            if not (self.free(x, 1, z) and self.free(x, 2, z)) or (x, z) in self.reserved:
+                continue
+            if not (self.free(fx, 1, fz) and self.free(fx, 2, fz)):
+                continue
+            self.stack(fr, u, v, "locker", facing, 2)
+            return True
+        return False
 
     def back_wall(self, fr, u0, u1, name, height=1, y=1):
         for u in range(u0, u1 + 1):

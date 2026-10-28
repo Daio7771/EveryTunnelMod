@@ -7,6 +7,7 @@ lines and raises SystemExit when the level is wrong, so a bad LEVEL_3 never reac
   closed doors (the puzzle will open them), round solid furniture (never over it) and
   through what a player walks through. Every room, the library, the hatch, the top of
   the stairs and the door to Level 4 must be reached, and no standing place may be left out.
+  Every room must also have a locker whose door opens onto a reached place (to hide in).
 - enclosed(): every room and the library is closed by walls but for its doors, so two spaces
   given side by side without a wall between them (a slip in the plan's numbers) fail here.
 """
@@ -86,10 +87,18 @@ def walk(lv):
         "top of the stairs": any((x, lv.top_landing_y + 1, p.STAIRS[3] - 1) in seen for x in range(p.STAIRS[0], p.STAIRS[2])),
     }
     missing += [k for k, ok in targets.items() if not ok]
+    # Every room has a locker to hide in whose door opens onto a reached standing place.
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    lockers = [(x, z, state.split("facing=")[1].split(",")[0].split("]")[0])
+               for (x, y, z), state in lv.fittings.items() if y == 1 and state.startswith("every_tunnel:locker[")]
+    for s, _ in lv.rooms:
+        x0, z0, x1, z1 = s.box
+        if not any(x0 <= x < x1 and z0 <= z < z1 and (x + steps[f][0], 1, z + steps[f][1]) in seen for x, z, f in lockers):
+            missing.append(f"a locker to hide in, in {s.id}")
     if missing:
         raise SystemExit(f"LEVEL_3: not reached from the start: {', '.join(missing)}")
     return [f"B3 walk: {len(seen)} standing places, all reached from the antechamber: "
-            f"{len(lv.rooms)} rooms, the library, the hatch, the bunker and the door to Level 4"]
+            f"{len(lv.rooms)} rooms (each with a locker to hide in), the library, the hatch, the bunker and the door to Level 4"]
 
 
 def enclosed(lv):

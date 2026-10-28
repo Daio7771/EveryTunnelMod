@@ -1,5 +1,6 @@
 package daio7771.everytunnel.platform
 
+import daio7771.everytunnel.core.achievement.Achievement
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.DoorBlock
@@ -25,7 +26,8 @@ import net.minecraft.world.World
 /**
  * A keycard reader on a wall, [FACING] the way its front looks. Locked it shows a red light;
  * right-clicked by a player carrying the keycard it beeps, turns green ([UNLOCKED]) and opens
- * the iron doors within [DOOR_REACH] blocks (which hands cannot open). Without the card it
+ * the iron doors within [DOOR_REACH] blocks (which hands cannot open), and everyone there earns
+ * "Employee of the Month" ([AchievementHooks]). Without the card it
  * buzzes: "It needs a keycard". A new game locks it and closes the doors again
  * ([KeycardHooks.resetReaders]).
  */
@@ -58,6 +60,7 @@ class CardReaderBlock(settings: Settings) : Block(settings) {
         world.setBlockState(pos, state.with(UNLOCKED, true))
         world.playSound(null, pos, ModSounds.CARD_READER_ACCEPT, SoundCategory.BLOCKS, 1f, 1f)
         setDoors(world as ServerWorld, pos, open = true)
+        AchievementHooks.puzzleSolved(world, Achievement.KEYCARD)
         return ActionResult.CONSUME
     }
 

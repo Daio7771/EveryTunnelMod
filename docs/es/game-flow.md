@@ -54,7 +54,9 @@ créditos y al cerrarse una pantalla sin mundo abierto (Escape en las opciones).
   papel blanco gastado que se desplaza con la rueda, con pestañas de papel para saltar entre
   el índice y cada página. Sale en el idioma del juego (español para cualquier `es_*`, inglés
   en los demás). El idioma en sí se cambia en OPTIONS.
-- **CREDITS** pasa los créditos (`EndOfDemoScreen.credits`) y vuelve.
+  Su última pestaña, **Créditos**, pasa los créditos (`EndOfDemoScreen.credits`) y vuelve.
+- **ACHIEVEMENTS** muestra los [logros](#logros) (`AchievementsScreen`) en el mismo papel
+  gastado.
 - **EXIT** cierra el juego.
 - Detrás de todo, una planta del aparcamiento vista a lo largo de su pasillo desde una cámara
   fija (`MenuScene`), con lámparas que parpadean de vez en cuando. El logo y las opciones van
@@ -163,7 +165,8 @@ Reabrir el mundo o reaparecer dentro de un nivel no cuenta como entrar.
   lámparas del pozo de escaleras (zona con la etiqueta `lights_stay`).
 - **La salida:** una puerta EXIT junto a la planta 3 con un `CardReaderBlock`. Sin la
   tarjeta zumba "It needs a keycard"; con ella pita, se pone verde y abre las puertas de
-  hierro de al lado (zona con la etiqueta `keycard_door`).
+  hierro de al lado (zona con la etiqueta `keycard_door`), y todos los que están en el mundo
+  consiguen "Employee of the Month" (ver [Logros](#logros)).
 - **Las escaleras a B3:** tras la puerta, un pozo redondo de paneles metálicos con una
   escalera de rejilla que baja en espiral 4 vueltas (32 bloques, medio bloque por escalón)
   alrededor de un hueco abierto, con barandilla de barrotes de hierro y una lámpara de pared
@@ -191,7 +194,7 @@ final.
   9 vuelve a 0), con un golpe y agua en la tubería; la chapa de cada lado muestra su letra y
   sus vueltas. Cuando las cinco marcan su cifra, un golpe de ariete recorre la tubería, las
   válvulas quedan abiertas y fijas y se abren las puertas del checkpoint (zona con la
-  etiqueta `valve_door`). Equivocarse no cuesta nada. Al morir se conserva lo resuelto; solo
+  etiqueta `valve_door`), y se consigue "Under Pressure". Equivocarse no cuesta nada. Al morir se conserva lo resuelto; solo
   una partida nueva lo deshace. `/everytunnel valves` muestra las cifras.
 - Pasado este, a través del cinturón de 17 habitaciones, el **pasillo interior**: un anillo
   alrededor de la **biblioteca central** (64 × 64, 12 de alto, con lámparas colgadas de
@@ -201,6 +204,15 @@ final.
   la biblioteca tiene filas de estanterías de cuatro de alto, a dos bloques unas de otras,
   alrededor de un claro con mesas de lectura, y el mostrador del bibliotecario junto a la
   puerta sur. No hay nadie.
+- **Taquillas para esconderse:** cada sala tiene al menos una (las salas Lockers y Changing
+  room están llenas; la biblioteca no tiene). Un clic derecho en una taquilla desde delante
+  de su puerta mete al jugador dentro (`HidingHooks`): va montado en un asiento invisible en
+  el suelo de la taquilla (`LockerSeatEntity`), mirando hacia fuera, la cabeza gira como
+  mucho 30° a los lados y 15° arriba o abajo (`core.hiding.LookLimit`), y la pantalla queda
+  tapada por el interior de la puerta con las rendijas de su rejilla
+  (`client.hud.LockerView`). Dentro, el jugador no hace ningún ruido. Otro clic derecho o
+  agacharse le saca delante de la puerta; en los dos sentidos suena la puerta
+  (`block.locker.door`, que no es ruido para los enemigos). Una partida nueva saca a todos.
 - En el centro de la biblioteca, la **trampilla del búnker**: trampillas de hierro (cerradas)
   en un marco de chapa estriada. Debajo, una escalera de mano baja por un pozo hasta un
   pasillo iluminado que recorre 32 bloques hacia el sur hasta la puerta a B4, donde termina
@@ -237,3 +249,33 @@ sigue vivo:
 El inventario se conserva: lo recogido sigue recogido. Un jugador que nunca entró en un
 nivel muere como en vanilla. `RespawnHooks` además fija el punto de reaparición de vanilla
 en el inicio del nivel actual, como respaldo.
+
+## Logros
+
+Ocho logros (`core.achievement.Achievement`, en el orden de la lista). El servidor dice cuándo
+se consigue uno (`platform.AchievementHooks`, solo en mundos con niveles), una vez por partida:
+volver a conseguirlo en la misma partida (morir otra vez por un Pale man) no muestra nada, y una
+partida nueva deja que salgan todos otra vez. El cliente muestra el aviso "Achievement
+Unlocked!", dibujado como el de desafío de vanilla con su fanfarria
+(`client.hud.AchievementToast`), y lo recuerda para siempre en
+`config/every_tunnel/achievements.json` (`client.AchievementStore`), entre partidas y mundos.
+Los logros de vanilla no se tocan.
+
+| Logro | Se consigue al | Icono |
+|---|---|---|
+| First Day at Work | salir del ascensor (la zona con la etiqueta `start` de un nivel con intro) | la placa del vigilante |
+| Stay Hydrated | beber una botella de agua (`DrinkHooks`) | la botella de agua |
+| Beware of Tall Men | entrar en el nivel 2 (`AchievementHooks.LEVEL_ENTRIES`) | la silueta del Pale man |
+| Ouch! | morir a manos de un Pale man (`DeathHooks`) | una calavera |
+| Employee of the Month | abrir el lector de la salida con la tarjeta (todos los del mundo) | la tarjeta |
+| Under Pressure | dejar bien las válvulas del nivel 3 (todos los del mundo) | la válvula |
+| Master of the Boxes | poner las cajas del nivel 3 en la estantería de Storage (pendiente) | (pendiente) |
+| Shhh! | devolver los libros del nivel 3 al mostrador del bibliotecario (pendiente) | (pendiente) |
+
+La pantalla ACHIEVEMENTS del menú principal (`client.screen.AchievementsScreen`) los muestra en
+el papel de la guía (`client.screen.Paper`) con cuántos se tienen; uno que aún no se tiene
+muestra un "?" y "Not yet unlocked". Los textos están en el archivo de idioma
+(`achievement.every_tunnel.<id>`, su `.description`, `toast.every_tunnel.achievement_unlocked`);
+los iconos de la placa, la calavera, la silueta y el "?" salen de
+`tools/gui/achievement_icons.py`, los demás son objetos del mod (`client.AchievementIcons`; el
+libro es el de vanilla hasta que existan los libros del nivel 3). Está previsto un sonido propio en lugar de la fanfarria.

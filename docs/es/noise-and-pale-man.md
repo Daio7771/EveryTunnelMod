@@ -26,7 +26,8 @@ descarta.
 ### De dónde salen los ruidos
 
 `platform.NoiseHooks` alimenta el sistema cada tick del servidor, para jugadores en
-Supervivencia y Aventura en mundos con niveles (Creativo y Espectador son silenciosos):
+Supervivencia y Aventura en mundos con niveles (Creativo y Espectador son silenciosos, y
+también un jugador escondido en una taquilla, `HidingHooks`):
 
 | Ruido | Radio (por defecto) | Cómo se detecta |
 |---|---|---|

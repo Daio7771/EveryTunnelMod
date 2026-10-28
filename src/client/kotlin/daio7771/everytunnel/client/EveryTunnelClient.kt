@@ -11,6 +11,8 @@ import daio7771.everytunnel.client.effects.ScreenFade
 import daio7771.everytunnel.client.effects.TensionMusic
 import daio7771.everytunnel.client.hud.ExhaustionVignette
 import daio7771.everytunnel.client.hud.FlashlightOverlay
+import daio7771.everytunnel.client.hud.LockerView
+import daio7771.everytunnel.client.hud.AchievementToast
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.LootRenderer
 import daio7771.everytunnel.client.screen.EndOfDemoScreen
@@ -30,6 +32,7 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import net.minecraft.client.render.RenderLayer
+import net.minecraft.client.render.entity.EmptyEntityRenderer
 
 /**
  * Client-only entrypoint for Every Tunnel.
@@ -41,7 +44,8 @@ import net.minecraft.client.render.RenderLayer
  * `client.compat.LambDynamicLightsCompat` when LambDynamicLights is installed), the
  * exhausted breathing ([BreathingEffect]), the heartbeat near the Pale man
  * ([HeartbeatEffect]), the level ambience ([AmbiencePlayer]), the
- * hum of fluorescent lights ([FluorescentHum]), the status bars ([StatusHud]) and the
+ * hum of fluorescent lights ([FluorescentHum]), the view from inside a locker ([LockerView]),
+ * the "Achievement Unlocked!" toasts ([AchievementToast]), the status bars ([StatusHud]) and the
  * loading screen of worlds with levels ([LoadingCover]), and the main menu in place of
  * vanilla's title screen ([MainMenuScreen], with its music: [MenuMusic]).
  * Blocks whose textures have see-through pixels are drawn in the cutout layer, and the
@@ -66,6 +70,7 @@ object EveryTunnelClient : ClientModInitializer {
         AmbiencePlayer.register()
         FluorescentHum.register()
         FlashlightOverlay.register() // without shaders: the dark around the beam, under everything else
+        LockerView.register() // over the beam's dark, under the HUD
         ExhaustionVignette.register() // before the HUD, so the icons stay on top
         StatusHud.register()
         ScreenFade.register() // after the HUD, so the black covers it
@@ -76,6 +81,8 @@ object EveryTunnelClient : ClientModInitializer {
         MenuMusic.register()
         MenuScene.register()
         EntityRendererRegistry.register(ModEntities.PALE_MAN, ::PaleManRenderer)
+        EntityRendererRegistry.register(ModEntities.LOCKER_SEAT, ::EmptyEntityRenderer)
+        AchievementToast.register()
         BlockEntityRendererFactories.register(ModBlocks.LOOT_ENTITY, ::LootRenderer)
         BlockRenderLayerMap.INSTANCE.putBlocks(
             RenderLayer.getCutout(),

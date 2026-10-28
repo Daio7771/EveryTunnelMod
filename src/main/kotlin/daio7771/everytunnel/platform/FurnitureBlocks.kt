@@ -130,7 +130,7 @@ class TileFurnitureBlock(settings: Settings, boxes: List<BlockShapes.Box>) : Blo
  * machine): it faces a way and joins the same block facing the same way [UP] and [DOWN], so
  * the stack has one base and one top.
  */
-class StackFurnitureBlock(settings: Settings, boxes: List<BlockShapes.Box>) : Block(settings) {
+open class StackFurnitureBlock(settings: Settings, boxes: List<BlockShapes.Box>) : Block(settings) {
 
     private val shapes: Map<Direction, VoxelShape> = BlockShapes.horizontal(boxes)
 

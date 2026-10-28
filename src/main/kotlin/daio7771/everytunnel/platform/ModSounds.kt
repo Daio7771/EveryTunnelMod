@@ -51,6 +51,9 @@ object ModSounds {
     val VALVE_TURN = event("block.valve.turn")
     val VALVE_RELEASE = event("block.valve.release")
 
+    /** A Level 3 locker's door, getting in or out ([HidingHooks]); it makes no noise for enemies. */
+    val LOCKER_DOOR = event("block.locker.door")
+
     /** A rolling shutter coming down and slamming shut (heard up to 32 blocks away). */
     val SHUTTER_CLOSE = event("block.shutter.close", range = 32f)
 

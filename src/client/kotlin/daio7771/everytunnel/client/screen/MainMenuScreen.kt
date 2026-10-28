@@ -27,8 +27,8 @@ import org.lwjgl.glfw.GLFW
  * - BEGIN opens Noname Complex (installed by `client.MapWorldInstaller`), behind the loading
  *   screen ([LoadingCover]).
  * - OPTIONS opens vanilla's options (the language is changed there); GUIDE opens the player
- *   guide ([GuideScreen]); CREDITS rolls the credits
- *   ([EndOfDemoScreen] without "End of demo"); EXIT closes the game.
+ *   guide ([GuideScreen], whose last tab rolls the credits); ACHIEVEMENTS lists the
+ *   achievements ([AchievementsScreen]); EXIT closes the game.
  * - Mouse (hover and click) or keyboard (arrows, Enter).
  * - Ctrl+Shift+V, not shown anywhere, swaps to vanilla's title screen (other worlds, mods,
  *   multiplayer) and back. Vanilla's stays until the player joins a world.
@@ -42,7 +42,7 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         BEGIN("menu.every_tunnel.begin"),
         OPTIONS("menu.every_tunnel.options"),
         GUIDE("menu.every_tunnel.guide"),
-        CREDITS("menu.every_tunnel.credits"),
+        ACHIEVEMENTS("menu.every_tunnel.achievements"),
         EXIT("menu.every_tunnel.exit"),
     }
 
@@ -184,7 +184,7 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
             Option.BEGIN -> begin(client)
             Option.OPTIONS -> client.setScreen(OptionsScreen(this, client.options))
             Option.GUIDE -> client.setScreen(GuideScreen(this))
-            Option.CREDITS -> client.setScreen(EndOfDemoScreen.credits(this))
+            Option.ACHIEVEMENTS -> client.setScreen(AchievementsScreen(this))
             Option.EXIT -> client.scheduleStop()
         }
     }

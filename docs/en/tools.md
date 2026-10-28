@@ -26,6 +26,8 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png` | HUD icons |
 | `tools/gui/logo.py` | `logo.png` | the logo |
 | `tools/gui/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | the no-shader spot |
+| `tools/gui/locker_view.py` | `locker_view.png` | the view from inside a locker |
+| `tools/gui/achievement_icons.py` | `achievement_icons.png` | the achievement icons drawn for the mod (badge, skull, Pale man, locked) |
 | `tools/gui/guide_paper.py` | `guide_paper.png` (seamless tile), `guide_stains.png` | the guide's paper |
 | `tools/sounds/generate.py` | WAV previews and a listening page (`tools/sounds/out/index.html`) | a sound, to listen |
 | `tools/sounds/export.py` | `.ogg` files and `sounds.json` in the mod | a sound, to ship it |
