@@ -77,6 +77,10 @@ object ModSounds {
      */
     val PALE_MAN_STEP = event("entity.pale_man.step")
     val PALE_MAN_STEP_RUN = event("entity.pale_man.step_run", range = 24f)
+
+    /** His music (stereo loops, `client.effects.TensionMusic`): walking your way, and running at you. */
+    val OBSERVER_APPROACH = event("music.observer.approach")
+    val OBSERVER_CHASE = event("music.observer.chase")
     val PALE_MAN_BREATHING = event("entity.pale_man.breathing")
 
     /** Fluorescent light: loop for lit lights (client), burst, switching on (starter ticks), power down. */

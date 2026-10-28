@@ -39,6 +39,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | Linterna y batería | `item.flashlight.on`, `.off`, `.dead`, `.flicker`, `item.battery.open`, `.close` | síntesis |
 | Jugador | `player.heartbeat` (4 variaciones), `player.tinnitus`, `player.breathing_exhausted`, `player.drink` | síntesis / CC0 (respiración, tragos) |
 | El Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | síntesis / CC0 (respiración) |
+| El Observer | `music.observer.approach`, `music.observer.chase` (sin pasos: lo delata su música) | síntesis |
 | Música | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | síntesis / CC BY (ascensor) |
 | Eventos | `event.death`, `event.level_transition`, `event.observer.alert` (provisional) | síntesis |
 
@@ -62,7 +63,7 @@ Lado del cliente (`client.effects`), por jugador y sin posición salvo que se in
 | `FluorescentHum` | El zumbido de las 4 luces más cercanas a 10 bloques o menos, cada una con un tono un poco distinto (con posición) | Bloques |
 | `HeartbeatEffect` | Un latido cada vez cerca del Pale man | Jugadores |
 | `BreathingEffect` | Respiración fuerte agotado | Jugadores |
-| `TensionMusic` | Las capas de música del Pale man, con fundido cruzado | Música |
+| `TensionMusic` | Las capas de música del Pale man y las del Observer (viniendo hacia ti, corriendo a por ti), con fundido cruzado | Música |
 | `IntroMusic` | La canción del ascensor y luego su parada de cinta | Música |
 | `MenuMusic` | El tema del menú y luego 15 s de silencio, solo en los menús | Música |
 

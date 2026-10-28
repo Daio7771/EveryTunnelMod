@@ -37,6 +37,7 @@ registered in `platform.ModSounds`. Any of them can be tried with
 | Flashlight and battery | `item.flashlight.on`, `.off`, `.dead`, `.flicker`, `item.battery.open`, `.close` | synth |
 | Player | `player.heartbeat` (4 variations), `player.tinnitus`, `player.breathing_exhausted`, `player.drink` | synth / CC0 (breathing, gulps) |
 | The Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | synth / CC0 (breathing) |
+| The Observer | `music.observer.approach`, `music.observer.chase` (no footsteps: his music gives him away) | synth |
 | Music | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | synth / CC BY (elevator) |
 | Events | `event.death`, `event.level_transition`, `event.observer.alert` (placeholder) | synth |
 
@@ -58,7 +59,7 @@ Client side (`client.effects`), per player and not positioned unless noted:
 | `FluorescentHum` | The hum of the 4 nearest lights within 10 blocks, each at a slightly different pitch (positioned) | Blocks |
 | `HeartbeatEffect` | One heartbeat at a time near the Pale man | Players |
 | `BreathingEffect` | Heavy breathing when exhausted | Players |
-| `TensionMusic` | The Pale man's music layers, crossfaded | Music |
+| `TensionMusic` | The Pale man's music layers, and the Observer's (walking your way, running at you), crossfaded | Music |
 | `IntroMusic` | The elevator song, then its tape-stop fade | Music |
 | `MenuMusic` | The menu theme, then 15 s of silence, only in menus | Music |
 

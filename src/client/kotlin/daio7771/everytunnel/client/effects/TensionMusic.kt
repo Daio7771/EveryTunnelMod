@@ -4,6 +4,8 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.ClientResources
 import daio7771.everytunnel.entities.PaleManBrain
 import daio7771.everytunnel.platform.ModSounds
+import daio7771.everytunnel.entities.ObserverBrain
+import daio7771.everytunnel.platform.ObserverEntity
 import daio7771.everytunnel.platform.PaleManEntity
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
@@ -23,6 +25,8 @@ import kotlin.math.sqrt
  * - [Layer.STRINGS] (dissonant strings): one is within [CLOSE] blocks and not walking
  *   to a noise (listening, searching or wandering).
  * - [Layer.CHASE]: one is chasing, within [CHASE_RANGE] blocks.
+ * - Level 3's Observer ([observerLayer]): [Layer.OBSERVER_APPROACH] while he walks your way after
+ *   seeing you (within [NEAR]), [Layer.OBSERVER_CHASE] while he runs at you (within [CHASE_RANGE]).
  *
  * The strongest layer wins. Stronger layers start at once; a weaker one takes over only
  * after it has been the right one for [SETTLE_TICKS], so brief state changes do not
@@ -41,13 +45,17 @@ object TensionMusic {
     private const val CHASE_RANGE = 64.0
     private const val MARGIN = 4.0
     private const val SETTLE_TICKS = 30
+    /** The Observer's states that are after a player (not after a box). */
+    private val OBSERVER_HUNTING = setOf(ObserverBrain.State.CHASE, ObserverBrain.State.SEARCH, ObserverBrain.State.GRAB)
 
     enum class Layer(val sound: SoundEvent?, val volume: Float, val fadeInSeconds: Double, val fadeOutSeconds: Double) {
         NONE(null, 0f, 0.0, 0.0),
         PULSE(ModSounds.TENSION_PULSE, 0.7f, 4.0, 4.0),
         RISING(ModSounds.TENSION_RISING, 0.6f, 3.0, 3.0),
         STRINGS(ModSounds.TENSION_STRINGS, 0.8f, 2.0, 3.0),
+        OBSERVER_APPROACH(ModSounds.OBSERVER_APPROACH, 0.7f, 2.0, 3.0),
         CHASE(ModSounds.CHASE, 1.0f, 1.0, 3.0),
+        OBSERVER_CHASE(ModSounds.OBSERVER_CHASE, 1.0f, 0.5, 3.0),
     }
 
     private var current = Layer.NONE
@@ -82,8 +90,11 @@ object TensionMusic {
         client.musicTracker.stop()
         if (client.isPaused) return
 
-        val wanted = world.getEntitiesByClass(PaleManEntity::class.java, player.boundingBox.expand(CHASE_RANGE + MARGIN)) { it.isAlive }
+        val paleMen = world.getEntitiesByClass(PaleManEntity::class.java, player.boundingBox.expand(CHASE_RANGE + MARGIN)) { it.isAlive }
             .maxOfOrNull { layerFor(it.brainState, sqrt(it.squaredDistanceTo(player))) } ?: Layer.NONE
+        val observers = world.getEntitiesByClass(ObserverEntity::class.java, player.boundingBox.expand(CHASE_RANGE + MARGIN)) { it.isAlive }
+            .maxOfOrNull { observerLayer(it, sqrt(it.squaredDistanceTo(player))) } ?: Layer.NONE
+        val wanted = maxOf(paleMen, observers)
 
         when {
             wanted == current -> pending = Layer.NONE
@@ -104,6 +115,17 @@ object TensionMusic {
             state != PaleManBrain.State.INVESTIGATE && within(CLOSE, Layer.STRINGS) -> Layer.STRINGS
             state == PaleManBrain.State.INVESTIGATE && within(NEAR, Layer.RISING) -> Layer.RISING
             within(NEAR, Layer.PULSE) -> Layer.PULSE
+            else -> Layer.NONE
+        }
+    }
+
+    /** The layer the Observer asks for: running at you, or walking your way after seeing you. */
+    private fun observerLayer(observer: ObserverEntity, distance: Double): Layer {
+        fun within(range: Double, layer: Layer) = distance <= range + if (current >= layer) MARGIN else 0.0
+        val hunting = observer.brainState in OBSERVER_HUNTING
+        return when {
+            hunting && observer.running && within(CHASE_RANGE, Layer.OBSERVER_CHASE) -> Layer.OBSERVER_CHASE
+            hunting && within(NEAR, Layer.OBSERVER_APPROACH) -> Layer.OBSERVER_APPROACH
             else -> Layer.NONE
         }
     }

@@ -517,6 +517,22 @@
       }
     ]
   },
+  "music.observer.approach": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/observer/approach_1",
+        "stream": true
+      }
+    ]
+  },
+  "music.observer.chase": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/observer/chase_1",
+        "stream": true
+      }
+    ]
+  },
   "music.stinger.heard": {
     "sounds": [
       "every_tunnel:music/stinger/heard_1",

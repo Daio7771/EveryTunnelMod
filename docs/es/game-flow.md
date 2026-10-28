@@ -177,8 +177,7 @@ Reabrir el mundo o reaparecer dentro de un nivel no cuenta como entrar.
 
 Las oficinas del complejo alrededor de la biblioteca central, en perfecto estado y vacías.
 Hecho hasta ahora: la estructura, los muebles, el puzle de las válvulas, las taquillas y los
-puzles de las cajas y los libros que abren el búnker, y el Observer (faltan sus sonidos y su
-música); faltan las demás notas, el loot y el derrumbe, con sus zonas y puntos de spawn ya en el
+puzles de las cajas y los libros que abren el búnker, y el Observer; faltan las demás notas, el loot y el derrumbe, con sus zonas y puntos de spawn ya en el
 archivo del nivel (ver [Niveles](levels.md#ganchos-del-nivel-3)). La música queda para el
 final.
 
@@ -230,7 +229,10 @@ silencio.
   `ObserverHooks` en el punto de spawn con la etiqueta `observant_guard`): un vigilante alto
   vestido de negro con una cabeza gris lisa (`tools/entity/observer.py`). Ve; no oye pasos.
   Patrulla la biblioteca (la zona con la etiqueta `observer_home`): anda tieso entre las
-  estanterías y se para a mirar alrededor, la cabeza girando de lado a lado. Ve a un jugador
+  estanterías y se para a mirar alrededor, la cabeza girando de lado a lado. Solo ve dentro de la biblioteca: un jugador
+  en el anillo o en una sala está a salvo de él, salvo si una caja lo hizo salir (entonces ve en
+  cualquier sitio hasta que vuelve a patrullar) o si ya va a por él (una persecución o una
+  búsqueda siguen fuera). Ve a un jugador
   en un cono de 90° hacia donde mira su cabeza, hasta 24 bloques (12 agachado, 32 con la
   linterna encendida), sin nada sólido en medio, y a cualquiera a menos de 2 bloques mire
   hacia donde mire; nunca a uno escondido en una taquilla. Si ve a uno, primero va andando
@@ -242,7 +244,10 @@ silencio.
   Storage le hace ir corriendo allí, más rápido aún, y sale "He's coming. Hide." en grande y en
   rojo oscuro; mira alrededor y vuelve. La taquilla de Storage está justo al lado de la
   estantería (él entra por la puerta). A un jugador al
-  que ve meterse en una taquilla lo saca y muere. Una partida nueva o una muerte lo devuelven
+  que ve meterse en una taquilla lo saca y muere. No hace ningún ruido propio, ni pasos; cuando viene
+  andando hacia ti suenan un reloj lento y un zumbido
+  (`music.observer.approach`), y cuando corre a por ti, el reloj desbocado
+  (`music.observer.chase`). Una partida nueva o una muerte lo devuelven
   a su punto de spawn. Números de partida, a ajustar jugando (`ObserverSettings`; el log dice a
   qué velocidad corrió de verdad en cada carrera, "[observer] ran ...").
 - **Taquillas para esconderse:** cada sala tiene al menos una (las salas Lockers y Changing

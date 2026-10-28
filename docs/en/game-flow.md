@@ -168,7 +168,7 @@ Reopening the world or respawning inside a level does not count as walking in.
 
 The offices of the complex around the central library, in perfect order and empty. Built
 so far: the structure, the furniture, the valve puzzle, the lockers, the box and book
-puzzles that open the bunker, and the Observer (his own sounds and music still to come); the
+puzzles that open the bunker, and the Observer; the
 other notes, the loot and the collapse are still to come, their zones and spawn points already in the
 level file (see [Levels](levels.md#level-3-hooks)). The music is planned for last.
 
@@ -217,8 +217,10 @@ silent.
   `ObserverHooks` at the spawn point tagged `observant_guard`): a tall guard in black with a
   blank grey head (`tools/entity/observer.py`). He sees; he does not hear footsteps. He
   patrols the library (the zone tagged `observer_home`), walking stiffly between the shelves
-  and stopping to look round, his head sweeping from side to side. He sees a player in a
-  90° cone round where his head faces, up to 24 blocks (12 sneaking, 32 with the flashlight
+  and stopping to look round, his head sweeping from side to side. He sees only into the library: a player out
+  in the ring or a room is safe from him, unless a box sent him out (then he sees anywhere until
+  he is back on patrol) or he is already after them (a chase or a search goes on outside). He
+  sees a player in a 90° cone round where his head faces, up to 24 blocks (12 sneaking, 32 with the flashlight
   on), with nothing solid in between, and anyone within 2 blocks whatever way he faces;
   never a player hidden in a locker. Seeing one, he first walks towards them; once they have
   stayed in his sight for 1.5 s, or are within 6 blocks, he runs, a little faster than a
@@ -227,7 +229,9 @@ silent.
   sneak out of his range, duck behind a shelf or get into a locker unseen. A box on Storage's shelf brings him running there, faster
   still, and "He's coming. Hide." shows in big dark red letters; he looks round and walks home.
   Storage's locker stands right beside the shelf (he comes in by the door). A player he sees get into a locker is pulled out and
-  dies. A new game or a death sends him back to his spawn point. Starting numbers, to tune by
+  dies. He makes no sound of his own, not even footsteps; walking your way he
+  brings a slow clock and a drone (`music.observer.approach`), running at you the clock gone
+  mad (`music.observer.chase`). A new game or a death sends him back to his spawn point. Starting numbers, to tune by
   playing (`ObserverSettings`; the log says how fast each run really was, "[observer] ran ...").
 - **Lockers to hide in:** every room has at least one (the Lockers and Changing rooms are
   full of them; the library has none). Right-clicking a locker from in front of its door

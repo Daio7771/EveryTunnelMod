@@ -8,6 +8,7 @@ import daio7771.everytunnel.core.level.Position
 import daio7771.everytunnel.entities.ObserverBrain
 import daio7771.everytunnel.entities.ObserverSettings
 import daio7771.everytunnel.systems.ResourceSystem
+import net.minecraft.block.BlockState
 import net.minecraft.entity.EntityDimensions
 import net.minecraft.entity.EntityPose
 import net.minecraft.entity.EntityType
@@ -51,7 +52,9 @@ import kotlin.math.sqrt
  * player dying, sends him back there. His home is the zone tagged [HOME_TAG] (the library):
  * he patrols it and goes back to it after anything else.
  *
- * Every tick he looks ([sight]): a player in Survival or Adventure, not hidden in a locker,
+ * Every tick he looks ([sight]): only into the library, unless a box sent him out ([outOnAlert],
+ * until he is back on patrol) or he is already after someone (chasing or searching), when he
+ * sees anywhere. There, a player in Survival or Adventure, not hidden in a locker,
  * within his cone ([ObserverSettings.fieldOfView] round where his head faces) and his range
  * (shorter sneaking, longer with the flashlight on), with nothing solid in between, is seen;
  * closer than [ObserverSettings.senseRange] he notices them whatever way he faces. A player
@@ -60,7 +63,9 @@ import kotlin.math.sqrt
  * (pathfinding at the brain's pace), turns his head (looking round), and catches: a caught
  * player dies; one in a locker is pulled out first ([HidingHooks.pullOut]).
  *
- * His state is synced to clients ([brainState]) for his animations (and his music).
+ * His state is synced to clients ([brainState], [running]) for his animations and his music
+ * (`client.effects.TensionMusic`). He makes no sound of his own, not even footsteps: his
+ * music, a clock, is what gives him away.
  * Model, animations and texture: `tools/entity/observer.py` (GeckoLib); 2.5 blocks tall, his
  * hitbox 1.9 like the player's room, so his paths fit wherever the player's do.
  */
@@ -85,6 +90,8 @@ class ObserverEntity(type: EntityType<out HostileEntity>, world: World) : Hostil
     private var lastX = 0.0
     private var lastZ = 0.0
     private val witnessed = HashMap<UUID, BlockPos>()
+    /** Sent out by a box and not yet back on patrol: he sees players outside the library too. */
+    private var outOnAlert = false
 
     var brainState: ObserverBrain.State
         get() = ObserverBrain.State.entries.getOrElse(dataTracker.get(STATE)) { ObserverBrain.State.PATROL }
@@ -133,6 +140,11 @@ class ObserverEntity(type: EntityType<out HostileEntity>, world: World) : Hostil
             EveryTunnel.LOGGER.info("Observer {} at ({}, {}, {}): {} -> {}, target {}", id, blockX, blockY, blockZ,
                 brainState, decision.state, decision.target)
         }
+        when (decision.state) {
+            ObserverBrain.State.ALERTED -> outOnAlert = true
+            ObserverBrain.State.PATROL, ObserverBrain.State.LOOK -> outOnAlert = false
+            else -> Unit
+        }
         brainState = decision.state
         val wasRunning = running
         running = decision.pace == ObserverBrain.Pace.RUN || decision.pace == ObserverBrain.Pace.ALERT_RUN
@@ -168,6 +180,9 @@ class ObserverEntity(type: EntityType<out HostileEntity>, world: World) : Hostil
         }
     }
 
+    // Silent: no footsteps at all (his music gives him away).
+    override fun playStepSound(pos: BlockPos, state: BlockState) = Unit
+
     private fun move(decision: ObserverBrain.Decision, seen: ObserverBrain.Seen?) {
         val target = decision.target
         val speed = when (decision.pace) {
@@ -196,9 +211,13 @@ class ObserverEntity(type: EntityType<out HostileEntity>, world: World) : Hostil
     private fun sight(world: ServerWorld, now: Long): ObserverBrain.Seen? {
         val eye = Vec3d(x, eyeY, z)
         var best: ObserverBrain.Seen? = null
+        val home = home()
+        // Out of the library he sees only on an errand (a box) or while already after someone.
+        val seesOutside = outOnAlert || brainState == ObserverBrain.State.CHASE || brainState == ObserverBrain.State.SEARCH
         for (player in world.players) {
             if (player !is ServerPlayerEntity || !ResourceHooks.appliesTo(player) || DeathHooks.isDying(player)) continue
             if (HidingHooks.isHidden(player)) continue
+            if (!seesOutside && home != null && !home.contains(player.x, player.y + 0.5, player.z)) continue
             val distance = sqrt(squaredDistanceTo(player))
             val flashlight = ResourceSystem.stateOf(player.uuid, ConfigManager.gameplay).flashlightOn
             val range = when {
@@ -282,6 +301,7 @@ class ObserverEntity(type: EntityType<out HostileEntity>, world: World) : Hostil
         running = false
         lastSeen.clear()
         witnessed.clear()
+        outOnAlert = false
         refreshPositionAndAngles(x, y, z, yaw, 0f)
         headYaw = yaw
         velocity = Vec3d.ZERO

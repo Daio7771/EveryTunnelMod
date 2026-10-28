@@ -993,6 +993,76 @@ def office_phone(rng, variant):
     return fade(lowpass(y, 2200.0), 0.003, 0.4)
 
 
+# ===========================================================================
+# Level 3 / the Observer
+
+def clock_tick(n, rng, start, tock, amp=1.0):
+    """One tick (or the lower tock) of a big clock, its wooden case ringing a little."""
+    base = rng.uniform(1650, 1750) if tock else rng.uniform(2050, 2150)
+    y = knock(n, rng, start, base, [1.0, 1.52, 2.3], [0.5, 0.25, 0.12], [0.012, 0.008, 0.005], click=0.45, click_hi=8000.0)
+    y += 0.5 * knock(n, rng, start, rng.uniform(380, 420) if tock else rng.uniform(460, 500), [1.0, 2.1], [0.6, 0.2],
+                     [0.03, 0.015], click=0.0)
+    return y * amp
+
+
+def observer_approach(rng, variant):
+    """The Observer has seen you and walks your way: the library's clock again, but faster and
+    closer (100 a minute), a low drone swelling under it and a thin, high tremolo held very
+    quietly over it. 9.6 s, looping."""
+    beat = 0.6
+    seconds = 16 * beat
+    n = samples(seconds)
+    t = time_axis(n)
+    y = np.zeros((n, 2))
+    for k in range(16):
+        tick = clock_tick(samples(0.3), rng, 0.0, tock=k % 2 == 1, amp=0.55)
+        place(y, pan(tick, -0.15 if k % 2 else 0.15), k * beat + 0.02, circular=True)
+    swell = 0.55 + 0.45 * (0.5 - 0.5 * np.cos(TAU * t / seconds))
+    drone = sum(string_voice(t, f, seconds, rng, vibrato_cents=6.0) for f in (36.71, 38.89)) * 0.25
+    drone = fft_filter(drone, 25.0, 300.0, order=2) * swell
+    y += stereo(drone, drone)
+    trem = 1.0 - 0.6 * (0.5 + 0.5 * np.sin(TAU * loop_frequency(10.0, seconds) * t))
+    for f, position in ((1174.7, -0.5), (1244.5, 0.5)):
+        y += pan(0.025 * string_voice(t, f, seconds, rng) * trem * swell, position)
+    return y
+
+
+def observer_chase(rng, variant):
+    """The Observer running at you: the clock gone mad. Ticks racing on every eighth at 160,
+    louder and harder on the beat, a dissonant string cluster in fast tremolo climbing over
+    every two bars, and low, dull hits on the first and third beats, the drone pumping with
+    them. 12 s (8 bars), looping."""
+    bpm = 160.0
+    beat = 60.0 / bpm
+    seconds = 32 * beat
+    n = samples(seconds)
+    t = time_axis(n)
+    y = np.zeros((n, 2))
+    offset = 0.01                                                             # hits just after the loop point
+    for e in range(64):                                                       # eighths
+        on_beat = e % 2 == 0
+        tick = clock_tick(samples(0.2), rng, 0.0, tock=e % 4 == 2, amp=0.7 if on_beat else 0.4)
+        place(y, pan(tick, 0.2 if e % 2 else -0.2), e * beat / 2 + offset, circular=True)
+    hit_n = samples(0.7)
+    ht = time_axis(hit_n)
+    hit = glide_tone(44.0 + 18.0 * np.exp(-ht / 0.05), (1.0, 0.35)) * np.exp(-ht / 0.25)
+    hit = drive(hit, 1.8) + burst(hit_n, rng, 0.0, 0.03, hi=400.0, tau=0.015, amp=0.5)
+    for b in range(0, 32, 2):
+        place(y, stereo(hit, hit), b * beat + offset, circular=True)
+    since_hit = (t - offset) % (2 * beat)
+    pump = 1.0 - 0.5 * np.exp(-since_hit / 0.15) * (1.0 - np.exp(-since_hit / 0.004))
+    drone = sum(string_voice(t, f, seconds, rng, vibrato_cents=4.0) for f in (36.71, 38.89, 55.0)) * 0.22
+    y += stereo(*(2 * [fft_filter(drone, 25.0, 350.0, order=2) * pump]))
+    # The cluster climbs a semitone over every two bars, then drops back: the clock racing.
+    climb = ((t / (8 * beat)) % 1.0)
+    trem = 1.0 - 0.75 * (0.5 + 0.5 * np.sin(TAU * loop_frequency(14.0, seconds) * t))
+    for f, position in ((587.3, -0.6), (622.3, 0.0), (659.3, 0.6)):
+        curve = f * 2 ** (climb / 12.0)
+        voice = glide_tone(curve, harmonics=(1.0, 0.5, 0.33, 0.25, 0.2))
+        y += pan(0.07 * voice * trem * (0.6 + 0.4 * climb), position)
+    return fft_filter(y, 30.0, 9000.0, order=2)
+
+
 def hatch_open(rng, variant):
     """The bunker hatch opening by itself (the fifth book back): under the floor a heavy bolt
     grinds back and drops free with a deep clank, then the two iron trapdoors swing up and bang
@@ -1191,6 +1261,10 @@ SOUNDS = [
           "stereo", True, 1, library_clock, -6.0, stream=True, game_volume=0.45),
     Sound("ambient.offices.phone", "Level 3 ambience", "A phone ringing far off (2, 3 or 4 rings, cut mid-ring), now and then",
           "mono", False, 3, office_phone, -3.0, attenuation=32),
+    Sound("music.observer.approach", "Level 3 / the Observer", "He has seen you and walks your way (clock, drone, high tremolo)", "stereo", True, 1,
+          observer_approach, -4.0, stream=True),
+    Sound("music.observer.chase", "Level 3 / the Observer", "He runs at you: the clock gone mad (160 bpm, 8 bars)", "stereo", True, 1,
+          observer_chase, -1.0, stream=True),
     Sound("block.hatch.open", "Level progress", "Level 3's bunker hatch opening by itself (bolt, trapdoors banging up, the shaft booming)",
           "mono", False, 1, hatch_open, -1.0, attenuation=48),
     Sound("event.observer.alert", "Level progress", "Level 3: something far off noticed (a box went on the shelf); a placeholder for the observant guard",
