@@ -18,6 +18,41 @@
       }
     ]
   },
+  "ambient.library.clock": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/library/clock_1",
+        "stream": true,
+        "volume": 0.45
+      }
+    ]
+  },
+  "ambient.offices.phone": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/offices/phone_1",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "every_tunnel:ambient/offices/phone_2",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "every_tunnel:ambient/offices/phone_3",
+        "stream": true,
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "ambient.offices.room_tone": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/offices/room_tone_1",
+        "stream": true,
+        "volume": 0.5
+      }
+    ]
+  },
   "ambient.relay": {
     "sounds": [
       "every_tunnel:ambient/relay_1",

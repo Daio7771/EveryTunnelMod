@@ -104,6 +104,26 @@ class LevelParserTest {
     }
 
     @Test
+    fun `a zone's own ambience replaces the level's inside it, and an empty one is silence`() {
+        val level = assertNotNull(
+            LevelParser.parse(
+                "zoned",
+                """{ "order": 3, "ambience": { "loop": "every_tunnel:ambient.offices.room_tone" },
+                    "zones": [
+                        { "id": "ring", "from": [0, 0, 0], "to": [9, 4, 9] },
+                        { "id": "library", "from": [2, 0, 2], "to": [5, 4, 5], "ambience": { "loop": "every_tunnel:ambient.library.clock" } },
+                        { "id": "bunker", "from": [0, -8, 0], "to": [3, -5, 3], "ambience": {} }
+                    ] }""",
+            ).level,
+        )
+        assertEquals(null, level.zone("ring")?.ambience)
+        assertEquals("every_tunnel:ambient.offices.room_tone", level.ambienceIn(setOf("ring")).loop)
+        assertEquals("every_tunnel:ambient.library.clock", level.ambienceIn(setOf("ring", "library")).loop)
+        assertEquals(Ambience.NONE, level.ambienceIn(setOf("bunker")))
+        assertEquals("every_tunnel:ambient.offices.room_tone", level.ambienceIn(emptySet()).loop)
+    }
+
+    @Test
     fun `a spawn point's zone must be a zone of the level`() {
         val result = LevelParser.parse(
             "zones",

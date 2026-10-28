@@ -172,6 +172,12 @@ puzzles that open the bunker; the observant guard, the books' lore and the other
 loot and the collapse are still to come, their zones and spawn points already in the
 level file (see [Levels](levels.md#level-3-hooks)). The music is planned for last.
 
+The **ambience** is the near-silence of an empty office building (`ambient.offices.room_tone`)
+with, rarely (every 1.5 to 4 minutes), a phone ringing somewhere far off and stopping
+mid-ring (`ambient.offices.phone`); the library has a slow clock ticking from nowhere in place
+of the room tone (`ambient.library.clock`, the library zone's own ambience), and the bunker is
+silent.
+
 - Behind the open door, stairs climb down 8 blocks to the **antechamber**, the electrical
   room. Walking into it shows "Level 3" (the stairs belong to no zone); its spawn point
   tagged `player` is there. On its wall, a cork board with the electrician's note

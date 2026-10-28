@@ -13,6 +13,7 @@ from typing import Callable, Optional
 import numpy as np
 
 import menu_piano
+from scipy import signal as sp_signal
 from dsp import (
     SR, TAU, bandpass, burst, crossfade_loop, damped_partials, drive, envelope, fade, fft_filter,
     glide_tone, highpass, loop_frequency, lowpass, mains_hum, pan, place, resonator, samples, saw,
@@ -901,6 +902,97 @@ def valve_release(rng, variant):
     return fade(y, 0.0, 0.3)
 
 
+# ===========================================================================
+# Level 3 ambience: a near-empty building's room tone, the library's slow clock, and a phone
+# ringing somewhere far off.
+
+def hall_reverb(x, rng, seconds, damp_hz, early=((0.031, 0.5), (0.057, 0.35), (0.089, 0.25))):
+    """A big, hard room's reverb for one channel: a few early reflections and an exponentially
+    decaying noise tail (`seconds` to fade 60 dB), darker as it decays (`damp_hz`). Wet only."""
+    n = samples(seconds)
+    t = time_axis(n)
+    tail = rng.standard_normal(n) * np.exp(-t * 6.9 / seconds)
+    tail = dark_to_bright(tail, damp_hz, damp_hz * 4.0, np.clip(1.0 - t / seconds, 0.0, 1.0) ** 2)
+    ir = 0.08 * tail
+    for delay, gain in early:
+        ir[samples(delay)] += gain
+    return sp_signal.fftconvolve(x, ir)[: x.shape[0] + n]
+
+
+def room_tone_layers(n, rng, seconds):
+    """The offices' room tone, one stereo pair: the building's deep, slow breath, a faint hiss of
+    air in far-off ducts and a soft, far hum, all looping by themselves."""
+    t = time_axis(n)
+    deep = shaped_noise(n, rng, exponent=2.2, lo=16.0, hi=140.0)
+    breath = 1.0 + 0.35 * smooth_random(n, 0.04, rng, True)
+    channels = []
+    for _ in range(2):
+        air = shaped_noise(n, rng, exponent=1.3, lo=120.0, hi=2600.0) * (1.0 + 0.2 * smooth_random(n, 0.07, rng, True))
+        low = 0.7 * deep + 0.3 * shaped_noise(n, rng, exponent=2.2, lo=16.0, hi=140.0)
+        channels.append(low * 0.5 * breath + air * 0.06)
+    far_hum = 0.035 * np.sin(TAU * loop_frequency(52.0, seconds) * t) * (1 + 0.5 * smooth_random(n, 0.05, rng, True))
+    return channels[0] + far_hum, channels[1] + far_hum
+
+
+def offices_room_tone(rng, variant):
+    """Level 3's background everywhere but the library and the bunker: the near-silence of a
+    big, empty office building. Barely there, so the silence weighs."""
+    seconds = 48.0
+    n = samples(seconds)
+    left, right = room_tone_layers(n, rng, seconds)
+    return stereo(left, right)
+
+
+def library_clock(rng, variant):
+    """The library's background: a slow clock, tick and tock a second apart, filling the whole
+    room with no clock to be seen, its knocks ringing round the wood and the high ceiling; the
+    room tone faint under it. Loops: the reverb wraps round to the start."""
+    seconds = 32.0
+    n = samples(seconds)
+    left, right = room_tone_layers(n, rng, seconds)
+    y = stereo(left * 0.6, right * 0.6)
+    dry = np.zeros(n)
+    for k in range(int(seconds)):
+        tock = k % 2 == 1
+        base = rng.uniform(1650, 1750) if tock else rng.uniform(2050, 2150)
+        tick = knock(samples(0.25), rng, 0.0, base, [1.0, 1.52, 2.3], [0.5, 0.25, 0.12], [0.012, 0.008, 0.005],
+                     click=0.45, click_hi=8000.0)
+        tick += 0.5 * knock(samples(0.25), rng, 0.0, rng.uniform(380, 420) if tock else rng.uniform(460, 500),
+                            [1.0, 2.1], [0.6, 0.2], [0.03, 0.015], click=0.0)              # the case's wooden body
+        place(dry, tick * (0.85 if tock else 1.0), k * 1.0 + 0.5, circular=True)        # off the loop point
+    for ch, side in ((0, 0.9), (1, 1.1)):
+        wet = hall_reverb(dry, rng, 2.6, 1800.0)
+        loop = np.zeros(n)
+        place(loop, wet, 0.0, circular=True)
+        y[:, ch] += dry * 0.55 * side + loop * 0.9
+    return y
+
+
+def office_phone(rng, variant):
+    """A desk phone ringing somewhere far off in the offices, in an empty room down a corridor:
+    the electronic trill (two tones warbling), muffled by the distance and the walls, the room
+    answering with its long echo. It rings 2, 3 or 4 times (the variant) and stops mid-ring,
+    as if picked up. Played now and then at a spot around the player."""
+    rings = variant + 1
+    period, on = 4.0, 1.2
+    length = (rings - 1) * period + on * rng.uniform(0.45, 0.8)
+    n_dry = samples(length + 0.05)
+    t = time_axis(n_dry)
+    warble = (np.floor(t * 16.0) % 2).astype(float)
+    tone = glide_tone(1000.0 + 250.0 * warble, harmonics=(1.0, 0.45, 0.25, 0.12))
+    gate = np.zeros(n_dry)
+    for r in range(rings):
+        start, stop = r * period, min(r * period + on, length)
+        gate += envelope(n_dry, [(0.0, 0.0), (start, 0.0), (start + 0.01, 1.0), (stop - 0.01, 1.0), (stop, 0.0), (length + 0.05, 0.0)])
+    dry = bandpass(tone * np.clip(gate, 0.0, 1.0), 300.0, 2600.0)
+    dry = lowpass(dry, 1800.0) * 0.35                                                        # far off, through walls
+    wet = hall_reverb(dry, rng, 2.4, 1200.0, early=((0.043, 0.6), (0.071, 0.45), (0.12, 0.3), (0.19, 0.2)))
+    y = np.zeros(wet.shape[0])
+    y[:n_dry] += dry * 0.45
+    y += wet * 1.2
+    return fade(lowpass(y, 2200.0), 0.003, 0.4)
+
+
 def hatch_open(rng, variant):
     """The bunker hatch opening by itself (the fifth book back): under the floor a heavy bolt
     grinds back and drops free with a deep clank, then the two iron trapdoors swing up and bang
@@ -1093,6 +1185,12 @@ SOUNDS = [
           valve_turn, -4.0),
     Sound("block.valve.release", "Level progress", "Level 3's valves all right: water hammer, the pipe settles, the door unlocks", "mono",
           False, 1, valve_release, -2.0, attenuation=24),
+    Sound("ambient.offices.room_tone", "Level 3 ambience", "The near-silence of the empty offices (everywhere but the library and the bunker)",
+          "stereo", True, 1, offices_room_tone, -9.0, stream=True, game_volume=0.5),
+    Sound("ambient.library.clock", "Level 3 ambience", "The library: a slow clock ticking, from nowhere in particular, over the room tone",
+          "stereo", True, 1, library_clock, -6.0, stream=True, game_volume=0.45),
+    Sound("ambient.offices.phone", "Level 3 ambience", "A phone ringing far off (2, 3 or 4 rings, cut mid-ring), now and then",
+          "mono", False, 3, office_phone, -3.0, attenuation=32),
     Sound("block.hatch.open", "Level progress", "Level 3's bunker hatch opening by itself (bolt, trapdoors banging up, the shaft booming)",
           "mono", False, 1, hatch_open, -1.0, attenuation=48),
     Sound("event.observer.alert", "Level progress", "Level 3: something far off noticed (a box went on the shelf); a placeholder for the observant guard",

@@ -77,6 +77,7 @@ Un ejemplo completo (todas las claves):
 | `id` | sí | Único dentro del nivel, `a-z0-9_` |
 | `from`, `to` | sí | Dos esquinas opuestas, coordenadas de bloque enteras, en cualquier orden. Las dos esquinas se incluyen, como en `/fill` |
 | `tags` | no | Cadenas que marcan zonas especiales (abajo) |
+| `ambience` | no | El [ambiente](#ambiente) propio de la zona, que suena en lugar del del nivel mientras el jugador está en ella (la primera zona así, en el orden del archivo); `{}` es silencio |
 
 Las zonas pueden solaparse. El **nivel actual** del jugador es el primer nivel (por
 `order`) con una zona que lo contiene; el jugador está "en" cada zona que lo contiene, de

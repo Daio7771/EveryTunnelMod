@@ -182,6 +182,13 @@ notas, el loot y el derrumbe, con sus zonas y puntos de spawn ya en el
 archivo del nivel (ver [Niveles](levels.md#ganchos-del-nivel-3)). La música queda para el
 final.
 
+El **ambiente** es el casi silencio de un edificio de oficinas vacío
+(`ambient.offices.room_tone`) con, de tarde en tarde (cada 1,5 a 4 minutos), un teléfono que
+suena muy lejos y se corta a medio timbrazo (`ambient.offices.phone`); la biblioteca tiene en
+lugar del tono de sala un reloj lento que hace tic-tac sin que se vea ninguno
+(`ambient.library.clock`, el ambiente propio de la zona de la biblioteca), y el búnker está en
+silencio.
+
 - Tras la puerta abierta, unas escaleras bajan 8 bloques hasta la **antesala**, el cuarto
   eléctrico. Al entrar aparece "Level 3" (las escaleras no pertenecen a ninguna zona); ahí
   está su punto de spawn con la etiqueta `player`. En su pared, un tablón de corcho con la

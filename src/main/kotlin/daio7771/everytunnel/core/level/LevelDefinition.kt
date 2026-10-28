@@ -19,7 +19,7 @@ data class LevelDefinition(
     val dimension: String,
     val zones: List<Zone>,
     val spawnPoints: List<SpawnPoint>,
-    /** Background sound while a player is in this level. */
+    /** Background sound while a player is in this level (a zone may have its own: [ambienceIn]). */
     val ambience: Ambience = Ambience.NONE,
     /** What a player gets on walking in from the previous level, or null for nothing. */
     val entry: LevelEntry? = null,
@@ -36,6 +36,13 @@ data class LevelDefinition(
 
     fun spawnPoint(id: String): SpawnPoint? = spawnPoints.firstOrNull { it.id == id }
 
+    /**
+     * The ambience for a player in the zones [zoneIds] of this level: that of the first zone
+     * (in file order) among them with its own, else the level's.
+     */
+    fun ambienceIn(zoneIds: Set<String>): Ambience =
+        zones.firstOrNull { it.ambience != null && it.id in zoneIds }?.ambience ?: ambience
+
     /** First zone of this level containing the position, or null. */
     fun zoneAt(dimension: String, x: Double, y: Double, z: Double): Zone? {
         if (dimension != this.dimension) return null
@@ -48,6 +55,8 @@ data class Zone(
     val id: String,
     val box: BlockBox,
     val tags: Set<String>,
+    /** The zone's own ambience in place of the level's while a player is in it (see [LevelDefinition.ambienceIn]); null for none. */
+    val ambience: Ambience? = null,
 )
 
 /** A named position (player start, enemy spawn, ...). [tags] describe its use. */

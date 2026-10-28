@@ -76,6 +76,7 @@ A full example (every key):
 | `id` | yes | Unique inside the level, `a-z0-9_` |
 | `from`, `to` | yes | Two opposite corners, whole block coordinates, in any order. Both corners are included, like `/fill` |
 | `tags` | no | Strings that mark special zones (below) |
+| `ambience` | no | The zone's own [ambience](#ambience), played instead of the level's while the player is in it (the first such zone, in file order); `{}` is silence |
 
 Zones may overlap. The player's **current level** is the first level (by `order`) with a
 zone containing them; the player is "in" every zone containing them, from any level.

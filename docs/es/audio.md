@@ -32,6 +32,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | Grupo | Eventos | Origen |
 |---|---|---|
 | Ambiente | `ambient.garage.drone` (bucle), `ambient.drip`, `ambient.relay`, `ambient.rumble`, `ambient.sparks`, `ambient.vent` | síntesis |
+| Ambiente del nivel 3 | `ambient.offices.room_tone` (bucle), `ambient.library.clock` (bucle), `ambient.offices.phone` (2-4 timbrazos) | síntesis |
 | Fluorescentes | `block.fluorescent.hum` (bucle), `.flicker`, `.start`, `.off` | síntesis |
 | Materiales (pasos e impactos de los props) | `block.cardboard`, `block.hollow_metal`, `block.metal_pipe`, `block.plastic`, `block.puddle`, `block.sheet_metal`, `block.wire_mesh`, `block.wood`, cada uno `.step` e `.impact` | síntesis |
 | Eventos del mapa | `block.elevator.ding`, `block.elevator.doors`, `block.shutter.close`, `block.card_reader.accept`, `block.card_reader.deny`, `block.valve.turn`, `block.valve.release`, `block.locker.door`, `block.hatch.open` | síntesis |
@@ -57,7 +58,7 @@ Lado del cliente (`client.effects`), por jugador y sin posición salvo que se in
 
 | Clase | Qué reproduce | Control de volumen |
 |---|---|---|
-| `AmbiencePlayer` | El bucle del nivel (con fundido al cambiar de nivel) y sus sonidos aleatorios en puntos aleatorios alrededor del jugador (con posición) | Ambiente/Entorno |
+| `AmbiencePlayer` | El bucle del nivel (o de la zona; con fundido al cambiar) y sus sonidos aleatorios en puntos aleatorios alrededor del jugador (con posición) | Ambiente/Entorno |
 | `FluorescentHum` | El zumbido de las 4 luces más cercanas a 10 bloques o menos, cada una con un tono un poco distinto (con posición) | Bloques |
 | `HeartbeatEffect` | Un latido cada vez cerca del Pale man | Jugadores |
 | `BreathingEffect` | Respiración fuerte agotado | Jugadores |
@@ -65,8 +66,9 @@ Lado del cliente (`client.effects`), por jugador y sin posición salvo que se in
 | `IntroMusic` | La canción del ascensor y luego su parada de cinta | Música |
 | `MenuMusic` | El tema del menú y luego 15 s de silencio, solo en los menús | Música |
 
-El ambiente del nivel lo envía el servidor (`platform.AmbienceHooks`) cuando el jugador
-cambia de nivel y tras `/reload`; el cliente hace el bucle y la colocación aleatoria, que no
+El ambiente lo envía el servidor (`platform.AmbienceHooks`) cada vez que cambia el del
+jugador, el del nivel o el propio de una zona (nivel 3: el reloj de la biblioteca, el silencio
+del búnker), y tras `/reload`; el cliente hace el bucle y la colocación aleatoria, que no
 necesitan trabajo del servidor. Que los sonidos aleatorios caigan dentro de muros no
 importa: Sound Physics los amortigua, y suena a algo detrás del muro.
 

@@ -248,6 +248,15 @@ LEVEL_3 = dict(
     # collapse goes off, and the stretch behind the player its blocks will fill.
     COLLAPSE=dict(trigger=(5, 2), blocks=(9, 6)),
     GUARD_SPAWN=(80, 62),            # the observant guard: (x, z); he keeps to the library and the ring
+    # Ambience (AmbienceHooks): the empty offices' room tone and, rarely, a phone ringing far off,
+    # everywhere; the library has its slow clock instead (with the phone), the bunker silence.
+    AMBIENCE={"loop": "every_tunnel:ambient.offices.room_tone", "loop_volume": 1.0,
+              "random": [{"sound": "every_tunnel:ambient.offices.phone", "interval": [90, 240], "distance": [10, 16], "volume": 0.8}]},
+    ZONE_AMBIENCE={
+        "library": {"loop": "every_tunnel:ambient.library.clock", "loop_volume": 1.0,
+                    "random": [{"sound": "every_tunnel:ambient.offices.phone", "interval": [90, 240], "distance": [10, 16], "volume": 0.8}]},
+        "bunker_shaft": {}, "bunker_corridor": {},
+    },
     # Furniture (offices/furnish.py): each room's template; the same template, the same room.
     FURNISH=dict(
         open_office_nw="open_office", open_office_ne="open_office", archive="archive", meeting_room="meeting",
@@ -765,19 +774,24 @@ def attach(level, level2):
 def level3_json(lv3, place):
     """Level 3: zones and spawn points from offices/level.py, moved into the world by `place`.
     Walking into the antechamber shows its title (the stairs down to it belong to no zone)."""
-    zones = [{"id": zid, "from": list(place.box(b)[:3]), "to": list(place.box(b)[3:]), **({"tags": tags} if tags else {})}
+    p3 = lv3.p
+    zones = [{"id": zid, "from": list(place.box(b)[:3]), "to": list(place.box(b)[3:]), **({"tags": tags} if tags else {}),
+              **({"ambience": p3.ZONE_AMBIENCE[zid]} if zid in p3.ZONE_AMBIENCE else {})}
              for zid, b, tags in lv3.zones]
+    unknown = set(p3.ZONE_AMBIENCE) - {zid for zid, _, _ in lv3.zones}
+    if unknown:
+        raise SystemExit(f"LEVEL_3 ZONE_AMBIENCE: no zone {', '.join(sorted(unknown))}")
     spawns = []
     for sid, pos, yaw, tags, zone in lv3.spawns:
         spawns.append({"id": sid, "pos": list(place.point(*pos)), "yaw": place.yaw(yaw), "tags": tags,
                        **({"zone": zone} if zone else {})})
-    p3 = lv3.p
     return json.dumps({
         "name": f"Level 3 - Offices {p3.LEVEL_SIGN} (generated)",
         "order": 3,
         "dimension": "minecraft:overworld",
         "zones": zones,
         "spawn_points": spawns,
+        "ambience": p3.AMBIENCE,
         "entry": {"title": p3.TITLE, "subtitle": "", "sound": "every_tunnel:event.level_transition"},
         "build": BUILD_FUNCTION,
     }, indent=1) + "\n"

@@ -16,7 +16,8 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  *   "dimension": "minecraft:overworld",
  *   "zones": [
  *     { "id": "garage", "from": [0, -60, 0], "to": [31, -55, 31] },
- *     { "id": "ramp_down", "from": [28, -60, 28], "to": [31, -57, 31], "tags": ["exit"] }
+ *     { "id": "ramp_down", "from": [28, -60, 28], "to": [31, -57, 31], "tags": ["exit"] },
+ *     { "id": "boiler_room", "from": [0, -60, 20], "to": [8, -55, 31], "ambience": { "loop": "every_tunnel:ambient.vent" } }
  *   ],
  *   "spawn_points": [
  *     { "id": "player_start", "pos": [4.5, -60, 4.5], "yaw": 180, "tags": ["player"] },
@@ -37,7 +38,8 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  *
  * `name` (defaults to the id), `dimension` (defaults to the overworld), `tags`,
  * `yaw`, `pitch`, a spawn point's `zone` (the zone what spawns there stays in),
- * `spawn_points`, `ambience`, `entry`, `intro` (and everything inside them) and `build`
+ * `spawn_points`, `ambience` (the level's, and a zone's own, which replaces it inside that zone;
+ * `{}` there means silence), `entry`, `intro` (and everything inside them) and `build`
  * (the function that builds the level's blocks, run every time the world opens) are
  * optional; `intro.seconds` defaults to 25. `order` and at least one valid zone are required. A broken zone, spawn
  * point or random sound is skipped with a problem; the level is rejected only when
@@ -219,11 +221,12 @@ object LevelParser {
             val from = intVec3(entry, "from", problems)
             val to = intVec3(entry, "to", problems)
             val tags = entry.stringList("tags").toSet()
+            val ambience = if (entry.has("ambience")) parseAmbience(entry, problems) else null
             entry.reportUnknownKeys()
             when {
                 from == null || to == null -> problems += "${entry.pathOf("id")} \"$id\": zone skipped"
                 zones.any { it.id == id } -> problems += "${entry.pathOf("id")}: duplicate zone id \"$id\", zone skipped"
-                else -> zones += Zone(id, BlockBox.ofCorners(from[0], from[1], from[2], to[0], to[1], to[2]), tags)
+                else -> zones += Zone(id, BlockBox.ofCorners(from[0], from[1], from[2], to[0], to[1], to[2]), tags, ambience)
             }
         }
         return zones
