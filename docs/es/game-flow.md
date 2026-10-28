@@ -176,7 +176,8 @@ Reabrir el mundo o reaparecer dentro de un nivel no cuenta como entrar.
 ## 9. Nivel 3 (B3)
 
 Las oficinas del complejo alrededor de la biblioteca central, en perfecto estado y vacías.
-Hecho hasta ahora: la estructura, los muebles y el puzle de las válvulas; faltan el guardia
+Hecho hasta ahora: la estructura, los muebles, el puzle de las válvulas, las taquillas y el
+puzle de las cajas; faltan el guardia
 observador, los libros, las demás notas y el loot, con sus zonas y puntos de spawn ya en el
 archivo del nivel (ver [Niveles](levels.md#ganchos-del-nivel-3)). La música queda para el
 final.
@@ -204,6 +205,20 @@ final.
   la biblioteca tiene filas de estanterías de cuatro de alto, a dos bloques unas de otras,
   alrededor de un claro con mesas de lectura, y el mostrador del bibliotecario junto a la
   puerta sur. No hay nadie.
+- **El puzle de las cajas** (`BoxHooks`): una partida nueva pone diez cajas de archivo moradas
+  (`PurpleBoxBlock`, a brillo completo) en diez de los 25 sitios del nivel con la etiqueta
+  `box_spot`, al azar: uno en cada sala menos Storage, sobre una mesa, mostrador o archivador
+  o en el suelo contra una pared, y nueve por el anillo. Un clic derecho coge una y la lleva en
+  la mano: de una en una; mientras se lleva sigue en la mano (cambiar de hueco la mueve con
+  él), no se puede tirar (vuelve sola) y no se puede correr; se puede entrar con ella en una
+  taquilla. En Storage, una estantería metálica vacía de 2 de ancho y 3 de alto con cinco
+  baldas (`BoxShelfBlock`, punto de spawn con la etiqueta `box_shelf`; las cajas encima las
+  dibuja `BoxShelfRenderer`): un clic derecho en un hueco deja ahí la caja, sale "3 / 10"
+  encima de la barra y se avisa al guardia observador (de momento una línea en el log y un
+  sonido lejano, `event.observer.alert`). Con las diez puestas se consigue "Master of the
+  Boxes"; entonces aparecerán los libros (pendiente). Al morir, una caja en la mano vuelve a
+  donde estaba; la estantería conserva las suyas. `/everytunnel boxes` dice dónde están y
+  `boxes fill` llena todo menos el último hueco.
 - **Taquillas para esconderse:** cada sala tiene al menos una (las salas Lockers y Changing
   room están llenas; la biblioteca no tiene). Un clic derecho en una taquilla desde delante
   de su puerta mete al jugador dentro (`HidingHooks`): va montado en un asiento invisible en
@@ -269,7 +284,7 @@ Los logros de vanilla no se tocan.
 | Ouch! | morir a manos de un Pale man (`DeathHooks`) | una calavera |
 | Employee of the Month | abrir el lector de la salida con la tarjeta (todos los del mundo) | la tarjeta |
 | Under Pressure | dejar bien las válvulas del nivel 3 (todos los del mundo) | la válvula |
-| Master of the Boxes | poner las cajas del nivel 3 en la estantería de Storage (pendiente) | (pendiente) |
+| Master of the Boxes | poner las diez cajas del nivel 3 en la estantería de Storage (todos los del mundo) | la caja morada |
 | Shhh! | devolver los libros del nivel 3 al mostrador del bibliotecario (pendiente) | (pendiente) |
 
 La pantalla ACHIEVEMENTS del menú principal (`client.screen.AchievementsScreen`) los muestra en

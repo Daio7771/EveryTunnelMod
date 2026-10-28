@@ -1,0 +1,119 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "s": "every_tunnel:block/purple_box_side",
+    "t": "every_tunnel:block/purple_box_top",
+    "particle": "every_tunnel:block/purple_box_side"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        8.5,
+        14
+      ],
+      "faces": {
+        "north": {
+          "texture": "#s",
+          "uv": [
+            2,
+            4.5,
+            14,
+            13
+          ]
+        },
+        "east": {
+          "texture": "#s",
+          "uv": [
+            2,
+            4.5,
+            14,
+            13
+          ]
+        },
+        "south": {
+          "texture": "#s",
+          "uv": [
+            2,
+            4.5,
+            14,
+            13
+          ]
+        },
+        "west": {
+          "texture": "#s",
+          "uv": [
+            2,
+            4.5,
+            14,
+            13
+          ]
+        },
+        "down": {
+          "texture": "#t"
+        }
+      }
+    },
+    {
+      "from": [
+        1.5,
+        8.5,
+        1.5
+      ],
+      "to": [
+        14.5,
+        11,
+        14.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#s",
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ]
+        },
+        "east": {
+          "texture": "#s",
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ]
+        },
+        "south": {
+          "texture": "#s",
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ]
+        },
+        "west": {
+          "texture": "#s",
+          "uv": [
+            0,
+            0,
+            16,
+            3
+          ]
+        },
+        "up": {
+          "texture": "#t"
+        },
+        "down": {
+          "texture": "#t"
+        }
+      }
+    }
+  ]
+}

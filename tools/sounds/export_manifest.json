@@ -114,6 +114,8 @@
   "event/death_1": "4e010fe8bdd2a15c",
   "event/death_2": "c1b9b14e53deb223",
   "event/level_transition_1": "1c8f24116fe38fca",
+  "event/observer/alert_1": "b63c0acd1ad008e8",
+  "event/observer/alert_2": "df9e37c3d6a8f213",
   "item/battery/close_1": "5cb00b00084ee40c",
   "item/battery/close_2": "01abf052a3f0b6a3",
   "item/battery/open_1": "b855c3e3c54e5697",

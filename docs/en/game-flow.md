@@ -167,7 +167,8 @@ Reopening the world or respawning inside a level does not count as walking in.
 ## 9. Level 3 (B3)
 
 The offices of the complex around the central library, in perfect order and empty. Built
-so far: the structure, the furniture and the valve puzzle; the observant guard, the books,
+so far: the structure, the furniture, the valve puzzle, the lockers and the box puzzle; the
+observant guard, the books,
 the other notes and the loot are still to come, their zones and spawn points already in the
 level file (see [Levels](levels.md#level-3-hooks)). The music is planned for last.
 
@@ -193,6 +194,19 @@ level file (see [Levels](levels.md#level-3-hooks)). The music is planned for las
   chairs and phones, filing cabinets, server racks, lockers, the cafeteria's tables...); the
   library has rows of bookshelves four high, two blocks apart, round a clearing with reading
   tables, and the librarian's counter by the south door. Nobody is there.
+- **The box puzzle** (`BoxHooks`): a new game puts ten purple archive boxes (`PurpleBoxBlock`,
+  drawn full bright) at ten of the level's 25 spots tagged `box_spot`, drawn at random: one in
+  every room but Storage, on a desk, counter or cabinet or on the floor against a wall, and
+  nine round the ring. Right-click picks one up into the hand: one at a time; while carried it
+  stays in the hand (changing slot moves it along), it cannot be thrown away (it comes
+  straight back) and the player cannot sprint; hiding in a locker with it is fine. In Storage,
+  an empty metal shelf, 2 wide and 3 high with five boards (`BoxShelfBlock`, spawn point tagged
+  `box_shelf`; the boxes on it drawn by `BoxShelfRenderer`): right-clicking a place on it puts
+  the box there, "3 / 10" shows above the hotbar, and the observant guard is alerted (for now a
+  log line and a distant sound, `event.observer.alert`). With all ten up, "Master of the Boxes"
+  is earned; the books will appear then (still to come). Dying puts a carried box back where it
+  was found; the shelf keeps its boxes. `/everytunnel boxes` tells where they are, `boxes fill`
+  fills all but the last.
 - **Lockers to hide in:** every room has at least one (the Lockers and Changing rooms are
   full of them; the library has none). Right-clicking a locker from in front of its door
   gets in (`HidingHooks`): the player rides an invisible seat on the locker's floor
@@ -254,7 +268,7 @@ The vanilla advancements are not touched.
 | Ouch! | killed by a Pale man (`DeathHooks`) | a skull |
 | Employee of the Month | the keycard opens the exit's reader (everyone in the world) | the keycard |
 | Under Pressure | Level 3's valves are right (everyone in the world) | the valve |
-| Master of the Boxes | Level 3's boxes are on Storage's shelf (to come) | (to come) |
+| Master of the Boxes | Level 3's ten boxes are on Storage's shelf (everyone in the world) | the purple box |
 | Shhh! | Level 3's books are back on the librarian's counter (to come) | (to come) |
 
 The ACHIEVEMENTS screen in the main menu (`client.screen.AchievementsScreen`) lists them on

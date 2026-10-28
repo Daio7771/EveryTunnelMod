@@ -273,6 +273,9 @@ LEVEL_3 = dict(
         note=dict(id="pressure_line", x=74, z=195, facing="east")),
     CORRIDOR_PLANTS=[(43, 61), (116, 61), (43, 134), (116, 134)],                 # (x, z): the ring's corners
     CORRIDOR_CLOCKS=[(67, 61, "south"), (100, 134, "north"), (43, 110, "east"), (116, 110, "west")],
+    # The box puzzle (BoxHooks): how many boxes a new game puts out, the spots round the ring
+    # (one more in every room but these); the empty shelf they go on is in Storage.
+    BOX_PUZZLE=dict(boxes=10, ring=9, not_in=["storage"]),
     BOOK_SPOTS={},                   # room id -> (x, z) of the filing cabinet its book lies on; else its template's
     NOTE_SPOTS=[],                   # (x, z) on the main floor: other notes, not placed yet
     BATTERY_SPOTS=[],

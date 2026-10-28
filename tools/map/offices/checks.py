@@ -7,7 +7,8 @@ lines and raises SystemExit when the level is wrong, so a bad LEVEL_3 never reac
   closed doors (the puzzle will open them), round solid furniture (never over it) and
   through what a player walks through. Every room, the library, the hatch, the top of
   the stairs and the door to Level 4 must be reached, and no standing place may be left out.
-  Every room must also have a locker whose door opens onto a reached place (to hide in).
+  Every room must also have a locker whose door opens onto a reached place (to hide in), and
+  the walk goes round the box puzzle's spots as if a box lay on each.
 - enclosed(): every room and the library is closed by walls but for its doors, so two spaces
   given side by side without a wall between them (a slip in the plan's numbers) fail here.
 """
@@ -21,9 +22,11 @@ NOT_SUPPORT = ("every_tunnel:pipe", "every_tunnel:valve", "minecraft:chain", "ev
 def walk(lv):
     w = lv.world.blocks
     inside = set(lv.air) | lv.passable
+    # A box may lie on these floor cells (the box puzzle): the walk must not need them.
+    boxes = {(x, y, z) for x, y, z, _ in lv.box_spots}
 
     def passable(c):
-        return c in inside and (c not in w or c in lv.passable or c in lv.walk_through)
+        return c in inside and c not in boxes and (c not in w or c in lv.passable or c in lv.walk_through)
 
     def climbable(c):
         return c in lv.passable and ("ladder" in w.get(c, "") or "trapdoor" in w.get(c, ""))

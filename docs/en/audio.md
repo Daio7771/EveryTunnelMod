@@ -37,7 +37,7 @@ registered in `platform.ModSounds`. Any of them can be tried with
 | Player | `player.heartbeat` (4 variations), `player.tinnitus`, `player.breathing_exhausted`, `player.drink` | synth / CC0 (breathing, gulps) |
 | The Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | synth / CC0 (breathing) |
 | Music | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | synth / CC BY (elevator) |
-| Events | `event.death`, `event.level_transition` | synth |
+| Events | `event.death`, `event.level_transition`, `event.observer.alert` (placeholder) | synth |
 
 ## Who plays what
 

@@ -90,6 +90,7 @@ KDoc comment that says more.
 | `ShutterBlock.kt` | A piece of a rolling shutter |
 | `CardReaderBlock.kt` | The keycard reader that opens iron doors |
 | `NoteBoardBlock.kt` | A cork board with a note: right-click reads it |
+| `BoxBlocks.kt` | Level 3's purple box (picked up) and its shelf: parts, slots, the boxes' block entity |
 | `LockerBlock.kt` | A locker (a two-block stack): right-click hides in it |
 | `LockerSeatEntity.kt` | The invisible seat a hiding player rides: look limit, getting out in front, the door's sound |
 | `FurnitureBlocks.kt` | Level 3's furniture that joins its own kind: row pieces (desks, counters, sofas) left and right, table tiles on all sides, stacks (bookshelves, racks, lockers) up and down |
@@ -127,6 +128,7 @@ KDoc comment that says more.
 | `KeycardHooks.kt` | Lights-out wave, restoring lights, locking readers |
 | `ValveHooks.kt` | Level 3's valve puzzle: digits per new game, checking turns, opening the door, resetting |
 | `NoteHooks.kt` | Reading a pinned note: finds its id, sends it with the valve digits |
+| `BoxHooks.kt` | Level 3's box puzzle: boxes out at random, carrying, the shelf, death, debug |
 | `HidingHooks.kt` | Hiding in lockers: in, out, no noise inside, out on a new game |
 | `AchievementHooks.kt` | Earning achievements: what earns each, telling the client |
 | `EndingHooks.kt` | The end of the demo: footsteps, fade, end screen |
@@ -186,6 +188,7 @@ KDoc comment that says more.
 |---|---|
 | `PaleManRenderer.kt` | GeckoLib renderer with the eye glow mask |
 | `PaleManModel.kt` | His GeckoLib model, plus the stoop under low ceilings |
+| `BoxShelfRenderer.kt` | The purple boxes on the box shelf, full bright |
 | `LootRenderer.kt` | Draws loot items lying flat |
 | `GuardUniform.kt` | The uniform skin for every player |
 

@@ -167,5 +167,10 @@
   "achievement.every_tunnel.boxes": "Master of the Boxes",
   "achievement.every_tunnel.boxes.description": "Filled the empty shelf in Storage.",
   "achievement.every_tunnel.books": "Shhh!",
-  "achievement.every_tunnel.books.description": "Returned every book to the library."
+  "achievement.every_tunnel.books.description": "Returned every book to the library.",
+  "message.every_tunnel.boxes_placed": "%s / %s",
+  "message.every_tunnel.box_hands_full": "Your hands are full",
+  "message.every_tunnel.box_no_room": "No room in your pockets",
+  "block.every_tunnel.purple_box": "Purple Box",
+  "block.every_tunnel.box_shelf": "Box Shelf"
 }

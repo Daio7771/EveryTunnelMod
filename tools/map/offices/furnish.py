@@ -14,12 +14,17 @@ sides, stacks up and down) are worked out here the same way the game does, since
 takes a state as given.
 """
 
+import math
+import random
+
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
 NAMES = {v: k for k, v in DIRS.items()}
 
 ROW = {"office_desk", "whiteboard", "sofa", "bench", "counter", "library_counter"}
 TILE = {"meeting_table", "reading_table"}
 STACK = {"server_rack", "metal_shelf", "locker", "vending_machine", "bookshelf"}
+# Furniture with a full-block top a box can stand on (the box puzzle's spots).
+FLAT_TOPS = {"office_desk", "counter", "filing_cabinet", "library_counter"}
 # The ones a player walks through (ModBlocks: noCollision).
 WALK_THROUGH = {"whiteboard", "electrical_panel", "cafe_chair", "coffee_machine", "potted_plant", "wall_clock",
                 "wooden_chair", "desk_phone", "note_board"}
@@ -54,7 +59,9 @@ class Furnisher:
         self.lv = lv
         self.p = lv.p
         self.items = {}            # (x, y, z) -> (block name, facing or None)
+        self.parts = {}            # (x, y, z) -> (col, row): the box shelf's parts
         self.reserved = set()      # (x, z) kept clear
+        self.locker_fronts = set() # (x, z) in front of a locker's door, kept clear to step out
 
     def free(self, x, y, z):
         lv = self.lv
@@ -152,6 +159,25 @@ class Furnisher:
             self.stack(fr, u, v, "locker", facing, 2)
             return True
         return False
+
+    def box_shelf(self, fr, u0):
+        """The box puzzle's empty shelf (BoxShelfBlock): 2 wide and 3 high against the back wall
+        at u0 and u0 + 1, facing into the room; column 0 is the left one as seen from in front
+        (the lower u). Put in before the back wall's other shelves; its foot's (x, z), facing."""
+        cells = [(u0 + col, row_) for col in (0, 1) for row_ in (0, 1, 2)]
+        if not all(self.free(*self._at(fr, u, fr.D - 1, row_ + 1)) for u, row_ in cells):
+            raise SystemExit("LEVEL_3: no room for the box shelf in Storage")
+        for u, row_ in cells:
+            x, z = fr.cell(u, fr.D - 1)
+            self.put(x, row_ + 1, z, "box_shelf", fr.facing("front"), force=True)
+            self.parts[(x, row_ + 1, z)] = (u - u0, row_)
+        x, z = fr.cell(u0, fr.D - 1)
+        return x, z, fr.facing("front")
+
+    @staticmethod
+    def _at(fr, u, v, y):
+        x, z = fr.cell(u, v)
+        return x, y, z
 
     def back_wall(self, fr, u0, u1, name, height=1, y=1):
         for u in range(u0, u1 + 1):
@@ -260,6 +286,9 @@ class Furnisher:
             elif name in TILE:
                 sides = {s: same((x + d[0], y, z + d[1]), name, None) for s, d in DIRS.items()}
                 state = bid + "[" + ",".join(f"{s}={str(sides[s]).lower()}" for s in ("east", "north", "south", "west")) + "]"
+            elif name == "box_shelf":
+                col, row_ = self.parts[(x, y, z)]
+                state = f"{bid}[col={col},facing={facing},row={row_}]"
             elif name in STACK:
                 up, down = same((x, y + 1, z), name, facing), same((x, y - 1, z), name, facing)
                 state = f"{bid}[down={str(down).lower()},facing={facing},up={str(up).lower()}]"
@@ -363,6 +392,7 @@ def servers(f, fr):
 
 
 def storage(f, fr):
+    f.lv.box_shelf = f.box_shelf(fr, fr.W // 2 - 1)
     for v_front in (4, 8):
         for u in range(2, fr.W - 2):
             f.stack(fr, u, v_front, "metal_shelf", "front", 2)
@@ -494,5 +524,72 @@ def furnish(lv):
         f.put(x, 1, z, "potted_plant", "north")
     for x, z, facing in p.CORRIDOR_CLOCKS:
         f.put(x, 3, z, "wall_clock", facing)
+    lv.box_spots = box_spots(f, books)
     f.finish()
     return books
+
+
+def ring_zone(p, x, z):
+    """The ring's zone (level.py, data()) holding the cell (x, z)."""
+    n, s_, w, e = p.INNER_CORRIDOR
+    for zid, (x0, z0, x1, z1) in (("inner_corridor_north", n), ("inner_corridor_south", s_),
+                                  ("inner_corridor_west", (w[0], n[3], w[2], s_[1])),
+                                  ("inner_corridor_east", (e[0], n[3], e[2], s_[1]))):
+        if x0 <= x < x1 and z0 <= z < z1:
+            return zid
+    raise SystemExit(f"LEVEL_3 BOX_PUZZLE: ({x}, {z}) is not in the ring")
+
+
+def box_spots(f, books):
+    """The box puzzle's spots (BoxHooks; a new game puts a box at BOX_PUZZLE["boxes"] of them):
+    one in every room but Storage, every other one on a piece of furniture with a flat top and
+    the rest on the floor against a wall (clear of doors and lockers), and BOX_PUZZLE["ring"]
+    spread round the ring against the library's wall, clear of its doors. Picked the same way
+    every run (seeded by the room). [(x, y, z, zone id)]."""
+    lv, p = f.lv, f.lv.p
+    cfg = p.BOX_PUZZLE
+    items = f.items
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    fronts = {(x + steps[fc][0], z + steps[fc][1]) for (x, y, z), (name, fc) in items.items() if name == "locker" and y == 1}
+
+    def clear_floor(x, z):
+        return f.free(x, 1, z) and f.free(x, 2, z) and (x, z) not in fronts
+
+    def near_door(x, z, reach):
+        return any(lv.air.get((x + dx, 1, z + dz), ("",))[0] == "door"
+                   for dx in range(-reach, reach + 1) for dz in range(-reach, reach + 1))
+
+    spots = []
+    for i, (s, _) in enumerate(lv.rooms):
+        if s.id in cfg["not_in"]:
+            continue
+        rng = random.Random(f"box:{s.id}")
+        x0, z0, x1, z1 = s.box
+        tops = [(x, 2, z) for (x, y, z), (name, _) in items.items()
+                if y == 1 and name in FLAT_TOPS and x0 <= x < x1 and z0 <= z < z1
+                and f.free(x, 2, z) and (x, z) != books.get(s.id)]
+        floor = [(x, 1, z) for x in range(x0, x1) for z in range(z0, z1)
+                 if (x in (x0, x1 - 1) or z in (z0, z1 - 1)) and clear_floor(x, z)
+                 and not near_door(x, z, p.DOOR_CLEARANCE + 1)]
+        pick = tops if (i % 2 == 0 and tops) or not floor else floor
+        if not pick:
+            raise SystemExit(f"LEVEL_3 BOX_PUZZLE: no spot for a box in {s.id}")
+        x, y, z = rng.choice(sorted(pick))
+        spots.append((x, y, z, s.id))
+    # The ring: against the library's walls, spread round it.
+    lx0, lz0, lx1, lz1 = p.LIBRARY
+    ring = []
+    for x in range(lx0 - 1, lx1 + 1):
+        ring += [(x, lz0 - 2), (x, lz1 + 1)]
+    for z in range(lz0, lz1):
+        ring += [(lx0 - 2, z), (lx1 + 1, z)]
+    ring = [(x, z) for x, z in ring if clear_floor(x, z) and not near_door(x, z, 3) and (x, 1, z) in lv.air]
+    cx, cz = (lx0 + lx1) / 2, (lz0 + lz1) / 2
+    ring.sort(key=lambda c: math.atan2(c[1] - cz, c[0] - cx))
+    n = cfg["ring"]
+    for k in range(n):
+        x, z = ring[(k * len(ring)) // n + len(ring) // (2 * n)]
+        spots.append((x, 1, z, ring_zone(p, x, z)))
+    if len(spots) < cfg["boxes"]:
+        raise SystemExit(f"LEVEL_3 BOX_PUZZLE: {len(spots)} spots for {cfg['boxes']} boxes")
+    return spots

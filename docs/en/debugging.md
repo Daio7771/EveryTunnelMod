@@ -18,6 +18,8 @@
 | `/everytunnel intro` | Plays the elevator intro again (Survival or Adventure) |
 | `/everytunnel newgame` | Starts the game over in this world |
 | `/everytunnel valves` | This game's valve digits for Level 3 (A to E) |
+| `/everytunnel boxes` | Level 3's box puzzle: how many are on the shelf, where the others lie |
+| `/everytunnel boxes fill` | Fills the shelf but for one place and leaves one box lying about (to test the last) |
 | `/everytunnel rebuilt` | Run by `garage:build` at its end: puts the loot back. Not for hand use |
 | `/everytunnel devworld save\|forget` | Dev runs only, see [Building](building-and-release.md#dev-worlds) |
 

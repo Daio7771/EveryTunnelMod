@@ -59,6 +59,10 @@ object DebugCommands {
                 .then(CommandManager.literal("intro").executes(::intro))
                 .then(CommandManager.literal("newgame").executes(::newGame))
                 .then(CommandManager.literal("valves").executes(::valves))
+                .then(
+                    CommandManager.literal("boxes").executes(::boxes)
+                        .then(CommandManager.literal("fill").executes(::fillBoxes)),
+                )
                 .then(CommandManager.literal("rebuilt").executes(::rebuilt))
             if (DevWorlds.enabled) {
                 root.then(
@@ -238,6 +242,19 @@ object DebugCommands {
             reply(context, "${level.id}: " + ValveHooks.values(level).entries.joinToString(", ") { (letter, digit) -> "$letter $digit" })
         }
         return 1
+    }
+
+    private fun boxes(context: CommandContext<ServerCommandSource>): Int {
+        val lines = BoxHooks.report(context.source.server)
+        if (lines.isEmpty()) reply(context, "No level has a box shelf.")
+        lines.forEach { reply(context, it) }
+        return lines.size
+    }
+
+    private fun fillBoxes(context: CommandContext<ServerCommandSource>): Int {
+        val shelves = BoxHooks.fillAllButOne(context.source.server)
+        reply(context, if (shelves == 0) "No level has a box shelf." else "Shelf filled but for one place; one box left lying about.")
+        return shelves
     }
 
     private fun rebuilt(context: CommandContext<ServerCommandSource>): Int {

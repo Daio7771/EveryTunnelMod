@@ -152,6 +152,8 @@ the server starts (levels built together name the same one). The function must e
 | `keycard` | `LootSpawner` | The keycard |
 | `checkpoint` | (none yet) | Level 3: where a death past the checkpoint will restart |
 | `observant_guard` | (none yet) | Level 3: the observant guard, kept to `guard_area` (the library and the ring) |
+| `box_spot` | `BoxHooks` | Level 3: a place a purple box may lie (a new game puts ten at random); on the floor, or on furniture (y 2) |
+| `box_shelf` | `BoxHooks` | Level 3: the foot (left, bottom) of the shelf the boxes go on |
 | `book_spot` | (none yet) | Level 3: where a room's book lies, on top of a filing cabinet (one per "book" room) |
 | `valve` | `ValveHooks` | A valve of the level's puzzle (`valve_a` to `valve_e`: the `ValveBlock` at that block, lettered) |
 | `note` | `NoteHooks` | A note pinned at that block (a `NoteBoardBlock`); its id names the text, `assets/every_tunnel/notes/<en/es>/<id>.txt` |
@@ -173,7 +175,8 @@ will read:
 - **Spawn points:** `player_start` (the antechamber), `checkpoint`, `observant_guard`, a
   `book_<room>` per book room (on the filing cabinet its furniture template picks, unless
   `BOOK_SPOTS` names one),
-  `valve_a` to `valve_e`, the electrician's note `pressure_line` (tagged `note`), and the lists `NOTE_SPOTS`, `BATTERY_SPOTS`, `WATER_SPOTS`,
+  `box_1` to `box_25` (tagged `box_spot`, in their room's or ring's zone; `BOX_PUZZLE` sets
+  how many), `box_shelf` (in Storage), `valve_a` to `valve_e`, the electrician's note `pressure_line` (tagged `note`), and the lists `NOTE_SPOTS`, `BATTERY_SPOTS`, `WATER_SPOTS`,
   `FOOD_SPOTS` (empty).
 
 ## How the mod tracks players

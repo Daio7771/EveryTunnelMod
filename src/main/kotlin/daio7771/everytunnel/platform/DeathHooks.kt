@@ -90,6 +90,7 @@ object DeathHooks {
     fun isDying(player: ServerPlayerEntity): Boolean = player.uuid in dying
 
     private fun startDying(player: ServerPlayerEntity, levelId: String, source: DamageSource) {
+        BoxHooks.died(player)
         player.health = 1f
         player.isSprinting = false
         dying[player.uuid] = Dying(levelId)

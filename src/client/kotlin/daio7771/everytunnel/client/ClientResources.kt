@@ -1,10 +1,12 @@
 package daio7771.everytunnel.client
 
 import daio7771.everytunnel.platform.DrinkHooks
+import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.FlashlightHooks
 import daio7771.everytunnel.platform.ResourceSyncPacket
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
+import net.minecraft.client.MinecraftClient
 
 /**
  * The local player's stamina, thirst and flashlight as last sent by the server
@@ -27,7 +29,14 @@ object ClientResources {
         DrinkHooks.clientThirstNotFull = { current.thirst < current.thirstMax }
     }
 
-    /** True while the player is exhausted and must not sprint. Called from `ClientPlayerEntityMixin`. */
+    /** True while the player is exhausted, or carries a box, and must not sprint. Called from `ClientPlayerEntityMixin`. */
     @JvmStatic
-    fun isSprintBlocked(): Boolean = current.active && current.exhausted
+    fun isSprintBlocked(): Boolean = current.active && (current.exhausted || carryingBox())
+
+    /** Level 3's purple box in the inventory: no sprinting while carrying it (`platform.BoxHooks`). */
+    private fun carryingBox(): Boolean {
+        val player = MinecraftClient.getInstance().player ?: return false
+        val box = ModBlocks.PURPLE_BOX.asItem()
+        return player.inventory.containsAny { it.isOf(box) }
+    }
 }

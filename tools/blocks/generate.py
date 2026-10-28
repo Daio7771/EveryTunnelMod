@@ -629,6 +629,32 @@ def clock_tex(rng):
     return img
 
 
+PURPLE = (168, 72, 220)
+
+
+def purple_box_tex(rng, face):
+    """Level 3's purple archive box (the box puzzle): bright purple cardboard. `side`: the lid's
+    band (rows 0-2), a hand hole and a blank white label; `top`: the lid, its rim darker."""
+    img = new(PURPLE)
+    noise(img, rng, 6)
+    if face == "top":
+        rect(img, 0, 0, 15, 15, (184, 92, 232))
+        noise(img, rng, 5)
+        for i in range(16):
+            for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
+                px(img, x, y, (136, 52, 186))
+        rect(img, 1, 7, 14, 8, (150, 60, 200), 0.5)                       # the lid's fold
+    else:
+        rect(img, 0, 0, 15, 2, (146, 56, 194))                            # the lid's band
+        rect(img, 0, 2, 15, 2, (118, 40, 160), 0.7)
+        rect(img, 6, 5, 9, 6, (52, 18, 72))                               # hand hole
+        rect(img, 3, 9, 12, 12, (228, 222, 236))                          # label
+        rect(img, 4, 10, 10, 10, (150, 140, 160), 0.6)
+        for i in range(16):
+            px(img, i, 15, (110, 40, 150), 0.6)
+    return img
+
+
 def books_tex(rng):
     """Two shelves of book spines (rows 1-7 and 9-15) in muted colours and heights, the shelf
     boards (rows 0 and 8) and the carcass (columns 0 and 15) in dark wood."""
@@ -1589,6 +1615,38 @@ def build():
         [el((0, 0, 1), (16, 15, 16), "w", north="p", south="p"), el((0, 15, 0), (16, 16, 16), "w")])
     prop("card_catalog", "Card Catalog", {"w": "library_wood", "f": "card_catalog_front"},
          [el((1, 0, 2), (15, 14, 16), "w", north="f")])
+
+    # The box puzzle (BoxHooks): the purple archive box, drawn full bright in game
+    # (PurpleBoxBlock; it glows a little with shaders too), and the empty shelf in Storage.
+    box_glow = T.CARDBOARD.but(emission=GLOW["DIFFUSER_GLOW"])
+    a.texture("purple_box_side", purple_box_tex(r("purple_box_side"), "side"),
+              lambda x, y, c: T.PAPER.but(emission=GLOW["DIFFUSER_GLOW"]) if T.near(c, (228, 222, 236), 20) else box_glow)
+    a.texture("purple_box_top", purple_box_tex(r("purple_box_top"), "top"), box_glow)
+    lid_band = (0, 0, 16, 3)
+    prop("purple_box", "Purple Box", {"s": "purple_box_side", "t": "purple_box_top"},
+         [el((2, 0, 2), (14, 8.5, 14), "s", up=None, down="t",
+             north=("s", (2, 4.5, 14, 13)), south=("s", (2, 4.5, 14, 13)), east=("s", (2, 4.5, 14, 13)), west=("s", (2, 4.5, 14, 13))),
+          el((1.5, 8.5, 1.5), (14.5, 11, 14.5), "s", up="t", down="t",
+             north=("s", lid_band), south=("s", lid_band), east=("s", lid_band), west=("s", lid_band))])
+    # The shelf: 2 blocks wide, 3 high (BoxShelfBlock: col 0 on the left as seen from the front,
+    # the east of a model facing north; row 0 at the bottom). Five boards 8 pixels apart from the
+    # floor, a top, a back and the two outer sides; the boxes stand on the boards (drawn by
+    # BoxShelfRenderer), board k's top at 1 + 8k pixels over the shelf's foot.
+    variants = {}
+    for col in (0, 1):
+        outer = (15.5, 16) if col == 0 else (0, 0.5)
+        post = (15, 16) if col == 0 else (0, 1)
+        for row_ in (0, 1, 2):
+            boards = [(0, 1), (8, 9)] if row_ < 2 else [(0, 1), (15, 16)]
+            els = [el((0, y0, 2), (16, y1, 16), "m") for y0, y1 in boards]
+            els += [el((0, 0, 15.5), (16, 16, 16), "m"),                                    # the back
+                    el((outer[0], 0, 2), (outer[1], 16, 16), "m"),                           # the outer side
+                    el((post[0], 0, 2), (post[1], 16, 3), "m")]                              # the front post
+            name = f"box_shelf_{col}_{row_}"
+            a.models[name] = model({"m": "office_metal"}, els)
+            for facing, y in HORIZONTAL.items():
+                variants[f"col={col},facing={facing},row={row_}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("box_shelf", "Box Shelf", {"variants": variants}, {"parent": f"{NS}:block/box_shelf_0_0"})
 
     # --- The service elevator ------------------------------------------------------------
     a.texture("checker_plate", checker_plate_tex(r("checker_plate")), T.STEEL.but(smoothness=0.5, metal=255, relief=0.9))

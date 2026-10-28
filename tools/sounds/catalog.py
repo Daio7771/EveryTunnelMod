@@ -901,6 +901,34 @@ def valve_release(rng, variant):
     return fade(y, 0.0, 0.3)
 
 
+def observer_alert(rng, variant):
+    """Somewhere far off in the offices, something noticed: a heavy door knocked against its
+    frame a long way down the corridors (low, dull, with the building's long echo), then the
+    faint creak of a floor or a chair taking weight. A placeholder for the observant guard
+    hearing a box go on the shelf, until he exists. Stereo, in the player's head, from one side."""
+    n = samples(4.0)
+    t = time_axis(n)
+    thud = knock(n, rng, 0.05, rng.uniform(55, 65), [1.0, 1.6, 2.4], [1.0, 0.5, 0.25], [0.35, 0.2, 0.12], click=0.3, click_hi=1200.0)
+    thud += burst(n, rng, 0.05, 0.12, hi=180.0, tau=0.06, amp=1.4)
+    # Far away: no highs, and the long corridors answering.
+    thud = lowpass(thud, 600.0)
+    echo = np.zeros(n)
+    for delay, gain in ((0.21, 0.45), (0.47, 0.3), (0.83, 0.2), (1.3, 0.12)):
+        d = samples(delay)
+        echo[d:] += gain * thud[:n - d]
+    tail = lowpass(shaped_noise(n, rng, 1.5, 30.0, 400.0), 300.0) * np.exp(-np.maximum(t - 0.05, 0.0) / 1.4) * (t > 0.05) * 0.25
+    body = thud + lowpass(echo, 400.0) + tail
+    # The creak: a slow, dry glide, quiet, a while after.
+    c0 = 1.6 + rng.uniform(0.0, 0.3)
+    glide = np.clip((t - c0) / 0.9, 0.0, 1.0)
+    creak = glide_tone(180.0 + 90.0 * glide + 12.0 * smooth_random(n, 25.0, rng), harmonics=(1.0, 0.6, 0.4, 0.25, 0.15))
+    creak *= envelope(n, [(0.0, 0.0), (c0, 0.0), (c0 + 0.15, 0.06), (c0 + 0.7, 0.04), (c0 + 0.95, 0.0)])
+    creak *= 0.5 + 0.5 * np.abs(smooth_random(n, 40.0, rng))
+    creak = bandpass(creak, 150.0, 1800.0)
+    side = rng.uniform(0.35, 0.6) * (1 if variant % 2 else -1)
+    return fade(pan(body, side) + pan(creak, side * 0.7), 0.002, 0.6)
+
+
 def locker_door(rng, variant):
     """A steel locker's door opened and pulled shut again: the latch lifting, the thin door's
     hinge squeaking as it swings, then the sheet clanging home, its vents buzzing and the latch
@@ -1036,6 +1064,8 @@ SOUNDS = [
           valve_turn, -4.0),
     Sound("block.valve.release", "Level progress", "Level 3's valves all right: water hammer, the pipe settles, the door unlocks", "mono",
           False, 1, valve_release, -2.0, attenuation=24),
+    Sound("event.observer.alert", "Level progress", "Level 3: something far off noticed (a box went on the shelf); a placeholder for the observant guard",
+          "stereo", False, 2, observer_alert, -6.0),
     Sound("block.locker.door", "Level progress", "A Level 3 locker's door, getting in or out (latch, hinge, clang); no noise for enemies",
           "mono", False, 3, locker_door, -4.0),
     Sound("block.shutter.close", "Level progress", "The rolling shutter closing behind the player (rattle down, slam)", "mono", False, 1,

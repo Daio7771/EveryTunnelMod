@@ -15,7 +15,8 @@ import net.minecraft.world.GameMode
  * Starts the game over for a player, in the same world: every time the world opens
  * ([LoadingHooks]) and with `/everytunnel newgame`.
  *
- * - The world: everyone out of the lockers ([HidingHooks]), every shutter opens ([LevelEntryHooks.openAll]), all the loot is back
+ * - The world: everyone out of the lockers ([HidingHooks]), Level 3's boxes put out at random and
+ *   their shelf emptied ([BoxHooks]), every shutter opens ([LevelEntryHooks.openAll]), all the loot is back
  *   ([LootSpawner.restock]), the lights the keycard put out are back and the card readers
  *   locked ([KeycardHooks]), Level 3's valves back on 0 with new digits and their door shut
  *   ([ValveHooks]), and every Pale man goes back to his spawn point (also the ones in unloaded chunks, when they load:
@@ -37,6 +38,7 @@ object NewGame {
         LevelEntryHooks.openAll(server)
         KeycardHooks.forgetLights(server)
         ValveHooks.levelsRebuilt()
+        BoxHooks.levelsRebuilt()
         LootSpawner.restock(server)
         PaleManSpawner.startNewGame(server)
         LoadingHooks.levelsRebuilt(server)
@@ -48,6 +50,7 @@ object NewGame {
         val server = player.server
         HidingHooks.newGame(server)
         AchievementHooks.newGame(player)
+        BoxHooks.newGame(server)
         LevelEntryHooks.openAll(server)
         LootSpawner.restock(server)
         KeycardHooks.restoreLights(server)

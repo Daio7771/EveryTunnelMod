@@ -72,6 +72,8 @@ class Offices:
         self.furniture = set()   # cells of solid furniture
         self.walk_through = set()  # cells of furniture a player walks through (chairs, plants...)
         self.books = {}          # room id -> (x, z) of the cabinet its book lies on
+        self.box_spots = []      # (x, y, z, zone id): where the box puzzle's boxes may lie (furnish.py)
+        self.box_shelf = None    # (x, z, facing) of the box shelf's foot, in Storage (furnish.py)
         self.notes = {}          # note id -> (x, y, z) of the board it is pinned to
 
     # --- spaces --------------------------------------------------------------------
@@ -388,6 +390,11 @@ class Offices:
                 continue
             bx, bz = self.books[s.id]                    # on top of its filing cabinet
             self.spawn(f"book_{s.id}", bx, 2, bz, "north", ["book_spot"], s.id)
+        for i, (x, y, z, zone) in enumerate(self.box_spots):
+            self.spawn(f"box_{i + 1}", x, y, z, "north", ["box_spot"], zone)
+        if self.box_shelf:
+            x, z, facing = self.box_shelf
+            self.spawn("box_shelf", x, 1, z, facing, ["box_shelf"], "storage")
         for letter, (x, y, z) in self.valves:
             self.spawn(f"valve_{letter.lower()}", x, y, z, "west", ["valve"])
         for note_id, (x, y, z) in self.notes.items():

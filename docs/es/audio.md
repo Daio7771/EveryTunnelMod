@@ -39,7 +39,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | Jugador | `player.heartbeat` (4 variaciones), `player.tinnitus`, `player.breathing_exhausted`, `player.drink` | síntesis / CC0 (respiración, tragos) |
 | El Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | síntesis / CC0 (respiración) |
 | Música | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | síntesis / CC BY (ascensor) |
-| Eventos | `event.death`, `event.level_transition` | síntesis |
+| Eventos | `event.death`, `event.level_transition`, `event.observer.alert` (provisional) | síntesis |
 
 ## Quién reproduce qué
 

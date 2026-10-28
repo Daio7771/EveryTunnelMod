@@ -90,6 +90,7 @@ con un comentario KDoc que cuenta más.
 | `ShutterBlock.kt` | Una pieza de una persiana metálica |
 | `CardReaderBlock.kt` | El lector de tarjetas que abre puertas de hierro |
 | `NoteBoardBlock.kt` | Un tablón de corcho con una nota: clic derecho para leerla |
+| `BoxBlocks.kt` | La caja morada del nivel 3 (se recoge) y su estantería: partes, huecos, la entidad de bloque de las cajas |
 | `LockerBlock.kt` | Una taquilla (dos bloques apilados): clic derecho para esconderse |
 | `LockerSeatEntity.kt` | El asiento invisible en el que va el jugador escondido: límite de giro, salir por delante, el sonido de la puerta |
 | `FurnitureBlocks.kt` | Los muebles del nivel 3 que se unen a los de su clase: piezas en fila (mesas, barras, sofás) a izquierda y derecha, tableros de mesa por todos los lados, piezas apiladas (estanterías, racks, taquillas) arriba y abajo |
@@ -127,6 +128,7 @@ con un comentario KDoc que cuenta más.
 | `KeycardHooks.kt` | Ola de apagado, restaurar luces, bloquear lectores |
 | `ValveHooks.kt` | El puzle de las válvulas del nivel 3: cifras por partida, comprobar giros, abrir la puerta, reiniciar |
 | `NoteHooks.kt` | Leer una nota clavada: busca su id y la envía con las cifras de las válvulas |
+| `BoxHooks.kt` | El puzle de las cajas del nivel 3: cajas al azar, llevarlas, la estantería, la muerte, depuración |
 | `HidingHooks.kt` | Esconderse en taquillas: entrar, salir, sin ruido dentro, salir en partida nueva |
 | `AchievementHooks.kt` | Conseguir logros: qué da cada uno, avisar al cliente |
 | `EndingHooks.kt` | El final de la demo: pasos, fundido, pantalla final |
@@ -186,6 +188,7 @@ con un comentario KDoc que cuenta más.
 |---|---|
 | `PaleManRenderer.kt` | Renderizador de GeckoLib con la máscara de brillo de los ojos |
 | `PaleManModel.kt` | Su modelo de GeckoLib, más la postura encorvada bajo techos bajos |
+| `BoxShelfRenderer.kt` | Las cajas moradas en la estantería, a brillo completo |
 | `LootRenderer.kt` | Dibuja el botín tumbado |
 | `GuardUniform.kt` | La skin del uniforme para todos los jugadores |
 

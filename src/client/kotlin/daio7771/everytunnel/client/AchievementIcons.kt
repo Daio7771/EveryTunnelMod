@@ -35,8 +35,8 @@ object AchievementIcons {
         Achievement.STAY_HYDRATED -> ItemStack(ModItems.WATER_BOTTLE)
         Achievement.KEYCARD -> ItemStack(ModItems.KEYCARD)
         Achievement.VALVES -> ItemStack(ModBlocks.VALVE)
-        // Stand-ins until their puzzles bring their own things (the purple box, the book).
-        Achievement.BOXES -> ItemStack(ModBlocks.CARDBOARD_BOX)
+        Achievement.BOXES -> ItemStack(ModBlocks.PURPLE_BOX)
+        // A stand-in until Level 3's books exist.
         Achievement.BOOKS -> ItemStack(Items.BOOK)
     }
 

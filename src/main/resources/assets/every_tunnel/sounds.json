@@ -404,6 +404,12 @@
       "every_tunnel:event/level_transition_1"
     ]
   },
+  "event.observer.alert": {
+    "sounds": [
+      "every_tunnel:event/observer/alert_1",
+      "every_tunnel:event/observer/alert_2"
+    ]
+  },
   "item.battery.close": {
     "sounds": [
       "every_tunnel:item/battery/close_1",

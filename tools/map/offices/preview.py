@@ -17,7 +17,9 @@ FURNITURE_COLORS = {
     "filing_cabinet": (176, 180, 184), "metal_shelf": (176, 180, 184), "server_rack": (30, 32, 34),
     "locker": (120, 132, 148), "bench": (206, 182, 140), "sofa": (80, 90, 110), "vending_machine": (170, 48, 42),
     "water_dispenser": (120, 170, 210), "potted_plant": (70, 140, 70), "cardboard_box": (168, 130, 80),
+    "box_shelf": (200, 150, 236),
 }
+BOX_SPOT = (200, 70, 255)
 DOOR = (170, 110, 60)
 
 
@@ -105,6 +107,9 @@ def write(path, lv, stats, s=4):
         d.rectangle(rect(pad, x, z), fill=(20, 20, 20) if hole else (232, 112, 90))
         if hole:
             d.rectangle(rect(ox2, x, z), fill=(20, 20, 20))
+    for x, y, z, _ in lv.box_spots:                     # the box puzzle's spots: a purple dot, ringed on furniture
+        X0, Z0, X1, Z1 = rect(pad, x, z)
+        d.rectangle((X0 + 1, Z0 + 1, X1 - 1, Z1 - 1), fill=BOX_SPOT, outline=(255, 255, 255) if y > 1 else None)
     for letter, (x, y, z) in lv.valves:
         d.rectangle(rect(pad, x, z), fill=(240, 170, 50))
         X0, Z0, _, _ = rect(pad, x + 2, z)

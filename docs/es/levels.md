@@ -154,6 +154,8 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `keycard` | `LootSpawner` | La tarjeta |
 | `checkpoint` | (nadie aún) | Nivel 3: donde reiniciará una muerte pasado el checkpoint |
 | `observant_guard` | (nadie aún) | Nivel 3: el guardia observador, dentro de `guard_area` (la biblioteca y el anillo) |
+| `box_spot` | `BoxHooks` | Nivel 3: un sitio donde puede estar una caja morada (una partida nueva pone diez al azar); en el suelo o sobre un mueble (y 2) |
+| `box_shelf` | `BoxHooks` | Nivel 3: el pie (izquierda, abajo) de la estantería donde van las cajas |
 | `book_spot` | (nadie aún) | Nivel 3: donde está el libro de una habitación, encima de un archivador (una por habitación "book") |
 | `valve` | `ValveHooks` | Una válvula del puzle del nivel (`valve_a` a `valve_e`: el `ValveBlock` de ese bloque, con su letra) |
 | `note` | `NoteHooks` | Una nota clavada en ese bloque (un `NoteBoardBlock`); su id nombra el texto, `assets/every_tunnel/notes/<en/es>/<id>.txt` |
@@ -176,7 +178,9 @@ sistemas que vienen:
   la antesala.
 - **Puntos de spawn:** `player_start` (la antesala), `checkpoint`, `observant_guard`, un
   `book_<habitación>` por cada habitación con libro (en el archivador que elige su plantilla
-  de muebles, salvo que `BOOK_SPOTS` diga otro), `valve_a` a `valve_e`, la nota del electricista `pressure_line` (con la etiqueta `note`), y las listas `NOTE_SPOTS`,
+  de muebles, salvo que `BOOK_SPOTS` diga otro), `box_1` a `box_25` (con la etiqueta
+  `box_spot`, en la zona de su sala o del anillo; `BOX_PUZZLE` dice cuántos), `box_shelf` (en
+  Storage), `valve_a` a `valve_e`, la nota del electricista `pressure_line` (con la etiqueta `note`), y las listas `NOTE_SPOTS`,
   `BATTERY_SPOTS`, `WATER_SPOTS` y `FOOD_SPOTS` (vacías).
 
 ## Cómo sigue el mod a los jugadores

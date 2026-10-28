@@ -22,7 +22,7 @@ import net.minecraft.world.BlockView
  * [BlockShapes]); it is used for the outline and, unless the block settings say
  * `noCollision`, for collision. Placed by hand it faces the player.
  */
-class PropBlock(settings: Settings, boxes: List<BlockShapes.Box>) : Block(settings) {
+open class PropBlock(settings: Settings, boxes: List<BlockShapes.Box>) : Block(settings) {
 
     private val shapes: Map<Direction, VoxelShape> = BlockShapes.horizontal(boxes)
 

@@ -154,8 +154,21 @@ object ModBlocks {
         CardReaderBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 2 }.noCollision()),
     )
 
+    /** Level 3's box puzzle ([BoxHooks]): a purple archive box, drawn full bright; picked up with right-click. */
+    val PURPLE_BOX: Block = register(
+        "purple_box",
+        PurpleBoxBlock(props(MapColor.PURPLE, ModSoundGroups.CARDBOARD).emissiveLighting { _, _, _ -> true }, listOf(box(1.5, 0, 1.5, 14.5, 11, 14.5))),
+    )
+
+    /** The empty shelf in Storage the boxes go on: six parts, 2 wide and 3 high ([BoxShelfBlock]). */
+    val BOX_SHELF: Block = register("box_shelf", BoxShelfBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
+
     /** Shared by the loot blocks; registered in [register]. */
     lateinit var LOOT_ENTITY: BlockEntityType<LootBlockEntity>
+        private set
+
+    /** The boxes on a [BoxShelfBlock], at its foot; registered in [register]. */
+    lateinit var BOX_SHELF_ENTITY: BlockEntityType<BoxShelfBlockEntity>
         private set
 
     // --- The service elevator ------------------------------------------------------------
@@ -297,6 +310,10 @@ object ModBlocks {
         LOOT_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "loot"),
             FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD).build(),
+        )
+        BOX_SHELF_ENTITY = Registry.register(
+            Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),
+            FabricBlockEntityTypeBuilder.create(::BoxShelfBlockEntity, BOX_SHELF).build(),
         )
         val tab: ItemGroup = FabricItemGroup.builder()
             .icon { ItemStack(FLUORESCENT_LIGHT) }
