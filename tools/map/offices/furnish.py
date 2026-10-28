@@ -22,7 +22,7 @@ TILE = {"meeting_table", "reading_table"}
 STACK = {"server_rack", "metal_shelf", "locker", "vending_machine", "bookshelf"}
 # The ones a player walks through (ModBlocks: noCollision).
 WALK_THROUGH = {"whiteboard", "electrical_panel", "cafe_chair", "coffee_machine", "potted_plant", "wall_clock",
-                "wooden_chair", "desk_phone"}
+                "wooden_chair", "desk_phone", "note_board"}
 
 
 class Frame:
@@ -429,7 +429,8 @@ TEMPLATES = {
 
 
 def furnish(lv):
-    """Furnishes the level; returns {room id: (x, z) of the cabinet its book lies on}."""
+    """Furnishes the level (also the electrical room and its note, into lv.notes); returns
+    {room id: (x, z) of the cabinet its book lies on}."""
     p = lv.p
     f = Furnisher(lv)
     books = {}
@@ -451,6 +452,15 @@ def furnish(lv):
             books[s.id] = anchor
     f.reserved = set()
     f.library()
+    room = p.ELECTRICAL_ROOM
+    for x, z, facing in room["panels"]:
+        f.put(x, 2, z, "electrical_panel", facing)
+    for x, z, facing in room["cabinets"]:
+        f.put(x, 1, z, "filing_cabinet", facing)
+    note = room["note"]
+    if not f.put(note["x"], 2, note["z"], "note_board", note["facing"]):
+        raise SystemExit(f"LEVEL_3 ELECTRICAL_ROOM: no room for the note board at ({note['x']}, {note['z']})")
+    lv.notes[note["id"]] = (note["x"], 2, note["z"])
     for x, z in p.CORRIDOR_PLANTS:
         f.put(x, 1, z, "potted_plant", "north")
     for x, z, facing in p.CORRIDOR_CLOCKS:

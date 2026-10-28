@@ -14,6 +14,7 @@ import daio7771.everytunnel.client.hud.FlashlightOverlay
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.LootRenderer
 import daio7771.everytunnel.client.screen.EndOfDemoScreen
+import daio7771.everytunnel.client.screen.NoteScreen
 import daio7771.everytunnel.client.screen.LoadingCover
 import daio7771.everytunnel.client.screen.MainMenuScreen
 import daio7771.everytunnel.client.effects.MenuMusic
@@ -69,6 +70,7 @@ object EveryTunnelClient : ClientModInitializer {
         StatusHud.register()
         ScreenFade.register() // after the HUD, so the black covers it
         EndOfDemoScreen.register()
+        NoteScreen.register()
         LoadingCover.register()
         MainMenuScreen.register()
         MenuMusic.register()

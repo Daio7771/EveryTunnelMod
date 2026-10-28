@@ -138,6 +138,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `lights_stay` | `KeycardHooks` | Sus luces siguen encendidas al coger la tarjeta (el pozo de escaleras a B3) |
 | `end` | `EndingHooks` | Entrar termina la demo |
 | `exit` | (nadie aún) | Marca la salida de un nivel; reservada para sistemas futuros |
+| `valve_door` | `ValveHooks` | Las puertas que abren las válvulas cuando todas están bien; una partida nueva las cierra |
 | `checkpoint` | (nadie aún) | Nivel 3: justo pasada la puerta del checkpoint, donde reiniciará una muerte |
 | `collapse` | (nadie aún) | Nivel 3: al entrar, el techo del pasillo del búnker caerá detrás del jugador |
 | `collapse_blocks` | (nadie aún) | Nivel 3: el tramo de pasillo que llenará el derrumbe |
@@ -154,8 +155,9 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `checkpoint` | (nadie aún) | Nivel 3: donde reiniciará una muerte pasado el checkpoint |
 | `observant_guard` | (nadie aún) | Nivel 3: el guardia observador, dentro de `guard_area` (la biblioteca y el anillo) |
 | `book_spot` | (nadie aún) | Nivel 3: donde está el libro de una habitación, encima de un archivador (una por habitación "book") |
-| `valve` | (nadie aún) | Nivel 3: una válvula (`valve_a` a `valve_e`, el `ValveBlock` de ahí) |
-| `note_spot`, `battery_spot`, `water_spot`, `food_spot` | (nadie aún) | Nivel 3: notas y loot, listados en `LEVEL_3` (vacíos por ahora) |
+| `valve` | `ValveHooks` | Una válvula del puzle del nivel (`valve_a` a `valve_e`: el `ValveBlock` de ese bloque, con su letra) |
+| `note` | `NoteHooks` | Una nota clavada en ese bloque (un `NoteBoardBlock`); su id nombra el texto, `assets/every_tunnel/notes/<en/es>/<id>.txt` |
+| `note_spot`, `battery_spot`, `water_spot`, `food_spot` | (nadie aún) | Nivel 3: más notas y loot, listados en `LEVEL_3` (vacíos por ahora) |
 
 Las etiquetas son cadenas libres: un sistema nuevo puede definir las suyas sin tocar el
 parser.
@@ -168,13 +170,13 @@ sistemas que vienen:
 - **Zonas:** una por habitación (su id en snake case: `archive`, `meeting_room`...,
   `open_office_nw`, `open_office_ne`), `library`, el anillo en cuatro
   (`inner_corridor_north`, `_south`, `_west`, `_east`), `guard_area` (la biblioteca y el
-  anillo juntos), `valve_corridor`, `checkpoint`, `antechamber`, `bunker_shaft`,
+  anillo juntos), `valve_corridor`, `checkpoint`, `checkpoint_door` (con la etiqueta `valve_door`), `antechamber`, `bunker_shaft`,
   `bunker_corridor`, `collapse`, `collapse_blocks` y `end` (delante de la puerta a B4). Las
   escaleras desde B2 no pertenecen a ninguna zona, así que "Level 3" aparece al entrar en
   la antesala.
 - **Puntos de spawn:** `player_start` (la antesala), `checkpoint`, `observant_guard`, un
   `book_<habitación>` por cada habitación con libro (en el archivador que elige su plantilla
-  de muebles, salvo que `BOOK_SPOTS` diga otro), `valve_a` a `valve_e`, y las listas `NOTE_SPOTS`,
+  de muebles, salvo que `BOOK_SPOTS` diga otro), `valve_a` a `valve_e`, la nota del electricista `pressure_line` (con la etiqueta `note`), y las listas `NOTE_SPOTS`,
   `BATTERY_SPOTS`, `WATER_SPOTS` y `FOOD_SPOTS` (vacías).
 
 ## Cómo sigue el mod a los jugadores

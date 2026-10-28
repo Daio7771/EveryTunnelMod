@@ -28,6 +28,7 @@ import net.minecraft.text.Text
  * - `/everytunnel paleman`: the Pale men near you, what they are doing and where they are going.
  * - `/everytunnel intro`: plays the new-game intro (the elevator) again for you (see [IntroHooks]).
  * - `/everytunnel newgame`: starts the game over in this world (see [NewGame]).
+ * - `/everytunnel valves`: this game's valve digits, per level with valves (see [ValveHooks]).
  * - `/everytunnel rebuilt`: run by the map's `garage:build` after rebuilding the levels:
  *   puts the loot back ([NewGame.levelsRebuilt]).
  * - `/everytunnel devworld save|forget` (development only): make this world start from
@@ -57,6 +58,7 @@ object DebugCommands {
                 .then(CommandManager.literal("paleman").executes(::paleMen))
                 .then(CommandManager.literal("intro").executes(::intro))
                 .then(CommandManager.literal("newgame").executes(::newGame))
+                .then(CommandManager.literal("valves").executes(::valves))
                 .then(CommandManager.literal("rebuilt").executes(::rebuilt))
             if (DevWorlds.enabled) {
                 root.then(
@@ -223,6 +225,18 @@ object DebugCommands {
             return 0
         }
         reply(context, "New game: shutters open, Pale men home, inventory cleared, back at the start of ${level.id}.")
+        return 1
+    }
+
+    private fun valves(context: CommandContext<ServerCommandSource>): Int {
+        val levels = LevelManager.all().filter { level -> level.spawnPoints.any { ValveHooks.VALVE_TAG in it.tags } }
+        if (levels.isEmpty()) {
+            reply(context, "No level has valves.")
+            return 0
+        }
+        for (level in levels) {
+            reply(context, "${level.id}: " + ValveHooks.values(level).entries.joinToString(", ") { (letter, digit) -> "$letter $digit" })
+        }
         return 1
     }
 

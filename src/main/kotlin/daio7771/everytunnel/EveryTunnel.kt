@@ -5,15 +5,15 @@ import daio7771.everytunnel.platform.AmbienceHooks
 import daio7771.everytunnel.platform.DeathHooks
 import daio7771.everytunnel.platform.DebugCommands
 import daio7771.everytunnel.platform.DevWorlds
+import daio7771.everytunnel.platform.EndingHooks
 import daio7771.everytunnel.platform.FlashlightHooks
 import daio7771.everytunnel.platform.IntroHooks
+import daio7771.everytunnel.platform.KeycardHooks
 import daio7771.everytunnel.platform.LevelEntryHooks
 import daio7771.everytunnel.platform.LevelReloadListener
 import daio7771.everytunnel.platform.LevelTrackingHooks
 import daio7771.everytunnel.platform.LoadingHooks
 import daio7771.everytunnel.platform.LootSpawner
-import daio7771.everytunnel.platform.KeycardHooks
-import daio7771.everytunnel.platform.EndingHooks
 import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.ModEntities
 import daio7771.everytunnel.platform.ModItems
@@ -21,8 +21,9 @@ import daio7771.everytunnel.platform.ModSounds
 import daio7771.everytunnel.platform.NoiseHooks
 import daio7771.everytunnel.platform.PaleManSpawner
 import daio7771.everytunnel.platform.PlaytestLog
-import daio7771.everytunnel.platform.RespawnHooks
 import daio7771.everytunnel.platform.ResourceHooks
+import daio7771.everytunnel.platform.RespawnHooks
+import daio7771.everytunnel.platform.ValveHooks
 import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
@@ -67,6 +68,7 @@ object EveryTunnel : ModInitializer {
         PaleManSpawner.register()
         LootSpawner.register()
         KeycardHooks.register()
+        ValveHooks.register()
         EndingHooks.register()
         RespawnHooks.register()
         DeathHooks.register()

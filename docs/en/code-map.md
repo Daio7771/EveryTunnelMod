@@ -19,7 +19,7 @@ KDoc comment that says more.
 | `GameplayConfigParser.kt` | JSON ↔ config, value ranges, problems and missing keys. No file IO |
 | `ConfigManager.kt` | Loads and writes `config/every_tunnel/gameplay.json` safely |
 
-### `core/`, `core/level/`, `core/guide/` and `core/menu/`
+### `core/`, `core/level/`, `core/guide/`, `core/menu/` and `core/puzzle/`
 
 | File | What it does |
 |---|---|
@@ -30,6 +30,8 @@ KDoc comment that says more.
 | `guide/GuideMarkdown.kt` | Reads a player guide page (the Markdown subset) into blocks |
 | `menu/LampFlicker.kt` | When the menu scene's lamps flicker |
 | `menu/BlockLight.kt` | Block light for a box of blocks with no world (the menu scene) |
+| `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
+| `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 
 ### `systems/`
 
@@ -85,6 +87,7 @@ KDoc comment that says more.
 | `FloorIndicatorBlock.kt` | The elevator's LED floor display |
 | `ShutterBlock.kt` | A piece of a rolling shutter |
 | `CardReaderBlock.kt` | The keycard reader that opens iron doors |
+| `NoteBoardBlock.kt` | A cork board with a note: right-click reads it |
 | `FurnitureBlocks.kt` | Level 3's furniture that joins its own kind: row pieces (desks, counters, sofas) left and right, table tiles on all sides, stacks (bookshelves, racks, lockers) up and down |
 | `ValveBlock.kt` | A gate valve inline in a wall pipe: facing, open, letter A to E (Level 3) |
 | `LootBlock.kt` | Loot lying on the floor, picked up with right-click |
@@ -118,6 +121,8 @@ KDoc comment that says more.
 | `LevelEntryHooks.kt` | Level titles and closing shutters behind the player |
 | `LootSpawner.kt` | Places and restocks loot at tagged spawn points |
 | `KeycardHooks.kt` | Lights-out wave, restoring lights, locking readers |
+| `ValveHooks.kt` | Level 3's valve puzzle: digits per new game, checking turns, opening the door, resetting |
+| `NoteHooks.kt` | Reading a pinned note: finds its id, sends it with the valve digits |
 | `EndingHooks.kt` | The end of the demo: footsteps, fade, end screen |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
@@ -188,6 +193,7 @@ KDoc comment that says more.
 |---|---|
 | `MainMenuScreen.kt` | The main menu |
 | `GuideScreen.kt` | The player guide: a scrolling paper sheet with tabs |
+| `NoteScreen.kt` | A note read on the guide's paper over the game, placeholders filled |
 | `LoadingScreen.kt` | The loading screen and `LoadingCover`, which draws it over everything |
 | `LoadingTips.kt` | Rotating tips with the player's keys |
 | `EndOfDemoScreen.kt` | "End of demo" and the rolling credits |

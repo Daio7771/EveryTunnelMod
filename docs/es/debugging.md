@@ -17,6 +17,7 @@
 | `/everytunnel paleman` | Los Pale men cercanos: estado y objetivo |
 | `/everytunnel intro` | Repite la intro del ascensor (Supervivencia o Aventura) |
 | `/everytunnel newgame` | Empieza la partida de nuevo en este mundo |
+| `/everytunnel valves` | Las cifras de las válvulas del nivel 3 en esta partida (A a E) |
 | `/everytunnel rebuilt` | Lo ejecuta `garage:build` al terminar: vuelve a poner el botín. No es para usarlo a mano |
 | `/everytunnel devworld save\|forget` | Solo en desarrollo, ver [Compilación](building-and-release.md#mundos-de-desarrollo) |
 

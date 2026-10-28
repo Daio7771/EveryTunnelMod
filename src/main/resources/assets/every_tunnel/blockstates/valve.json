@@ -1,154 +1,667 @@
 {
-  "variants": {
-    "facing=north,letter=a,open=false": {
-      "model": "every_tunnel:block/valve_closed_a"
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "open": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_closed"
+      }
     },
-    "facing=east,letter=a,open=false": {
-      "model": "every_tunnel:block/valve_closed_a",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "open": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_closed",
+        "y": 90
+      }
     },
-    "facing=south,letter=a,open=false": {
-      "model": "every_tunnel:block/valve_closed_a",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "open": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_closed",
+        "y": 180
+      }
     },
-    "facing=west,letter=a,open=false": {
-      "model": "every_tunnel:block/valve_closed_a",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "open": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_closed",
+        "y": 270
+      }
     },
-    "facing=north,letter=a,open=true": {
-      "model": "every_tunnel:block/valve_open_a"
+    {
+      "when": {
+        "facing": "north",
+        "open": "true"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_open"
+      }
     },
-    "facing=east,letter=a,open=true": {
-      "model": "every_tunnel:block/valve_open_a",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "open": "true"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_open",
+        "y": 90
+      }
     },
-    "facing=south,letter=a,open=true": {
-      "model": "every_tunnel:block/valve_open_a",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "open": "true"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_open",
+        "y": 180
+      }
     },
-    "facing=west,letter=a,open=true": {
-      "model": "every_tunnel:block/valve_open_a",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "open": "true"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_open",
+        "y": 270
+      }
     },
-    "facing=north,letter=b,open=false": {
-      "model": "every_tunnel:block/valve_closed_b"
+    {
+      "when": {
+        "facing": "north",
+        "letter": "a"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_a"
+      }
     },
-    "facing=east,letter=b,open=false": {
-      "model": "every_tunnel:block/valve_closed_b",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "letter": "a"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_a",
+        "y": 90
+      }
     },
-    "facing=south,letter=b,open=false": {
-      "model": "every_tunnel:block/valve_closed_b",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "letter": "a"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_a",
+        "y": 180
+      }
     },
-    "facing=west,letter=b,open=false": {
-      "model": "every_tunnel:block/valve_closed_b",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "letter": "a"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_a",
+        "y": 270
+      }
     },
-    "facing=north,letter=b,open=true": {
-      "model": "every_tunnel:block/valve_open_b"
+    {
+      "when": {
+        "facing": "north",
+        "letter": "b"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_b"
+      }
     },
-    "facing=east,letter=b,open=true": {
-      "model": "every_tunnel:block/valve_open_b",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "letter": "b"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_b",
+        "y": 90
+      }
     },
-    "facing=south,letter=b,open=true": {
-      "model": "every_tunnel:block/valve_open_b",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "letter": "b"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_b",
+        "y": 180
+      }
     },
-    "facing=west,letter=b,open=true": {
-      "model": "every_tunnel:block/valve_open_b",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "letter": "b"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_b",
+        "y": 270
+      }
     },
-    "facing=north,letter=c,open=false": {
-      "model": "every_tunnel:block/valve_closed_c"
+    {
+      "when": {
+        "facing": "north",
+        "letter": "c"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_c"
+      }
     },
-    "facing=east,letter=c,open=false": {
-      "model": "every_tunnel:block/valve_closed_c",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "letter": "c"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_c",
+        "y": 90
+      }
     },
-    "facing=south,letter=c,open=false": {
-      "model": "every_tunnel:block/valve_closed_c",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "letter": "c"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_c",
+        "y": 180
+      }
     },
-    "facing=west,letter=c,open=false": {
-      "model": "every_tunnel:block/valve_closed_c",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "letter": "c"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_c",
+        "y": 270
+      }
     },
-    "facing=north,letter=c,open=true": {
-      "model": "every_tunnel:block/valve_open_c"
+    {
+      "when": {
+        "facing": "north",
+        "letter": "d"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_d"
+      }
     },
-    "facing=east,letter=c,open=true": {
-      "model": "every_tunnel:block/valve_open_c",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "letter": "d"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_d",
+        "y": 90
+      }
     },
-    "facing=south,letter=c,open=true": {
-      "model": "every_tunnel:block/valve_open_c",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "letter": "d"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_d",
+        "y": 180
+      }
     },
-    "facing=west,letter=c,open=true": {
-      "model": "every_tunnel:block/valve_open_c",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "letter": "d"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_d",
+        "y": 270
+      }
     },
-    "facing=north,letter=d,open=false": {
-      "model": "every_tunnel:block/valve_closed_d"
+    {
+      "when": {
+        "facing": "north",
+        "letter": "e"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_e"
+      }
     },
-    "facing=east,letter=d,open=false": {
-      "model": "every_tunnel:block/valve_closed_d",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "letter": "e"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_e",
+        "y": 90
+      }
     },
-    "facing=south,letter=d,open=false": {
-      "model": "every_tunnel:block/valve_closed_d",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "letter": "e"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_e",
+        "y": 180
+      }
     },
-    "facing=west,letter=d,open=false": {
-      "model": "every_tunnel:block/valve_closed_d",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "letter": "e"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_letter_e",
+        "y": 270
+      }
     },
-    "facing=north,letter=d,open=true": {
-      "model": "every_tunnel:block/valve_open_d"
+    {
+      "when": {
+        "facing": "north",
+        "turns": "0"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_0"
+      }
     },
-    "facing=east,letter=d,open=true": {
-      "model": "every_tunnel:block/valve_open_d",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "turns": "0"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_0",
+        "y": 90
+      }
     },
-    "facing=south,letter=d,open=true": {
-      "model": "every_tunnel:block/valve_open_d",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "turns": "0"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_0",
+        "y": 180
+      }
     },
-    "facing=west,letter=d,open=true": {
-      "model": "every_tunnel:block/valve_open_d",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "turns": "0"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_0",
+        "y": 270
+      }
     },
-    "facing=north,letter=e,open=false": {
-      "model": "every_tunnel:block/valve_closed_e"
+    {
+      "when": {
+        "facing": "north",
+        "turns": "1"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_1"
+      }
     },
-    "facing=east,letter=e,open=false": {
-      "model": "every_tunnel:block/valve_closed_e",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "turns": "1"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_1",
+        "y": 90
+      }
     },
-    "facing=south,letter=e,open=false": {
-      "model": "every_tunnel:block/valve_closed_e",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "turns": "1"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_1",
+        "y": 180
+      }
     },
-    "facing=west,letter=e,open=false": {
-      "model": "every_tunnel:block/valve_closed_e",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "turns": "1"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_1",
+        "y": 270
+      }
     },
-    "facing=north,letter=e,open=true": {
-      "model": "every_tunnel:block/valve_open_e"
+    {
+      "when": {
+        "facing": "north",
+        "turns": "2"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_2"
+      }
     },
-    "facing=east,letter=e,open=true": {
-      "model": "every_tunnel:block/valve_open_e",
-      "y": 90
+    {
+      "when": {
+        "facing": "east",
+        "turns": "2"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_2",
+        "y": 90
+      }
     },
-    "facing=south,letter=e,open=true": {
-      "model": "every_tunnel:block/valve_open_e",
-      "y": 180
+    {
+      "when": {
+        "facing": "south",
+        "turns": "2"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_2",
+        "y": 180
+      }
     },
-    "facing=west,letter=e,open=true": {
-      "model": "every_tunnel:block/valve_open_e",
-      "y": 270
+    {
+      "when": {
+        "facing": "west",
+        "turns": "2"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "turns": "3"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "turns": "3"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "turns": "3"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "turns": "3"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "turns": "4"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "turns": "4"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "turns": "4"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "turns": "4"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "turns": "5"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_5"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "turns": "5"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_5",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "turns": "5"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_5",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "turns": "5"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_5",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "turns": "6"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_6"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "turns": "6"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_6",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "turns": "6"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_6",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "turns": "6"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_6",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "turns": "7"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_7"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "turns": "7"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_7",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "turns": "7"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_7",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "turns": "7"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_7",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "turns": "8"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_8"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "turns": "8"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_8",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "turns": "8"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_8",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "turns": "8"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_8",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "turns": "9"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_9"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "turns": "9"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_9",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "turns": "9"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_9",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "turns": "9"
+      },
+      "apply": {
+        "model": "every_tunnel:block/valve_digit_9",
+        "y": 270
+      }
     }
-  }
+  ]
 }

@@ -1,0 +1,55 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "p": "every_tunnel:block/valve_plate_c",
+    "particle": "every_tunnel:block/valve_plate_c"
+  },
+  "elements": [
+    {
+      "from": [
+        12,
+        5,
+        8
+      ],
+      "to": [
+        12.25,
+        12,
+        12
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            4,
+            4,
+            8,
+            11
+          ],
+          "texture": "#p"
+        }
+      }
+    },
+    {
+      "from": [
+        3.75,
+        5,
+        4
+      ],
+      "to": [
+        4,
+        12,
+        8
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            4,
+            4,
+            8,
+            11
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

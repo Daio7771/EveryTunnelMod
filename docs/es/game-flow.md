@@ -173,16 +173,26 @@ Reabrir el mundo o reaparecer dentro de un nivel no cuenta como entrar.
 ## 9. Nivel 3 (B3)
 
 Las oficinas del complejo alrededor de la biblioteca central, en perfecto estado y vacías.
-De momento **solo está la estructura** (fase A): faltan el guardia observador, los libros, el
-puzle de las válvulas, las notas y el loot; sus zonas y puntos de spawn ya están en el
-archivo del nivel (ver [Niveles](levels.md#ganchos-del-nivel-3)).
+Hecho hasta ahora: la estructura, los muebles y el puzle de las válvulas; faltan el guardia
+observador, los libros, las demás notas y el loot, con sus zonas y puntos de spawn ya en el
+archivo del nivel (ver [Niveles](levels.md#ganchos-del-nivel-3)). La música queda para el
+final.
 
-- Tras la puerta abierta, unas escaleras bajan 8 bloques hasta la **antesala**. Al entrar
-  aparece "Level 3" (las escaleras no pertenecen a ninguna zona); ahí está su punto de spawn
-  con la etiqueta `player`.
+- Tras la puerta abierta, unas escaleras bajan 8 bloques hasta la **antesala**, el cuarto
+  eléctrico. Al entrar aparece "Level 3" (las escaleras no pertenecen a ninguna zona); ahí
+  está su punto de spawn con la etiqueta `player`. En su pared, un tablón de corcho con la
+  nota del electricista (`NoteBoardBlock`): con clic derecho se abre en papel (`NoteScreen`)
+  y dice, en letra, cuántas vueltas completas necesita cada válvula.
 - Al norte, el **pasillo de las válvulas**: cinco válvulas (A a E) en su pared este, cada
-  una un `ValveBlock` en línea en una tubería (cerradas; girarlas llegará con el puzle), y
-  luego un muro con una puerta doble de emergencia cerrada, el **checkpoint**.
+  una un `ValveBlock` en línea en una tubería, y luego un muro con una puerta doble de
+  emergencia cerrada, el **checkpoint**.
+- **El puzle de las válvulas** (`ValveHooks`): una partida nueva sortea una cifra del 0 al 9
+  para cada válvula y las pone todas en 0. Un clic derecho gira una válvula una vez más (de
+  9 vuelve a 0), con un golpe y agua en la tubería; la chapa de cada lado muestra su letra y
+  sus vueltas. Cuando las cinco marcan su cifra, un golpe de ariete recorre la tubería, las
+  válvulas quedan abiertas y fijas y se abren las puertas del checkpoint (zona con la
+  etiqueta `valve_door`). Equivocarse no cuesta nada. Al morir se conserva lo resuelto; solo
+  una partida nueva lo deshace. `/everytunnel valves` muestra las cifras.
 - Pasado este, a través del cinturón de 17 habitaciones, el **pasillo interior**: un anillo
   alrededor de la **biblioteca central** (64 × 64, 12 de alto, con lámparas colgadas de
   cadenas). Todas las luces están encendidas y las superficies, limpias.

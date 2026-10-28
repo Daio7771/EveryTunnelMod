@@ -3,9 +3,10 @@
   "textures": {
     "pipe": "every_tunnel:block/pipe",
     "body": "every_tunnel:block/valve_body",
-    "plate": "every_tunnel:block/valve_plate_d",
     "stem": "every_tunnel:block/valve_stem",
     "wheel": "every_tunnel:block/valve_wheel",
+    "p": "every_tunnel:block/valve_plate_a",
+    "d": "every_tunnel:block/valve_digit_0",
     "particle": "every_tunnel:block/pipe"
   },
   "elements": [
@@ -107,52 +108,6 @@
     },
     {
       "from": [
-        12,
-        5,
-        4
-      ],
-      "to": [
-        12.25,
-        12,
-        11
-      ],
-      "faces": {
-        "east": {
-          "uv": [
-            5,
-            4,
-            12,
-            11
-          ],
-          "texture": "#plate"
-        }
-      }
-    },
-    {
-      "from": [
-        3.75,
-        5,
-        4
-      ],
-      "to": [
-        4,
-        12,
-        11
-      ],
-      "faces": {
-        "west": {
-          "uv": [
-            5,
-            4,
-            12,
-            11
-          ],
-          "texture": "#plate"
-        }
-      }
-    },
-    {
-      "from": [
         7,
         7,
         1
@@ -212,6 +167,98 @@
             14
           ],
           "texture": "#wheel"
+        }
+      }
+    },
+    {
+      "from": [
+        12,
+        5,
+        8
+      ],
+      "to": [
+        12.25,
+        12,
+        12
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            4,
+            4,
+            8,
+            11
+          ],
+          "texture": "#p"
+        }
+      }
+    },
+    {
+      "from": [
+        3.75,
+        5,
+        4
+      ],
+      "to": [
+        4,
+        12,
+        8
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            4,
+            4,
+            8,
+            11
+          ],
+          "texture": "#p"
+        }
+      }
+    },
+    {
+      "from": [
+        12,
+        5,
+        4
+      ],
+      "to": [
+        12.25,
+        12,
+        8
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            8,
+            4,
+            12,
+            11
+          ],
+          "texture": "#d"
+        }
+      }
+    },
+    {
+      "from": [
+        3.75,
+        5,
+        8
+      ],
+      "to": [
+        4,
+        12,
+        12
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            8,
+            4,
+            12,
+            11
+          ],
+          "texture": "#d"
         }
       }
     }

@@ -17,6 +17,7 @@
 | `/everytunnel paleman` | The Pale men near you: state and target |
 | `/everytunnel intro` | Plays the elevator intro again (Survival or Adventure) |
 | `/everytunnel newgame` | Starts the game over in this world |
+| `/everytunnel valves` | This game's valve digits for Level 3 (A to E) |
 | `/everytunnel rebuilt` | Run by `garage:build` at its end: puts the loot back. Not for hand use |
 | `/everytunnel devworld save\|forget` | Dev runs only, see [Building](building-and-release.md#dev-worlds) |
 

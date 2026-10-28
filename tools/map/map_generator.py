@@ -232,7 +232,7 @@ LEVEL_3 = dict(
     CHECKPOINT_DEPTH=3,              # the checkpoint zone: this many blocks past that door
     VALVES=[("A", 160), ("B", 166), ("C", 172), ("D", 178), ("E", 184)],    # (letter, z) on the east wall
     VALVE_HEIGHT=2,                  # the valve's block in its pipe, over the floor's blocks (hand height)
-    ANTECHAMBER=(74, 190, 86, 200),
+    ANTECHAMBER=(74, 190, 86, 200),  # the electrical room (ELECTRICAL_ROOM)
     # The stairs up to Level 2, climbing south: a landing of STAIRS_LANDING at each end and
     # STAIRS_DROP steps (one block each) between them; its length must be 2 landings + the steps.
     STAIRS=(76, 200, 84, 212),
@@ -263,10 +263,18 @@ LEVEL_3 = dict(
     LIBRARY_LAYOUT=dict(shelf_height=4, aisle=2, perimeter=2, clearing=16, table=(3, 2), desk=dict(
         counter=((71, 77), 121, "south"), area=(66, 116, 78, 127),
         catalog=(84, (120, 123), "west"), catalog_area=(83, 116, 93, 127))),
+    # The antechamber is the electrical room: panels on its side walls (x, z, facing), cabinets,
+    # and the cork board with the electrician's note (`id` names its text, notes/<lang>/<id>.txt
+    # in the mod; it tells this game's valve digits).
+    ELECTRICAL_ROOM=dict(
+        panels=[(74, 191, "east"), (74, 193, "east"), (74, 197, "east"),
+                (85, 191, "west"), (85, 193, "west"), (85, 195, "west"), (85, 197, "west")],
+        cabinets=[(74, 199, "east"), (85, 199, "west")],
+        note=dict(id="pressure_line", x=74, z=195, facing="east")),
     CORRIDOR_PLANTS=[(43, 61), (116, 61), (43, 134), (116, 134)],                 # (x, z): the ring's corners
     CORRIDOR_CLOCKS=[(67, 61, "south"), (100, 134, "north"), (43, 110, "east"), (116, 110, "west")],
     BOOK_SPOTS={},                   # room id -> (x, z) of the filing cabinet its book lies on; else its template's
-    NOTE_SPOTS=[],                   # (x, z) on the main floor: not placed yet
+    NOTE_SPOTS=[],                   # (x, z) on the main floor: other notes, not placed yet
     BATTERY_SPOTS=[],
     WATER_SPOTS=[],
     FOOD_SPOTS=[],

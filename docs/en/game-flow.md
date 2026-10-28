@@ -163,16 +163,25 @@ Reopening the world or respawning inside a level does not count as walking in.
 
 ## 9. Level 3 (B3)
 
-The offices of the complex around the central library, in perfect order and empty. So far
-**only the structure** is built (phase A): the observant guard, the books, the valve
-puzzle, the notes and the loot are still to come; their zones and spawn points are already
-in the level file (see [Levels](levels.md#level-3-hooks)).
+The offices of the complex around the central library, in perfect order and empty. Built
+so far: the structure, the furniture and the valve puzzle; the observant guard, the books,
+the other notes and the loot are still to come, their zones and spawn points already in the
+level file (see [Levels](levels.md#level-3-hooks)). The music is planned for last.
 
-- Behind the open door, stairs climb down 8 blocks to the **antechamber**. Walking into it
-  shows "Level 3" (the stairs belong to no zone); its spawn point tagged `player` is there.
+- Behind the open door, stairs climb down 8 blocks to the **antechamber**, the electrical
+  room. Walking into it shows "Level 3" (the stairs belong to no zone); its spawn point
+  tagged `player` is there. On its wall, a cork board with the electrician's note
+  (`NoteBoardBlock`): right-clicked, it opens on paper (`NoteScreen`) and tells, in words,
+  how many full turns each valve needs.
 - North, the **valve corridor**: five valves (A to E) on its east wall, each a `ValveBlock`
-  inline in a pipe (shut; turning them comes with the puzzle), then a wall with a closed
-  double emergency door, the **checkpoint**.
+  inline in a pipe, then a wall with a closed double emergency door, the **checkpoint**.
+- **The valve puzzle** (`ValveHooks`): a new game draws a digit 0 to 9 for each valve and
+  puts every valve on 0. A right-click turns a valve once more (from 9 back to 0), with a
+  clunk and water in the pipe; the plate on each side shows its letter and its turns. When
+  all five show their digits, a water hammer bangs through the pipe, the valves lock open
+  and the checkpoint's doors (zone tagged `valve_door`) open. Getting it wrong costs
+  nothing. Dying keeps what is solved; only a new game sets it back.
+  `/everytunnel valves` shows the digits.
 - Past it, through the belt of 17 rooms, the **inner corridor**: a ring round the
   **central library** (64 × 64, 12 high, lit by lights hanging on chains). Every light is
   on; the surfaces are clean.

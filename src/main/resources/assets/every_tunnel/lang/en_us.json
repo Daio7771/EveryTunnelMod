@@ -67,7 +67,7 @@
   "menu.every_tunnel.guide": "GUIDE",
   "menu.every_tunnel.credits": "CREDITS",
   "menu.every_tunnel.exit": "EXIT",
-  "menu.every_tunnel.version": "v%s demo",
+  "menu.every_tunnel.version": "v%s Beta (Level 3)",
   "menu.every_tunnel.world_missing": "The map is missing. Reinstall the mod.",
   "loading.every_tunnel.tip.1": "He can't see you. He doesn't need to. Sneak ({sneak}) to walk quietly.",
   "loading.every_tunnel.tip.2": "The flashlight ({flashlight}) is company property. The batteries are your problem.",
@@ -134,5 +134,16 @@
   "block.every_tunnel.reading_table": "Reading Table",
   "block.every_tunnel.wooden_chair": "Wooden Chair",
   "block.every_tunnel.library_counter": "Library Counter",
-  "block.every_tunnel.card_catalog": "Card Catalog"
+  "block.every_tunnel.card_catalog": "Card Catalog",
+  "note.every_tunnel.number.0": "zero",
+  "note.every_tunnel.number.1": "one",
+  "note.every_tunnel.number.2": "two",
+  "note.every_tunnel.number.3": "three",
+  "note.every_tunnel.number.4": "four",
+  "note.every_tunnel.number.5": "five",
+  "note.every_tunnel.number.6": "six",
+  "note.every_tunnel.number.7": "seven",
+  "note.every_tunnel.number.8": "eight",
+  "note.every_tunnel.number.9": "nine",
+  "block.every_tunnel.note_board": "Note Board"
 }

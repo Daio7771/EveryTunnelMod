@@ -251,6 +251,21 @@
       }
     ]
   },
+  "block.valve.release": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/valve/release_1",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "block.valve.turn": {
+    "sounds": [
+      "every_tunnel:block/valve/turn_1",
+      "every_tunnel:block/valve/turn_2",
+      "every_tunnel:block/valve/turn_3"
+    ]
+  },
   "block.wire_mesh.impact": {
     "sounds": [
       {

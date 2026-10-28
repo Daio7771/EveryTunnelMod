@@ -72,6 +72,7 @@ class Offices:
         self.furniture = set()   # cells of solid furniture
         self.walk_through = set()  # cells of furniture a player walks through (chairs, plants...)
         self.books = {}          # room id -> (x, z) of the cabinet its book lies on
+        self.notes = {}          # note id -> (x, y, z) of the board it is pinned to
 
     # --- spaces --------------------------------------------------------------------
 
@@ -317,7 +318,7 @@ class Offices:
                 arms = dict(north=False, south=False, east=False, west=False, up=y < h, down=y > 1)
                 self.fittings[(px, y, z)] = p.BLOCKS["pipe"] + "[" + ",".join(
                     f"{k}={'true' if v else 'false'}" for k, v in arms.items()) + "]"
-            self.fittings[(px, vy, z)] = f"{p.BLOCKS['valve']}[facing=west,letter={letter.lower()},open=false]"
+            self.fittings[(px, vy, z)] = f"{p.BLOCKS['valve']}[facing=west,letter={letter.lower()},open=false,turns=0]"
             self.valves.append((letter, (px, vy, z)))
 
     def hatch(self):
@@ -363,6 +364,8 @@ class Offices:
         cx0, _, cx1, _ = p.VALVE_CORRIDOR
         cz = p.CHECKPOINT_Z
         self.zone("checkpoint", (cx0, cz - p.CHECKPOINT_DEPTH, cx1, cz), 1, H["corridor"], ["checkpoint"])
+        mid = (cx0 + cx1) // 2                            # the double door the valves open
+        self.zone("checkpoint_door", (mid - 1, cz, mid + 1, cz + 1), 1, 2, ["valve_door"])
         self.zone("antechamber", p.ANTECHAMBER, 1, H["antechamber"])
         floor, bh = self.bunker_floor, p.BUNKER["height"]
         self.zone("bunker_shaft", p.HATCH["hole"], floor + bh + 1, 0)
@@ -387,12 +390,14 @@ class Offices:
             self.spawn(f"book_{s.id}", bx, 2, bz, "north", ["book_spot"], s.id)
         for letter, (x, y, z) in self.valves:
             self.spawn(f"valve_{letter.lower()}", x, y, z, "west", ["valve"])
+        for note_id, (x, y, z) in self.notes.items():
+            self.spawn(note_id, x, y, z, "north", ["note"])
         for tag, spots in (("note_spot", p.NOTE_SPOTS), ("battery_spot", p.BATTERY_SPOTS),
                            ("water_spot", p.WATER_SPOTS), ("food_spot", p.FOOD_SPOTS)):
             for i, (x, z) in enumerate(spots):
                 self.spawn(f"{tag[:-5]}_{i + 1}", x, 1, z, "north", [tag])
         self.labels += [(p.VALVE_CORRIDOR[0] - 10, p.CHECKPOINT_Z, "checkpoint"),
-                        ((p.ANTECHAMBER[0] + p.ANTECHAMBER[2]) // 2, p.ANTECHAMBER[1] + 6, "Antechamber"),
+                        ((p.ANTECHAMBER[0] + p.ANTECHAMBER[2]) // 2, p.ANTECHAMBER[1] + 6, "Electrical room"),
                         ((p.STAIRS[0] + p.STAIRS[2]) // 2, p.STAIRS[3] + 3, "stairs up to B2")]
 
 

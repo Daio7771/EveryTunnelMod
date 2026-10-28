@@ -17,7 +17,8 @@ import net.minecraft.world.GameMode
  *
  * - The world: every shutter opens ([LevelEntryHooks.openAll]), all the loot is back
  *   ([LootSpawner.restock]), the lights the keycard put out are back and the card readers
- *   locked ([KeycardHooks]), and every Pale man goes back to his spawn point (also the ones in unloaded chunks, when they load:
+ *   locked ([KeycardHooks]), Level 3's valves back on 0 with new digits and their door shut
+ *   ([ValveHooks]), and every Pale man goes back to his spawn point (also the ones in unloaded chunks, when they load:
  *   [PaleManSpawner.startNewGame]).
  * - The player: empty inventory, full health and resources, Survival, and back at the
  *   start of the first level with an intro, which plays again ([IntroHooks.replay]); without
@@ -35,6 +36,7 @@ object NewGame {
     fun levelsRebuilt(server: MinecraftServer) {
         LevelEntryHooks.openAll(server)
         KeycardHooks.forgetLights(server)
+        ValveHooks.levelsRebuilt()
         LootSpawner.restock(server)
         PaleManSpawner.startNewGame(server)
         LoadingHooks.levelsRebuilt(server)
@@ -48,6 +50,7 @@ object NewGame {
         LootSpawner.restock(server)
         KeycardHooks.restoreLights(server)
         KeycardHooks.resetReaders(server)
+        ValveHooks.newGame(server)
         PaleManSpawner.startNewGame(server)
 
         player.inventory.clear()

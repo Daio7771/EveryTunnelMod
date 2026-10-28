@@ -19,7 +19,7 @@ con un comentario KDoc que cuenta más.
 | `GameplayConfigParser.kt` | JSON ↔ configuración, rangos de valores, problemas y claves ausentes. Sin E/S de archivos |
 | `ConfigManager.kt` | Carga y escribe `config/every_tunnel/gameplay.json` de forma segura |
 
-### `core/`, `core/level/`, `core/guide/` y `core/menu/`
+### `core/`, `core/level/`, `core/guide/`, `core/menu/` y `core/puzzle/`
 
 | Archivo | Qué hace |
 |---|---|
@@ -30,6 +30,8 @@ con un comentario KDoc que cuenta más.
 | `guide/GuideMarkdown.kt` | Lee una página de la guía del jugador (el subconjunto de Markdown) en bloques |
 | `menu/LampFlicker.kt` | Cuándo parpadean las lámparas de la escena del menú |
 | `menu/BlockLight.kt` | Luz de bloque para una caja de bloques sin mundo (la escena del menú) |
+| `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
+| `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
 
 ### `systems/`
 
@@ -85,6 +87,7 @@ con un comentario KDoc que cuenta más.
 | `FloorIndicatorBlock.kt` | El indicador LED de planta del ascensor |
 | `ShutterBlock.kt` | Una pieza de una persiana metálica |
 | `CardReaderBlock.kt` | El lector de tarjetas que abre puertas de hierro |
+| `NoteBoardBlock.kt` | Un tablón de corcho con una nota: clic derecho para leerla |
 | `FurnitureBlocks.kt` | Los muebles del nivel 3 que se unen a los de su clase: piezas en fila (mesas, barras, sofás) a izquierda y derecha, tableros de mesa por todos los lados, piezas apiladas (estanterías, racks, taquillas) arriba y abajo |
 | `ValveBlock.kt` | Una válvula de compuerta en línea en una tubería de pared: orientación, abierta, letra A a E (nivel 3) |
 | `LootBlock.kt` | Botín tirado en el suelo, se recoge con clic derecho |
@@ -118,6 +121,8 @@ con un comentario KDoc que cuenta más.
 | `LevelEntryHooks.kt` | Títulos de nivel y persianas que se cierran tras el jugador |
 | `LootSpawner.kt` | Coloca y repone el botín en los puntos con etiqueta |
 | `KeycardHooks.kt` | Ola de apagado, restaurar luces, bloquear lectores |
+| `ValveHooks.kt` | El puzle de las válvulas del nivel 3: cifras por partida, comprobar giros, abrir la puerta, reiniciar |
+| `NoteHooks.kt` | Leer una nota clavada: busca su id y la envía con las cifras de las válvulas |
 | `EndingHooks.kt` | El final de la demo: pasos, fundido, pantalla final |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
@@ -188,6 +193,7 @@ con un comentario KDoc que cuenta más.
 |---|---|
 | `MainMenuScreen.kt` | El menú principal |
 | `GuideScreen.kt` | La guía del jugador: una hoja de papel con scroll y pestañas |
+| `NoteScreen.kt` | Una nota leída en el papel de la guía sobre el juego, con los huecos rellenos |
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |
 | `LoadingTips.kt` | Consejos que van cambiando, con las teclas del jugador |
 | `EndOfDemoScreen.kt` | "End of demo" y los créditos que suben |

@@ -1,0 +1,14 @@
+PRESSURE LINE - SETTINGS
+
+Valves A to E feed the line that keeps the door locked.
+Each valve needs its exact number of full turns.
+They only turn one way. If you go too far, the valve resets to zero.
+Every valve clunks the same. You cannot hear which one is wrong.
+
+Valve A: {A:word}
+Valve B: {B:word}
+Valve C: {C:word}
+Valve D: {D:word}
+Valve E: {E:word}
+
+When all five are right, the lock releases.

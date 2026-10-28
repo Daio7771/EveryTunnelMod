@@ -98,6 +98,8 @@ object ModBlocks {
     )
     /** A gate valve inline in a wall pipe, lettered A to E: Level 3's valve corridor. */
     val VALVE: Block = register("valve", ValveBlock(props(MapColor.RED, ModSoundGroups.METAL_PIPE)))
+    /** A cork board with a note pinned to it; right-click reads the note (NoteHooks). */
+    val NOTE_BOARD: Block = register("note_board", NoteBoardBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision()))
     val DUCT: Block = register(
         "duct",
         ConnectingPropBlock(

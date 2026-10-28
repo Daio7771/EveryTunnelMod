@@ -3,7 +3,6 @@
   "textures": {
     "pipe": "every_tunnel:block/pipe",
     "body": "every_tunnel:block/valve_body",
-    "plate": "every_tunnel:block/valve_plate_e",
     "stem": "every_tunnel:block/valve_stem",
     "wheel": "every_tunnel:block/valve_wheel_turned",
     "particle": "every_tunnel:block/pipe"
@@ -102,52 +101,6 @@
         },
         "down": {
           "texture": "#body"
-        }
-      }
-    },
-    {
-      "from": [
-        12,
-        5,
-        4
-      ],
-      "to": [
-        12.25,
-        12,
-        11
-      ],
-      "faces": {
-        "east": {
-          "uv": [
-            5,
-            4,
-            12,
-            11
-          ],
-          "texture": "#plate"
-        }
-      }
-    },
-    {
-      "from": [
-        3.75,
-        5,
-        4
-      ],
-      "to": [
-        4,
-        12,
-        11
-      ],
-      "faces": {
-        "west": {
-          "uv": [
-            5,
-            4,
-            12,
-            11
-          ],
-          "texture": "#plate"
         }
       }
     },

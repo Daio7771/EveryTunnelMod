@@ -1,0 +1,55 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "d": "every_tunnel:block/valve_digit_8",
+    "particle": "every_tunnel:block/valve_digit_8"
+  },
+  "elements": [
+    {
+      "from": [
+        12,
+        5,
+        4
+      ],
+      "to": [
+        12.25,
+        12,
+        8
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            8,
+            4,
+            12,
+            11
+          ],
+          "texture": "#d"
+        }
+      }
+    },
+    {
+      "from": [
+        3.75,
+        5,
+        8
+      ],
+      "to": [
+        4,
+        12,
+        12
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            8,
+            4,
+            12,
+            11
+          ],
+          "texture": "#d"
+        }
+      }
+    }
+  ]
+}

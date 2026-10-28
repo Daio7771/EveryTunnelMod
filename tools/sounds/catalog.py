@@ -865,6 +865,42 @@ def card_reader_deny(rng, variant):
     return fade(lowpass(y, 4000.0), 0.0, 0.05)
 
 
+
+def valve_turn(rng, variant):
+    """One full turn of a valve's handwheel: the ratchet ticking round, the clunk of the turn
+    coming home, then water shifting in the pipe (a few bubbles and a low gurgle). Every valve
+    sounds the same, as the electrician's note says."""
+    n = samples(1.1)
+    y = np.zeros(n)
+    at = 0.0
+    for _ in range(int(rng.integers(4, 6))):                                                # the ratchet's pawl
+        y += knock(n, rng, at, rng.uniform(2300, 2700), [1.0, 1.9], [0.25, 0.1], [0.006, 0.004], click=0.35, click_hi=9000.0)
+        at += rng.uniform(0.045, 0.06)
+    y += knock(n, rng, at + 0.02, rng.uniform(170, 200), [1.0, 2.756, 5.404], [1.0, 0.45, 0.2], [0.14, 0.07, 0.04], click=0.9)
+    y += burst(n, rng, at + 0.02, 0.05, hi=500.0, tau=0.02, amp=0.8)                         # the body's thud
+    flow = shaped_noise(n, rng, 1.2, 120.0, 900.0) * envelope(n, [(0.0, 0.0), (at + 0.05, 0.0), (at + 0.2, 0.28), (1.05, 0.0)])
+    y += resonator(flow, rng.uniform(210, 240), 6.0) * 0.6 + flow * 0.4
+    for _ in range(int(rng.integers(3, 6))):
+        y += bubble(n, rng.uniform(at + 0.1, 0.9), rng.uniform(3.5, 6.5), rng.uniform(0.08, 0.16), rng, rise=0.05)
+    return fade(lowpass(y, 7000.0), 0.0, 0.08)
+
+
+def valve_release(rng, variant):
+    """All five valves right: a water hammer bangs through the pipe, the pipe rings and knocks
+    as the pressure drops, a long hiss fades out and the last bubbles settle."""
+    n = samples(3.4)
+    t = time_axis(n)
+    y = knock(n, rng, 0.02, 92.0, [1.0, 2.1, 2.756, 5.404], [1.0, 0.6, 0.5, 0.25], [0.5, 0.3, 0.25, 0.12], click=1.2)
+    y += burst(n, rng, 0.02, 0.08, hi=300.0, tau=0.04, amp=1.4)
+    for k, at in enumerate((0.55, 0.95, 1.25)):                                              # the pipe knocking down
+        y += (0.5 - 0.12 * k) * knock(n, rng, at, rng.uniform(260, 320), [1.0, 2.756, 5.404], [1.0, 0.5, 0.25], [0.3, 0.15, 0.08])
+    hiss = shaped_noise(n, rng, 0.3, 1500.0, 7000.0) * np.exp(-np.maximum(t - 0.1, 0.0) / 0.9) * (t > 0.08)
+    y += 0.35 * hiss
+    for _ in range(8):
+        y += bubble(n, rng.uniform(0.4, 2.6), rng.uniform(4.0, 9.0), rng.uniform(0.05, 0.12), rng, rise=0.05)
+    return fade(y, 0.0, 0.3)
+
+
 def shutter_close(rng, variant):
     """
     A rolling shutter dropping shut: the slats clatter down the guide rails faster and
@@ -965,6 +1001,10 @@ SOUNDS = [
     Sound("block.card_reader.accept", "Level progress", "The exit's card reader taking the keycard (beeps, lock opens)", "mono", False, 1,
           card_reader_accept, -3.0),
     Sound("block.card_reader.deny", "Level progress", "The card reader refusing (no keycard)", "mono", False, 1, card_reader_deny, -6.0),
+    Sound("block.valve.turn", "Level progress", "One full turn of a Level 3 valve (ratchet, clunk, water in the pipe)", "mono", False, 3,
+          valve_turn, -4.0),
+    Sound("block.valve.release", "Level progress", "Level 3's valves all right: water hammer, the pipe settles, the door unlocks", "mono",
+          False, 1, valve_release, -2.0, attenuation=24),
     Sound("block.shutter.close", "Level progress", "The rolling shutter closing behind the player (rattle down, slam)", "mono", False, 1,
           shutter_close, -1.0, attenuation=32),
     Sound("event.level_transition", "Level progress", "Going from Level 1 to Level 2", "stereo", False, 1, level_transition, -1.0),

@@ -400,21 +400,74 @@ def valve_stem_tex(rng):
     return img
 
 
+# Painted digits of the valves' dial windows, 3 x 5 pixels.
+VALVE_DIGITS = [
+    ["###", "#.#", "#.#", "#.#", "###"], [".#.", "##.", ".#.", ".#.", "###"], ["###", "..#", "###", "#..", "###"],
+    ["###", "..#", ".##", "..#", "###"], ["#.#", "#.#", "###", "..#", "..#"], ["###", "#..", "###", "..#", "###"],
+    ["###", "#..", "###", "#.#", "###"], ["###", "..#", ".#.", ".#.", ".#."], ["###", "#.#", "###", "#.#", "###"],
+    ["###", "#.#", "###", "..#", "###"],
+]
+PLATE_EDGE = (120, 122, 118)
+
+
 def valve_plate_tex(rng, letter):
-    """An enamel plate with a painted letter, in the pixels the model's plates show (x 5-11, y 4-10)."""
+    """The left half of a side plate: an enamel plate with the letter painted on, in the pixels
+    the model shows (x 4-7, y 4-10; the dial window takes x 8-11)."""
     img = new((92, 104, 94))
-    rect(img, 5, 4, 11, 10, (214, 212, 200))
-    for x in range(5, 12):
-        px(img, x, 4, (120, 122, 118), 0.8)
-        px(img, x, 10, (120, 122, 118), 0.8)
+    rect(img, 4, 4, 7, 10, (214, 212, 200))
+    for x in range(4, 8):
+        px(img, x, 4, PLATE_EDGE, 0.8)
+        px(img, x, 10, PLATE_EDGE, 0.8)
     for y in range(4, 11):
-        px(img, 5, y, (120, 122, 118), 0.8)
-        px(img, 11, y, (120, 122, 118), 0.8)
+        px(img, 4, y, PLATE_EDGE, 0.8)
     for row, line in enumerate(VALVE_LETTERS[letter]):
         for col, c in enumerate(line):
             if c == "#":
-                px(img, 7 + col, 5 + row, (28, 28, 30))
+                px(img, 5 + col, 5 + row, (28, 28, 30))
     noise(img, rng, 2)
+    return img
+
+
+def valve_digit_tex(rng, digit):
+    """The right half of a side plate: the dial's little dark window with its turns, 0 to 9
+    (x 8-11, y 4-10)."""
+    img = new((92, 104, 94))
+    rect(img, 8, 4, 11, 10, (30, 30, 32))
+    for x in range(8, 12):
+        px(img, x, 4, PLATE_EDGE, 0.8)
+        px(img, x, 10, PLATE_EDGE, 0.8)
+    for y in range(4, 11):
+        px(img, 11, y, PLATE_EDGE, 0.8)
+    for row, line in enumerate(VALVE_DIGITS[digit]):
+        for col, c in enumerate(line):
+            if c == "#":
+                px(img, 8 + col, 5 + row, (236, 214, 150))
+    return img
+
+
+def cork_tex(rng):
+    img = new((150, 110, 70))
+    noise(img, rng, 10)
+    speckle(img, rng, 30, (110, 78, 46), 0.7)
+    speckle(img, rng, 20, (178, 138, 92), 0.6)
+    for i in range(16):
+        px(img, i, 0, (96, 70, 44), 0.8)
+        px(img, i, 15, (96, 70, 44), 0.8)
+        px(img, 0, i, (96, 70, 44), 0.8)
+        px(img, 15, i, (96, 70, 44), 0.8)
+    return img
+
+
+def pinned_note_tex(rng):
+    """Typed sheets pinned to the board: rows of grey type, a heading line."""
+    img = new((232, 230, 220))
+    noise(img, rng, 2)
+    for x in range(2, 12):
+        px(img, x, 2, (60, 60, 66), 0.9)
+    for y in range(5, 15, 2):
+        for x in range(2, rng.randrange(9, 14)):
+            if rng.random() < 0.85:
+                px(img, x, y, (120, 120, 126), 0.7)
     return img
 
 
@@ -1305,41 +1358,71 @@ def build():
             variants[f"facing={facing},unlocked={unlocked}"] = v
     a.block("card_reader", "Card Reader", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
 
+    def facing_parts(models, when=None):
+        """Multipart parts turning `models` (one name, or several picked at random) to each facing."""
+        out = []
+        for facing, y in HORIZONTAL.items():
+            apply = [{"model": f"{NS}:block/{m}", **({"y": y} if y else {})} for m in ([models] if isinstance(models, str) else models)]
+            out.append({"when": {"facing": facing, **(when or {})}, "apply": apply if len(apply) > 1 else apply[0]})
+        return out
+
     # Valve: a gate valve inline in a wall pipe (ValveBlock's shapes), facing north: the pipe
-    # through it, a stub back into the wall, the body with a lettered plate on each side, the
-    # red handwheel on its hub; open, the rising stem stands out through the wheel.
+    # through it, a stub back into the wall, the body, the red handwheel on its hub; open, the
+    # rising stem stands out through the wheel. On each side a plate: the letter on the left,
+    # the dial's window with its turns on the right, as seen from that side. A multipart: the
+    # body by open, the letter halves by letter, the windows by turns.
     a.texture("valve_body", valve_body_tex(r("valve_body")), T.PAINTED_METAL.but(smoothness=0.35))
     a.texture("valve_stem", valve_stem_tex(r("valve_stem")), T.STEEL.but(smoothness=0.6, metal=255))
     for turned in (False, True):
         a.texture(f"valve_wheel{'_turned' if turned else ''}", valve_wheel_tex(r("valve_wheel"), turned),
                   T.PAINTED_METAL.but(smoothness=0.5, relief=0.4), tiles=False)
-    variants = {}
+    parts = []
+    for opened in ("false", "true"):
+        name = f"valve_{'open' if opened == 'true' else 'closed'}"
+        elements = [
+            element((5, 0, 5), (11, 16, 11), "pipe"),
+            element((5, 5, 11), (11, 11, 16), "pipe"),
+            element((4, 4, 4), (12, 12, 12), "body"),
+            element((7, 7, 1), (9, 9, 4), "stem"),
+            {"from": [2, 2, 2], "to": [14, 14, 3], "faces": {
+                "north": {"uv": [2, 2, 14, 14], "texture": "#wheel"},
+                "south": {"uv": [2, 2, 14, 14], "texture": "#wheel"}}},
+        ]
+        if opened == "true":
+            elements.append(element((7.5, 7.5, -2), (8.5, 8.5, 1), "stem"))
+        a.models[name] = model({"pipe": "pipe", "body": "valve_body", "stem": "valve_stem",
+                                "wheel": "valve_wheel_turned" if opened == "true" else "valve_wheel"}, elements)
+        parts.append((name, {"open": opened}))
+
+    def plate_halves(key, east_z, west_z, uv):
+        return [{"from": [12, 5, east_z[0]], "to": [12.25, 12, east_z[1]], "faces": {"east": {"uv": uv, "texture": f"#{key}"}}},
+                {"from": [3.75, 5, west_z[0]], "to": [4, 12, west_z[1]], "faces": {"west": {"uv": uv, "texture": f"#{key}"}}}]
+
     for letter in VALVE_LETTERS:
         a.texture(f"valve_plate_{letter}", valve_plate_tex(r("valve_plate"), letter), T.PAINTED_METAL.but(smoothness=0.6, relief=0.2))
-        for opened in ("false", "true"):
-            name = f"valve_{'open' if opened == 'true' else 'closed'}_{letter}"
-            wheel = "valve_wheel_turned" if opened == "true" else "valve_wheel"
-            elements = [
-                element((5, 0, 5), (11, 16, 11), "pipe"),
-                element((5, 5, 11), (11, 11, 16), "pipe"),
-                element((4, 4, 4), (12, 12, 12), "body"),
-                {"from": [12, 5, 4], "to": [12.25, 12, 11], "faces": {"east": {"uv": [5, 4, 12, 11], "texture": "#plate"}}},
-                {"from": [3.75, 5, 4], "to": [4, 12, 11], "faces": {"west": {"uv": [5, 4, 12, 11], "texture": "#plate"}}},
-                element((7, 7, 1), (9, 9, 4), "stem"),
-                {"from": [2, 2, 2], "to": [14, 14, 3], "faces": {
-                    "north": {"uv": [2, 2, 14, 14], "texture": "#wheel"},
-                    "south": {"uv": [2, 2, 14, 14], "texture": "#wheel"}}},
-            ]
-            if opened == "true":
-                elements.append(element((7.5, 7.5, -2), (8.5, 8.5, 1), "stem"))
-            a.models[name] = model({"pipe": "pipe", "body": "valve_body", "plate": f"valve_plate_{letter}",
-                                    "stem": "valve_stem", "wheel": wheel}, elements)
-            for facing, y in HORIZONTAL.items():
-                v = {"model": f"{NS}:block/{name}"}
-                if y:
-                    v["y"] = y
-                variants[f"facing={facing},letter={letter},open={opened}"] = v
-    a.block("valve", "Valve", {"variants": variants}, {"parent": f"{NS}:block/valve_closed_a"})
+        a.models[f"valve_letter_{letter}"] = model({"p": f"valve_plate_{letter}"}, plate_halves("p", (8, 12), (4, 8), [4, 4, 8, 11]))
+        parts.append((f"valve_letter_{letter}", {"letter": letter}))
+    for digit in range(10):
+        a.texture(f"valve_digit_{digit}", valve_digit_tex(r("valve_digit"), digit), T.PAINTED_METAL.but(smoothness=0.7, relief=0.1))
+        a.models[f"valve_digit_{digit}"] = model({"d": f"valve_digit_{digit}"}, plate_halves("d", (4, 8), (8, 12), [8, 4, 12, 11]))
+        parts.append((f"valve_digit_{digit}", {"turns": str(digit)}))
+    multipart = []
+    for name, when in parts:
+        multipart += facing_parts(name, when)
+    inventory = a.models["valve_closed"]["elements"] + a.models["valve_letter_a"]["elements"] + a.models["valve_digit_0"]["elements"]
+    a.models["valve_inventory"] = model({"pipe": "pipe", "body": "valve_body", "stem": "valve_stem", "wheel": "valve_wheel",
+                                         "p": "valve_plate_a", "d": "valve_digit_0"}, inventory)
+    a.block("valve", "Valve", {"multipart": multipart}, {"parent": f"{NS}:block/valve_inventory"})
+
+    # Note board: cork on a wall (NoteBoardBlock's shape), typed sheets pinned to it.
+    a.texture("cork", cork_tex(r("cork")), T.Material(0.05, porosity=0.9, relief=0.7))
+    a.texture("pinned_note", pinned_note_tex(r("pinned_note")), T.PAPER)
+    a.texture("pin_red", plastic_tex(r("pin_red"), (180, 40, 36)), T.PLASTIC.but(smoothness=0.7))
+    a.models["note_board"] = model({"c": "cork", "n": "pinned_note", "r": "pin_red"}, [
+        element((1, 2, 15), (15, 14, 16), "c"),
+        element((3, 4, 14.8), (9, 13, 15), "n"), element((8, 3, 14.6), (13, 10, 14.8), "n"),
+        element((5.5, 12, 14.4), (6.5, 13, 14.8), "r"), element((10, 9, 14.2), (11, 10, 14.6), "r")])
+    a.block("note_board", "Note Board", horizontal_blockstate("note_board"), {"parent": f"{NS}:block/note_board"})
 
     # --- Level 3 furniture (FurnitureBlocks.kt): models facing north, the front at z = 0. Row
     # pieces put their end pieces where they do not join (left = east, as seen from the front),
@@ -1382,14 +1465,6 @@ def build():
             key, uv = (v, None) if isinstance(v, str) else v
             e["faces"][f] = {"texture": f"#{key}", **({"uv": list(uv)} if uv else {})}
         return e
-
-    def facing_parts(models, when=None):
-        """Multipart parts turning `models` (one name, or several picked at random) to each facing."""
-        out = []
-        for facing, y in HORIZONTAL.items():
-            apply = [{"model": f"{NS}:block/{m}", **({"y": y} if y else {})} for m in ([models] if isinstance(models, str) else models)]
-            out.append({"when": {"facing": facing, **(when or {})}, "apply": apply if len(apply) > 1 else apply[0]})
-        return out
 
     def row(block_id, name, textures, core, left=(), right=(), ao=True):
         """A row piece: `core` always, `left` / `right` (the end pieces) where it does not join."""
