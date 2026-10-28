@@ -39,7 +39,7 @@ platform/                                           everything that touches Mine
 | `core.achievement` | `Achievement`, the eight achievements |
 | `core.hiding` | `LookLimit`, how far the head turns in a locker |
 | `systems` | `ResourceSystem` (stamina, thirst, battery), `NoiseSystem`, `FlashlightBeam` (beam math) |
-| `entities` | `PaleManBrain`, the Pale man's decisions |
+| `entities` | `PaleManBrain` and `ObserverBrain`, the Pale man's and the Observer's decisions |
 | `util` | `JsonFields`, a forgiving JSON reader shared by both parsers |
 | `world` | `WorldRules` (when the rules apply), `LevelTriggers` (zone enter/exit listeners) |
 | `platform` | Blocks, items, the entity, sounds, every `*Hooks` object, packets, commands |

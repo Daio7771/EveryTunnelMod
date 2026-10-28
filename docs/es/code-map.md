@@ -48,6 +48,7 @@ con un comentario KDoc que cuenta más.
 | Archivo | Qué hace |
 |---|---|
 | `PaleManBrain.kt` | La máquina de estados del Pale man y la fórmula del volumen |
+| `ObserverBrain.kt` | La máquina de estados del Observer (patrulla, aviso, persecución, búsqueda, sacar de la taquilla) y sus números |
 | `Package.kt` | Documentación del paquete |
 
 ### `util/` y `world/`
@@ -79,7 +80,8 @@ con un comentario KDoc que cuenta más.
 
 | Archivo | Qué hace |
 |---|---|
-| `BlockShapes.kt` | Cajas de contorno y colisión en píxeles, giradas como los blockstates |
+| `BlockShapes.kt` | Cajas de contorno y colisión en píxeles, giradas como los blockstates; los mobs rodean cualquier bloque del mod con colisión |
+| `PathingRules.kt` | Mantiene a los mobs fuera y lejos de encima de los bloques sólidos del mod (muebles, props): los rodean, nunca los atraviesan ni se suben |
 | `PropBlock.kt` | Un prop de suelo orientado a uno de cuatro lados |
 | `ConnectingPropBlock.kt` | Tuberías, conductos y bandejas de cables que se conectan con sus vecinos |
 | `FluorescentLightBlock.kt` | La luz: encendida, parpadeante, apagada; nivel de luz 13, dibujada a brillo máximo |
@@ -103,6 +105,8 @@ con un comentario KDoc que cuenta más.
 |---|---|
 | `PaleManEntity.kt` | La entidad: oído, muros, territorio, rutas, golpes, sonidos, animaciones |
 | `PaleManSpawner.kt` | Genera uno por cada punto `pale_man`, una vez por mundo; contador de partidas nuevas |
+| `ObserverEntity.kt` | El Observer: vista (cono, alcance, paredes), moverse y mirar alrededor, atrapar, sacar de las taquillas |
+| `ObserverHooks.kt` | Genera al Observer, le pasa los avisos de las cajas, lo devuelve a casa al morir el jugador |
 
 ### `platform/`: hooks (lógica de juego movida por eventos)
 
@@ -156,6 +160,7 @@ con un comentario KDoc que cuenta más.
 | `ShaderMode.kt` | Shaders sí o no, consultado en vivo con la API de Iris |
 | `ShaderSettings.kt` | Escribe una vez los ajustes recomendados de Complementary |
 | `MapWorldInstaller.kt` | Desempaqueta el mundo del mapa del jar en `saves/` |
+| `SprintCheck.kt` | Apunta en el log por qué el jugador no corre con la tecla de correr pulsada |
 | `AchievementStore.kt` | Los logros conseguidos, guardados para siempre en `config/every_tunnel/achievements.json` |
 | `AchievementIcons.kt` | El icono de cada logro (un objeto o uno dibujado para el mod, o el "?" de bloqueado) |
 | `compat/LambDynamicLightsCompat.kt` | El haz como fuente de luz de LambDynamicLights |
@@ -189,6 +194,7 @@ con un comentario KDoc que cuenta más.
 | Archivo | Qué hace |
 |---|---|
 | `PaleManRenderer.kt` | Renderizador de GeckoLib con la máscara de brillo de los ojos |
+| `ObserverRenderer.kt` | Renderizador de GeckoLib del Observer; su cabeza gira con la de la entidad |
 | `PaleManModel.kt` | Su modelo de GeckoLib, más la postura encorvada bajo techos bajos |
 | `BoxShelfRenderer.kt` | Las cajas moradas en la estantería, a brillo completo |
 | `LootRenderer.kt` | Dibuja el botín tumbado |

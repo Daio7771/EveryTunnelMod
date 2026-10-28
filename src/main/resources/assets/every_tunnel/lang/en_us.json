@@ -174,5 +174,8 @@
   "message.every_tunnel.carry_hands_full": "Your hands are full",
   "message.every_tunnel.carry_no_room": "No room in your pockets",
   "message.every_tunnel.books_returned": "%s / %s",
-  "block.every_tunnel.office_book": "Office Book"
+  "block.every_tunnel.office_book": "Office Book",
+  "entity.every_tunnel.observer": "Observer",
+  "item.every_tunnel.observer_spawn_egg": "Observer Spawn Egg",
+  "message.every_tunnel.observer_coming": "He's coming. Hide."
 }

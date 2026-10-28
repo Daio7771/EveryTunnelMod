@@ -78,6 +78,13 @@ object HidingHooks {
         return true
     }
 
+    /** [player] is pulled out of their locker (the Observer saw them get in): out, the door banging. */
+    fun pullOut(player: ServerPlayerEntity) {
+        if (!isHidden(player)) return
+        lastUse[player.uuid] = player.server.ticks
+        player.stopRiding()
+    }
+
     /** In a world with levels, alive, not a spectator, on their feet and not riding anything. */
     private fun canHide(player: ServerPlayerEntity): Boolean =
         WorldRules.active && player.isAlive && !player.isSpectator && !player.hasVehicle() && !player.isSneaking &&

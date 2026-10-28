@@ -177,8 +177,8 @@ Reabrir el mundo o reaparecer dentro de un nivel no cuenta como entrar.
 
 Las oficinas del complejo alrededor de la biblioteca central, en perfecto estado y vacías.
 Hecho hasta ahora: la estructura, los muebles, el puzle de las válvulas, las taquillas y los
-puzles de las cajas y los libros que abren el búnker; faltan el guardia observador, las demás
-notas, el loot y el derrumbe, con sus zonas y puntos de spawn ya en el
+puzles de las cajas y los libros que abren el búnker, y el Observer (faltan sus sonidos y su
+música); faltan las demás notas, el loot y el derrumbe, con sus zonas y puntos de spawn ya en el
 archivo del nivel (ver [Niveles](levels.md#ganchos-del-nivel-3)). La música queda para el
 final.
 
@@ -221,11 +221,30 @@ silencio.
   taquilla. En Storage, una estantería metálica vacía de 2 de ancho y 3 de alto con cinco
   baldas (`BoxShelfBlock`, punto de spawn con la etiqueta `box_shelf`; las cajas encima las
   dibuja `BoxShelfRenderer`): un clic derecho en un hueco deja ahí la caja, sale "3 / 10"
-  encima de la barra y se avisa al guardia observador (de momento una línea en el log y un
-  sonido lejano, `event.observer.alert`). Con las diez puestas se consigue "Master of the
+  encima de la barra y se avisa al Observer (viene corriendo; a lo lejos se oye que algo se ha
+  dado cuenta, `event.observer.alert`). Con las diez puestas se consigue "Master of the
   Boxes" y aparecen los libros. Llevarlas sigue `CarryHooks` (los libros también). Al morir,
   una caja en la mano vuelve a donde estaba; la estantería conserva las suyas. `/everytunnel boxes` dice dónde están y
   `boxes fill` llena todo menos el último hueco.
+- **El Observer** (`ObserverEntity`, decisiones en `entities.ObserverBrain`, generado por
+  `ObserverHooks` en el punto de spawn con la etiqueta `observant_guard`): un vigilante alto
+  vestido de negro con una cabeza gris lisa (`tools/entity/observer.py`). Ve; no oye pasos.
+  Patrulla la biblioteca (la zona con la etiqueta `observer_home`): anda tieso entre las
+  estanterías y se para a mirar alrededor, la cabeza girando de lado a lado. Ve a un jugador
+  en un cono de 90° hacia donde mira su cabeza, hasta 24 bloques (12 agachado, 32 con la
+  linterna encendida), sin nada sólido en medio, y a cualquiera a menos de 2 bloques mire
+  hacia donde mire; nunca a uno escondido en una taquilla. Si ve a uno, primero va andando
+  hacia él; si sigue a la vista 1,5 s, o está a 6 bloques o menos, corre, algo más rápido que
+  un sprint, y el jugador atrapado muere. Si lo pierde de vista 1,5 s, va a donde lo vio por
+  última vez (corriendo si ya corría), mira alrededor y vuelve andando: un jugador recién
+  visto tiene un momento para agacharse fuera de su alcance, meterse detrás de una estantería
+  o esconderse en una taquilla sin que lo vea. Una caja en la estantería de
+  Storage le hace ir corriendo allí, más rápido aún, y sale "He's coming. Hide." en grande y en
+  rojo oscuro; mira alrededor y vuelve. La taquilla de Storage está justo al lado de la
+  estantería (él entra por la puerta). A un jugador al
+  que ve meterse en una taquilla lo saca y muere. Una partida nueva o una muerte lo devuelven
+  a su punto de spawn. Números de partida, a ajustar jugando (`ObserverSettings`; el log dice a
+  qué velocidad corrió de verdad en cada carrera, "[observer] ran ...").
 - **Taquillas para esconderse:** cada sala tiene al menos una (las salas Lockers y Changing
   room están llenas; la biblioteca no tiene). Un clic derecho en una taquilla desde delante
   de su puerta mete al jugador dentro (`HidingHooks`): va montado en un asiento invisible en

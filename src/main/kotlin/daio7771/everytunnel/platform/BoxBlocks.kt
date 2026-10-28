@@ -1,5 +1,7 @@
 package daio7771.everytunnel.platform
 
+import net.minecraft.world.BlockView
+import net.minecraft.entity.ai.pathing.NavigationType
 import net.minecraft.block.Block
 import net.minecraft.block.BlockRenderType
 import net.minecraft.block.BlockState
@@ -59,6 +61,11 @@ class PurpleBoxBlock(settings: Settings, boxes: List<BlockShapes.Box>) : PropBlo
  * generator places the six parts (`tools/map/offices/furnish.py`).
  */
 class BoxShelfBlock(settings: Settings) : BlockWithEntity(settings) {
+
+    /** Mobs path round it, not into it (see [BlockShapes.pathfindThrough]). */
+    @Deprecated("Deprecated in Java")
+    override fun canPathfindThrough(state: BlockState, world: BlockView, pos: BlockPos, type: NavigationType): Boolean =
+        BlockShapes.pathfindThrough(state, world, pos, type)
 
     init {
         defaultState = stateManager.defaultState.with(FACING, Direction.NORTH).with(COL, 0).with(ROW, 0)

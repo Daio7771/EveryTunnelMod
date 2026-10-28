@@ -1,5 +1,6 @@
 package daio7771.everytunnel.platform
 
+import net.minecraft.entity.ai.pathing.NavigationType
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.ShapeContext
@@ -30,6 +31,11 @@ import net.minecraft.world.WorldAccess
  * block facing the same way on its [LEFT] and [RIGHT], as seen from its front.
  */
 class RowFurnitureBlock(settings: Settings, boxes: List<BlockShapes.Box>) : Block(settings) {
+
+    /** Mobs path round it, not into it (see [BlockShapes.pathfindThrough]). */
+    @Deprecated("Deprecated in Java")
+    override fun canPathfindThrough(state: BlockState, world: BlockView, pos: BlockPos, type: NavigationType): Boolean =
+        BlockShapes.pathfindThrough(state, world, pos, type)
 
     private val shapes: Map<Direction, VoxelShape> = BlockShapes.horizontal(boxes)
 
@@ -87,6 +93,11 @@ class RowFurnitureBlock(settings: Settings, boxes: List<BlockShapes.Box>) : Bloc
  */
 class TileFurnitureBlock(settings: Settings, boxes: List<BlockShapes.Box>) : Block(settings) {
 
+    /** Mobs path round it, not into it (see [BlockShapes.pathfindThrough]). */
+    @Deprecated("Deprecated in Java")
+    override fun canPathfindThrough(state: BlockState, world: BlockView, pos: BlockPos, type: NavigationType): Boolean =
+        BlockShapes.pathfindThrough(state, world, pos, type)
+
     private val shape: VoxelShape = BlockShapes.rotated(boxes, 0, 0)
 
     init {
@@ -131,6 +142,11 @@ class TileFurnitureBlock(settings: Settings, boxes: List<BlockShapes.Box>) : Blo
  * the stack has one base and one top.
  */
 open class StackFurnitureBlock(settings: Settings, boxes: List<BlockShapes.Box>) : Block(settings) {
+
+    /** Mobs path round it, not into it (see [BlockShapes.pathfindThrough]). */
+    @Deprecated("Deprecated in Java")
+    override fun canPathfindThrough(state: BlockState, world: BlockView, pos: BlockPos, type: NavigationType): Boolean =
+        BlockShapes.pathfindThrough(state, world, pos, type)
 
     private val shapes: Map<Direction, VoxelShape> = BlockShapes.horizontal(boxes)
 

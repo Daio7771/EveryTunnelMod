@@ -29,8 +29,8 @@ import kotlin.random.Random
  *   [CarryHooks]: one thing at a time, kept in the hand, never dropped, no sprinting; hiding in a
  *   locker with it is fine.
  * - **Putting it on the shelf** ([useShelf]): right-click the place pointed at; a filled one
- *   takes nothing. "3 / 10" above the hotbar, and the observant guard is alerted to the shelf
- *   ([alertObserver]: until he exists, a log line and a distant sound, `event.observer.alert`).
+ *   takes nothing. "3 / 10" above the hotbar, and the Observer is alerted to the shelf
+ *   ([alertObserver], [ObserverHooks]; with a distant sound, `event.observer.alert`).
  *   With all ten up, everyone there earns "Master of the Boxes" and the books appear
  *   ([completed], [BookHooks]).
  * - **Dying** puts a carried box back where it was picked up ([CarryHooks]); the shelf keeps
@@ -66,11 +66,12 @@ object BoxHooks {
     }
 
     /**
-     * A box was put on the shelf at [foot]: the observant guard hears it and walks there from
-     * wherever he is. He does not exist yet: a log line, and a distant sound for the players.
+     * A box was put on the shelf at [foot]: the Observer comes running ([ObserverHooks]); far off,
+     * something is heard noticing (`event.observer.alert`). He comes to the place in front of it.
      */
     private fun alertObserver(world: ServerWorld, foot: BlockPos) {
-        EveryTunnel.LOGGER.info("[observer] a box went on the shelf at {}: the observant guard would walk there", foot)
+        val facing = world.getBlockState(foot).get(BoxShelfBlock.FACING)
+        ObserverHooks.alert(world, foot.offset(facing, 2))
         for (player in world.players) player.playSound(ModSounds.OBSERVER_ALERT, SoundCategory.HOSTILE, 1f, 1f)
     }
 

@@ -23,7 +23,9 @@ import daio7771.everytunnel.platform.ModEntities
 import daio7771.everytunnel.platform.ModItems
 import daio7771.everytunnel.platform.ModSounds
 import daio7771.everytunnel.platform.NoiseHooks
+import daio7771.everytunnel.platform.ObserverHooks
 import daio7771.everytunnel.platform.PaleManSpawner
+import daio7771.everytunnel.platform.PathingRules
 import daio7771.everytunnel.platform.PlaytestLog
 import daio7771.everytunnel.platform.ResourceHooks
 import daio7771.everytunnel.platform.RespawnHooks
@@ -60,6 +62,7 @@ object EveryTunnel : ModInitializer {
         ConfigManager.load(FabricLoader.getInstance().configDir)
         ModItems.register()
         ModBlocks.register()
+        PathingRules.register()
         ModEntities.register()
         ModSounds.register()
         LevelReloadListener.register()
@@ -70,6 +73,7 @@ object EveryTunnel : ModInitializer {
         FlashlightHooks.register()
         NoiseHooks.register()
         PaleManSpawner.register()
+        ObserverHooks.register()
         LootSpawner.register()
         KeycardHooks.register()
         ValveHooks.register()

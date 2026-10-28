@@ -1,6 +1,7 @@
 package daio7771.everytunnel.platform
 
 import com.mojang.brigadier.arguments.DoubleArgumentType
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.context.CommandContext
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.core.LevelManager
@@ -10,8 +11,11 @@ import daio7771.everytunnel.systems.ResourceSystem
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.server.command.CommandManager
+import net.minecraft.registry.RegistryKey
+import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Text
+import net.minecraft.util.Identifier
 
 /**
  * Developer commands for building and checking the map (operator level 2,
@@ -28,7 +32,12 @@ import net.minecraft.text.Text
  * - `/everytunnel paleman`: the Pale men near you, what they are doing and where they are going.
  * - `/everytunnel intro`: plays the new-game intro (the elevator) again for you (see [IntroHooks]).
  * - `/everytunnel newgame`: starts the game over in this world (see [NewGame]).
+ * - `/everytunnel setlevel <number>`: takes you to the start of the level of that `order`
+ *   (1, 2, 3...), as if you had walked in: its title shows, its enemies spawn. Nothing else
+ *   changes: puzzles stay as they are, nothing is solved for you.
  * - `/everytunnel valves`: this game's valve digits, per level with valves (see [ValveHooks]).
+ * - `/everytunnel boxes [fill]`, `/everytunnel books [fill]`: Level 3's box and book puzzles,
+ *   where things are; `fill` does all but the last step (see [BoxHooks], [BookHooks]).
  * - `/everytunnel rebuilt`: run by the map's `garage:build` after rebuilding the levels:
  *   puts the loot back ([NewGame.levelsRebuilt]).
  * - `/everytunnel devworld save|forget` (development only): make this world start from
@@ -58,6 +67,10 @@ object DebugCommands {
                 .then(CommandManager.literal("paleman").executes(::paleMen))
                 .then(CommandManager.literal("intro").executes(::intro))
                 .then(CommandManager.literal("newgame").executes(::newGame))
+                .then(
+                    CommandManager.literal("setlevel")
+                        .then(CommandManager.argument("number", IntegerArgumentType.integer(1)).executes(::setLevel)),
+                )
                 .then(CommandManager.literal("valves").executes(::valves))
                 .then(
                     CommandManager.literal("boxes").executes(::boxes)
@@ -233,6 +246,26 @@ object DebugCommands {
             return 0
         }
         reply(context, "New game: shutters open, Pale men home, inventory cleared, back at the start of ${level.id}.")
+        return 1
+    }
+
+    private fun setLevel(context: CommandContext<ServerCommandSource>): Int {
+        val number = IntegerArgumentType.getInteger(context, "number")
+        val player = context.source.playerOrThrow
+        val level = LevelManager.all().firstOrNull { it.order == number }
+        if (level == null) {
+            reply(context, "No level $number. Levels: " + LevelManager.all().joinToString(", ") { "${it.order} (${it.id})" })
+            return 0
+        }
+        val start = level.spawnPoints.firstOrNull { RespawnHooks.TAG in it.tags }
+        val world = context.source.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension)))
+        if (start == null || world == null) {
+            reply(context, "${level.id} has no start (a spawn point tagged ${RespawnHooks.TAG}).")
+            return 0
+        }
+        player.stopRiding()
+        player.teleport(world, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
+        reply(context, "At the start of level $number (${level.id}).")
         return 1
     }
 

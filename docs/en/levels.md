@@ -138,6 +138,7 @@ the server starts (levels built together name the same one). The function must e
 | `lights_stay` | `KeycardHooks` | Its lights stay on when the keycard is taken (the stair shaft down to B3) |
 | `exit` | (none yet) | Marks a level's way out; kept for later systems |
 | `valve_door` | `ValveHooks` | The doors the valves open when all are right; a new game shuts them |
+| `observer_home` | `ObserverEntity` | The zone the Observer patrols and goes back to (Level 3's library) |
 | `book_hatch` | `BookHooks` | The trapdoors the fifth book back opens (Level 3's bunker hatch); a new game shuts them |
 | `checkpoint` | (none yet) | Level 3: just past the checkpoint door, where a death will restart |
 | `collapse` | (none yet) | Level 3: walking in will bring the bunker corridor's ceiling down behind the player |
@@ -153,7 +154,7 @@ the server starts (levels built together name the same one). The function must e
 | `water` | `LootSpawner` | A water bottle |
 | `keycard` | `LootSpawner` | The keycard |
 | `checkpoint` | (none yet) | Level 3: where a death past the checkpoint will restart |
-| `observant_guard` | (none yet) | Level 3: the observant guard, kept to `guard_area` (the library and the ring) |
+| `observant_guard` | `ObserverHooks` | Level 3: the Observer, spawned there once (in the library) |
 | `box_spot` | `BoxHooks` | Level 3: a place a purple box may lie (a new game puts ten at random); on the floor, or on furniture (y 2) |
 | `box_shelf` | `BoxHooks` | Level 3: the foot (left, bottom) of the shelf the boxes go on |
 | `book_spot` | `BookHooks` | Level 3: where a room's book appears once the boxes are done, on top of a filing cabinet (one per "book" room) |
@@ -173,7 +174,7 @@ will read:
   `open_office_nw`, `open_office_ne`), `library`, the ring in four (`inner_corridor_north`,
   `_south`, `_west`, `_east`), `guard_area` (the library and the ring together),
   `valve_corridor`, `checkpoint`, `checkpoint_door` (tagged `valve_door`), `antechamber`, `bunker_shaft`, `bunker_corridor`,
-  `hatch` (its trapdoors, tagged `book_hatch`), `collapse`, `collapse_blocks` and `end` (in front of the door to B4). The stairs from B2
+  `hatch` (its trapdoors, tagged `book_hatch`), a zone per doorway (`door_...`, `library_door_...`: walking through a door never leaves the level), `collapse`, `collapse_blocks` and `end` (in front of the door to B4). The stairs from B2
   belong to no zone, so "Level 3" shows on walking into the antechamber.
 - **Spawn points:** `player_start` (the antechamber), `checkpoint`, `observant_guard`, a
   `book_<room>` per book room (on the filing cabinet its furniture template picks, unless

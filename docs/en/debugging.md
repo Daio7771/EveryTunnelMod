@@ -17,6 +17,7 @@
 | `/everytunnel paleman` | The Pale men near you: state and target |
 | `/everytunnel intro` | Plays the elevator intro again (Survival or Adventure) |
 | `/everytunnel newgame` | Starts the game over in this world |
+| `/everytunnel setlevel <number>` | Takes you to the start of level 1, 2, 3... (its `order`), as if you walked in (its title, its enemies); puzzles stay as they are |
 | `/everytunnel valves` | This game's valve digits for Level 3 (A to E) |
 | `/everytunnel boxes` | Level 3's box puzzle: how many are on the shelf, where the others lie |
 | `/everytunnel books` | Level 3's book puzzle: how many are on the counter, where the others lie |
@@ -62,6 +63,13 @@ only: reopening the world starts a new one.
 
 - Every zone change of every player (`LevelTrackingHooks`), with the zone ids.
 - Every Pale man state change, with his position, target and the loudest noise.
+- Every Observer state change (`Observer … PATROL -> CHASE`), whom he caught or saw get into a
+  locker, and how fast each run really was: `[observer] ran 64.0 blocks in 9.8 s: 6.5 blocks/s
+  (ALERT_RUN)`, to tune `ObserverSettings`.
+- `[sprint] held but not sprinting at (x, y, z): …` (`client.SprintCheck`): while the sprint
+  key is held walking forwards and the player does not sprint, every 2 s, what stands in the
+  way (exhausted, carrying a box or book, hungry, using an item, crouching, bumping into
+  something, in the air, blind, riding).
 - Config and level file problems, with the JSON path.
 
 ## Unit tests

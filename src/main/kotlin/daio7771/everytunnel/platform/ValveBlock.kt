@@ -1,5 +1,6 @@
 package daio7771.everytunnel.platform
 
+import net.minecraft.entity.ai.pathing.NavigationType
 import daio7771.everytunnel.core.puzzle.ValveCode
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
@@ -46,6 +47,11 @@ enum class ValveLetter(private val id: String) : StringIdentifiable {
  * matches [SHAPES].
  */
 class ValveBlock(settings: Settings) : Block(settings) {
+
+    /** Mobs path round it, not into it (see [BlockShapes.pathfindThrough]). */
+    @Deprecated("Deprecated in Java")
+    override fun canPathfindThrough(state: BlockState, world: BlockView, pos: BlockPos, type: NavigationType): Boolean =
+        BlockShapes.pathfindThrough(state, world, pos, type)
 
     init {
         defaultState = stateManager.defaultState.with(FACING, Direction.NORTH).with(OPEN, false).with(LETTER, ValveLetter.A)

@@ -41,7 +41,7 @@ platform/                                           todo lo que toca Minecraft o
 | `core.achievement` | `Achievement`, los ocho logros |
 | `core.hiding` | `LookLimit`, cuánto gira la cabeza en una taquilla |
 | `systems` | `ResourceSystem` (stamina, sed, batería), `NoiseSystem`, `FlashlightBeam` (matemática del haz) |
-| `entities` | `PaleManBrain`, las decisiones del Pale man |
+| `entities` | `PaleManBrain` y `ObserverBrain`, las decisiones del Pale man y del Observer |
 | `util` | `JsonFields`, un lector de JSON tolerante que usan ambos parsers |
 | `world` | `WorldRules` (cuándo se aplican las reglas), `LevelTriggers` (oyentes de entrada y salida de zonas) |
 | `platform` | Bloques, objetos, la entidad, sonidos, cada objeto `*Hooks`, paquetes, comandos |

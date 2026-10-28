@@ -17,6 +17,7 @@
 | `/everytunnel paleman` | Los Pale men cercanos: estado y objetivo |
 | `/everytunnel intro` | Repite la intro del ascensor (Supervivencia o Aventura) |
 | `/everytunnel newgame` | Empieza la partida de nuevo en este mundo |
+| `/everytunnel setlevel <número>` | Te lleva al inicio del nivel 1, 2, 3... (su `order`), como si entraras andando (su título, sus enemigos); los puzles se quedan como estén |
 | `/everytunnel valves` | Las cifras de las válvulas del nivel 3 en esta partida (A a E) |
 | `/everytunnel boxes` | El puzle de las cajas del nivel 3: cuántas hay en la estantería y dónde están las demás |
 | `/everytunnel books` | El puzle de los libros del nivel 3: cuántos hay en el mostrador y dónde están los demás |
@@ -62,6 +63,13 @@ cuenta. Las partidas viven solo en memoria: reabrir el mundo empieza una nueva.
 
 - Cada cambio de zona de cada jugador (`LevelTrackingHooks`), con los ids de zona.
 - Cada cambio de estado de un Pale man, con su posición, objetivo y el ruido más fuerte.
+- Cada cambio de estado del Observer (`Observer … PATROL -> CHASE`), a quién atrapó o vio
+  meterse en una taquilla, y a qué velocidad corrió de verdad en cada carrera: `[observer] ran
+  64.0 blocks in 9.8 s: 6.5 blocks/s (ALERT_RUN)`, para ajustar `ObserverSettings`.
+- `[sprint] held but not sprinting at (x, y, z): …` (`client.SprintCheck`): mientras se
+  mantiene la tecla de correr andando hacia delante y el jugador no corre, cada 2 s, qué lo
+  impide (agotado, llevando una caja o un libro, hambre, usando un objeto, agachado, chocando
+  con algo, en el aire, ciego, montado).
 - Problemas de los archivos de configuración y de nivel, con la ruta JSON.
 
 ## Tests unitarios

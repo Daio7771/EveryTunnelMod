@@ -1,5 +1,6 @@
 package daio7771.everytunnel.platform
 
+import net.minecraft.entity.ai.pathing.NavigationType
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.ShapeContext
@@ -23,6 +24,11 @@ import net.minecraft.world.BlockView
  * `noCollision`, for collision. Placed by hand it faces the player.
  */
 open class PropBlock(settings: Settings, boxes: List<BlockShapes.Box>) : Block(settings) {
+
+    /** Mobs path round it, not into it (see [BlockShapes.pathfindThrough]). */
+    @Deprecated("Deprecated in Java")
+    override fun canPathfindThrough(state: BlockState, world: BlockView, pos: BlockPos, type: NavigationType): Boolean =
+        BlockShapes.pathfindThrough(state, world, pos, type)
 
     private val shapes: Map<Direction, VoxelShape> = BlockShapes.horizontal(boxes)
 

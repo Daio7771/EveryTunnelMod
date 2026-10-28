@@ -1,6 +1,11 @@
 package daio7771.everytunnel.platform
 
 import net.minecraft.block.Block
+import net.minecraft.block.BlockState
+import net.minecraft.entity.ai.pathing.NavigationType
+import net.minecraft.registry.tag.FluidTags
+import net.minecraft.util.math.BlockPos
+import net.minecraft.world.BlockView
 import net.minecraft.util.math.Direction
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.util.shape.VoxelShapes
@@ -15,6 +20,19 @@ import net.minecraft.util.shape.VoxelShapes
  * same rotations as the blockstates keeps the hitbox on the visible model.
  */
 object BlockShapes {
+
+    /**
+     * Whether mobs may path through a block of the mod: on land only if it has no collision.
+     * Vanilla treats anything but a full cube as open ground, so the Pale man and the Observer
+     * walked into furniture, shelves and props (they are not full cubes) and got stuck there.
+     * The pathfinder itself is told by [PathingRules] (which also keeps them off the tops);
+     * this keeps the block's own answer in line with it.
+     */
+    fun pathfindThrough(state: BlockState, world: BlockView, pos: BlockPos, type: NavigationType): Boolean = when (type) {
+        NavigationType.LAND -> state.getCollisionShape(world, pos).isEmpty
+        NavigationType.WATER -> world.getFluidState(pos).isIn(FluidTags.WATER)
+        NavigationType.AIR -> !state.isFullCube(world, pos)
+    }
 
     /** A box in pixels: x1, y1, z1, x2, y2, z2. */
     class Box(val x1: Double, val y1: Double, val z1: Double, val x2: Double, val y2: Double, val z2: Double)

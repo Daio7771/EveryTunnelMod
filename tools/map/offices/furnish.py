@@ -392,7 +392,13 @@ def servers(f, fr):
 
 
 def storage(f, fr):
-    f.lv.box_shelf = f.box_shelf(fr, fr.W // 2 - 1)
+    u0 = fr.W // 2 - 1
+    f.lv.box_shelf = f.box_shelf(fr, u0)
+    # Storage's locker stands right of the shelf, on the back wall: the Observer comes in by the
+    # door, so one by the door would mean running towards him after putting a box up.
+    if not f.at(fr, u0 + 2, fr.D - 1, "locker", "front"):
+        raise SystemExit("LEVEL_3: no room for Storage's locker beside the box shelf")
+    f.at(fr, u0 + 2, fr.D - 1, "locker", "front", y=2, force=True)
     for v_front in (4, 8):
         for u in range(2, fr.W - 2):
             f.stack(fr, u, v_front, "metal_shelf", "front", 2)

@@ -140,6 +140,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `end` | `EndingHooks` | Entrar termina la demo |
 | `exit` | (nadie aún) | Marca la salida de un nivel; reservada para sistemas futuros |
 | `valve_door` | `ValveHooks` | Las puertas que abren las válvulas cuando todas están bien; una partida nueva las cierra |
+| `observer_home` | `ObserverEntity` | La zona que patrulla el Observer y a la que vuelve (la biblioteca del nivel 3) |
 | `book_hatch` | `BookHooks` | Las trampillas que abre el quinto libro devuelto (la del búnker del nivel 3); una partida nueva las cierra |
 | `checkpoint` | (nadie aún) | Nivel 3: justo pasada la puerta del checkpoint, donde reiniciará una muerte |
 | `collapse` | (nadie aún) | Nivel 3: al entrar, el techo del pasillo del búnker caerá detrás del jugador |
@@ -155,7 +156,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `water` | `LootSpawner` | Una botella de agua |
 | `keycard` | `LootSpawner` | La tarjeta |
 | `checkpoint` | (nadie aún) | Nivel 3: donde reiniciará una muerte pasado el checkpoint |
-| `observant_guard` | (nadie aún) | Nivel 3: el guardia observador, dentro de `guard_area` (la biblioteca y el anillo) |
+| `observant_guard` | `ObserverHooks` | Nivel 3: el Observer, que aparece ahí una vez (en la biblioteca) |
 | `box_spot` | `BoxHooks` | Nivel 3: un sitio donde puede estar una caja morada (una partida nueva pone diez al azar); en el suelo o sobre un mueble (y 2) |
 | `box_shelf` | `BoxHooks` | Nivel 3: el pie (izquierda, abajo) de la estantería donde van las cajas |
 | `book_spot` | `BookHooks` | Nivel 3: donde aparece el libro de una habitación cuando están las cajas, encima de un archivador (una por habitación "book") |
@@ -176,7 +177,7 @@ sistemas que vienen:
   `open_office_nw`, `open_office_ne`), `library`, el anillo en cuatro
   (`inner_corridor_north`, `_south`, `_west`, `_east`), `guard_area` (la biblioteca y el
   anillo juntos), `valve_corridor`, `checkpoint`, `checkpoint_door` (con la etiqueta `valve_door`), `antechamber`, `bunker_shaft`,
-  `bunker_corridor`, `hatch` (sus trampillas, con la etiqueta `book_hatch`), `collapse`, `collapse_blocks` y `end` (delante de la puerta a B4). Las
+  `bunker_corridor`, `hatch` (sus trampillas, con la etiqueta `book_hatch`), una zona por cada hueco de puerta (`door_...`, `library_door_...`: cruzar una puerta nunca te saca del nivel), `collapse`, `collapse_blocks` y `end` (delante de la puerta a B4). Las
   escaleras desde B2 no pertenecen a ninguna zona, así que "Level 3" aparece al entrar en
   la antesala.
 - **Puntos de spawn:** `player_start` (la antesala), `checkpoint`, `observant_guard`, un

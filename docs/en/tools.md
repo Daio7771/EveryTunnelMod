@@ -22,6 +22,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/map/map_generator.py` | Level datapacks, world resource pack, installs into `run/saves/noname_complex`; the menu scene into the mod | the map or the menu scene |
 | `tools/blocks/generate.py` | Block/item models, blockstates, textures + LabPBR maps, names, loot tables | a mod block |
 | `tools/entity/pale_man.py` | Pale man geometry, animations, texture, glow mask, spawn egg model | the Pale man |
+| `tools/entity/observer.py` | The Observer's geometry, animations, texture, spawn egg model | the Observer |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (the uniform skin) | the uniform |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png` | HUD icons |
 | `tools/gui/logo.py` | `logo.png` | the logo |

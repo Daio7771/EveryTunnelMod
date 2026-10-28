@@ -167,9 +167,9 @@ Reopening the world or respawning inside a level does not count as walking in.
 ## 9. Level 3 (B3)
 
 The offices of the complex around the central library, in perfect order and empty. Built
-so far: the structure, the furniture, the valve puzzle, the lockers and the box and book
-puzzles that open the bunker; the observant guard, the books' lore and the other notes, the
-loot and the collapse are still to come, their zones and spawn points already in the
+so far: the structure, the furniture, the valve puzzle, the lockers, the box and book
+puzzles that open the bunker, and the Observer (his own sounds and music still to come); the
+other notes, the loot and the collapse are still to come, their zones and spawn points already in the
 level file (see [Levels](levels.md#level-3-hooks)). The music is planned for last.
 
 The **ambience** is the near-silence of an empty office building (`ambient.offices.room_tone`)
@@ -208,11 +208,27 @@ silent.
   straight back) and the player cannot sprint; hiding in a locker with it is fine. In Storage,
   an empty metal shelf, 2 wide and 3 high with five boards (`BoxShelfBlock`, spawn point tagged
   `box_shelf`; the boxes on it drawn by `BoxShelfRenderer`): right-clicking a place on it puts
-  the box there, "3 / 10" shows above the hotbar, and the observant guard is alerted (for now a
-  log line and a distant sound, `event.observer.alert`). With all ten up, "Master of the Boxes"
+  the box there, "3 / 10" shows above the hotbar, and the Observer is alerted (he comes running;
+  far off, something is heard noticing, `event.observer.alert`). With all ten up, "Master of the Boxes"
   is earned and the books appear. Carrying follows `CarryHooks` (for the books too). Dying
   puts a carried box back where it was found; the shelf keeps its boxes. `/everytunnel boxes` tells where they are, `boxes fill`
   fills all but the last.
+- **The Observer** (`ObserverEntity`, decisions in `entities.ObserverBrain`, spawned by
+  `ObserverHooks` at the spawn point tagged `observant_guard`): a tall guard in black with a
+  blank grey head (`tools/entity/observer.py`). He sees; he does not hear footsteps. He
+  patrols the library (the zone tagged `observer_home`), walking stiffly between the shelves
+  and stopping to look round, his head sweeping from side to side. He sees a player in a
+  90° cone round where his head faces, up to 24 blocks (12 sneaking, 32 with the flashlight
+  on), with nothing solid in between, and anyone within 2 blocks whatever way he faces;
+  never a player hidden in a locker. Seeing one, he first walks towards them; once they have
+  stayed in his sight for 1.5 s, or are within 6 blocks, he runs, a little faster than a
+  sprint, and a caught player dies. Out of his sight for 1.5 s, he goes to where he saw them
+  last (running if he was), looks round and walks home: a player just spotted has a moment to
+  sneak out of his range, duck behind a shelf or get into a locker unseen. A box on Storage's shelf brings him running there, faster
+  still, and "He's coming. Hide." shows in big dark red letters; he looks round and walks home.
+  Storage's locker stands right beside the shelf (he comes in by the door). A player he sees get into a locker is pulled out and
+  dies. A new game or a death sends him back to his spawn point. Starting numbers, to tune by
+  playing (`ObserverSettings`; the log says how fast each run really was, "[observer] ran ...").
 - **Lockers to hide in:** every room has at least one (the Lockers and Changing rooms are
   full of them; the library has none). Right-clicking a locker from in front of its door
   gets in (`HidingHooks`): the player rides an invisible seat on the locker's floor

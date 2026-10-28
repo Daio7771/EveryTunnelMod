@@ -247,7 +247,7 @@ LEVEL_3 = dict(
     # Zones in the bunker corridor, in blocks before the door to Level 4 (from, to): where the
     # collapse goes off, and the stretch behind the player its blocks will fill.
     COLLAPSE=dict(trigger=(5, 2), blocks=(9, 6)),
-    GUARD_SPAWN=(80, 62),            # the observant guard: (x, z); he keeps to the library and the ring
+    GUARD_SPAWN=(80, 88),            # the Observer: (x, z), in the library's north-south aisle; he patrols the library
     # Ambience (AmbienceHooks): the empty offices' room tone and, rarely, a phone ringing far off,
     # everywhere; the library has its slow clock instead (with the phone), the bunker silence.
     AMBIENCE={"loop": "every_tunnel:ambient.offices.room_tone", "loop_volume": 1.0,

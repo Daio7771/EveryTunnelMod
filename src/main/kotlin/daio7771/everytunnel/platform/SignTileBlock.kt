@@ -1,5 +1,8 @@
 package daio7771.everytunnel.platform
 
+import net.minecraft.world.BlockView
+import net.minecraft.util.math.BlockPos
+import net.minecraft.entity.ai.pathing.NavigationType
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.item.ItemPlacementContext
@@ -21,6 +24,11 @@ import net.minecraft.util.math.Direction
  * (facing, slot) to that level's text. [FACING] is the side the text faces.
  */
 class SignTileBlock(settings: Settings) : Block(settings) {
+
+    /** Mobs path round it, not into it (see [BlockShapes.pathfindThrough]). */
+    @Deprecated("Deprecated in Java")
+    override fun canPathfindThrough(state: BlockState, world: BlockView, pos: BlockPos, type: NavigationType): Boolean =
+        BlockShapes.pathfindThrough(state, world, pos, type)
 
     init {
         defaultState = stateManager.defaultState.with(FACING, Direction.NORTH).with(SLOT, 0)

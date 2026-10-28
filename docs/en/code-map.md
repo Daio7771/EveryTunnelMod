@@ -48,6 +48,7 @@ KDoc comment that says more.
 | File | What it does |
 |---|---|
 | `PaleManBrain.kt` | The Pale man's state machine and loudness formula |
+| `ObserverBrain.kt` | The Observer's state machine (patrol, alerted, chase, search, grab) and his numbers |
 | `Package.kt` | Package doc |
 
 ### `util/` and `world/`
@@ -79,7 +80,8 @@ KDoc comment that says more.
 
 | File | What it does |
 |---|---|
-| `BlockShapes.kt` | Outline and collision boxes in pixels, rotated like the blockstates |
+| `BlockShapes.kt` | Outline and collision boxes in pixels, rotated like the blockstates; mobs path round any block of the mod with collision |
+| `PathingRules.kt` | Keeps mobs out of and off the mod's solid blocks (furniture, props): they path round them, never through or over |
 | `PropBlock.kt` | A floor prop facing one of four sides |
 | `ConnectingPropBlock.kt` | Pipes, ducts and cable trays that connect to neighbours |
 | `FluorescentLightBlock.kt` | The light: on, flicker, off; light level 13, drawn full bright |
@@ -103,6 +105,8 @@ KDoc comment that says more.
 |---|---|
 | `PaleManEntity.kt` | The entity: hearing, walls, territory, pathing, hits, sounds, animations |
 | `PaleManSpawner.kt` | Spawns one per `pale_man` spawn point, once per world; new-game counter |
+| `ObserverEntity.kt` | The Observer: sight (cone, range, walls), moving and looking round, catching, pulling out of lockers |
+| `ObserverHooks.kt` | Spawns the Observer, passes him the box alerts, sends him home on a death |
 
 ### `platform/`: hooks (game logic driven by events)
 
@@ -156,6 +160,7 @@ KDoc comment that says more.
 | `ShaderMode.kt` | Shaders on or off, asked live through Iris's API |
 | `ShaderSettings.kt` | Writes the recommended Complementary settings once |
 | `MapWorldInstaller.kt` | Unpacks the map world from the jar into `saves/` |
+| `SprintCheck.kt` | Logs why the player does not sprint while the sprint key is held |
 | `AchievementStore.kt` | The achievements earned, kept for good in `config/every_tunnel/achievements.json` |
 | `AchievementIcons.kt` | Each achievement's icon (an item or one drawn for the mod, or the locked "?") |
 | `compat/LambDynamicLightsCompat.kt` | The beam as a LambDynamicLights light source |
@@ -189,6 +194,7 @@ KDoc comment that says more.
 | File | What it does |
 |---|---|
 | `PaleManRenderer.kt` | GeckoLib renderer with the eye glow mask |
+| `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
 | `PaleManModel.kt` | His GeckoLib model, plus the stoop under low ceilings |
 | `BoxShelfRenderer.kt` | The purple boxes on the box shelf, full bright |
 | `LootRenderer.kt` | Draws loot items lying flat |

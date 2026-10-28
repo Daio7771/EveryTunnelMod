@@ -350,7 +350,7 @@ class Offices:
         for s, kind in self.rooms:
             self.zone(s.id, s.box, 1, H["room"])
             self.labels.append(((s.box[0] + s.box[2]) // 2, (s.box[1] + s.box[3]) // 2, s.name))
-        self.zone("library", p.LIBRARY, 1, H["library"])
+        self.zone("library", p.LIBRARY, 1, H["library"], ["observer_home"])          # the Observer patrols it
         self.labels.append(((p.LIBRARY[0] + p.LIBRARY[2]) // 2, p.LIBRARY[1] + 8, "Central library"))
         n, s_, w, e = p.INNER_CORRIDOR
         self.zone("inner_corridor_north", n, 1, H["corridor"])
@@ -362,6 +362,11 @@ class Offices:
         gx1 = max(b[2] for b in p.INNER_CORRIDOR)
         gz1 = max(b[3] for b in p.INNER_CORRIDOR)
         self.zone("guard_area", (gx0, gz0, gx1, gz1), 1, H["library"])
+        # Every doorway its own zone: walking through one never leaves the level (no gap that
+        # would drop the ambience and fire level changes at every door).
+        for s in self.spaces:
+            if s.kind == "door":
+                self.zone(s.id, s.box, 1, s.height)
         self.zone("hatch", p.HATCH["hole"], 0, 0, ["book_hatch"])          # the trapdoors the fifth book opens
         self.zone("valve_corridor", p.VALVE_CORRIDOR, 1, H["corridor"])
         cx0, _, cx1, _ = p.VALVE_CORRIDOR
