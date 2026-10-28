@@ -93,8 +93,11 @@ object ModBlocks {
                 Direction.WEST to box(0, 5, 5, 5, 11, 11), Direction.EAST to box(11, 5, 5, 16, 11, 11),
                 Direction.UP to box(5, 11, 5, 11, 16, 11), Direction.DOWN to box(5, 0, 5, 11, 5, 11),
             ),
+            throughValves = true,
         ),
     )
+    /** A gate valve inline in a wall pipe, lettered A to E: Level 3's valve corridor. */
+    val VALVE: Block = register("valve", ValveBlock(props(MapColor.RED, ModSoundGroups.METAL_PIPE)))
     val DUCT: Block = register(
         "duct",
         ConnectingPropBlock(
@@ -206,6 +209,42 @@ object ModBlocks {
     val KEY_RACK: Block = register(
         "key_rack", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(2, 4, 14, 14, 11, 16))),
     )
+
+    // --- Level 3: the offices (grey metal, light laminate), staff rooms and the library ----
+    // Row pieces join left and right, tiles join on all sides, stacks join up and down (see
+    // FurnitureBlocks.kt). Chairs, plants and small things on tables can be walked through.
+    // Desks and counters are a full block high, so a phone or a coffee machine stands on them.
+
+    val OFFICE_DESK: Block = register("office_desk", RowFurnitureBlock(props(MapColor.PALE_YELLOW, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 16, 16))))
+    val FILING_CABINET: Block = register("filing_cabinet", PropBlock(props(MapColor.LIGHT_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(1, 0, 2, 15, 16, 16))))
+    val MEETING_TABLE: Block = register("meeting_table", TileFurnitureBlock(props(MapColor.PALE_YELLOW, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 12, 16))))
+    /** A blank whiteboard on a wall; boards side by side make one long board. */
+    val WHITEBOARD: Block = register("whiteboard", RowFurnitureBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(0, 3, 14, 16, 14, 16))))
+    val SOFA: Block = register("sofa", RowFurnitureBlock(props(MapColor.GRAY, BlockSoundGroup.WOOL), listOf(box(0, 0, 1, 16, 7, 16), box(0, 7, 12, 16, 14, 16))))
+    /** Server cabinet, stacked two high; its LEDs glow faintly. */
+    val SERVER_RACK: Block = register("server_rack", StackFurnitureBlock(props(MapColor.BLACK, ModSoundGroups.SHEET_METAL).luminance { 2 }, listOf(box(1, 0, 1, 15, 16, 15))))
+    val METAL_SHELF: Block = register("metal_shelf", StackFurnitureBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 2, 16, 16, 16))))
+    val ELECTRICAL_PANEL: Block = register("electrical_panel", PropBlock(props(MapColor.LIGHT_GRAY, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(2, 2, 12, 14, 15, 16))))
+    val LOCKER: Block = register("locker", StackFurnitureBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(1, 0, 1, 15, 16, 16))))
+    val BENCH: Block = register("bench", RowFurnitureBlock(props(MapColor.PALE_YELLOW, ModSoundGroups.WOOD), listOf(box(0, 0, 4, 16, 7, 12))))
+    val CAFE_TABLE: Block = register("cafe_table", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC), listOf(box(1, 0, 1, 15, 12, 15))))
+    val CAFE_CHAIR: Block = register("cafe_chair", PropBlock(props(MapColor.LIGHT_GRAY, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 13, 8, 13), box(3, 8, 12, 13, 15, 14))))
+    val COUNTER: Block = register("counter", RowFurnitureBlock(props(MapColor.PALE_YELLOW, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 16, 16))))
+    /** Drinks machine, stacked two high; its front panel is lit. */
+    val VENDING_MACHINE: Block = register("vending_machine", StackFurnitureBlock(props(MapColor.RED, ModSoundGroups.SHEET_METAL).luminance { 5 }, listOf(box(1, 0, 1, 15, 16, 16))))
+    val COFFEE_MACHINE: Block = register("coffee_machine", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision(), listOf(box(4, 0, 5, 12, 10, 13))))
+    val WATER_DISPENSER: Block = register("water_dispenser", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC), listOf(box(3, 0, 3, 13, 16, 13))))
+    /** An artificial plant in a pot, never watered, never wilting. */
+    val POTTED_PLANT: Block = register("potted_plant", PropBlock(props(MapColor.DARK_GREEN, BlockSoundGroup.GRASS).noCollision(), listOf(box(3, 0, 3, 13, 16, 13))))
+    /** A wall clock, stopped. */
+    val WALL_CLOCK: Block = register("wall_clock", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 3, 15, 13, 13, 16))))
+    /** Dark wood shelves full of books, both sides; stacked four high in the library. */
+    val BOOKSHELF: Block = register("bookshelf", StackFurnitureBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(0, 0, 1, 16, 16, 15))))
+    val READING_TABLE: Block = register("reading_table", TileFurnitureBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 12, 16))))
+    val WOODEN_CHAIR: Block = register("wooden_chair", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(3, 0, 3, 13, 9, 13), box(3, 9, 12, 13, 16, 14))))
+    val LIBRARY_COUNTER: Block = register("library_counter", RowFurnitureBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 16, 16))))
+    /** The library's card catalogue: rows of small drawers with brass pulls. */
+    val CARD_CATALOG: Block = register("card_catalog", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(1, 0, 2, 15, 14, 16))))
 
     // --- Doors and the exit sign ------------------------------------------------------
 

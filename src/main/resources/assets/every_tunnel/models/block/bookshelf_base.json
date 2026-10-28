@@ -1,0 +1,41 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "w": "every_tunnel:block/library_wood",
+    "particle": "every_tunnel:block/library_wood"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        1
+      ],
+      "to": [
+        16,
+        1,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#w"
+        },
+        "east": {
+          "texture": "#w"
+        },
+        "south": {
+          "texture": "#w"
+        },
+        "west": {
+          "texture": "#w"
+        },
+        "up": {
+          "texture": "#w"
+        },
+        "down": {
+          "texture": "#w"
+        }
+      }
+    }
+  ]
+}

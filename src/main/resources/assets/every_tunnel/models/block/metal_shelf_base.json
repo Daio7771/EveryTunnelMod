@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m": "every_tunnel:block/office_metal",
+    "c": "every_tunnel:block/cardboard_box_side",
+    "particle": "every_tunnel:block/office_metal"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        2
+      ],
+      "to": [
+        16,
+        1,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m"
+        },
+        "east": {
+          "texture": "#m"
+        },
+        "south": {
+          "texture": "#m"
+        },
+        "west": {
+          "texture": "#m"
+        },
+        "up": {
+          "texture": "#m"
+        },
+        "down": {
+          "texture": "#m"
+        }
+      }
+    }
+  ]
+}

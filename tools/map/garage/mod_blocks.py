@@ -11,7 +11,8 @@ by itself when a player places the block is set here instead:
 - stains get the way they face and a random picture; a floor stain is sometimes a
   puddle instead (as often as the vanilla version's puddle decal)
 - pipes, ducts and cable trays connect like ConnectingPropBlock does: to the same block
-  on any side it has an arm, and to a full solid face on the horizontal sides
+  on any side it has an arm, and to a full solid face on the horizontal sides unless the
+  run goes up or down there (Level 3 sets its valve risers itself: offices/level.py)
 """
 
 # Pictures per surface; the same counts as StainBlock.patterns and PuddleBlock.PATTERNS.
@@ -74,10 +75,11 @@ def finish(world, p, rng):
     for pos in sorted(blocks):
         bid = block_id(blocks[pos])
         if bid in CONNECTING:
-            sides = {}
-            for side in OFFSETS:
-                other = block_id(blocks.get(shift(pos, side)))
-                sides[side] = side in CONNECTING[bid] and (other == bid or (side in HORIZONTAL and other in solid))
+            others = {side: block_id(blocks.get(shift(pos, side))) for side in OFFSETS}
+            joined = {side: side in CONNECTING[bid] and others[side] == bid for side in OFFSETS}
+            riser = joined["up"] or joined["down"]
+            sides = {side: joined[side] or (not riser and side in CONNECTING[bid] and side in HORIZONTAL
+                                            and others[side] in solid) for side in OFFSETS}
             blocks[pos] = bid + "[" + ",".join(f"{side}={'true' if on else 'false'}" for side, on in sides.items()) + "]"
 
 

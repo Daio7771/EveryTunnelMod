@@ -18,13 +18,16 @@ flowchart TD
     I -->|ramp down| J[Shutter closes, Level 2 title]
     J --> K[Level 2, B2: Pale men]
     K -->|keycard| L[Every light goes out]
-    L -->|EXIT door| M[Stairs to B3: footsteps behind]
-    M --> N[End of demo, credits]
+    L -->|EXIT door| M[Spiral stairs down to B3]
+    M --> P[Level 3, B3: offices, library, bunker]
+    P -->|door to B4| N[End of demo: footsteps behind, credits]
     N --> C
     I -.->|death| O[Fade to black, restart level]
     K -.->|death| O
+    P -.->|death| O
     O -.-> I
     O -.-> K
+    O -.-> P
 ```
 
 ## 1. Start-up
@@ -156,15 +159,38 @@ Reopening the world or respawning inside a level does not count as walking in.
 - **The stairs to B3:** behind the door, a round shaft of metal panels with grating stairs
   spiralling down 4 turns (32 blocks, half a block per step) around an open well, railed
   with iron bars and lit by a wall lamp every half turn. At the bottom, a small landing
-  with a closed door under the "B3" sign.
+  and an open door under the "B3" sign: the way into Level 3.
 
-## 9. The end
+## 9. Level 3 (B3)
 
-`platform.EndingHooks`: at the bottom of the spiral stairs to B3 the player walks onto the
-landing, a zone tagged `end`.
+The offices of the complex around the central library, in perfect order and empty. So far
+**only the structure** is built (phase A): the observant guard, the books, the valve
+puzzle, the notes and the loot are still to come; their zones and spawn points are already
+in the level file (see [Levels](levels.md#level-3-hooks)).
 
-1. Five bare footsteps come down the stairs behind the player (the Pale man's own step
-   sound).
+- Behind the open door, stairs climb down 8 blocks to the **antechamber**. Walking into it
+  shows "Level 3" (the stairs belong to no zone); its spawn point tagged `player` is there.
+- North, the **valve corridor**: five valves (A to E) on its east wall, each a `ValveBlock`
+  inline in a pipe (shut; turning them comes with the puzzle), then a wall with a closed
+  double emergency door, the **checkpoint**.
+- Past it, through the belt of 17 rooms, the **inner corridor**: a ring round the
+  **central library** (64 × 64, 12 high, lit by lights hanging on chains). Every light is
+  on; the surfaces are clean.
+- Every room is furnished for what it is, tidy and no more than it needs (desks with their
+  chairs and phones, filing cabinets, server racks, lockers, the cafeteria's tables...); the
+  library has rows of bookshelves four high, two blocks apart, round a clearing with reading
+  tables, and the librarian's counter by the south door. Nobody is there.
+- In the library's centre, the **bunker hatch**: iron trapdoors (shut) in a frame of checker
+  plate. Under it a ladder goes down a shaft to a lit corridor that runs 32 blocks south to
+  the door to B4, where the demo ends.
+
+## 10. The end
+
+`platform.EndingHooks`: at the end of Level 3's bunker corridor, in front of the door to
+B4, the player walks into a zone tagged `end`.
+
+1. Five bare footsteps come down behind the player, each a little closer and lower (the
+   Pale man's own step sound).
 2. The screen fades to black over 2.5 s.
 3. The server sends `ending`; the client opens `EndOfDemoScreen`: "End of demo" fades in,
    then the credits roll (the CC BY music credit among them) until "Thank you for playing."

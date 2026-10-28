@@ -18,13 +18,16 @@ flowchart TD
     I -->|rampa abajo| J[Se cierra la persiana, título Level 2]
     J --> K[Nivel 2, B2: Pale men]
     K -->|tarjeta| L[Se apagan todas las luces]
-    L -->|puerta EXIT| M[Escaleras a B3: pasos detrás]
-    M --> N[Fin de la demo, créditos]
+    L -->|puerta EXIT| M[Escalera de caracol a B3]
+    M --> P[Nivel 3, B3: oficinas, biblioteca, búnker]
+    P -->|puerta a B4| N[Fin de la demo: pasos detrás, créditos]
     N --> C
     I -.->|muerte| O[Fundido a negro, reinicia el nivel]
     K -.->|muerte| O
+    P -.->|muerte| O
     O -.-> I
     O -.-> K
+    O -.-> P
 ```
 
 ## 1. Arranque
@@ -164,15 +167,42 @@ Reabrir el mundo o reaparecer dentro de un nivel no cuenta como entrar.
 - **Las escaleras a B3:** tras la puerta, un pozo redondo de paneles metálicos con una
   escalera de rejilla que baja en espiral 4 vueltas (32 bloques, medio bloque por escalón)
   alrededor de un hueco abierto, con barandilla de barrotes de hierro y una lámpara de pared
-  cada media vuelta. Abajo, un rellano pequeño con una puerta cerrada bajo la señal "B3".
+  cada media vuelta. Abajo, un rellano pequeño y una puerta abierta bajo la señal "B3": la
+  entrada al nivel 3.
 
-## 9. El final
+## 9. Nivel 3 (B3)
 
-`platform.EndingHooks`: al pie de la escalera de caracol a B3 el jugador llega al rellano,
-una zona con la etiqueta `end`.
+Las oficinas del complejo alrededor de la biblioteca central, en perfecto estado y vacías.
+De momento **solo está la estructura** (fase A): faltan el guardia observador, los libros, el
+puzle de las válvulas, las notas y el loot; sus zonas y puntos de spawn ya están en el
+archivo del nivel (ver [Niveles](levels.md#ganchos-del-nivel-3)).
 
-1. Cinco pasos descalzos bajan las escaleras detrás del jugador (el sonido de paso del
-   propio Pale man).
+- Tras la puerta abierta, unas escaleras bajan 8 bloques hasta la **antesala**. Al entrar
+  aparece "Level 3" (las escaleras no pertenecen a ninguna zona); ahí está su punto de spawn
+  con la etiqueta `player`.
+- Al norte, el **pasillo de las válvulas**: cinco válvulas (A a E) en su pared este, cada
+  una un `ValveBlock` en línea en una tubería (cerradas; girarlas llegará con el puzle), y
+  luego un muro con una puerta doble de emergencia cerrada, el **checkpoint**.
+- Pasado este, a través del cinturón de 17 habitaciones, el **pasillo interior**: un anillo
+  alrededor de la **biblioteca central** (64 × 64, 12 de alto, con lámparas colgadas de
+  cadenas). Todas las luces están encendidas y las superficies, limpias.
+- Cada sala tiene los muebles de lo que es, ordenados y sin sobrar nada (mesas con sus sillas
+  y teléfonos, archivadores, racks de servidores, taquillas, las mesas de la cafetería...);
+  la biblioteca tiene filas de estanterías de cuatro de alto, a dos bloques unas de otras,
+  alrededor de un claro con mesas de lectura, y el mostrador del bibliotecario junto a la
+  puerta sur. No hay nadie.
+- En el centro de la biblioteca, la **trampilla del búnker**: trampillas de hierro (cerradas)
+  en un marco de chapa estriada. Debajo, una escalera de mano baja por un pozo hasta un
+  pasillo iluminado que recorre 32 bloques hacia el sur hasta la puerta a B4, donde termina
+  la demo.
+
+## 10. El final
+
+`platform.EndingHooks`: al final del pasillo del búnker del nivel 3, delante de la puerta a
+B4, el jugador entra en una zona con la etiqueta `end`.
+
+1. Cinco pasos descalzos se acercan por detrás del jugador, cada uno algo más cerca y más
+   bajo (el sonido de paso del propio Pale man).
 2. La pantalla funde a negro en 2,5 s.
 3. El servidor envía `ending`; el cliente abre `EndOfDemoScreen`: aparece "End of demo" y
    luego suben los créditos (entre ellos el crédito CC BY de la música) hasta "Thank you

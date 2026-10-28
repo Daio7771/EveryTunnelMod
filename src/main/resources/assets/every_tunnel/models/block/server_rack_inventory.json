@@ -1,0 +1,74 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "b": "every_tunnel:block/rack_black",
+    "f": "every_tunnel:block/server_front",
+    "particle": "every_tunnel:block/rack_black"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        16,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#f"
+        },
+        "east": {
+          "texture": "#b"
+        },
+        "south": {
+          "texture": "#b"
+        },
+        "west": {
+          "texture": "#b"
+        },
+        "up": {
+          "texture": "#b"
+        },
+        "down": {
+          "texture": "#b"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        1,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#b"
+        },
+        "east": {
+          "texture": "#b"
+        },
+        "south": {
+          "texture": "#b"
+        },
+        "west": {
+          "texture": "#b"
+        },
+        "up": {
+          "texture": "#b"
+        },
+        "down": {
+          "texture": "#b"
+        }
+      }
+    }
+  ]
+}

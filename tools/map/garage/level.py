@@ -51,6 +51,7 @@ class Level:
         self.landing = None      # END "ramp": the dark landing (far wall x, floor y, centre z, east)
         self.entry = None        # START "entry": (x, y, z) of the entry corridor's first cell (west end, centre)
         self.keycard = None      # KEYCARD_HALL: (x, y, z) where the keycard lies
+        self.next_door = None    # keycard_exit: the door under the next level's sign, (x, y, wall z, step)
         self.rng = random.Random(f"{p.SEED}-level")
 
     # --- small builders --------------------------------------------------------------
@@ -429,8 +430,10 @@ class Level:
         with grating stairs spiralling down around an open well, railed with iron bars:
         EXIT_TURNS turns of EXIT_TURN_DROP blocks each, half a block per step, clockwise seen
         from above. Wall lamps every half turn stay on when the keycard puts the level's lights
-        out (the zone is tagged lights_stay). At the bottom, a landing with a closed door under
-        the next level's sign: the zone tagged end, where the demo ends.
+        out (the zone is tagged lights_stay). At the bottom, a landing with a door under the next
+        level's sign: open when EXIT_DOOR_OPEN (the next level lies behind it, see attach_level_3
+        in map_generator.py), closed otherwise; with EXIT_END the landing is the zone tagged end,
+        where the demo ends.
 
         Seen from above, from the hall's wall (z = wall_z) outwards (step):
           +1, +2     the entry landing at the top, 3 wide; the bottom landing under it
@@ -548,8 +551,10 @@ class Level:
         for x in range(dx - 2, dx + 3):
             for yy in range(bottom - 1, bottom + 4):
                 self.set(x, yy, wall_z, metal)
-        self.set(dx, bottom, wall_z, f"{S['emergency_door']}[facing={facing_out},half=lower,hinge=left,open=false,powered=false]")
-        self.set(dx, bottom + 1, wall_z, f"{S['emergency_door']}[facing={facing_out},half=upper,hinge=left,open=false,powered=false]")
+        is_open = "true" if p.EXIT_DOOR_OPEN else "false"
+        self.set(dx, bottom, wall_z, f"{S['emergency_door']}[facing={facing_out},half=lower,hinge=left,open={is_open},powered=false]")
+        self.set(dx, bottom + 1, wall_z, f"{S['emergency_door']}[facing={facing_out},half=upper,hinge=left,open={is_open},powered=false]")
+        self.next_door = (dx, bottom, wall_z, step)
         self.set(dx, bottom + 2, wall_z, self.glyphs.wall_state(p.NEXT_LEVEL_SIGN, facing_out))
         self.fixture(dx, wall_z + step * 2, bottom + 3, "lit")
 
@@ -573,8 +578,9 @@ class Level:
         xs = [x for x, _ in walls]
         zs = [z for _, z in walls] + [wall_z + step]
         self.zone(f"keycard_exit_hall_{spec['hall'] + 1}", min(xs), bottom - 1, min(zs), max(xs), top + 4, max(zs), ["lights_stay"])
-        e0, e1 = sorted(landing_zs)
-        self.zone("end", dx - 1, bottom, e0, dx + 1, bottom + 2, e1, ["end"])
+        if p.EXIT_END:
+            e0, e1 = sorted(landing_zs)
+            self.zone("end", dx - 1, bottom, e0, dx + 1, bottom + 2, e1, ["end"])
         self.labels.append((dx - 5, min(zs) - 1 if step < 0 else max(zs) + 2,
                             f"EXIT (keycard): spiral stairs down to {p.NEXT_LEVEL_SIGN}"))
 

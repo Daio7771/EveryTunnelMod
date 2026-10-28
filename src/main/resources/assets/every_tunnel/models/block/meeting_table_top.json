@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "l": "every_tunnel:block/laminate",
+    "m": "every_tunnel:block/office_metal",
+    "particle": "every_tunnel:block/laminate"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        11,
+        0
+      ],
+      "to": [
+        16,
+        12,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#l"
+        },
+        "east": {
+          "texture": "#l"
+        },
+        "south": {
+          "texture": "#l"
+        },
+        "west": {
+          "texture": "#l"
+        },
+        "up": {
+          "texture": "#l"
+        },
+        "down": {
+          "texture": "#l"
+        }
+      }
+    }
+  ]
+}

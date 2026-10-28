@@ -22,7 +22,8 @@ que tocar.
    `water`.
 4. `/reload` y comprueba con `/everytunnel levels` y `/everytunnel where`. Los problemas
    están en el log con su ruta JSON.
-5. Si el mapa crece, mantén el área de carga forzada por debajo de 256 chunks.
+5. Si el mapa crece, mantén el área de carga forzada de cada etapa del build por debajo de
+   256 chunks (el generador las muestra y se para si alguna se pasa).
 
 ## Añadir una etiqueta de zona o de punto
 

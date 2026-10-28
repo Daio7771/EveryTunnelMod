@@ -1,0 +1,131 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north"
+      },
+      "apply": [
+        {
+          "model": "every_tunnel:block/bookshelf_core_0"
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_1"
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_2"
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_3"
+        }
+      ]
+    },
+    {
+      "when": {
+        "facing": "east"
+      },
+      "apply": [
+        {
+          "model": "every_tunnel:block/bookshelf_core_0",
+          "y": 90
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_1",
+          "y": 90
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_2",
+          "y": 90
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_3",
+          "y": 90
+        }
+      ]
+    },
+    {
+      "when": {
+        "facing": "south"
+      },
+      "apply": [
+        {
+          "model": "every_tunnel:block/bookshelf_core_0",
+          "y": 180
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_1",
+          "y": 180
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_2",
+          "y": 180
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_3",
+          "y": 180
+        }
+      ]
+    },
+    {
+      "when": {
+        "facing": "west"
+      },
+      "apply": [
+        {
+          "model": "every_tunnel:block/bookshelf_core_0",
+          "y": 270
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_1",
+          "y": 270
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_2",
+          "y": 270
+        },
+        {
+          "model": "every_tunnel:block/bookshelf_core_3",
+          "y": 270
+        }
+      ]
+    },
+    {
+      "when": {
+        "facing": "north",
+        "down": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/bookshelf_base"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "down": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/bookshelf_base",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "down": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/bookshelf_base",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "down": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/bookshelf_base",
+        "y": 270
+      }
+    }
+  ]
+}

@@ -85,6 +85,8 @@ KDoc comment that says more.
 | `FloorIndicatorBlock.kt` | The elevator's LED floor display |
 | `ShutterBlock.kt` | A piece of a rolling shutter |
 | `CardReaderBlock.kt` | The keycard reader that opens iron doors |
+| `FurnitureBlocks.kt` | Level 3's furniture that joins its own kind: row pieces (desks, counters, sofas) left and right, table tiles on all sides, stacks (bookshelves, racks, lockers) up and down |
+| `ValveBlock.kt` | A gate valve inline in a wall pipe: facing, open, letter A to E (Level 3) |
 | `LootBlock.kt` | Loot lying on the floor, picked up with right-click |
 
 ### `platform/`: the Pale man

@@ -32,11 +32,14 @@ Run every tool **from the repository root**. Each writes its real output into `s
 
 ## Map
 
-`tools/map/map_generator.py` builds both levels of the parking garage.
+`tools/map/map_generator.py` builds the levels: the two of the parking garage and Level 3,
+the offices.
 
 - **Parameters** are at the top of the file: Level 1's (`HALLS`, `SIDE_ROOMS`, `LOOT`,
   `SEED`, `WEAR`, lights, props, oddities...) and `LEVEL_2`, a dict of overrides for
   Level 2 (darker, more worn, `PALE_MEN` per hall, `KEYCARD_HALL`, `END = "none"`).
+  `LEVEL_3` is Level 3: every box of its plan (rooms, doors, corridors, the library, the
+  bunker), heights, materials and its stand-in blocks, the hooks' spawn points.
   `MENU_SCENE` and `MENU_CAMERA` are the main menu's scene: one hall and the camera.
 - **Modules** in `tools/map/garage/`:
 
@@ -52,9 +55,21 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `preview.py` | Top-down plan of the level and texture sheets |
 | `menu_scene.py` | The main menu's scene: one hall, written into the mod with the models of its re-skinned blocks |
 
+- **Level 3** has its own modules in `tools/map/offices/` (mod pack only):
+
+| Module | Job |
+|---|---|
+| `level.py` | The level from `LEVEL_3`: spaces as boxes of air, the shell round them (floor, walls, ceiling in each space's materials), the fittings, zones and spawn points; `Placement` turns and moves the plan onto Level 2's door |
+| `checks.py` | A walk over every standing place from the antechamber (every room, the library, the hatch, the bunker, the door to B4; nothing left out) and a check that rooms are closed but for their doors. A failed check stops the generator |
+| `textures.py` | Level 3's own textures (carpet, plaster, ceiling tiles, vinyl, wood, concrete), added to the world resource pack |
+| `furnish.py` | The furniture: a template per kind of room (`FURNISH` in `LEVEL_3`), worked out in the room's own frame from its main door, kept off the doors; the library's rows, clearing and counter (`LIBRARY_LAYOUT`); the ring's plants and clocks; the joined states |
+| `preview.py` | Top-down plan of Level 3 read from its blocks, furniture included, with the bunker beside it |
+
 - **Output** (`tools/map/output/`): the mod datapack `every_tunnel_level1_mod` (level JSON
   files and `garage:build`), the vanilla datapack `every_tunnel_level1_vanilla`,
-  `level_resources.zip`, `level_preview.png`, `texture_sheet.png`, `pbr_sheet.png`. Into the
+  `level_resources.zip`, `level_preview.png`, `level3_preview.png`, `texture_sheet.png`,
+  `level3_furniture.png` (the same, bigger), `level3_texture_sheet.png`, `pbr_sheet.png`. The run prints both build stages' chunks and
+  commands. Into the
   mod (in git): the menu scene, `assets/every_tunnel/menu/scene.json` and the models and
   textures under `block/menu/`.
 - **Install:** into every world listed in `INSTALL` that exists: `run/saves/noname_complex`
@@ -65,7 +80,7 @@ just open the world. `/function garage:build` rebuilds by hand. See [Levels](lev
 
 ## Blocks
 
-`tools/blocks/generate.py` makes the assets of the mod's 39 blocks. The blocks themselves
+`tools/blocks/generate.py` makes the assets of the mod's 63 blocks. The blocks themselves
 (properties, shapes, sounds) are registered in Kotlin (`platform/ModBlocks.kt`); the tool
 **stops if the two id lists disagree**. Model rotations must match the shapes in
 `platform/BlockShapes.kt`. Textures reuse the map's painters (`garage/textures.py`), so

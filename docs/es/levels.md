@@ -138,6 +138,9 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `lights_stay` | `KeycardHooks` | Sus luces siguen encendidas al coger la tarjeta (el pozo de escaleras a B3) |
 | `end` | `EndingHooks` | Entrar termina la demo |
 | `exit` | (nadie aún) | Marca la salida de un nivel; reservada para sistemas futuros |
+| `checkpoint` | (nadie aún) | Nivel 3: justo pasada la puerta del checkpoint, donde reiniciará una muerte |
+| `collapse` | (nadie aún) | Nivel 3: al entrar, el techo del pasillo del búnker caerá detrás del jugador |
+| `collapse_blocks` | (nadie aún) | Nivel 3: el tramo de pasillo que llenará el derrumbe |
 
 ### Etiquetas de punto de aparición
 
@@ -148,9 +151,31 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `battery` | `LootSpawner` | Una batería en el suelo |
 | `water` | `LootSpawner` | Una botella de agua |
 | `keycard` | `LootSpawner` | La tarjeta |
+| `checkpoint` | (nadie aún) | Nivel 3: donde reiniciará una muerte pasado el checkpoint |
+| `observant_guard` | (nadie aún) | Nivel 3: el guardia observador, dentro de `guard_area` (la biblioteca y el anillo) |
+| `book_spot` | (nadie aún) | Nivel 3: donde está el libro de una habitación, encima de un archivador (una por habitación "book") |
+| `valve` | (nadie aún) | Nivel 3: una válvula (`valve_a` a `valve_e`, el `ValveBlock` de ahí) |
+| `note_spot`, `battery_spot`, `water_spot`, `food_spot` | (nadie aún) | Nivel 3: notas y loot, listados en `LEVEL_3` (vacíos por ahora) |
 
 Las etiquetas son cadenas libres: un sistema nuevo puede definir las suyas sin tocar el
 parser.
+
+### Ganchos del nivel 3
+
+Del nivel 3 de momento solo está la estructura; su archivo ya tiene lo que leerán los
+sistemas que vienen:
+
+- **Zonas:** una por habitación (su id en snake case: `archive`, `meeting_room`...,
+  `open_office_nw`, `open_office_ne`), `library`, el anillo en cuatro
+  (`inner_corridor_north`, `_south`, `_west`, `_east`), `guard_area` (la biblioteca y el
+  anillo juntos), `valve_corridor`, `checkpoint`, `antechamber`, `bunker_shaft`,
+  `bunker_corridor`, `collapse`, `collapse_blocks` y `end` (delante de la puerta a B4). Las
+  escaleras desde B2 no pertenecen a ninguna zona, así que "Level 3" aparece al entrar en
+  la antesala.
+- **Puntos de spawn:** `player_start` (la antesala), `checkpoint`, `observant_guard`, un
+  `book_<habitación>` por cada habitación con libro (en el archivador que elige su plantilla
+  de muebles, salvo que `BOOK_SPOTS` diga otro), `valve_a` a `valve_e`, y las listas `NOTE_SPOTS`,
+  `BATTERY_SPOTS`, `WATER_SPOTS` y `FOOD_SPOTS` (vacías).
 
 ## Cómo sigue el mod a los jugadores
 
@@ -171,18 +196,24 @@ tick del servidor --> LevelTrackingHooks --> PlayerLocationTracker.update(pos)
 
 ## Cómo se construye Noname Complex
 
-Los dos niveles de la demo los genera `tools/map/map_generator.py` (ver
+Los niveles los genera `tools/map/map_generator.py` (ver
 [Herramientas Python](tools.md)). Escribe:
 
 - **`every_tunnel_level1_mod/`**, el datapack que usa el mod:
-  - `data/every_tunnel/levels/level_1.json` y `level_2.json`;
-  - `data/garage/functions/build.mcfunction`: fuerza la carga del área del mapa y programa
-    `build_wait`, que cada 5 ticks comprueba si las esquinas están cargadas y entonces
-    ejecuta `build_now`;
+  - `data/every_tunnel/levels/level_1.json`, `level_2.json` y `level_3.json`;
+  - `data/garage/functions/build.mcfunction`: fuerza la carga del área de los niveles 1 y 2 y programa
+    `build_wait`, que pide otra comprobación a los 5 ticks y, cuando todas las esquinas
+    están cargadas, ejecuta `build_go`: cancela esa comprobación, ejecuta `build_now` y libera
+    el área (`garage:clear` funciona igual, con `clear_wait` y `clear_go`);
   - `build_now.mcfunction`: unos 12.000 comandos. Desactiva los drops de bloques, quita a
     los Pale men del área, coloca cada bloque (con los bloques del mod y sus estados
-    exactos), restaura la gamerule y termina con `everytunnel rebuilt`.
-- **`every_tunnel_level1_vanilla/`**, el mismo nivel con bloques vanilla retexturizados para
+    exactos), restaura la gamerule y programa la segunda etapa, `level3_build`.
+  - `level3_build.mcfunction` hace lo mismo con el nivel 3 en su propia área de carga
+    forzada (`level3_build_wait` y luego `level3_build_go`, que ejecuta `level3_now`: unos
+    2.000 comandos, los bloques unidos en rectángulos capa a capa) y termina con
+    `everytunnel rebuilt`. Son dos etapas porque un área sobre los tres niveles pasaría
+    de los 256 chunks que admite `/forceload`.
+- **`every_tunnel_level1_vanilla/`**, los niveles 1 y 2 con bloques vanilla retexturizados para
   Minecraft sin mods (se construye solo al abrir el mundo).
 - **`level_resources.zip`**, el resource pack del mundo: texturas generadas y sus mapas
   LabPBR, y los textos de los carteles (las ranuras de `SignTileBlock`). Se instala como
@@ -193,9 +224,9 @@ El generador instala el datapack del mod y el resource pack en `run/saves/noname
 
 ### Límites
 
-- La construcción fuerza la carga de todo el mapa, así que debe caber en 256 chunks (ahora
-  unos 180).
-- `SignTileBlock` tiene 4 orientaciones × 64 ranuras; quedan libres 9 de las 64.
+- Cada etapa fuerza la carga de su área, que debe caber en 256 chunks (ahora 160 para los
+  niveles 1 y 2 y 77 para el nivel 3).
+- `SignTileBlock` tiene 4 orientaciones × 64 ranuras; quedan libres 8 de las 64.
 - `/fill` está limitado a 32.768 bloques por comando y una función a 65.536 comandos.
 
 ## Añadir un nivel

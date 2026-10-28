@@ -34,13 +34,16 @@ git).
 
 ## Mapa
 
-`tools/map/map_generator.py` construye los dos niveles del aparcamiento.
+`tools/map/map_generator.py` construye los niveles: los dos del aparcamiento y el nivel 3,
+las oficinas.
 
 - **Los parámetros** están al principio del archivo: los del Nivel 1 (`HALLS`, `SIDE_ROOMS`,
   `LOOT`, `SEED`, `WEAR`, luces, props, rarezas...) y `LEVEL_2`, un diccionario de valores
   que cambian para el Nivel 2 (más oscuro, más gastado, `PALE_MEN` por planta,
-  `KEYCARD_HALL`, `END = "none"`). `MENU_SCENE` y `MENU_CAMERA` son la escena del menú
-  principal: una planta y la cámara.
+  `KEYCARD_HALL`, `END = "none"`). `LEVEL_3` es el nivel 3: cada caja de su plano
+  (habitaciones, puertas, pasillos, la biblioteca, el búnker), alturas, materiales y sus
+  bloques sustitutos, los puntos de spawn de los ganchos. `MENU_SCENE` y `MENU_CAMERA` son
+  la escena del menú principal: una planta y la cámara.
 - **Módulos** en `tools/map/garage/`:
 
 | Módulo | Función |
@@ -55,9 +58,21 @@ git).
 | `preview.py` | Plano visto desde arriba del nivel y hojas de texturas |
 | `menu_scene.py` | La escena del menú principal: una planta, escrita en el mod con los modelos de sus bloques re-texturizados |
 
+- **El nivel 3** tiene sus propios módulos en `tools/map/offices/` (solo en el pack del mod):
+
+| Módulo | Función |
+|---|---|
+| `level.py` | El nivel a partir de `LEVEL_3`: los espacios como cajas de aire, la carcasa a su alrededor (suelo, paredes y techo con los materiales de cada espacio), los accesorios, las zonas y los puntos de spawn; `Placement` gira y mueve el plano hasta la puerta del nivel 2 |
+| `checks.py` | Un recorrido por cada sitio donde se puede estar de pie desde la antesala (todas las habitaciones, la biblioteca, la trampilla, el búnker, la puerta a B4; sin dejar ninguno) y una comprobación de que las habitaciones están cerradas salvo por sus puertas. Si falla, el generador se para |
+| `textures.py` | Las texturas propias del nivel 3 (moqueta, yeso, placas de techo, vinilo, madera, hormigón), añadidas al resource pack del mundo |
+| `furnish.py` | Los muebles: una plantilla por tipo de sala (`FURNISH` en `LEVEL_3`), calculada en el marco propio de la sala desde su puerta principal y lejos de las puertas; las filas, el claro y el mostrador de la biblioteca (`LIBRARY_LAYOUT`); las plantas y relojes del anillo; los estados de las uniones |
+| `preview.py` | Plano visto desde arriba del nivel 3 leído de sus bloques, con los muebles y el búnker al lado |
+
 - **Salida** (`tools/map/output/`): el datapack del mod `every_tunnel_level1_mod` (archivos
   JSON de los niveles y `garage:build`), el datapack vanilla `every_tunnel_level1_vanilla`,
-  `level_resources.zip`, `level_preview.png`, `texture_sheet.png`, `pbr_sheet.png`. En el mod
+  `level_resources.zip`, `level_preview.png`, `level3_preview.png`, `texture_sheet.png`,
+  `level3_furniture.png` (el mismo, más grande), `level3_texture_sheet.png`, `pbr_sheet.png`. La ejecución muestra los chunks y comandos de
+  las dos etapas del build. En el mod
   (en git): la escena del menú, `assets/every_tunnel/menu/scene.json` y los modelos y
   texturas de `block/menu/`.
 - **Instalación:** en cada mundo de `INSTALL` que exista: `run/saves/noname_complex` y, si
@@ -69,7 +84,7 @@ generador basta con abrir el mundo. `/function garage:build` reconstruye a mano.
 
 ## Bloques
 
-`tools/blocks/generate.py` hace los recursos de los 39 bloques del mod. Los bloques en sí
+`tools/blocks/generate.py` hace los recursos de los 63 bloques del mod. Los bloques en sí
 (propiedades, formas, sonidos) se registran en Kotlin (`platform/ModBlocks.kt`); la
 herramienta **se detiene si las dos listas de ids no coinciden**. Las rotaciones de los
 modelos deben coincidir con las formas de `platform/BlockShapes.kt`. Las texturas reutilizan

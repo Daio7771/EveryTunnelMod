@@ -22,7 +22,11 @@ import net.minecraft.world.WorldAccess
  *
  * A side connects when it has an arm ([arms]) and the neighbour is the same block, or,
  * for horizontal sides, a full solid face (a run ends inside the wall instead of in the
- * air). Never up or down into a solid block: the ceiling and beams above a run must not
+ * air), or, up and down when [throughValves], a [ValveBlock] (it carries the pipe through
+ * itself, so a pipe runs on through the valve). A run going up or down (joined above or
+ * below) grows no arms into walls: one on every block of a riser reads as a comb. Since
+ * that hangs on the sides above and below, every update works out all sides again. Never
+ * up or down into a solid block: the ceiling and beams above a run must not
  * grow stubs. `tools/map/map_generator.py` sets the same connections when it builds a
  * level, since `/setblock` takes the state as given.
  */
@@ -30,6 +34,7 @@ class ConnectingPropBlock(
     settings: Settings,
     core: BlockShapes.Box,
     private val arms: Map<Direction, BlockShapes.Box>,
+    private val throughValves: Boolean = false,
 ) : Block(settings) {
 
     private val shapes: Map<BlockState, VoxelShape>
@@ -49,25 +54,33 @@ class ConnectingPropBlock(
         builder.add(*SIDES.values.toTypedArray())
     }
 
-    override fun getPlacementState(ctx: ItemPlacementContext): BlockState {
-        var state = defaultState
-        for (side in Direction.entries) {
-            val pos = ctx.blockPos.offset(side)
-            state = state.with(SIDES.getValue(side), connects(side, ctx.world.getBlockState(pos), ctx.world, pos))
-        }
-        return state
-    }
+    override fun getPlacementState(ctx: ItemPlacementContext): BlockState = connections(ctx.world, ctx.blockPos)
 
     @Deprecated("Deprecated in Java")
     override fun getStateForNeighborUpdate(
         state: BlockState, direction: Direction, neighborState: BlockState,
         world: WorldAccess, pos: BlockPos, neighborPos: BlockPos,
-    ): BlockState = state.with(SIDES.getValue(direction), connects(direction, neighborState, world, neighborPos))
+    ): BlockState = connections(world, pos, direction, neighborState)
 
-    private fun connects(side: Direction, neighbor: BlockState, world: BlockView, neighborPos: BlockPos): Boolean {
+    /** The state with every side's arm, [changed] being [changedState] (a neighbour being updated). */
+    private fun connections(world: BlockView, pos: BlockPos, changed: Direction? = null, changedState: BlockState? = null): BlockState {
+        val neighbors = Direction.entries.associateWith { side ->
+            if (side == changed && changedState != null) changedState else world.getBlockState(pos.offset(side))
+        }
+        val joined = neighbors.mapValues { (side, neighbor) -> joins(side, neighbor) }
+        val riser = joined.getValue(Direction.UP) || joined.getValue(Direction.DOWN)
+        return Direction.entries.fold(defaultState) { state, side ->
+            val wall = !riser && side.axis.isHorizontal && side in arms &&
+                neighbors.getValue(side).isSideSolidFullSquare(world, pos.offset(side), side.opposite)
+            state.with(SIDES.getValue(side), joined.getValue(side) || wall)
+        }
+    }
+
+    /** The same block, or a valve above or below, on a side with an arm. */
+    private fun joins(side: Direction, neighbor: BlockState): Boolean {
         if (side !in arms) return false
         if (neighbor.isOf(this)) return true
-        return side.axis.isHorizontal && neighbor.isSideSolidFullSquare(world, neighborPos, side.opposite)
+        return throughValves && side.axis.isVertical && neighbor.block is ValveBlock
     }
 
     @Deprecated("Deprecated in Java")

@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "c": "every_tunnel:block/wall_clock",
+    "particle": "every_tunnel:block/wall_clock"
+  },
+  "elements": [
+    {
+      "from": [
+        3,
+        3,
+        15
+      ],
+      "to": [
+        13,
+        13,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.5,
+            2.5,
+            12.5,
+            12.5
+          ],
+          "texture": "#c"
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

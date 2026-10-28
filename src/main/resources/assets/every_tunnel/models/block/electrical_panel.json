@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m": "every_tunnel:block/office_metal",
+    "f": "every_tunnel:block/electrical_front",
+    "particle": "every_tunnel:block/office_metal"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        2,
+        12
+      ],
+      "to": [
+        14,
+        15,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#f"
+        },
+        "east": {
+          "texture": "#m"
+        },
+        "south": {
+          "texture": "#m"
+        },
+        "west": {
+          "texture": "#m"
+        },
+        "up": {
+          "texture": "#m"
+        },
+        "down": {
+          "texture": "#m"
+        }
+      }
+    }
+  ]
+}

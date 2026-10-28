@@ -37,6 +37,7 @@ from garage import pbr, preview                                         # noqa: 
 from garage import textures as T                                        # noqa: E402
 from garage.pbr import Material                                         # noqa: E402
 from garage.textures import mix, new, noise, px, rect, speckle         # noqa: E402
+from offices import textures as OT                                     # noqa: E402
 
 NS = "every_tunnel"
 RESOURCES = ROOT / "src" / "main" / "resources"
@@ -349,7 +350,270 @@ def card_reader_tex(rng, part):
     return img
 
 
+# Painted letters of the valves' plates, 3 x 5 pixels.
+VALVE_LETTERS = {
+    "a": [".#.", "#.#", "###", "#.#", "#.#"],
+    "b": ["##.", "#.#", "##.", "#.#", "##."],
+    "c": [".##", "#..", "#..", "#..", ".##"],
+    "d": ["##.", "#.#", "#.#", "#.#", "##."],
+    "e": ["###", "#..", "##.", "#..", "###"],
+}
+
+
+def valve_wheel_tex(rng, turned):
+    """A round red handwheel, seen face on, on a clear background (drawn cutout): rim, four
+    spokes (straight, or an eighth round when `turned`) and the hub. The model shows texels
+    2-13; the wheel is centred between texels 7 and 8, as the model's stem is."""
+    img = new((0, 0, 0), alpha=0)
+    red = (158, 42, 38)
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x - 7.5, y - 7.5
+            d = (dx * dx + dy * dy) ** 0.5
+            rim = 4.4 <= d <= 5.9
+            spoke = d < 4.6 and (abs(dx + dy) < 1.0 or abs(dx - dy) < 1.0 if turned else abs(dx) < 1 or abs(dy) < 1)
+            if rim or spoke or d < 1.8:
+                shade = 1.15 if dy < -1 else 0.85 if dy > 1.5 else 1.0          # lit from above
+                if d < 1.8:
+                    shade *= 0.8
+                c = tuple(T.clamp(v * shade + rng.uniform(-6, 6)) for v in red)
+                img.putpixel((x, y), (*c, 255))
+    return img
+
+
+def valve_body_tex(rng):
+    """The valve's cast body: the pipe's paint, darker and duller."""
+    img = new((92, 104, 94))
+    noise(img, rng, 4)
+    speckle(img, rng, 14, (74, 84, 76), 0.6)
+    rect(img, 0, 0, 15, 0, (70, 80, 72), 0.5)                       # cast seams
+    rect(img, 0, 15, 15, 15, (70, 80, 72), 0.5)
+    return img
+
+
+def valve_stem_tex(rng):
+    """The threaded steel stem and hub: bright and dark rows."""
+    img = new((150, 154, 160))
+    for y in range(0, 16, 2):
+        rect(img, 0, y, 15, y, (104, 108, 114), 0.8)
+    noise(img, rng, 3)
+    return img
+
+
+def valve_plate_tex(rng, letter):
+    """An enamel plate with a painted letter, in the pixels the model's plates show (x 5-11, y 4-10)."""
+    img = new((92, 104, 94))
+    rect(img, 5, 4, 11, 10, (214, 212, 200))
+    for x in range(5, 12):
+        px(img, x, 4, (120, 122, 118), 0.8)
+        px(img, x, 10, (120, 122, 118), 0.8)
+    for y in range(4, 11):
+        px(img, 5, y, (120, 122, 118), 0.8)
+        px(img, 11, y, (120, 122, 118), 0.8)
+    for row, line in enumerate(VALVE_LETTERS[letter]):
+        for col, c in enumerate(line):
+            if c == "#":
+                px(img, 7 + col, 5 + row, (28, 28, 30))
+    noise(img, rng, 2)
+    return img
+
+
+# --- Level 3 furniture ------------------------------------------------------------------
+# Offices: powder-coated light grey metal and a light beech laminate; the library: the dark
+# wood of its walls (offices/textures.py); staff rooms in plain plastics. Clean, no wear.
+
+LAMINATE = (196, 172, 132)
+OFFICE_METAL = (168, 172, 176)
+LIBRARY_WOOD = OT.WOOD_DARK
+BOOK_COLOURS = [(112, 42, 40), (52, 82, 62), (44, 54, 84), (102, 72, 46), (150, 120, 62), (88, 88, 92), (70, 40, 58)]
+
+
+def laminate_tex(rng, base=LAMINATE):
+    """Wood-look laminate: a faint grain running along the texture."""
+    img = new(base)
+    for y in range(16):
+        shade = rng.uniform(-5, 5)
+        for x in range(16):
+            px(img, x, y, tuple(T.clamp(c + shade) for c in base), 0.7)
+    noise(img, rng, 2)
+    for _ in range(3):
+        y = rng.randrange(16)
+        for x in range(rng.randrange(0, 6), rng.randrange(10, 16)):
+            px(img, x, y, tuple(c - 14 for c in base), 0.35)
+    return img
+
+
+def powder_metal_tex(rng, base=OFFICE_METAL):
+    img = new(base)
+    noise(img, rng, 2)
+    speckle(img, rng, 10, tuple(c - 10 for c in base), 0.4)
+    return img
+
+
+def dark_wood_tex(rng):
+    """The library's dark wood, plain (tops, chairs, legs)."""
+    return OT.wood_tex(rng, "plain")
+
+
+def filing_front_tex(rng):
+    """Four drawers, each with a handle and a white label slot."""
+    img = powder_metal_tex(rng)
+    for top in (0, 4, 8, 12):
+        rect(img, 1, top, 14, top, (130, 134, 138), 0.8)                 # gap between drawers
+        rect(img, 6, top + 2, 9, top + 2, (90, 94, 98))                   # handle
+        rect(img, 6, top + 1, 9, top + 1, (226, 226, 220))                # label
+    return img
+
+
+def whiteboard_tex(rng):
+    img = new((236, 238, 236))
+    noise(img, rng, 1)
+    T.blob(img, rng, (244, 246, 244), 6, 0.4)                              # a sheen, nothing written
+    return img
+
+
+def server_front_tex(rng):
+    """A rack's perforated door with a column of status LEDs."""
+    img = new((28, 30, 32))
+    for y in range(1, 15):
+        for x in range(2, 14):
+            if (x + y) % 2 == 0:
+                px(img, x, y, (12, 12, 14))
+    for y in range(2, 14, 2):
+        px(img, 14, y, (60, 220, 90) if rng.random() < 0.8 else (230, 170, 40))
+    rect(img, 0, 0, 15, 0, (50, 52, 56))
+    rect(img, 0, 15, 15, 15, (50, 52, 56))
+    return img
+
+
+def leds_glow(x, y, c):
+    if max(c) > 160 and min(c) < 120:
+        return T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["TUBE_GLOW"])
+    return T.PAINTED_METAL.but(smoothness=0.3)
+
+
+def electrical_front_tex(rng):
+    """A grey wall cabinet's door: seams, a lock and a yellow warning label."""
+    img = powder_metal_tex(rng, (178, 180, 176))
+    rect(img, 0, 0, 15, 0, (140, 142, 138))
+    rect(img, 8, 0, 8, 15, (140, 142, 138), 0.7)                            # two leaves
+    for x, y in ((6, 4), (7, 3), (8, 2), (9, 3), (10, 4), (6, 5), (7, 5), (8, 5), (9, 5), (10, 5)):
+        px(img, x - 4, y + 3, (226, 190, 40))                              # warning triangle
+    px(img, 4, 7, (30, 30, 30))
+    rect(img, 10, 8, 11, 9, (70, 72, 76))                                   # lock
+    return img
+
+
+def locker_tex(rng, part):
+    """A grey-blue locker door: vents at the top of the upper block, the handle on the lower."""
+    base = (120, 132, 148)
+    img = powder_metal_tex(rng, base)
+    rect(img, 0, 0, 0, 15, (90, 100, 114))
+    rect(img, 15, 0, 15, 15, (90, 100, 114))
+    if part == "upper":
+        for y in (2, 4, 6):
+            rect(img, 4, y, 11, y, (70, 78, 90))
+    else:
+        rect(img, 11, 2, 12, 5, (70, 74, 80))
+        rect(img, 0, 15, 15, 15, (90, 100, 114))
+    return img
+
+
+def vending_tex(rng, part):
+    """The drinks machine: the lit window of cans on the upper block, the slot and coin panel below."""
+    img = new((150, 40, 36))
+    noise(img, rng, 3)
+    if part == "upper":
+        rect(img, 1, 1, 10, 14, (214, 220, 222))                           # lit window
+        for row, y in enumerate((2, 6, 10)):
+            for x in range(2, 10, 2):
+                c = rng.choice([(200, 40, 40), (40, 90, 170), (230, 200, 60), (60, 150, 80), (240, 240, 240)])
+                rect(img, x, y, x, y + 2, c)
+        rect(img, 12, 3, 14, 12, (40, 40, 44))                             # button column
+        for y in range(4, 12, 2):
+            px(img, 13, y, (240, 230, 160))
+    else:
+        rect(img, 2, 9, 13, 13, (24, 24, 26))                               # delivery slot
+        rect(img, 11, 2, 13, 6, (60, 62, 66))                               # coin panel
+        px(img, 12, 3, (20, 20, 22))
+    return img
+
+
+def vending_glow(x, y, c):
+    if min(c) > 190:
+        return T.PLASTIC.but(smoothness=0.8, relief=0.0, emission=GLOW["DIFFUSER_GLOW"])
+    return T.PAINTED_METAL
+
+
+def leaves_tex(rng):
+    """Artificial leaves on a clear background (drawn cutout): too even, too green."""
+    img = new((0, 0, 0), alpha=0)
+    for _ in range(26):
+        x, y = rng.randrange(1, 15), rng.randrange(0, 14)
+        c = rng.choice([(58, 112, 58), (70, 128, 64), (48, 96, 52)])
+        for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1), (-1, 1)):
+            if 0 <= x + dx < 16 and 0 <= y + dy < 16:
+                img.putpixel((x + dx, y + dy), (*c, 255))
+    for y in range(8, 16):                                                  # the stems
+        img.putpixel((7, y), (60, 70, 40, 255))
+    return img
+
+
+def clock_tex(rng):
+    """A white clock face in a black rim on a clear background, its hands stopped at 3:47."""
+    img = new((0, 0, 0), alpha=0)
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            if d <= 5.4:
+                img.putpixel((x, y), (30, 30, 32, 255) if d > 4.4 else (236, 236, 230, 255))
+    for x, y in ((8, 7), (9, 7), (10, 7)):                                   # hour hand towards 3-4
+        img.putpixel((x, y + (1 if x == 10 else 0)), (20, 20, 20, 255))
+    for x, y in ((7, 7), (6, 6), (5, 5), (5, 4)):                            # minute hand at 47
+        img.putpixel((x, y), (20, 20, 20, 255))
+    for x, y in ((7, 3), (11, 7), (7, 11), (3, 7)):
+        img.putpixel((x, y), (60, 60, 60, 255))
+    return img
+
+
+def books_tex(rng):
+    """Two shelves of book spines (rows 1-7 and 9-15) in muted colours and heights, the shelf
+    boards (rows 0 and 8) and the carcass (columns 0 and 15) in dark wood."""
+    img = dark_wood_tex(rng)
+    for top in (1, 9):
+        rect(img, 1, top, 14, top + 6, (26, 18, 12))                       # the dark inside
+        x = 1
+        while x < 15:
+            w = rng.choice([1, 1, 2, 2, 2])
+            h = rng.randrange(4, 8)
+            c = rng.choice(BOOK_COLOURS)
+            for i in range(w):
+                if x + i > 14:
+                    break
+                shade = 1.0 if i == 0 else 0.85
+                for yy in range(top + 7 - h, top + 7):
+                    px(img, x + i, yy, tuple(T.clamp(v * shade) for v in c))
+                if h >= 6:
+                    px(img, x + i, top + 7 - h + 1, tuple(T.clamp(v + 40) for v in c), 0.6)   # a band
+            x += w
+            if rng.random() < 0.1:
+                x += 1                                                     # a gap
+    return img
+
+
+def card_catalog_tex(rng):
+    """Rows of small drawers with brass pulls and white label cards."""
+    img = dark_wood_tex(rng)
+    for y0 in (1, 5, 9):
+        for x0 in (1, 5, 9, 12):
+            rect(img, x0, y0, x0 + 2, y0 + 2, (84, 62, 44))
+            px(img, x0 + 1, y0, (226, 224, 214))
+            px(img, x0 + 1, y0 + 2, (176, 146, 70))
+    return img
+
+
 def led_glow(x, y, c):
+
     if max(c) > 200 and min(c) < 120:
         return T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["TUBE_GLOW"])
     return T.PLASTIC.but(smoothness=0.5, relief=0.3)
@@ -1040,6 +1304,216 @@ def build():
                 v["y"] = y
             variants[f"facing={facing},unlocked={unlocked}"] = v
     a.block("card_reader", "Card Reader", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
+
+    # Valve: a gate valve inline in a wall pipe (ValveBlock's shapes), facing north: the pipe
+    # through it, a stub back into the wall, the body with a lettered plate on each side, the
+    # red handwheel on its hub; open, the rising stem stands out through the wheel.
+    a.texture("valve_body", valve_body_tex(r("valve_body")), T.PAINTED_METAL.but(smoothness=0.35))
+    a.texture("valve_stem", valve_stem_tex(r("valve_stem")), T.STEEL.but(smoothness=0.6, metal=255))
+    for turned in (False, True):
+        a.texture(f"valve_wheel{'_turned' if turned else ''}", valve_wheel_tex(r("valve_wheel"), turned),
+                  T.PAINTED_METAL.but(smoothness=0.5, relief=0.4), tiles=False)
+    variants = {}
+    for letter in VALVE_LETTERS:
+        a.texture(f"valve_plate_{letter}", valve_plate_tex(r("valve_plate"), letter), T.PAINTED_METAL.but(smoothness=0.6, relief=0.2))
+        for opened in ("false", "true"):
+            name = f"valve_{'open' if opened == 'true' else 'closed'}_{letter}"
+            wheel = "valve_wheel_turned" if opened == "true" else "valve_wheel"
+            elements = [
+                element((5, 0, 5), (11, 16, 11), "pipe"),
+                element((5, 5, 11), (11, 11, 16), "pipe"),
+                element((4, 4, 4), (12, 12, 12), "body"),
+                {"from": [12, 5, 4], "to": [12.25, 12, 11], "faces": {"east": {"uv": [5, 4, 12, 11], "texture": "#plate"}}},
+                {"from": [3.75, 5, 4], "to": [4, 12, 11], "faces": {"west": {"uv": [5, 4, 12, 11], "texture": "#plate"}}},
+                element((7, 7, 1), (9, 9, 4), "stem"),
+                {"from": [2, 2, 2], "to": [14, 14, 3], "faces": {
+                    "north": {"uv": [2, 2, 14, 14], "texture": "#wheel"},
+                    "south": {"uv": [2, 2, 14, 14], "texture": "#wheel"}}},
+            ]
+            if opened == "true":
+                elements.append(element((7.5, 7.5, -2), (8.5, 8.5, 1), "stem"))
+            a.models[name] = model({"pipe": "pipe", "body": "valve_body", "plate": f"valve_plate_{letter}",
+                                    "stem": "valve_stem", "wheel": wheel}, elements)
+            for facing, y in HORIZONTAL.items():
+                v = {"model": f"{NS}:block/{name}"}
+                if y:
+                    v["y"] = y
+                variants[f"facing={facing},letter={letter},open={opened}"] = v
+    a.block("valve", "Valve", {"variants": variants}, {"parent": f"{NS}:block/valve_closed_a"})
+
+    # --- Level 3 furniture (FurnitureBlocks.kt): models facing north, the front at z = 0. Row
+    # pieces put their end pieces where they do not join (left = east, as seen from the front),
+    # stacks their base where nothing is below, tiles a leg at each corner that is an outside one.
+    a.texture("laminate", laminate_tex(r("laminate")), T.Material(0.5, porosity=0.1, relief=0.2))
+    a.texture("office_metal", powder_metal_tex(r("office_metal")), T.PAINTED_METAL.but(smoothness=0.4))
+    a.texture("dark_metal", powder_metal_tex(r("dark_metal"), (60, 62, 66)), T.PAINTED_METAL.but(smoothness=0.35))
+    a.texture("library_wood", dark_wood_tex(r("library_wood")), T.Material(0.4, porosity=0.2, relief=0.5))
+    a.texture("filing_front", filing_front_tex(r("filing_front")), T.PAINTED_METAL.but(smoothness=0.4))
+    a.texture("whiteboard", whiteboard_tex(r("whiteboard")), T.Material(0.85, relief=0.0))
+    a.texture("aluminium", powder_metal_tex(r("aluminium"), (192, 196, 200)), T.STEEL.but(smoothness=0.6, metal=232))
+    a.texture("sofa_fabric", plastic_tex(r("sofa_fabric"), (72, 80, 94), "fabric"), T.Material(0.05, porosity=0.9, relief=0.5))
+    a.texture("rack_black", powder_metal_tex(r("rack_black"), (30, 32, 34)), T.PAINTED_METAL.but(smoothness=0.3))
+    a.texture("server_front", server_front_tex(r("server_front")), leds_glow)
+    a.texture("electrical_front", electrical_front_tex(r("electrical_front")), T.PAINTED_METAL.but(smoothness=0.4))
+    for part in ("upper", "lower"):
+        a.texture(f"locker_{part}", locker_tex(r("locker"), part), T.PAINTED_METAL.but(smoothness=0.4))
+        a.texture(f"vending_{part}", vending_tex(r("vending"), part), vending_glow)
+    a.texture("vending_side", plastic_tex(r("vending_side"), (150, 40, 36)), T.PAINTED_METAL)
+    a.texture("white_plastic", plastic_tex(r("white_plastic"), (226, 226, 222)), T.PLASTIC.but(smoothness=0.55))
+    a.texture("grey_plastic", plastic_tex(r("grey_plastic"), (150, 160, 168)), T.PLASTIC)
+    a.texture("black_plastic", plastic_tex(r("black_plastic"), (28, 28, 30)), T.PLASTIC.but(smoothness=0.55))
+    a.texture("counter_front", laminate_tex(r("counter_front"), (150, 152, 154)), T.Material(0.5, porosity=0.1, relief=0.2))
+    a.texture("bottle_blue", plastic_tex(r("bottle_blue"), (110, 160, 200)), T.Material(0.85, relief=0.0))
+    a.texture("plant_leaves", leaves_tex(r("plant_leaves")), T.PLASTIC.but(smoothness=0.5), tiles=False)
+    a.texture("wall_clock", clock_tex(r("wall_clock")), T.PLASTIC.but(smoothness=0.6), tiles=False)
+    a.texture("card_catalog_front", card_catalog_tex(r("card_catalog")), T.Material(0.4, porosity=0.2, relief=0.5))
+    a.texture("library_panel", OT.wood_tex(r("library_panel"), "panel"), T.Material(0.4, porosity=0.2, relief=0.5))
+    books = [f"books_{i}" for i in range(4)]
+    for name in books:
+        a.texture(name, books_tex(r(name)), T.Material(0.2, porosity=0.4, relief=0.6))
+
+    def el(frm, to, tex, **faces):
+        """A box showing `tex` on every face, but where `faces` say: key, (key, uv), or None (no face)."""
+        e = element(frm, to, tex)
+        for f, v in faces.items():
+            if v is None:
+                del e["faces"][f]
+                continue
+            key, uv = (v, None) if isinstance(v, str) else v
+            e["faces"][f] = {"texture": f"#{key}", **({"uv": list(uv)} if uv else {})}
+        return e
+
+    def facing_parts(models, when=None):
+        """Multipart parts turning `models` (one name, or several picked at random) to each facing."""
+        out = []
+        for facing, y in HORIZONTAL.items():
+            apply = [{"model": f"{NS}:block/{m}", **({"y": y} if y else {})} for m in ([models] if isinstance(models, str) else models)]
+            out.append({"when": {"facing": facing, **(when or {})}, "apply": apply if len(apply) > 1 else apply[0]})
+        return out
+
+    def row(block_id, name, textures, core, left=(), right=(), ao=True):
+        """A row piece: `core` always, `left` / `right` (the end pieces) where it does not join."""
+        parts = []
+        for key, els in (("core", core), ("left", left), ("right", right)):
+            if els:
+                a.models[f"{block_id}_{key}"] = model(textures, list(els), ao=ao)
+                parts += facing_parts(f"{block_id}_{key}", None if key == "core" else {key: "false"})
+        a.models[f"{block_id}_inventory"] = model(textures, list(core) + list(left) + list(right), ao=ao)
+        a.block(block_id, name, {"multipart": parts}, {"parent": f"{NS}:block/{block_id}_inventory"})
+
+    def stack(block_id, name, textures, core, base=(), upper=None):
+        """A stack piece: `core` (several = picked at random, as names of models already made, or
+        one list of elements), `base` where nothing is below, and with `upper` a different body
+        for the blocks that stand on another (core is then the lowest one's)."""
+        parts = []
+        if isinstance(core, list) and core and isinstance(core[0], str):
+            parts += facing_parts(core)
+            inventory = a.models[core[0]]["elements"]
+        else:
+            a.models[f"{block_id}_core"] = model(textures, list(core))
+            parts += facing_parts(f"{block_id}_core", {"down": "false"} if upper else None)
+            inventory = list(core)
+        if upper:
+            a.models[f"{block_id}_upper"] = model(textures, list(upper))
+            parts += facing_parts(f"{block_id}_upper", {"down": "true"})
+        if base:
+            a.models[f"{block_id}_base"] = model(textures, list(base))
+            parts += facing_parts(f"{block_id}_base", {"down": "false"})
+        a.models[f"{block_id}_inventory"] = model(textures, list(inventory) + list(base))
+        a.block(block_id, name, {"multipart": parts}, {"parent": f"{NS}:block/{block_id}_inventory"})
+
+    def tile(block_id, name, textures, top, leg):
+        """A table tile: the top always, a leg (x0, x1) x (z0, z1) at each outside corner."""
+        corners = {"nw": ((1, 3), (1, 3), "north", "west"), "ne": ((13, 15), (1, 3), "north", "east"),
+                   "sw": ((1, 3), (13, 15), "south", "west"), "se": ((13, 15), (13, 15), "south", "east")}
+        a.models[f"{block_id}_top"] = model(textures, list(top))
+        parts = [{"apply": {"model": f"{NS}:block/{block_id}_top"}}]
+        legs = []
+        for key, ((x0, x1), (z0, z1), s1, s2) in corners.items():
+            e = el((x0, 0, z0), (x1, leg[0], z1), leg[1])
+            a.models[f"{block_id}_leg_{key}"] = model(textures, [e])
+            parts.append({"when": {s1: "false", s2: "false"}, "apply": {"model": f"{NS}:block/{block_id}_leg_{key}"}})
+            legs.append(e)
+        a.models[f"{block_id}_inventory"] = model(textures, list(top) + legs)
+        a.block(block_id, name, {"multipart": parts}, {"parent": f"{NS}:block/{block_id}_inventory"})
+
+    def prop(block_id, name, textures, els, ao=True):
+        a.models[block_id] = model(textures, list(els), ao=ao)
+        a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:block/{block_id}"})
+
+    # Offices.
+    row("office_desk", "Office Desk", {"l": "laminate", "m": "office_metal"},
+        [el((0, 15, 0), (16, 16, 16), "l"), el((0, 2, 13), (16, 15, 14), "m")],
+        left=[el((15, 0, 1), (16, 15, 15), "m")], right=[el((0, 0, 1), (1, 15, 15), "m")])
+    prop("filing_cabinet", "Filing Cabinet", {"m": "office_metal", "f": "filing_front"},
+         [el((1, 0, 2), (15, 16, 16), "m", north="f")])
+    tile("meeting_table", "Meeting Table", {"l": "laminate", "m": "office_metal"},
+         [el((0, 11, 0), (16, 12, 16), "l")], (11, "m"))
+    row("whiteboard", "Whiteboard", {"w": "whiteboard", "a": "aluminium"},
+        [el((0, 4, 15), (16, 13, 16), "w", east=None, west=None), el((0, 13, 14.5), (16, 14, 16), "a"),
+         el((0, 3, 14), (16, 4, 16), "a")],
+        left=[el((15, 4, 14.5), (16, 13, 16), "a")], right=[el((0, 4, 14.5), (1, 13, 16), "a")])
+    row("sofa", "Sofa", {"f": "sofa_fabric", "d": "dark_metal"},
+        [el((0, 0, 2), (16, 2, 14), "d"), el((0, 2, 1), (16, 6, 13), "f"), el((0, 2, 12), (16, 14, 16), "f")],
+        left=[el((13, 2, 1), (16, 10, 16), "f")], right=[el((0, 2, 1), (3, 10, 16), "f")])
+
+    # Services.
+    stack("server_rack", "Server Rack", {"b": "rack_black", "f": "server_front"},
+          [el((1, 0, 1), (15, 16, 15), "b", north="f")], base=[el((1, 0, 1), (15, 1, 15), "b")])
+    box_side = "cardboard_box_side"
+    stack("metal_shelf", "Metal Shelf", {"m": "office_metal", "c": box_side},
+          [el((0, 0, 2), (1, 16, 3), "m"), el((15, 0, 2), (16, 16, 3), "m"), el((0, 0, 15), (1, 16, 16), "m"),
+           el((15, 0, 15), (16, 16, 16), "m"), el((0, 7, 2), (16, 8, 16), "m"),
+           el((1, 8, 4), (7, 13, 14), "c"), el((8, 8, 6), (15, 12, 15), "c"), el((2, 0, 5), (9, 5, 15), "c")],
+          base=[el((0, 0, 2), (16, 1, 16), "m")])
+    prop("electrical_panel", "Electrical Panel", {"m": "office_metal", "f": "electrical_front"},
+         [el((2, 2, 12), (14, 15, 16), "m", north="f")])
+
+    # Staff rooms.
+    stack("locker", "Locker", {"m": "office_metal", "l": "locker_lower", "u": "locker_upper"},
+          [el((1, 0, 1), (15, 16, 16), "m", north="l")], upper=[el((1, 0, 1), (15, 16, 16), "m", north="u")])
+    row("bench", "Bench", {"l": "laminate", "m": "office_metal"},
+        [el((0, 6, 4), (16, 7.5, 12), "l")],
+        left=[el((13, 0, 5), (15, 6, 11), "m")], right=[el((1, 0, 5), (3, 6, 11), "m")])
+    prop("cafe_table", "Cafe Table", {"w": "white_plastic", "m": "office_metal"},
+         [el((1, 11, 1), (15, 12, 15), "w"), el((7, 1, 7), (9, 11, 9), "m"), el((4, 0, 4), (12, 1, 12), "m")])
+    prop("cafe_chair", "Cafe Chair", {"p": "grey_plastic", "m": "office_metal"},
+         [el((3, 6, 3), (13, 7, 13), "p"), el((3, 7, 12), (13, 15, 13), "p")]
+         + [el((x, 0, z), (x + 1, 6, z + 1), "m") for x in (3, 12) for z in (3, 12)])
+    row("counter", "Counter", {"l": "laminate", "f": "counter_front"},
+        [el((0, 0, 1), (16, 15, 16), "f"), el((0, 15, 0), (16, 16, 16), "l")])
+    stack("vending_machine", "Vending Machine", {"s": "vending_side", "l": "vending_lower", "u": "vending_upper"},
+          [el((1, 0, 1), (15, 16, 16), "s", north="l")], upper=[el((1, 0, 1), (15, 16, 16), "s", north="u")])
+    prop("coffee_machine", "Coffee Machine", {"b": "black_plastic", "s": "aluminium"},
+         [el((4, 0, 6), (12, 10, 13), "b"), el((6, 5, 5), (10, 7, 6), "s"), el((5, 0, 4), (11, 1, 6), "s")])
+    prop("water_dispenser", "Water Dispenser", {"w": "white_plastic", "b": "bottle_blue", "s": "aluminium"},
+         [el((4, 0, 4), (12, 11, 12), "w"), el((5, 11, 5), (11, 16, 11), "b"), el((6, 7, 3), (10, 8, 4), "s")])
+
+    # Details.
+    leaves = [{"from": [0.8, 4, 8], "to": [15.2, 16, 8], "rotation": {"origin": [8, 8, 8], "axis": "y", "angle": angle, "rescale": True},
+               "shade": False, "faces": {"north": {"texture": "#v"}, "south": {"texture": "#v"}}} for angle in (45, -45)]
+    prop("potted_plant", "Potted Plant", {"d": "dark_metal", "v": "plant_leaves"},
+         [el((5, 0, 5), (11, 5, 11), "d")] + leaves, ao=False)
+    prop("wall_clock", "Wall Clock", {"c": "wall_clock"},
+         [{"from": [3, 3, 15], "to": [13, 13, 16], "faces": {"north": {"uv": [2.5, 2.5, 12.5, 12.5], "texture": "#c"}}}], ao=False)
+
+    # The library.
+    for i, name in enumerate(books):
+        textures = {"w": "library_wood", "b": name}
+        a.models[f"bookshelf_core_{i}"] = model(textures, [
+            el((1, 0, 2), (15, 16, 14), "w", north=("b", (1, 0, 15, 16)), south=("b", (1, 0, 15, 16))),
+            el((0, 0, 1), (1, 16, 15), "w"), el((15, 0, 1), (16, 16, 15), "w"),
+            el((1, 7.5, 1), (15, 8.5, 15), "w"), el((1, 15, 1), (15, 16, 15), "w")])
+    stack("bookshelf", "Bookshelf", {"w": "library_wood"}, [f"bookshelf_core_{i}" for i in range(len(books))],
+          base=[el((0, 0, 1), (16, 1, 15), "w")])
+    tile("reading_table", "Reading Table", {"w": "library_wood"}, [el((0, 11, 0), (16, 12, 16), "w")], (11, "w"))
+    prop("wooden_chair", "Wooden Chair", {"w": "library_wood"},
+         [el((3, 6, 3), (13, 7, 13), "w"), el((3, 7, 12), (13, 16, 13), "w")]
+         + [el((x, 0, z), (x + 1, 6, z + 1), "w") for x in (3, 12) for z in (3, 12)])
+    row("library_counter", "Library Counter", {"w": "library_wood", "p": "library_panel"},
+        [el((0, 0, 1), (16, 15, 16), "w", north="p", south="p"), el((0, 15, 0), (16, 16, 16), "w")])
+    prop("card_catalog", "Card Catalog", {"w": "library_wood", "f": "card_catalog_front"},
+         [el((1, 0, 2), (15, 14, 16), "w", north="f")])
 
     # --- The service elevator ------------------------------------------------------------
     a.texture("checker_plate", checker_plate_tex(r("checker_plate")), T.STEEL.but(smoothness=0.5, metal=255, relief=0.9))

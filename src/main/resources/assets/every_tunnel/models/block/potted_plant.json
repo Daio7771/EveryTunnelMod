@@ -1,0 +1,105 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "d": "every_tunnel:block/dark_metal",
+    "v": "every_tunnel:block/plant_leaves",
+    "particle": "every_tunnel:block/dark_metal"
+  },
+  "elements": [
+    {
+      "from": [
+        5,
+        0,
+        5
+      ],
+      "to": [
+        11,
+        5,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#d"
+        },
+        "east": {
+          "texture": "#d"
+        },
+        "south": {
+          "texture": "#d"
+        },
+        "west": {
+          "texture": "#d"
+        },
+        "up": {
+          "texture": "#d"
+        },
+        "down": {
+          "texture": "#d"
+        }
+      }
+    },
+    {
+      "from": [
+        0.8,
+        4,
+        8
+      ],
+      "to": [
+        15.2,
+        16,
+        8
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": 45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#v"
+        },
+        "south": {
+          "texture": "#v"
+        }
+      }
+    },
+    {
+      "from": [
+        0.8,
+        4,
+        8
+      ],
+      "to": [
+        15.2,
+        16,
+        8
+      ],
+      "rotation": {
+        "origin": [
+          8,
+          8,
+          8
+        ],
+        "axis": "y",
+        "angle": -45,
+        "rescale": true
+      },
+      "shade": false,
+      "faces": {
+        "north": {
+          "texture": "#v"
+        },
+        "south": {
+          "texture": "#v"
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "w": "every_tunnel:block/whiteboard",
+    "a": "every_tunnel:block/aluminium",
+    "particle": "every_tunnel:block/whiteboard"
+  },
+  "elements": [
+    {
+      "from": [
+        15,
+        4,
+        14.5
+      ],
+      "to": [
+        16,
+        13,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#a"
+        },
+        "east": {
+          "texture": "#a"
+        },
+        "south": {
+          "texture": "#a"
+        },
+        "west": {
+          "texture": "#a"
+        },
+        "up": {
+          "texture": "#a"
+        },
+        "down": {
+          "texture": "#a"
+        }
+      }
+    }
+  ]
+}

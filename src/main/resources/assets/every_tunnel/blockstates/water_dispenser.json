@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/water_dispenser"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/water_dispenser",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/water_dispenser",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/water_dispenser",
+      "y": 270
+    }
+  }
+}

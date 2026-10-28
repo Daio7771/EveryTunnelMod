@@ -1,0 +1,100 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "w": "every_tunnel:block/whiteboard",
+    "a": "every_tunnel:block/aluminium",
+    "particle": "every_tunnel:block/whiteboard"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        4,
+        15
+      ],
+      "to": [
+        16,
+        13,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#w"
+        },
+        "south": {
+          "texture": "#w"
+        },
+        "up": {
+          "texture": "#w"
+        },
+        "down": {
+          "texture": "#w"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        13,
+        14.5
+      ],
+      "to": [
+        16,
+        14,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#a"
+        },
+        "east": {
+          "texture": "#a"
+        },
+        "south": {
+          "texture": "#a"
+        },
+        "west": {
+          "texture": "#a"
+        },
+        "up": {
+          "texture": "#a"
+        },
+        "down": {
+          "texture": "#a"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        3,
+        14
+      ],
+      "to": [
+        16,
+        4,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#a"
+        },
+        "east": {
+          "texture": "#a"
+        },
+        "south": {
+          "texture": "#a"
+        },
+        "west": {
+          "texture": "#a"
+        },
+        "up": {
+          "texture": "#a"
+        },
+        "down": {
+          "texture": "#a"
+        }
+      }
+    }
+  ]
+}

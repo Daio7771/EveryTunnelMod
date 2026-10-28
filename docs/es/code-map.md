@@ -85,6 +85,8 @@ con un comentario KDoc que cuenta más.
 | `FloorIndicatorBlock.kt` | El indicador LED de planta del ascensor |
 | `ShutterBlock.kt` | Una pieza de una persiana metálica |
 | `CardReaderBlock.kt` | El lector de tarjetas que abre puertas de hierro |
+| `FurnitureBlocks.kt` | Los muebles del nivel 3 que se unen a los de su clase: piezas en fila (mesas, barras, sofás) a izquierda y derecha, tableros de mesa por todos los lados, piezas apiladas (estanterías, racks, taquillas) arriba y abajo |
+| `ValveBlock.kt` | Una válvula de compuerta en línea en una tubería de pared: orientación, abierta, letra A a E (nivel 3) |
 | `LootBlock.kt` | Botín tirado en el suelo, se recoge con clic derecho |
 
 ### `platform/`: el Pale man

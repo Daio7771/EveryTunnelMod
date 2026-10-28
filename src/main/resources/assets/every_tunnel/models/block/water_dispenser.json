@@ -1,0 +1,107 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "w": "every_tunnel:block/white_plastic",
+    "b": "every_tunnel:block/bottle_blue",
+    "s": "every_tunnel:block/aluminium",
+    "particle": "every_tunnel:block/white_plastic"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        0,
+        4
+      ],
+      "to": [
+        12,
+        11,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#w"
+        },
+        "east": {
+          "texture": "#w"
+        },
+        "south": {
+          "texture": "#w"
+        },
+        "west": {
+          "texture": "#w"
+        },
+        "up": {
+          "texture": "#w"
+        },
+        "down": {
+          "texture": "#w"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        11,
+        5
+      ],
+      "to": [
+        11,
+        16,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#b"
+        },
+        "east": {
+          "texture": "#b"
+        },
+        "south": {
+          "texture": "#b"
+        },
+        "west": {
+          "texture": "#b"
+        },
+        "up": {
+          "texture": "#b"
+        },
+        "down": {
+          "texture": "#b"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        7,
+        3
+      ],
+      "to": [
+        10,
+        8,
+        4
+      ],
+      "faces": {
+        "north": {
+          "texture": "#s"
+        },
+        "east": {
+          "texture": "#s"
+        },
+        "south": {
+          "texture": "#s"
+        },
+        "west": {
+          "texture": "#s"
+        },
+        "up": {
+          "texture": "#s"
+        },
+        "down": {
+          "texture": "#s"
+        }
+      }
+    }
+  ]
+}

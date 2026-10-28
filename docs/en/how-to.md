@@ -20,7 +20,8 @@ Short recipes for the changes people make most. Each one lists every file to tou
 3. **Spawn points** tagged `pale_man` (with `zone` to keep him in), `battery`, `water`.
 4. `/reload` and check with `/everytunnel levels` and `/everytunnel where`. Problems are
    in the log with their JSON path.
-5. If the map grows, keep the build's force-loaded area under 256 chunks.
+5. If the map grows, keep each build stage's force-loaded area under 256 chunks (the
+   generator prints them and stops if one is over).
 
 ## Add a zone or spawn point tag
 

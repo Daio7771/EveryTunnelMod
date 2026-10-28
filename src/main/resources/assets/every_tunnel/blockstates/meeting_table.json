@@ -1,0 +1,45 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "every_tunnel:block/meeting_table_top"
+      }
+    },
+    {
+      "when": {
+        "north": "false",
+        "west": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/meeting_table_leg_nw"
+      }
+    },
+    {
+      "when": {
+        "north": "false",
+        "east": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/meeting_table_leg_ne"
+      }
+    },
+    {
+      "when": {
+        "south": "false",
+        "west": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/meeting_table_leg_sw"
+      }
+    },
+    {
+      "when": {
+        "south": "false",
+        "east": "false"
+      },
+      "apply": {
+        "model": "every_tunnel:block/meeting_table_leg_se"
+      }
+    }
+  ]
+}

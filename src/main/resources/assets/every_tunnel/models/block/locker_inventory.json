@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m": "every_tunnel:block/office_metal",
+    "l": "every_tunnel:block/locker_lower",
+    "u": "every_tunnel:block/locker_upper",
+    "particle": "every_tunnel:block/office_metal"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#l"
+        },
+        "east": {
+          "texture": "#m"
+        },
+        "south": {
+          "texture": "#m"
+        },
+        "west": {
+          "texture": "#m"
+        },
+        "up": {
+          "texture": "#m"
+        },
+        "down": {
+          "texture": "#m"
+        }
+      }
+    }
+  ]
+}

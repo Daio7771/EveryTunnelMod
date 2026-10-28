@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "s": "every_tunnel:block/vending_side",
+    "l": "every_tunnel:block/vending_lower",
+    "u": "every_tunnel:block/vending_upper",
+    "particle": "every_tunnel:block/vending_side"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        1
+      ],
+      "to": [
+        15,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#l"
+        },
+        "east": {
+          "texture": "#s"
+        },
+        "south": {
+          "texture": "#s"
+        },
+        "west": {
+          "texture": "#s"
+        },
+        "up": {
+          "texture": "#s"
+        },
+        "down": {
+          "texture": "#s"
+        }
+      }
+    }
+  ]
+}

@@ -16,10 +16,10 @@ import net.minecraft.util.math.Vec3d
 import java.util.UUID
 
 /**
- * The end of the demo: walking into a zone tagged [END_TAG] (the landing at the bottom of
- * the spiral stairs behind Level 2's exit) while the world rules apply. Not while loading
- * ([LoadingHooks.isLoading]): a game saved after the end opens with the player still on that
- * landing, until the new game takes them to the elevator.
+ * The end of the demo: walking into a zone tagged [END_TAG] (in front of the door to Level 4
+ * at the end of Level 3's bunker corridor) while the world rules apply. Not while loading
+ * ([LoadingHooks.isLoading]): a game saved after the end opens with the player still in that
+ * zone, until the new game takes them to the elevator.
  *
  * Bare footsteps come down the stairs behind the player ([STEPS], the Pale man's own
  * sound), the screen fades to black, and the client shows "End of demo" with the credits
@@ -40,7 +40,7 @@ object EndingHooks {
     private const val FADE_SECONDS = 2.5f
     private const val SCREEN_TICK = FADE_TICK + 60
 
-    /** [behind]: unit vector, horizontal, pointing back up the stairs the player came down. */
+    /** [behind]: unit vector, horizontal, pointing back the way the player came. */
     private class Ending(val behind: Vec3d, var ticks: Int = 0)
 
     // Server thread only.

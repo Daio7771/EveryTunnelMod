@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/potted_plant"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/potted_plant",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/potted_plant",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/potted_plant",
+      "y": 270
+    }
+  }
+}
