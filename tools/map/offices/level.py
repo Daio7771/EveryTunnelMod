@@ -362,6 +362,7 @@ class Offices:
         gx1 = max(b[2] for b in p.INNER_CORRIDOR)
         gz1 = max(b[3] for b in p.INNER_CORRIDOR)
         self.zone("guard_area", (gx0, gz0, gx1, gz1), 1, H["library"])
+        self.zone("hatch", p.HATCH["hole"], 0, 0, ["book_hatch"])          # the trapdoors the fifth book opens
         self.zone("valve_corridor", p.VALVE_CORRIDOR, 1, H["corridor"])
         cx0, _, cx1, _ = p.VALVE_CORRIDOR
         cz = p.CHECKPOINT_Z
@@ -395,6 +396,12 @@ class Offices:
         if self.box_shelf:
             x, z, facing = self.box_shelf
             self.spawn("box_shelf", x, 1, z, facing, ["box_shelf"], "storage")
+        # The book puzzle: the places along the librarian's counter the books go back to.
+        (cx0, cx1), counter_z, counter_facing = p.LIBRARY_LAYOUT["desk"]["counter"]
+        length, n = cx1 - cx0, p.LIBRARY_LAYOUT["desk"]["returns"]
+        for i in range(n):
+            x = cx0 + round(i * (length - 1) / (n - 1))
+            self.spawn(f"book_return_{i + 1}", x, 2, counter_z, counter_facing, ["book_return"], "library")
         for letter, (x, y, z) in self.valves:
             self.spawn(f"valve_{letter.lower()}", x, y, z, "west", ["valve"])
         for note_id, (x, y, z) in self.notes.items():

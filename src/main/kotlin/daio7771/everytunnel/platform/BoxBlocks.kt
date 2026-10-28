@@ -13,6 +13,7 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.state.StateManager
+import net.minecraft.state.property.BooleanProperty
 import net.minecraft.state.property.DirectionProperty
 import net.minecraft.state.property.IntProperty
 import net.minecraft.state.property.Properties
@@ -27,8 +28,9 @@ import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 
 /*
- * Level 3's box puzzle ([BoxHooks]): the purple archive boxes and the empty shelf in Storage
- * they are stacked on. Models and textures in tools/blocks/generate.py.
+ * Level 3's box and book puzzles ([BoxHooks], [BookHooks]): the purple archive boxes, the empty
+ * shelf in Storage they are stacked on, and the office books. Models and textures in
+ * tools/blocks/generate.py.
  */
 
 /**
@@ -173,4 +175,34 @@ class BoxShelfBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlo
     override fun toUpdatePacket(): Packet<ClientPlayPacketListener> = BlockEntityUpdateS2CPacket.create(this)
 
     override fun toInitialChunkDataNbt(): NbtCompound = createNbt()
+}
+
+/**
+ * One of Level 3's five office books (the book puzzle, [BookHooks]): a blue-grey hardback lying
+ * flat, drawn full bright like the boxes. Lying on a filing cabinet, right-click picks it up;
+ * [DELIVERED] on the librarian's counter, it stays, and right-clicking it with another book
+ * hands that one in too.
+ */
+class OfficeBookBlock(settings: Settings, boxes: List<BlockShapes.Box>) : PropBlock(settings, boxes) {
+
+    init {
+        defaultState = defaultState.with(DELIVERED, false)
+    }
+
+    override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
+        super.appendProperties(builder)
+        builder.add(DELIVERED)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onUse(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult): ActionResult {
+        if (world.isClient) return ActionResult.SUCCESS
+        val server = player as? ServerPlayerEntity ?: return ActionResult.PASS
+        val used = if (state.get(DELIVERED)) BookHooks.deliver(server, world as ServerWorld, pos) else BookHooks.pickUp(server, pos)
+        return if (used) ActionResult.CONSUME else ActionResult.PASS
+    }
+
+    companion object {
+        val DELIVERED: BooleanProperty = BooleanProperty.of("delivered")
+    }
 }

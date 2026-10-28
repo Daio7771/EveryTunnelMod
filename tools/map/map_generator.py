@@ -261,7 +261,7 @@ LEVEL_3 = dict(
     # librarian's counter ((x0, x1), z, facing) and the card catalogue (x, (z0, z1), facing) by
     # the south door, in their areas (x0, z0, x1, z1; no shelves there).
     LIBRARY_LAYOUT=dict(shelf_height=4, aisle=2, perimeter=2, clearing=16, table=(3, 2), desk=dict(
-        counter=((71, 77), 121, "south"), area=(66, 116, 78, 127),
+        counter=((71, 77), 121, "south"), returns=5, area=(66, 116, 78, 127),
         catalog=(84, (120, 123), "west"), catalog_area=(83, 116, 93, 127))),
     # The antechamber is the electrical room: panels on its side walls (x, z, facing), cabinets,
     # and the cork board with the electrician's note (`id` names its text, notes/<lang>/<id>.txt

@@ -29,14 +29,14 @@ object ClientResources {
         DrinkHooks.clientThirstNotFull = { current.thirst < current.thirstMax }
     }
 
-    /** True while the player is exhausted, or carries a box, and must not sprint. Called from `ClientPlayerEntityMixin`. */
+    /** True while the player is exhausted, or carries a box or a book, and must not sprint. Called from `ClientPlayerEntityMixin`. */
     @JvmStatic
     fun isSprintBlocked(): Boolean = current.active && (current.exhausted || carryingBox())
 
-    /** Level 3's purple box in the inventory: no sprinting while carrying it (`platform.BoxHooks`). */
+    /** A Level 3 box or book in the inventory: no sprinting while carrying it (`platform.CarryHooks`). */
     private fun carryingBox(): Boolean {
         val player = MinecraftClient.getInstance().player ?: return false
-        val box = ModBlocks.PURPLE_BOX.asItem()
-        return player.inventory.containsAny { it.isOf(box) }
+        val things = setOf(ModBlocks.PURPLE_BOX.asItem(), ModBlocks.OFFICE_BOOK.asItem())
+        return player.inventory.containsAny { it.item in things }
     }
 }

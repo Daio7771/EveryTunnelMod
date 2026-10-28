@@ -160,6 +160,12 @@ object ModBlocks {
         PurpleBoxBlock(props(MapColor.PURPLE, ModSoundGroups.CARDBOARD).emissiveLighting { _, _, _ -> true }, listOf(box(1.5, 0, 1.5, 14.5, 11, 14.5))),
     )
 
+    /** Level 3's book puzzle ([BookHooks]): an office book lying flat, drawn full bright. */
+    val OFFICE_BOOK: Block = register(
+        "office_book",
+        OfficeBookBlock(props(MapColor.BLUE, ModSoundGroups.CARDBOARD).noCollision().emissiveLighting { _, _, _ -> true }, listOf(box(4, 0, 3, 12, 2.5, 13))),
+    )
+
     /** The empty shelf in Storage the boxes go on: six parts, 2 wide and 3 high ([BoxShelfBlock]). */
     val BOX_SHELF: Block = register("box_shelf", BoxShelfBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
 

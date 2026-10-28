@@ -5,12 +5,7 @@ import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.achievement.Achievement
 import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.world.WorldRules
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
-import net.minecraft.entity.ItemEntity
 import net.minecraft.item.Item
-import net.minecraft.item.ItemStack
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.MinecraftServer
@@ -21,7 +16,6 @@ import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
-import java.util.UUID
 import kotlin.random.Random
 
 /**
@@ -31,18 +25,16 @@ import kotlin.random.Random
  *   level's spawn points tagged [SPOT_TAG] (about 25: on floors and furniture of the rooms and
  *   the ring), drawn at random, and empties the shelf at the spawn point tagged [SHELF_TAG]
  *   ([BoxShelfBlock], in Storage).
- * - **Picking one up** ([pickUp]): right-click; it goes into the hand (the selected hotbar slot,
- *   whatever was there moves aside). One at a time. While carried it stays in the hand
- *   ([tick] moves it back if the slot changes), it cannot be dropped (thrown out, it comes
- *   straight back) and the player cannot sprint (here and `client.ClientResources`). Hiding
- *   in a locker with it is fine.
+ * - **Picking one up** ([pickUp]): right-click; it goes into the hand, carried by the rules of
+ *   [CarryHooks]: one thing at a time, kept in the hand, never dropped, no sprinting; hiding in a
+ *   locker with it is fine.
  * - **Putting it on the shelf** ([useShelf]): right-click the place pointed at; a filled one
  *   takes nothing. "3 / 10" above the hotbar, and the observant guard is alerted to the shelf
  *   ([alertObserver]: until he exists, a log line and a distant sound, `event.observer.alert`).
- *   With all ten up, everyone there earns "Master of the Boxes" and the books will appear
- *   (step 3, [completed]).
- * - **Dying** ([died]) puts a carried box back where it was picked up; the shelf keeps its
- *   boxes. Only a new game starts it over.
+ *   With all ten up, everyone there earns "Master of the Boxes" and the books appear
+ *   ([completed], [BookHooks]).
+ * - **Dying** puts a carried box back where it was picked up ([CarryHooks]); the shelf keeps
+ *   its boxes. Only a new game starts it over.
  */
 object BoxHooks {
 
@@ -50,104 +42,20 @@ object BoxHooks {
     const val SHELF_TAG = "box_shelf"
     const val BOXES = BoxShelfBlock.SLOTS
 
-    /** A box in someone's hands, and where it was picked up from. */
-    private class Carried(val dimension: String, val pos: BlockPos, val facing: Direction)
-
-    // Server thread only.
-    private val carried = mutableMapOf<UUID, Carried>()
-
     private val boxItem: Item get() = ModBlocks.PURPLE_BOX.asItem()
 
-    fun register() {
-        ServerLifecycleEvents.SERVER_STOPPED.register { carried.clear() }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
-        // A carried box thrown out (Q, or dragged out of the inventory) comes straight back.
-        // A box never lies about as a dropped item: it goes back to whoever carried it (the
-        // thrower, or the nearest carrier who no longer has it), or else [tick] puts it back
-        // where it was picked up.
-        ServerEntityEvents.ENTITY_LOAD.register { entity, world ->
-            val item = entity as? ItemEntity ?: return@register
-            if (!WorldRules.active || !item.stack.isOf(boxItem)) return@register
-            val stack = item.stack.copy()
-            item.discard()
-            val carrier = (item.owner as? ServerPlayerEntity)?.takeIf { it.uuid in carried && !isCarrying(it) }
-                ?: world.players.filter { it.uuid in carried && !isCarrying(it) }.minByOrNull { it.squaredDistanceTo(item) }
-                ?: return@register
-            val inventory = carrier.inventory
-            if (inventory.main[inventory.selectedSlot].isEmpty) inventory.main[inventory.selectedSlot] = stack else inventory.insertStack(stack)
-            inventory.markDirty()
-        }
-    }
-
-    fun isCarrying(player: ServerPlayerEntity): Boolean = player.inventory.containsAny { it.isOf(boxItem) }
-
-    private fun tick(server: MinecraftServer) {
-        for (player in server.playerManager.playerList) {
-            if (!isCarrying(player)) {
-                // The box left the inventory some other way (a command, Creative): back to its place.
-                if (player.uuid in carried && !DeathHooks.isDying(player)) putBack(server, player)
-                continue
-            }
-            if (player.isSprinting) player.isSprinting = false
-            keepInHand(player)
-        }
-    }
-
-    /** The box always in the selected hotbar slot: if the slot changed, the box moves to it. */
-    private fun keepInHand(player: ServerPlayerEntity) {
-        val inventory = player.inventory
-        val selected = inventory.selectedSlot
-        if (inventory.main[selected].isOf(boxItem)) return
-        val offHand = inventory.offHand
-        if (offHand[0].isOf(boxItem)) {
-            val box = offHand[0]
-            offHand[0] = inventory.main[selected]
-            inventory.main[selected] = box
-        } else {
-            val at = inventory.main.indexOfFirst { it.isOf(boxItem) }
-            if (at < 0) return
-            val box = inventory.main[at]
-            inventory.main[at] = inventory.main[selected]
-            inventory.main[selected] = box
-        }
-        inventory.markDirty()
-    }
-
-    /** [player] right-clicked the box at [pos]. True if it was taken (or the click was used). */
+    /** [player] right-clicked the box at [pos]: into the hand ([CarryHooks]). */
     fun pickUp(player: ServerPlayerEntity, pos: BlockPos): Boolean {
-        if (!WorldRules.active || player.isSpectator || DeathHooks.isDying(player)) return false
-        if (isCarrying(player)) {
-            player.sendMessage(Text.translatable("message.every_tunnel.box_hands_full"), true)
-            return true
-        }
-        val world = player.serverWorld
-        val state = world.getBlockState(pos)
-        if (!state.isOf(ModBlocks.PURPLE_BOX)) return false
-        val inventory = player.inventory
-        val selected = inventory.selectedSlot
-        if (!inventory.main[selected].isEmpty) {
-            val free = inventory.emptySlot
-            if (free < 0) {
-                player.sendMessage(Text.translatable("message.every_tunnel.box_no_room"), true)
-                return true
-            }
-            inventory.main[free] = inventory.main[selected]
-        }
-        inventory.main[selected] = ItemStack(boxItem)
-        inventory.markDirty()
-        world.removeBlock(pos, false)
-        world.playSound(null, pos, ModSounds.CARDBOARD.impact, SoundCategory.BLOCKS, 0.8f, 1.1f)
-        carried[player.uuid] = Carried(world.registryKey.value.toString(), pos.toImmutable(), state.get(PropBlock.FACING))
-        return true
+        if (!player.serverWorld.getBlockState(pos).isOf(ModBlocks.PURPLE_BOX)) return false
+        return CarryHooks.take(player, pos, boxItem, ModSounds.CARDBOARD.impact)
     }
 
     /** [player] right-clicked [slot] of the shelf whose foot is at [foot]. True if a box went up. */
     fun useShelf(player: ServerPlayerEntity, world: ServerWorld, foot: BlockPos, slot: Int): Boolean {
-        if (!WorldRules.active || !isCarrying(player)) return false
+        if (!WorldRules.active || !CarryHooks.isCarrying(player, boxItem)) return false
         val shelf = world.getBlockEntity(foot) as? BoxShelfBlockEntity ?: return false
         if (shelf.isFilled(slot)) return true
-        removeBoxes(player)
-        carried.remove(player.uuid)
+        CarryHooks.release(player)
         shelf.set(slot, true)
         val at = BoxShelfBlock.slotCentre(foot, world.getBlockState(foot).get(BoxShelfBlock.FACING), slot)
         world.playSound(null, at.x, at.y, at.z, ModSounds.CARDBOARD.impact, SoundCategory.BLOCKS, 1f, 0.9f)
@@ -166,33 +74,11 @@ object BoxHooks {
         for (player in world.players) player.playSound(ModSounds.OBSERVER_ALERT, SoundCategory.HOSTILE, 1f, 1f)
     }
 
-    /** All ten on the shelf: the achievement, and (step 3) the books appear. */
+    /** All ten on the shelf: the achievement, and the books appear ([BookHooks]). */
     private fun completed(world: ServerWorld, foot: BlockPos) {
-        EveryTunnel.LOGGER.info("All {} boxes on the shelf at {}: the books would appear now", BOXES, foot)
+        EveryTunnel.LOGGER.info("All {} boxes on the shelf at {}: the books appear", BOXES, foot)
         AchievementHooks.puzzleSolved(world, Achievement.BOXES)
-    }
-
-    /** [player] is dying: a carried box goes back where it was picked up. */
-    fun died(player: ServerPlayerEntity) {
-        if (player.uuid !in carried && !isCarrying(player)) return
-        removeBoxes(player)
-        putBack(player.server, player)
-    }
-
-    private fun removeBoxes(player: ServerPlayerEntity) {
-        val inventory = player.inventory
-        for (list in listOf(inventory.main, inventory.offHand)) {
-            for (i in list.indices) if (list[i].isOf(boxItem)) list[i] = ItemStack.EMPTY
-        }
-        inventory.markDirty()
-    }
-
-    private fun putBack(server: MinecraftServer, player: ServerPlayerEntity) {
-        val box = carried.remove(player.uuid) ?: return
-        val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(box.dimension))) ?: return
-        if (world.getBlockState(box.pos).isAir) {
-            world.setBlockState(box.pos, ModBlocks.PURPLE_BOX.defaultState.with(PropBlock.FACING, box.facing))
-        }
+        LevelManager.levelAt(world.registryKey.value.toString(), foot.x + 0.5, foot.y + 0.5, foot.z + 0.5)?.let { BookHooks.appear(world, it) }
     }
 
     private fun spots(level: LevelDefinition): List<BlockPos> =
@@ -206,7 +92,6 @@ object BoxHooks {
 
     /** A new game: the boxes off every spot, ten put back at random, the shelf emptied. */
     fun newGame(server: MinecraftServer) {
-        carried.clear()
         for (level in LevelManager.all()) {
             val spots = spots(level)
             val foot = shelfFoot(level)
@@ -226,11 +111,6 @@ object BoxHooks {
             if (spots.size < BOXES) EveryTunnel.LOGGER.warn("{} has only {} box spots for {} boxes", level.id, spots.size, BOXES)
             EveryTunnel.LOGGER.info("Boxes for {}: {}", level.id, chosen.joinToString(" ") { "(${it.x} ${it.y} ${it.z})" })
         }
-    }
-
-    /** The map was rebuilt: no box is in anyone's hands any more (a new game follows). */
-    fun levelsRebuilt() {
-        carried.clear()
     }
 
     /** For `/everytunnel boxes`: the boxes lying about and the shelf's count, per level with a shelf. */

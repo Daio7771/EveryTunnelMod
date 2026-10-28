@@ -169,8 +169,10 @@
   "achievement.every_tunnel.books": "Shhh!",
   "achievement.every_tunnel.books.description": "Returned every book to the library.",
   "message.every_tunnel.boxes_placed": "%s / %s",
-  "message.every_tunnel.box_hands_full": "Your hands are full",
-  "message.every_tunnel.box_no_room": "No room in your pockets",
   "block.every_tunnel.purple_box": "Purple Box",
-  "block.every_tunnel.box_shelf": "Box Shelf"
+  "block.every_tunnel.box_shelf": "Box Shelf",
+  "message.every_tunnel.carry_hands_full": "Your hands are full",
+  "message.every_tunnel.carry_no_room": "No room in your pockets",
+  "message.every_tunnel.books_returned": "%s / %s",
+  "block.every_tunnel.office_book": "Office Book"
 }

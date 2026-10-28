@@ -19,6 +19,8 @@
 | `/everytunnel newgame` | Starts the game over in this world |
 | `/everytunnel valves` | This game's valve digits for Level 3 (A to E) |
 | `/everytunnel boxes` | Level 3's box puzzle: how many are on the shelf, where the others lie |
+| `/everytunnel books` | Level 3's book puzzle: how many are on the counter, where the others lie |
+| `/everytunnel books fill` | Puts the books out with all but one already on the counter (to test the last) |
 | `/everytunnel boxes fill` | Fills the shelf but for one place and leaves one box lying about (to test the last) |
 | `/everytunnel rebuilt` | Run by `garage:build` at its end: puts the loot back. Not for hand use |
 | `/everytunnel devworld save\|forget` | Dev runs only, see [Building](building-and-release.md#dev-worlds) |

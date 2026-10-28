@@ -123,6 +123,14 @@
       "every_tunnel:block/fluorescent/start_2"
     ]
   },
+  "block.hatch.open": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/hatch/open_1",
+        "attenuation_distance": 48
+      }
+    ]
+  },
   "block.hollow_metal.impact": {
     "sounds": [
       {

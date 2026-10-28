@@ -167,9 +167,9 @@ Reopening the world or respawning inside a level does not count as walking in.
 ## 9. Level 3 (B3)
 
 The offices of the complex around the central library, in perfect order and empty. Built
-so far: the structure, the furniture, the valve puzzle, the lockers and the box puzzle; the
-observant guard, the books,
-the other notes and the loot are still to come, their zones and spawn points already in the
+so far: the structure, the furniture, the valve puzzle, the lockers and the box and book
+puzzles that open the bunker; the observant guard, the books' lore and the other notes, the
+loot and the collapse are still to come, their zones and spawn points already in the
 level file (see [Levels](levels.md#level-3-hooks)). The music is planned for last.
 
 - Behind the open door, stairs climb down 8 blocks to the **antechamber**, the electrical
@@ -204,8 +204,8 @@ level file (see [Levels](levels.md#level-3-hooks)). The music is planned for las
   `box_shelf`; the boxes on it drawn by `BoxShelfRenderer`): right-clicking a place on it puts
   the box there, "3 / 10" shows above the hotbar, and the observant guard is alerted (for now a
   log line and a distant sound, `event.observer.alert`). With all ten up, "Master of the Boxes"
-  is earned; the books will appear then (still to come). Dying puts a carried box back where it
-  was found; the shelf keeps its boxes. `/everytunnel boxes` tells where they are, `boxes fill`
+  is earned and the books appear. Carrying follows `CarryHooks` (for the books too). Dying
+  puts a carried box back where it was found; the shelf keeps its boxes. `/everytunnel boxes` tells where they are, `boxes fill`
   fills all but the last.
 - **Lockers to hide in:** every room has at least one (the Lockers and Changing rooms are
   full of them; the library has none). Right-clicking a locker from in front of its door
@@ -215,8 +215,18 @@ level file (see [Levels](levels.md#level-3-hooks)). The music is planned for las
   vent's slits (`client.hud.LockerView`). Inside, the player makes no noise at all. Right-
   clicking again or sneaking gets out in front of the door; both ways the door's sound plays
   (`block.locker.door`, not a noise for enemies). A new game takes everyone out.
-- In the library's centre, the **bunker hatch**: iron trapdoors (shut) in a frame of checker
-  plate. Under it a ladder goes down a shaft to a lit corridor that runs 32 blocks south to
+- **The book puzzle** (`BookHooks`): with the boxes done, an office book (`OfficeBookBlock`,
+  blue-grey, drawn full bright) appears, silently, on the filing cabinet of each of the five
+  book rooms (spawn points tagged `book_spot`). They are carried like the boxes and alert no
+  one. Right-clicking the librarian's counter by the south door (or a book already on it) hands
+  one in: it lies at the next of five places along the counter (tagged `book_return`), and
+  "2 / 5" shows. The fifth opens the hatch by itself (the zone tagged `book_hatch`: its iron
+  trapdoors swing up with `block.hatch.open`) and "Shhh!" is earned. Dying puts a carried book
+  back on its cabinet; only a new game takes the books away and shuts the hatch.
+  `/everytunnel books` tells where they are, `books fill` puts them out with all but one
+  already on the counter.
+- In the library's centre, the **bunker hatch**: iron trapdoors in a frame of checker plate,
+  shut until the books are back. Under it a ladder goes down a shaft to a lit corridor that runs 32 blocks south to
   the door to B4, where the demo ends.
 
 ## 10. The end
@@ -269,12 +279,12 @@ The vanilla advancements are not touched.
 | Employee of the Month | the keycard opens the exit's reader (everyone in the world) | the keycard |
 | Under Pressure | Level 3's valves are right (everyone in the world) | the valve |
 | Master of the Boxes | Level 3's ten boxes are on Storage's shelf (everyone in the world) | the purple box |
-| Shhh! | Level 3's books are back on the librarian's counter (to come) | (to come) |
+| Shhh! | Level 3's five books are back on the librarian's counter (everyone in the world) | the office book |
 
 The ACHIEVEMENTS screen in the main menu (`client.screen.AchievementsScreen`) lists them on
 the guide's paper (`client.screen.Paper`) with how many are earned; one not earned yet shows a
 "?" and "Not yet unlocked". The texts are in the lang file (`achievement.every_tunnel.<id>`, its
 `.description`, `toast.every_tunnel.achievement_unlocked`); the badge, skull, silhouette and
 "?" icons come from `tools/gui/achievement_icons.py`, the others are the mod's items
-(`client.AchievementIcons`; the book is vanilla's until Level 3's books exist). An own sound
+(`client.AchievementIcons`). An own sound
 in place of the fanfare is planned.

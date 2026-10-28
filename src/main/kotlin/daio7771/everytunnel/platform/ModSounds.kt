@@ -57,6 +57,9 @@ object ModSounds {
     /** Level 3: something far off noticed a box going on the shelf (stereo; a placeholder for the observant guard, [BoxHooks]). */
     val OBSERVER_ALERT = event("event.observer.alert")
 
+    /** Level 3's bunker hatch opening by itself, the fifth book back ([BookHooks]): a heavy latch, the trapdoors swinging up. */
+    val HATCH_OPEN = event("block.hatch.open", range = 48f)
+
     /** A rolling shutter coming down and slamming shut (heard up to 32 blocks away). */
     val SHUTTER_CLOSE = event("block.shutter.close", range = 32f)
 

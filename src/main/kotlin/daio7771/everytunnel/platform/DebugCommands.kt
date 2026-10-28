@@ -63,6 +63,10 @@ object DebugCommands {
                     CommandManager.literal("boxes").executes(::boxes)
                         .then(CommandManager.literal("fill").executes(::fillBoxes)),
                 )
+                .then(
+                    CommandManager.literal("books").executes(::books)
+                        .then(CommandManager.literal("fill").executes(::fillBooks)),
+                )
                 .then(CommandManager.literal("rebuilt").executes(::rebuilt))
             if (DevWorlds.enabled) {
                 root.then(
@@ -255,6 +259,19 @@ object DebugCommands {
         val shelves = BoxHooks.fillAllButOne(context.source.server)
         reply(context, if (shelves == 0) "No level has a box shelf." else "Shelf filled but for one place; one box left lying about.")
         return shelves
+    }
+
+    private fun books(context: CommandContext<ServerCommandSource>): Int {
+        val lines = BookHooks.report(context.source.server)
+        if (lines.isEmpty()) reply(context, "No level has a book counter.")
+        lines.forEach { reply(context, it) }
+        return lines.size
+    }
+
+    private fun fillBooks(context: CommandContext<ServerCommandSource>): Int {
+        val levels = BookHooks.fillAllButOne(context.source.server)
+        reply(context, if (levels == 0) "No level has a book counter." else "The books are out, all but one already on the counter.")
+        return levels
     }
 
     private fun rebuilt(context: CommandContext<ServerCommandSource>): Int {

@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Stops sprinting while the player is exhausted (out of stamina) or carries a Level 3 box.
+ * Stops sprinting while the player is exhausted (out of stamina) or carries a Level 3 box or book.
  *
  * Sprinting is decided on the client, so the server cannot refuse it reliably.
  * {@code canSprint()} is checked both when starting a sprint and every tick while

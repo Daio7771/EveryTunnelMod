@@ -176,9 +176,9 @@ Reabrir el mundo o reaparecer dentro de un nivel no cuenta como entrar.
 ## 9. Nivel 3 (B3)
 
 Las oficinas del complejo alrededor de la biblioteca central, en perfecto estado y vacías.
-Hecho hasta ahora: la estructura, los muebles, el puzle de las válvulas, las taquillas y el
-puzle de las cajas; faltan el guardia
-observador, los libros, las demás notas y el loot, con sus zonas y puntos de spawn ya en el
+Hecho hasta ahora: la estructura, los muebles, el puzle de las válvulas, las taquillas y los
+puzles de las cajas y los libros que abren el búnker; faltan el guardia observador, las demás
+notas, el loot y el derrumbe, con sus zonas y puntos de spawn ya en el
 archivo del nivel (ver [Niveles](levels.md#ganchos-del-nivel-3)). La música queda para el
 final.
 
@@ -216,8 +216,8 @@ final.
   dibuja `BoxShelfRenderer`): un clic derecho en un hueco deja ahí la caja, sale "3 / 10"
   encima de la barra y se avisa al guardia observador (de momento una línea en el log y un
   sonido lejano, `event.observer.alert`). Con las diez puestas se consigue "Master of the
-  Boxes"; entonces aparecerán los libros (pendiente). Al morir, una caja en la mano vuelve a
-  donde estaba; la estantería conserva las suyas. `/everytunnel boxes` dice dónde están y
+  Boxes" y aparecen los libros. Llevarlas sigue `CarryHooks` (los libros también). Al morir,
+  una caja en la mano vuelve a donde estaba; la estantería conserva las suyas. `/everytunnel boxes` dice dónde están y
   `boxes fill` llena todo menos el último hueco.
 - **Taquillas para esconderse:** cada sala tiene al menos una (las salas Lockers y Changing
   room están llenas; la biblioteca no tiene). Un clic derecho en una taquilla desde delante
@@ -228,8 +228,19 @@ final.
   (`client.hud.LockerView`). Dentro, el jugador no hace ningún ruido. Otro clic derecho o
   agacharse le saca delante de la puerta; en los dos sentidos suena la puerta
   (`block.locker.door`, que no es ruido para los enemigos). Una partida nueva saca a todos.
-- En el centro de la biblioteca, la **trampilla del búnker**: trampillas de hierro (cerradas)
-  en un marco de chapa estriada. Debajo, una escalera de mano baja por un pozo hasta un
+- **El puzle de los libros** (`BookHooks`): con las cajas puestas aparece, en silencio, un
+  libro de oficina (`OfficeBookBlock`, azul grisáceo, a brillo completo) sobre el archivador de
+  cada una de las cinco salas con libro (puntos con la etiqueta `book_spot`). Se llevan como
+  las cajas y no avisan a nadie. Un clic derecho en el mostrador del bibliotecario junto a la
+  puerta sur (o en un libro ya puesto) entrega uno: queda tumbado en el siguiente de cinco
+  sitios a lo largo del mostrador (con la etiqueta `book_return`) y sale "2 / 5". El quinto
+  abre la trampilla solo (la zona con la etiqueta `book_hatch`: sus trampillas de hierro se
+  levantan con `block.hatch.open`) y se consigue "Shhh!". Al morir, un libro en la mano vuelve
+  a su archivador; solo una partida nueva quita los libros y cierra la trampilla.
+  `/everytunnel books` dice dónde están y `books fill` los saca con todos menos uno ya en el
+  mostrador.
+- En el centro de la biblioteca, la **trampilla del búnker**: trampillas de hierro en un marco
+  de chapa estriada, cerradas hasta que vuelven los libros. Debajo, una escalera de mano baja por un pozo hasta un
   pasillo iluminado que recorre 32 bloques hacia el sur hasta la puerta a B4, donde termina
   la demo.
 
@@ -285,12 +296,11 @@ Los logros de vanilla no se tocan.
 | Employee of the Month | abrir el lector de la salida con la tarjeta (todos los del mundo) | la tarjeta |
 | Under Pressure | dejar bien las válvulas del nivel 3 (todos los del mundo) | la válvula |
 | Master of the Boxes | poner las diez cajas del nivel 3 en la estantería de Storage (todos los del mundo) | la caja morada |
-| Shhh! | devolver los libros del nivel 3 al mostrador del bibliotecario (pendiente) | (pendiente) |
+| Shhh! | devolver los cinco libros del nivel 3 al mostrador del bibliotecario (todos los del mundo) | el libro de oficina |
 
 La pantalla ACHIEVEMENTS del menú principal (`client.screen.AchievementsScreen`) los muestra en
 el papel de la guía (`client.screen.Paper`) con cuántos se tienen; uno que aún no se tiene
 muestra un "?" y "Not yet unlocked". Los textos están en el archivo de idioma
 (`achievement.every_tunnel.<id>`, su `.description`, `toast.every_tunnel.achievement_unlocked`);
 los iconos de la placa, la calavera, la silueta y el "?" salen de
-`tools/gui/achievement_icons.py`, los demás son objetos del mod (`client.AchievementIcons`; el
-libro es el de vanilla hasta que existan los libros del nivel 3). Está previsto un sonido propio en lugar de la fanfarria.
+`tools/gui/achievement_icons.py`, los demás son objetos del mod (`client.AchievementIcons`). Está previsto un sonido propio en lugar de la fanfarria.

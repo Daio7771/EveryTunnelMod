@@ -655,6 +655,27 @@ def purple_box_tex(rng, face):
     return img
 
 
+def office_book_tex(rng, face):
+    """Level 3's office book (the book puzzle): a corporate blue-grey hardback. `cover`: cloth
+    with a darker spine band and a pale blank label; `pages`: the page edges between the boards."""
+    if face == "pages":
+        img = new((226, 222, 210))
+        noise(img, rng, 4)
+        for y in range(0, 16, 2):
+            rect(img, 0, y, 15, y, (204, 200, 188), 0.5)
+        rect(img, 0, 0, 15, 1, (92, 110, 132))                               # the boards
+        rect(img, 0, 14, 15, 15, (92, 110, 132))
+        return img
+    img = new((96, 116, 138))
+    noise(img, rng, 5)
+    rect(img, 0, 0, 2, 15, (70, 86, 106))                                     # the spine
+    rect(img, 6, 5, 12, 9, (214, 216, 220))                                   # the label
+    rect(img, 7, 7, 11, 7, (130, 138, 150), 0.6)
+    for i in range(16):
+        px(img, 15, i, (120, 138, 160), 0.5)
+    return img
+
+
 def books_tex(rng):
     """Two shelves of book spines (rows 1-7 and 9-15) in muted colours and heights, the shelf
     boards (rows 0 and 8) and the carcass (columns 0 and 15) in dark wood."""
@@ -1628,6 +1649,15 @@ def build():
              north=("s", (2, 4.5, 14, 13)), south=("s", (2, 4.5, 14, 13)), east=("s", (2, 4.5, 14, 13)), west=("s", (2, 4.5, 14, 13))),
           el((1.5, 8.5, 1.5), (14.5, 11, 14.5), "s", up="t", down="t",
              north=("s", lid_band), south=("s", lid_band), east=("s", lid_band), west=("s", lid_band))])
+    # The office book (OfficeBookBlock), lying flat: boards top and bottom, page edges round
+    # three sides, the spine on the west; drawn full bright, glowing a little with shaders.
+    book_glow = T.PAPER.but(emission=GLOW["DIFFUSER_GLOW"])
+    a.texture("office_book_cover", office_book_tex(r("office_book_cover"), "cover"), book_glow)
+    a.texture("office_book_pages", office_book_tex(r("office_book_pages"), "pages"), book_glow)
+    pages_uv = (0, 0, 16, 16)
+    prop("office_book", "Office Book", {"c": "office_book_cover", "p": "office_book_pages"},
+         [el((4, 0, 3), (12, 2.5, 13), "c", north=("p", pages_uv), south=("p", pages_uv), east=("p", pages_uv),
+             west=("c", (0, 0, 3, 16)))])
     # The shelf: 2 blocks wide, 3 high (BoxShelfBlock: col 0 on the left as seen from the front,
     # the east of a model facing north; row 0 at the bottom). Five boards 8 pixels apart from the
     # floor, a top, a back and the two outer sides; the boxes stand on the boards (drawn by

@@ -901,6 +901,35 @@ def valve_release(rng, variant):
     return fade(y, 0.0, 0.3)
 
 
+def hatch_open(rng, variant):
+    """The bunker hatch opening by itself (the fifth book back): under the floor a heavy bolt
+    grinds back and drops free with a deep clank, then the two iron trapdoors swing up and bang
+    against their stops one after the other, the shaft below booming with them, and the
+    library's silence takes the ringing."""
+    n = samples(3.6)
+    t = time_axis(n)
+    y = np.zeros(n)
+    # The bolt: steel sliding on steel, rough and slowing, then its clank home.
+    slide0, slide1 = 0.05, 0.55
+    grind = shaped_noise(n, rng, 0.5, 300.0, 3500.0) * envelope(n, [(0.0, 0.0), (slide0, 0.0), (slide0 + 0.05, 0.35), (slide1 - 0.1, 0.25), (slide1, 0.0)])
+    grind *= 0.6 + 0.4 * np.abs(smooth_random(n, 35.0, rng))
+    y += resonator(grind, rng.uniform(900, 1100), 8.0) * 0.6 + grind * 0.3
+    y += knock(n, rng, slide1, rng.uniform(140, 160), [1.0, 2.756, 5.404], [1.0, 0.5, 0.25], [0.35, 0.18, 0.08], click=1.0)
+    y += burst(n, rng, slide1, 0.05, hi=500.0, tau=0.02, amp=1.0)
+    # The trapdoors: a creak each as they swing, then the bang on their stops.
+    for k, at in enumerate((1.05, 1.32)):
+        swing = glide_tone(120.0 + 60.0 * np.clip((t - at + 0.3) / 0.3, 0, 1) + 8 * smooth_random(n, 20.0, rng), harmonics=(1.0, 0.5, 0.3))
+        y += 0.08 * bandpass(swing * envelope(n, [(0.0, 0.0), (at - 0.3, 0.0), (at - 0.2, 1.0), (at, 0.6), (at + 0.01, 0.0)]), 100.0, 1500.0)
+        ratios = sorted(rng.uniform(1.0, 7.0, 10))
+        y += (0.9 - 0.15 * k) * knock(n, rng, at, rng.uniform(70, 85), ratios, [1.0 / (1 + i * 0.35) for i in range(10)],
+                                      [0.9 / (1 + i * 0.3) for i in range(10)], click=1.1)
+        y += burst(n, rng, at, 0.07, hi=250.0, tau=0.04, amp=1.6 - 0.3 * k)
+    # The shaft below and the library: a low, long boom under it all.
+    boom = lowpass(shaped_noise(n, rng, 2.0, 25.0, 140.0), 140.0) * np.exp(-np.maximum(t - 1.05, 0.0) / 1.1) * (t > 1.05)
+    y += 0.5 * boom
+    return fade(drive(y, 1.2), 0.0, 0.5)
+
+
 def observer_alert(rng, variant):
     """Somewhere far off in the offices, something noticed: a heavy door knocked against its
     frame a long way down the corridors (low, dull, with the building's long echo), then the
@@ -1064,6 +1093,8 @@ SOUNDS = [
           valve_turn, -4.0),
     Sound("block.valve.release", "Level progress", "Level 3's valves all right: water hammer, the pipe settles, the door unlocks", "mono",
           False, 1, valve_release, -2.0, attenuation=24),
+    Sound("block.hatch.open", "Level progress", "Level 3's bunker hatch opening by itself (bolt, trapdoors banging up, the shaft booming)",
+          "mono", False, 1, hatch_open, -1.0, attenuation=48),
     Sound("event.observer.alert", "Level progress", "Level 3: something far off noticed (a box went on the shelf); a placeholder for the observant guard",
           "stereo", False, 2, observer_alert, -6.0),
     Sound("block.locker.door", "Level progress", "A Level 3 locker's door, getting in or out (latch, hinge, clang); no noise for enemies",

@@ -7,7 +7,6 @@ import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.ModItems
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.item.ItemStack
-import net.minecraft.item.Items
 import net.minecraft.util.Identifier
 
 /**
@@ -36,8 +35,7 @@ object AchievementIcons {
         Achievement.KEYCARD -> ItemStack(ModItems.KEYCARD)
         Achievement.VALVES -> ItemStack(ModBlocks.VALVE)
         Achievement.BOXES -> ItemStack(ModBlocks.PURPLE_BOX)
-        // A stand-in until Level 3's books exist.
-        Achievement.BOOKS -> ItemStack(Items.BOOK)
+        Achievement.BOOKS -> ItemStack(ModBlocks.OFFICE_BOOK)
     }
 
     /** [achievement]'s icon at ([x], [y]), or the "?" if [locked]. */

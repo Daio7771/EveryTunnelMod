@@ -110,6 +110,10 @@ def write(path, lv, stats, s=4):
     for x, y, z, _ in lv.box_spots:                     # the box puzzle's spots: a purple dot, ringed on furniture
         X0, Z0, X1, Z1 = rect(pad, x, z)
         d.rectangle((X0 + 1, Z0 + 1, X1 - 1, Z1 - 1), fill=BOX_SPOT, outline=(255, 255, 255) if y > 1 else None)
+    for sid, (x, y, z), _, tags, _ in lv.spawns:            # the book puzzle's places on the counter
+        if "book_return" in tags:
+            X0, Z0, X1, Z1 = rect(pad, int(x), int(z))
+            d.rectangle((X0 + 1, Z0 + 1, X1 - 1, Z1 - 1), fill=(120, 150, 190), outline=(255, 255, 255))
     for letter, (x, y, z) in lv.valves:
         d.rectangle(rect(pad, x, z), fill=(240, 170, 50))
         X0, Z0, _, _ = rect(pad, x + 2, z)
