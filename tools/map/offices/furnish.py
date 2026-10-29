@@ -26,8 +26,8 @@ STACK = {"server_rack", "metal_shelf", "locker", "vending_machine", "bookshelf"}
 # Furniture with a full-block top a box can stand on (the box puzzle's spots).
 FLAT_TOPS = {"office_desk", "counter", "filing_cabinet", "library_counter"}
 # The ones a player walks through (ModBlocks: noCollision).
-WALK_THROUGH = {"whiteboard", "electrical_panel", "cafe_chair", "coffee_machine", "potted_plant", "wall_clock",
-                "wooden_chair", "desk_phone", "note_board"}
+WALK_THROUGH = {"desk_lamp", "whiteboard", "electrical_panel", "cafe_chair", "coffee_machine", "potted_plant", "wall_clock",
+                "wooden_chair", "desk_phone", "note_board", "note_paper"}
 
 
 class Frame:
@@ -204,8 +204,8 @@ class Furnisher:
     def library(self):
         """Bookshelves round the walls; rows of double-sided shelves (BOOKSHELF_HEIGHT high,
         AISLE apart) in the four quarters, kept off the aisles from the four doors and off a
-        clearing round the hatch, where reading tables stand at the corners; the librarian's
-        counter and the card catalogue by the south door."""
+        clearing round the hatch, where the librarian's desk stands in a U round the hatch
+        (hatch_desk); the card catalogue by the south door."""
         p, L = self.p, self.p.LIBRARY_LAYOUT
         x0, z0, x1, z1 = p.LIBRARY
         h, aisle, edge = L["shelf_height"], L["aisle"], L["perimeter"]
@@ -220,7 +220,7 @@ class Furnisher:
                 ((x0, cross_z[0] - 1, x1, cross_z[1] + 2)),                   # the west-east aisle
                 (clearing[0] - 1, clearing[1] - 1, clearing[2] + 1, clearing[3] + 1)]
         desk = L["desk"]
-        keep += [desk["area"], desk["catalog_area"]]
+        keep += [desk["catalog_area"]]
 
         def kept(x, z):
             return any(a <= x < b and c <= z < d for a, c, b, d in keep)
@@ -247,23 +247,45 @@ class Furnisher:
             for x in run:
                 if (x - 1 in run) or (x + 1 in run):                         # no lone shelves
                     shelf(x, z, "north")
-        # Reading tables at the clearing's corners (the hatch stays in sight down the aisles).
-        tw, td = L["table"]
-        for ax, az in ((clearing[0] + 1, clearing[1] + 1), (clearing[2] - 1 - tw, clearing[1] + 1),
-                       (clearing[0] + 1, clearing[3] - 1 - td), (clearing[2] - 1 - tw, clearing[3] - 1 - td)):
-            for x in range(ax, ax + tw):
-                for z in range(az, az + td):
-                    self.put(x, 1, z, "reading_table")
-                self.put(x, 1, az - 1, "wooden_chair", "south")
-                self.put(x, 1, az + td, "wooden_chair", "north")
-        # The librarian's counter facing the south door, a chair behind it; the card catalogue.
-        (cx0, cx1), cz_, facing = desk["counter"]
-        for x in range(cx0, cx1):
-            self.put(x, 1, cz_, "library_counter", facing)
-        self.put((cx0 + cx1) // 2, 1, cz_ - DIRS[facing][1], "wooden_chair", facing)
+        self.hatch_desk()
         cat_x, (cat_z0, cat_z1), cat_facing = desk["catalog"]
         for z in range(cat_z0, cat_z1):
             self.put(cat_x, 1, z, "card_catalog", cat_facing)
+
+    def hatch_desk(self):
+        """The librarian's desk: a U of library counters round the hatch's frame, `ring` blocks
+        of floor between them, open on the `open` side, each piece facing out. The books go
+        back onto it: `returns` places spread along it, off its corners (lv.book_returns,
+        [(x, z, facing)]); a lamp on the `lamp` corner."""
+        p, desk = self.p, self.p.LIBRARY_LAYOUT["desk"]
+        fx0, fz0, fx1, fz1 = p.HATCH["frame"]
+        r = desk["ring"]
+        x0, z0, x1, z1 = fx0 - r - 1, fz0 - r - 1, fx1 + r, fz1 + r          # the desk's cells, inclusive
+        sides = {"north": [(x, z0) for x in range(x0, x1 + 1)],
+                 "east": [(x1, z) for z in range(z0 + 1, z1)],
+                 "south": [(x, z1) for x in range(x1, x0 - 1, -1)],
+                 "west": [(x0, z) for z in range(z1 - 1, z0, -1)]}
+        if desk["open"] not in sides:
+            raise SystemExit(f"LEVEL_3 LIBRARY_LAYOUT desk: open must be one of {', '.join(sides)}")
+        # Round the U from one open end to the other: the corners go with the north and south rows.
+        order = ["north", "east", "south", "west"]
+        start = (order.index(desk["open"]) + 1) % 4
+        path = []
+        for side in order[start:] + order[:start]:
+            if side == desk["open"]:
+                continue
+            for x, z in sides[side]:
+                if not self.put(x, 1, z, "library_counter", side, force=True):
+                    raise SystemExit(f"LEVEL_3: no room for the librarian's desk at ({x}, {z})")
+                path.append((x, z, side))
+        corners = {(x0, z0), (x1, z0), (x0, z1), (x1, z1)}
+        lamp = {"northwest": (x0, z0), "northeast": (x1, z0), "southwest": (x0, z1), "southeast": (x1, z1)}[desk["lamp"]]
+        if lamp not in [(x, z) for x, z, _ in path]:
+            raise SystemExit(f"LEVEL_3 LIBRARY_LAYOUT desk: the lamp's corner {desk['lamp']} is on the open side")
+        self.put(lamp[0], 2, lamp[1], "desk_lamp", "south")
+        places = [c for c in path if (c[0], c[1]) not in corners]
+        n = desk["returns"]
+        self.lv.book_returns = [places[round(i * (len(places) - 1) / (n - 1))] for i in range(n)]
 
     # --- the result ------------------------------------------------------------------
 
@@ -399,11 +421,12 @@ def storage(f, fr):
     if not f.at(fr, u0 + 2, fr.D - 1, "locker", "front"):
         raise SystemExit("LEVEL_3: no room for Storage's locker beside the box shelf")
     f.at(fr, u0 + 2, fr.D - 1, "locker", "front", y=2, force=True)
-    for v_front in (4, 8):
-        for u in range(2, fr.W - 2):
-            f.stack(fr, u, v_front, "metal_shelf", "front", 2)
-            f.stack(fr, u, v_front + 1, "metal_shelf", "back", 2)
+    # Shelves only along the walls, the middle left open: from the box shelf the door is in
+    # plain sight, so the Observer is seen coming in.
     f.back_wall(fr, 2, fr.W - 3, "metal_shelf", height=2)
+    for v in range(fr.D - 1):
+        f.stack(fr, 0, v, "metal_shelf", "right", 2)
+        f.stack(fr, fr.W - 1, v, "metal_shelf", "left", 2)
     f.at(fr, fr.W - 2, fr.D - 3, "cardboard_box", "front")
     f.at(fr, fr.W - 2, fr.D - 4, "cardboard_box", "left")
 
@@ -441,6 +464,9 @@ def lockers(f, fr, plant=False):
         f.stack(fr, fr.W - 1, v, "locker", "left", 2)
     for u in range(4, fr.W - 4):
         f.at(fr, u, 7, "bench", "front")
+    # A desk by the front wall, in the corner left of the way in: the room's note lies on it.
+    f.at(fr, 1, 0, "office_desk", "back")
+    f.at(fr, 1, 1, "office_chair", "front")
     if plant:
         f.at(fr, fr.W - 1, fr.D - 1, "potted_plant")
 
@@ -494,7 +520,7 @@ TEMPLATES = {
 
 
 def furnish(lv):
-    """Furnishes the level (also the electrical room and its note, into lv.notes); returns
+    """Furnishes the level (also the electrical room and its note, and the documents, into lv.notes); returns
     {room id: (x, z) of the cabinet its book lies on}."""
     p = lv.p
     f = Furnisher(lv)
@@ -530,9 +556,33 @@ def furnish(lv):
         f.put(x, 1, z, "potted_plant", "north")
     for x, z, facing in p.CORRIDOR_CLOCKS:
         f.put(x, 3, z, "wall_clock", facing)
+    note_papers(f, books)
     lv.box_spots = box_spots(f, books)
     f.finish()
     return books
+
+
+def note_papers(f, books):
+    """The company's documents (NOTE_PAPERS: room id -> note id): a loose sheet on a desk or
+    counter in the room (a filing cabinet when there is none, never the book's), the one
+    nearest the room's doors; into lv.notes. Put in before the box spots, which then keep off it."""
+    lv, p = f.lv, f.lv.p
+    rooms = {s.id: s for s, _ in lv.rooms}
+    for room_id, note_id in p.NOTE_PAPERS.items():
+        if room_id not in rooms:
+            raise SystemExit(f"LEVEL_3 NOTE_PAPERS: no room {room_id!r}")
+        box = rooms[room_id].box
+        x0, z0, x1, z1 = box
+        doors = [c for cells in f.doors_of(box).values() for c in cells]
+        tops = [(x, z, name, facing) for (x, y, z), (name, facing) in f.items.items()
+                if y == 1 and name in FLAT_TOPS and x0 <= x < x1 and z0 <= z < z1
+                and f.free(x, 2, z) and (x, z) != books.get(room_id)]
+        if not tops:
+            raise SystemExit(f"LEVEL_3 NOTE_PAPERS: nothing in {room_id} to lay the note {note_id!r} on")
+        x, z, _, facing = min(tops, key=lambda t: (t[2] == "filing_cabinet",
+                                                   min(abs(t[0] - dx) + abs(t[1] - dz) for dx, dz in doors), t[0], t[1]))
+        f.put(x, 2, z, "note_paper", facing, force=True)
+        lv.notes[note_id] = (x, 2, z)
 
 
 def ring_zone(p, x, z):

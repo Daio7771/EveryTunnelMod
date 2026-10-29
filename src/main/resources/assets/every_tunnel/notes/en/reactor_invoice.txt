@@ -1,0 +1,13 @@
+INVOICE No. 0451-R
+
+From: Nuclear Energy Systems Inc.
+Bill to: Noname Complex, Research Division
+Delivery: Noname Complex, lower levels. Sealed shipment.
+
+1 x Compact pressurised-water reactor, 40 MW: 142,000,000.00
+1 x Initial fuel load: 21,500,000.00
+1 x Shielding and containment, installed: 18,900,000.00
+1 x Installation, commissioning and staff training: 4,000,000.00
+
+Total due: 186,400,000.00
+Status: PAID IN FULL

@@ -168,8 +168,8 @@ Reopening the world or respawning inside a level does not count as walking in.
 
 The offices of the complex around the central library, in perfect order and empty. Built
 so far: the structure, the furniture, the valve puzzle, the lockers, the box and book
-puzzles that open the bunker, and the Observer; the
-other notes, the loot and the collapse are still to come, their zones and spawn points already in the
+puzzles that open the bunker, the Observer and the company's documents; the
+loot and the collapse are still to come, their zones and spawn points already in the
 level file (see [Levels](levels.md#level-3-hooks)). The music is planned for last.
 
 The **ambience** is the near-silence of an empty office building (`ambient.offices.room_tone`)
@@ -198,15 +198,23 @@ silent.
   on; the surfaces are clean.
 - Every room is furnished for what it is, tidy and no more than it needs (desks with their
   chairs and phones, filing cabinets, server racks, lockers, the cafeteria's tables...); the
-  library has rows of bookshelves four high, two blocks apart, round a clearing with reading
-  tables, and the librarian's counter by the south door. Nobody is there.
+  library has rows of bookshelves four high, two blocks apart, round a clearing, and in it
+  the librarian's desk in a U round the hatch, open to the south, a brass lamp
+  with a green shade on it (`desk_lamp`). Nobody is there.
+- **The company's documents** (the lore): five loose typed sheets (`NotePaperBlock`), each
+  on the desk or counter nearest the doors of its room (`NOTE_PAPERS`): a memo on the
+  reading room's supervision (HR), the archive's procedure for boxes and books (Archive), a
+  notice on the lockers (Lockers), a staff complaint about the machine brought down
+  (Management) and the invoice for a reactor (Finance). Read like the electrician's note
+  (`NoteScreen`). Formal, no humour; the first three hint at the Observer and the puzzles.
 - **The box puzzle** (`BoxHooks`): a new game puts ten purple archive boxes (`PurpleBoxBlock`,
   drawn full bright) at ten of the level's 25 spots tagged `box_spot`, drawn at random: one in
   every room but Storage, on a desk, counter or cabinet or on the floor against a wall, and
   nine round the ring. Right-click picks one up into the hand: one at a time; while carried it
   stays in the hand (changing slot moves it along), it cannot be thrown away (it comes
   straight back) and the player cannot sprint; hiding in a locker with it is fine. In Storage,
-  an empty metal shelf, 2 wide and 3 high with five boards (`BoxShelfBlock`, spawn point tagged
+  its other shelves only along the walls (the middle open, the door in plain sight from the
+  box shelf), an empty metal shelf, 2 wide and 3 high with five boards (`BoxShelfBlock`, spawn point tagged
   `box_shelf`; the boxes on it drawn by `BoxShelfRenderer`): right-clicking a place on it puts
   the box there, "3 / 10" shows above the hotbar, and the Observer is alerted (he comes running;
   far off, something is heard noticing, `event.observer.alert`). With all ten up, "Master of the Boxes"
@@ -227,7 +235,8 @@ silent.
   sprint, and a caught player dies. Out of his sight for 1.5 s, he goes to where he saw them
   last (running if he was), looks round and walks home: a player just spotted has a moment to
   sneak out of his range, duck behind a shelf or get into a locker unseen. A box on Storage's shelf brings him running there, faster
-  still, and "He's coming. Hide." shows in big dark red letters; he looks round and walks home.
+  still, and "He's coming. Hide." shows in big dark red letters; he looks round and runs home
+  (only after a box; after a search he walks).
   Storage's locker stands right beside the shelf (he comes in by the door). A player he sees get into a locker is pulled out and
   dies. He makes no sound of his own, not even footsteps; walking your way he
   brings a slow clock and a drone (`music.observer.approach`), running at you the clock gone
@@ -244,14 +253,22 @@ silent.
 - **The book puzzle** (`BookHooks`): with the boxes done, an office book (`OfficeBookBlock`,
   blue-grey, drawn full bright) appears, silently, on the filing cabinet of each of the five
   book rooms (spawn points tagged `book_spot`). They are carried like the boxes and alert no
-  one. Right-clicking the librarian's counter by the south door (or a book already on it) hands
-  one in: it lies at the next of five places along the counter (tagged `book_return`), and
-  "2 / 5" shows. The fifth opens the hatch by itself (the zone tagged `book_hatch`: its iron
-  trapdoors swing up with `block.hatch.open`) and "Shhh!" is earned. Dying puts a carried book
+  one. Right-clicking the librarian's desk round the hatch (or a book already on it) hands
+  one in: it lies at the next of five places spread along the desk (tagged `book_return`), and
+  "2 / 5" shows. The fifth opens the hatch by itself (the zone tagged `book_hatch`: its steel
+  leaves swing up with `block.hatch.open`) and "Shhh!" is earned. Dying puts a carried book
   back on its cabinet; only a new game takes the books away and shuts the hatch.
   `/everytunnel books` tells where they are, `books fill` puts them out with all but one
   already on the counter.
-- In the library's centre, the **bunker hatch**: iron trapdoors in a frame of checker plate,
+  While the books are out (`BookPhaseHooks`, rules in `systems.ObserverNearness`), the
+  library's clock ticks in the player's head whenever the Observer is within 24 blocks, tick
+  and tock, every 0.75 s at the edge down to every 0.25 s within 4 blocks, louder as he nears
+  (`event.observer.tick` / `tock`); and when he first comes within 16 blocks, "He's near.
+  Hide." shows like the box warning (again only once he has been farther than 24; not while
+  he is already after the player).
+- In the library's centre, the **bunker hatch**: two leaves of dark steel checker plate
+  (`bunker_trapdoor`, a trapdoor nobody opens by hand) with a yellow and black band along their
+  hinges, hinged on the west and east sides, in a frame of checker plate,
   shut until the books are back. Under it a ladder goes down a shaft to a lit corridor that runs 32 blocks south to
   the door to B4, where the demo ends.
 
@@ -305,7 +322,7 @@ The vanilla advancements are not touched.
 | Employee of the Month | the keycard opens the exit's reader (everyone in the world) | the keycard |
 | Under Pressure | Level 3's valves are right (everyone in the world) | the valve |
 | Master of the Boxes | Level 3's ten boxes are on Storage's shelf (everyone in the world) | the purple box |
-| Shhh! | Level 3's five books are back on the librarian's counter (everyone in the world) | the office book |
+| Shhh! | Level 3's five books are back on the librarian's desk (everyone in the world) | the office book |
 
 The ACHIEVEMENTS screen in the main menu (`client.screen.AchievementsScreen`) lists them on
 the guide's paper (`client.screen.Paper`) with how many are earned; one not earned yet shows a

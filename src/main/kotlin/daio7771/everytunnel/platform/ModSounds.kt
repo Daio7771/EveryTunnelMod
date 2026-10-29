@@ -56,6 +56,9 @@ object ModSounds {
 
     /** Level 3: something far off noticed a box going on the shelf (stereo; a placeholder for the observant guard, [BoxHooks]). */
     val OBSERVER_ALERT = event("event.observer.alert")
+    /** Level 3's book phase: the library clock's tick and tock in the head, quickening as the Observer nears ([BookPhaseHooks]). */
+    val OBSERVER_TICK = event("event.observer.tick")
+    val OBSERVER_TOCK = event("event.observer.tock")
 
     /** Level 3's bunker hatch opening by itself, the fifth book back ([BookHooks]): a heavy latch, the trapdoors swinging up. */
     val HATCH_OPEN = event("block.hatch.open", range = 48f)

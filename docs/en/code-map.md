@@ -42,6 +42,7 @@ KDoc comment that says more.
 | `ResourceSystem.kt` | Stamina, thirst and battery simulation, as pure functions |
 | `NoiseSystem.kt` | Noise events, their memory, audibility, and the rules that pick radii |
 | `FlashlightBeam.kt` | The beam's light at any point (cone, falloff, hot spot, glow) |
+| `ObserverNearness.kt` | Level 3's book phase: the clock's pace and volume and the "He's near" warning from the Observer's distance |
 
 ### `entities/`
 
@@ -92,6 +93,7 @@ KDoc comment that says more.
 | `ShutterBlock.kt` | A piece of a rolling shutter |
 | `CardReaderBlock.kt` | The keycard reader that opens iron doors |
 | `NoteBoardBlock.kt` | A cork board with a note: right-click reads it |
+| `NotePaperBlock.kt` | A loose typed sheet on a desk (Level 3's documents): right-click reads it |
 | `BoxBlocks.kt` | Level 3's purple box (picked up), its shelf (parts, slots, the boxes' block entity) and the office book |
 | `LockerBlock.kt` | A locker (a two-block stack): right-click hides in it |
 | `LockerSeatEntity.kt` | The invisible seat a hiding player rides: look limit, getting out in front, the door's sound |
@@ -131,9 +133,10 @@ KDoc comment that says more.
 | `LootSpawner.kt` | Places and restocks loot at tagged spawn points |
 | `KeycardHooks.kt` | Lights-out wave, restoring lights, locking readers |
 | `ValveHooks.kt` | Level 3's valve puzzle: digits per new game, checking turns, opening the door, resetting |
-| `NoteHooks.kt` | Reading a pinned note: finds its id, sends it with the valve digits |
+| `NoteHooks.kt` | Reading a note (board or sheet): finds its id, sends it with the valve digits |
 | `CarryHooks.kt` | Carrying a box or a book: in the hand, never dropped, no sprint, back on death |
 | `BookHooks.kt` | Level 3's book puzzle: books appear, handed in at the counter, the hatch opens, debug |
+| `BookPhaseHooks.kt` | While the books are out: the clock in the head and the "He's near. Hide." warning |
 | `BoxHooks.kt` | Level 3's box puzzle: boxes out at random, carrying, the shelf, death, debug |
 | `HidingHooks.kt` | Hiding in lockers: in, out, no noise inside, out on a new game |
 | `AchievementHooks.kt` | Earning achievements: what earns each, telling the client |

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/note_paper"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/note_paper",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/note_paper",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/note_paper",
+      "y": 270
+    }
+  }
+}

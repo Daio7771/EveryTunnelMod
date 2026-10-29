@@ -12,7 +12,8 @@ import kotlin.math.sin
  * - [State.PATROL]: walks between points of his home (the library), and at each one
  *   [State.LOOK]s round: stands, his head sweeping slowly from side to side ([lookOffset]).
  * - [State.ALERTED]: a box was put on the shelf: he runs there, very fast, from wherever he is,
- *   then [State.INSPECT]s (stands and looks round) and [State.RETURN]s, walking, to his home.
+ *   then [State.INSPECT]s (stands and looks round) and [State.RETURN]s, running, to his home
+ *   (going home after anything else, he walks).
  * - [State.CHASE]: he sees a player: first he walks towards them; only once they have stayed in
  *   his sight for [ObserverSettings.spotSeconds] (a moment's gap does not count), or are within
  *   [ObserverSettings.spotCloseRange], does he run at them. Close enough, he catches them
@@ -80,6 +81,8 @@ class ObserverBrain(private val settings: ObserverSettings = ObserverSettings())
     /** Since when he has had the chased player in sight without a real gap, and whether he runs yet. */
     private var inSightSince = Long.MIN_VALUE
     private var running = false
+    /** Sent out by a box and not yet back on patrol (nor after a player since): he runs home. */
+    private var onAlert = false
     private var chased: UUID? = null
     private var hiddenTarget: Hidden? = null
 
@@ -89,15 +92,13 @@ class ObserverBrain(private val settings: ObserverSettings = ObserverSettings())
         lastSeenTick = Long.MIN_VALUE
         inSightSince = Long.MIN_VALUE
         running = false
+        onAlert = false
         chased = null
         hiddenTarget = null
     }
 
     fun tick(senses: Senses): Decision {
         stateTicks++
-        val arrived = target?.let { PaleManBrain.horizontalDistance(senses.position, it) <= ARRIVE_DISTANCE } == true ||
-            (senses.navigationIdle && stateTicks > NAVIGATION_GRACE_TICKS)
-        val timeUp = stateTicks >= stateLength
 
         // What beats whatever he is doing.
         senses.hidden?.let { hidden ->
@@ -110,6 +111,7 @@ class ObserverBrain(private val settings: ObserverSettings = ObserverSettings())
         val seen = senses.seen
         if (state != State.GRAB && seen != null) {
             if (state != State.CHASE && state != State.SEARCH) running = false
+            onAlert = false
             if (state != State.CHASE) enter(State.CHASE, 0)
             if (senses.now - lastSeenTick > SIGHT_GAP_TICKS || chased != seen.id) inSightSince = senses.now
             target = seen.position
@@ -120,7 +122,13 @@ class ObserverBrain(private val settings: ObserverSettings = ObserverSettings())
         if (senses.alert != null && state in INTERRUPTIBLE) {
             enter(State.ALERTED, ticks(settings.alertTimeoutSeconds))
             target = senses.alert
+            onAlert = true
         }
+        // Only now: what beats the rest may have changed his state and target (a box put up while
+        // he stood looking round must not count him as there already).
+        val arrived = target?.let { PaleManBrain.horizontalDistance(senses.position, it) <= ARRIVE_DISTANCE } == true ||
+            (senses.navigationIdle && stateTicks > NAVIGATION_GRACE_TICKS)
+        val timeUp = stateTicks >= stateLength
 
         return when (state) {
             State.PATROL -> {
@@ -187,12 +195,13 @@ class ObserverBrain(private val settings: ObserverSettings = ObserverSettings())
             State.RETURN -> {
                 when {
                     senses.atHome -> {
+                        onAlert = false
                         enter(State.PATROL, ticks(settings.patrolLegSeconds))
                         target = senses.patrolPoint
                         Decision(state, target, Pace.WALK)
                     }
                     target == null || arrived || timeUp -> goHome(senses)
-                    else -> Decision(state, target, Pace.WALK)
+                    else -> Decision(state, target, homePace())
                 }
             }
             State.GRAB -> {
@@ -221,8 +230,10 @@ class ObserverBrain(private val settings: ObserverSettings = ObserverSettings())
     private fun goHome(senses: Senses): Decision {
         enter(State.RETURN, ticks(settings.returnTimeoutSeconds))
         target = senses.patrolPoint
-        return Decision(state, target, Pace.WALK)
+        return Decision(state, target, homePace())
     }
+
+    private fun homePace(): Pace = if (onAlert) Pace.RUN else Pace.WALK
 
     /** How far his head is turned, looking round: a slow sweep from side to side. */
     private fun lookOffset(ticks: Int): Double =

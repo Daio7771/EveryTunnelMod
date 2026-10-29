@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/desk_lamp"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/desk_lamp",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/desk_lamp",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/desk_lamp",
+      "y": 270
+    }
+  }
+}

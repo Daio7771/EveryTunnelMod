@@ -82,6 +82,12 @@ object BoxHooks {
         LevelManager.levelAt(world.registryKey.value.toString(), foot.x + 0.5, foot.y + 0.5, foot.z + 0.5)?.let { BookHooks.appear(world, it) }
     }
 
+    /** All the boxes of [level] are on its shelf (false for a level without one). */
+    fun shelfFull(world: ServerWorld, level: LevelDefinition): Boolean {
+        val foot = shelfFoot(level) ?: return false
+        return ((world.getBlockEntity(foot) as? BoxShelfBlockEntity)?.count ?: 0) >= BOXES
+    }
+
     private fun spots(level: LevelDefinition): List<BlockPos> =
         level.spawnPoints.filter { SPOT_TAG in it.tags }.map { BlockPos.ofFloored(it.position.x, it.position.y, it.position.z) }
 

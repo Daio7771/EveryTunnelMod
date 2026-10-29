@@ -1005,6 +1005,25 @@ def clock_tick(n, rng, start, tock, amp=1.0):
     return y * amp
 
 
+def observer_clock(tock):
+    """The book phase's warning (ObserverClock): one tick (or tock) of the library's clock, played
+    in the head faster and louder the nearer the Observer is. Dry and close, a short ring of the
+    room behind it; 0.6 s, so it never overlaps the next even at the fastest pace."""
+    def generate(rng, variant):
+        seconds = 0.6
+        dry = np.zeros(samples(seconds))
+        place(dry, clock_tick(samples(0.3), rng, 0.0, tock=tock), 0.005)
+        y = stereo(dry * 0.8, dry * 0.8)
+        for ch, side in ((0, 0.9), (1, 1.1)):
+            wet = hall_reverb(dry, rng, 0.5, 2200.0)[:len(dry)]
+            y[:, ch] += wet * 0.35 * side
+        fade = np.ones(len(dry))
+        tail = samples(0.1)
+        fade[-tail:] = np.linspace(1.0, 0.0, tail)
+        return y * fade[:, None]
+    return generate
+
+
 def observer_approach(rng, variant):
     """The Observer has seen you and walks your way: the library's clock again, but faster and
     closer (100 a minute), a low drone swelling under it and a thin, high tremolo held very
@@ -1269,6 +1288,10 @@ SOUNDS = [
           "mono", False, 1, hatch_open, -1.0, attenuation=48),
     Sound("event.observer.alert", "Level progress", "Level 3: something far off noticed (a box went on the shelf); a placeholder for the observant guard",
           "stereo", False, 2, observer_alert, -6.0),
+    Sound("event.observer.tick", "Level 3 / the Observer", "Book phase: the library clock's tick in your head, faster and louder as he nears",
+          "stereo", False, 2, observer_clock(False), -6.0, stream=False),
+    Sound("event.observer.tock", "Level 3 / the Observer", "Book phase: the library clock's tock in your head, faster and louder as he nears",
+          "stereo", False, 2, observer_clock(True), -6.0, stream=False),
     Sound("block.locker.door", "Level progress", "A Level 3 locker's door, getting in or out (latch, hinge, clang); no noise for enemies",
           "mono", False, 3, locker_door, -4.0),
     Sound("block.shutter.close", "Level progress", "The rolling shutter closing behind the player (rattle down, slam)", "mono", False, 1,

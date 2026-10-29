@@ -158,10 +158,10 @@ the server starts (levels built together name the same one). The function must e
 | `box_spot` | `BoxHooks` | Level 3: a place a purple box may lie (a new game puts ten at random); on the floor, or on furniture (y 2) |
 | `box_shelf` | `BoxHooks` | Level 3: the foot (left, bottom) of the shelf the boxes go on |
 | `book_spot` | `BookHooks` | Level 3: where a room's book appears once the boxes are done, on top of a filing cabinet (one per "book" room) |
-| `book_return` | `BookHooks` | Level 3: a place on the librarian's counter a book goes back to (five) |
+| `book_return` | `BookHooks` | Level 3: a place on the librarian's desk round the hatch a book goes back to (five) |
 | `valve` | `ValveHooks` | A valve of the level's puzzle (`valve_a` to `valve_e`: the `ValveBlock` at that block, lettered) |
-| `note` | `NoteHooks` | A note pinned at that block (a `NoteBoardBlock`); its id names the text, `assets/every_tunnel/notes/<en/es>/<id>.txt` |
-| `note_spot`, `battery_spot`, `water_spot`, `food_spot` | (none yet) | Level 3: more notes and loot, listed in `LEVEL_3` (empty for now) |
+| `note` | `NoteHooks` | A note at that block (pinned on a `NoteBoardBlock` or a loose sheet, `NotePaperBlock`); its id names the text, `assets/every_tunnel/notes/<en/es>/<id>.txt` |
+| `battery_spot`, `water_spot`, `food_spot` | (none yet) | Level 3: loot, listed in `LEVEL_3` (empty for now) |
 
 Tags are open strings: a new system can define its own without touching the parser.
 
@@ -180,7 +180,9 @@ will read:
   `book_<room>` per book room (on the filing cabinet its furniture template picks, unless
   `BOOK_SPOTS` names one),
   `box_1` to `box_25` (tagged `box_spot`, in their room's or ring's zone; `BOX_PUZZLE` sets
-  how many), `box_shelf` (in Storage), `book_return_1` to `_5` (on the counter), `valve_a` to `valve_e`, the electrician's note `pressure_line` (tagged `note`), and the lists `NOTE_SPOTS`, `BATTERY_SPOTS`, `WATER_SPOTS`,
+  how many), `box_shelf` (in Storage), `book_return_1` to `_5` (on the counter), `valve_a` to `valve_e`, the electrician's note `pressure_line` and the company's
+  documents (`NOTE_PAPERS`: a note id per room, a loose sheet on the desk or counter nearest
+  the room's doors), all tagged `note`, and the lists `BATTERY_SPOTS`, `WATER_SPOTS`,
   `FOOD_SPOTS` (empty).
 
 ## How the mod tracks players

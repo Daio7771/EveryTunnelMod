@@ -74,7 +74,8 @@ class Offices:
         self.books = {}          # room id -> (x, z) of the cabinet its book lies on
         self.box_spots = []      # (x, y, z, zone id): where the box puzzle's boxes may lie (furnish.py)
         self.box_shelf = None    # (x, z, facing) of the box shelf's foot, in Storage (furnish.py)
-        self.notes = {}          # note id -> (x, y, z) of the board it is pinned to
+        self.notes = {}          # note id -> (x, y, z) of its board or sheet
+        self.book_returns = []   # [(x, z, facing)]: the places on the librarian's desk the books go back to
 
     # --- spaces --------------------------------------------------------------------
 
@@ -324,13 +325,16 @@ class Offices:
             self.valves.append((letter, (px, vy, z)))
 
     def hatch(self):
-        """The bunker hatch in the floor: a frame of checker plate, the hole shut with iron
-        trapdoors (lying flush with the floor)."""
+        """The bunker hatch in the floor: a frame of checker plate, the hole shut with two leaves
+        of steel trapdoors (lying flush with the floor), the west half hinged on its west side and
+        the east half on its east side, so they open up out of the way of the ladder."""
         p = self.p
         for x, z in cells(p.HATCH["frame"]):
             self.fittings[(x, 0, z)] = p.BLOCKS["hatch_frame"]
+        hx0, _, hx1, _ = p.HATCH["hole"]
         for x, z in cells(p.HATCH["hole"]):
-            self.fittings[(x, 0, z)] = f"{p.BLOCKS['hatch_lid']}[facing=north,half=top,open=false,powered=false,waterlogged=false]"
+            facing = "east" if x < (hx0 + hx1) / 2 else "west"            # a trapdoor faces away from its hinge
+            self.fittings[(x, 0, z)] = f"{p.BLOCKS['hatch_lid']}[facing={facing},half=top,open=false,powered=false,waterlogged=false]"
             self.passable.add((x, 0, z))
 
     def write_blocks(self):
@@ -401,17 +405,14 @@ class Offices:
         if self.box_shelf:
             x, z, facing = self.box_shelf
             self.spawn("box_shelf", x, 1, z, facing, ["box_shelf"], "storage")
-        # The book puzzle: the places along the librarian's counter the books go back to.
-        (cx0, cx1), counter_z, counter_facing = p.LIBRARY_LAYOUT["desk"]["counter"]
-        length, n = cx1 - cx0, p.LIBRARY_LAYOUT["desk"]["returns"]
-        for i in range(n):
-            x = cx0 + round(i * (length - 1) / (n - 1))
-            self.spawn(f"book_return_{i + 1}", x, 2, counter_z, counter_facing, ["book_return"], "library")
+        # The book puzzle: the places along the librarian's desk round the hatch the books go back to.
+        for i, (x, z, facing) in enumerate(self.book_returns):
+            self.spawn(f"book_return_{i + 1}", x, 2, z, facing, ["book_return"], "library")
         for letter, (x, y, z) in self.valves:
             self.spawn(f"valve_{letter.lower()}", x, y, z, "west", ["valve"])
         for note_id, (x, y, z) in self.notes.items():
             self.spawn(note_id, x, y, z, "north", ["note"])
-        for tag, spots in (("note_spot", p.NOTE_SPOTS), ("battery_spot", p.BATTERY_SPOTS),
+        for tag, spots in (("battery_spot", p.BATTERY_SPOTS),
                            ("water_spot", p.WATER_SPOTS), ("food_spot", p.FOOD_SPOTS)):
             for i, (x, z) in enumerate(spots):
                 self.spawn(f"{tag[:-5]}_{i + 1}", x, 1, z, "north", [tag])

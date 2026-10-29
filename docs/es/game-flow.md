@@ -177,7 +177,7 @@ Reabrir el mundo o reaparecer dentro de un nivel no cuenta como entrar.
 
 Las oficinas del complejo alrededor de la biblioteca central, en perfecto estado y vacías.
 Hecho hasta ahora: la estructura, los muebles, el puzle de las válvulas, las taquillas y los
-puzles de las cajas y los libros que abren el búnker, y el Observer; faltan las demás notas, el loot y el derrumbe, con sus zonas y puntos de spawn ya en el
+puzles de las cajas y los libros que abren el búnker, el Observer y los documentos de la empresa; faltan el loot y el derrumbe, con sus zonas y puntos de spawn ya en el
 archivo del nivel (ver [Niveles](levels.md#ganchos-del-nivel-3)). La música queda para el
 final.
 
@@ -209,15 +209,23 @@ silencio.
 - Cada sala tiene los muebles de lo que es, ordenados y sin sobrar nada (mesas con sus sillas
   y teléfonos, archivadores, racks de servidores, taquillas, las mesas de la cafetería...);
   la biblioteca tiene filas de estanterías de cuatro de alto, a dos bloques unas de otras,
-  alrededor de un claro con mesas de lectura, y el mostrador del bibliotecario junto a la
-  puerta sur. No hay nadie.
+  alrededor de un claro, y en él la mesa del bibliotecario en U alrededor de la
+  trampilla, abierta al sur, con una lámpara de latón y pantalla verde (`desk_lamp`). No hay nadie.
+- **Los documentos de la empresa** (el lore): cinco folios mecanografiados sueltos
+  (`NotePaperBlock`), cada uno en la mesa o el mostrador más cercano a las puertas de su sala
+  (`NOTE_PAPERS`): un memorando sobre la supervisión de la sala de lectura (HR), el
+  procedimiento del archivo para cajas y libros (Archive), un aviso sobre las taquillas
+  (Lockers), una queja del personal por la máquina que bajaron (Management) y la factura de un
+  reactor (Finance). Se leen como la nota del electricista (`NoteScreen`). Formales, sin humor;
+  los tres primeros dan pistas sobre el Observer y los puzles.
 - **El puzle de las cajas** (`BoxHooks`): una partida nueva pone diez cajas de archivo moradas
   (`PurpleBoxBlock`, a brillo completo) en diez de los 25 sitios del nivel con la etiqueta
   `box_spot`, al azar: uno en cada sala menos Storage, sobre una mesa, mostrador o archivador
   o en el suelo contra una pared, y nueve por el anillo. Un clic derecho coge una y la lleva en
   la mano: de una en una; mientras se lleva sigue en la mano (cambiar de hueco la mueve con
   él), no se puede tirar (vuelve sola) y no se puede correr; se puede entrar con ella en una
-  taquilla. En Storage, una estantería metálica vacía de 2 de ancho y 3 de alto con cinco
+  taquilla. En Storage, con las demás estanterías solo junto a las paredes (el centro libre:
+  desde la estantería de las cajas se ve la puerta), una estantería metálica vacía de 2 de ancho y 3 de alto con cinco
   baldas (`BoxShelfBlock`, punto de spawn con la etiqueta `box_shelf`; las cajas encima las
   dibuja `BoxShelfRenderer`): un clic derecho en un hueco deja ahí la caja, sale "3 / 10"
   encima de la barra y se avisa al Observer (viene corriendo; a lo lejos se oye que algo se ha
@@ -242,7 +250,8 @@ silencio.
   visto tiene un momento para agacharse fuera de su alcance, meterse detrás de una estantería
   o esconderse en una taquilla sin que lo vea. Una caja en la estantería de
   Storage le hace ir corriendo allí, más rápido aún, y sale "He's coming. Hide." en grande y en
-  rojo oscuro; mira alrededor y vuelve. La taquilla de Storage está justo al lado de la
+  rojo oscuro; mira alrededor y vuelve corriendo (solo tras una caja; tras una búsqueda vuelve
+  andando). La taquilla de Storage está justo al lado de la
   estantería (él entra por la puerta). A un jugador al
   que ve meterse en una taquilla lo saca y muere. No hace ningún ruido propio, ni pasos; cuando viene
   andando hacia ti suenan un reloj lento y un zumbido
@@ -262,15 +271,23 @@ silencio.
 - **El puzle de los libros** (`BookHooks`): con las cajas puestas aparece, en silencio, un
   libro de oficina (`OfficeBookBlock`, azul grisáceo, a brillo completo) sobre el archivador de
   cada una de las cinco salas con libro (puntos con la etiqueta `book_spot`). Se llevan como
-  las cajas y no avisan a nadie. Un clic derecho en el mostrador del bibliotecario junto a la
-  puerta sur (o en un libro ya puesto) entrega uno: queda tumbado en el siguiente de cinco
-  sitios a lo largo del mostrador (con la etiqueta `book_return`) y sale "2 / 5". El quinto
-  abre la trampilla solo (la zona con la etiqueta `book_hatch`: sus trampillas de hierro se
+  las cajas y no avisan a nadie. Un clic derecho en la mesa del bibliotecario alrededor de la
+  trampilla (o en un libro ya puesto) entrega uno: queda tumbado en el siguiente de cinco
+  sitios repartidos por la mesa (con la etiqueta `book_return`) y sale "2 / 5". El quinto
+  abre la trampilla solo (la zona con la etiqueta `book_hatch`: sus hojas de acero se
   levantan con `block.hatch.open`) y se consigue "Shhh!". Al morir, un libro en la mano vuelve
   a su archivador; solo una partida nueva quita los libros y cierra la trampilla.
   `/everytunnel books` dice dónde están y `books fill` los saca con todos menos uno ya en el
   mostrador.
-- En el centro de la biblioteca, la **trampilla del búnker**: trampillas de hierro en un marco
+  Mientras los libros están fuera (`BookPhaseHooks`, reglas en `systems.ObserverNearness`), el
+  reloj de la biblioteca suena en la cabeza del jugador cuando el Observer está a 24 bloques o
+  menos, tic y tac, cada 0,75 s en el borde y hasta cada 0,25 s a 4 bloques o menos, más fuerte
+  cuanto más cerca (`event.observer.tick` / `tock`); y la primera vez que se acerca a 16
+  bloques sale "He's near. Hide." como el aviso de las cajas (otra vez solo después de haberse
+  alejado a más de 24; no si ya va a por el jugador).
+- En el centro de la biblioteca, la **trampilla del búnker**: dos hojas de chapa estriada de acero oscuro
+  (`bunker_trapdoor`, una trampilla que nadie abre a mano) con una banda amarilla y negra junto a
+  las bisagras, una con bisagra al oeste y otra al este, en un marco
   de chapa estriada, cerradas hasta que vuelven los libros. Debajo, una escalera de mano baja por un pozo hasta un
   pasillo iluminado que recorre 32 bloques hacia el sur hasta la puerta a B4, donde termina
   la demo.
@@ -327,7 +344,7 @@ Los logros de vanilla no se tocan.
 | Employee of the Month | abrir el lector de la salida con la tarjeta (todos los del mundo) | la tarjeta |
 | Under Pressure | dejar bien las válvulas del nivel 3 (todos los del mundo) | la válvula |
 | Master of the Boxes | poner las diez cajas del nivel 3 en la estantería de Storage (todos los del mundo) | la caja morada |
-| Shhh! | devolver los cinco libros del nivel 3 al mostrador del bibliotecario (todos los del mundo) | el libro de oficina |
+| Shhh! | devolver los cinco libros del nivel 3 a la mesa del bibliotecario (todos los del mundo) | el libro de oficina |
 
 La pantalla ACHIEVEMENTS del menú principal (`client.screen.AchievementsScreen`) los muestra en
 el papel de la guía (`client.screen.Paper`) con cuántos se tienen; uno que aún no se tiene

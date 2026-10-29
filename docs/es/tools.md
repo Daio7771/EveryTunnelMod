@@ -68,7 +68,7 @@ las oficinas.
 | `level.py` | El nivel a partir de `LEVEL_3`: los espacios como cajas de aire, la carcasa a su alrededor (suelo, paredes y techo con los materiales de cada espacio), los accesorios, las zonas y los puntos de spawn; `Placement` gira y mueve el plano hasta la puerta del nivel 2 |
 | `checks.py` | Un recorrido por cada sitio donde se puede estar de pie desde la antesala (todas las habitaciones, la biblioteca, la trampilla, el búnker, la puerta a B4; sin dejar ninguno) y una comprobación de que las habitaciones están cerradas salvo por sus puertas. Si falla, el generador se para |
 | `textures.py` | Las texturas propias del nivel 3 (moqueta, yeso, placas de techo, vinilo, madera, hormigón), añadidas al resource pack del mundo |
-| `furnish.py` | Los muebles: una plantilla por tipo de sala (`FURNISH` en `LEVEL_3`), calculada en el marco propio de la sala desde su puerta principal y lejos de las puertas; las filas, el claro y el mostrador de la biblioteca (`LIBRARY_LAYOUT`); las plantas y relojes del anillo; los estados de las uniones |
+| `furnish.py` | Los muebles: una plantilla por tipo de sala (`FURNISH` en `LEVEL_3`), calculada en el marco propio de la sala desde su puerta principal y lejos de las puertas; las filas, el claro y la mesa del bibliotecario alrededor de la trampilla (`LIBRARY_LAYOUT`); las plantas y relojes del anillo; los estados de las uniones |
 | `preview.py` | Plano visto desde arriba del nivel 3 leído de sus bloques, con los muebles y el búnker al lado |
 
 - **Salida** (`tools/map/output/`): el datapack del mod `every_tunnel_level1_mod` (archivos
@@ -87,7 +87,7 @@ generador basta con abrir el mundo. `/function garage:build` reconstruye a mano.
 
 ## Bloques
 
-`tools/blocks/generate.py` hace los recursos de los 64 bloques del mod. Los bloques en sí
+`tools/blocks/generate.py` hace los recursos de los 70 bloques del mod. Los bloques en sí
 (propiedades, formas, sonidos) se registran en Kotlin (`platform/ModBlocks.kt`); la
 herramienta **se detiene si las dos listas de ids no coinciden**. Las rotaciones de los
 modelos deben coincidir con las formas de `platform/BlockShapes.kt`. Las texturas reutilizan

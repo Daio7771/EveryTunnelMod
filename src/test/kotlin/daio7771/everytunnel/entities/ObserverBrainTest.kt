@@ -47,7 +47,7 @@ class ObserverBrainTest {
     }
 
     @Test
-    fun `a box on the shelf sends him running there, then he looks round and walks home`() {
+    fun `a box on the shelf sends him running there, then he looks round and runs home`() {
         val brain = ObserverBrain(settings)
         brain.step()
         val shelf = Position(40.0, 0.0, 40.0)
@@ -59,8 +59,23 @@ class ObserverBrainTest {
         assertEquals(ObserverBrain.State.INSPECT, there.state)
         val back = brain.run((settings.inspectSeconds * 20).toInt(), at = shelf, atHome = false)
         assertEquals(ObserverBrain.State.RETURN, back.state)
-        assertEquals(ObserverBrain.Pace.WALK, back.pace)
-        assertEquals(ObserverBrain.State.PATROL, brain.step(atHome = true).state)
+        assertEquals(ObserverBrain.Pace.RUN, back.pace)
+        assertEquals(ObserverBrain.Pace.RUN, brain.step(at = shelf, atHome = false).pace)
+        val patrol = brain.step(atHome = true)
+        assertEquals(ObserverBrain.State.PATROL, patrol.state)
+        assertEquals(ObserverBrain.Pace.WALK, patrol.pace)
+    }
+
+    @Test
+    fun `a box put up while he stands looking round still sends him running`() {
+        val brain = ObserverBrain(settings)
+        brain.step()
+        assertEquals(ObserverBrain.State.LOOK, brain.step(at = point).state)
+        val shelf = Position(40.0, 0.0, 40.0)
+        val alerted = brain.step(at = point, alert = shelf)
+        assertEquals(ObserverBrain.State.ALERTED, alerted.state)
+        assertEquals(ObserverBrain.Pace.ALERT_RUN, alerted.pace)
+        assertEquals(ObserverBrain.State.ALERTED, brain.step(at = point).state)
     }
 
     @Test
@@ -111,6 +126,9 @@ class ObserverBrainTest {
         assertEquals(ObserverBrain.State.SEARCH, lost.state)
         assertEquals(lastSeen, lost.target)
         assertEquals(ObserverBrain.State.INSPECT, brain.step(at = lastSeen).state)
+        val back = brain.run((settings.inspectSeconds * 20).toInt(), at = lastSeen, atHome = false)
+        assertEquals(ObserverBrain.State.RETURN, back.state)
+        assertEquals(ObserverBrain.Pace.WALK, back.pace, "only a box sends him home running")
     }
 
     @Test

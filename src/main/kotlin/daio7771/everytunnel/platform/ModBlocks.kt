@@ -11,6 +11,7 @@ import net.minecraft.block.BlockSetType
 import net.minecraft.block.DoorBlock
 import net.minecraft.block.MapColor
 import net.minecraft.block.SlabBlock
+import net.minecraft.block.TrapdoorBlock
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.block.piston.PistonBehavior
 import net.minecraft.item.BlockItem
@@ -100,6 +101,11 @@ object ModBlocks {
     val VALVE: Block = register("valve", ValveBlock(props(MapColor.RED, ModSoundGroups.METAL_PIPE)))
     /** A cork board with a note pinned to it; right-click reads the note (NoteHooks). */
     val NOTE_BOARD: Block = register("note_board", NoteBoardBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision()))
+    /** A loose typed sheet on a desk: Level 3's company documents; right-click reads it (NoteHooks). */
+    val NOTE_PAPER: Block = register(
+        "note_paper",
+        NotePaperBlock(props(MapColor.WHITE, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(3, 0, 1.5, 13, 1, 14.5))),
+    )
     val DUCT: Block = register(
         "duct",
         ConnectingPropBlock(
@@ -264,6 +270,12 @@ object ModBlocks {
     val READING_TABLE: Block = register("reading_table", TileFurnitureBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 12, 16))))
     val WOODEN_CHAIR: Block = register("wooden_chair", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(3, 0, 3, 13, 9, 13), box(3, 9, 12, 13, 16, 14))))
     val LIBRARY_COUNTER: Block = register("library_counter", RowFurnitureBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 16, 16))))
+    /** A brass desk lamp with a green shade, lit: on the librarian's desk round the hatch. */
+    val DESK_LAMP: Block = register(
+        "desk_lamp", PropBlock(props(MapColor.GREEN, ModSoundGroups.METAL_PIPE).noCollision().luminance { 10 }, listOf(box(4, 0, 6, 12, 8.5, 10))),
+    )
+    /** A leaf of Level 3's bunker hatch: a steel trapdoor nobody opens by hand ([BookHooks] does). */
+    val BUNKER_TRAPDOOR: Block = register("bunker_trapdoor", TrapdoorBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), BlockSetType.IRON))
     /** The library's card catalogue: rows of small drawers with brass pulls. */
     val CARD_CATALOG: Block = register("card_catalog", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(1, 0, 2, 15, 14, 16))))
 

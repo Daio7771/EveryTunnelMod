@@ -266,11 +266,12 @@ LEVEL_3 = dict(
     ),
     DOOR_CLEARANCE=2,                # no furniture within this many blocks of a room's doors
     # The library: shelves this high, rows `aisle` apart, a `perimeter` aisle along the walls,
-    # a square clearing round the hatch with reading tables (width, depth) at its corners, the
-    # librarian's counter ((x0, x1), z, facing) and the card catalogue (x, (z0, z1), facing) by
-    # the south door, in their areas (x0, z0, x1, z1; no shelves there).
-    LIBRARY_LAYOUT=dict(shelf_height=4, aisle=2, perimeter=2, clearing=16, table=(3, 2), desk=dict(
-        counter=((71, 77), 121, "south"), returns=5, area=(66, 116, 78, 127),
+    # a square clearing round the hatch; the librarian's desk in a U round the hatch, `ring`
+    # blocks of floor between it and the hatch's frame, open on the `open` side, `returns`
+    # places on it for the books and a lamp at the `lamp` corner; the card catalogue (x, (z0, z1), facing) by the south door, in its area
+    # (x0, z0, x1, z1; no shelves there).
+    LIBRARY_LAYOUT=dict(shelf_height=4, aisle=2, perimeter=2, clearing=16, desk=dict(
+        ring=1, open="south", returns=5, lamp="northwest",
         catalog=(84, (120, 123), "west"), catalog_area=(83, 116, 93, 127))),
     # The antechamber is the electrical room: panels on its side walls (x, z, facing), cabinets,
     # and the cork board with the electrician's note (`id` names its text, notes/<lang>/<id>.txt
@@ -286,7 +287,10 @@ LEVEL_3 = dict(
     # (one more in every room but these); the empty shelf they go on is in Storage.
     BOX_PUZZLE=dict(boxes=10, ring=9, not_in=["storage"]),
     BOOK_SPOTS={},                   # room id -> (x, z) of the filing cabinet its book lies on; else its template's
-    NOTE_SPOTS=[],                   # (x, z) on the main floor: other notes, not placed yet
+    # The company's documents (the lore): room id -> note id (notes/<lang>/<id>.txt in the mod).
+    # Each lies as a loose sheet on a desk or cabinet in its room, the one nearest the main door.
+    NOTE_PAPERS={"hr": "reading_room_supervision", "archive": "archive_procedure",
+                 "lockers": "staff_lockers", "management": "staff_complaint", "finance": "reactor_invoice"},
     BATTERY_SPOTS=[],
     WATER_SPOTS=[],
     FOOD_SPOTS=[],
@@ -324,7 +328,7 @@ LEVEL_3 = dict(
         pipe="every_tunnel:pipe",
         valve="every_tunnel:valve",
         hatch_frame="every_tunnel:checker_plate",
-        hatch_lid="minecraft:iron_trapdoor",
+        hatch_lid="every_tunnel:bunker_trapdoor",
     ),
 )
 

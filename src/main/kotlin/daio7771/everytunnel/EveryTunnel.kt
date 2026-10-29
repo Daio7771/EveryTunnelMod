@@ -4,6 +4,7 @@ import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.platform.AchievementHooks
 import daio7771.everytunnel.platform.AmbienceHooks
 import daio7771.everytunnel.platform.BookHooks
+import daio7771.everytunnel.platform.BookPhaseHooks
 import daio7771.everytunnel.platform.CarryHooks
 import daio7771.everytunnel.platform.DeathHooks
 import daio7771.everytunnel.platform.DebugCommands
@@ -80,6 +81,7 @@ object EveryTunnel : ModInitializer {
         HidingHooks.register()
         CarryHooks.register()
         BookHooks.register()
+        BookPhaseHooks.register()
         AchievementHooks.register()
         EndingHooks.register()
         RespawnHooks.register()

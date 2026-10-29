@@ -64,12 +64,12 @@ object ObserverHooks {
         for (player in world.players) warn(player)
     }
 
-    /** "He's coming. Hide." in big dark red letters in the middle of the screen. */
-    private fun warn(player: ServerPlayerEntity) {
+    /** A warning in big dark red letters in the middle of the screen: "He's coming. Hide." by default. */
+    fun warn(player: ServerPlayerEntity, key: String = "message.every_tunnel.observer_coming") {
         val network = player.networkHandler
         network.sendPacket(TitleFadeS2CPacket(WARNING_FADE_IN, WARNING_STAY, WARNING_FADE_OUT))
         network.sendPacket(SubtitleS2CPacket(Text.empty()))
-        network.sendPacket(TitleS2CPacket(Text.translatable("message.every_tunnel.observer_coming").formatted(Formatting.DARK_RED)))
+        network.sendPacket(TitleS2CPacket(Text.translatable(key).formatted(Formatting.DARK_RED)))
     }
 
     /** The alerts in [world] made after server tick [tick], oldest first. */

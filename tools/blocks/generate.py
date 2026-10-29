@@ -471,6 +471,22 @@ def pinned_note_tex(rng):
     return img
 
 
+def note_paper_tex(rng):
+    """A loose typed sheet (NotePaperBlock), the whole texture mapped onto the sheet: a dark
+    heading, a rule under it, then rows of grey type with ragged ends."""
+    img = new((234, 232, 224))
+    noise(img, rng, 2)
+    for x in range(2, 10):
+        px(img, x, 2, (52, 52, 58), 0.9)
+    for x in range(2, 14):
+        px(img, x, 4, (150, 150, 156), 0.5)
+    for y in range(6, 15, 2):
+        for x in range(2, rng.randrange(9, 15)):
+            if rng.random() < 0.85:
+                px(img, x, y, (118, 118, 124), 0.7)
+    return img
+
+
 # --- Level 3 furniture ------------------------------------------------------------------
 # Offices: powder-coated light grey metal and a light beech laminate; the library: the dark
 # wood of its walls (offices/textures.py); staff rooms in plain plastics. Clean, no wear.
@@ -834,6 +850,24 @@ def checker_plate_tex(rng):
                 px(img, x, y, (170, 176, 182) if i == 0 else (78, 82, 88), 0.85)
     T.blob(img, rng, (70, 72, 76), 5, 0.3)
     speckle(img, rng, 8, (60, 62, 66), 0.5)
+    return img
+
+
+def bunker_trapdoor_tex(rng):
+    """One block of a bunker hatch leaf (the hinge along the bottom rows, the south of a model
+    facing north): dark painted steel checker plate, a yellow and black band along the hinge,
+    a bolt head in each corner."""
+    img = checker_plate_tex(rng)
+    for y in range(16):
+        for x in range(16):
+            r, g, b, a = img.getpixel((x, y))
+            img.putpixel((x, y), (T.clamp(r * 0.62), T.clamp(g * 0.66), T.clamp(b * 0.6), a))
+    for y in range(13, 16):
+        for x in range(16):
+            px(img, x, y, (214, 168, 32) if (x + y) // 3 % 2 == 0 else (28, 28, 30), 0.95)
+    rect(img, 0, 12, 15, 12, (36, 38, 40), 0.8)
+    for x, y in ((1, 1), (14, 1), (1, 10), (14, 10)):
+        px(img, x, y, (150, 154, 158))
     return img
 
 
@@ -1634,6 +1668,36 @@ def build():
          + [el((x, 0, z), (x + 1, 6, z + 1), "w") for x in (3, 12) for z in (3, 12)])
     row("library_counter", "Library Counter", {"w": "library_wood", "p": "library_panel"},
         [el((0, 0, 1), (16, 15, 16), "w", north="p", south="p"), el((0, 15, 0), (16, 16, 16), "w")])
+    # The bunker hatch's leaves (a TrapdoorBlock of steel, opened only by BookHooks): models facing
+    # north with the hinge on the south, closed flush at the top or bottom of the block or open
+    # standing at the hinge; hinge knuckles and a grab handle stand out of the plate.
+    a.texture("bunker_trapdoor", bunker_trapdoor_tex(r("bunker_trapdoor")), T.PAINTED_METAL.but(relief=0.8))
+    hatch_tex = {"p": "bunker_trapdoor", "e": "dark_metal"}
+
+    def leaf(y0):
+        y1 = y0 + 3
+        return [el((0, y0, 0), (16, y1, 16), "e", up="p"),
+                el((2, y1, 13.5), (5, y1 + 1, 16), "e"), el((11, y1, 13.5), (14, y1 + 1, 16), "e"),
+                el((6, y1, 2), (10, y1 + 0.75, 3), "e")]
+    a.models["bunker_trapdoor_bottom"] = model(hatch_tex, leaf(0))
+    a.models["bunker_trapdoor_top"] = model(hatch_tex, leaf(13))
+    a.models["bunker_trapdoor_open"] = model(hatch_tex, [
+        el((0, 0, 13), (16, 16, 16), "e", north="p"),
+        el((2, 0, 12), (5, 3, 13), "e"), el((11, 0, 12), (14, 3, 13), "e"),
+        el((6, 13, 12.25), (10, 14, 13), "e")])
+    variants = {}
+    for facing, y in HORIZONTAL.items():
+        for half in ("bottom", "top"):
+            for opened in ("false", "true"):
+                name = "bunker_trapdoor_open" if opened == "true" else f"bunker_trapdoor_{half}"
+                variants[f"facing={facing},half={half},open={opened}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("bunker_trapdoor", "Bunker Hatch", {"variants": variants}, {"parent": f"{NS}:block/bunker_trapdoor_bottom"})
+
+    # A brass desk lamp with a green glass shade, on the librarian's desk (lit, ModBlocks).
+    a.texture("brass", plastic_tex(r("brass"), (176, 140, 70)), T.STEEL.but(smoothness=0.6))
+    a.texture("lamp_shade", plastic_tex(r("lamp_shade"), (40, 104, 60)), T.PLASTIC.but(smoothness=0.8, emission=GLOW["DIFFUSER_GLOW"]))
+    prop("desk_lamp", "Desk Lamp", {"b": "brass", "g": "lamp_shade"},
+         [el((5, 0, 6), (11, 1, 10), "b"), el((7.5, 1, 7.5), (8.5, 6, 8.5), "b"), el((4, 6, 6), (12, 8.5, 10), "g")])
     prop("card_catalog", "Card Catalog", {"w": "library_wood", "f": "card_catalog_front"},
          [el((1, 0, 2), (15, 14, 16), "w", north="f")])
 
@@ -1658,6 +1722,11 @@ def build():
     prop("office_book", "Office Book", {"c": "office_book_cover", "p": "office_book_pages"},
          [el((4, 0, 3), (12, 2.5, 13), "c", north=("p", pages_uv), south=("p", pages_uv), east=("p", pages_uv),
              west=("c", (0, 0, 3, 16)))])
+    # A loose typed sheet on a desk (NotePaperBlock, Level 3's documents): the texture covers its top.
+    a.texture("note_paper", note_paper_tex(r("note_paper")), T.PAPER)
+    sheet_uv = (0, 0, 16, 16)
+    prop("note_paper", "Note Paper", {"p": "note_paper"},
+         [el((3, 0, 1.5), (13, 0.25, 14.5), "p", up=("p", sheet_uv), down=("p", sheet_uv))])
     # The shelf: 2 blocks wide, 3 high (BoxShelfBlock: col 0 on the left as seen from the front,
     # the east of a model facing north; row 0 at the bottom). Five boards 8 pixels apart from the
     # floor, a top, a back and the two outer sides; the boxes stand on the boards (drawn by

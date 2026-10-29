@@ -453,6 +453,18 @@
       "every_tunnel:event/observer/alert_2"
     ]
   },
+  "event.observer.tick": {
+    "sounds": [
+      "every_tunnel:event/observer/tick_1",
+      "every_tunnel:event/observer/tick_2"
+    ]
+  },
+  "event.observer.tock": {
+    "sounds": [
+      "every_tunnel:event/observer/tock_1",
+      "every_tunnel:event/observer/tock_2"
+    ]
+  },
   "item.battery.close": {
     "sounds": [
       "every_tunnel:item/battery/close_1",

@@ -177,5 +177,9 @@
   "block.every_tunnel.office_book": "Office Book",
   "entity.every_tunnel.observer": "Observer",
   "item.every_tunnel.observer_spawn_egg": "Observer Spawn Egg",
-  "message.every_tunnel.observer_coming": "He's coming. Hide."
+  "message.every_tunnel.observer_coming": "He's coming. Hide.",
+  "message.every_tunnel.observer_near": "He's near. Hide.",
+  "block.every_tunnel.note_paper": "Note Paper",
+  "block.every_tunnel.bunker_trapdoor": "Bunker Hatch",
+  "block.every_tunnel.desk_lamp": "Desk Lamp"
 }

@@ -9,8 +9,9 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 
 /**
- * Reading a note pinned in a level ([NoteBoardBlock]): the note is the level's spawn point
- * tagged [NOTE_TAG] at that block, and its id names the text (`assets/every_tunnel/notes/<lang>/<id>.txt`).
+ * Reading a note in a level, pinned on a board ([NoteBoardBlock]) or a loose sheet
+ * ([NotePaperBlock]): the note is the level's spawn point tagged [NOTE_TAG] at that block, and
+ * its id names the text (`assets/every_tunnel/notes/<lang>/<id>.txt`).
  * The server sends the id and the values for the text's placeholders (the valve digits of this
  * game, [ValveHooks.values]); the client shows it on paper (`client.screen.NoteScreen`).
  */

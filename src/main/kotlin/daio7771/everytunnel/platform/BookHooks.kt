@@ -29,10 +29,10 @@ import net.minecraft.util.math.Direction
  *   tagged [SPOT_TAG]), in silence.
  * - **Carried** like the boxes ([CarryHooks]): one thing at a time, kept in the hand, never
  *   dropped, no sprinting; dying puts it back on its cabinet. They alert no one.
- * - **Handed in** ([deliver]) by right-clicking the librarian's counter (or a book already on
- *   it): the book lies at the next free one of the five places along it (spawn points tagged
+ * - **Handed in** ([deliver]) by right-clicking the librarian's desk round the hatch (library
+ *   counters; or a book already on it): the book lies at the next free one of the five places on it (spawn points tagged
  *   [RETURN_TAG]), and "2 / 5" shows above the hotbar.
- * - **The fifth** opens the bunker hatch by itself: the iron trapdoors in the zones tagged
+ * - **The fifth** opens the bunker hatch by itself: the steel trapdoors in the zones tagged
  *   [HATCH_TAG] swing open with a heavy latch (`block.hatch.open`), and everyone there earns
  *   "Shhh!".
  *
@@ -100,6 +100,13 @@ object BookHooks {
         player.sendMessage(Text.translatable("message.every_tunnel.books_returned", returned, places.size), true)
         if (returned >= places.size) completed(world, level)
         return true
+    }
+
+    /** The book phase of [level]: the boxes are done and not every book is back yet. */
+    fun booksOut(world: ServerWorld, level: LevelDefinition): Boolean {
+        val returns = positions(level, RETURN_TAG)
+        if (returns.isEmpty() || !BoxHooks.shelfFull(world, level)) return false
+        return returns.count { world.getBlockState(it).isOf(ModBlocks.OFFICE_BOOK) } < returns.size
     }
 
     /** All five back: the hatch opens, and the achievement. */

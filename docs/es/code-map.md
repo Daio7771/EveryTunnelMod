@@ -42,6 +42,7 @@ con un comentario KDoc que cuenta más.
 | `ResourceSystem.kt` | Simulación de stamina, sed y batería, como funciones puras |
 | `NoiseSystem.kt` | Eventos de ruido, su memoria, audibilidad y las reglas que eligen los radios |
 | `FlashlightBeam.kt` | La luz del haz en cualquier punto (cono, caída, punto caliente, brillo) |
+| `ObserverNearness.kt` | La fase de los libros del nivel 3: ritmo y volumen del reloj y el aviso "He's near" según la distancia al Observer |
 
 ### `entities/`
 
@@ -92,6 +93,7 @@ con un comentario KDoc que cuenta más.
 | `ShutterBlock.kt` | Una pieza de una persiana metálica |
 | `CardReaderBlock.kt` | El lector de tarjetas que abre puertas de hierro |
 | `NoteBoardBlock.kt` | Un tablón de corcho con una nota: clic derecho para leerla |
+| `NotePaperBlock.kt` | Un folio mecanografiado suelto sobre una mesa (los documentos del Nivel 3): clic derecho para leerlo |
 | `BoxBlocks.kt` | La caja morada del nivel 3 (se recoge), su estantería (partes, huecos, la entidad de bloque de las cajas) y el libro de oficina |
 | `LockerBlock.kt` | Una taquilla (dos bloques apilados): clic derecho para esconderse |
 | `LockerSeatEntity.kt` | El asiento invisible en el que va el jugador escondido: límite de giro, salir por delante, el sonido de la puerta |
@@ -131,9 +133,10 @@ con un comentario KDoc que cuenta más.
 | `LootSpawner.kt` | Coloca y repone el botín en los puntos con etiqueta |
 | `KeycardHooks.kt` | Ola de apagado, restaurar luces, bloquear lectores |
 | `ValveHooks.kt` | El puzle de las válvulas del nivel 3: cifras por partida, comprobar giros, abrir la puerta, reiniciar |
-| `NoteHooks.kt` | Leer una nota clavada: busca su id y la envía con las cifras de las válvulas |
+| `NoteHooks.kt` | Leer una nota (tablón o folio): busca su id y la envía con las cifras de las válvulas |
 | `CarryHooks.kt` | Llevar una caja o un libro: en la mano, sin soltarlo, sin correr, de vuelta al morir |
 | `BookHooks.kt` | El puzle de los libros del nivel 3: aparecen, se entregan en el mostrador, se abre la trampilla, depuración |
+| `BookPhaseHooks.kt` | Mientras los libros están fuera: el reloj en la cabeza y el aviso "He's near. Hide." |
 | `BoxHooks.kt` | El puzle de las cajas del nivel 3: cajas al azar, llevarlas, la estantería, la muerte, depuración |
 | `HidingHooks.kt` | Esconderse en taquillas: entrar, salir, sin ruido dentro, salir en partida nueva |
 | `AchievementHooks.kt` | Conseguir logros: qué da cada uno, avisar al cliente |
