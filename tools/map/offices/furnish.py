@@ -62,7 +62,7 @@ class Furnisher:
         self.parts = {}            # (x, y, z) -> (col, row): the box shelf's parts
         self.reserved = set()      # (x, z) kept clear
         self.locker_fronts = set() # (x, z) in front of a locker's door, kept clear to step out
-        self.texts = {}            # (x, y, z) -> (lang key, style, offset): the wall_text blocks' data
+        self.texts = {}            # (x, y, z) -> (lang key, style, offset, align): the wall_text blocks' data
 
     def free(self, x, y, z):
         lv = self.lv
@@ -357,8 +357,8 @@ class Furnisher:
                 col, row_ = self.parts[(x, y, z)]
                 state = f"{bid}[col={col},facing={facing},row={row_}]"
             elif name == "wall_text":
-                key, style, offset = self.texts[(x, y, z)]
-                state = f'{bid}[facing={facing}]{{Text:"{key}",Style:"{style}",Offset:{offset}f}}'
+                key, style, offset, align = self.texts[(x, y, z)]
+                state = f'{bid}[facing={facing}]{{Text:"{key}",Style:"{style}",Offset:{offset}f,Align:"{align}"}}'
             elif name in STACK:
                 up, down = same((x, y + 1, z), name, facing), same((x, y - 1, z), name, facing)
                 state = f"{bid}[down={str(down).lower()},facing={facing},up={str(up).lower()}]"
@@ -598,7 +598,7 @@ def furnish(lv):
     sign = p.ENTRANCE_SIGN
     if not f.put(*sign["at"], "wall_text", sign["facing"]):
         raise SystemExit(f"LEVEL_3 ENTRANCE_SIGN: {sign['at']} is not free air")
-    f.texts[sign["at"]] = (sign["text"], "letters", sign["offset"])
+    f.texts[sign["at"]] = (sign["text"], "letters", sign["offset"], "center")
     note_papers(f)
     lv.box_spots = box_spots(f)
     lv.loot = loot_spots(f)
@@ -630,7 +630,8 @@ def room_signs(f):
             if (x, 2, z) in lv.air or lv.air.get((x, 1, z), ("",))[0] == "door":
                 continue
             if f.put(px, 2, pz, "wall_text", front):
-                f.texts[(px, 2, pz)] = (f"sign.every_tunnel.room.{s.id}", "plate", 0.0)
+                # Kept to the door's side of its block: it grows along the wall, away from the doorway.
+                f.texts[(px, 2, pz)] = (f"sign.every_tunnel.room.{s.id}", "plate", 0.0, "left" if step == 1 else "right")
                 placed = True
                 break
         if not placed:

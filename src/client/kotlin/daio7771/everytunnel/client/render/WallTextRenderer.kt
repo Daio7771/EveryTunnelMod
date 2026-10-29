@@ -19,7 +19,8 @@ import org.joml.Matrix4f
  * lit like the wall:
  *
  * - [WallTextBlockEntity.Style.PLATE]: a room's nameplate, white letters [PLATE_TEXT_HEIGHT]
- *   of a block high on an anthracite plate with a thin grey rim, as wide as the name needs.
+ *   of a block high on an anthracite plate with a thin grey rim, as wide as the name needs;
+ *   kept to one edge of its block when [WallTextBlockEntity.align] says so (beside a door).
  * - [WallTextBlockEntity.Style.LETTERS]: big dark grey letters [LETTERS_HEIGHT] of a block high
  *   straight on the wall, a darker shadow under them for relief; they may run over several
  *   blocks either side ([rendersOutsideBoundingBox]).
@@ -40,11 +41,14 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         val width = font.getWidth(text).toFloat()
         val plate = entity.style == WallTextBlockEntity.Style.PLATE
         val scale = (if (plate) PLATE_TEXT_HEIGHT else LETTERS_HEIGHT) / GLYPH_HEIGHT
+        // Kept to an edge: the whole thing (with the plate's margins) starts EDGE_GAP in from it.
+        val halfWidth = (width / 2f + if (plate) PAD_X + RIM else 0f) * scale
+        val shift = entity.align * (0.5f - EDGE_GAP - halfWidth)              // align -1: left end at -0.5 + EDGE_GAP
 
         matrices.push()
         matrices.translate(0.5, 0.5, 0.5)
         matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-facing.asRotation()))   // local +z: the way it faces
-        matrices.translate(entity.offset.toDouble(), 0.0, -0.5 + WALL_GAP)                 // against the wall behind (+x: the reader's right)
+        matrices.translate((entity.offset + shift).toDouble(), 0.0, -0.5 + WALL_GAP)       // against the wall behind (+x: the reader's right)
         matrices.scale(scale, -scale, scale)
         val x = -width / 2f
         val y = -GLYPH_HEIGHT / 2f
@@ -88,6 +92,8 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         const val LETTERS_HEIGHT = 0.6f
         /** How far off the wall's face the text sits (blocks), so it never flickers into it. */
         const val WALL_GAP = 0.01
+        /** How far in from the block's edge an aligned text starts (blocks). */
+        const val EDGE_GAP = 0.12f
         /** The plate's margins and rim round the name, and the step between its layers (font units). */
         const val PAD_X = 4f
         const val PAD_Y = 3f

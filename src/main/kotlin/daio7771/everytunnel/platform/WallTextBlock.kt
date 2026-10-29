@@ -67,8 +67,10 @@ class WallTextBlock(settings: Settings) : BlockWithEntity(settings) {
  * What a [WallTextBlock] says: [text], a translation key (`sign.every_tunnel.*`), and its
  * [style]: [Style.PLATE], white letters on a dark nameplate, or [Style.LETTERS], big dark
  * letters straight on the wall; [offset], blocks to the reader's right of the block's centre
- * (to centre a text on a wall an even number of blocks wide). NBT:
- * `{Text: "...", Style: "plate" | "letters", Offset: 0.5f}`.
+ * (to centre a text on a wall an even number of blocks wide); [align], which of the block's
+ * edges the text keeps to (a nameplate beside a door keeps to the door's side and grows along
+ * the wall, never over the doorway), or `center`. NBT:
+ * `{Text: "...", Style: "plate" | "letters", Offset: 0.5f, Align: "left" | "right" | "center"}`.
  */
 class WallTextBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlocks.WALL_TEXT_ENTITY, pos, state) {
 
@@ -80,12 +82,16 @@ class WallTextBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlo
         private set
     var offset: Float = 0f
         private set
+    /** -1: the text's left end at the block's left edge (as read), 1: its right end at the right edge, 0: centred. */
+    var align: Int = 0
+        private set
 
     override fun readNbt(nbt: NbtCompound) {
         super.readNbt(nbt)
         text = nbt.getString("Text")
         style = if (nbt.getString("Style") == "letters") Style.LETTERS else Style.PLATE
         offset = nbt.getFloat("Offset")
+        align = when (nbt.getString("Align")) { "left" -> -1; "right" -> 1; else -> 0 }
     }
 
     override fun writeNbt(nbt: NbtCompound) {
@@ -93,6 +99,7 @@ class WallTextBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlo
         nbt.putString("Text", text)
         nbt.putString("Style", style.name.lowercase())
         nbt.putFloat("Offset", offset)
+        nbt.putString("Align", when (align) { -1 -> "left"; 1 -> "right"; else -> "center" })
     }
 
     override fun toUpdatePacket(): Packet<ClientPlayPacketListener> = BlockEntityUpdateS2CPacket.create(this)
