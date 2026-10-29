@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "every_tunnel:block/dark_metal"
+  },
+  "elements": []
+}

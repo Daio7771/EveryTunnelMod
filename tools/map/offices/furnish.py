@@ -26,7 +26,7 @@ STACK = {"server_rack", "metal_shelf", "locker", "vending_machine", "bookshelf"}
 # Furniture with a full-block top a box can stand on (the box puzzle's spots).
 FLAT_TOPS = {"office_desk", "counter", "filing_cabinet", "library_counter"}
 # The ones a player walks through (ModBlocks: noCollision).
-WALK_THROUGH = {"desk_lamp", "whiteboard", "electrical_panel", "cafe_chair", "coffee_machine", "potted_plant", "wall_clock",
+WALK_THROUGH = {"wall_text", "desk_lamp", "whiteboard", "electrical_panel", "cafe_chair", "coffee_machine", "potted_plant", "wall_clock",
                 "wooden_chair", "desk_phone", "note_board", "note_paper"}
 
 
@@ -62,6 +62,7 @@ class Furnisher:
         self.parts = {}            # (x, y, z) -> (col, row): the box shelf's parts
         self.reserved = set()      # (x, z) kept clear
         self.locker_fronts = set() # (x, z) in front of a locker's door, kept clear to step out
+        self.texts = {}            # (x, y, z) -> (lang key, style, offset): the wall_text blocks' data
 
     def free(self, x, y, z):
         lv = self.lv
@@ -355,6 +356,9 @@ class Furnisher:
             elif name == "box_shelf":
                 col, row_ = self.parts[(x, y, z)]
                 state = f"{bid}[col={col},facing={facing},row={row_}]"
+            elif name == "wall_text":
+                key, style, offset = self.texts[(x, y, z)]
+                state = f'{bid}[facing={facing}]{{Text:"{key}",Style:"{style}",Offset:{offset}f}}'
             elif name in STACK:
                 up, down = same((x, y + 1, z), name, facing), same((x, y - 1, z), name, facing)
                 state = f"{bid}[down={str(down).lower()},facing={facing},up={str(up).lower()}]"
@@ -590,11 +594,47 @@ def furnish(lv):
         f.put(x, 1, z, "potted_plant", "north")
     for x, z, facing in p.CORRIDOR_CLOCKS:
         f.put(x, 3, z, "wall_clock", facing)
+    room_signs(f)
+    sign = p.ENTRANCE_SIGN
+    if not f.put(*sign["at"], "wall_text", sign["facing"]):
+        raise SystemExit(f"LEVEL_3 ENTRANCE_SIGN: {sign['at']} is not free air")
+    f.texts[sign["at"]] = (sign["text"], "letters", sign["offset"])
     note_papers(f)
     lv.box_spots = box_spots(f)
     lv.loot = loot_spots(f)
     lv.water_sources = water_sources(f)
     f.finish()
+
+
+def room_signs(f):
+    """Each room's nameplate (a wall_text plate, `sign.every_tunnel.room.<id>`) on the wall
+    beside its main door (the one to the ring; a corner room's into its neighbour), outside,
+    at eye height: right of the door as seen from outside, else left."""
+    lv = f.lv
+    for s, _ in lv.rooms:
+        doors = f.doors_of(s.box)
+        front = None
+        for side, cells in sorted(doors.items()):
+            dx, dz = DIRS[side]
+            if any(lv.air.get((x + dx, 1, z + dz), ("",))[0] == "corridor" for x, z in cells):
+                front = side
+        front = front or sorted(doors)[0]
+        ox, oz = DIRS[front]                                     # out of the room
+        rx, rz = oz, -ox                                         # the right of someone outside facing the door
+        cells = doors[front]
+        along = sorted(cells, key=lambda c: c[0] * rx + c[1] * rz)
+        placed = False
+        for (wx, wz), step in ((along[-1], 1), (along[0], -1)):  # right end of the door, then left
+            x, z = wx + rx * step, wz + rz * step                   # the wall cell beside the door
+            px, pz = x + ox, z + oz                                 # in front of it, outside
+            if (x, 2, z) in lv.air or lv.air.get((x, 1, z), ("",))[0] == "door":
+                continue
+            if f.put(px, 2, pz, "wall_text", front):
+                f.texts[(px, 2, pz)] = (f"sign.every_tunnel.room.{s.id}", "plate", 0.0)
+                placed = True
+                break
+        if not placed:
+            raise SystemExit(f"LEVEL_3: no room for {s.id}'s nameplate beside its door")
 
 
 def note_papers(f):

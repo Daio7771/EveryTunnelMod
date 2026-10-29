@@ -179,7 +179,8 @@ of the room tone (`ambient.library.clock`, the library zone's own ambience), and
 silent.
 
 - Behind the open door, stairs climb down 8 blocks to the **antechamber**, the electrical
-  room. Walking into it shows "Level 3" (the stairs belong to no zone); its spawn point
+  room; over the way into it, big dark letters on the wall read "OFFICES & LIBRARY"
+  (`ENTRANCE_SIGN`). Walking into it shows "Level 3" (the stairs belong to no zone); its spawn point
   tagged `player` is there. On its wall, a cork board with the electrician's note
   (`NoteBoardBlock`): right-clicked, it opens on paper (`NoteScreen`) and tells, in words,
   how many full turns each valve needs.
@@ -195,7 +196,8 @@ silent.
   `/everytunnel valves` shows the digits.
 - Past it, through the belt of 17 rooms, the **inner corridor**: a ring round the
   **central library** (64 × 64, 12 high, lit by lights hanging on chains). Every light is
-  on; the surfaces are clean.
+  on; the surfaces are clean. Beside each room's door, a dark nameplate with its name in
+  white (`WallTextBlock`, in the game's font and language: `sign.every_tunnel.room.<id>`).
 - Every room is furnished for what it is, tidy and no more than it needs (desks with their
   chairs and phones, filing cabinets, server racks, lockers, the cafeteria's tables...); the
   library has rows of bookshelves four high, two blocks apart, round a clearing, and in it

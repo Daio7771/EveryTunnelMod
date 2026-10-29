@@ -1693,6 +1693,9 @@ def build():
                 variants[f"facing={facing},half={half},open={opened}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
     a.block("bunker_trapdoor", "Bunker Hatch", {"variants": variants}, {"parent": f"{NS}:block/bunker_trapdoor_bottom"})
 
+    # Text on a wall (WallTextBlock): nothing of its own to draw, its block entity writes the text.
+    a.models["wall_text"] = model({"particle": "dark_metal"}, [])
+    a.block("wall_text", "Wall Text", horizontal_blockstate("wall_text"), {"parent": f"{NS}:block/wall_text"})
     # A brass desk lamp with a green glass shade, on the librarian's desk (lit, ModBlocks).
     a.texture("brass", plastic_tex(r("brass"), (176, 140, 70)), T.STEEL.but(smoothness=0.6))
     a.texture("lamp_shade", plastic_tex(r("lamp_shade"), (40, 104, 60)), T.PLASTIC.but(smoothness=0.8, emission=GLOW["DIFFUSER_GLOW"]))

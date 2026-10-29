@@ -15,6 +15,7 @@ import daio7771.everytunnel.client.hud.LockerView
 import daio7771.everytunnel.client.hud.AchievementToast
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.BoxShelfRenderer
+import daio7771.everytunnel.client.render.WallTextRenderer
 import daio7771.everytunnel.client.render.LootRenderer
 import daio7771.everytunnel.client.screen.EndOfDemoScreen
 import daio7771.everytunnel.client.screen.NoteScreen
@@ -89,6 +90,7 @@ object EveryTunnelClient : ClientModInitializer {
         SprintCheck.register()
         BlockEntityRendererFactories.register(ModBlocks.LOOT_ENTITY, ::LootRenderer)
         BlockEntityRendererFactories.register(ModBlocks.BOX_SHELF_ENTITY, ::BoxShelfRenderer)
+        BlockEntityRendererFactories.register(ModBlocks.WALL_TEXT_ENTITY, ::WallTextRenderer)
         BlockRenderLayerMap.INSTANCE.putBlocks(
             RenderLayer.getCutout(),
             ModBlocks.SHOPPING_CART, ModBlocks.CABLE_TRAY, ModBlocks.HANGING_CABLE, ModBlocks.STAIN, ModBlocks.PUDDLE,

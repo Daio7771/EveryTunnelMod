@@ -179,6 +179,10 @@ object ModBlocks {
     lateinit var LOOT_ENTITY: BlockEntityType<LootBlockEntity>
         private set
 
+    /** What a [WallTextBlock] says; registered in [register]. */
+    lateinit var WALL_TEXT_ENTITY: BlockEntityType<WallTextBlockEntity>
+        private set
+
     /** The boxes on a [BoxShelfBlock], at its foot; registered in [register]. */
     lateinit var BOX_SHELF_ENTITY: BlockEntityType<BoxShelfBlockEntity>
         private set
@@ -274,6 +278,8 @@ object ModBlocks {
     val DESK_LAMP: Block = register(
         "desk_lamp", PropBlock(props(MapColor.GREEN, ModSoundGroups.METAL_PIPE).noCollision().luminance { 10 }, listOf(box(4, 0, 6, 12, 8.5, 10))),
     )
+    /** Text on a wall in the game's font (Level 3's nameplates and entrance lettering), drawn by its block entity. */
+    val WALL_TEXT: Block = register("wall_text", WallTextBlock(props(MapColor.CLEAR, ModSoundGroups.PLASTIC).noCollision()))
     /** A leaf of Level 3's bunker hatch: a steel trapdoor nobody opens by hand ([BookHooks] does). */
     val BUNKER_TRAPDOOR: Block = register("bunker_trapdoor", TrapdoorBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), BlockSetType.IRON))
     /** The library's card catalogue: rows of small drawers with brass pulls. */
@@ -334,6 +340,10 @@ object ModBlocks {
         BOX_SHELF_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),
             FabricBlockEntityTypeBuilder.create(::BoxShelfBlockEntity, BOX_SHELF).build(),
+        )
+        WALL_TEXT_ENTITY = Registry.register(
+            Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "wall_text"),
+            FabricBlockEntityTypeBuilder.create(::WallTextBlockEntity, WALL_TEXT).build(),
         )
         val tab: ItemGroup = FabricItemGroup.builder()
             .icon { ItemStack(FLUORESCENT_LIGHT) }

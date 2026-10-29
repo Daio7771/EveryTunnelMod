@@ -282,6 +282,10 @@ LEVEL_3 = dict(
                 (85, 191, "west"), (85, 193, "west"), (85, 195, "west"), (85, 197, "west")],
         cabinets=[(74, 199, "east"), (85, 199, "west")],
         note=dict(id="pressure_line", x=74, z=195, facing="east")),
+    # Big lettering over the way into the antechamber, seen coming down the stairs (a wall_text
+    # block in front of the wall: its lang key, (x, y, z) of the block, the way the text faces,
+    # and how far right of the block's centre the text's centre is).
+    ENTRANCE_SIGN=dict(text="sign.every_tunnel.level_3_entrance", at=(79, 4, 200), facing="south", offset=0.5),
     CORRIDOR_PLANTS=[(43, 61), (116, 61), (43, 134), (116, 134)],                 # (x, z): the ring's corners
     CORRIDOR_CLOCKS=[(67, 61, "south"), (100, 134, "north"), (43, 110, "east"), (116, 110, "west")],
     # The box puzzle (BoxHooks): how many boxes a new game puts out, the spots round the ring

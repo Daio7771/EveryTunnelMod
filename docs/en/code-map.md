@@ -94,6 +94,7 @@ KDoc comment that says more.
 | `CardReaderBlock.kt` | The keycard reader that opens iron doors |
 | `NoteBoardBlock.kt` | A cork board with a note: right-click reads it |
 | `NotePaperBlock.kt` | A loose typed sheet on a desk (Level 3's documents): right-click reads it |
+| `WallTextBlock.kt` | Text on a wall in the game's font (Level 3's nameplates, entrance lettering) and its block entity |
 | `BoxBlocks.kt` | Level 3's purple box (picked up), its shelf (parts, slots, the boxes' block entity) and the office book |
 | `LockerBlock.kt` | A locker (a two-block stack): right-click hides in it |
 | `LockerSeatEntity.kt` | The invisible seat a hiding player rides: look limit, getting out in front, the door's sound |
@@ -201,6 +202,7 @@ KDoc comment that says more.
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
 | `PaleManModel.kt` | His GeckoLib model, plus the stoop under low ceilings |
 | `BoxShelfRenderer.kt` | The purple boxes on the box shelf, full bright |
+| `WallTextRenderer.kt` | A wall text: white on a dark plate, or big dark letters on the wall |
 | `LootRenderer.kt` | Draws loot items lying flat |
 | `GuardUniform.kt` | The uniform skin for every player |
 

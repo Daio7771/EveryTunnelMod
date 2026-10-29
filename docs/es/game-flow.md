@@ -189,7 +189,8 @@ lugar del tono de sala un reloj lento que hace tic-tac sin que se vea ninguno
 silencio.
 
 - Tras la puerta abierta, unas escaleras bajan 8 bloques hasta la **antesala**, el cuarto
-  eléctrico. Al entrar aparece "Level 3" (las escaleras no pertenecen a ninguna zona); ahí
+  eléctrico; sobre la entrada, en la pared, letras grandes oscuras: "OFFICES & LIBRARY"
+  (`ENTRANCE_SIGN`). Al entrar aparece "Level 3" (las escaleras no pertenecen a ninguna zona); ahí
   está su punto de spawn con la etiqueta `player`. En su pared, un tablón de corcho con la
   nota del electricista (`NoteBoardBlock`): con clic derecho se abre en papel (`NoteScreen`)
   y dice, en letra, cuántas vueltas completas necesita cada válvula.
@@ -205,7 +206,9 @@ silencio.
   una partida nueva lo deshace. `/everytunnel valves` muestra las cifras.
 - Pasado este, a través del cinturón de 17 habitaciones, el **pasillo interior**: un anillo
   alrededor de la **biblioteca central** (64 × 64, 12 de alto, con lámparas colgadas de
-  cadenas). Todas las luces están encendidas y las superficies, limpias.
+  cadenas). Todas las luces están encendidas y las superficies, limpias. Junto a la puerta
+  de cada sala, una placa oscura con su nombre en blanco (`WallTextBlock`, con la fuente y el
+  idioma del juego: `sign.every_tunnel.room.<id>`).
 - Cada sala tiene los muebles de lo que es, ordenados y sin sobrar nada (mesas con sus sillas
   y teléfonos, archivadores, racks de servidores, taquillas, las mesas de la cafetería...);
   la biblioteca tiene filas de estanterías de cuatro de alto, a dos bloques unas de otras,

@@ -269,12 +269,13 @@ class Offices:
         for x in grid(x0, x1 - 1, sp):
             for z in grid(z0, z1 - 1, sp):
                 self.light(x, p.HEIGHTS["antechamber"], z, "x")
-        # The stairs: over each landing.
+        # The stairs: over each landing (the bottom one's a block off the wall: the lettering
+        # over the way into the antechamber, ENTRANCE_SIGN, is there).
         x0, z0, x1, z1 = p.STAIRS
         mid = (x0 + x1) // 2
         h = p.HEIGHTS["stairs"]
         for x in (mid - 1, mid):
-            self.light(x, h, z0, "x")
+            self.light(x, h, z0 + 1, "x")
             self.light(x, self.top_landing_y + h, z1 - 1, "x")
         # Library pendants: a chain from the ceiling down to the light, PENDANT height over the floor.
         x0, z0, x1, z1 = p.LIBRARY
@@ -455,7 +456,8 @@ class Placement:
     def state(self, state):
         if self.step > 0 or "[" not in state:
             return state
-        bid, props = state[:-1].split("[", 1)
+        nbt = state[state.index("{"):] if "{" in state else ""            # block entity data, kept as is
+        bid, props = state[:len(state) - len(nbt) - 1].split("[", 1)
         out = []
         for kv in props.split(","):
             k, v = kv.split("=")
@@ -464,7 +466,7 @@ class Placement:
             elif k in OPPOSITE:
                 k = OPPOSITE[k]
             out.append((k, v))
-        return f"{bid}[{','.join(f'{k}={v}' for k, v in sorted(out))}]"
+        return f"{bid}[{','.join(f'{k}={v}' for k, v in sorted(out))}]{nbt}"
 
     def blocks(self, world):
         return {self.cell(*pos): self.state(st) for pos, st in world.blocks.items()}
