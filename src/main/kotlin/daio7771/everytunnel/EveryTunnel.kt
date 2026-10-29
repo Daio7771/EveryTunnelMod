@@ -20,6 +20,7 @@ import daio7771.everytunnel.platform.LevelEntryHooks
 import daio7771.everytunnel.platform.LevelReloadListener
 import daio7771.everytunnel.platform.LevelTrackingHooks
 import daio7771.everytunnel.platform.LoadingHooks
+import daio7771.everytunnel.platform.SaveGameHooks
 import daio7771.everytunnel.platform.LootSpawner
 import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.ModEntities
@@ -93,6 +94,7 @@ object EveryTunnel : ModInitializer {
         LevelEntryHooks.register()
         IntroHooks.register()
         LoadingHooks.register()
+        SaveGameHooks.register()
         DebugCommands.register()
         DevWorlds.register()
         PlaytestLog.register()

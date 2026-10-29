@@ -9,9 +9,9 @@ nombra el código que hay detrás de cada paso.
 flowchart TD
     A[Arranca el juego] --> B[MapWorldInstaller: desempaqueta Noname Complex]
     B --> C[Menú principal]
-    C -->|BEGIN| D[Pantalla de carga]
+    C -->|CONTINUE / NEW GAME| D[Pantalla de carga]
     D --> E[Servidor: ejecuta garage:build]
-    E --> F[NewGame.start]
+    E --> F[NewGame.start, o SaveGameHooks.continueGame]
     F --> G[El cliente dibuja el ascensor, fundido de entrada]
     G --> H[Intro del ascensor, 25 s]
     H --> I[Nivel 1, B1]
@@ -47,8 +47,11 @@ flowchart TD
 juego la abriría (`MinecraftClientMixin`): al arrancar, al salir de un mundo, tras los
 créditos y al cerrarse una pantalla sin mundo abierto (Escape en las opciones).
 
-- **BEGIN** abre Noname Complex. Si el mundo falta, dice "The map is missing. Reinstall the
-  mod."
+- **CONTINUE** (solo con una partida guardada, ver [Una partida guardada](#una-partida-guardada))
+  abre Noname Complex y la partida sigue. **NEW GAME** borra lo guardado y lo abre: la partida
+  empieza de cero en el ascensor. Con una partida guardada pregunta antes ("Start over? Your
+  progress will be lost.", YES, START OVER / NO, con NO elegido al principio). Si el mundo
+  falta, dice "The map is missing. Reinstall the mod."
 - **OPTIONS** abre las opciones de vanilla.
 - **GUIDE** abre la [guía del jugador](guide/01-how-to-play.md) (`GuideScreen`): una hoja de
   papel blanco gastado que se desplaza con la rueda, con pestañas de papel para saltar entre
@@ -87,9 +90,10 @@ Lado del servidor (`platform.LoadingHooks`):
    (`NewGame.levelsRebuilt`).
 2. Un jugador que entra está *cargando*: congelado, invulnerable, silencioso, sin gasto de
    recursos, sin intro. Al cliente se le envía el estado `0`.
-3. Cuando la construcción ha avisado, un jugador en Supervivencia o Aventura recibe una
-   **partida nueva** (`NewGame.start`). Los jugadores en Creativo y Espectador se quedan
-   donde están.
+3. Cuando la construcción ha avisado, un jugador en Supervivencia o Aventura sigue con la
+   **partida guardada** (`SaveGameHooks.continueGame`, ver [Una partida guardada](#una-partida-guardada)),
+   o si no hay ninguna recibe una **partida nueva** (`NewGame.start`). Los jugadores en
+   Creativo y Espectador se quedan donde están.
 4. Se vuelve a enviar la luz. La construcción corre mientras el jugador entra, así que los
    chunks que recibió pueden traer la luz de antes (el ascensor llegó a tener luz del cielo
    y ninguna lámpara). Tras 1 s como mínimo, cuando el motor de luz ya no tiene
@@ -114,7 +118,27 @@ cliente no responde nunca, se le suelta a los 30 s.
 - **Jugador:** inventario vacío, vida y recursos llenos, Supervivencia, en el inicio del
   primer nivel con intro, y la intro se repite (`IntroHooks.replay`).
 
-`/everytunnel newgame` hace lo mismo en cualquier momento.
+`/everytunnel newgame` hace lo mismo en cualquier momento. Lo guardado empieza de cero con ella.
+
+### Una partida guardada
+
+`platform.SaveGameHooks` guarda la partida entre sesiones en `data/every_tunnel_progress.dat`
+(los datos en `core.save.SavedGame`); el menú principal lee ese archivo para CONTINUE.
+
+- **Qué se guarda:** el nivel más avanzado al que se llegó y hasta dónde llegaron los puzles:
+  las cifras y los giros de las válvulas, dónde están las cajas y los libros (uno en las
+  manos, donde se cogió), las cajas de la estantería y los libros del mostrador, las luces que
+  apagó la tarjeta, los lectores desbloqueados, el botín recogido y los logros conseguidos en
+  esta partida. El inventario lo guarda vanilla y los recursos `ResourceHooks`.
+- **Cuándo:** al salir el jugador, al pararse el servidor, cada minuto, y el nivel en cuanto
+  se entra en uno más avanzado; nunca antes de que la partida de esta sesión haya empezado o
+  seguido.
+- **Seguir:** el mapa se reconstruye como siempre, luego se devuelven los puzles de cada
+  nivel, se cierran las persianas de atrás, el ascensor queda abierto si ya se tuvo la intro,
+  y el jugador aparece en el inicio del nivel más avanzado (como tras morir) con lo que
+  llevaba, su sed y su batería. Los enemigos aparecen al entrar el jugador.
+- **El final de la demo** olvida lo guardado (`SaveGameHooks.finished`): el menú solo ofrece
+  NEW GAME.
 
 ## 5. La intro del ascensor
 
@@ -332,7 +356,7 @@ B4, el jugador entra en una zona con la etiqueta `end`.
 4. Cualquier tecla tras un momento, Esc o un tiempo límite guardan el mundo y vuelven al
    menú principal.
 
-Abrir el mundo otra vez empieza una partida nueva, como siempre.
+El final olvida la partida guardada, así que el menú solo ofrece NEW GAME.
 
 ## Muerte
 

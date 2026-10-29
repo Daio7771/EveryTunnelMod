@@ -3,6 +3,7 @@ package daio7771.everytunnel.client.screen
 import com.mojang.blaze3d.systems.RenderSystem
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.menu.MenuScene
+import daio7771.everytunnel.platform.SaveGameHooks
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents
@@ -13,10 +14,13 @@ import net.minecraft.client.gui.screen.MessageScreen
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.client.gui.screen.TitleScreen
 import net.minecraft.client.gui.screen.option.OptionsScreen
+import net.minecraft.nbt.NbtIo
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.Util
 import org.lwjgl.glfw.GLFW
+import java.nio.file.Files
+import java.nio.file.Path
 
 /**
  * Every Tunnel's main menu, in place of vanilla's title screen (`MinecraftClientMixin`): the
@@ -24,8 +28,11 @@ import org.lwjgl.glfw.GLFW
  * a parking hall whose lamps flicker now and then ([MenuScene]); the black fades out towards
  * the right ([drawShade]) to show it. Its music is [MenuMusic].
  *
- * - BEGIN opens Noname Complex (installed by `client.MapWorldInstaller`), behind the loading
- *   screen ([LoadingCover]).
+ * - CONTINUE (only with a game saved, `data/every_tunnel_progress.dat` in the world, see
+ *   `platform.SaveGameHooks`) opens Noname Complex (installed by `client.MapWorldInstaller`),
+ *   behind the loading screen ([LoadingCover]): the game goes on at the furthest level reached.
+ * - NEW GAME deletes that save and opens it: the game starts over in the elevator. With a game
+ *   saved it asks first, in place of the options ("Start over?", NO picked to begin with).
  * - OPTIONS opens vanilla's options (the language is changed there); GUIDE opens the player
  *   guide ([GuideScreen], whose last tab rolls the credits); ACHIEVEMENTS lists the
  *   achievements ([AchievementsScreen]); EXIT closes the game.
@@ -39,15 +46,37 @@ import org.lwjgl.glfw.GLFW
 class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
 
     private enum class Option(val key: String) {
-        BEGIN("menu.every_tunnel.begin"),
+        CONTINUE("menu.every_tunnel.continue"),
+        NEW_GAME("menu.every_tunnel.new_game"),
         OPTIONS("menu.every_tunnel.options"),
         GUIDE("menu.every_tunnel.guide"),
         ACHIEVEMENTS("menu.every_tunnel.achievements"),
         EXIT("menu.every_tunnel.exit"),
+        START_OVER("menu.every_tunnel.start_over"),
+        KEEP("menu.every_tunnel.keep_game"),
     }
 
     private val openedAtMs = Util.getMeasuringTimeMs()
     private var selected = 0
+    /** A game is saved in the map world (read as the screen opens). */
+    private var saved = false
+    /** NEW GAME was picked with a game saved: asking first. */
+    private var confirming = false
+
+    /** The options shown now, top to bottom. */
+    private val shown: List<Option>
+        get() = when {
+            confirming -> listOf(Option.START_OVER, Option.KEEP)
+            saved -> listOf(Option.CONTINUE, Option.NEW_GAME, Option.OPTIONS, Option.GUIDE, Option.ACHIEVEMENTS, Option.EXIT)
+            else -> listOf(Option.NEW_GAME, Option.OPTIONS, Option.GUIDE, Option.ACHIEVEMENTS, Option.EXIT)
+        }
+
+    override fun init() {
+        super.init()
+        saved = client?.let(::hasSavedGame) == true
+        confirming = false
+        selected = selected.coerceIn(0, shown.size - 1)
+    }
     private var notice: Text? = null
     private var noticeUntilMs = 0L
 
@@ -65,9 +94,12 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         val left = layout.left
         drawLogo(context, layout, fade)
 
-        val top = layout.optionsTop
+        val top = optionsTop(layout)
         hoveredOption(mouseX, mouseY, layout)?.let { selected = it }
-        Option.entries.forEachIndexed { index, option ->
+        if (confirming) {
+            context.drawText(textRenderer, Text.translatable("menu.every_tunnel.start_over_question"), left, layout.optionsTop, argb(QUESTION_COLOR, fade), false)
+        }
+        shown.forEachIndexed { index, option ->
             val y = top + index * LINE_HEIGHT
             val chosen = index == selected
             val label = Text.translatable(option.key)
@@ -80,7 +112,7 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         }
 
         notice?.takeIf { Util.getMeasuringTimeMs() < noticeUntilMs }?.let {
-            context.drawText(textRenderer, it, left, top + optionsHeight() + NOTICE_GAP, argb(NOTICE_COLOR, fade), false)
+            context.drawText(textRenderer, it, left, layout.optionsTop + optionsHeight() + NOTICE_GAP, argb(NOTICE_COLOR, fade), false)
         }
         context.drawText(textRenderer, versionText, left, height - VERSION_FROM_BOTTOM, argb(VERSION_COLOR, fade), false)
     }
@@ -102,7 +134,11 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         return Layout(left, logoTop, logoHeight, logoTop + logoHeight + gap)
     }
 
-    private fun optionsHeight(): Int = (Option.entries.size - 1) * LINE_HEIGHT + (9 * OPTION_SCALE).toInt()
+    /** The room the options take: the longest list, so the menu does not move when it changes. */
+    private fun optionsHeight(): Int = (MOST_OPTIONS - 1) * LINE_HEIGHT + (9 * OPTION_SCALE).toInt()
+
+    /** Where the first option goes: one line lower while asking, under the question. */
+    private fun optionsTop(layout: Layout): Int = layout.optionsTop + if (confirming) QUESTION_HEIGHT else 0
 
     /**
      * Black over the scene: solid behind the logo and the options (at least [SOLID_SHARE] of
@@ -110,7 +146,10 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
      * shows fully.
      */
     private fun drawShade(context: DrawContext, layout: Layout) {
-        val options = Option.entries.maxOf { (textRenderer.getWidth(Text.translatable(it.key)) * OPTION_SCALE).toInt() }
+        val options = maxOf(
+            Option.entries.maxOf { (textRenderer.getWidth(Text.translatable(it.key)) * OPTION_SCALE).toInt() },
+            textRenderer.getWidth(Text.translatable("menu.every_tunnel.start_over_question")),
+        )
         val menuRight = layout.left + maxOf(layout.logoHeight * 2, options) + SHADE_MARGIN
         val solid = maxOf((width * SOLID_SHARE).toInt(), menuRight).coerceAtMost(width)
         val clear = maxOf((width * CLEAR_SHARE).toInt(), solid + (width * MIN_FADE_SHARE).toInt()).coerceAtMost(width)
@@ -148,8 +187,8 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
 
     private fun hoveredOption(mouseX: Int, mouseY: Int, layout: Layout): Int? {
         val left = layout.left
-        val top = layout.optionsTop
-        Option.entries.forEachIndexed { index, option ->
+        val top = optionsTop(layout)
+        shown.forEachIndexed { index, option ->
             val y = top + index * LINE_HEIGHT
             val w = (textRenderer.getWidth(Text.translatable(option.key)) * OPTION_SCALE).toInt()
             if (mouseX in (left - 14)..(left + w) && mouseY in (y - 2)..(y + (9 * OPTION_SCALE).toInt() + 2)) return index
@@ -160,7 +199,7 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
         val index = hoveredOption(mouseX.toInt(), mouseY.toInt(), layout()) ?: return false
         selected = index
-        choose(Option.entries[index])
+        choose(shown[index])
         return true
     }
 
@@ -170,9 +209,10 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
             return true
         }
         when (keyCode) {
-            GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> selected = (selected + Option.entries.size - 1) % Option.entries.size
-            GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> selected = (selected + 1) % Option.entries.size
-            GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_SPACE -> choose(Option.entries[selected])
+            GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> selected = (selected + shown.size - 1) % shown.size
+            GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> selected = (selected + 1) % shown.size
+            GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_SPACE -> choose(shown[selected])
+            GLFW.GLFW_KEY_ESCAPE -> if (confirming) choose(Option.KEEP) else return super.keyPressed(keyCode, scanCode, modifiers)
             else -> return super.keyPressed(keyCode, scanCode, modifiers)
         }
         return true
@@ -181,7 +221,18 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     private fun choose(option: Option) {
         val client = client ?: return
         when (option) {
-            Option.BEGIN -> begin(client)
+            Option.CONTINUE -> begin(client)
+            Option.NEW_GAME -> if (saved) {
+                confirming = true
+                selected = shown.indexOf(Option.KEEP)
+            } else {
+                newGame(client)
+            }
+            Option.START_OVER -> newGame(client)
+            Option.KEEP -> {
+                confirming = false
+                selected = shown.indexOf(Option.NEW_GAME)
+            }
             Option.OPTIONS -> client.setScreen(OptionsScreen(this, client.options))
             Option.GUIDE -> client.setScreen(GuideScreen(this))
             Option.ACHIEVEMENTS -> client.setScreen(AchievementsScreen(this))
@@ -189,12 +240,27 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         }
     }
 
+    /** The saved game deleted (if any), then the world opens: the server starts a new game. */
+    private fun newGame(client: MinecraftClient) {
+        val save = saveFile(client)
+        try {
+            Files.deleteIfExists(save)
+        } catch (e: Exception) {
+            EveryTunnel.LOGGER.error("NEW GAME: could not delete the saved game {}", save, e)
+            notice = Text.translatable("menu.every_tunnel.save_not_deleted")
+            noticeUntilMs = Util.getMeasuringTimeMs() + 5000L
+            confirming = false
+            return
+        }
+        begin(client)
+    }
+
     private fun begin(client: MinecraftClient) {
         val world = client.levelStorage.savesDirectory.resolve(WORLD_FOLDER)
         if (!world.resolve("level.dat").toFile().isFile) {
             notice = Text.translatable("menu.every_tunnel.world_missing")
             noticeUntilMs = Util.getMeasuringTimeMs() + 5000L
-            EveryTunnel.LOGGER.warn("BEGIN: no map world at {}", world)
+            EveryTunnel.LOGGER.warn("No map world at {}", world)
             return
         }
         // As vanilla does when a world is picked in the list (and LoadingCover covers it).
@@ -211,6 +277,10 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         private const val LOGO_HEIGHT = 100
         private const val MIN_LOGO_HEIGHT = 24
         private const val WORLD_FOLDER = "noname_complex"
+        /** The most options shown at once (with a game saved). */
+        private const val MOST_OPTIONS = 6
+        /** The question's line above the options while asking. */
+        private const val QUESTION_HEIGHT = 16
 
         private const val FADE_IN_MS = 1500L
         /** The black over the scene ([drawShade]): solid to here at least, clear from here, as shares of the width. */
@@ -236,6 +306,22 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         private const val SELECTED_COLOR = 0xE8ECF0
         private const val VERSION_COLOR = 0x3A3E44
         private const val NOTICE_COLOR = 0xA05050
+        private const val QUESTION_COLOR = 0xB8BCC2
+
+        private fun saveFile(client: MinecraftClient): Path =
+            client.levelStorage.savesDirectory.resolve(WORLD_FOLDER).resolve("data").resolve("${SaveGameHooks.SAVE_ID}.dat")
+
+        /** A game in progress is saved in the map world (`platform.SaveGameHooks`). */
+        private fun hasSavedGame(client: MinecraftClient): Boolean {
+            val file = saveFile(client)
+            if (!Files.isRegularFile(file)) return false
+            return try {
+                NbtIo.readCompressed(file.toFile()).getCompound("data").getBoolean("active")
+            } catch (e: Exception) {
+                EveryTunnel.LOGGER.warn("Could not read the saved game {}", file, e)
+                false
+            }
+        }
 
         /** True while vanilla's title screen was asked for (Ctrl+Shift+V), until the player joins a world. */
         @JvmStatic

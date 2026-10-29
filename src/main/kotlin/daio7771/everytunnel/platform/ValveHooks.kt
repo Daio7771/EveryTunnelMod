@@ -98,6 +98,26 @@ object ValveHooks {
         }
     }
 
+    /** This game's digits for [levelId], if drawn yet (for the save, [SaveGameHooks]). */
+    fun drawnCode(levelId: String): List<Int>? = codes[levelId]
+
+    /**
+     * A saved game goes on ([SaveGameHooks]): [code] is [level]'s again and its valves are
+     * turned as they were ([turns], A first). If that was right, they are open and locked and
+     * the doors open, quietly.
+     */
+    fun restore(world: ServerWorld, level: LevelDefinition, code: List<Int>, turns: List<Int>) {
+        codes[level.id] = code
+        val solved = ValveCode.solved(code, turns)
+        for (p in valves(level)) {
+            val state = world.getBlockState(p)
+            if (!state.isOf(ModBlocks.VALVE)) continue
+            val t = turns.getOrNull(state.get(ValveBlock.LETTER).ordinal) ?: 0
+            world.setBlockState(p, state.with(ValveBlock.TURNS, t.coerceIn(0, ValveCode.POSITIONS - 1)).with(ValveBlock.OPEN, solved))
+        }
+        if (solved) setDoors(world, level, open = true)
+    }
+
     /** The map was rebuilt (valves on 0, doors shut): a new game draws new digits. */
     fun levelsRebuilt() {
         codes.clear()

@@ -23,8 +23,9 @@ import java.util.UUID
  *
  * Bare footsteps come down the stairs behind the player ([STEPS], the Pale man's own
  * sound), the screen fades to black, and the client shows "End of demo" with the credits
- * (`client.screen.EndOfDemoScreen`), then saves and goes back to the title screen. Opening
- * the world again starts a new game, as it always does ([LoadingHooks]).
+ * (`client.screen.EndOfDemoScreen`), then saves and goes back to the title screen. The saved
+ * game is forgotten as the end screen shows ([SaveGameHooks.finished]), so opening the world
+ * again starts a new game.
  */
 object EndingHooks {
 
@@ -93,6 +94,7 @@ object EndingHooks {
             if (t == FADE_TICK) DeathHooks.sendFade(player, 1f, FADE_SECONDS)
             if (t >= SCREEN_TICK) {
                 iterator.remove()
+                SaveGameHooks.finished(server)
                 if (ServerPlayNetworking.canSend(player, ENDING_PACKET_ID)) {
                     ServerPlayNetworking.send(player, ENDING_PACKET_ID, PacketByteBufs.empty())
                 }

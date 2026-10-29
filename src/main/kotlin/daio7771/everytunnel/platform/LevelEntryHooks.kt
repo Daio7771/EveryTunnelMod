@@ -119,6 +119,25 @@ object LevelEntryHooks {
         }
     }
 
+    /**
+     * Every shutter of the levels up to [order] shut at once, without a sound: a saved game goes
+     * on past them ([SaveGameHooks]), so the way back is closed as it was.
+     */
+    fun closeNow(server: MinecraftServer, order: Int) {
+        pending.clear()
+        closing.clear()
+        for (level in LevelManager.all().filter { it.order <= order }) {
+            val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: continue
+            for (zone in level.zones.filter { SHUTTER_TAG in it.tags }) {
+                val box = zone.box
+                val state = ShutterBlock.across(box.maxX - box.minX + 1, box.maxZ - box.minZ + 1)
+                for (pos in BlockPos.iterate(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ)) {
+                    if (world.getBlockState(pos).isAir) world.setBlockState(pos, state)
+                }
+            }
+        }
+    }
+
     private fun tick(server: MinecraftServer) {
         pending.removeIf { shutter ->
             val player = server.playerManager.getPlayer(shutter.playerId) ?: return@removeIf true

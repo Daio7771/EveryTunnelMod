@@ -6,6 +6,7 @@ import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.minecraft.block.Block
+import net.minecraft.block.Blocks
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtElement
 import net.minecraft.nbt.NbtList
@@ -53,6 +54,41 @@ object LootSpawner {
         state.placed.clear()
         state.markDirty()
         for (level in LevelManager.all()) place(server, level)
+    }
+
+    /** Loot spots ("level/point") filled in this game whose loot is gone (picked up), where the chunk is loaded. */
+    fun taken(server: MinecraftServer): Set<String> {
+        val placed = state(server).placed
+        val taken = LinkedHashSet<String>()
+        for (level in LevelManager.all()) {
+            val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: continue
+            for (point in level.spawnPoints) {
+                if (point.tags.none { it in LOOT }) continue
+                val key = "${level.id}/${point.id}"
+                if (key !in placed) continue
+                val pos = BlockPos.ofFloored(point.position.x, point.position.y, point.position.z)
+                if (!world.chunkManager.isChunkLoaded(pos.x shr 4, pos.z shr 4)) continue
+                if (world.getBlockState(pos).block !is LootBlock) taken += key
+            }
+        }
+        return taken
+    }
+
+    /** A saved game goes on ([SaveGameHooks]): the loot picked up before is gone again. */
+    fun takeAway(server: MinecraftServer, keys: Set<String>) {
+        if (keys.isEmpty()) return
+        val state = state(server)
+        for (level in LevelManager.all()) {
+            val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: continue
+            for (point in level.spawnPoints) {
+                val key = "${level.id}/${point.id}"
+                if (key !in keys) continue
+                val pos = BlockPos.ofFloored(point.position.x, point.position.y, point.position.z)
+                if (world.getBlockState(pos).block is LootBlock) world.setBlockState(pos, Blocks.AIR.defaultState)
+                state.placed += key
+            }
+        }
+        state.markDirty()
     }
 
     private fun place(server: MinecraftServer, level: LevelDefinition) {

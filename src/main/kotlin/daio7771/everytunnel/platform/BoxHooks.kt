@@ -105,27 +105,52 @@ object BoxHooks {
     private fun world(server: MinecraftServer, level: LevelDefinition): ServerWorld? =
         server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension)))
 
+    /**
+     * A saved game goes on ([SaveGameHooks]): [level]'s boxes lie at [lying] again and its shelf
+     * has [slots] filled. With nothing saved for it ([lying] null: never seen in this game),
+     * the boxes are drawn as in a new game.
+     */
+    fun restore(world: ServerWorld, level: LevelDefinition, lying: List<BlockPos>?, slots: List<Int>) {
+        if (lying == null) return newGameIn(world, level)
+        for (pos in spots(level)) if (world.getBlockState(pos).isOf(ModBlocks.PURPLE_BOX)) world.removeBlock(pos, false)
+        for (pos in lying) {
+            if (!world.getBlockState(pos).isAir) continue
+            world.setBlockState(pos, ModBlocks.PURPLE_BOX.defaultState.with(PropBlock.FACING, Direction.Type.HORIZONTAL.random(world.random)))
+        }
+        shelfFoot(level)?.let { foot ->
+            val shelf = world.getBlockEntity(foot) as? BoxShelfBlockEntity ?: return@let
+            shelf.clear()
+            for (slot in slots) if (slot in 0 until BoxShelfBlock.SLOTS) shelf.set(slot, true)
+        }
+        EveryTunnel.LOGGER.info("Boxes of {} back: {} lying, {} on the shelf", level.id, lying.size, slots.size)
+    }
+
     /** A new game: the boxes off every spot, ten put back at random, the shelf emptied. */
     fun newGame(server: MinecraftServer) {
         for (level in LevelManager.all()) {
-            val spots = spots(level)
-            val foot = shelfFoot(level)
-            if (spots.isEmpty() && foot == null) continue
+            if (spots(level).isEmpty() && shelfFoot(level) == null) continue
             val world = world(server, level) ?: continue
-            for (pos in spots) if (world.getBlockState(pos).isOf(ModBlocks.PURPLE_BOX)) world.removeBlock(pos, false)
-            val chosen = spots.shuffled(Random.Default).take(BOXES)
-            for (pos in chosen) {
-                if (!world.getBlockState(pos).isAir) {
-                    EveryTunnel.LOGGER.warn("Box spot {} in {} is not free: no box there", pos, level.id)
-                    continue
-                }
-                val facing = Direction.Type.HORIZONTAL.random(world.random)
-                world.setBlockState(pos, ModBlocks.PURPLE_BOX.defaultState.with(PropBlock.FACING, facing))
-            }
-            foot?.let { (world.getBlockEntity(it) as? BoxShelfBlockEntity)?.clear() }
-            if (spots.size < BOXES) EveryTunnel.LOGGER.warn("{} has only {} box spots for {} boxes", level.id, spots.size, BOXES)
-            EveryTunnel.LOGGER.info("Boxes for {}: {}", level.id, chosen.joinToString(" ") { "(${it.x} ${it.y} ${it.z})" })
+            newGameIn(world, level)
         }
+    }
+
+    private fun newGameIn(world: ServerWorld, level: LevelDefinition) {
+        val spots = spots(level)
+        val foot = shelfFoot(level)
+        if (spots.isEmpty() && foot == null) return
+        for (pos in spots) if (world.getBlockState(pos).isOf(ModBlocks.PURPLE_BOX)) world.removeBlock(pos, false)
+        val chosen = spots.shuffled(Random.Default).take(BOXES)
+        for (pos in chosen) {
+            if (!world.getBlockState(pos).isAir) {
+                EveryTunnel.LOGGER.warn("Box spot {} in {} is not free: no box there", pos, level.id)
+                continue
+            }
+            val facing = Direction.Type.HORIZONTAL.random(world.random)
+            world.setBlockState(pos, ModBlocks.PURPLE_BOX.defaultState.with(PropBlock.FACING, facing))
+        }
+        foot?.let { (world.getBlockEntity(it) as? BoxShelfBlockEntity)?.clear() }
+        if (spots.size < BOXES) EveryTunnel.LOGGER.warn("{} has only {} box spots for {} boxes", level.id, spots.size, BOXES)
+        EveryTunnel.LOGGER.info("Boxes for {}: {}", level.id, chosen.joinToString(" ") { "(${it.x} ${it.y} ${it.z})" })
     }
 
     /** For `/everytunnel boxes`: the boxes lying about and the shelf's count, per level with a shelf. */

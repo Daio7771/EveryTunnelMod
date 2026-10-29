@@ -48,7 +48,7 @@ something in the library watches. It never hears you. It only needs to see you o
    launcher).
 2. Put the Every Tunnel `.jar` and LambDynamicLights in the `mods` folder (the CurseForge
    app does this for you).
-3. Start the game and press **BEGIN**. New to the game? Open **GUIDE** first.
+3. Start the game and press **NEW GAME** (later, **CONTINUE** picks up where you left off). New to the game? Open **GUIDE** first.
 
 The map appears in your worlds as **Noname Complex**. Opening it always starts a new shift.
 

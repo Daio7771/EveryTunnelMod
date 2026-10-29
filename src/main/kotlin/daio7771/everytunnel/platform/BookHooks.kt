@@ -119,7 +119,7 @@ object BookHooks {
         EveryTunnel.LOGGER.info("All the books of {} are back: the hatch opens", level.id)
     }
 
-    private fun setHatch(world: ServerWorld, level: LevelDefinition, open: Boolean) {
+    private fun setHatch(world: ServerWorld, level: LevelDefinition, open: Boolean, sound: Boolean = open) {
         val zones = level.zones.filter { HATCH_TAG in it.tags }
         for (zone in zones) {
             val box = zone.box
@@ -129,11 +129,32 @@ object BookHooks {
                     world.setBlockState(pos, state.with(TrapdoorBlock.OPEN, open))
                 }
             }
-            if (open) {
+            if (sound) {
                 world.playSound(null, (box.minX + box.maxX + 1) / 2.0, box.minY + 0.5, (box.minZ + box.maxZ + 1) / 2.0,
                     ModSounds.HATCH_OPEN, SoundCategory.BLOCKS, 1f, 1f)
             }
         }
+    }
+
+    /**
+     * A saved game goes on ([SaveGameHooks]): [level]'s books lie at [lying] again, those
+     * handed in are on the counter at [returned]; all of them back: the hatch is open (quietly).
+     */
+    fun restore(world: ServerWorld, level: LevelDefinition, lying: List<BlockPos>, returned: List<BlockPos>) {
+        clear(world, level)
+        for (pos in lying) {
+            if (!world.getBlockState(pos).isAir) continue
+            world.setBlockState(pos, ModBlocks.OFFICE_BOOK.defaultState.with(PropBlock.FACING, Direction.Type.HORIZONTAL.random(world.random)))
+        }
+        val places = positions(level, RETURN_TAG)
+        for (pos in returned.filter { it in places }) {
+            if (!world.getBlockState(pos).isAir) continue
+            val facing = world.getBlockState(pos.down()).takeIf { it.contains(PropBlock.FACING) }?.get(PropBlock.FACING) ?: Direction.NORTH
+            world.setBlockState(pos, ModBlocks.OFFICE_BOOK.defaultState.with(PropBlock.FACING, facing).with(OfficeBookBlock.DELIVERED, true))
+        }
+        if (places.isNotEmpty() && places.all { world.getBlockState(it).isOf(ModBlocks.OFFICE_BOOK) }) setHatch(world, level, open = true, sound = false)
+        BookPhaseHooks.phaseChanged()
+        EveryTunnel.LOGGER.info("Books of {} back: {} lying, {} on the counter", level.id, lying.size, returned.size)
     }
 
     /** A new game: no book on the cabinets or the counter, the hatch shut. */

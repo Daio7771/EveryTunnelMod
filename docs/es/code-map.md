@@ -34,6 +34,7 @@ con un comentario KDoc que cuenta más.
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
+| `save/SavedGame.kt` | Los datos de la partida guardada: nivel más avanzado, puzles, botín, logros |
 
 ### `systems/`
 
@@ -129,8 +130,9 @@ con un comentario KDoc que cuenta más.
 | `AmbienceHooks.kt` | Envía a cada jugador el ambiente de su nivel |
 | `RespawnHooks.kt` | Pone el punto de reaparición en el inicio del nivel actual |
 | `DeathHooks.kt` | La muerte como fundido a negro y reinicio del nivel |
-| `LoadingHooks.kt` | Reconstruir al abrir, estado de carga, partida nueva, tiempos límite de seguridad |
+| `LoadingHooks.kt` | Reconstruir al abrir, estado de carga, partida nueva o guardada, tiempos límite de seguridad |
 | `NewGame.kt` | Reinicia el mundo y el jugador para una partida nueva |
+| `SaveGameHooks.kt` | La partida guardada: se guarda al salir y cada minuto, se devuelve al abrir el mundo (CONTINUE) |
 | `IntroHooks.kt` | La intro del ascensor: puertas, canción, indicadores de planta, título |
 | `LevelEntryHooks.kt` | Títulos de nivel y persianas que se cierran tras el jugador |
 | `LootSpawner.kt` | Coloca y repone el botín en los puntos con etiqueta |

@@ -34,6 +34,7 @@ KDoc comment that says more.
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 | `hiding/LookLimit.kt` | How far the head turns inside a locker |
+| `save/SavedGame.kt` | The saved game's data: furthest level, puzzles, loot, achievements |
 
 ### `systems/`
 
@@ -129,8 +130,9 @@ KDoc comment that says more.
 | `AmbienceHooks.kt` | Sends each player their level's ambience |
 | `RespawnHooks.kt` | Sets the respawn point to the current level's start |
 | `DeathHooks.kt` | Death as fade to black and level restart |
-| `LoadingHooks.kt` | Rebuild on open, loading state, new game, safety timeouts |
+| `LoadingHooks.kt` | Rebuild on open, loading state, new or saved game, safety timeouts |
 | `NewGame.kt` | Resets the world and the player for a new game |
+| `SaveGameHooks.kt` | The saved game: kept as the player leaves and every minute, put back when the world opens (CONTINUE) |
 | `IntroHooks.kt` | The elevator intro: doors, song, floor indicators, title |
 | `LevelEntryHooks.kt` | Level titles and closing shutters behind the player |
 | `LootSpawner.kt` | Places and restocks loot at tagged spawn points |

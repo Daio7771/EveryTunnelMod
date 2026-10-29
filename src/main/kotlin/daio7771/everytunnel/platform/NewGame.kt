@@ -12,8 +12,9 @@ import net.minecraft.util.Identifier
 import net.minecraft.world.GameMode
 
 /**
- * Starts the game over for a player, in the same world: every time the world opens
- * ([LoadingHooks]) and with `/everytunnel newgame`.
+ * Starts the game over for a player, in the same world: when the world opens with no game
+ * saved ([LoadingHooks], [SaveGameHooks]; NEW GAME in the main menu deletes the save) and with
+ * `/everytunnel newgame`. The save starts over from here ([SaveGameHooks.started]).
  *
  * - The world: everyone out of the lockers ([HidingHooks]), nothing carried any more
  *   ([CarryHooks]), Level 3's boxes put out at random and their shelf emptied ([BoxHooks]), its
@@ -75,6 +76,7 @@ object NewGame {
 
         PlaytestLog.newGame(player)
         val level = IntroHooks.replay(player) ?: firstLevelStart(player)
+        SaveGameHooks.started(server, level)
         EveryTunnel.LOGGER.info("{}: new game in {}", player.name.string, level?.id)
         return level
     }

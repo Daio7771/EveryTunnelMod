@@ -20,8 +20,8 @@ import java.util.Locale
 import java.util.UUID
 
 /**
- * Opening a world with levels: the map is rebuilt and the player starts a new game, behind
- * the loading screen (`client.screen.LoadingScreen`).
+ * Opening a world with levels: the map is rebuilt and the player goes on with the saved game
+ * or starts a new one, behind the loading screen (`client.screen.LoadingScreen`).
  *
  * - When the server starts, every level's `build` function runs once (the map's
  *   `garage:build`; levels built together name the same one). It force-loads the map,
@@ -30,9 +30,10 @@ import java.util.UUID
  * - A player who joins a world with levels is loading: the client shows the loading screen
  *   ([STATE_LOADING]), and the player cannot move, be hurt or make a noise, their
  *   resources do not drain, and no intro starts.
- * - Once the world is built, a Survival or Adventure player starts a new game
- *   ([NewGame.start]): every level is reset and they wait in the closed elevator. Creative
- *   and Spectator players stay where they are.
+ * - Once the world is built, a Survival or Adventure player goes on with the saved game
+ *   ([SaveGameHooks.continueGame]: its puzzles put back, at the start of the furthest level
+ *   reached), or with none saved starts a new game ([NewGame.start]): every level is reset and
+ *   they wait in the closed elevator. Creative and Spectator players stay where they are.
  * - Then the light: the build runs while the player joins, so the chunks they were sent
  *   can carry light from before the build (the elevator with sky light and no lamp). Once
  *   the light engine has settled ([LIGHT_SETTLE_TICKS], at most [LIGHT_TIMEOUT_TICKS]),
@@ -163,7 +164,9 @@ object LoadingHooks {
             if (!state.prepared) {
                 state.prepared = true
                 state.preparedTick = now
-                if (WorldRules.appliesTo(player.isCreative, player.isSpectator)) NewGame.start(player)
+                if (WorldRules.appliesTo(player.isCreative, player.isSpectator)) {
+                    if (SaveGameHooks.canContinue(server)) SaveGameHooks.continueGame(player) else NewGame.start(player)
+                }
             }
             if (!state.lightSent) {
                 val waited = now - state.preparedTick

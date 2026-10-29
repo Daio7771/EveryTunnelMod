@@ -79,7 +79,7 @@ Not bundled, for licence reasons:
 2. Put `everytunnel-<version>.jar` and LambDynamicLights (4.4.0 or newer) in `mods/`.
 3. Optionally: Sodium + Iris + Indium and a Complementary shader pack, and Sound Physics
    Remastered.
-4. Start the game and press BEGIN.
+4. Start the game and press NEW GAME.
 
 On first launch `client.MapWorldInstaller` unpacks the world into `saves/noname_complex`,
 removes the stored player and makes it Survival. A later mod version only replaces the

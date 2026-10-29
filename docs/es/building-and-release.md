@@ -79,7 +79,7 @@ No van dentro, por licencias:
 2. Poner `everytunnel-<version>.jar` y LambDynamicLights (4.4.0 o más nuevo) en `mods/`.
 3. Opcional: Sodium + Iris + Indium y un shader pack Complementary, y Sound Physics
    Remastered.
-4. Arrancar el juego y pulsar BEGIN.
+4. Arrancar el juego y pulsar NEW GAME.
 
 En el primer arranque `client.MapWorldInstaller` desempaqueta el mundo en
 `saves/noname_complex`, quita el jugador guardado y lo pone en Supervivencia. Una versión

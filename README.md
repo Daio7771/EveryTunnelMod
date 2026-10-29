@@ -59,7 +59,7 @@ something in the library watches. It never hears you. It only needs to see you o
    folder.
 3. Download [LambDynamicLights](https://modrinth.com/mod/lambdynamiclights/versions?g=1.20.1)
    for 1.20.1 and put it in the same folder.
-4. Start the game and press **BEGIN**.
+4. Start the game and press **NEW GAME** (later, **CONTINUE** picks up where you left off).
 
 Step-by-step instructions, recommended mods, shader setup and troubleshooting:
 **[INSTALL.md](INSTALL.md)**.

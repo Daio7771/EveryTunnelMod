@@ -70,6 +70,19 @@ object AchievementHooks {
         EveryTunnel.LOGGER.info("{} earned the achievement {}", player.name.string, achievement.id)
     }
 
+    /** What every player has earned in this game (UUID -> achievement ids), for the save ([SaveGameHooks]). */
+    fun earnedIds(): Map<String, Set<String>> =
+        earnedThisGame.entries.associate { (id, earned) -> id.toString() to earned.map { it.id }.toSet() }
+
+    /** A saved game goes on: what was earned in it is not told again. */
+    fun restoreEarned(saved: Map<String, Set<String>>) {
+        earnedThisGame.clear()
+        for ((id, ids) in saved) {
+            val uuid = runCatching { UUID.fromString(id) }.getOrNull() ?: continue
+            earnedThisGame[uuid] = ids.mapNotNull { key -> Achievement.entries.firstOrNull { it.id == key } }.toMutableSet()
+        }
+    }
+
     /** A new game for [player]: every achievement can be earned (and told) again. */
     fun newGame(player: ServerPlayerEntity) {
         earnedThisGame.remove(player.uuid)

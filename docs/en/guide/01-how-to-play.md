@@ -55,8 +55,9 @@ is no way back.
 
 ## A new shift
 
-Every time you open the world, a new game starts: the map is rebuilt, the supplies are
-back, and you start again in the elevator. Your shift always starts from the beginning.
+Your shift is saved when you leave. CONTINUE takes you back to the start of the furthest
+level you reached, with what you carried and everything you solved. NEW GAME starts the
+shift over from the elevator.
 
 ## Tips
 

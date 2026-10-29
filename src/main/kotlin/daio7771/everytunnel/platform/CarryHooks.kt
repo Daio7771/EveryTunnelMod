@@ -75,6 +75,9 @@ object CarryHooks {
         }
     }
 
+    /** Everything in someone's hands: (dimension, where it was picked up, how it lay), for the save. */
+    fun carriedThings(): List<Triple<String, BlockPos, BlockState>> = carried.values.map { Triple(it.dimension, it.pos, it.state) }
+
     /** Anything carried in the inventory? */
     fun isCarrying(player: ServerPlayerEntity): Boolean = player.inventory.containsAny { it.item in items }
 

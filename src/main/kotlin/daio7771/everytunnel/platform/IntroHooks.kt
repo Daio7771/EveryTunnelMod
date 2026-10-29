@@ -98,6 +98,21 @@ object IntroHooks {
         return level
     }
 
+    /** [player] has had the intro in this world (their doors were opened). */
+    fun hadIntro(player: ServerPlayerEntity): Boolean = player.uuid in state(player.server).done
+
+    /** The elevator doors of every level with an intro open at once, without a sound (a saved game goes on). */
+    fun openDoorsNow(server: MinecraftServer) {
+        for (level in LevelManager.all().filter { it.intro != null }) {
+            val world = worldOf(server, level) ?: continue
+            opening.removeIf { it.world == world }
+            for (box in doors(level)) {
+                forEachBlock(box) { pos -> if (world.getBlockState(pos).isOf(ModBlocks.ELEVATOR_DOOR)) world.setBlockState(pos, Blocks.AIR.defaultState) }
+            }
+            setIndicators(world, level, FloorIndicatorBlock.LABELS.lastIndex, moving = false)
+        }
+    }
+
     private fun tick(server: MinecraftServer) {
         if (++checkTicks >= CHECK_TICKS) {
             checkTicks = 0

@@ -5,6 +5,7 @@ import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.level.LevelDefinition
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+import net.minecraft.block.BlockState
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtElement
 import net.minecraft.nbt.NbtList
@@ -123,6 +124,61 @@ object KeycardHooks {
         val state = state(server)
         state.lights.clear()
         state.markDirty()
+    }
+
+    /** The lights the keycard has put out in this game ("dimension|x|y|z" -> their mode before), for the save. */
+    fun lightsOut(server: MinecraftServer): Map<String, LightMode> = state(server).lights.toMap()
+
+    /**
+     * A saved game goes on ([SaveGameHooks]): the lights the keycard had put out go out again at
+     * once, without a sound, and are remembered as before (a new game puts them back on).
+     */
+    fun restoreLightsOut(server: MinecraftServer, lights: Map<String, LightMode>) {
+        waves.clear()
+        val state = state(server)
+        for ((key, mode) in lights) {
+            val (dimension, pos) = LightsState.parse(key) ?: continue
+            val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(dimension))) ?: continue
+            val block = world.getBlockState(pos)
+            if (!block.isOf(ModBlocks.FLUORESCENT_LIGHT)) continue
+            world.setBlockState(pos, FluorescentLightBlock.withMode(block, LightMode.OFF))
+            state.put(world, pos, mode)
+        }
+        if (lights.isNotEmpty()) EveryTunnel.LOGGER.info("Keycard lights back out: {}", lights.size)
+    }
+
+    /** The card readers unlocked ("dimension|x|y|z"), in zones tagged [DOOR_TAG] whose chunks are loaded. */
+    fun unlockedReaders(server: MinecraftServer): Set<String> {
+        val unlocked = LinkedHashSet<String>()
+        forEachReader(server, loadedOnly = true) { world, pos, state ->
+            if (state.get(CardReaderBlock.UNLOCKED)) unlocked += "${world.registryKey.value}|${pos.x}|${pos.y}|${pos.z}"
+        }
+        return unlocked
+    }
+
+    /** A saved game goes on ([SaveGameHooks]): these readers unlocked again, their doors open. */
+    fun unlockReaders(server: MinecraftServer, keys: Set<String>) {
+        if (keys.isEmpty()) return
+        forEachReader(server, loadedOnly = false) { world, pos, state ->
+            if ("${world.registryKey.value}|${pos.x}|${pos.y}|${pos.z}" !in keys) return@forEachReader
+            world.setBlockState(pos, state.with(CardReaderBlock.UNLOCKED, true))
+            CardReaderBlock.setDoors(world, pos, open = true)
+        }
+    }
+
+    /** Every card reader in zones tagged [DOOR_TAG]; [loadedOnly]: only where the chunk is loaded (a look, no loading). */
+    private inline fun forEachReader(server: MinecraftServer, loadedOnly: Boolean, action: (ServerWorld, BlockPos, BlockState) -> Unit) {
+        for (level in LevelManager.all()) {
+            val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: continue
+            for (zone in level.zones.filter { DOOR_TAG in it.tags }) {
+                val box = zone.box
+                if (loadedOnly && !world.chunkManager.isChunkLoaded(box.minX shr 4, box.minZ shr 4)) continue
+                for (pos in BlockPos.iterate(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ)) {
+                    val block = world.getBlockState(pos)
+                    if (block.isOf(ModBlocks.CARD_READER)) action(world, pos.toImmutable(), block)
+                }
+            }
+        }
     }
 
     /** Card readers in zones tagged [DOOR_TAG] locked again, their doors closed (a new game). */

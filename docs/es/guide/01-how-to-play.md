@@ -59,9 +59,9 @@ nivel nuevo, no hay vuelta atrás.
 
 ## Un turno nuevo
 
-Cada vez que abres el mundo empieza una partida nueva: el mapa se reconstruye, los
-suministros vuelven y empiezas otra vez en el ascensor. Tu turno siempre empieza desde el
-principio.
+Tu turno se guarda al salir. CONTINUE te lleva al inicio del nivel más avanzado al que
+llegaste, con lo que llevabas y todo lo que resolviste. NEW GAME empieza el turno otra vez
+desde el ascensor.
 
 ## Consejos
 

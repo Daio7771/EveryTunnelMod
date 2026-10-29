@@ -9,9 +9,9 @@ and names the code behind each step.
 flowchart TD
     A[Game starts] --> B[MapWorldInstaller: unpack Noname Complex]
     B --> C[Main menu]
-    C -->|BEGIN| D[Loading screen]
+    C -->|CONTINUE / NEW GAME| D[Loading screen]
     D --> E[Server: run garage:build]
-    E --> F[NewGame.start]
+    E --> F[NewGame.start, or SaveGameHooks.continueGame]
     F --> G[Client draws the elevator, fades in]
     G --> H[Elevator intro, 25 s]
     H --> I[Level 1, B1]
@@ -47,8 +47,11 @@ flowchart TD
 it (`MinecraftClientMixin`): at start-up, after leaving a world, after the credits, and when a
 screen closes with no world open (Escape in the options).
 
-- **BEGIN** opens Noname Complex. If the world is missing it says "The map is missing.
-  Reinstall the mod."
+- **CONTINUE** (only with a game saved, see [A saved game](#a-saved-game)) opens Noname
+  Complex and the game goes on. **NEW GAME** deletes the save and opens it: the game starts
+  over in the elevator. With a game saved it asks first ("Start over? Your progress will be
+  lost.", YES, START OVER / NO, NO picked to begin with). If the world is missing it says
+  "The map is missing. Reinstall the mod."
 - **OPTIONS** opens vanilla's options.
 - **GUIDE** opens the [player guide](guide/01-how-to-play.md) (`GuideScreen`): one sheet of
   worn white paper, scrolled with the wheel, with paper tabs to jump between the contents and
@@ -83,8 +86,10 @@ Server side (`platform.LoadingHooks`):
    `/everytunnel rebuilt`, which puts the loot back (`NewGame.levelsRebuilt`).
 2. A joining player is *loading*: frozen, invulnerable, silent, no resource drain, no
    intro. The client is sent state `0`.
-3. Once the build has reported back, a Survival or Adventure player gets a **new game**
-   (`NewGame.start`). Creative and Spectator players are left where they are.
+3. Once the build has reported back, a Survival or Adventure player goes on with the
+   **saved game** (`SaveGameHooks.continueGame`, see [A saved game](#a-saved-game)), or with
+   none saved gets a **new game** (`NewGame.start`). Creative and Spectator players are left
+   where they are.
 4. The light is sent again. The build runs while the player joins, so the chunks they
    were sent can carry light from before it (the elevator once had sky light and no lamp).
    After at least 1 s, once the light engine has no updates left (at most 10 s), the light
@@ -107,7 +112,26 @@ never answers is let go after 30 s.
 - **Player:** empty inventory, full health and resources, Survival, at the start of the
   first level with an intro, and the intro plays again (`IntroHooks.replay`).
 
-`/everytunnel newgame` does the same at any time.
+`/everytunnel newgame` does the same at any time. The save starts over from it.
+
+### A saved game
+
+`platform.SaveGameHooks` keeps the game between sessions in `data/every_tunnel_progress.dat`
+(the data in `core.save.SavedGame`); the main menu reads that file for CONTINUE.
+
+- **What is kept:** the furthest level reached, and how far the puzzles got: the valve
+  digits and turns, where the boxes and books lie (one in the hands as where it was picked
+  up), the boxes on the shelf and the books on the counter, the lights the keycard put out,
+  the card readers unlocked, the loot picked up, and the achievements earned in this game.
+  The inventory is vanilla's save and the resources `ResourceHooks`'.
+- **When:** as the player leaves, as the server stops, every minute, and the level as soon as
+  a further one is walked into; never before this session's game has started or gone on.
+- **Going on:** the map is rebuilt as always, then every level's puzzles are put back, the
+  shutters behind are shut, the elevator stands open if the intro was had, and the player is
+  at the start of the furthest level (as after a death) with what they carried, their thirst
+  and battery. The enemies spawn as the player walks in.
+- **The end of the demo** forgets the save (`SaveGameHooks.finished`): the menu offers NEW
+  GAME only.
 
 ## 5. The elevator intro
 
@@ -309,7 +333,7 @@ B4, the player walks into a zone tagged `end`.
    then the credits roll (the CC BY music credit among them) until "Thank you for playing."
 4. Any key after a moment, Esc, or a timeout saves the world and returns to the main menu.
 
-Opening the world again starts a new game, as always.
+The end forgets the saved game, so the menu offers NEW GAME only.
 
 ## Death
 
