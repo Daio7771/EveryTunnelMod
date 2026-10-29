@@ -54,7 +54,8 @@ import kotlin.math.sqrt
  *
  * Every tick he looks ([sight]): only into the library, unless a box sent him out ([outOnAlert],
  * until he is back on patrol) or he is already after someone (chasing or searching), when he
- * sees anywhere. There, a player in Survival or Adventure, not hidden in a locker,
+ * sees anywhere but in the zones tagged [NEVER_TAG] (the bunker: he never follows anyone down
+ * the hatch). There, a player in Survival or Adventure, not hidden in a locker,
  * within his cone ([ObserverSettings.fieldOfView] round where his head faces) and his range
  * (shorter sneaking, longer with the flashlight on), with nothing solid in between, is seen;
  * closer than [ObserverSettings.senseRange] he notices them whatever way he faces. A player
@@ -218,6 +219,7 @@ class ObserverEntity(type: EntityType<out HostileEntity>, world: World) : Hostil
             if (player !is ServerPlayerEntity || !ResourceHooks.appliesTo(player) || DeathHooks.isDying(player)) continue
             if (HidingHooks.isHidden(player)) continue
             if (!seesOutside && home != null && !home.contains(player.x, player.y + 0.5, player.z)) continue
+            if (beyondReach.any { it.contains(player.x, player.y + 0.5, player.z) }) continue
             val distance = sqrt(squaredDistanceTo(player))
             val flashlight = ResourceSystem.stateOf(player.uuid, ConfigManager.gameplay).flashlightOn
             val range = when {
@@ -258,6 +260,11 @@ class ObserverEntity(type: EntityType<out HostileEntity>, world: World) : Hostil
         world.raycast(RaycastContext(from, to, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, this)).type == HitResult.Type.MISS
 
     /** His home: the level's zone tagged [HOME_TAG], or null (summoned by hand somewhere else). */
+    /** Where he never goes after anyone (zones tagged [NEVER_TAG]: Level 3's bunker), his level's. */
+    private val beyondReach: List<BlockBox>
+        get() = (homeKey?.let { LevelManager.get(it.substringBefore('/')) }?.zones ?: emptyList())
+            .filter { NEVER_TAG in it.tags }.map { it.box }
+
     private fun home(): BlockBox? {
         val level = homeKey?.let { LevelManager.get(it.substringBefore('/')) }
             ?: LevelManager.levelAt(world.registryKey.value.toString(), x, y, z) ?: return null
@@ -356,6 +363,8 @@ class ObserverEntity(type: EntityType<out HostileEntity>, world: World) : Hostil
 
         /** The zone he patrols and goes back to. */
         const val HOME_TAG = "observer_home"
+        /** Zones he never sees anyone in, so never follows anyone into (Level 3's bunker shaft and tunnel). */
+        const val NEVER_TAG = "observer_never"
         /** His hitbox ([ModEntities.OBSERVER]); the model stands 2.5 (`tools/entity/observer.py`). */
         const val HITBOX_HEIGHT = 1.9f
         /** His eyes are in the model's blank head, well above the hitbox. */

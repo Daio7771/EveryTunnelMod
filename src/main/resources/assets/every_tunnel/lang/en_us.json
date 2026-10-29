@@ -201,5 +201,7 @@
   "block.every_tunnel.bunker_trapdoor": "Bunker Hatch",
   "block.every_tunnel.desk_lamp": "Desk Lamp",
   "block.every_tunnel.book_cart": "Book Cart",
-  "block.every_tunnel.wall_text": "Wall Text"
+  "block.every_tunnel.wall_text": "Wall Text",
+  "block.every_tunnel.hazard_steel": "Hazard Steel",
+  "block.every_tunnel.blast_door": "Blast Door"
 }

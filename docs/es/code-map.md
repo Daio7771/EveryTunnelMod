@@ -42,6 +42,7 @@ con un comentario KDoc que cuenta más.
 | `ResourceSystem.kt` | Simulación de stamina, sed y batería, como funciones puras |
 | `NoiseSystem.kt` | Eventos de ruido, su memoria, audibilidad y las reglas que eligen los radios |
 | `FlashlightBeam.kt` | La luz del haz en cualquier punto (cono, caída, punto caliente, brillo) |
+| `CollapseSchedule.kt` | Los tiempos del derrumbe del túnel del nivel 3: escombros, parpadeo, polvo, fuerza del temblor |
 | `ObserverNearness.kt` | La fase de los libros del nivel 3: ritmo y volumen del reloj y el aviso "He's near" según la distancia al Observer |
 
 ### `entities/`
@@ -138,6 +139,7 @@ con un comentario KDoc que cuenta más.
 | `NoteHooks.kt` | Leer una nota (tablón o folio): busca su id y la envía con las cifras de las válvulas |
 | `CarryHooks.kt` | Llevar una caja o un libro: en la mano, sin soltarlo, sin correr, de vuelta al morir |
 | `BookHooks.kt` | El puzle de los libros del nivel 3: aparecen, se entregan en el mostrador, se abre la trampilla, depuración |
+| `CollapseHooks.kt` | El derrumbe del túnel del nivel 3: sonido, temblor, escombros, polvo, luces parpadeando; se deshace al morir o en partida nueva |
 | `BookPhaseHooks.kt` | Mientras los libros están fuera: el reloj en la cabeza y el aviso "He's near. Hide." |
 | `BoxHooks.kt` | El puzle de las cajas del nivel 3: cajas al azar, llevarlas, la estantería, la muerte, depuración |
 | `HidingHooks.kt` | Esconderse en taquillas: entrar, salir, sin ruido dentro, salir en partida nueva |
@@ -177,6 +179,7 @@ con un comentario KDoc que cuenta más.
 | `AmbiencePlayer.kt` | Bucle del nivel y sonidos aleatorios con posición |
 | `FluorescentHum.kt` | Zumbido de las 4 luces más cercanas |
 | `HeartbeatEffect.kt` | Latido según la distancia al Pale man |
+| `CameraShake.kt` | La cámara temblando en el derrumbe del túnel del nivel 3 |
 | `BreathingEffect.kt` | Respiración fuerte agotado |
 | `TensionMusic.kt` | Capas de música según el estado de los Pale men |
 | `IntroMusic.kt` | La canción del ascensor y su parada de cinta |

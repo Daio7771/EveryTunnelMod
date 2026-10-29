@@ -148,7 +148,8 @@ def write(path, lv, stats, s=4):
         tw = d.textlength(text, font=font)
         d.text((X - tw / 2, Z - 6), text, fill=(235, 235, 235), font=font)
     d.text((ox2 - 20, pad - 18), "Bunker, under the library", fill=(235, 235, 235), font=font)
-    d.text((ox2 + bunker_w // 2 - 20, pad + (lv.bunker_box[3] - minz) * s + 8), f"door {p.NEXT_LEVEL_SIGN}", fill=(250, 90, 90), font=font)
+    dx_, _, dz_ = lv.l4_door
+    d.text((ox2 + (dx_ - bminx) * s + s + 4, pad + (dz_ - minz) * s - 2), f"door {p.NEXT_LEVEL_SIGN}", fill=(250, 90, 90), font=font)
     y = pad + (maxz - minz + 1) * s + 16
     for line in stats:
         d.text((pad, y), line, fill=(200, 200, 200), font=font)

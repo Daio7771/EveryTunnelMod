@@ -143,8 +143,9 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `observer_home` | `ObserverEntity` | La zona que patrulla el Observer y a la que vuelve (la biblioteca del nivel 3) |
 | `book_hatch` | `BookHooks` | Las trampillas que abre el quinto libro devuelto (la del búnker del nivel 3); una partida nueva las cierra |
 | `checkpoint` | (nadie aún) | Nivel 3: justo pasada la puerta del checkpoint, donde reiniciará una muerte |
-| `collapse` | (nadie aún) | Nivel 3: al entrar, el techo del pasillo del búnker caerá detrás del jugador |
-| `collapse_blocks` | (nadie aún) | Nivel 3: el tramo de pasillo que llenará el derrumbe |
+| `collapse` | `CollapseHooks` | Nivel 3: al entrar, el techo del túnel del búnker cae detrás del jugador (una vez por partida) |
+| `collapse_blocks` | `CollapseHooks` | Nivel 3: el tramo de túnel que el derrumbe llena de escombros |
+| `observer_never` | `ObserverEntity` | El pozo y el túnel del búnker del nivel 3: el Observer no ve a nadie ahí, así que nunca baja detrás de nadie |
 
 ### Etiquetas de punto de aparición
 

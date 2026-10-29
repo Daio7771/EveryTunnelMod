@@ -41,7 +41,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | El Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | síntesis / CC0 (respiración) |
 | El Observer | `music.observer.approach`, `music.observer.chase` (sin pasos: lo delata su música); en la fase de los libros `event.observer.tick` / `tock` (el reloj de la biblioteca en la cabeza, más rápido cuanto más cerca) | síntesis |
 | Música | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | síntesis / CC BY (ascensor) |
-| Eventos | `event.death`, `event.level_transition`, `event.observer.alert` (provisional) | síntesis |
+| Eventos | `event.death`, `event.level_transition`, `event.observer.alert` (provisional), `event.collapse` (el derrumbe del túnel del nivel 3) | síntesis |
 
 ## Quién reproduce qué
 

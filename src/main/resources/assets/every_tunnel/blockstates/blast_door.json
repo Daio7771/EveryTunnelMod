@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/blast_door"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/blast_door",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/blast_door",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/blast_door",
+      "y": 270
+    }
+  }
+}

@@ -436,6 +436,11 @@
       }
     ]
   },
+  "event.collapse": {
+    "sounds": [
+      "every_tunnel:event/collapse_1"
+    ]
+  },
   "event.death": {
     "sounds": [
       "every_tunnel:event/death_1",

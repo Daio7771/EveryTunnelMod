@@ -152,6 +152,7 @@ object DeathHooks {
             paleMan.returnHome(point.position.x, point.position.y, point.position.z, point.yaw)
         }
         ObserverHooks.sendHome(world, levelId)
+        CollapseHooks.reset(player.server, levelId)
     }
 
     private fun unfreeze(player: ServerPlayerEntity) {

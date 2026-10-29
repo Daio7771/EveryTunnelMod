@@ -39,7 +39,7 @@ registered in `platform.ModSounds`. Any of them can be tried with
 | The Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | synth / CC0 (breathing) |
 | The Observer | `music.observer.approach`, `music.observer.chase` (no footsteps: his music gives him away); in the book phase `event.observer.tick` / `tock` (the library clock in the head, quicker as he nears) | synth |
 | Music | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | synth / CC BY (elevator) |
-| Events | `event.death`, `event.level_transition`, `event.observer.alert` (placeholder) | synth |
+| Events | `event.death`, `event.level_transition`, `event.observer.alert` (placeholder), `event.collapse` (Level 3's tunnel collapse) | synth |
 
 ## Who plays what
 

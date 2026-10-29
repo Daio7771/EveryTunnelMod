@@ -86,7 +86,7 @@ def walk(lv):
         "hatch": any((x, 1, z) in seen for x in range(p.HATCH["hole"][0], p.HATCH["hole"][2])
                      for z in range(p.HATCH["hole"][1], p.HATCH["hole"][3])),
         "bunker corridor": any(y == lv.bunker_floor + 1 for _, y, _ in seen),
-        "door to Level 4": (lv.l4_door[0], lv.l4_door[1], lv.l4_door[2] - 1) in seen,
+        "door to Level 4": lv.l4_front in seen,
         "top of the stairs": any((x, lv.top_landing_y + 1, p.STAIRS[3] - 1) in seen for x in range(p.STAIRS[0], p.STAIRS[2])),
     }
     missing += [k for k, ok in targets.items() if not ok]

@@ -161,6 +161,7 @@ Las mínimas: una mixin solo donde Fabric API no tiene evento.
 | `ServerWorldMixin` | `ServerWorld.emitGameEvent` | Permite al sistema de ruido oír puertas, palancas, cofres (las "vibraciones" de vanilla); no cambia nada |
 | `LivingEntityMixin` | `LivingEntity.shouldSpawnConsumptionEffects` | Sin el sorbo de vanilla para la botella de agua; tiene sus propios tragos |
 | `ClientPlayerEntityMixin` | `canSprint` | No se puede esprintar agotado (el sprint lo decide el cliente) |
+| `GameRendererMixin` | `tiltViewWhenHurt` (final) | Hace temblar la cámara en el derrumbe del túnel del nivel 3 (`CameraShake`) |
 | `InGameHudMixin` | `renderStatusBars`, `renderExperienceBar` | Oculta las barras de vanilla mientras el HUD del mod las sustituye |
 | `AbstractClientPlayerEntityMixin` | `getSkinTexture`, `getModel`, `getCapeTexture` | Todos los jugadores llevan el uniforme del vigilante en los mundos con niveles |
 | `LightmapTextureManagerMixin` | `update` (gamma) | El brillo cuenta como Moody en los niveles |

@@ -6,6 +6,7 @@
   "client": [
     "AbstractClientPlayerEntityMixin",
     "ClientPlayerEntityMixin",
+    "GameRendererMixin",
     "InGameHudMixin",
     "LightmapTextureManagerMixin",
     "MinecraftClientMixin",

@@ -168,9 +168,9 @@ Reopening the world or respawning inside a level does not count as walking in.
 
 The offices of the complex around the central library, in perfect order and empty. Built
 so far: the structure, the furniture, the valve puzzle, the lockers, the box and book
-puzzles that open the bunker, the Observer, the company's documents and the loot; the
-collapse is still to come, its zones already in the
-level file (see [Levels](levels.md#level-3-hooks)). The music is planned for last.
+puzzles that open the bunker, the Observer, the company's documents, the loot, the room
+nameplates and the bunker tunnel with its collapse (see [Levels](levels.md#level-3-hooks)).
+There is no music of its own (one is ready for Level 4).
 
 The **ambience** is the near-silence of an empty office building (`ambient.offices.room_tone`)
 with, rarely (every 1.5 to 4 minutes), a phone ringing somewhere far off and stopping
@@ -279,8 +279,19 @@ silent.
 - In the library's centre, the **bunker hatch**: two leaves of dark steel checker plate
   (`bunker_trapdoor`, a trapdoor nobody opens by hand) with a yellow and black band along their
   hinges, hinged on the west and east sides, in a frame of checker plate,
-  shut until the books are back. Under it a ladder goes down a shaft to a lit corridor that runs 32 blocks south to
-  the door to B4, where the demo ends.
+  shut until the books are back. Under it a ladder goes down a shaft to the **bunker tunnel**:
+  about 90 blocks of lit concrete, 3 wide, in four legs at right angles (`BUNKER["path"]`),
+  pipes along the ceiling on one side and a cable tray on the other, through two open blast
+  doors (a hazard-striped steel frame, `hazard_steel`, and the leaf folded back against the
+  wall, `blast_door`), to the door to B4, where the demo ends. The Observer never follows
+  anyone down (the shaft and tunnel are tagged `observer_never`).
+- **The collapse** (`CollapseHooks`, timing in `systems.CollapseSchedule`): about 13 blocks
+  before the door, the tunnel's ceiling comes down behind the player: a groan, cracks and the
+  crash of the fall (`event.collapse`), the camera shaking (`CameraShake`), the stretch behind
+  filling with rubble over a second and a half (the tunnel's concrete and cobbled deepslate),
+  dust falling and the lights round about flickering. No way back; once per game. A death in
+  Level 3 (the player starts again at the antechamber), a new game and the map's rebuild clear
+  the rubble.
 
 ## 10. The end
 

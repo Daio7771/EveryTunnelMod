@@ -871,6 +871,35 @@ def bunker_trapdoor_tex(rng):
     return img
 
 
+def hazard_steel_tex(rng):
+    """Worn steel painted in yellow and black diagonal stripes, 4 pixels wide: the frame of
+    Level 3's blast doors. The stripes run on across neighbouring blocks."""
+    img = new((214, 168, 32))
+    for y in range(16):
+        for x in range(16):
+            if (x + y) // 4 % 2:
+                px(img, x, y, (30, 30, 32))
+    noise(img, rng, 6)
+    T.blob(img, rng, (120, 110, 90), 4, 0.25)                         # scuffs
+    speckle(img, rng, 10, (90, 92, 96), 0.6)
+    return img
+
+
+def blast_door_tex(rng):
+    """A blast door leaf's face: thick dark grey-green steel, a row of rivets along each edge
+    (so a leaf of several blocks reads as one plate with seams), worn bright here and there."""
+    img = new((74, 82, 78))
+    noise(img, rng, 4)
+    T.blob(img, rng, (96, 104, 100), 4, 0.3)
+    for i in range(1, 16, 3):
+        for x, y in ((i, 1), (i, 14), (1, i), (14, i)):
+            px(img, x, y, (128, 134, 130))
+            px(img, x, y + 1 if y < 15 else y, (44, 48, 46), 0.6)
+    rect(img, 0, 0, 15, 0, (40, 44, 42), 0.8)
+    rect(img, 0, 0, 0, 15, (40, 44, 42), 0.8)
+    return img
+
+
 def grating_tex(rng):
     """Steel bar grating, painted dark and worn bright along the bars: a grid of square holes
     (see-through) with rust in the corners. The treads of the spiral stairs down to B3."""
@@ -1765,6 +1794,18 @@ def build():
     a.models["checker_plate"] = cube_all("checker_plate")
     a.block("checker_plate", "Checker Plate", {"variants": {"": {"model": f"{NS}:block/checker_plate"}}},
             {"parent": f"{NS}:block/checker_plate"})
+
+    # Level 3's blast doors (offices/level.py, bunker_fittings): the hazard-striped frame, a
+    # full block; and a leaf's piece, a thick plate against the back of its block (facing north,
+    # the plate's face to the north), two ribs across it.
+    a.texture("hazard_steel", hazard_steel_tex(r("hazard_steel")), T.PAINTED_METAL.but(relief=0.6))
+    a.models["hazard_steel"] = cube_all("hazard_steel")
+    a.block("hazard_steel", "Hazard Steel", {"variants": {"": {"model": f"{NS}:block/hazard_steel"}}},
+            {"parent": f"{NS}:block/hazard_steel"})
+    a.texture("blast_door", blast_door_tex(r("blast_door")), T.PAINTED_METAL.but(smoothness=0.35, relief=0.7))
+    a.models["blast_door"] = model({"b": "blast_door"}, [
+        element((0, 0, 12), (16, 16, 16), "b"), element((0, 4, 11), (16, 6, 12), "b"), element((0, 10, 11), (16, 12, 12), "b")])
+    a.block("blast_door", "Blast Door", horizontal_blockstate("blast_door"), {"parent": f"{NS}:block/blast_door"})
 
     # --- Metal grating: a slab drawn as a thin see-through plate at its top -------------------
     a.texture("metal_grating", grating_tex(r("grating")), T.STEEL.but(smoothness=0.35, metal=255, relief=0.7))

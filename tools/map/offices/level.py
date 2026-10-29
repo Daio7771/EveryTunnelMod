@@ -27,6 +27,9 @@ from garage.build import World
 from offices.furnish import furnish
 
 OPPOSITE = {"north": "south", "south": "north", "east": "west", "west": "east"}
+DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+NAMES = {v: k for k, v in DIRS.items()}
+DIRS6 = {"north": (0, 0, -1), "south": (0, 0, 1), "east": (1, 0, 0), "west": (-1, 0, 0), "up": (0, 1, 0), "down": (0, -1, 0)}
 YAW = {"south": 0, "west": 90, "north": 180, "east": 270}
 SIDES = ((1, 0, 0), (-1, 0, 0), (0, 0, 1), (0, 0, -1), (0, 1, 0), (0, -1, 0))
 AROUND = [(dx, dy, dz) for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1) if (dx, dy, dz) != (0, 0, 0)]
@@ -126,6 +129,7 @@ class Offices:
         self.bunker()
         self.shell()
         self.fit_lights()
+        self.bunker_fittings()
         self.valve_fittings()
         self.hatch()
         furnish(self)
@@ -174,34 +178,107 @@ class Offices:
 
     def bunker(self):
         """Under the hatch in the library's centre: a shaft down with a ladder on its north wall,
-        and at its foot a long lit corridor running south to the door of Level 4."""
+        and at its foot a long lit tunnel along BUNKER["path"] (legs at right angles) to the
+        door of Level 4. The legs' centre line is kept in bunker_line, [(x, z, direction)] from
+        the shaft to the last cell before the door."""
         p = self.p
         b = p.BUNKER
         hx0, hz0, hx1, hz1 = p.HATCH["hole"]
-        floor = -b["depth"]                              # the corridor's floor blocks
+        floor = -b["depth"]                              # the tunnel's floor blocks
         top = floor + b["height"]                        # its last air row
-        w = b["width"]
-        cx = (hx0 + hx1) // 2
-        cx0 = cx - w // 2
-        self.bunker_box = (cx0, hz0, cx0 + w, hz0 + b["length"])
-        self.space("bunker_corridor", "Bunker corridor", "bunker", self.bunker_box, b["height"], floor)
+        half = b["width"] // 2
+        x, z = (hx0 + hx1) // 2, hz0                     # under the shaft
+        self.bunker_line = []
+        for k, (direction, length) in enumerate(b["path"]):
+            dx, dz = DIRS[direction]
+            line = [(x + dx * i, z + dz * i) for i in range(length)]
+            rx, rz = -dz, dx                             # across the leg
+            xs = [cx + rx * o for cx, _ in line for o in (-half, half)]
+            zs = [cz + rz * o for _, cz in line for o in (-half, half)]
+            self.space(f"bunker_corridor_{k + 1}", "Bunker tunnel", "bunker",
+                       (min(xs), min(zs), max(xs) + 1, max(zs) + 1), b["height"], floor)
+            self.bunker_line += [(cx, cz, direction) for cx, cz in (line if k == 0 else line[1:])]
+            x, z = line[-1]
+        xs = [c[0] for c in self.bunker_line]
+        zs = [c[1] for c in self.bunker_line]
+        self.bunker_box = (min(xs) - half, min(zs) - half, max(xs) + half + 1, max(zs) + half + 1)
         shaft = Space("bunker_shaft", "Bunker shaft", "bunker", p.HATCH["hole"], top, -1 - top)
-        for x, z in cells(p.HATCH["hole"]):
+        for cx, cz in cells(p.HATCH["hole"]):
             for y in range(top + 1, 0):
-                self.air.setdefault((x, y, z), ("bunker", floor))
+                self.air.setdefault((cx, y, cz), ("bunker", floor))
         self.spaces.append(shaft)
-        for x in range(hx0, hx1):                        # the ladder, on the shaft's north wall
+        for cx in range(hx0, hx1):                       # the ladder, on the shaft's north wall
             for y in range(floor + 1, 0):
-                self.fittings[(x, y, hz0)] = f"{p.BLOCKS['ladder']}[facing=south,waterlogged=false]"
-                self.passable.add((x, y, hz0))
-        # The door to Level 4 in the far wall, its sign over it.
-        dz = self.bunker_box[3]
-        self.l4_door = (cx, floor + 1, dz)
-        for y, half in ((floor + 1, "lower"), (floor + 2, "upper")):
-            self.fittings[(cx, y, dz)] = f"{p.BLOCKS['door']}[facing=north,half={half},hinge=left,open=false,powered=false]"
-            self.passable.add((cx, y, dz))
-        self.fittings[(cx, floor + 3, dz)] = self.glyphs.wall_state(p.NEXT_LEVEL_SIGN, "north")
+                self.fittings[(cx, y, hz0)] = f"{p.BLOCKS['ladder']}[facing=south,waterlogged=false]"
+                self.passable.add((cx, y, hz0))
+        # The door to Level 4 in the wall at the end, its sign over it, both facing back down the tunnel.
+        ex, ez, direction = self.bunker_line[-1]
+        dx, dz = DIRS[direction]
+        back = OPPOSITE[direction]
+        self.l4_door = (ex + dx, floor + 1, ez + dz)
+        self.l4_front = (ex, floor + 1, ez)
+        for y, part in ((floor + 1, "lower"), (floor + 2, "upper")):
+            self.fittings[(ex + dx, y, ez + dz)] = f"{p.BLOCKS['door']}[facing={back},half={part},hinge=left,open=false,powered=false]"
+            self.passable.add((ex + dx, y, ez + dz))
+        self.fittings[(ex + dx, floor + 3, ez + dz)] = self.glyphs.wall_state(p.NEXT_LEVEL_SIGN, back)
         self.bunker_floor = floor
+
+    def bunker_from_door(self, k0, k1):
+        """The tunnel's cells k1..k0 blocks before the door to Level 4 (on its last leg), its
+        full width: a box (x0, z0, x1, z1)."""
+        half = self.p.BUNKER["width"] // 2
+        ex, ez, direction = self.bunker_line[-1]
+        dx, dz = DIRS[direction]
+        pts = [(ex - dx * (k - 1), ez - dz * (k - 1)) for k in (k0, k1)]
+        xs = [x + o for x, _ in pts for o in ((-half, half) if dz else (0,))]
+        zs = [z + o for _, z in pts for o in ((-half, half) if dx else (0,))]
+        return min(xs), min(zs), max(xs) + 1, max(zs) + 1
+
+    def bunker_fittings(self):
+        """The tunnel's open blast doors and the services along it. A blast door: a frame of
+        hazard-striped steel round the tunnel (walls, ceiling, a threshold in the floor) and
+        its leaf, 3 blocks long, folded back against the right-hand wall just past the frame.
+        Then pipes along the ceiling on the left, a cable tray on the right, joined round the
+        turns, kept off the lights, the ladder, the leaves and the shaft's opening."""
+        p = self.p
+        b = p.BUNKER
+        half, floor = b["width"] // 2, self.bunker_floor
+        top = floor + b["height"]
+        line = self.bunker_line
+        for at in b["blast_doors"]:
+            x, z, direction = line[at]
+            dx, dz = DIRS[direction]
+            if any(line[j][2] != direction for j in range(at - 2, at + 5)):
+                raise SystemExit(f"LEVEL_3 BUNKER blast door at {at}: too near a turn")
+            rx, rz = -dz, dx                             # to the right, going on
+            for o in (-half - 1, half + 1):
+                for y in range(floor + 1, top + 1):
+                    self.fittings[(x + rx * o, y, z + rz * o)] = p.BLOCKS["blast_frame"]
+            for o in range(-half - 1, half + 2):
+                self.fittings[(x + rx * o, top + 1, z + rz * o)] = p.BLOCKS["blast_frame"]
+            for o in range(-half, half + 1):
+                self.fittings[(x + rx * o, floor, z + rz * o)] = p.BLOCKS["blast_frame"]
+            inward = NAMES[(-rx, -rz)]
+            for j in range(1, 4):
+                for y in range(floor + 1, top + 1):
+                    self.fittings[(x + dx * j + rx * half, y, z + dz * j + rz * half)] = f"{p.BLOCKS['blast_leaf']}[facing={inward}]"
+
+        def run(offset):
+            out = set()
+            for x, z, direction in line:
+                dx, dz = DIRS[direction]
+                rx, rz = -dz, dx
+                for j in (-1, 0, 1):                     # a cell past each end, to meet round a turn
+                    c = (x + rx * offset + dx * j, top, z + rz * offset + dz * j)
+                    if c in self.air and c not in self.fittings and (c[0], top + 1, c[2]) not in self.air:
+                        out.add(c)
+            return out
+
+        flat = {n: (v[0], 0, v[1]) for n, v in DIRS.items()}               # a tray joins only sideways
+        for cells_, block, sides in ((run(-half), p.BLOCKS["pipe"], DIRS6), (run(half), p.BLOCKS["cable_tray"], flat)):
+            for (x, y, z) in cells_:
+                arms = {n: (x + d[0], y + d[1], z + d[2]) in cells_ for n, d in sides.items()}
+                self.fittings[(x, y, z)] = block + "[" + ",".join(f"{k}={'true' if v else 'false'}" for k, v in sorted(arms.items())) + "]"
 
     # --- the shell -----------------------------------------------------------------
 
@@ -263,7 +340,7 @@ class Offices:
                 for z in grid(z0, z1 - 1, sp):
                     self.light(x, s.height, z, axis)
         for s in self.spaces:
-            if s.id.startswith("inner_corridor") or s.id in ("valve_corridor", "bunker_corridor"):
+            if s.id.startswith(("inner_corridor", "bunker_corridor")) or s.id == "valve_corridor":
                 self.corridor_lights(s)
         x0, z0, x1, z1 = p.ANTECHAMBER
         for x in grid(x0, x1 - 1, sp):
@@ -383,15 +460,12 @@ class Offices:
         self.zone("checkpoint_door", (mid - 1, cz, mid + 1, cz + 1), 1, 2, ["valve_door"])
         self.zone("antechamber", p.ANTECHAMBER, 1, H["antechamber"])
         floor, bh = self.bunker_floor, p.BUNKER["height"]
-        self.zone("bunker_shaft", p.HATCH["hole"], floor + bh + 1, 0)
-        self.zone("bunker_corridor", self.bunker_box, floor + 1, floor + bh)
-        bx0, bz0, bx1, bz1 = self.bunker_box
-        dz = bz1                                          # the door's wall row
+        self.zone("bunker_shaft", p.HATCH["hole"], floor + bh + 1, 0, ["observer_never"])
+        self.zone("bunker_corridor", self.bunker_box, floor + 1, floor + bh, ["observer_never"])
         (t0, t1), (b0, b1) = p.COLLAPSE["trigger"], p.COLLAPSE["blocks"]
-        self.zone("collapse", (bx0, dz - t0, bx1, dz - t1 + 1), floor + 1, floor + bh, ["collapse"])
-        self.zone("collapse_blocks", (bx0, dz - b0, bx1, dz - b1 + 1), floor + 1, floor + bh, ["collapse_blocks"])
-        cx = self.l4_door[0]
-        self.zone("end", (cx - 1, dz - 3, cx + 2, dz), floor + 1, floor + 3, ["end"])
+        self.zone("collapse", self.bunker_from_door(t0, t1), floor + 1, floor + bh, ["collapse"])
+        self.zone("collapse_blocks", self.bunker_from_door(b0, b1), floor + 1, floor + bh, ["collapse_blocks"])
+        self.zone("end", self.bunker_from_door(3, 1), floor + 1, floor + 3, ["end"])
 
         sx, sz, facing = p.PLAYER_START
         self.spawn("player_start", sx, 1, sz, facing, ["player"])

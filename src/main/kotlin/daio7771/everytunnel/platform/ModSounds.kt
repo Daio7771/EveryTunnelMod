@@ -59,6 +59,8 @@ object ModSounds {
     /** Level 3's book phase: the library clock's tick and tock in the head, quickening as the Observer nears ([BookPhaseHooks]). */
     val OBSERVER_TICK = event("event.observer.tick")
     val OBSERVER_TOCK = event("event.observer.tock")
+    /** Level 3's tunnel ceiling coming down behind the player ([CollapseHooks]): stereo, in the head. */
+    val COLLAPSE = event("event.collapse")
 
     /** Level 3's bunker hatch opening by itself, the fifth book back ([BookHooks]): a heavy latch, the trapdoors swinging up. */
     val HATCH_OPEN = event("block.hatch.open", range = 48f)

@@ -42,6 +42,7 @@ KDoc comment that says more.
 | `ResourceSystem.kt` | Stamina, thirst and battery simulation, as pure functions |
 | `NoiseSystem.kt` | Noise events, their memory, audibility, and the rules that pick radii |
 | `FlashlightBeam.kt` | The beam's light at any point (cone, falloff, hot spot, glow) |
+| `CollapseSchedule.kt` | The timing of Level 3's tunnel collapse: rubble, flicker, dust, the camera shake's strength |
 | `ObserverNearness.kt` | Level 3's book phase: the clock's pace and volume and the "He's near" warning from the Observer's distance |
 
 ### `entities/`
@@ -138,6 +139,7 @@ KDoc comment that says more.
 | `NoteHooks.kt` | Reading a note (board or sheet): finds its id, sends it with the valve digits |
 | `CarryHooks.kt` | Carrying a box or a book: in the hand, never dropped, no sprint, back on death |
 | `BookHooks.kt` | Level 3's book puzzle: books appear, handed in at the counter, the hatch opens, debug |
+| `CollapseHooks.kt` | Level 3's tunnel collapse: sound, shake, rubble, dust, flickering lights; undone on a death or new game |
 | `BookPhaseHooks.kt` | While the books are out: the clock in the head and the "He's near. Hide." warning |
 | `BoxHooks.kt` | Level 3's box puzzle: boxes out at random, carrying, the shelf, death, debug |
 | `HidingHooks.kt` | Hiding in lockers: in, out, no noise inside, out on a new game |
@@ -177,6 +179,7 @@ KDoc comment that says more.
 | `AmbiencePlayer.kt` | Level loop and random positioned sounds |
 | `FluorescentHum.kt` | Hum of the 4 nearest lights |
 | `HeartbeatEffect.kt` | Heartbeat by distance to the Pale man |
+| `CameraShake.kt` | The camera shaking in Level 3's tunnel collapse |
 | `BreathingEffect.kt` | Heavy breathing when exhausted |
 | `TensionMusic.kt` | Music layers from the Pale men's state |
 | `IntroMusic.kt` | The elevator song and its tape-stop fade |

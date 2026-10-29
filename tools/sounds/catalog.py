@@ -1111,6 +1111,50 @@ def hatch_open(rng, variant):
     return fade(drive(y, 1.2), 0.0, 0.5)
 
 
+def bunker_collapse(rng, variant):
+    """The bunker tunnel's ceiling coming down behind the player (CollapseHooks): a deep groan
+    in the concrete swelling for a second, sharp cracks running along it, then the fall: heavy
+    slabs and chunks crashing down one after another over a low roar, rubble sliding and
+    trickling after, and the tunnel's dull echo. Stereo, in the player's head, mostly behind:
+    the left and right differ a little so it feels wide. 6 s."""
+    seconds = 6.0
+    n = samples(seconds)
+    t = time_axis(n)
+    chans = []
+    for side in (0, 1):
+        y = np.zeros(n)
+        # The groan: very low, rising and wavering, before anything gives way.
+        groan = lowpass(shaped_noise(n, rng, 2.0, 18.0, 90.0), 90.0)
+        groan *= envelope(n, [(0.0, 0.0), (0.6, 0.5), (1.1, 1.0), (2.5, 0.8), (4.5, 0.2), (seconds, 0.0)])
+        y += 0.45 * groan * (0.8 + 0.2 * smooth_random(n, 3.0, rng))
+        # Cracks: dry, sharp, quickening, as the concrete splits.
+        at = 0.55
+        while at < 1.25:
+            y += burst(n, rng, at, rng.uniform(0.01, 0.03), lo=900.0, hi=7000.0, tau=0.008, amp=rng.uniform(0.4, 0.9))
+            at += rng.uniform(0.05, 0.16)
+        # The fall: big slabs, then smaller chunks, crowding together, over a roar.
+        roar = shaped_noise(n, rng, 1.5, 40.0, 900.0) * envelope(n, [(0.0, 0.0), (1.2, 0.0), (1.4, 1.0), (2.8, 0.7), (4.6, 0.15), (seconds, 0.0)])
+        y += 0.14 * roar
+        at = 1.2
+        while at < 3.6:
+            big = at < 2.2
+            base = rng.uniform(45, 70) if big else rng.uniform(90, 160)
+            ratios = sorted(rng.uniform(1.0, 5.0, 6))
+            y += (1.0 if big else 0.45) * knock(n, rng, at, base, ratios, [1.0 / (1 + i * 0.5) for i in range(6)],
+                                               [0.25 / (1 + i * 0.4) for i in range(6)], click=0.8, click_hi=2500.0)
+            y += burst(n, rng, at, 0.06 if big else 0.03, hi=1500.0 if big else 3000.0, tau=0.03, amp=1.2 if big else 0.6)
+            at += rng.uniform(0.12, 0.3) if big else rng.uniform(0.05, 0.15)
+        # Rubble sliding, settling, a last trickle of grit.
+        grit = shaped_noise(n, rng, 0.5, 1500.0, 9000.0) * np.abs(smooth_random(n, 25.0, rng))
+        y += 0.1 * grit * envelope(n, [(0.0, 0.0), (1.6, 0.0), (2.4, 1.0), (4.2, 0.5), (5.6, 0.1), (seconds, 0.0)])
+        for _ in range(8):
+            y += burst(n, rng, rng.uniform(3.6, 5.4), 0.015, lo=1500.0, hi=6000.0, tau=0.006, amp=rng.uniform(0.1, 0.3))
+        # The tunnel answering, dark.
+        y += 0.45 * hall_reverb(lowpass(y, 2500.0), rng, 2.2, 900.0)[:n]
+        chans.append(y)
+    return stereo(*(fade(drive(0.25 * c, 1.3), 0.0, 0.6) for c in chans))
+
+
 def observer_alert(rng, variant):
     """Somewhere far off in the offices, something noticed: a heavy door knocked against its
     frame a long way down the corridors (low, dull, with the building's long echo), then the
@@ -1284,6 +1328,8 @@ SOUNDS = [
           observer_approach, -4.0, stream=True),
     Sound("music.observer.chase", "Level 3 / the Observer", "He runs at you: the clock gone mad (160 bpm, 8 bars)", "stereo", True, 1,
           observer_chase, -1.0, stream=True),
+    Sound("event.collapse", "Level progress", "Level 3: the bunker tunnel's ceiling coming down behind the player (groan, cracks, slabs, rubble)",
+          "stereo", False, 1, bunker_collapse, -1.0),
     Sound("block.hatch.open", "Level progress", "Level 3's bunker hatch opening by itself (bolt, trapdoors banging up, the shaft booming)",
           "mono", False, 1, hatch_open, -1.0, attenuation=48),
     Sound("event.observer.alert", "Level progress", "Level 3: something far off noticed (a box went on the shelf); a placeholder for the observant guard",

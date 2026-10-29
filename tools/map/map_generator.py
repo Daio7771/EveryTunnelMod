@@ -241,12 +241,17 @@ LEVEL_3 = dict(
     PLAYER_START=(80, 196, "north"),                     # (x, z, facing), in the antechamber
     # The hatch in the library's centre: a 4 x 4 frame round a 2 x 2 hole down to the bunker.
     HATCH=dict(frame=(78, 96, 82, 100), hole=(79, 97, 81, 99)),
-    # The bunker: its corridor's floor `depth` blocks under the main floor, `width` wide and
-    # `length` long, running south from the foot of the shaft to the door to Level 4.
-    BUNKER=dict(depth=7, width=3, length=32, height=4),
-    # Zones in the bunker corridor, in blocks before the door to Level 4 (from, to): where the
-    # collapse goes off, and the stretch behind the player its blocks will fill.
-    COLLAPSE=dict(trigger=(5, 2), blocks=(9, 6)),
+    # The bunker: its tunnel's floor `depth` blocks under the main floor, `width` wide and
+    # `height` high, from the foot of the shaft to the door to Level 4 along `path`: (direction,
+    # length) legs, each starting on the last one's end cell (so a turn shares its corner).
+    # Pipes run along its ceiling on one side, a cable tray on the other; `blast_doors`: open
+    # blast doors, at these distances along the path (on a straight stretch, 2 blocks or more
+    # from a turn and with 3 more after them for the leaf folded against the wall).
+    BUNKER=dict(depth=7, width=3, height=4, path=[("south", 24), ("west", 22), ("south", 22), ("east", 26)],
+                blast_doors=[16, 56]),
+    # Zones in the last leg of the tunnel, in blocks before the door to Level 4 (from, to):
+    # where the collapse goes off, and the stretch behind the player its rubble fills.
+    COLLAPSE=dict(trigger=(14, 12), blocks=(20, 17)),
     GUARD_SPAWN=(80, 88),            # the Observer: (x, z), in the library's north-south aisle; he patrols the library
     # Ambience (AmbienceHooks): the empty offices' room tone and, rarely, a phone ringing far off,
     # everywhere; the library has its slow clock instead (with the phone), the bunker silence.
@@ -336,6 +341,9 @@ LEVEL_3 = dict(
         valve="every_tunnel:valve",
         hatch_frame="every_tunnel:checker_plate",
         hatch_lid="every_tunnel:bunker_trapdoor",
+        blast_frame="every_tunnel:hazard_steel",
+        blast_leaf="every_tunnel:blast_door",
+        cable_tray="every_tunnel:cable_tray",
     ),
 )
 

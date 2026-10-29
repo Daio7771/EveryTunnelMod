@@ -141,8 +141,9 @@ the server starts (levels built together name the same one). The function must e
 | `observer_home` | `ObserverEntity` | The zone the Observer patrols and goes back to (Level 3's library) |
 | `book_hatch` | `BookHooks` | The trapdoors the fifth book back opens (Level 3's bunker hatch); a new game shuts them |
 | `checkpoint` | (none yet) | Level 3: just past the checkpoint door, where a death will restart |
-| `collapse` | (none yet) | Level 3: walking in will bring the bunker corridor's ceiling down behind the player |
-| `collapse_blocks` | (none yet) | Level 3: the stretch of corridor the collapse will fill |
+| `collapse` | `CollapseHooks` | Level 3: walking in brings the bunker tunnel's ceiling down behind the player (once per game) |
+| `collapse_blocks` | `CollapseHooks` | Level 3: the stretch of tunnel the collapse fills with rubble |
+| `observer_never` | `ObserverEntity` | Level 3's bunker shaft and tunnel: the Observer sees no one there, so never follows anyone down |
 
 ### Spawn point tags
 

@@ -156,6 +156,7 @@ Kept to the minimum: a mixin only where Fabric API has no event.
 | `ServerWorldMixin` | `ServerWorld.emitGameEvent` | Lets the noise system hear doors, levers, chests (vanilla "vibrations"); changes nothing |
 | `LivingEntityMixin` | `LivingEntity.shouldSpawnConsumptionEffects` | No vanilla sipping sound for the water bottle; it plays its own gulps |
 | `ClientPlayerEntityMixin` | `canSprint` | No sprinting while exhausted (sprint is decided on the client) |
+| `GameRendererMixin` | `tiltViewWhenHurt` (tail) | Shakes the camera in Level 3's tunnel collapse (`CameraShake`) |
 | `InGameHudMixin` | `renderStatusBars`, `renderExperienceBar` | Hides vanilla bars while the mod's HUD replaces them |
 | `AbstractClientPlayerEntityMixin` | `getSkinTexture`, `getModel`, `getCapeTexture` | Every player wears the guard uniform in level worlds |
 | `LightmapTextureManagerMixin` | `update` (gamma) | Brightness counts as Moody in the levels |

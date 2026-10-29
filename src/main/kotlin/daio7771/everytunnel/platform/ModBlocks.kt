@@ -280,6 +280,12 @@ object ModBlocks {
     )
     /** Text on a wall in the game's font (Level 3's nameplates and entrance lettering), drawn by its block entity. */
     val WALL_TEXT: Block = register("wall_text", WallTextBlock(props(MapColor.CLEAR, ModSoundGroups.PLASTIC).noCollision()))
+    /** Steel painted in yellow and black stripes: the frames of Level 3's blast doors. */
+    val HAZARD_STEEL: Block = register("hazard_steel", Block(solid(MapColor.YELLOW, ModSoundGroups.SHEET_METAL)))
+    /** A piece of an open blast door's leaf, a thick plate against the wall (Level 3's bunker tunnel). */
+    val BLAST_DOOR: Block = register(
+        "blast_door", PropBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 11, 16, 16, 16))),
+    )
     /** A leaf of Level 3's bunker hatch: a steel trapdoor nobody opens by hand ([BookHooks] does). */
     val BUNKER_TRAPDOOR: Block = register("bunker_trapdoor", TrapdoorBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), BlockSetType.IRON))
     /** The library's card catalogue: rows of small drawers with brass pulls. */

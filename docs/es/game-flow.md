@@ -177,9 +177,9 @@ Reabrir el mundo o reaparecer dentro de un nivel no cuenta como entrar.
 
 Las oficinas del complejo alrededor de la biblioteca central, en perfecto estado y vacías.
 Hecho hasta ahora: la estructura, los muebles, el puzle de las válvulas, las taquillas y los
-puzles de las cajas y los libros que abren el búnker, el Observer, los documentos de la empresa y el loot; falta el derrumbe, con sus zonas ya en el
-archivo del nivel (ver [Niveles](levels.md#ganchos-del-nivel-3)). La música queda para el
-final.
+puzles de las cajas y los libros que abren el búnker, el Observer, los documentos de la empresa, el loot, las
+placas de las salas y el túnel del búnker con su derrumbe (ver [Niveles](levels.md#ganchos-del-nivel-3)).
+No tiene música propia (hay una preparada para el nivel 4).
 
 El **ambiente** es el casi silencio de un edificio de oficinas vacío
 (`ambient.offices.room_tone`) con, de tarde en tarde (cada 1,5 a 4 minutos), un teléfono que
@@ -300,8 +300,19 @@ silencio.
   (`bunker_trapdoor`, una trampilla que nadie abre a mano) con una banda amarilla y negra junto a
   las bisagras, una con bisagra al oeste y otra al este, en un marco
   de chapa estriada, cerradas hasta que vuelven los libros. Debajo, una escalera de mano baja por un pozo hasta un
-  pasillo iluminado que recorre 32 bloques hacia el sur hasta la puerta a B4, donde termina
-  la demo.
+  **túnel del búnker**: unos 90 bloques de hormigón iluminado, de 3 de ancho, en cuatro tramos
+  en ángulo recto (`BUNKER["path"]`), con tuberías por el techo a un lado y una bandeja de
+  cables al otro, que pasa por dos puertas blindadas abiertas (un marco de acero con franjas,
+  `hazard_steel`, y la hoja plegada contra la pared, `blast_door`) hasta la puerta a B4, donde
+  termina la demo. El Observer nunca baja detrás de nadie (el pozo y el túnel tienen la
+  etiqueta `observer_never`).
+- **El derrumbe** (`CollapseHooks`, tiempos en `systems.CollapseSchedule`): unos 13 bloques
+  antes de la puerta, el techo del túnel cae detrás del jugador: un crujido, grietas y el
+  estruendo de la caída (`event.collapse`), la cámara tiembla (`CameraShake`), el tramo de
+  detrás se llena de escombros en segundo y medio (el hormigón del túnel y pizarra profunda),
+  cae polvo y las luces de alrededor parpadean. No hay vuelta atrás; una vez por partida. Una
+  muerte en el nivel 3 (el jugador vuelve a empezar en la antesala), una partida nueva y la
+  reconstrucción del mapa quitan los escombros.
 
 ## 10. El final
 

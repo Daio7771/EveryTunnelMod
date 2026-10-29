@@ -4,6 +4,7 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.effects.AmbiencePlayer
 import daio7771.everytunnel.client.effects.BreathingEffect
 import daio7771.everytunnel.client.effects.FlashlightEffect
+import daio7771.everytunnel.client.effects.CameraShake
 import daio7771.everytunnel.client.effects.HeartbeatEffect
 import daio7771.everytunnel.client.effects.IntroMusic
 import daio7771.everytunnel.client.effects.FluorescentHum
@@ -68,6 +69,7 @@ object EveryTunnelClient : ClientModInitializer {
         FlashlightEffect.register()
         BreathingEffect.register()
         HeartbeatEffect.register()
+        CameraShake.register()
         TensionMusic.register()
         IntroMusic.register()
         AmbiencePlayer.register()
