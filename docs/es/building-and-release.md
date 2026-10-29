@@ -18,7 +18,7 @@
 | `./gradlew runClient` | El juego, en el menú principal |
 | `./gradlew runClientMapWorld` | Directo a `noname_complex` (quick play). Falla enseguida si falta el mundo o su datapack |
 | `./gradlew runClientDevWorld` | Directo a `dev_flat`, el mundo plano de pruebas |
-| `./gradlew everytunnerBuild` | El jar de release: `build/libs/everytunner_build.jar` |
+| `./gradlew everytunnerBuild` | El jar de release: `build/libs/everytunnel-<version>.jar` |
 | `./gradlew runDatagen` | Generación de datos de Fabric (sin proveedores; los recursos salen de las herramientas Python) |
 
 Las ejecuciones de desarrollo viven en `run/` (no está en git) y siempre entran como `Dev`,
@@ -46,7 +46,7 @@ arriba; `python3 tools/map/map_generator.py`; `./gradlew runClientMapWorld`.
 
 ## El jar de release
 
-`./gradlew everytunnerBuild` → `build/libs/everytunner_build.jar` (unos 21 MB). Un solo jar
+`./gradlew everytunnerBuild` → `build/libs/everytunnel-<version>.jar` (unos 26 MB). Un solo jar
 con todo menos Fabric Loader y LambDynamicLights:
 
 | Dentro | Cómo |
@@ -76,7 +76,7 @@ No van dentro, por licencias:
 ### Lo que hace un jugador
 
 1. Instalar Fabric Loader 0.19.5 o más nuevo para Minecraft 1.20.1.
-2. Poner `everytunner_build.jar` y LambDynamicLights (4.4.0 o más nuevo) en `mods/`.
+2. Poner `everytunnel-<version>.jar` y LambDynamicLights (4.4.0 o más nuevo) en `mods/`.
 3. Opcional: Sodium + Iris + Indium y un shader pack Complementary, y Sound Physics
    Remastered.
 4. Arrancar el juego y pulsar BEGIN.

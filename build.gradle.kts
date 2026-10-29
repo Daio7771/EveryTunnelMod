@@ -276,13 +276,17 @@ tasks.jar {
 }
 
 // The jar to hand out: everything inside but LambDynamicLights (map world, GeckoLib, Fabric
-// API, Kotlin). ./gradlew everytunnerBuild -> build/libs/everytunner_build.jar
+// API, Kotlin). ./gradlew everytunnerBuild -> build/libs/everytunnel-<mod_version>.jar: the version
+// in the name, so a player can tell which one they downloaded.
 tasks.register<Copy>("everytunnerBuild") {
-    description = "Builds the mod and copies it to build/libs/everytunner_build.jar."
+    description = "Builds the mod and copies it to build/libs/everytunnel-<version>.jar."
     dependsOn(tasks.named("build"))
     from(tasks.named("remapJar"))
     into(layout.buildDirectory.dir("libs"))
-    rename { "everytunner_build.jar" }
+    val jarName = "everytunnel-${project.version}.jar"
+    // The name as an input: a new name copies again even when the jar is unchanged.
+    inputs.property("jarName", jarName)
+    rename { jarName }
 }
 
 // configure the maven publication
