@@ -20,18 +20,20 @@ import net.minecraft.util.ActionResult
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
+import kotlin.random.Random
 
 /**
  * Level 3's book puzzle, after the boxes ([BoxHooks]), in worlds with levels.
  *
- * - **The books appear** ([appear]) once the ten boxes are on Storage's shelf: an office book
- *   ([OfficeBookBlock]) on the filing cabinet of each of the five book rooms (spawn points
- *   tagged [SPOT_TAG]), in silence.
+ * - **The books appear** ([appear]) once the ten boxes are on Storage's shelf: five office
+ *   books ([OfficeBookBlock]), in silence, at spots picked at random among the level's spawn
+ *   points tagged [SPOT_TAG] (in the library: on book carts, on the floor of the aisles, on the
+ *   card catalogue).
  * - **Carried** like the boxes ([CarryHooks]): one thing at a time, kept in the hand, never
- *   dropped, no sprinting; dying puts it back on its cabinet. They alert no one.
+ *   dropped, no sprinting; dying puts it back where it was found. They alert no one.
  * - **Handed in** ([deliver]) by right-clicking the librarian's desk round the hatch (library
- *   counters; or a book already on it): the book lies at the next free one of the five places on it (spawn points tagged
- *   [RETURN_TAG]), and "2 / 5" shows above the hotbar.
+ *   counters; or a book already on it): the book lies at the next free one of the five places
+ *   on it (spawn points tagged [RETURN_TAG]), and "2 / 5" shows above the hotbar.
  * - **The fifth** opens the bunker hatch by itself: the steel trapdoors in the zones tagged
  *   [HATCH_TAG] swing open with a heavy latch (`block.hatch.open`), and everyone there earns
  *   "Shhh!".
@@ -65,17 +67,16 @@ object BookHooks {
     private fun levelAt(world: ServerWorld, pos: BlockPos): LevelDefinition? =
         LevelManager.levelAt(world.registryKey.value.toString(), pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)
 
-    /** The boxes are done: a book on each book room's cabinet. */
-    fun appear(world: ServerWorld, level: LevelDefinition) {
-        val spots = positions(level, SPOT_TAG)
-        for (pos in spots) {
-            if (!world.getBlockState(pos).isAir) {
-                EveryTunnel.LOGGER.warn("Book spot {} in {} is not free: no book there", pos, level.id)
-                continue
-            }
+    /** The boxes are done: as many books as the desk has places, at spots picked at random; where they lie. */
+    fun appear(world: ServerWorld, level: LevelDefinition): List<BlockPos> {
+        val count = positions(level, RETURN_TAG).size
+        val chosen = positions(level, SPOT_TAG).filter { world.getBlockState(it).isAir }.shuffled(Random.Default).take(count)
+        if (chosen.size < count) EveryTunnel.LOGGER.warn("{} has only {} free book spots for {} books", level.id, chosen.size, count)
+        for (pos in chosen) {
             world.setBlockState(pos, ModBlocks.OFFICE_BOOK.defaultState.with(PropBlock.FACING, Direction.Type.HORIZONTAL.random(world.random)))
         }
-        EveryTunnel.LOGGER.info("The books of {} appear: {}", level.id, spots.joinToString(" ") { "(${it.x} ${it.y} ${it.z})" })
+        EveryTunnel.LOGGER.info("The books of {} appear: {}", level.id, chosen.joinToString(" ") { "(${it.x} ${it.y} ${it.z})" })
+        return chosen
     }
 
     /** [player] right-clicked the book lying at [pos]: into the hand. */
@@ -149,11 +150,11 @@ object BookHooks {
         val world = world(server, level) ?: return@mapNotNull null
         val back = returns.count { world.getBlockState(it).isOf(ModBlocks.OFFICE_BOOK) }
         val lying = positions(level, SPOT_TAG).filter { world.getBlockState(it).isOf(ModBlocks.OFFICE_BOOK) }
-        "${level.id}: $back / ${returns.size} on the counter; lying at " +
+        "${level.id}: $back / ${returns.size} on the desk; lying at " +
             lying.joinToString(" ") { "(${it.x} ${it.y} ${it.z})" }.ifEmpty { "nowhere" }
     }
 
-    /** For `/everytunnel books fill`: the books out, all but one already on the counter (to test the last). */
+    /** For `/everytunnel books fill`: the boxes done, the books out, all but one already on the desk (to test the last). */
     fun fillAllButOne(server: MinecraftServer): Int {
         var done = 0
         for (level in LevelManager.all()) {
@@ -161,10 +162,10 @@ object BookHooks {
             if (returns.isEmpty()) continue
             val world = world(server, level) ?: continue
             clear(world, level)
-            appear(world, level)
-            val spots = positions(level, SPOT_TAG)
+            BoxHooks.fillShelf(world, level)
+            val lying = appear(world, level)
             for ((i, place) in returns.dropLast(1).withIndex()) {
-                spots.getOrNull(i)?.let { world.removeBlock(it, false) }
+                lying.getOrNull(i)?.let { world.removeBlock(it, false) }
                 world.setBlockState(place, ModBlocks.OFFICE_BOOK.defaultState.with(OfficeBookBlock.DELIVERED, true))
             }
             done++

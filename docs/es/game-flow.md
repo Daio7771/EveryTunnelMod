@@ -177,7 +177,7 @@ Reabrir el mundo o reaparecer dentro de un nivel no cuenta como entrar.
 
 Las oficinas del complejo alrededor de la biblioteca central, en perfecto estado y vacías.
 Hecho hasta ahora: la estructura, los muebles, el puzle de las válvulas, las taquillas y los
-puzles de las cajas y los libros que abren el búnker, el Observer y los documentos de la empresa; faltan el loot y el derrumbe, con sus zonas y puntos de spawn ya en el
+puzles de las cajas y los libros que abren el búnker, el Observer, los documentos de la empresa y el loot; falta el derrumbe, con sus zonas ya en el
 archivo del nivel (ver [Niveles](levels.md#ganchos-del-nivel-3)). La música queda para el
 final.
 
@@ -211,6 +211,12 @@ silencio.
   la biblioteca tiene filas de estanterías de cuatro de alto, a dos bloques unas de otras,
   alrededor de un claro, y en él la mesa del bibliotecario en U alrededor de la
   trampilla, abierta al sur, con una lámpara de latón y pantalla verde (`desk_lamp`). No hay nadie.
+- **Loot:** en el nivel 3 no hay botellas. El dispensador de agua de la cafetería da agua: con
+  clic derecho el jugador bebe ahí, cuantas veces quiera, lo que da una botella cada vez (como
+  mucho una vez cada 1,5 s; hace el ruido de beber), `WaterDispenserHooks`, el dispensador en
+  el punto de spawn con la etiqueta `water_source` (`WATER_SOURCES`; los demás dispensadores
+  son solo muebles). Tres baterías en el suelo de la sala Electrical del anillo (`LOOT`, puntos
+  de spawn con la etiqueta `battery`, que coloca `LootSpawner` como el loot de los garajes).
 - **Los documentos de la empresa** (el lore): cinco folios mecanografiados sueltos
   (`NotePaperBlock`), cada uno en la mesa o el mostrador más cercano a las puertas de su sala
   (`NOTE_PAPERS`): un memorando sobre la supervisión de la sala de lectura (HR), el
@@ -268,17 +274,19 @@ silencio.
   (`client.hud.LockerView`). Dentro, el jugador no hace ningún ruido. Otro clic derecho o
   agacharse le saca delante de la puerta; en los dos sentidos suena la puerta
   (`block.locker.door`, que no es ruido para los enemigos). Una partida nueva saca a todos.
-- **El puzle de los libros** (`BookHooks`): con las cajas puestas aparece, en silencio, un
-  libro de oficina (`OfficeBookBlock`, azul grisáceo, a brillo completo) sobre el archivador de
-  cada una de las cinco salas con libro (puntos con la etiqueta `book_spot`). Se llevan como
+- **El puzle de los libros** (`BookHooks`): con las cajas puestas aparecen, en silencio,
+  cinco libros de oficina (`OfficeBookBlock`, azul grisáceo, a brillo completo) en la biblioteca,
+  su terreno: en cinco de sus 13 sitios elegidos al azar (puntos con la etiqueta `book_spot`):
+  sobre carritos de libros (`book_cart`) y en el suelo de los pasillos entre las estanterías, y
+  uno sobre el fichero junto a la puerta sur (`LIBRARY_LAYOUT["books"]`). Se llevan como
   las cajas y no avisan a nadie. Un clic derecho en la mesa del bibliotecario alrededor de la
   trampilla (o en un libro ya puesto) entrega uno: queda tumbado en el siguiente de cinco
   sitios repartidos por la mesa (con la etiqueta `book_return`) y sale "2 / 5". El quinto
   abre la trampilla solo (la zona con la etiqueta `book_hatch`: sus hojas de acero se
   levantan con `block.hatch.open`) y se consigue "Shhh!". Al morir, un libro en la mano vuelve
-  a su archivador; solo una partida nueva quita los libros y cierra la trampilla.
-  `/everytunnel books` dice dónde están y `books fill` los saca con todos menos uno ya en el
-  mostrador.
+  a donde estaba; solo una partida nueva quita los libros y cierra la trampilla.
+  `/everytunnel books` dice dónde están y `books fill` completa las cajas y saca los
+  libros con todos menos uno ya en la mesa.
   Mientras los libros están fuera (`BookPhaseHooks`, reglas en `systems.ObserverNearness`), el
   reloj de la biblioteca suena en la cabeza del jugador cuando el Observer está a 24 bloques o
   menos, tic y tac, cada 0,75 s en el borde y hasta cada 0,25 s a 4 bloques o menos, más fuerte

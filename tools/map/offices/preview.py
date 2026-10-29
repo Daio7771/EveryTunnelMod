@@ -17,7 +17,7 @@ FURNITURE_COLORS = {
     "filing_cabinet": (176, 180, 184), "metal_shelf": (176, 180, 184), "server_rack": (30, 32, 34),
     "locker": (120, 132, 148), "bench": (206, 182, 140), "sofa": (80, 90, 110), "vending_machine": (170, 48, 42),
     "water_dispenser": (120, 170, 210), "potted_plant": (70, 140, 70), "cardboard_box": (168, 130, 80),
-    "box_shelf": (200, 150, 236),
+    "box_shelf": (200, 150, 236), "book_cart": (150, 110, 74),
 }
 BOX_SPOT = (200, 70, 255)
 DOOR = (170, 110, 60)
@@ -110,10 +110,11 @@ def write(path, lv, stats, s=4):
     for x, y, z, _ in lv.box_spots:                     # the box puzzle's spots: a purple dot, ringed on furniture
         X0, Z0, X1, Z1 = rect(pad, x, z)
         d.rectangle((X0 + 1, Z0 + 1, X1 - 1, Z1 - 1), fill=BOX_SPOT, outline=(255, 255, 255) if y > 1 else None)
-    for sid, (x, y, z), _, tags, _ in lv.spawns:            # the book puzzle's places on the counter
-        if "book_return" in tags:
+    for sid, (x, y, z), _, tags, _ in lv.spawns:            # the book puzzle: its spots (blue, ringed on a cart or
+        if "book_return" in tags or "book_spot" in tags:   # the catalogue) and the places on the desk (ringed)
             X0, Z0, X1, Z1 = rect(pad, int(x), int(z))
-            d.rectangle((X0 + 1, Z0 + 1, X1 - 1, Z1 - 1), fill=(120, 150, 190), outline=(255, 255, 255))
+            ring = (255, 255, 255) if "book_return" in tags or y > 1 else None
+            d.rectangle((X0 + 1, Z0 + 1, X1 - 1, Z1 - 1), fill=(120, 150, 190), outline=ring)
     for letter, (x, y, z) in lv.valves:
         d.rectangle(rect(pad, x, z), fill=(240, 170, 50))
         X0, Z0, _, _ = rect(pad, x + 2, z)

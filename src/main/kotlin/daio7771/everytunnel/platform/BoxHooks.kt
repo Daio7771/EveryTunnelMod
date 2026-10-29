@@ -88,6 +88,14 @@ object BoxHooks {
         return ((world.getBlockEntity(foot) as? BoxShelfBlockEntity)?.count ?: 0) >= BOXES
     }
 
+    /** For `/everytunnel books fill`: every box on the shelf and none lying about (the boxes done, quietly). */
+    fun fillShelf(world: ServerWorld, level: LevelDefinition) {
+        val foot = shelfFoot(level) ?: return
+        val shelf = world.getBlockEntity(foot) as? BoxShelfBlockEntity ?: return
+        for (pos in spots(level)) if (world.getBlockState(pos).isOf(ModBlocks.PURPLE_BOX)) world.removeBlock(pos, false)
+        for (slot in 0 until BoxShelfBlock.SLOTS) if (!shelf.isFilled(slot)) shelf.set(slot, true)
+    }
+
     private fun spots(level: LevelDefinition): List<BlockPos> =
         level.spawnPoints.filter { SPOT_TAG in it.tags }.map { BlockPos.ofFloored(it.position.x, it.position.y, it.position.z) }
 

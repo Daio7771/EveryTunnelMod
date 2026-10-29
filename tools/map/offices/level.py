@@ -71,11 +71,13 @@ class Offices:
         self.passable = set()    # door, ladder and hatch cells a player gets through
         self.furniture = set()   # cells of solid furniture
         self.walk_through = set()  # cells of furniture a player walks through (chairs, plants...)
-        self.books = {}          # room id -> (x, z) of the cabinet its book lies on
+        self.book_spots = []     # [(x, y, z)]: in the library, where the books may lie (furnish.py)
         self.box_spots = []      # (x, y, z, zone id): where the box puzzle's boxes may lie (furnish.py)
         self.box_shelf = None    # (x, z, facing) of the box shelf's foot, in Storage (furnish.py)
         self.notes = {}          # note id -> (x, y, z) of its board or sheet
         self.book_returns = []   # [(x, z, facing)]: the places on the librarian's desk the books go back to
+        self.loot = []           # [(item, x, z, room id)] (furnish.py)
+        self.water_sources = []  # [(x, z, room id)]: the water dispensers drunk from
 
     # --- spaces --------------------------------------------------------------------
 
@@ -126,7 +128,7 @@ class Offices:
         self.fit_lights()
         self.valve_fittings()
         self.hatch()
-        self.books = furnish(self)
+        furnish(self)
         self.write_blocks()
         self.data()
         return self
@@ -395,11 +397,8 @@ class Offices:
         self.spawn("checkpoint", (cx0 + cx1) // 2, 1, cz - p.CHECKPOINT_DEPTH // 2 - 1, "north", ["checkpoint"])
         gx, gz = p.GUARD_SPAWN
         self.spawn("observant_guard", gx, 1, gz, "north", ["observant_guard"], "guard_area")
-        for s, kind in self.rooms:
-            if kind != "book":
-                continue
-            bx, bz = self.books[s.id]                    # on top of its filing cabinet
-            self.spawn(f"book_{s.id}", bx, 2, bz, "north", ["book_spot"], s.id)
+        for i, (x, y, z) in enumerate(self.book_spots):
+            self.spawn(f"book_{i + 1}", x, y, z, "north", ["book_spot"], "library")
         for i, (x, y, z, zone) in enumerate(self.box_spots):
             self.spawn(f"box_{i + 1}", x, y, z, "north", ["box_spot"], zone)
         if self.box_shelf:
@@ -412,10 +411,11 @@ class Offices:
             self.spawn(f"valve_{letter.lower()}", x, y, z, "west", ["valve"])
         for note_id, (x, y, z) in self.notes.items():
             self.spawn(note_id, x, y, z, "north", ["note"])
-        for tag, spots in (("battery_spot", p.BATTERY_SPOTS),
-                           ("water_spot", p.WATER_SPOTS), ("food_spot", p.FOOD_SPOTS)):
-            for i, (x, z) in enumerate(spots):
-                self.spawn(f"{tag[:-5]}_{i + 1}", x, 1, z, "north", [tag])
+        # The loot (LootSpawner reads the tag: the item) and the dispensers that give water.
+        for i, (item, x, z, room) in enumerate(self.loot):
+            self.spawn(f"{item}_{i + 1}", x, 1, z, "north", [item], room)
+        for x, z, room in self.water_sources:
+            self.spawn(f"water_source_{room}", x, 1, z, "north", ["water_source"], room)
         self.labels += [(p.VALVE_CORRIDOR[0] - 10, p.CHECKPOINT_Z, "checkpoint"),
                         ((p.ANTECHAMBER[0] + p.ANTECHAMBER[2]) // 2, p.ANTECHAMBER[1] + 6, "Electrical room"),
                         ((p.STAIRS[0] + p.STAIRS[2]) // 2, p.STAIRS[3] + 3, "stairs up to B2")]

@@ -121,6 +121,7 @@ con un comentario KDoc que cuenta más.
 | `ResourceSyncPacket.kt` | El paquete de recursos al cliente |
 | `FlashlightHooks.kt` | La petición de encender la linterna, las baterías, los avisos |
 | `DrinkHooks.kt` | Beber botellas de agua |
+| `WaterDispenserHooks.kt` | Beber en un dispensador de agua que da agua (la cafetería del nivel 3) |
 | `JumpCounter.kt` | Saltos por jugador a partir de la estadística de vanilla |
 | `NoiseHooks.kt` | Convierte pasos, saltos, aterrizajes, jadeos y game events en ruidos |
 | `AmbienceHooks.kt` | Envía a cada jugador el ambiente de su nivel |

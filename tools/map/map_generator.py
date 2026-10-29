@@ -195,20 +195,20 @@ LEVEL_3 = dict(
     # The inner corridor, a ring 4 wide round the library: north, south, west, east.
     INNER_CORRIDOR=[(43, 61, 117, 65), (43, 131, 117, 135), (43, 61, 47, 135), (113, 61, 117, 135)],
     LIBRARY_DOORS=[(78, 65, 82, 66), (78, 130, 82, 131), (47, 96, 48, 100), (112, 96, 113, 100)],
-    # The belt of rooms round the ring, 14 deep: (zone id, name, box, type). "book": a book
-    # lies there; "service": service rooms (battery loot); "office": an ordinary room.
+    # The belt of rooms round the ring, 14 deep: (zone id, name, box, type). "service": a
+    # service room (vinyl floor); "office": an ordinary room (carpet).
     ROOMS=[
-        ("archive", "Archive", (43, 46, 68, 60), "book"),
+        ("archive", "Archive", (43, 46, 68, 60), "office"),
         ("meeting_room", "Meeting room", (69, 46, 91, 60), "office"),
-        ("management", "Management", (92, 46, 117, 60), "book"),
-        ("finance", "Finance", (118, 61, 132, 85), "book"),
+        ("management", "Management", (92, 46, 117, 60), "office"),
+        ("finance", "Finance", (118, 61, 132, 85), "office"),
         ("servers", "Servers", (118, 86, 132, 110), "service"),
         ("office", "Office", (118, 111, 132, 135), "office"),
-        ("maintenance", "Maintenance", (43, 136, 61, 150), "book"),
+        ("maintenance", "Maintenance", (43, 136, 61, 150), "office"),
         ("storage", "Storage", (62, 136, 77, 150), "service"),
         ("electrical", "Electrical", (83, 136, 99, 150), "service"),
         ("lockers", "Lockers", (100, 136, 117, 150), "office"),
-        ("hr", "HR", (28, 61, 42, 85), "book"),
+        ("hr", "HR", (28, 61, 42, 85), "office"),
         ("cafeteria", "Cafeteria", (28, 86, 42, 110), "office"),
         ("printing", "Printing", (28, 111, 42, 135), "service"),
         ("open_office_nw", "Open office", (28, 46, 42, 60), "office"),
@@ -268,9 +268,10 @@ LEVEL_3 = dict(
     # The library: shelves this high, rows `aisle` apart, a `perimeter` aisle along the walls,
     # a square clearing round the hatch; the librarian's desk in a U round the hatch, `ring`
     # blocks of floor between it and the hatch's frame, open on the `open` side, `returns`
-    # places on it for the books and a lamp at the `lamp` corner; the card catalogue (x, (z0, z1), facing) by the south door, in its area
+    # places on it for the books and a lamp at the `lamp` corner; the book puzzle's spots
+    # (`books`: how many on book carts, on the floor of the aisles and on the card catalogue); the card catalogue (x, (z0, z1), facing) by the south door, in its area
     # (x0, z0, x1, z1; no shelves there).
-    LIBRARY_LAYOUT=dict(shelf_height=4, aisle=2, perimeter=2, clearing=16, desk=dict(
+    LIBRARY_LAYOUT=dict(shelf_height=4, aisle=2, perimeter=2, clearing=16, books=dict(carts=6, floor=6, catalog=1), desk=dict(
         ring=1, open="south", returns=5, lamp="northwest",
         catalog=(84, (120, 123), "west"), catalog_area=(83, 116, 93, 127))),
     # The antechamber is the electrical room: panels on its side walls (x, z, facing), cabinets,
@@ -286,14 +287,16 @@ LEVEL_3 = dict(
     # The box puzzle (BoxHooks): how many boxes a new game puts out, the spots round the ring
     # (one more in every room but these); the empty shelf they go on is in Storage.
     BOX_PUZZLE=dict(boxes=10, ring=9, not_in=["storage"]),
-    BOOK_SPOTS={},                   # room id -> (x, z) of the filing cabinet its book lies on; else its template's
     # The company's documents (the lore): room id -> note id (notes/<lang>/<id>.txt in the mod).
     # Each lies as a loose sheet on a desk or cabinet in its room, the one nearest the main door.
     NOTE_PAPERS={"hr": "reading_room_supervision", "archive": "archive_procedure",
                  "lockers": "staff_lockers", "management": "staff_complaint", "finance": "reactor_invoice"},
-    BATTERY_SPOTS=[],
-    WATER_SPOTS=[],
-    FOOD_SPOTS=[],
+    # Loot (LootSpawner): (item, room id) per piece, "battery" or "water", lying on the floor
+    # against a wall of that room (clear of doors, lockers and the box spot); the same spot
+    # every run. Water comes from WATER_SOURCES instead: the water dispensers of these rooms
+    # are drunk from (WaterDispenserHooks), as often as the player likes.
+    LOOT=[("battery", "electrical"), ("battery", "electrical"), ("battery", "electrical")],
+    WATER_SOURCES=["cafeteria"],
     LIGHT_SPACING=6,
     PENDANT=dict(height=5, spacing=8),   # the library's lights hang on chains, this high over the floor
     # What each kind of space is made of (roles of STAND_INS below).

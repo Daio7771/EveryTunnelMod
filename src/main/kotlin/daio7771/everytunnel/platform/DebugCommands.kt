@@ -303,7 +303,7 @@ object DebugCommands {
 
     private fun fillBooks(context: CommandContext<ServerCommandSource>): Int {
         val levels = BookHooks.fillAllButOne(context.source.server)
-        reply(context, if (levels == 0) "No level has a book counter." else "The books are out, all but one already on the counter.")
+        reply(context, if (levels == 0) "No level has a book desk." else "The boxes are done and the books out, all but one already on the desk.")
         return levels
     }
 

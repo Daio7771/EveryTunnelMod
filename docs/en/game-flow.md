@@ -168,8 +168,8 @@ Reopening the world or respawning inside a level does not count as walking in.
 
 The offices of the complex around the central library, in perfect order and empty. Built
 so far: the structure, the furniture, the valve puzzle, the lockers, the box and book
-puzzles that open the bunker, the Observer and the company's documents; the
-loot and the collapse are still to come, their zones and spawn points already in the
+puzzles that open the bunker, the Observer, the company's documents and the loot; the
+collapse is still to come, its zones already in the
 level file (see [Levels](levels.md#level-3-hooks)). The music is planned for last.
 
 The **ambience** is the near-silence of an empty office building (`ambient.offices.room_tone`)
@@ -201,6 +201,12 @@ silent.
   library has rows of bookshelves four high, two blocks apart, round a clearing, and in it
   the librarian's desk in a U round the hatch, open to the south, a brass lamp
   with a green shade on it (`desk_lamp`). Nobody is there.
+- **Loot:** no bottles in Level 3. The cafeteria's water dispenser gives water: right-clicked,
+  the player drinks there, as often as they like, a bottle's worth each time (at most once
+  every 1.5 s; a noise like drinking a bottle), `WaterDispenserHooks`, the dispenser at the
+  spawn point tagged `water_source` (`WATER_SOURCES`; the other dispensers are only
+  furniture). Three batteries lie on the floor of the Electrical room by the ring (`LOOT`,
+  spawn points tagged `battery`, put there by `LootSpawner` like the garages' loot).
 - **The company's documents** (the lore): five loose typed sheets (`NotePaperBlock`), each
   on the desk or counter nearest the doors of its room (`NOTE_PAPERS`): a memo on the
   reading room's supervision (HR), the archive's procedure for boxes and books (Archive), a
@@ -250,16 +256,18 @@ silent.
   vent's slits (`client.hud.LockerView`). Inside, the player makes no noise at all. Right-
   clicking again or sneaking gets out in front of the door; both ways the door's sound plays
   (`block.locker.door`, not a noise for enemies). A new game takes everyone out.
-- **The book puzzle** (`BookHooks`): with the boxes done, an office book (`OfficeBookBlock`,
-  blue-grey, drawn full bright) appears, silently, on the filing cabinet of each of the five
-  book rooms (spawn points tagged `book_spot`). They are carried like the boxes and alert no
+- **The book puzzle** (`BookHooks`): with the boxes done, five office books (`OfficeBookBlock`,
+  blue-grey, drawn full bright) appear, silently, in the library, his ground: at five of its 13
+  spots picked at random (spawn points tagged `book_spot`): on book carts (`book_cart`) and on
+  the floor of the aisles between the shelves, and one on the card catalogue by the south door
+  (`LIBRARY_LAYOUT["books"]`). They are carried like the boxes and alert no
   one. Right-clicking the librarian's desk round the hatch (or a book already on it) hands
   one in: it lies at the next of five places spread along the desk (tagged `book_return`), and
   "2 / 5" shows. The fifth opens the hatch by itself (the zone tagged `book_hatch`: its steel
   leaves swing up with `block.hatch.open`) and "Shhh!" is earned. Dying puts a carried book
-  back on its cabinet; only a new game takes the books away and shuts the hatch.
-  `/everytunnel books` tells where they are, `books fill` puts them out with all but one
-  already on the counter.
+  back where it was found; only a new game takes the books away and shuts the hatch.
+  `/everytunnel books` tells where they are, `books fill` finishes the boxes and puts the
+  books out with all but one already on the desk.
   While the books are out (`BookPhaseHooks`, rules in `systems.ObserverNearness`), the
   library's clock ticks in the player's head whenever the Observer is within 24 blocks, tick
   and tock, every 0.75 s at the edge down to every 0.25 s within 4 blocks, louder as he nears

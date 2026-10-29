@@ -159,11 +159,11 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `observant_guard` | `ObserverHooks` | Nivel 3: el Observer, que aparece ahí una vez (en la biblioteca) |
 | `box_spot` | `BoxHooks` | Nivel 3: un sitio donde puede estar una caja morada (una partida nueva pone diez al azar); en el suelo o sobre un mueble (y 2) |
 | `box_shelf` | `BoxHooks` | Nivel 3: el pie (izquierda, abajo) de la estantería donde van las cajas |
-| `book_spot` | `BookHooks` | Nivel 3: donde aparece el libro de una habitación cuando están las cajas, encima de un archivador (una por habitación "book") |
+| `book_spot` | `BookHooks` | Nivel 3: donde puede aparecer un libro cuando están las cajas (los libros de una partida van a cinco al azar), en la biblioteca: sobre un carrito o el fichero (y 2) o en el suelo |
 | `book_return` | `BookHooks` | Nivel 3: un sitio de la mesa del bibliotecario, alrededor de la trampilla, al que vuelve un libro (cinco) |
 | `valve` | `ValveHooks` | Una válvula del puzle del nivel (`valve_a` a `valve_e`: el `ValveBlock` de ese bloque, con su letra) |
 | `note` | `NoteHooks` | Una nota en ese bloque (clavada en un `NoteBoardBlock` o un folio suelto, `NotePaperBlock`); su id nombra el texto, `assets/every_tunnel/notes/<en/es>/<id>.txt` |
-| `battery_spot`, `water_spot`, `food_spot` | (nadie aún) | Nivel 3: el loot, listado en `LEVEL_3` (vacío por ahora) |
+| `water_source` | `WaterDispenserHooks` | Un dispensador de agua del que el jugador bebe cuantas veces quiera (la cafetería del nivel 3) |
 
 Las etiquetas son cadenas libres: un sistema nuevo puede definir las suyas sin tocar el
 parser.
@@ -180,14 +180,16 @@ sistemas que vienen:
   `bunker_corridor`, `hatch` (sus trampillas, con la etiqueta `book_hatch`), una zona por cada hueco de puerta (`door_...`, `library_door_...`: cruzar una puerta nunca te saca del nivel), `collapse`, `collapse_blocks` y `end` (delante de la puerta a B4). Las
   escaleras desde B2 no pertenecen a ninguna zona, así que "Level 3" aparece al entrar en
   la antesala.
-- **Puntos de spawn:** `player_start` (la antesala), `checkpoint`, `observant_guard`, un
-  `book_<habitación>` por cada habitación con libro (en el archivador que elige su plantilla
-  de muebles, salvo que `BOOK_SPOTS` diga otro), `box_1` a `box_25` (con la etiqueta
+- **Puntos de spawn:** `player_start` (la antesala), `checkpoint`, `observant_guard`,
+  `book_1` a `book_13` (en la biblioteca, `LIBRARY_LAYOUT["books"]`: sobre carritos, en el
+  suelo, sobre el fichero), `box_1` a `box_25` (con la etiqueta
   `box_spot`, en la zona de su sala o del anillo; `BOX_PUZZLE` dice cuántos), `box_shelf` (en
-  Storage), `book_return_1` a `_5` (en el mostrador), `valve_a` a `valve_e`, la nota del electricista `pressure_line` y los documentos
+  Storage), `book_return_1` a `_5` (en la mesa), `valve_a` a `valve_e`, la nota del electricista `pressure_line` y los documentos
   de la empresa (`NOTE_PAPERS`: un id de nota por habitación, un folio suelto en la mesa o el
-  mostrador más cercano a sus puertas), todos con la etiqueta `note`, y las listas
-  `BATTERY_SPOTS`, `WATER_SPOTS` y `FOOD_SPOTS` (vacías).
+  mostrador más cercano a sus puertas), todos con la etiqueta `note`, el loot (`LOOT`:
+  `battery_1` a `_3`, con la etiqueta `battery`, en el suelo de Electrical) y
+  `water_source_cafeteria` (con la etiqueta `water_source`, el dispensador de la cafetería,
+  `WATER_SOURCES`).
 
 ## Cómo sigue el mod a los jugadores
 

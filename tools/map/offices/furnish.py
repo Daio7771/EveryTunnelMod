@@ -193,7 +193,7 @@ class Furnisher:
         self.at(fr, fr.W // 2, fr.D - 1, "wall_clock", "front", y=3)
 
     def book_cabinet(self, fr, u, v, facing="front"):
-        """A filing cabinet the room's book will lie on; its (x, z), or None."""
+        """A filing cabinet near (u, v), tried a little to each side; its (x, z), or None."""
         for du in (0, 1, -1, 2, -2, 3, -3):
             if self.at(fr, u + du, v, "filing_cabinet", facing):
                 return fr.cell(u + du, v)
@@ -251,6 +251,50 @@ class Furnisher:
         cat_x, (cat_z0, cat_z1), cat_facing = desk["catalog"]
         for z in range(cat_z0, cat_z1):
             self.put(cat_x, 1, z, "card_catalog", cat_facing)
+        self.library_books(keep, near_door)
+
+    def library_books(self, keep, near_door):
+        """The book puzzle's spots, all in the library (BookHooks puts the books at random ones):
+        LIBRARY_LAYOUT["books"] says how many on book carts, on the floor and on the card
+        catalogue. Carts and floor spots are in the aisles between the shelf rows, against a
+        shelf, off the kept aisles and the doors, spread round the library and 4 blocks or more
+        apart, carts and floor in turn; the catalogue's from its middle. Into lv.book_spots,
+        [(x, y, z)]: y 2 on a cart or the catalogue, 1 on the floor."""
+        p, cfg = self.p, self.p.LIBRARY_LAYOUT["books"]
+        x0, z0, x1, z1 = p.LIBRARY
+
+        def kept(x, z):
+            return any(a <= x < b and c <= z < d for a, c, b, d in keep)
+
+        shelves = {(x, z) for (x, y, z), (name, _) in self.items.items() if name == "bookshelf" and y == 1}
+        aisle = sorted((x, z) for x in range(x0 + 1, x1 - 1) for z in range(z0 + 1, z1 - 1)
+                       if self.free(x, 1, z) and self.free(x, 2, z) and not kept(x, z) and (x, z) not in near_door
+                       and ((x, z - 1) in shelves or (x, z + 1) in shelves)
+                       and (x - 1, z) not in shelves and (x + 1, z) not in shelves)
+        cx, cz = (x0 + x1) / 2, (z0 + z1) / 2
+        aisle.sort(key=lambda c: math.atan2(c[1] - cz, c[0] - cx))
+        n = cfg["carts"] + cfg["floor"]
+        picked = []
+        for k in range(n):                                                  # evenly round, the next one if too close
+            for j in range(len(aisle)):
+                x, z = aisle[((k * len(aisle)) // n + j) % len(aisle)]
+                if all(abs(x - a) + abs(z - b) >= 4 for a, b in picked):
+                    picked.append((x, z))
+                    break
+        if len(picked) < n:
+            raise SystemExit(f"LEVEL_3 LIBRARY_LAYOUT books: room for {len(picked)} cart and floor spots, {n} wanted")
+        spots, carts = [], cfg["carts"]
+        for i, (x, z) in enumerate(picked):
+            if carts > 0 and (i % 2 == 0 or n - i <= carts):
+                carts -= 1
+                self.put(x, 1, z, "book_cart", "north", force=True)        # its long side along the aisle
+                spots.append((x, 2, z))
+            else:
+                spots.append((x, 1, z))
+        cat_x, (cat_z0, cat_z1), _ = p.LIBRARY_LAYOUT["desk"]["catalog"]
+        for k in range(cfg["catalog"]):
+            spots.append((cat_x, 2, (cat_z0 + cat_z1) // 2 + k))
+        self.lv.book_spots = spots
 
     def hatch_desk(self):
         """The librarian's desk: a U of library counters round the hatch's frame, `ring` blocks
@@ -323,7 +367,7 @@ class Furnisher:
                 lv.furniture.add((x, y, z))
 
 
-# --- the templates: (furnisher, frame) -> the book's (x, z) or None ---------------------
+# --- the templates: (furnisher, frame) -> a filing cabinet's (x, z) or None (unused) -----
 
 def open_office(f, fr):
     for u0 in (2, fr.W - 6):
@@ -520,27 +564,17 @@ TEMPLATES = {
 
 
 def furnish(lv):
-    """Furnishes the level (also the electrical room and its note, and the documents, into lv.notes); returns
-    {room id: (x, z) of the cabinet its book lies on}."""
+    """Furnishes the level (also the electrical room and its note, and the documents, into
+    lv.notes; the book puzzle's spots into lv.book_spots)."""
     p = lv.p
     f = Furnisher(lv)
-    books = {}
     for s, kind in lv.rooms:
         template = p.FURNISH.get(s.id)
         if template is None:
             continue
         if template not in TEMPLATES:
             raise SystemExit(f"LEVEL_3 FURNISH: no template {template!r} (for {s.id}); there are {', '.join(sorted(TEMPLATES))}")
-        anchor = f.room(s, template)
-        if s.id in p.BOOK_SPOTS:
-            x, z = p.BOOK_SPOTS[s.id]
-            f.items.pop((x, 1, z), None)
-            f.put(x, 1, z, "filing_cabinet", "north", force=True)
-            anchor = (x, z)
-        if kind == "book":
-            if anchor is None:
-                raise SystemExit(f"LEVEL_3: room {s.id} holds a book but its template left no cabinet for it")
-            books[s.id] = anchor
+        f.room(s, template)
     f.reserved = set()
     f.library()
     room = p.ELECTRICAL_ROOM
@@ -556,15 +590,16 @@ def furnish(lv):
         f.put(x, 1, z, "potted_plant", "north")
     for x, z, facing in p.CORRIDOR_CLOCKS:
         f.put(x, 3, z, "wall_clock", facing)
-    note_papers(f, books)
-    lv.box_spots = box_spots(f, books)
+    note_papers(f)
+    lv.box_spots = box_spots(f)
+    lv.loot = loot_spots(f)
+    lv.water_sources = water_sources(f)
     f.finish()
-    return books
 
 
-def note_papers(f, books):
+def note_papers(f):
     """The company's documents (NOTE_PAPERS: room id -> note id): a loose sheet on a desk or
-    counter in the room (a filing cabinet when there is none, never the book's), the one
+    counter in the room (a filing cabinet when there is none), the one
     nearest the room's doors; into lv.notes. Put in before the box spots, which then keep off it."""
     lv, p = f.lv, f.lv.p
     rooms = {s.id: s for s, _ in lv.rooms}
@@ -576,13 +611,63 @@ def note_papers(f, books):
         doors = [c for cells in f.doors_of(box).values() for c in cells]
         tops = [(x, z, name, facing) for (x, y, z), (name, facing) in f.items.items()
                 if y == 1 and name in FLAT_TOPS and x0 <= x < x1 and z0 <= z < z1
-                and f.free(x, 2, z) and (x, z) != books.get(room_id)]
+                and f.free(x, 2, z)]
         if not tops:
             raise SystemExit(f"LEVEL_3 NOTE_PAPERS: nothing in {room_id} to lay the note {note_id!r} on")
         x, z, _, facing = min(tops, key=lambda t: (t[2] == "filing_cabinet",
                                                    min(abs(t[0] - dx) + abs(t[1] - dz) for dx, dz in doors), t[0], t[1]))
         f.put(x, 2, z, "note_paper", facing, force=True)
         lv.notes[note_id] = (x, 2, z)
+
+
+def loot_spots(f):
+    """The loot (LOOT: (item, room id) per piece): each on the floor against a wall of its room,
+    clear of the doors, of the floor in front of lockers and of the box spots, 3 blocks or more
+    apart, picked the same way every run (seeded by the room). [(item, x, z, room id)]."""
+    lv, p = f.lv, f.lv.p
+    rooms = {s.id: s for s, _ in lv.rooms}
+    steps = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+    fronts = {(x + steps[fc][0], z + steps[fc][1]) for (x, y, z), (name, fc) in f.items.items() if name == "locker" and y == 1}
+    taken = {(x, z) for x, _, z, _ in lv.box_spots}
+    out = []
+    for room_id in dict.fromkeys(room for _, room in p.LOOT):
+        if room_id not in rooms:
+            raise SystemExit(f"LEVEL_3 LOOT: no room {room_id!r}")
+        x0, z0, x1, z1 = rooms[room_id].box
+        free = sorted((x, z) for x in range(x0, x1) for z in range(z0, z1)
+                      if (x in (x0, x1 - 1) or z in (z0, z1 - 1)) and f.free(x, 1, z) and f.free(x, 2, z)
+                      and (x, z) not in fronts and (x, z) not in taken
+                      and not any(lv.air.get((x + dx, 1, z + dz), ("",))[0] == "door"
+                                  for dx in range(-3, 4) for dz in range(-3, 4)))
+        items = [item for item, room in p.LOOT if room == room_id]
+        if len(free) < len(items):
+            raise SystemExit(f"LEVEL_3 LOOT: room for {len(free)} pieces in {room_id}, {len(items)} wanted")
+        rng = random.Random(f"loot:{room_id}")
+        rng.shuffle(free)
+        picked = []
+        for x, z in free:                                                   # spread out, 3 blocks or more apart
+            if len(picked) < len(items) and all(abs(x - a) + abs(z - b) >= 3 for a, b in picked):
+                picked.append((x, z))
+        if len(picked) < len(items):
+            raise SystemExit(f"LEVEL_3 LOOT: no room for {len(items)} pieces 3 blocks apart in {room_id}")
+        for item, (x, z) in zip(items, picked):
+            out.append((item, x, z, room_id))
+    return out
+
+
+def water_sources(f):
+    """The water dispensers of the rooms in WATER_SOURCES, drunk from in game: [(x, z, room id)]."""
+    lv, p = f.lv, f.lv.p
+    rooms = {s.id: s for s, _ in lv.rooms}
+    out = []
+    for room_id in p.WATER_SOURCES:
+        x0, z0, x1, z1 = rooms[room_id].box
+        found = [(x, z, room_id) for (x, y, z), (name, _) in f.items.items()
+                 if name == "water_dispenser" and y == 1 and x0 <= x < x1 and z0 <= z < z1]
+        if not found:
+            raise SystemExit(f"LEVEL_3 WATER_SOURCES: no water dispenser in {room_id}")
+        out += found
+    return out
 
 
 def ring_zone(p, x, z):
@@ -596,7 +681,7 @@ def ring_zone(p, x, z):
     raise SystemExit(f"LEVEL_3 BOX_PUZZLE: ({x}, {z}) is not in the ring")
 
 
-def box_spots(f, books):
+def box_spots(f):
     """The box puzzle's spots (BoxHooks; a new game puts a box at BOX_PUZZLE["boxes"] of them):
     one in every room but Storage, every other one on a piece of furniture with a flat top and
     the rest on the floor against a wall (clear of doors and lockers), and BOX_PUZZLE["ring"]
@@ -623,7 +708,7 @@ def box_spots(f, books):
         x0, z0, x1, z1 = s.box
         tops = [(x, 2, z) for (x, y, z), (name, _) in items.items()
                 if y == 1 and name in FLAT_TOPS and x0 <= x < x1 and z0 <= z < z1
-                and f.free(x, 2, z) and (x, z) != books.get(s.id)]
+                and f.free(x, 2, z)]
         floor = [(x, 1, z) for x in range(x0, x1) for z in range(z0, z1)
                  if (x in (x0, x1 - 1) or z in (z0, z1 - 1)) and clear_floor(x, z)
                  and not near_door(x, z, p.DOOR_CLEARANCE + 1)]

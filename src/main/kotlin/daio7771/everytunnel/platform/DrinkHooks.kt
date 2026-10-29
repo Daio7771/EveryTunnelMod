@@ -13,7 +13,8 @@ import net.minecraft.text.Text
  * Drinking a water bottle (`ModItems.WATER_BOTTLE`): thirst goes up by
  * `thirst.drink_restore`, a gulp is heard about every half second while drinking, and the
  * drink is a noise for the Pale man (`noise.drink_radius`). Only where the flashlight and
- * thirst exist (worlds with levels); a full player cannot drink.
+ * thirst exist (worlds with levels); a full player cannot drink. [quench] is shared with the
+ * water dispensers ([WaterDispenserHooks]).
  */
 object DrinkHooks {
 
@@ -43,13 +44,18 @@ object DrinkHooks {
             explainRefused(player)
             return
         }
+        if (!player.abilities.creativeMode) stack.decrement(1)
+        quench(player)
+        AchievementHooks.earned(player, Achievement.STAY_HYDRATED)
+    }
+
+    /** A drink's worth of water (a bottle, or a drink at a water dispenser, [WaterDispenserHooks]). */
+    fun quench(player: ServerPlayerEntity) {
         val config = ConfigManager.gameplay
         val before = ResourceSystem.stateOf(player.uuid, config)
         val after = ResourceSystem.drink(before, config)
         ResourceSystem.set(player.uuid, after)
-        if (!player.abilities.creativeMode) stack.decrement(1)
         PlaytestLog.drank(player, before, after)
         NoiseHooks.drink(player)
-        AchievementHooks.earned(player, Achievement.STAY_HYDRATED)
     }
 }

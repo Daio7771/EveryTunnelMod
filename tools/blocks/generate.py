@@ -1698,8 +1698,18 @@ def build():
     a.texture("lamp_shade", plastic_tex(r("lamp_shade"), (40, 104, 60)), T.PLASTIC.but(smoothness=0.8, emission=GLOW["DIFFUSER_GLOW"]))
     prop("desk_lamp", "Desk Lamp", {"b": "brass", "g": "lamp_shade"},
          [el((5, 0, 6), (11, 1, 10), "b"), el((7.5, 1, 7.5), (8.5, 6, 8.5), "b"), el((4, 6, 6), (12, 8.5, 10), "g")])
+    # A full block high, so a book can lie on top (the book puzzle).
     prop("card_catalog", "Card Catalog", {"w": "library_wood", "f": "card_catalog_front"},
-         [el((1, 0, 2), (15, 14, 16), "w", north="f")])
+         [el((1, 0, 2), (15, 16, 16), "w", north="f")])
+    # A library book cart (the book puzzle: a book may lie on top): dark wood, two shelves of
+    # books, four small wheels; its top a full block high.
+    cart_books = (1, 1, 13, 6)
+    prop("book_cart", "Book Cart", {"w": "library_wood", "b": books[1], "m": "dark_metal"},
+         [el((x, 0, z), (x + 2, 2, z + 2), "m") for x in (2, 12) for z in (4, 10)]
+         + [el((1, 2, 3), (15, 3, 13), "w"), el((1, 8, 3), (15, 9, 13), "w"), el((1, 15, 3), (15, 16, 13), "w")]
+         + [el((x, 3, z), (x + 1, 15, z + 1), "w") for x in (1, 14) for z in (3, 12)]
+         + [el((2, y, 4), (14, y + 5, 12), "b", up=None, down=None, north=("b", cart_books), south=("b", cart_books),
+               east=("b", (1, 1, 9, 6)), west=("b", (1, 1, 9, 6))) for y in (3, 9)])
 
     # The box puzzle (BoxHooks): the purple archive box, drawn full bright in game
     # (PurpleBoxBlock; it glows a little with shaders too), and the empty shelf in Storage.

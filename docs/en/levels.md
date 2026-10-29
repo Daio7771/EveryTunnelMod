@@ -157,11 +157,11 @@ the server starts (levels built together name the same one). The function must e
 | `observant_guard` | `ObserverHooks` | Level 3: the Observer, spawned there once (in the library) |
 | `box_spot` | `BoxHooks` | Level 3: a place a purple box may lie (a new game puts ten at random); on the floor, or on furniture (y 2) |
 | `box_shelf` | `BoxHooks` | Level 3: the foot (left, bottom) of the shelf the boxes go on |
-| `book_spot` | `BookHooks` | Level 3: where a room's book appears once the boxes are done, on top of a filing cabinet (one per "book" room) |
+| `book_spot` | `BookHooks` | Level 3: where a book may appear once the boxes are done (a new game's books go to five at random), in the library: on a book cart or the card catalogue (y 2) or on the floor |
 | `book_return` | `BookHooks` | Level 3: a place on the librarian's desk round the hatch a book goes back to (five) |
 | `valve` | `ValveHooks` | A valve of the level's puzzle (`valve_a` to `valve_e`: the `ValveBlock` at that block, lettered) |
 | `note` | `NoteHooks` | A note at that block (pinned on a `NoteBoardBlock` or a loose sheet, `NotePaperBlock`); its id names the text, `assets/every_tunnel/notes/<en/es>/<id>.txt` |
-| `battery_spot`, `water_spot`, `food_spot` | (none yet) | Level 3: loot, listed in `LEVEL_3` (empty for now) |
+| `water_source` | `WaterDispenserHooks` | A water dispenser the player drinks from, as often as they like (Level 3's cafeteria) |
 
 Tags are open strings: a new system can define its own without touching the parser.
 
@@ -176,14 +176,15 @@ will read:
   `valve_corridor`, `checkpoint`, `checkpoint_door` (tagged `valve_door`), `antechamber`, `bunker_shaft`, `bunker_corridor`,
   `hatch` (its trapdoors, tagged `book_hatch`), a zone per doorway (`door_...`, `library_door_...`: walking through a door never leaves the level), `collapse`, `collapse_blocks` and `end` (in front of the door to B4). The stairs from B2
   belong to no zone, so "Level 3" shows on walking into the antechamber.
-- **Spawn points:** `player_start` (the antechamber), `checkpoint`, `observant_guard`, a
-  `book_<room>` per book room (on the filing cabinet its furniture template picks, unless
-  `BOOK_SPOTS` names one),
+- **Spawn points:** `player_start` (the antechamber), `checkpoint`, `observant_guard`,
+  `book_1` to `book_13` (in the library, `LIBRARY_LAYOUT["books"]`: on carts, the floor, the
+  card catalogue),
   `box_1` to `box_25` (tagged `box_spot`, in their room's or ring's zone; `BOX_PUZZLE` sets
-  how many), `box_shelf` (in Storage), `book_return_1` to `_5` (on the counter), `valve_a` to `valve_e`, the electrician's note `pressure_line` and the company's
+  how many), `box_shelf` (in Storage), `book_return_1` to `_5` (on the desk), `valve_a` to `valve_e`, the electrician's note `pressure_line` and the company's
   documents (`NOTE_PAPERS`: a note id per room, a loose sheet on the desk or counter nearest
-  the room's doors), all tagged `note`, and the lists `BATTERY_SPOTS`, `WATER_SPOTS`,
-  `FOOD_SPOTS` (empty).
+  the room's doors), all tagged `note`, the loot (`LOOT`: `battery_1` to `_3`, tagged `battery`, on the floor of
+  Electrical) and `water_source_cafeteria` (tagged `water_source`, the cafeteria's dispenser,
+  `WATER_SOURCES`).
 
 ## How the mod tracks players
 

@@ -277,7 +277,9 @@ object ModBlocks {
     /** A leaf of Level 3's bunker hatch: a steel trapdoor nobody opens by hand ([BookHooks] does). */
     val BUNKER_TRAPDOOR: Block = register("bunker_trapdoor", TrapdoorBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), BlockSetType.IRON))
     /** The library's card catalogue: rows of small drawers with brass pulls. */
-    val CARD_CATALOG: Block = register("card_catalog", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(1, 0, 2, 15, 14, 16))))
+    val CARD_CATALOG: Block = register("card_catalog", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(1, 0, 2, 15, 16, 16))))
+    /** A library book cart; a book of the puzzle may lie on top ([BookHooks]). */
+    val BOOK_CART: Block = register("book_cart", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(1, 0, 3, 15, 16, 13))))
 
     // --- Doors and the exit sign ------------------------------------------------------
 

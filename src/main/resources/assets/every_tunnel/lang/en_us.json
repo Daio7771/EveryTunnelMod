@@ -181,5 +181,6 @@
   "message.every_tunnel.observer_near": "He's near. Hide.",
   "block.every_tunnel.note_paper": "Note Paper",
   "block.every_tunnel.bunker_trapdoor": "Bunker Hatch",
-  "block.every_tunnel.desk_lamp": "Desk Lamp"
+  "block.every_tunnel.desk_lamp": "Desk Lamp",
+  "block.every_tunnel.book_cart": "Book Cart"
 }

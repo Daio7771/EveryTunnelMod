@@ -21,7 +21,7 @@
 | `/everytunnel valves` | Las cifras de las válvulas del nivel 3 en esta partida (A a E) |
 | `/everytunnel boxes` | El puzle de las cajas del nivel 3: cuántas hay en la estantería y dónde están las demás |
 | `/everytunnel books` | El puzle de los libros del nivel 3: cuántos hay en el mostrador y dónde están los demás |
-| `/everytunnel books fill` | Saca los libros con todos menos uno ya en el mostrador (para probar el último) |
+| `/everytunnel books fill` | Completa las cajas y saca los libros con todos menos uno ya en la mesa (para probar el último) |
 | `/everytunnel boxes fill` | Llena la estantería menos un hueco y deja una caja por ahí (para probar la última) |
 | `/everytunnel rebuilt` | Lo ejecuta `garage:build` al terminar: vuelve a poner el botín. No es para usarlo a mano |
 | `/everytunnel devworld save\|forget` | Solo en desarrollo, ver [Compilación](building-and-release.md#mundos-de-desarrollo) |
