@@ -258,7 +258,9 @@ silent.
   down (`core.hiding.LookLimit`), the screen covered by the inside of the door with its
   vent's slits (`client.hud.LockerView`). Inside, the player makes no noise at all. Right-
   clicking again or sneaking gets out in front of the door; both ways the door's sound plays
-  (`block.locker.door`, not a noise for enemies). A new game takes everyone out.
+  (`block.locker.door`, not a noise for enemies). Getting in, "Sneak (Left Shift) or
+  right-click to step out" shows over the hotbar in place of vanilla's dismount line. A new
+  game takes everyone out.
 - **The book puzzle** (`BookHooks`): with the boxes done, five office books (`OfficeBookBlock`,
   blue-grey, drawn full bright) appear, silently, in the library, his ground: at five of its 13
   spots picked at random (spawn points tagged `book_spot`): on book carts (`book_cart`) and on

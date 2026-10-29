@@ -179,6 +179,7 @@
   "item.every_tunnel.observer_spawn_egg": "Observer Spawn Egg",
   "message.every_tunnel.observer_coming": "He's coming. Hide.",
   "message.every_tunnel.observer_near": "He's near. Hide.",
+  "message.every_tunnel.locker_exit": "Sneak (%s) or right-click to step out",
   "sign.every_tunnel.room.archive": "Archive",
   "sign.every_tunnel.room.meeting_room": "Meeting room",
   "sign.every_tunnel.room.management": "Management",

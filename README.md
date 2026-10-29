@@ -6,18 +6,19 @@
 
 <p align="center">
   <b>A singleplayer psychological horror mod for Minecraft 1.20.1 (Fabric)</b><br>
-  Demo: Levels 1 and 2 · version 0.2.1
+  Demo: Levels 1 to 3 · version 0.3
 </p>
 
 ---
 
 You are the new night-shift security guard of the **Noname Complex**, an abandoned
 underground facility. Your shift starts in the service elevator and goes down through its
-parking garage.
+parking garage into the offices below.
 
 **Level 1** is empty. It teaches you to listen. **Level 2** adds the **Pale man**: tall,
 blind, and hunting by sound. Everything you do makes noise, and every noise tells him where
-you were.
+you were. **Level 3** is the complex's offices round a vast library, spotless and empty, and
+something in the library watches. It never hears you. It only needs to see you once.
 
 ## Features
 
@@ -27,12 +28,16 @@ you were.
 - **A blind hunter.** The Pale man stops and listens, walks to what he heard, runs at loud
   noises, and searches where he lost you. You hear him too: his bare feet, his breathing,
   and the silence when he holds his breath to listen.
+- **A watcher who never hears.** In Level 3 the danger is being seen: stay out of its sight,
+  keep low, keep your light off, and hide in a locker, as long as nothing saw you get in.
+- **Puzzles and secrets.** Valves, boxes, books and a hatch to the bunker; company papers left
+  on the desks say more than they should.
 - **Your body is the warning system.** Your heartbeat speeds up as he gets closer, and the
   music follows what he is doing.
 - **Survival on a budget.** Stamina, thirst and a flashlight battery, with a few batteries
   and water bottles left lying around by previous guards.
-- **A complete demo.** Its own main menu, an elevator intro, two levels, an ending and
-  credits. Every time you open the world, a new shift starts.
+- **A complete demo.** Its own main menu, an elevator intro, three levels, 8 achievements,
+  an ending and credits. Every time you open the world, a new shift starts.
 - **An in-game guide** (main menu, GUIDE), in English and Spanish.
 - **Looks right with or without shaders.** Tuned for Complementary Reimagined, with material
   maps for every texture. Plays fine on plain Minecraft too.
@@ -64,7 +69,8 @@ Step-by-step instructions, recommended mods, shader setup and troubleshooting:
 Not required, but they make a big difference:
 
 - **[Sound Physics Remastered](https://modrinth.com/mod/sound-physics-remastered)**: echoes
-  in the garage and sounds muffled behind walls. The game's sounds are made for it.
+  in the garage and the library, and sounds muffled behind walls. The game's sounds are
+  made for it.
 - **[Sodium](https://modrinth.com/mod/sodium) + [Iris](https://modrinth.com/mod/iris) +
   [Indium](https://modrinth.com/mod/indium)** with the
   **[Complementary Reimagined](https://modrinth.com/shader/complementary-reimagined)**
@@ -75,7 +81,7 @@ Play with headphones.
 ## Good to know
 
 - **Singleplayer**, Fabric only, Minecraft 1.20.1 only.
-- **This is a demo** of the first two levels. More of the Noname Complex is planned.
+- **This is a demo** of the first three levels. More of the Noname Complex is planned.
 - The mod replaces the title screen with its own menu. **Ctrl+Shift+V** switches to
   Minecraft's title screen and back (other worlds, multiplayer).
 - The mod only changes worlds that contain its levels. Your other worlds stay vanilla.

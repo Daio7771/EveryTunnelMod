@@ -16,6 +16,8 @@ en el archivo config/every_tunnel/gameplay.json.
 - El doble de rápido al esprintar.
 - Vacía: 1 de daño (medio corazón) cada 10 segundos.
 - Una botella de agua devuelve 40 y se tarda 1,5 segundos en beberla.
+- Un dispensador de agua que funcione devuelve 40 por trago, un trago cada 1,5 segundos,
+  cuantas veces quieras.
 
 ## Linterna
 
@@ -49,7 +51,20 @@ Cada bloque sólido en medio recorta la distancia: un muro al 60%, dos muros al 
 - Deja de andar hacia un ruido a los 20 segundos.
 - Con un toque basta.
 
+## El que mira
+
+- Ve hasta 24 bloques por delante, en un cuarto de círculo alrededor de hacia donde mira; 12
+  si vas agachado, 32 con la linterna encendida. Las paredes y las estanterías le tapan la
+  vista.
+- A 2 bloques o menos te nota mire hacia donde mire.
+- Primero va andando hacia ti; si sigues a la vista 1,5 segundos, o te acercas a 6 bloques o
+  menos, corre.
+- No te oye en absoluto.
+- Con un toque basta.
+
 ## Tus señales de aviso
 
 - Latido: desde 24 bloques, de 60 a 140 latidos por minuto según se acerca.
 - Sus pasos corriendo se oyen hasta a 24 bloques, andando hasta a 16.
+- A veces un reloj suena en tu cabeza: desde 24 bloques, más rápido y más fuerte según se
+  acerca el que mira.

@@ -277,7 +277,9 @@ silencio.
   tapada por el interior de la puerta con las rendijas de su rejilla
   (`client.hud.LockerView`). Dentro, el jugador no hace ningún ruido. Otro clic derecho o
   agacharse le saca delante de la puerta; en los dos sentidos suena la puerta
-  (`block.locker.door`, que no es ruido para los enemigos). Una partida nueva saca a todos.
+  (`block.locker.door`, que no es ruido para los enemigos). Al entrar, sobre la barra sale
+  "Sneak (Left Shift) or right-click to step out" en lugar de la línea de vanilla para
+  bajarse. Una partida nueva saca a todos.
 - **El puzle de los libros** (`BookHooks`): con las cajas puestas aparecen, en silencio,
   cinco libros de oficina (`OfficeBookBlock`, azul grisáceo, a brillo completo) en la biblioteca,
   su terreno: en cinco de sus 13 sitios elegidos al azar (puntos con la etiqueta `book_spot`):

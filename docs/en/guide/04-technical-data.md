@@ -16,6 +16,8 @@ the file config/every_tunnel/gameplay.json.
 - Twice as fast while sprinting.
 - Empty: 1 damage (half a heart) every 10 seconds.
 - A water bottle gives back 40 and takes 1.5 seconds to drink.
+- A working water dispenser gives back 40 each drink, one drink every 1.5 seconds, as often
+  as you like.
 
 ## Flashlight
 
@@ -48,7 +50,19 @@ Every solid block in between cuts the distance: one wall to 60%, two walls to 36
 - It gives up walking to a noise after 20 seconds.
 - One touch is enough.
 
+## The one who watches
+
+- It sees up to 24 blocks ahead, in a quarter circle round where it looks; 12 if you sneak,
+  32 with your flashlight on. Walls and shelves block its view.
+- Within 2 blocks it notices you whichever way it looks.
+- It walks towards you first; if you stay in sight for 1.5 seconds, or come within 6 blocks,
+  it runs.
+- It does not hear you at all.
+- One touch is enough.
+
 ## Your warning signs
 
 - Heartbeat: from 24 blocks away, 60 to 140 beats per minute as it gets closer.
 - Its running footsteps are heard up to 24 blocks away, walking up to 16.
+- Sometimes a clock ticks in your head: from 24 blocks away, faster and louder as the one
+  who watches gets closer.
