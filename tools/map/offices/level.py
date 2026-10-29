@@ -140,7 +140,8 @@ class Offices:
     def stairs(self):
         """The stairs up to Level 2: a landing at each end (STAIRS_LANDING long), between them
         one step down per block (STAIRS_DROP in all), climbing south. Each column's air starts
-        on its own step, so the ceiling steps down with the stairs."""
+        on its own step and goes up to one flat ceiling, the top landing's: a tall hall, so the
+        lettering over the way into the antechamber (ENTRANCE_SIGN) is seen from the top."""
         p = self.p
         x0, z0, x1, z1 = p.STAIRS
         drop, landing, h = p.STAIRS_DROP, p.STAIRS_LANDING, p.HEIGHTS["stairs"]
@@ -151,7 +152,7 @@ class Offices:
             k = z - z0                                   # 0 at the bottom (north) end
             fy = 0 if k < landing else drop if k >= landing + drop else k - landing + 1
             for x in range(x0, x1):
-                for y in range(fy + 1, fy + h + 1):
+                for y in range(fy + 1, drop + h + 1):
                     self.air.setdefault((x, y, z), ("corridor", fy))
                 if landing <= k < landing + drop:
                     self.stair_steps.append((x, fy, z))
@@ -346,14 +347,13 @@ class Offices:
         for x in grid(x0, x1 - 1, sp):
             for z in grid(z0, z1 - 1, sp):
                 self.light(x, p.HEIGHTS["antechamber"], z, "x")
-        # The stairs: over each landing (the bottom one's a block off the wall: the lettering
-        # over the way into the antechamber, ENTRANCE_SIGN, is there).
+        # The stairs: rows across the flat ceiling, over each landing and halfway.
         x0, z0, x1, z1 = p.STAIRS
         mid = (x0 + x1) // 2
-        h = p.HEIGHTS["stairs"]
-        for x in (mid - 1, mid):
-            self.light(x, h, z0 + 1, "x")
-            self.light(x, self.top_landing_y + h, z1 - 1, "x")
+        top = self.top_landing_y + p.HEIGHTS["stairs"]
+        for z in (z0 + 1, (z0 + z1) // 2, z1 - 1):
+            for x in (mid - 1, mid):
+                self.light(x, top, z, "x")
         # Library pendants: a chain from the ceiling down to the light, PENDANT height over the floor.
         x0, z0, x1, z1 = p.LIBRARY
         top = p.HEIGHTS["library"]

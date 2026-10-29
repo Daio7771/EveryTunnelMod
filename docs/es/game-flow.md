@@ -189,8 +189,9 @@ lugar del tono de sala un reloj lento que hace tic-tac sin que se vea ninguno
 silencio.
 
 - Tras la puerta abierta, unas escaleras bajan 8 bloques hasta la **antesala**, el cuarto
-  eléctrico; sobre la entrada, en la pared, letras grandes oscuras: "OFFICES & LIBRARY"
-  (`ENTRANCE_SIGN`). Al entrar aparece "Level 3" (las escaleras no pertenecen a ninguna zona); ahí
+  eléctrico, en una nave alta de techo plano (el del rellano de arriba) con tres filas de
+  luces; en lo alto de la pared sobre la entrada a la antesala, letras grandes oscuras:
+  "OFFICES & LIBRARY" (`ENTRANCE_SIGN`), que se ven durante toda la bajada. Al entrar aparece "Level 3" (las escaleras no pertenecen a ninguna zona); ahí
   está su punto de spawn con la etiqueta `player`. En su pared, un tablón de corcho con la
   nota del electricista (`NoteBoardBlock`): con clic derecho se abre en papel (`NoteScreen`)
   y dice, en letra, cuántas vueltas completas necesita cada válvula.

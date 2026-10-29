@@ -179,8 +179,9 @@ of the room tone (`ambient.library.clock`, the library zone's own ambience), and
 silent.
 
 - Behind the open door, stairs climb down 8 blocks to the **antechamber**, the electrical
-  room; over the way into it, big dark letters on the wall read "OFFICES & LIBRARY"
-  (`ENTRANCE_SIGN`). Walking into it shows "Level 3" (the stairs belong to no zone); its spawn point
+  room, in a tall hall with a flat ceiling (the top landing's) lit by three rows of lights;
+  high on the wall over the way into the antechamber, big dark letters read "OFFICES &
+  LIBRARY" (`ENTRANCE_SIGN`), seen all the way down. Walking into it shows "Level 3" (the stairs belong to no zone); its spawn point
   tagged `player` is there. On its wall, a cork board with the electrician's note
   (`NoteBoardBlock`): right-clicked, it opens on paper (`NoteScreen`) and tells, in words,
   how many full turns each valve needs.
