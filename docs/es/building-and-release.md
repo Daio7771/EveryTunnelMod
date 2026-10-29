@@ -59,7 +59,9 @@ con todo menos Fabric Loader y LambDynamicLights:
 
 `packMapWorld` deja fuera lo que pertenece a quien jugó el mundo: `playerdata/`, `stats/`,
 `advancements/`, `session.lock`, `level.dat_old`, el estado guardado del mod
-(`data/every_tunnel_*`) y `data/chunks.dat` (chunks forzados). Empaqueta el mundo tal como
+(`data/every_tunnel_*`), `data/chunks.dat` (chunks forzados), los mobs y objetos guardados
+(`entities/`: sin el registro del mod de que ya lo generó, un Observer empaquetado sería un
+segundo) y los archivos sueltos en `datapacks/`. Empaqueta el mundo tal como
 está **en ese momento**, así que construye el mapa antes. Sin ese mundo (un clon nuevo del
 repositorio), el jar simplemente no lleva mapa.
 
@@ -129,8 +131,7 @@ Todas en `gradle.properties`:
 
 ## Preguntas abiertas del release
 
-Por decidir antes de la primera versión pública: el aviso del resource pack del mundo, los
-trucos en el mundo que se distribuye, el canal de distribución y el nombre de la versión,
+Por decidir antes de la primera versión pública: el aviso del resource pack del mundo, el canal de distribución y el nombre de la versión,
 las notas de instalación, qué shader pack recomendar, si el registro `[playtest]` sigue
 activo, y si el jar aún necesita las regiones preconstruidas (el mapa se reconstruye al
 abrir de todos modos).

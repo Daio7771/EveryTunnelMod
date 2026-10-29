@@ -14,7 +14,7 @@ import net.minecraft.util.math.BlockPos
 import java.util.UUID
 
 /**
- * Water dispensers that give water (Level 3's cafeteria): a water dispenser at a level's spawn
+ * Water dispensers that give water (Level 3's kitchen): a water dispenser at a level's spawn
  * point tagged [TAG]. Right-clicked, the player drinks there, as often as they like: a bottle's
  * worth of thirst each time ([DrinkHooks.quench], a noise like drinking a bottle), at most once
  * per `thirst.drink_seconds`, the water gurgling in the dispenser and a gulp. A full player is

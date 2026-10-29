@@ -123,7 +123,7 @@ KDoc comment that says more.
 | `ResourceSyncPacket.kt` | The resources packet to the client |
 | `FlashlightHooks.kt` | The flashlight toggle request, battery items, feedback |
 | `DrinkHooks.kt` | Drinking water bottles |
-| `WaterDispenserHooks.kt` | Drinking at a water dispenser that gives water (Level 3's cafeteria) |
+| `WaterDispenserHooks.kt` | Drinking at a water dispenser that gives water (Level 3's kitchen) |
 | `JumpCounter.kt` | Jumps per player from the vanilla statistic |
 | `NoiseHooks.kt` | Turns steps, jumps, landings, panting and game events into noises |
 | `AmbienceHooks.kt` | Sends each player their level's ambience |

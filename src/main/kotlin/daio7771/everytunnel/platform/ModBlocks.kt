@@ -356,8 +356,12 @@ object ModBlocks {
             .displayName(Text.translatable("itemGroup.every_tunnel"))
             .entries { _, entries ->
                 items.forEach { entries.add(it) }
-                entries.add(ModEntities.PALE_MAN_SPAWN_EGG)
-                entries.add(ModEntities.OBSERVER_SPAWN_EGG)
+                // The enemies' spawn eggs only while developing: in a release they would put
+                // a second Observer or more Pale men into the levels.
+                if (DevWorlds.enabled) {
+                    entries.add(ModEntities.PALE_MAN_SPAWN_EGG)
+                    entries.add(ModEntities.OBSERVER_SPAWN_EGG)
+                }
             }
             .build()
         Registry.register(Registries.ITEM_GROUP, Identifier(EveryTunnel.MOD_ID, "blocks"), tab)

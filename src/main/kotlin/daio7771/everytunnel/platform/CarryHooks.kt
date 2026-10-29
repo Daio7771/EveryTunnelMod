@@ -1,9 +1,11 @@
 package daio7771.everytunnel.platform
 
+import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.block.BlockState
 import net.minecraft.entity.ItemEntity
 import net.minecraft.item.Item
@@ -31,7 +33,9 @@ import java.util.UUID
  * - dying ([died]), or losing it any other way, puts it back where it was picked up, as it lay.
  *
  * Putting it where it belongs is the puzzle's own ([release] then forgets it). A new game or a
- * rebuild of the map forgets everything carried ([forgetAll]).
+ * rebuild of the map forgets everything carried ([forgetAll]). A player who joins with one still
+ * in the inventory (they left carrying it, and no new game took it away: Creative, Spectator)
+ * loses it: the rebuild already took its place away, so it would be one box or book too many.
  */
 object CarryHooks {
 
@@ -47,6 +51,13 @@ object CarryHooks {
     fun register() {
         ServerLifecycleEvents.SERVER_STOPPED.register { carried.clear() }
         ServerTickEvents.END_SERVER_TICK.register(::tick)
+        ServerPlayConnectionEvents.JOIN.register { handler, _, _ ->
+            val player = handler.player
+            if (WorldRules.active && player.uuid !in carried && isCarrying(player)) {
+                removeAll(player)
+                EveryTunnel.LOGGER.info("{} joined carrying a box or book from an earlier game: taken away", player.name.string)
+            }
+        }
         // A carried thing never lies about as a dropped item: it goes back to whoever carried it
         // (the thrower, or the nearest carrier who no longer has it), or else [tick] puts it back
         // where it was picked up.

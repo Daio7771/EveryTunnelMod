@@ -4,7 +4,10 @@
 
 ## Debug commands
 
-`platform.DebugCommands`, operator level 2 (in singleplayer: "Allow Commands").
+`platform.DebugCommands`, operator level 2 (in singleplayer: "Allow Commands"). **Only in dev
+runs** (`./gradlew runClient`): a release jar has none but `rebuilt`, and its world is
+installed with cheats off (`client.MapWorldInstaller`), so players cannot skip levels or read
+the answers. The spawn eggs are in the Every Tunnel tab only in dev runs too.
 
 | Command | What it does |
 |---|---|
@@ -30,7 +33,7 @@ Useful vanilla commands:
 
 - `/function garage:build`: rebuild the map by hand.
 - `/playsound every_tunnel:<id> master @s`: try any sound.
-- `/summon every_tunnel:pale_man`, or the spawn egg in the Every Tunnel tab.
+- `/summon every_tunnel:pale_man`, or the spawn egg in the Every Tunnel tab (dev runs).
 - `/give @s every_tunnel:<block or item>`: any mod block or item.
 - `/gamemode creative`: free from the world rules, to build or look around.
 

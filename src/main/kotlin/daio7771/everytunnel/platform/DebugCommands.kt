@@ -19,7 +19,9 @@ import net.minecraft.util.Identifier
 
 /**
  * Developer commands for building and checking the map (operator level 2,
- * i.e. "Allow Commands" in singleplayer):
+ * i.e. "Allow Commands" in singleplayer). **Only in the development environment**
+ * (`./gradlew runClient`): a release has none of them but `rebuilt`, which the map's build
+ * needs, so players cannot skip levels, read the puzzles' answers or refill themselves.
  *
  * - `/everytunnel levels`: loaded levels with their zones and spawn points.
  * - `/everytunnel where`: the level and zones you are standing in, and whether
@@ -40,7 +42,7 @@ import net.minecraft.util.Identifier
  *   where things are; `fill` does all but the last step (see [BoxHooks], [BookHooks]).
  * - `/everytunnel rebuilt`: run by the map's `garage:build` after rebuilding the levels:
  *   puts the loot back ([NewGame.levelsRebuilt]).
- * - `/everytunnel devworld save|forget` (development only): make this world start from
+ * - `/everytunnel devworld save|forget`: make this world start from
  *   how it is when you quit, on every launch, or stop doing that (see [DevWorlds]).
  */
 object DebugCommands {
@@ -49,6 +51,12 @@ object DebugCommands {
         CommandRegistrationCallback.EVENT.register { dispatcher, _, _ ->
             val root = CommandManager.literal("everytunnel")
                 .requires { it.hasPermissionLevel(2) }
+                .then(CommandManager.literal("rebuilt").executes(::rebuilt))
+            if (!DevWorlds.enabled) {
+                dispatcher.register(root)
+                return@register
+            }
+            root
                 .then(CommandManager.literal("levels").executes(::levels))
                 .then(CommandManager.literal("where").executes(::where))
                 .then(
@@ -80,14 +88,11 @@ object DebugCommands {
                     CommandManager.literal("books").executes(::books)
                         .then(CommandManager.literal("fill").executes(::fillBooks)),
                 )
-                .then(CommandManager.literal("rebuilt").executes(::rebuilt))
-            if (DevWorlds.enabled) {
-                root.then(
+                .then(
                     CommandManager.literal("devworld")
                         .then(CommandManager.literal("save").executes(::saveDevWorld))
                         .then(CommandManager.literal("forget").executes(::forgetDevWorld)),
                 )
-            }
             dispatcher.register(root)
         }
     }

@@ -20,9 +20,10 @@ import kotlin.io.path.writeText
  *
  * - Missing: unpacked as `saves/noname_complex`. Its `level.dat` loses the player stored in
  *   it (whoever packed it), so a new player starts in Survival and the new game takes them
- *   to the elevator; its name becomes [WORLD_NAME].
+ *   to the elevator; its name becomes [WORLD_NAME], and cheats are off ([noCheats]).
  * - Already there, installed by an older version of the mod ([VERSION_FILE]): only its
- *   datapacks and `resources.zip` are replaced (the levels, their build and textures).
+ *   datapacks and `resources.zip` are replaced (the levels, their build and textures), and
+ *   cheats are turned off (0.3 and older shipped the world with them on).
  * - A jar without the packed world (a dev build without `run/saves/noname_complex`), or a
  *   world that was not installed by the mod (the dev world), is left alone.
  *
@@ -65,6 +66,7 @@ object MapWorldInstaller {
         data.putInt("GameType", 0)
         root.put("Data", data)
         NbtIo.writeCompressed(root, levelDat)
+        noCheats(temp)
         temp.resolve(VERSION_FILE).writeText(version)
         deleteTree(world)
         Files.move(temp, world, StandardCopyOption.ATOMIC_MOVE)
@@ -79,8 +81,22 @@ object MapWorldInstaller {
         Files.move(temp.resolve("datapacks"), world.resolve("datapacks"))
         Files.move(temp.resolve("resources.zip"), world.resolve("resources.zip"), StandardCopyOption.REPLACE_EXISTING)
         deleteTree(temp)
+        noCheats(world)
         world.resolve(VERSION_FILE).writeText(version)
         EveryTunnel.LOGGER.info("Updated the levels of the map world {} to version {}", world, version)
+    }
+
+    /**
+     * "Allow Cheats" off in [world]'s `level.dat`: no `/tp`, `/gamemode` or `/give` for the
+     * player. The map's own functions still run (they do not depend on it).
+     */
+    private fun noCheats(world: Path) {
+        val levelDat = world.resolve("level.dat").toFile()
+        val root = NbtIo.readCompressed(levelDat)
+        val data = root.getCompound("Data")
+        data.putBoolean("allowCommands", false)
+        root.put("Data", data)
+        NbtIo.writeCompressed(root, levelDat)
     }
 
     /** Unpacks the entries of the packed world that [wanted] accepts into [into]. */

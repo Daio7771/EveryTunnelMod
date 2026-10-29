@@ -200,11 +200,11 @@ silent.
   on; the surfaces are clean. Beside each room's door, a dark nameplate with its name in
   white (`WallTextBlock`, in the game's font and language: `sign.every_tunnel.room.<id>`).
 - Every room is furnished for what it is, tidy and no more than it needs (desks with their
-  chairs and phones, filing cabinets, server racks, lockers, the cafeteria's tables...); the
+  chairs and phones, filing cabinets, server racks, lockers, the kitchen's tables...); the
   library has rows of bookshelves four high, two blocks apart, round a clearing, and in it
   the librarian's desk in a U round the hatch, open to the south, a brass lamp
   with a green shade on it (`desk_lamp`). Nobody is there.
-- **Loot:** no bottles in Level 3. The cafeteria's water dispenser gives water: right-clicked,
+- **Loot:** no bottles in Level 3. The kitchen's water dispenser gives water: right-clicked,
   the player drinks there, as often as they like, a bottle's worth each time (at most once
   every 1.5 s; a noise like drinking a bottle), `WaterDispenserHooks`, the dispenser at the
   spawn point tagged `water_source` (`WATER_SOURCES`; the other dispensers are only
@@ -249,7 +249,8 @@ silent.
   Storage's locker stands right beside the shelf (he comes in by the door). A player he sees get into a locker is pulled out and
   dies. He makes no sound of his own, not even footsteps; walking your way he
   brings a slow clock and a drone (`music.observer.approach`), running at you the clock gone
-  mad (`music.observer.chase`). A new game or a death sends him back to his spawn point. Starting numbers, to tune by
+  mad (`music.observer.chase`). A new game or a death sends him back to his spawn point; every rebuild of the map
+  kills him, like the Pale men, and his spawn point spawns him again when a player walks in. Starting numbers, to tune by
   playing (`ObserverSettings`; the log says how fast each run really was, "[observer] ran ...").
 - **Lockers to hide in:** every room has at least one (the Lockers and Changing rooms are
   full of them; the library has none). Right-clicking a locker from in front of its door

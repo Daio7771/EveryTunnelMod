@@ -4,7 +4,11 @@
 
 ## Comandos de depuración
 
-`platform.DebugCommands`, nivel de operador 2 (en un jugador: "Permitir trucos").
+`platform.DebugCommands`, nivel de operador 2 (en un jugador: "Permitir trucos"). **Solo al
+desarrollar** (`./gradlew runClient`): un jar de release no tiene ninguno salvo `rebuilt`, y su
+mundo se instala con los trucos desactivados (`client.MapWorldInstaller`), así que los
+jugadores no pueden saltarse niveles ni leer las soluciones. Los huevos de aparición solo están
+en la pestaña Every Tunnel al desarrollar.
 
 | Comando | Qué hace |
 |---|---|
@@ -30,7 +34,7 @@ Comandos de vanilla útiles:
 
 - `/function garage:build`: reconstruir el mapa a mano.
 - `/playsound every_tunnel:<id> master @s`: probar cualquier sonido.
-- `/summon every_tunnel:pale_man`, o el huevo de aparición de la pestaña Every Tunnel.
+- `/summon every_tunnel:pale_man`, o el huevo de aparición de la pestaña Every Tunnel (al desarrollar).
 - `/give @s every_tunnel:<bloque u objeto>`: cualquier bloque u objeto del mod.
 - `/gamemode creative`: libre de las reglas del mundo, para construir o mirar.
 

@@ -164,7 +164,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `book_return` | `BookHooks` | Nivel 3: un sitio de la mesa del bibliotecario, alrededor de la trampilla, al que vuelve un libro (cinco) |
 | `valve` | `ValveHooks` | Una válvula del puzle del nivel (`valve_a` a `valve_e`: el `ValveBlock` de ese bloque, con su letra) |
 | `note` | `NoteHooks` | Una nota en ese bloque (clavada en un `NoteBoardBlock` o un folio suelto, `NotePaperBlock`); su id nombra el texto, `assets/every_tunnel/notes/<en/es>/<id>.txt` |
-| `water_source` | `WaterDispenserHooks` | Un dispensador de agua del que el jugador bebe cuantas veces quiera (la cafetería del nivel 3) |
+| `water_source` | `WaterDispenserHooks` | Un dispensador de agua del que el jugador bebe cuantas veces quiera (la cocina del nivel 3) |
 
 Las etiquetas son cadenas libres: un sistema nuevo puede definir las suyas sin tocar el
 parser.
@@ -189,7 +189,7 @@ sistemas que vienen:
   de la empresa (`NOTE_PAPERS`: un id de nota por habitación, un folio suelto en la mesa o el
   mostrador más cercano a sus puertas), todos con la etiqueta `note`, el loot (`LOOT`:
   `battery_1` a `_3`, con la etiqueta `battery`, en el suelo de Electrical) y
-  `water_source_cafeteria` (con la etiqueta `water_source`, el dispensador de la cafetería,
+  `water_source_cafeteria` (con la etiqueta `water_source`, el dispensador de la cocina,
   `WATER_SOURCES`).
 
 ## Cómo sigue el mod a los jugadores

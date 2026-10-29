@@ -162,7 +162,7 @@ the server starts (levels built together name the same one). The function must e
 | `book_return` | `BookHooks` | Level 3: a place on the librarian's desk round the hatch a book goes back to (five) |
 | `valve` | `ValveHooks` | A valve of the level's puzzle (`valve_a` to `valve_e`: the `ValveBlock` at that block, lettered) |
 | `note` | `NoteHooks` | A note at that block (pinned on a `NoteBoardBlock` or a loose sheet, `NotePaperBlock`); its id names the text, `assets/every_tunnel/notes/<en/es>/<id>.txt` |
-| `water_source` | `WaterDispenserHooks` | A water dispenser the player drinks from, as often as they like (Level 3's cafeteria) |
+| `water_source` | `WaterDispenserHooks` | A water dispenser the player drinks from, as often as they like (Level 3's kitchen) |
 
 Tags are open strings: a new system can define its own without touching the parser.
 
@@ -184,7 +184,7 @@ will read:
   how many), `box_shelf` (in Storage), `book_return_1` to `_5` (on the desk), `valve_a` to `valve_e`, the electrician's note `pressure_line` and the company's
   documents (`NOTE_PAPERS`: a note id per room, a loose sheet on the desk or counter nearest
   the room's doors), all tagged `note`, the loot (`LOOT`: `battery_1` to `_3`, tagged `battery`, on the floor of
-  Electrical) and `water_source_cafeteria` (tagged `water_source`, the cafeteria's dispenser,
+  Electrical) and `water_source_cafeteria` (tagged `water_source`, the kitchen's dispenser,
   `WATER_SOURCES`).
 
 ## How the mod tracks players

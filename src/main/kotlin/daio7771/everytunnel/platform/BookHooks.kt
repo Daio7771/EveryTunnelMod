@@ -76,6 +76,7 @@ object BookHooks {
             world.setBlockState(pos, ModBlocks.OFFICE_BOOK.defaultState.with(PropBlock.FACING, Direction.Type.HORIZONTAL.random(world.random)))
         }
         EveryTunnel.LOGGER.info("The books of {} appear: {}", level.id, chosen.joinToString(" ") { "(${it.x} ${it.y} ${it.z})" })
+        BookPhaseHooks.phaseChanged()
         return chosen
     }
 
@@ -113,6 +114,7 @@ object BookHooks {
     /** All five back: the hatch opens, and the achievement. */
     private fun completed(world: ServerWorld, level: LevelDefinition) {
         setHatch(world, level, open = true)
+        BookPhaseHooks.phaseChanged()
         AchievementHooks.puzzleSolved(world, Achievement.BOOKS)
         EveryTunnel.LOGGER.info("All the books of {} are back: the hatch opens", level.id)
     }
@@ -178,5 +180,6 @@ object BookHooks {
             if (world.getBlockState(pos).isOf(ModBlocks.OFFICE_BOOK)) world.removeBlock(pos, false)
         }
         setHatch(world, level, open = false)
+        BookPhaseHooks.phaseChanged()
     }
 }

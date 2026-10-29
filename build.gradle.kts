@@ -197,7 +197,7 @@ tasks.test {
 
 // The map world, packed into the jar: on first launch the client copies it into saves/
 // (client.MapWorldInstaller). Taken from run/saves/noname_complex without what belongs to
-// whoever played it (players, stats, the mod's game state) and the lock; the level is
+// whoever played it (players, stats, the mod's game state, saved mobs) and the lock; the level is
 // rebuilt every time the world opens anyway. Skipped when that world does not exist.
 val mapWorld = file("run/saves/noname_complex")
 val mapWorldResources = layout.buildDirectory.dir("generated/mapWorld")
@@ -207,6 +207,11 @@ val packMapWorld = tasks.register<Zip>("packMapWorld") {
     from(mapWorld) {
         exclude("session.lock", "level.dat_old", "playerdata/**", "stats/**", "advancements/**")
         exclude("data/every_tunnel_*", "data/chunks.dat")
+        // No saved mobs or items: the mod spawns its creatures itself and remembers it in
+        // data/every_tunnel_*, left out above, so a packed one would come as a second one.
+        exclude("entities/**", "DIM-1/entities/**", "DIM1/entities/**")
+        // Only the pack folders: a stray archive beside them is not a datapack.
+        exclude("datapacks/*.tar.xz", "datapacks/*.tar.gz")
     }
     destinationDirectory.set(mapWorldResources.map { it.dir("every_tunnel/world") })
     archiveFileName.set("noname_complex.zip")

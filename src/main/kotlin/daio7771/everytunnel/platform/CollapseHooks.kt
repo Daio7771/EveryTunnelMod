@@ -38,7 +38,8 @@ import net.minecraft.util.math.Box
  *
  * Once per level until [reset]: a death in the level (the player restarts at its start, and
  * the rubble would cut the way), a new game and the map's rebuild clear the rubble and arm it
- * again.
+ * again. [reset] takes away only the rubble the collapse put ([placed]), never the tunnel's own
+ * concrete, even where a zone reaches into it.
  */
 object CollapseHooks {
 
@@ -59,6 +60,8 @@ object CollapseHooks {
     // Server thread only.
     private val collapsed = HashSet<String>()
     private val running = ArrayList<Running>()
+    /** Level id -> the cells the collapse filled with rubble. */
+    private val placed = HashMap<String, MutableSet<BlockPos>>()
     private var server: MinecraftServer? = null
 
     fun register() {
@@ -67,6 +70,7 @@ object CollapseHooks {
             server = null
             collapsed.clear()
             running.clear()
+            placed.clear()
         }
         LevelTriggers.register { change ->
             val key = change.enteredZones.firstOrNull { key ->
@@ -110,6 +114,7 @@ object CollapseHooks {
                 val pos = run.cells[run.filled++]
                 if (world.players.any { it.boundingBox.intersects(Box(pos)) }) continue
                 world.setBlockState(pos, RUBBLE[world.random.nextInt(RUBBLE.size)])
+                placed.getOrPut(run.levelId) { HashSet() } += pos
                 world.spawnParticles(ParticleTypes.CLOUD, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5, 3, 0.4, 0.4, 0.4, 0.02)
             }
             if (t < CollapseSchedule.DUST_END && t % 2 == 0) {
@@ -137,16 +142,19 @@ object CollapseHooks {
     private fun playersIn(world: ServerWorld, level: LevelDefinition): List<ServerPlayerEntity> =
         world.players.filter { LevelManager.levelAt(world.registryKey.value.toString(), it.x, it.y, it.z)?.id == level.id }
 
-    /** The collapse of [levelId] undone: its rubble cleared, its lights on, ready to go off again. */
+    /**
+     * The collapse of [levelId] undone: its rubble cleared, its lights on, ready to go off again.
+     * Rubble from before the server started is not known here: the map's rebuild, every time
+     * the world opens, has already taken it away.
+     */
     fun reset(server: MinecraftServer, levelId: String) {
         val level = LevelManager.get(levelId) ?: return
-        val zone = level.zones.firstOrNull { BLOCKS_TAG in it.tags } ?: return
+        if (level.zones.none { BLOCKS_TAG in it.tags }) return
         val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: return
         running.filter { it.levelId == levelId }.forEach { run -> run.lights.forEach { setLit(world, it, true) } }
         running.removeAll { it.levelId == levelId }
-        val b = zone.box
         val rubble = RUBBLE.map { it.block }
-        for (pos in BlockPos.iterate(b.minX, b.minY, b.minZ, b.maxX, b.maxY, b.maxZ)) {
+        for (pos in placed.remove(levelId).orEmpty()) {
             if (world.getBlockState(pos).block in rubble) world.setBlockState(pos, Blocks.AIR.defaultState)
         }
         if (collapsed.remove(levelId)) EveryTunnel.LOGGER.info("The tunnel of {} is open again", levelId)

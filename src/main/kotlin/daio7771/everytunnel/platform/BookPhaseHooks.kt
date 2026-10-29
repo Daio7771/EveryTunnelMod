@@ -33,6 +33,11 @@ object BookPhaseHooks {
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> nearness.remove(handler.player.uuid) }
     }
 
+    /** The book phase began, ended or started over ([BookHooks]): checked again on the next tick. */
+    fun phaseChanged() {
+        phase.clear()
+    }
+
     private fun tick(server: MinecraftServer) {
         val active = HashSet<UUID>()
         for (player in server.playerManager.playerList) {

@@ -211,11 +211,11 @@ silencio.
   de cada sala, una placa oscura con su nombre en blanco (`WallTextBlock`, con la fuente y el
   idioma del juego: `sign.every_tunnel.room.<id>`).
 - Cada sala tiene los muebles de lo que es, ordenados y sin sobrar nada (mesas con sus sillas
-  y teléfonos, archivadores, racks de servidores, taquillas, las mesas de la cafetería...);
+  y teléfonos, archivadores, racks de servidores, taquillas, las mesas de la cocina...);
   la biblioteca tiene filas de estanterías de cuatro de alto, a dos bloques unas de otras,
   alrededor de un claro, y en él la mesa del bibliotecario en U alrededor de la
   trampilla, abierta al sur, con una lámpara de latón y pantalla verde (`desk_lamp`). No hay nadie.
-- **Loot:** en el nivel 3 no hay botellas. El dispensador de agua de la cafetería da agua: con
+- **Loot:** en el nivel 3 no hay botellas. El dispensador de agua de la cocina da agua: con
   clic derecho el jugador bebe ahí, cuantas veces quiera, lo que da una botella cada vez (como
   mucho una vez cada 1,5 s; hace el ruido de beber), `WaterDispenserHooks`, el dispensador en
   el punto de spawn con la etiqueta `water_source` (`WATER_SOURCES`; los demás dispensadores
@@ -267,7 +267,8 @@ silencio.
   andando hacia ti suenan un reloj lento y un zumbido
   (`music.observer.approach`), y cuando corre a por ti, el reloj desbocado
   (`music.observer.chase`). Una partida nueva o una muerte lo devuelven
-  a su punto de spawn. Números de partida, a ajustar jugando (`ObserverSettings`; el log dice a
+  a su punto de spawn; cada reconstrucción del mapa lo mata, como a los Pale men, y su punto
+  de spawn lo vuelve a generar cuando entra un jugador. Números de partida, a ajustar jugando (`ObserverSettings`; el log dice a
   qué velocidad corrió de verdad en cada carrera, "[observer] ran ...").
 - **Taquillas para esconderse:** cada sala tiene al menos una (las salas Lockers y Changing
   room están llenas; la biblioteca no tiene). Un clic derecho en una taquilla desde delante
