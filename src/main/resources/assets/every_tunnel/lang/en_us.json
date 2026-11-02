@@ -234,6 +234,8 @@
   "item.every_tunnel.reel_102": "Film Reel: 102 minutes",
   "item.every_tunnel.reel_120": "Film Reel: 120 minutes",
   "item.every_tunnel.dart": "Dart",
+  "item.every_tunnel.master_card": "Master Card",
+  "item.every_tunnel.master_key": "Master Key",
   "item.every_tunnel.master_card_nw": "Master Card: top left",
   "item.every_tunnel.master_card_ne": "Master Card: top right",
   "item.every_tunnel.master_card_sw": "Master Card: bottom left",
@@ -254,5 +256,14 @@
   "block.every_tunnel.throw_line": "Throwing Line",
   "block.every_tunnel.dart_tray": "Dart Tray",
   "block.every_tunnel.dart_hatch": "Dart Hatch",
-  "block.every_tunnel.wall_sheet": "Score Sheet"
+  "block.every_tunnel.wall_sheet": "Score Sheet",
+  "block.every_tunnel.loot_master_key": "Master Key (Loot)",
+  "block.every_tunnel.calm_plate_left": "Calm Room Plate",
+  "block.every_tunnel.calm_plate_right": "Calm Room Plate",
+  "block.every_tunnel.emergency_lamp": "Emergency Lamp",
+  "block.every_tunnel.calm_reader": "Master Card Reader",
+  "block.every_tunnel.wet_floor_sign": "Wet Floor Sign",
+  "block.every_tunnel.security_monitor": "Security Monitor",
+  "block.every_tunnel.big_door": "Big Door",
+  "block.every_tunnel.calm_door": "Calm Room Door"
 }

@@ -49,7 +49,7 @@ Server side (positioned in the world, heard by everyone near):
   shutters, card readers, locker doors (`LockerSeatEntity`, `HidingHooks`).
 - The Pale man's steps, breathing, stinger and the tinnitus (`PaleManEntity`).
 - Flashlight and battery sounds at the player (`FlashlightHooks`), gulps (`DrinkHooks`).
-- The ending's footsteps behind the player (`EndingHooks`), the death sound (`DeathHooks`).
+- The death sound (`DeathHooks`).
 
 Client side (`client.effects`), per player and not positioned unless noted:
 

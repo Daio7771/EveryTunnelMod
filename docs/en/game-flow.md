@@ -313,10 +313,9 @@ silent.
 The corridor already belongs to Level 4, so "Level 4" shows as the door to B4 shuts, and going back
 into the corridor from Reception does not count as Level 3 again.
 
-The map's rebuild, whenever the world opens, puts Level 3 back and clears Level 4. So far Level 4
-is its rooms, furniture, nine notes, loot and rules (a `safe` level, see
-[Player systems](player.md#safe-levels)), and its four puzzles (below). Its big door is a
-wall, so **the demo has no ending for now**.
+The map's rebuild, whenever the world opens, puts Level 3 back and clears Level 4. Level 4 is its
+rooms, furniture, nine notes, loot and rules (a `safe` level, see
+[Player systems](player.md#safe-levels)), its four puzzles (below) and its closing.
 
 Each puzzle gives a corner of the golden master card, kept by `ProgressService`. Failing costs
 nothing, and after 3 failures the next right thing glows (`core.puzzle.OrderPuzzle`,
@@ -335,17 +334,31 @@ nothing, and after 3 failures the next right thing glows (`core.puzzle.OrderPuzz
   opens a brass hatch under the board with the piece inside, and adds a line to the score sheet on
   the wall (`ch1_l4_note_score_sheet_won`). The line on the floor is only a guide.
 
+### The closing
+
+`platform.LoungeClosingHooks`, blocks in `LoungeClosingBlocks.kt`:
+
+1. **The master card:** the four corners, each in its place in the inventory's 2 x 2 crafting grid,
+   make the card (`data/every_tunnel/recipes/master_card.json`). Pieces, card and key left on the floor
+   never vanish.
+2. **The Calm room:** a door at the top of the steps, with a reader that opens it for someone carrying
+   the card. Without it the reader does nothing.
+3. **The blackout:** taking the Master Key from the room's table puts out every lamp at once and lights
+   the red emergency lamps on the way back. A wet floor sign now stands in the middle of the Hall. The
+   level stays safe, and the Security room's monitors stay on (`blackout` is there for the music of the
+   audio phase).
+4. **The big door:** a dull knock without the key. With it the key is used and the door opens from the
+   centre out, over 3 s.
+
 ## 11. The end
 
-`platform.EndingHooks`: past Level 4's big door, on a dark stretch, the player walks into a zone
-tagged `end`.
+Halfway along the dark stretch past the big door, a zone tagged `big_door_shut` slams the door behind
+the player. At the far end, `platform.EndingHooks`: a zone tagged `end`.
 
-1. Five bare footsteps come down behind the player, each a little closer and lower (the
-   Pale man's own step sound).
-2. The screen fades to black over 2.5 s.
-3. The server sends `ending`; the client opens `EndOfDemoScreen`: "End of demo" fades in,
+1. The screen fades to black over 2.5 s.
+2. The server sends `ending`; the client opens `EndOfDemoScreen`: "End of demo" fades in,
    then the credits roll (the CC BY music credit among them) until "Thank you for playing."
-4. Any key after a moment, Esc, or a timeout saves the world and returns to the main menu.
+3. Any key after a moment, Esc, or a timeout saves the world and returns to the main menu.
 
 Opening the world again starts a new game, as always.
 

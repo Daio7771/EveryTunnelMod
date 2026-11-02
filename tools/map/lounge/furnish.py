@@ -13,11 +13,11 @@ from offices.furnish import ROW, STACK, TILE, WALK_THROUGH
 TILES = TILE | {"pool_table", "lounge_desk"}
 RACKS = {"record_rack", "reel_rack"}
 THROUGH = WALK_THROUGH | {"cinema_seat", "bar_stool", "served_glass", "diploma", "office_chair", "cinema_screen",
-                         "throw_line", "dart_plate_left", "dart_plate_right", "wall_sheet"}
+                         "throw_line", "dart_plate_left", "dart_plate_right", "wall_sheet", "calm_reader", "calm_plate_left", "calm_plate_right", "emergency_lamp"}
 WORLD_FACING = {"north": "west", "west": "south", "south": "east", "east": "north"}
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
 LOOT_COLOUR = {"battery": (235, 205, 70), "water": (90, 215, 235), "food_plate": (225, 80, 70),
-               "food_popcorn": (225, 80, 70), "food_snack": (225, 80, 70)}
+               "food_popcorn": (225, 80, 70), "food_snack": (225, 80, 70), "master_key": (240, 200, 90)}
 
 
 def row(name, x0, x1, z, facing):
@@ -71,8 +71,8 @@ FURNITURE = (
     + column("throw_line", 78, 18, 22, "west") + [("nightstand", 78, 23, "west")]
     # The Hall: somewhere to sit.
     + column("sofa", 45, 23, 26, "east") + column("sofa", 54, 23, 26, "west")
-    # The Security room: the desk, cabinets (the monitors' place stays clear).
-    + row("office_desk", 41, 45, 5, "south") + [("office_chair", 43, 6, "north"), ("filing_cabinet", 40, 0, "south"), ("filing_cabinet", 41, 0, "south")]
+    # The Security room: the desk, cabinets, the monitors' desk against the big door's wall.
+    + row("office_desk", 54, 58, 0, "south") + row("office_desk", 41, 45, 5, "south") + [("office_chair", 43, 6, "north"), ("filing_cabinet", 40, 0, "south"), ("filing_cabinet", 41, 0, "south")]
     # The Calm room: bookshelves, tables, armchairs.
     + [("bookshelf", x, 30, "south") for x in range(93, 101)] + [("bookshelf", x, 43, "north") for x in range(93, 101)]
     + [("lounge_desk", x, z, "north") for x in (96, 97) for z in (36, 37)]
@@ -84,6 +84,7 @@ FURNITURE = (
 # Stacked on the ground floor's pieces: (name, x, z, facing, y).
 # DETAILS: a glass already served at the end of the bar, with nobody there.
 STACKED = [("served_glass", 45, 32, "north", 2), ("vending_machine", 69, 14, "south", 2), ("dart_tray", 78, 23, "west", 2)] + [
+    ("security_monitor", x, 0, "south", y) for x in range(54, 59) for y in (2, 3)] + [
     ("bookshelf", x, z, f, 2) for z, f in ((30, "south"), (43, "north")) for x in range(93, 101)]
 
 # (note id, x, z): a sheet on the furniture there.
@@ -112,6 +113,7 @@ LOOT = [
     ("battery", 28, 26, 2), ("battery", 20, 26, 2),                                                # the Suites
     ("food_snack", 71, 14, 2), ("battery", 73, 20, 1), ("battery", 74, 20, 1),                     # the Game room, by the pool table
     ("battery", 42, 5, 2), ("battery", 44, 5, 2),                                                  # the Security room's desk
+    ("master_key", 97, 36, 2),                                                                     # the Calm room's table, beside its card
 ]
 
 # Places that the puzzles and the closing fill: (x0, z0, x1, z1), kept clear. The final key goes on
@@ -122,7 +124,6 @@ RESERVED = {
     "cinema screen": (15, 32, 17, 42),
     "pool": (74, 33, 83, 41),
     "dartboard": (79, 16, 84, 24),
-    "monitors": (52, 1, 59, 4),
 }
 
 # Level 4's puzzles: (name, x, z, facing, y, what it holds). The records stand out of the menu's order,
@@ -139,6 +140,17 @@ PIECE_SPOTS = [("piece_bar", 61, 30), ("piece_cinema", 26, 32)]
 BOARD = [(83, 19 + col, 2 + row, col, row) for col in range(3) for row in range(3)]
 DART_THINGS = [("dart_hatch", 83, 20, 1), ("dart_plate_left", 83, 22, 3), ("dart_plate_right", 83, 23, 3)]
 DART_SPOTS = [("dartboard", 83, 20, 3), ("dart_tray", 78, 23, 2), ("dart_hatch", 83, 20, 1)]
+# Level 4's closing: the Calm room's reader and plate, on the Spa's side of the wall at the top of the steps.
+CLOSING_THINGS = [("calm_reader", 85, 38, 2), ("calm_plate_left", 85, 36, 3), ("calm_plate_right", 85, 37, 3)]
+# big_door: its bottom left part. wet_sign: nothing stands there until the blackout.
+CLOSING_SPOTS = [("big_door", 47, -1, 1), ("wet_sign", 50, 20, 1)]
+# The emergency lamps on the way back, on the walls, every 6 or so: (x, z, facing), at y 2 over their floor.
+EMERGENCY = [(90, 33, "east"), (90, 40, "east"), (88, 34, "south"),                                  # Calm room, steps
+             (85, 33, "west"), (84, 30, "south"), (78, 30, "south"), (72, 30, "south"),              # the Spa
+             (67, 34, "south"),                                                                      # its corridor
+             (63, 33, "west"), (55, 29, "south"), (46, 29, "south"),                                 # the Bar
+             (45, 26, "east"), (54, 25, "west"), (45, 15, "east"), (51, 12, "south"),                # the Hall
+             (48, 10, "north"), (46, 0, "south"), (53, 0, "south")]                                  # Security, by the door
 SCREEN = [(15, z, y) for z in range(33, 42) for y in range(1, 5)]
 
 DIPLOMAS = [(49, z, "east") for z in range(62, 79, 4)] + [(52, z, "west") for z in range(62, 79, 4)]
@@ -182,6 +194,10 @@ class Furnish:
             self.board[(x, self.lv.floors[(x, z)] + y, z)] = (col, row)
         for name, x, z, y in DART_THINGS:
             self.put(name, x, z, "west", y, in_gap=True)
+        for name, x, z, y in CLOSING_THINGS:
+            self.put(name, x, z, "west", y, in_gap=True)
+        for x, z, facing in EMERGENCY:
+            self.put("emergency_lamp", x, z, facing, 2, in_gap=True)
         for _, x, z, y in WALL_NOTES:
             self.put("wall_sheet", x, z, "west", y, in_gap=True)
         for _, x, z in NOTES:
@@ -257,7 +273,7 @@ class Furnish:
             out.append((nid, self.centre(x, y, z), "note"))
         for nid, x, z, y in WALL_NOTES:
             out.append((nid, self.centre(x, self.lv.floors[(x, z)] + y, z), "note"))
-        for sid, x, z, y in DART_SPOTS:
+        for sid, x, z, y in DART_SPOTS + CLOSING_SPOTS:
             out.append((sid, self.centre(x, y, z), "puzzle"))
         for k, (tag, x, z, y) in enumerate(LOOT):
             out.append((f"ch1_l4_loot_{k + 1}", self.centre(x, self.lv.floors[(x, z)] + y, z), tag))
@@ -282,7 +298,8 @@ class Furnish:
 
     def plan_cells(self):
         """For the preview: (x, z) -> what stands there, without the notes on top."""
-        return {(x, z): it[0] for (x, y, z), it in self.items.items() if it[0] not in ("note_paper", "diploma", "dart_tray", "dart_plate_left", "dart_plate_right")}
+        return {(x, z): it[0] for (x, y, z), it in self.items.items() if it[0] not in ("note_paper", "diploma", "dart_tray", "dart_plate_left", "dart_plate_right",
+                                                                                         "calm_plate_left", "calm_plate_right", "emergency_lamp", "security_monitor")}
 
     def dots(self):
         """For the preview: ((x, z), colour) of the notes and the loot."""

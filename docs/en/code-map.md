@@ -158,13 +158,15 @@ KDoc comment that says more.
 | `DartHooks.kt` | Level 4's darts: the tray, each hit, the hint, the hatch with the piece |
 | `DartBlocks.kt` | The dartboard's nine parts, the tray and the hatch |
 | `DartEntity.kt` | A thrown dart, built on vanilla's arrow; never saved |
+| `LoungeClosingHooks.kt` | Level 4's closing: the blackout, the emergency lamps, the big door |
+| `LoungeClosingBlocks.kt` | The big door, the Calm room's reader, the emergency lamp |
 | `SafeLevelHooks.kt` | Levels without risk: no damage (Level 4) |
 | `SuiteBedHooks.kt` | Resting in a bed: fade to black, health and stamina full |
 | `BookPhaseHooks.kt` | While the books are out: the clock in the head and the "He's near. Hide." warning |
 | `BoxHooks.kt` | Level 3's box puzzle: boxes out at random, carrying, the shelf, death, debug |
 | `HidingHooks.kt` | Hiding in lockers: in, out, no noise inside, out on a new game |
 | `AchievementHooks.kt` | Earning achievements: what earns each, telling the client |
-| `EndingHooks.kt` | The end of the demo: footsteps, fade, end screen |
+| `EndingHooks.kt` | The end of the demo: fade, end screen |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
 | `PlaytestLog.kt` | The `[playtest]` log |

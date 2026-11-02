@@ -158,6 +158,13 @@ class Lounge:
                     top = next(s.height for s in self.rooms if s.box[0] <= x < s.box[2] and s.box[1] <= z < s.box[3])
                     for y in range(3 if door else 1, top + 1):
                         air.pop((x, y, z), None)
+        wall = p["CALM_WALL"]
+        for z in range(wall["z0"], wall["z1"]):
+            door = z in wall["door"]
+            if not door:
+                self.blocked.add((wall["x"], z))
+            for y in range(3 if door else 1, self.steps.height + 1):
+                air.pop((wall["x"], y, z), None)
         steel = {(x, y, z) for x, y, z, _ in self.door_cells("steel_door")}
         for c in steel:
             air.pop(c, None)             # shut until the level stands: a wall for both shells
@@ -188,6 +195,18 @@ class Lounge:
         for x, y, z, st in self.door_cells("steel_door"):
             self.lounge_blocks[self.at(x, y, z)] = st
             self.corridor_blocks[self.at(x, y, z)] = st
+        # The Calm room's door, across the way east: someone coming looks at the world's south. Its
+        # hinges outward too: the leaf at the lower z is the world's west.
+        for z, hinge in zip(wall["door"], ("right", "left")):
+            for y, half in ((1, "lower"), (2, "upper")):
+                self.lounge_blocks[self.at(wall["x"], y, z)] = (
+                    f"{p['DOORS']['calm_door']}[facing=south,half={half},hinge={hinge},open=false,powered=false]")
+        # The big door: col 0 on the left as seen from the Security room, at the lower x.
+        for _, _, line, first, width, height, kind in self.openings:
+            if kind == "big_door":
+                for col in range(width):
+                    for row in range(height):
+                        self.lounge_blocks[self.at(first + col, row + 1, line)] = f"every_tunnel:big_door[col={col},facing=east,row={row}]"
         for x, z, open_ in p["PARTITION_DOORS"]:
             for y, half in ((1, "lower"), (2, "upper")):
                 self.lounge_blocks[self.at(x, y, z)] = (
@@ -260,7 +279,12 @@ class Lounge:
     def zones(self):
         """(id, world box inclusive, tags): every space, the part of the corridor that starts the
         build, and the openings between them, so that going through a door never leaves the level."""
-        out = [(s.id, self.space_zone(s), ["end"] if s is self.exit else []) for s in self.spaces]
+        out = [(s.id, self.space_zone(s), []) for s in self.spaces]
+        # Along the dark stretch, from the far end: where the big door slams, and where it ends.
+        x0, y0, z0, x1, y1, z1 = self.space_zone(self.exit)
+        far_x, _, _ = self.at(0, 0, self.exit.box[1])
+        out.append((f"{self.exit.id}_far", (x0, y0, z0, far_x + self.p["EXIT_SHUT_AT"], y1, z1), ["big_door_shut"]))
+        out.append((f"{self.exit.id}_end", (x0, y0, z0, far_x + self.p["EXIT_END_AT"], y1, z1), ["end"]))
         out.append((f"{self.diplomas.id}_build", self.build_zone(), ["lounge_build"]))
         y = self.p["FLOOR_Y"]
         # The pool's water: without it a swimmer would be out of the level, and of its safe rules.

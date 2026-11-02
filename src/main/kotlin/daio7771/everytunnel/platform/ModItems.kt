@@ -37,7 +37,7 @@ import net.minecraft.world.World
  *   effect in all three. Consumed outside Creative.
  *
  * - Level 4's puzzle items ([LoungePuzzleHooks]): four records, four film reels, and the four
- *   corners of the golden master card. One each.
+ *   corners of the golden master card, the card itself and the Master Key. One each.
  *
  * - Darts ([DartHooks]): three from the Game room's tray; right-click throws one straight away.
  *
@@ -74,6 +74,10 @@ object ModItems {
     val CARD_NE: Item = Item(Item.Settings().maxCount(1))
     val CARD_SW: Item = Item(Item.Settings().maxCount(1))
     val CARD_SE: Item = Item(Item.Settings().maxCount(1))
+    /** The four corners joined in the crafting grid (data/every_tunnel/recipes/master_card.json): opens the Calm room. */
+    val MASTER_CARD: Item = Item(Item.Settings().maxCount(1))
+    /** On the Calm room's table: taking it brings the blackout, and it opens the big door ([LoungeClosingHooks]). */
+    val MASTER_KEY: Item = Item(Item.Settings().maxCount(1))
 
     @JvmField
     val DART: Item = DartItem(Item.Settings().maxCount(DartHooks.DART_COUNT))
@@ -88,6 +92,7 @@ object ModItems {
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_snack"), FOOD_SNACK)
         val puzzleItems = RECORD_IDS.zip(RECORDS) + REEL_IDS.zip(REELS) + listOf(
             "master_card_nw" to CARD_NW, "master_card_ne" to CARD_NE, "master_card_sw" to CARD_SW, "master_card_se" to CARD_SE,
+            "master_card" to MASTER_CARD, "master_key" to MASTER_KEY,
         )
         for ((id, item) in puzzleItems) Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, id), item)
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register { entries ->

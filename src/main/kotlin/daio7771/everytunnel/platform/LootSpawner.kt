@@ -38,6 +38,7 @@ object LootSpawner {
         "food_popcorn" to { ModBlocks.LOOT_FOOD_POPCORN },
         "food_snack" to { ModBlocks.LOOT_FOOD_SNACK },
         "master_card_sw" to { ModBlocks.LOOT_CARD_SW },
+        "master_key" to { ModBlocks.LOOT_MASTER_KEY },
     )
 
     private var server: MinecraftServer? = null

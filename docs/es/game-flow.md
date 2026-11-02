@@ -337,8 +337,7 @@ volver al pasillo desde Reception no cuenta como regresar al nivel 3.
 
 La reconstrucción del mapa, cada vez que se abre el mundo, devuelve el nivel 3 y limpia el 4. De
 momento el nivel 4 son sus salas, muebles, nueve notas, botín y reglas (un nivel `safe`, ver
-[Sistemas del jugador](player.md#niveles-seguros)), y sus cuatro puzles (abajo). Su puerta
-grande es una pared, así que **por ahora la demo no tiene final**.
+[Sistemas del jugador](player.md#niveles-seguros)), sus cuatro puzles (abajo) y su cierre.
 
 Cada puzle da una esquina de la tarjeta maestra dorada, que guarda `ProgressService`. Fallar no
 cuesta nada, y tras 3 fallos brilla lo siguiente correcto (`core.puzzle.OrderPuzzle`,
@@ -359,18 +358,32 @@ cuesta nada, y tras 3 fallos brilla lo siguiente correcto (`core.puzzle.OrderPuz
   la hoja de puntuaciones de la pared (`ch1_l4_note_score_sheet_won`). La línea del suelo es solo una
   guía.
 
+### El cierre
+
+`platform.LoungeClosingHooks`, con sus bloques en `LoungeClosingBlocks.kt`:
+
+1. **La tarjeta maestra:** las cuatro esquinas, cada una en su sitio en la cuadrícula de crafteo de 2 x 2
+   del inventario, forman la tarjeta (`data/every_tunnel/recipes/master_card.json`). Las piezas, la
+   tarjeta y la llave que se dejan en el suelo no desaparecen nunca.
+2. **La Calm room:** una puerta arriba de los escalones, con un lector que la abre a quien lleve la
+   tarjeta. Sin ella, el lector no hace nada.
+3. **El apagón:** coger la Master Key de la mesa de la sala apaga todas las lámparas a la vez y enciende
+   las luces rojas de emergencia del camino de vuelta. Aparece un cartel de suelo mojado en medio del
+   Hall. El nivel sigue siendo seguro y los monitores de la Security room siguen encendidos (`blackout`
+   queda para la música de la fase de audio).
+4. **La puerta grande:** un golpe sordo sin la llave. Con ella, la llave se gasta y la puerta se abre del
+   centro hacia fuera en 3 s.
+
 ## 11. El final
 
-`platform.EndingHooks`: tras la puerta grande del nivel 4, en un tramo oscuro, el jugador entra en
-una zona con la etiqueta `end`.
+A mitad del tramo oscuro tras la puerta grande, una zona con la etiqueta `big_door_shut` cierra la puerta
+de golpe a espaldas del jugador. Al fondo, `platform.EndingHooks`: una zona con la etiqueta `end`.
 
-1. Cinco pasos descalzos se acercan por detrás del jugador, cada uno algo más cerca y más
-   bajo (el sonido de paso del propio Pale man).
-2. La pantalla funde a negro en 2,5 s.
-3. El servidor envía `ending`; el cliente abre `EndOfDemoScreen`: aparece "End of demo" y
+1. La pantalla funde a negro en 2,5 s.
+2. El servidor envía `ending`; el cliente abre `EndOfDemoScreen`: aparece "End of demo" y
    luego suben los créditos (entre ellos el crédito CC BY de la música) hasta "Thank you
    for playing."
-4. Cualquier tecla tras un momento, Esc o un tiempo límite guardan el mundo y vuelven al
+3. Cualquier tecla tras un momento, Esc o un tiempo límite guardan el mundo y vuelven al
    menú principal.
 
 Abrir el mundo otra vez empieza una partida nueva, como siempre.

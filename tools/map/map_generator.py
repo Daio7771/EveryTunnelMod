@@ -385,18 +385,22 @@ LEVEL_4 = dict(
     ],
     # Down to the Calm room, west to east: one cell of landing, then one step down per cell.
     STEPS=("ch1_l4_steps", (86, 34, 90, 40)),
+    # The wall at the top of the steps, on its landing, with the Calm room's double door.
+    CALM_WALL=dict(x=86, z0=34, z1=40, door=(36, 37)),
     # Openings through the one-block walls: (id, axis of the wall's line, line, first cell, width, height, kind).
     OPENINGS=[
         ("ch1_l4_arch_bar", "z", 28, 47, 6, 4, "arch"),
         ("ch1_l4_door_security", "z", 11, 49, 2, 2, "door"),
         ("ch1_l4_door_reception", "z", 59, 50, 2, 2, "steel_door"),
-        ("ch1_l4_door_big", "z", -1, 47, 6, 4, "big_door"),      # a plain wall until the level's closing phase
+        ("ch1_l4_door_big", "z", -1, 47, 6, 4, "big_door"),      # shut until the Master Key opens it
     ],
     # Between the door to B4 and Reception: 4 wide, 20 long, diplomas on its walls.
     DIPLOMA_CORRIDOR=("ch1_l4_diplomas", "Diploma corridor", (49, 60, 53, 80), 4),
     B4_DOOR=(50, 80),                # its cell (x, z) in the corridor's far wall; world (33, 10, 119)
     # Past the big door, dark: walking it starts the credits (the end of v0.4).
     EXIT_STRETCH=("ch1_l4_exit", "Dark stretch", (47, -17, 53, -1), 4),
+    EXIT_SHUT_AT=7,                  # cells from its far end, inclusive: the door slams from here on,
+    EXIT_END_AT=2,                   # and from here on the credits start
     START=(50, 55),                  # the checkpoint, in Reception, facing north
     # Plan to world: the plan's north is the world's west, so the level meets the corridor from B4:
     # world x = z + PLACE_X, world z = PLACE_Z - x.
@@ -427,7 +431,7 @@ LEVEL_4 = dict(
     LAMP="every_tunnel:warm_lamp[lit=true]",
     LAMP_SPACING=5,
     LAMP_SPACING_BAR=4,              # the Bar has the highest ceiling, so more of them
-    DOORS=dict(door="minecraft:dark_oak_door", steel_door="every_tunnel:emergency_door"),
+    DOORS=dict(door="minecraft:dark_oak_door", steel_door="every_tunnel:emergency_door", calm_door="every_tunnel:calm_door"),
     # Level 3's door to B4 and the corridor behind it (the corridor is built with Level 3, the rest
     # in play: see level4_steps). A step holds at most so many commands and blocks changed.
     STEP_COMMANDS=40,

@@ -10,9 +10,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.server.MinecraftServer
-import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
-import net.minecraft.util.math.Vec3d
 import java.util.UUID
 
 /**
@@ -21,8 +19,7 @@ import java.util.UUID
  * ([LoadingHooks.isLoading]): a game saved after the end opens with the player still in that
  * zone, until the new game takes them to the elevator.
  *
- * Bare footsteps come down the stairs behind the player ([STEPS], the Pale man's own
- * sound), the screen fades to black, and the client shows "End of demo" with the credits
+ * The screen fades to black, and the client shows "End of demo" with the credits
  * (`client.screen.EndOfDemoScreen`), then saves and goes back to the title screen. Opening
  * the world again starts a new game, as it always does ([LoadingHooks]).
  */
@@ -33,15 +30,10 @@ object EndingHooks {
     /** To the client: show the end screen (no payload). */
     val ENDING_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "ending")
 
-    private const val FIRST_STEP_TICK = 10
-    private const val STEPS = 5
-    private const val STEP_TICKS = 11
-    private const val FADE_TICK = FIRST_STEP_TICK + STEPS * STEP_TICKS
     private const val FADE_SECONDS = 2.5f
-    private const val SCREEN_TICK = FADE_TICK + 60
+    private const val SCREEN_TICK = 60
 
-    /** [behind]: unit vector, horizontal, pointing back the way the player came. */
-    private class Ending(val behind: Vec3d, var ticks: Int = 0)
+    private class Ending(var ticks: Int = 0)
 
     // Server thread only.
     private val endings = HashMap<UUID, Ending>()
@@ -60,9 +52,7 @@ object EndingHooks {
             if (!reachedEnd || change.playerId in endings) return@register
             val player = server?.playerManager?.getPlayer(change.playerId) ?: return@register
             if (!WorldRules.appliesTo(player.isCreative, player.isSpectator) || LoadingHooks.isLoading(player)) return@register
-            val look = player.rotationVector
-            val behind = Vec3d(-look.x, 0.0, -look.z).let { if (it.lengthSquared() < 1e-4) Vec3d(0.0, 0.0, 1.0) else it.normalize() }
-            endings[player.uuid] = Ending(behind)
+            endings[player.uuid] = Ending()
             EveryTunnel.LOGGER.info("{} reached the end of the demo", player.name.string)
             PlaytestLog.endOfDemo(player)
         }
@@ -80,17 +70,7 @@ object EndingHooks {
                 continue
             }
             val t = ending.ticks++
-            val step = (t - FIRST_STEP_TICK) / STEP_TICKS
-            if (t >= FIRST_STEP_TICK && (t - FIRST_STEP_TICK) % STEP_TICKS == 0 && step < STEPS) {
-                // Each step a little closer and lower: someone coming down the stairs after you.
-                val distance = 7.0 - step * 0.9
-                val height = 3.5 - step * 0.6
-                val at = player.pos.add(ending.behind.multiply(distance)).add(0.0, height, 0.0)
-                player.serverWorld.playSound(
-                    null, at.x, at.y, at.z, ModSounds.PALE_MAN_STEP, SoundCategory.HOSTILE, 0.9f, 0.9f + player.random.nextFloat() * 0.1f,
-                )
-            }
-            if (t == FADE_TICK) DeathHooks.sendFade(player, 1f, FADE_SECONDS)
+            if (t == 0) DeathHooks.sendFade(player, 1f, FADE_SECONDS)
             if (t >= SCREEN_TICK) {
                 iterator.remove()
                 if (ServerPlayNetworking.canSend(player, ENDING_PACKET_ID)) {

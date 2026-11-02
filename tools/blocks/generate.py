@@ -326,14 +326,16 @@ def diploma_tex(rng):
     return img
 
 
-# The darts' 3 x 5 letters, one string of 15 per character, row by row.
+# The plates' letters, 5 rows high and 3 wide (W, M and N, 5 wide: at 3 they read as H), row by row.
 DART_FONT = {
     "0": "111101101101111", "1": "010110010010111", "2": "111001111100111", "3": "111001111001111",
     "4": "101101111001001", "5": "111100111001111", "6": "111100111101111", "7": "111001001001001",
     "8": "111101111101111", "9": "111101111001111", "-": "000000111000000", ":": "000010000010000",
     " ": "000000000000000", "H": "101101111101101", "O": "111101101101111", "U": "101101101101111",
     "S": "111100111001111", "E": "111100110100111", "G": "111100101101111", "A": "111101111101101",
-    "M": "101111111101101",
+    "M": "1000111011101011000110001", "C": "111100100100111", "L": "100100100100111", "R": "110101110101101",
+    "W": "1000110001101011010101010", "T": "111010010010010", "F": "111100110100100", "D": "110101101101110",
+    "N": "1000111001101011001110001",
 }
 # As in core/puzzle/darts: DartboardGeometry.ORDER, DartHooks.SEQUENCE.
 DART_ORDER = (20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5)
@@ -343,13 +345,20 @@ DART_SCORING_PX = 38                                                   # Dartboa
 DART_RIM_PX = 47.5
 
 
+def dart_text_width(text, scale=1):
+    return (sum(len(DART_FONT[ch]) // 5 + 1 for ch in text) - 1) * scale
+
+
 def dart_text(img, x, y, text, colour, scale=1):
-    for k, ch in enumerate(text):
-        for i, bit in enumerate(DART_FONT[ch]):
+    for ch in text:
+        glyph = DART_FONT[ch]
+        width = len(glyph) // 5
+        for i, bit in enumerate(glyph):
             if bit == "1":
                 for dx in range(scale):
                     for dy in range(scale):
-                        img.putpixel((x + k * 4 * scale + (i % 3) * scale + dx, y + (i // 3) * scale + dy), colour)
+                        img.putpixel((x + (i % width) * scale + dx, y + (i // width) * scale + dy), colour)
+        x += (width + 1) * scale
 
 
 def dartboard_tex(rng, hint):
@@ -400,8 +409,117 @@ def dart_plate_tex(rng):
             elif rng.random() < 0.15:
                 img.putpixel((x, y), (168, 130, 66))
     ink = (38, 28, 18)
-    dart_text(img, 5, 4, "HOUSE GAME:", ink, 2)
-    dart_text(img, 5, 18, " - ".join(str(n) for n in DART_SEQUENCE), ink, 2)
+    numbers = " - ".join(str(n) for n in DART_SEQUENCE)
+    dart_text(img, (96 - dart_text_width("HOUSE GAME:", 2)) // 2, 4, "HOUSE GAME:", ink, 2)
+    dart_text(img, (96 - dart_text_width(numbers, 2)) // 2, 18, numbers, ink, 2)
+    return img
+
+
+def calm_plate_tex(rng):
+    """The plate over the Calm room's door, two blocks wide: 96 x 16."""
+    img = Image.new("RGB", (96, 16), (178, 140, 72))
+    for x in range(96):
+        for y in range(16):
+            if min(x, y, 95 - x, 15 - y) == 0:
+                img.putpixel((x, y), (112, 84, 40))
+            elif rng.random() < 0.15:
+                img.putpixel((x, y), (168, 130, 66))
+    dart_text(img, (96 - dart_text_width("CALM ROOM", 2)) // 2, 3, "CALM ROOM", (38, 28, 18), 2)
+    return img
+
+
+def wet_floor_tex(rng):
+    """The yellow sign, 32 x 32 (a size that keeps the game's mipmaps): the only thing in the lounge that looks like a warning."""
+    img = Image.new("RGB", (32, 32), (232, 196, 40))
+    for x in range(32):
+        for y in range(32):
+            if rng.random() < 0.1:
+                img.putpixel((x, y), (222, 186, 36))
+            if min(x, y, 31 - x, 31 - y) == 0:
+                img.putpixel((x, y), (40, 36, 28))
+    ink = (28, 24, 18)
+    for k, line in enumerate(("WET", "FLOOR", "DO NOT", "ENTER")):
+        dart_text(img, (32 - dart_text_width(line)) // 2, 3 + k * 6 + (2 if k > 1 else 0), line, ink)
+    return img
+
+
+def big_door_tex(rng):
+    """The big door's front, 96 x 64 for its 6 x 4 blocks: steel, a seam down the middle, ribs with
+    rivets, the brass lock on the seam at eye height."""
+    img = Image.new("RGB", (96, 64), (84, 88, 94))
+    for x in range(96):
+        for y in range(64):
+            col = mix((84, 88, 94), (rng.randint(60, 110),) * 3, 0.14)
+            if min(x, y, 95 - x, 63 - y) < 2:
+                col = (52, 54, 58)
+            elif x in (47, 48):
+                col = (24, 24, 26)
+            elif y in (20, 21, 48, 49):
+                col = (62, 65, 70)
+            elif y in (22, 50):
+                col = (104, 108, 114)
+            img.putpixel((x, y), col)
+    for x in range(6, 92, 8):
+        if abs(x - 47.5) > 3:
+            for y in (17, 45):
+                img.putpixel((x, y), (132, 136, 142))
+    for x in range(41, 55):
+        for y in range(33, 47):
+            edge = x in (41, 54) or y in (33, 46)
+            img.putpixel((x, y), (112, 84, 40) if edge else (178, 140, 72))
+    for x, y in ((47, 37), (48, 37), (47, 38), (48, 38), (47, 39), (48, 39), (47, 40), (48, 40), (47, 41), (48, 41), (46, 38), (49, 38)):
+        img.putpixel((x, y), (20, 16, 12))
+    return img
+
+
+def fog_frames(rng, frames=8):
+    """A monitor's picture, no camera behind it: grey fog drifting, a bar of signal rolling up."""
+    grid = [[rng.randint(70, 150) for _ in range(8)] for _ in range(8)]
+    out = []
+    for f in range(frames):
+        img = new((60, 64, 66))
+        for y in range(16):
+            for x in range(16):
+                gx, gy = (x / 2 + f) % 8, y / 2
+                a, b = grid[int(gy) % 8][int(gx) % 8], grid[int(gy) % 8][(int(gx) + 1) % 8]
+                t = gx - int(gx)
+                v = a + (b - a) * t + rng.randint(-12, 12)
+                if y == 15 - (f * 2):
+                    v += 40
+                img.putpixel((x, y), (int(v), int(v + 3), int(v + 4)))
+        out.append(img)
+    return out
+
+
+def master_card_tex(rng):
+    """Item: the whole golden card, the corners' picture at half size."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(3, 13):
+        for x in range(1, 15):
+            c = (150, 112, 40) if x in (1, 14) or y in (3, 12) else (216, 176, 78)
+            if y in (5, 6):
+                c = (120, 88, 30)
+            if 3 <= x < 6 and 8 <= y < 11:
+                c = (58, 44, 30)
+            if c == (216, 176, 78) and rng.random() < 0.08:
+                c = (238, 206, 120)
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
+def master_key_tex(rng):
+    """Item: the golden key, its bow at the top left, aimed down to the right."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    gold, dark = (226, 186, 84, 255), (150, 112, 40, 255)
+    for x, y in ((3, 1), (4, 1), (5, 1), (2, 2), (6, 2), (1, 3), (7, 3), (1, 4), (7, 4), (1, 5), (7, 5), (2, 6), (6, 6), (3, 7), (4, 7), (5, 7)):
+        img.putpixel((x, y), gold)
+    for x, y in ((3, 2), (4, 2), (5, 2), (2, 3), (2, 4), (2, 5), (3, 6), (4, 6)):
+        img.putpixel((x, y), dark)
+    for k in range(6, 14):
+        img.putpixel((k, k), gold)
+        img.putpixel((k + 1, k), dark)
+    for x, y in ((10, 12), (9, 13), (12, 14), (11, 15)):
+        img.putpixel((x, y), gold)
     return img
 
 
@@ -1708,7 +1826,8 @@ def build():
                                  ("loot_master_card_nw", "Master Card (Loot)", "master_card_nw"),
                                  ("loot_master_card_ne", "Master Card (Loot)", "master_card_ne"),
                                  ("loot_master_card_sw", "Master Card (Loot)", "master_card_sw"),
-                                 ("loot_master_card_se", "Master Card (Loot)", "master_card_se")):
+                                 ("loot_master_card_se", "Master Card (Loot)", "master_card_se"),
+                                 ("loot_master_key", "Master Key (Loot)", "master_key")):
         a.models[block_id] = {"textures": {"particle": f"{NS}:item/{item}"}}
         a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:item/{item}"})
 
@@ -2078,6 +2197,44 @@ def build():
     prop("projector", "Projector", {"m": "rack_metal", "d": "rack_dark"},
          [el((7, 0, 7), (9, 8, 9), "m"), el((3, 8, 3), (13, 15, 13), "m"), el((6, 10, 0), (10, 14, 3), "d")])
     prop("cinema_screen", "Cinema Screen", {"s": "screen_white"}, [el((0, 0, 15), (16, 16, 16), "s")])
+    # Level 4's closing.
+    plate = calm_plate_tex(r("calm_plate"))
+    for side, x0 in (("left", 0), ("right", 48)):
+        a.texture(f"calm_plate_{side}", plate.crop((x0, 0, x0 + 48, 16)), T.STEEL.but(smoothness=0.7, metal=231, relief=0.1), tiles=False)
+        prop(f"calm_plate_{side}", "Calm Room Plate", {"p": f"calm_plate_{side}", "b": "lounge_brass"},
+             [el((0, 5.33, 15.5), (16, 10.67, 16), "b", north=("p", (0, 0, 16, 16)))])
+    a.texture("lamp_red_lit", plastic_tex(r("lamp_red_lit"), (214, 50, 40)), T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    a.texture("lamp_red_off", plastic_tex(r("lamp_red_off"), (70, 24, 22)), T.PLASTIC.but(smoothness=0.7, relief=0.0))
+    for state, tex in (("lit", "lamp_red_lit"), ("off", "lamp_red_off")):
+        a.models[f"emergency_lamp_{state}"] = model({"d": "rack_dark", "l": tex}, [el((6, 5, 15), (10, 11, 16), "d"), el((7, 6, 14), (9, 10, 15), "l")])
+    a.block("emergency_lamp", "Emergency Lamp", {"variants": {
+        f"facing={f},lit={l}": {"model": f"{NS}:block/emergency_lamp_{'lit' if l == 'true' else 'off'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for l in ("true", "false")}}, {"parent": f"{NS}:block/emergency_lamp_off"})
+    for state, tex in (("locked", "rack_dark"), ("open", "card_gold")):
+        a.models[f"calm_reader_{state}"] = model({"b": "lounge_brass", "l": tex}, [el((5, 4, 15), (11, 12, 16), "b"), el((6, 8, 14.5), (10, 11, 15), "l")])
+    a.block("calm_reader", "Master Card Reader", {"variants": {
+        f"facing={f},unlocked={u}": {"model": f"{NS}:block/calm_reader_{'open' if u == 'true' else 'locked'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for u in ("true", "false")}}, {"parent": f"{NS}:block/calm_reader_locked"})
+    a.texture("wet_floor_front", wet_floor_tex(r("wet_floor")), T.PLASTIC.but(smoothness=0.5, relief=0.0), tiles=False)
+    a.texture("wet_floor_side", plastic_tex(r("wet_floor_side"), (232, 196, 40)), T.PLASTIC.but(smoothness=0.5, relief=0.0))
+    full_uv = (0, 0, 16, 16)
+    prop("wet_floor_sign", "Wet Floor Sign", {"f": "wet_floor_front", "s": "wet_floor_side"},
+         [el((2, 1, 7), (14, 15, 9), "s", north=("f", full_uv), south=("f", full_uv)), el((2, 0, 5), (14, 1, 11), "s")])
+    a.animated["monitor_fog"] = (fog_frames(r("monitor_fog")), 3)
+    a.models["security_monitor"] = model({"b": "monitor_body", "s": "monitor_fog"}, [
+        el((0, 0, 3), (16, 16, 16), "b", north=None), el((1, 1, 2), (15, 15, 3), "b"), el((2, 2, 1.75), (14, 14, 2), "s")], ao=False)
+    a.block("security_monitor", "Security Monitor", horizontal_blockstate("security_monitor"), {"parent": f"{NS}:block/security_monitor"})
+    door_front = big_door_tex(r("big_door"))
+    a.texture("big_door_back", plastic_tex(r("big_door_back"), (52, 54, 58)), T.STEEL.but(smoothness=0.4, metal=255, relief=0.3))
+    variants = {}
+    for col in range(6):
+        for row_ in range(4):
+            name = f"big_door_{col}_{row_}"
+            a.texture(name, door_front.crop((col * 16, (3 - row_) * 16, (col + 1) * 16, (4 - row_) * 16)), T.STEEL.but(smoothness=0.5, metal=255, relief=0.3), tiles=False)
+            a.models[name] = model({"f": name, "b": "big_door_back"}, [el((0, 0, 0), (16, 16, 16), "b", north="f")])
+            for facing, y in HORIZONTAL.items():
+                variants[f"col={col},facing={facing},row={row_}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("big_door", "Big Door", {"variants": variants}, {"parent": f"{NS}:block/big_door_2_1"})
     # The darts. The board's picture is cut in nine; a part the hint does not touch keeps its texture.
     board_material = T.PLASTIC.but(smoothness=0.2, relief=0.1)
     board_images = {hint: dartboard_tex(r("dartboard"), number) for hint, number in enumerate((None,) + DART_SEQUENCE)}
@@ -2251,7 +2408,8 @@ def build():
     # Doors: painted steel, the models are vanilla's door shapes (door_bottom_left ...).
     for door_id, name, colour, kind in (("storage_door", "Storage Door", (92, 100, 108), "storage"),
                                         ("electrical_door", "Electrical Room Door", (92, 100, 108), "electrical"),
-                                        ("emergency_door", "Emergency Exit Door", (70, 82, 90), "emergency")):
+                                        ("emergency_door", "Emergency Exit Door", (70, 82, 90), "emergency"),
+                                        ("calm_door", "Calm Room Door", (86, 58, 38), "emergency")):
         halves = {}
         for half in ("bottom", "top"):
             halves[half] = steel_door_tex(r(f"{door_id}_{half}"), half, colour, kind)
@@ -2388,7 +2546,7 @@ def main():
                           ("record_old_fashioned", lambda g: record_tex(g, (196, 120, 50))), ("record_sparkling_water", lambda g: record_tex(g, (120, 190, 220))),
                           ("record_still_water", lambda g: record_tex(g, (70, 110, 190))), ("record_chefs_plate", lambda g: record_tex(g, (150, 50, 60))),
                           ("reel_87", reel_tex), ("reel_94", reel_tex), ("reel_102", reel_tex), ("reel_120", reel_tex),
-                          ("dart", dart_tex),
+                          ("dart", dart_tex), ("master_card", master_card_tex), ("master_key", master_key_tex),
                           ("master_card_nw", lambda g: card_tex(g, 0, 0)), ("master_card_ne", lambda g: card_tex(g, 1, 0)),
                           ("master_card_sw", lambda g: card_tex(g, 0, 1)), ("master_card_se", lambda g: card_tex(g, 1, 1))):
         (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))

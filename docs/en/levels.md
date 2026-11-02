@@ -136,6 +136,7 @@ the server starts (levels built together name the same one). The function must e
 | `shutter` | `LevelEntryHooks` | The opening a rolling shutter closes behind the player who walks in from the previous level |
 | `keycard_door` | `KeycardHooks` | The iron doors a card reader opens; a new game closes them and locks the readers |
 | `end` | `EndingHooks` | Walking in ends the demo |
+| `big_door_shut` | `LoungeClosingHooks` | Walking in slams the big door, once it is open |
 | `b4_door_open` | `LoungeHooks` | Walking in opens the door to B4 |
 | `lounge_build` | `LoungeHooks` | Walking in shuts that door, erases Level 3 and builds Level 4 |
 | `lounge_door` | `LoungeHooks` | Its doors open once Level 4 stands (Reception's) |

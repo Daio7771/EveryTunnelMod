@@ -53,7 +53,7 @@ Lado del servidor (con posición en el mundo, lo oye todo el que esté cerca):
 - Los pasos, la respiración, el golpe musical y el acúfeno del Pale man (`PaleManEntity`).
 - Los sonidos de linterna y batería en el jugador (`FlashlightHooks`), los tragos
   (`DrinkHooks`).
-- Los pasos del final detrás del jugador (`EndingHooks`), el sonido de muerte (`DeathHooks`).
+- El sonido de muerte (`DeathHooks`).
 
 Lado del cliente (`client.effects`), por jugador y sin posición salvo que se indique:
 

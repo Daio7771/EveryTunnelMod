@@ -115,6 +115,7 @@ object LoungePuzzleHooks {
         filmWaiting = false
         filmTicks = -1
         DartHooks.reset()
+        LoungeClosingHooks.reset()
     }
 
     /** A piece was picked up: kept in the player's progress. */

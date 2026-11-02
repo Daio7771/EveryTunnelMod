@@ -65,6 +65,22 @@ object ModBlocks {
     val PROJECTOR: Block = register("projector", PuzzleDeviceBlock(props(MapColor.GRAY, ModSoundGroups.SHEET_METAL), listOf(box(2, 0, 2, 14, 16, 14))))
     val CINEMA_SCREEN: Block = register("cinema_screen", PropBlock(props(MapColor.WHITE, BlockSoundGroup.WOOL).noCollision(), listOf(box(0, 0, 15, 16, 16, 16))))
 
+    // Level 4's closing (LoungeClosingHooks).
+    val CALM_READER: Block = register("calm_reader", CalmReaderBlock(props(MapColor.GOLD, ModSoundGroups.PLASTIC).noCollision().luminance { 2 }))
+    val CALM_PLATE_LEFT: Block = register("calm_plate_left", PropBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(0, 5, 15, 16, 11, 16))))
+    val CALM_PLATE_RIGHT: Block = register("calm_plate_right", PropBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(0, 5, 15, 16, 11, 16))))
+    val EMERGENCY_LAMP: Block = register(
+        "emergency_lamp",
+        EmergencyLampBlock(
+            props(MapColor.RED, ModSoundGroups.PLASTIC).noCollision().luminance { if (it.get(EmergencyLampBlock.LIT)) EmergencyLampBlock.LIGHT_LEVEL else 0 }
+                .emissiveLighting { state, _, _ -> state.get(EmergencyLampBlock.LIT) },
+        ),
+    )
+    val WET_FLOOR_SIGN: Block = register("wet_floor_sign", PropBlock(props(MapColor.YELLOW, ModSoundGroups.PLASTIC), listOf(box(2, 0, 5, 14, 15, 11))))
+    /** Their screens show signal fog, in the dark too. */
+    val SECURITY_MONITOR: Block = register("security_monitor", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 6 }.emissiveLighting { _, _, _ -> true }, listOf(box(0, 0, 2, 16, 16, 16))))
+    val BIG_DOOR: Block = register("big_door", BigDoorBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
+
     // The darts (DartHooks).
     val DARTBOARD: Block = register("dartboard", DartboardBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).luminance { if (it.get(DartboardBlock.HINT) > 0) 7 else 0 }))
     val DART_TRAY: Block = register("dart_tray", DartTrayBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision()))
@@ -196,6 +212,8 @@ object ModBlocks {
     val LOOT_CARD_NE: Block = register("loot_master_card_ne", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.CARD_NE })
     val LOOT_CARD_SW: Block = register("loot_master_card_sw", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.CARD_SW })
     val LOOT_CARD_SE: Block = register("loot_master_card_se", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.CARD_SE })
+
+    val LOOT_MASTER_KEY: Block = register("loot_master_key", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.MASTER_KEY })
 
     val LOOT_KEYCARD: Block = register(
         "loot_keycard",
@@ -351,6 +369,8 @@ object ModBlocks {
     val ELECTRICAL_DOOR: Block = register("electrical_door", DoorBlock(door(), SERVICE_DOOR))
     /** Emergency exit: a push bar outside, no handle; like iron doors, hands cannot open it (a card reader can). */
     val EMERGENCY_DOOR: Block = register("emergency_door", DoorBlock(door(), BlockSetType.IRON))
+    /** The Calm room's: walnut to look at, but iron to hands, so only its reader opens it. */
+    val CALM_DOOR: Block = register("calm_door", DoorBlock(door(), BlockSetType.IRON))
     /** A lit green EXIT sign on the wall above an exit; it stays lit when the power goes (its own battery). */
     val EXIT_SIGN: Block = register(
         "exit_sign",

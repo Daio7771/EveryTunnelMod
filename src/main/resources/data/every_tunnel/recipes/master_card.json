@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": ["ab", "cd"],
+  "key": {
+    "a": {"item": "every_tunnel:master_card_nw"},
+    "b": {"item": "every_tunnel:master_card_ne"},
+    "c": {"item": "every_tunnel:master_card_sw"},
+    "d": {"item": "every_tunnel:master_card_se"}
+  },
+  "result": {"item": "every_tunnel:master_card"}
+}

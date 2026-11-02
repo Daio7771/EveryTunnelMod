@@ -158,13 +158,15 @@ con un comentario KDoc que cuenta más.
 | `DartHooks.kt` | Los dardos del nivel 4: la bandeja, cada acierto, la pista, la portezuela con la pieza |
 | `DartBlocks.kt` | Las nueve partes del tablero, la bandeja y la portezuela |
 | `DartEntity.kt` | Un dardo lanzado, sobre la flecha de vanilla; nunca se guarda |
+| `LoungeClosingHooks.kt` | El cierre del nivel 4: el apagón, las luces de emergencia, la puerta grande |
+| `LoungeClosingBlocks.kt` | La puerta grande, el lector de la Calm room, la luz de emergencia |
 | `SafeLevelHooks.kt` | Niveles sin riesgo: sin daño (el nivel 4) |
 | `SuiteBedHooks.kt` | Descansar en una cama: fundido a negro, vida y estamina llenas |
 | `BookPhaseHooks.kt` | Mientras los libros están fuera: el reloj en la cabeza y el aviso "He's near. Hide." |
 | `BoxHooks.kt` | El puzle de las cajas del nivel 3: cajas al azar, llevarlas, la estantería, la muerte, depuración |
 | `HidingHooks.kt` | Esconderse en taquillas: entrar, salir, sin ruido dentro, salir en partida nueva |
 | `AchievementHooks.kt` | Conseguir logros: qué da cada uno, avisar al cliente |
-| `EndingHooks.kt` | El final de la demo: pasos, fundido, pantalla final |
+| `EndingHooks.kt` | El final de la demo: fundido, pantalla final |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
 | `PlaytestLog.kt` | El registro `[playtest]` |
