@@ -21,6 +21,7 @@ import org.joml.Matrix4f
  * - [WallTextBlockEntity.Style.PLATE]: a room's nameplate, white letters [PLATE_TEXT_HEIGHT]
  *   of a block high on an anthracite plate with a thin grey rim, as wide as the name needs;
  *   kept to one edge of its block when [WallTextBlockEntity.align] says so (beside a door).
+ * - [WallTextBlockEntity.Style.BRASS]: the same plate in brass, dark letters.
  * - [WallTextBlockEntity.Style.LETTERS]: big dark grey letters [LETTERS_HEIGHT] of a block high
  *   straight on the wall, a darker shadow under them for relief; they may run over several
  *   blocks either side ([rendersOutsideBoundingBox]).
@@ -39,7 +40,8 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         val facing = state.get(WallTextBlock.FACING)
         val text = Text.translatable(entity.text)
         val width = font.getWidth(text).toFloat()
-        val plate = entity.style == WallTextBlockEntity.Style.PLATE
+        val brass = entity.style == WallTextBlockEntity.Style.BRASS
+        val plate = entity.style == WallTextBlockEntity.Style.PLATE || brass
         val scale = (if (plate) PLATE_TEXT_HEIGHT else LETTERS_HEIGHT) / GLYPH_HEIGHT
         // Kept to an edge: the whole thing (with the plate's margins) starts EDGE_GAP in from it.
         val halfWidth = (width / 2f + if (plate) PAD_X + RIM else 0f) * scale
@@ -55,10 +57,10 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         if (plate) {
             val matrix = matrices.peek().positionMatrix
             val buffer = vertexConsumers.getBuffer(RenderLayer.getTextBackground())
-            quad(buffer, matrix, x - PAD_X - RIM, y - PAD_Y - RIM, x + width + PAD_X + RIM, y + GLYPH_HEIGHT + PAD_Y + RIM, 0f, RIM_COLOR, light)
-            quad(buffer, matrix, x - PAD_X, y - PAD_Y, x + width + PAD_X, y + GLYPH_HEIGHT + PAD_Y, LAYER, PLATE_COLOR, light)
+            quad(buffer, matrix, x - PAD_X - RIM, y - PAD_Y - RIM, x + width + PAD_X + RIM, y + GLYPH_HEIGHT + PAD_Y + RIM, 0f, if (brass) BRASS_RIM else RIM_COLOR, light)
+            quad(buffer, matrix, x - PAD_X, y - PAD_Y, x + width + PAD_X, y + GLYPH_HEIGHT + PAD_Y, LAYER, if (brass) BRASS_COLOR else PLATE_COLOR, light)
             matrices.translate(0.0, 0.0, 2.0 * LAYER)
-            font.draw(text, x, y + 1f, PLATE_INK, false, matrices.peek().positionMatrix, vertexConsumers,
+            font.draw(text, x, y + 1f, if (brass) BRASS_INK else PLATE_INK, false, matrices.peek().positionMatrix, vertexConsumers,
                 TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light)
         } else {
             font.draw(text, x, y, LETTERS_INK, true, matrices.peek().positionMatrix, vertexConsumers,
@@ -102,6 +104,9 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         const val RIM_COLOR = 0xFF6A6E74.toInt()
         const val PLATE_COLOR = 0xFF1E2024.toInt()
         const val PLATE_INK = 0xFFE8E8E4.toInt()
+        const val BRASS_RIM = 0xFF70542A.toInt()
+        const val BRASS_COLOR = 0xFFB28C48.toInt()
+        const val BRASS_INK = 0xFF261C12.toInt()
         const val LETTERS_INK = 0xFF3A3D42.toInt()
     }
 }

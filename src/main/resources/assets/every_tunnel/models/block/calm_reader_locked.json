@@ -2,7 +2,7 @@
   "parent": "minecraft:block/block",
   "textures": {
     "b": "every_tunnel:block/lounge_brass",
-    "l": "every_tunnel:block/rack_dark",
+    "l": "every_tunnel:block/lamp_red_lit",
     "particle": "every_tunnel:block/lounge_brass"
   },
   "elements": [

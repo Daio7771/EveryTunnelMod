@@ -12,6 +12,7 @@ import net.minecraft.state.property.BooleanProperty
 import net.minecraft.state.property.DirectionProperty
 import net.minecraft.state.property.IntProperty
 import net.minecraft.state.property.Properties
+import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
@@ -53,16 +54,17 @@ class BigDoorBlock(settings: Settings) : Block(settings) {
 /**
  * The reader by the Calm room's door. Right-clicked by someone carrying the whole master card, crafted
  * from its four corners, it opens the iron doors next to it ([CardReaderBlock.setDoors]) and stays
- * [UNLOCKED]. Without the card it does nothing at all. The card is kept.
+ * [UNLOCKED]. It needs [POWERED], from the Maintenance room ([BreakerHooks]): without power it is dark and
+ * says so. Without the card it does nothing at all. The card is kept.
  */
 class CalmReaderBlock(settings: Settings) : Block(settings) {
 
     init {
-        defaultState = stateManager.defaultState.with(FACING, Direction.NORTH).with(UNLOCKED, false)
+        defaultState = stateManager.defaultState.with(FACING, Direction.NORTH).with(UNLOCKED, false).with(POWERED, false)
     }
 
     override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
-        builder.add(FACING, UNLOCKED)
+        builder.add(FACING, UNLOCKED, POWERED)
     }
 
     @Deprecated("Deprecated in Java")
@@ -73,6 +75,11 @@ class CalmReaderBlock(settings: Settings) : Block(settings) {
     override fun onUse(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult): ActionResult {
         if (world.isClient) return ActionResult.SUCCESS
         if (state.get(UNLOCKED) || !player.inventory.containsAny { it.isOf(ModItems.MASTER_CARD) }) return ActionResult.CONSUME
+        if (!state.get(POWERED)) {
+            world.playSound(null, pos, ModSounds.CARD_READER_DENY, SoundCategory.BLOCKS, 0.6f, 0.7f)
+            player.sendMessage(Text.translatable("message.every_tunnel.no_power"), true)
+            return ActionResult.CONSUME
+        }
         world.setBlockState(pos, state.with(UNLOCKED, true))
         world.playSound(null, pos, ModSounds.CARD_READER_ACCEPT, SoundCategory.BLOCKS, 1f, 1f)
         CardReaderBlock.setDoors(world as ServerWorld, pos, open = true)
@@ -82,6 +89,7 @@ class CalmReaderBlock(settings: Settings) : Block(settings) {
     companion object {
         val FACING: DirectionProperty = Properties.HORIZONTAL_FACING
         val UNLOCKED: BooleanProperty = BooleanProperty.of("unlocked")
+        val POWERED: BooleanProperty = BooleanProperty.of("powered")
 
         private val SHAPES = BlockShapes.horizontal(listOf(BlockShapes.box(5, 4, 14, 11, 12, 16)))
     }

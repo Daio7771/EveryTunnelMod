@@ -30,7 +30,7 @@ import net.minecraft.util.math.Direction
  * Level 4's darts, in the Game room: the fourth piece of the master card.
  *
  * The tray ([DartTrayBlock]) gives 3 darts ([ModItems.DART], [DartEntity]). The board's plate asks for
- * [SEQUENCE] in order, and only the number counts, not its ring. A wrong number, or anything that is
+ * three numbers in order, drawn each game, and only the number counts, not its ring. A wrong number, or anything that is
  * not the board, sends the darts back to the tray after [CLEAR_TICKS], so the player sees where it
  * landed; a dart dropped sends them back too, but costs nothing. After 3 failures the next number
  * glows ([OrderPuzzle.hint], [DartboardBlock.HINT]). The third hit opens the hatch under the board
@@ -39,12 +39,12 @@ import net.minecraft.util.math.Direction
  *
  * The state is kept in memory, like the other puzzles of the level: every opening of the world is a
  * new game. Places are the level's spawn points tagged `puzzle` (`dartboard`, its middle part;
- * `dart_tray`; `dart_hatch`). Most sounds are vanilla's for now.
+ * `dart_tray`; `dart_hatch`; `dart_plate`). Most sounds are vanilla's for now.
  */
 object DartHooks {
 
-    /** The plate says the same (`dart_plate_tex`, tools/blocks/generate.py), and the hints paint these. */
-    val SEQUENCE = listOf(20, 5, 12)
+    /** Drawn each game. The plate beside the board shows it ([sync]). */
+    private fun drawSequence(): List<Int> = (1..20).shuffled().take(3)
 
     const val DART_COUNT = 3
     private const val LEVEL_ID = "level_4"
@@ -53,7 +53,7 @@ object DartHooks {
     private const val SEARCH_BLOCKS = 32.0
     private const val SCORE_SHEET = "ch1_l4_note_score_sheet"
 
-    private val puzzle = OrderPuzzle(SEQUENCE)
+    private var puzzle = OrderPuzzle(drawSequence())
     private var server: MinecraftServer? = null
 
     /** Ticks until the darts stuck go back after a failure, or -1. */
@@ -70,8 +70,9 @@ object DartHooks {
 
     /** A new game, or the map rebuilt. */
     fun reset() {
-        puzzle.reset()
+        puzzle = OrderPuzzle(drawSequence())
         clearIn = -1
+        EveryTunnel.LOGGER.info("Level 4's darts this game: {}", puzzle.answer)
         val server = server ?: return
         if (!server.isRunning) return
         val (level, world) = place(server) ?: return
@@ -200,7 +201,11 @@ object DartHooks {
             }
         }
 
-        val hint = puzzle.hint?.let { SEQUENCE.indexOf(it) + 1 } ?: 0
+        pointOf(level, "dart_plate")?.let { at ->
+            (world.getBlockEntity(at) as? WallTextBlockEntity)?.say(plateText(), WallTextBlockEntity.Style.BRASS)
+        }
+
+        val hint = puzzle.hint ?: 0
         val board = world.getBlockState(centre)
         if (board.block != ModBlocks.DARTBOARD) return
         val right = board.get(DartboardBlock.FACING).rotateYCounterclockwise()
@@ -214,6 +219,8 @@ object DartHooks {
             }
         }
     }
+
+    private fun plateText(): String = "HOUSE GAME: " + puzzle.answer.joinToString(" - ")
 
     private fun discardDarts(level: LevelDefinition, world: ServerWorld) {
         val centre = pointOf(level, "dartboard") ?: return

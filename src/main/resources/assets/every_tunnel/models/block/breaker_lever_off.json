@@ -1,0 +1,107 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "d": "every_tunnel:block/rack_dark",
+    "m": "every_tunnel:block/rack_metal",
+    "h": "every_tunnel:block/record_sleeve_3",
+    "particle": "every_tunnel:block/rack_dark"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        1,
+        15
+      ],
+      "to": [
+        12,
+        15,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#d"
+        },
+        "east": {
+          "texture": "#d"
+        },
+        "south": {
+          "texture": "#d"
+        },
+        "west": {
+          "texture": "#d"
+        },
+        "up": {
+          "texture": "#d"
+        },
+        "down": {
+          "texture": "#d"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        4,
+        12
+      ],
+      "to": [
+        9,
+        6,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m"
+        },
+        "east": {
+          "texture": "#m"
+        },
+        "south": {
+          "texture": "#m"
+        },
+        "west": {
+          "texture": "#m"
+        },
+        "up": {
+          "texture": "#m"
+        },
+        "down": {
+          "texture": "#m"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        2,
+        11
+      ],
+      "to": [
+        10,
+        5,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#h"
+        },
+        "east": {
+          "texture": "#h"
+        },
+        "south": {
+          "texture": "#h"
+        },
+        "west": {
+          "texture": "#h"
+        },
+        "up": {
+          "texture": "#h"
+        },
+        "down": {
+          "texture": "#h"
+        }
+      }
+    }
+  ]
+}

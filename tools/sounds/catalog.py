@@ -1216,6 +1216,32 @@ def observer_alert(rng, variant):
     return fade(pan(body, side) + pan(creak, side * 0.7), 0.002, 0.6)
 
 
+def safe_tick(rng, variant):
+    """A safe's dial passing a number: a tiny dry tick, high and short."""
+    n = samples(0.05)
+    return knock(n, rng, 0.001, rng.uniform(3400, 4200), [1.0, 1.7], [0.35, 0.15], [0.006, 0.004], click=0.3, click_hi=9000.0)
+
+
+def safe_click(rng, variant):
+    """The right number: under the tick, a low clack of a tumbler dropping into place, felt more than heard."""
+    n = samples(0.18)
+    y = knock(n, rng, 0.001, rng.uniform(3000, 3400), [1.0, 1.7], [0.2, 0.1], [0.006, 0.004], click=0.25, click_hi=8000.0)
+    return y + knock(n, rng, 0.004, rng.uniform(210, 250), [1.0, 2.3, 3.7], [1.0, 0.5, 0.25], [0.05, 0.03, 0.02], click=0.5, click_hi=2500.0)
+
+
+def safe_open(rng, variant):
+    """The safe giving way: bolts drawn with a heavy clunk, then the door's dry hinge."""
+    n = samples(1.0)
+    t = time_axis(n)
+    y = knock(n, rng, 0.02, rng.uniform(160, 190), [1.0, 2.1, 3.4], [1.0, 0.5, 0.3], [0.12, 0.07, 0.04], click=0.7, click_hi=4000.0)
+    y += knock(n, rng, 0.12, rng.uniform(220, 260), [1.0, 2.3], [0.7, 0.3], [0.08, 0.05], click=0.5, click_hi=3000.0)
+    f0 = rng.uniform(520, 640)
+    glide = np.clip((t - 0.3) / 0.6, 0.0, 1.0)
+    squeak = glide_tone(f0 + f0 * 0.3 * glide + 18.0 * smooth_random(n, 30.0, rng), harmonics=(1.0, 0.5, 0.25))
+    squeak *= envelope(n, [(0.0, 0.0), (0.3, 0.0), (0.36, 0.1), (0.85, 0.06), (0.95, 0.0)])
+    return y + bandpass(squeak, 400.0, 4000.0)
+
+
 def locker_door(rng, variant):
     """A steel locker's door opened and pulled shut again: the latch lifting, the thin door's
     hinge squeaking as it swings, then the sheet clanging home, its vents buzzing and the latch
@@ -1375,6 +1401,9 @@ SOUNDS = [
           "stereo", False, 2, observer_clock(True), -6.0, stream=False),
     Sound("block.locker.door", "Level progress", "A Level 3 locker's door, getting in or out (latch, hinge, clang); no noise for enemies",
           "mono", False, 3, locker_door, -4.0),
+    Sound("block.safe.tick", "Level progress", "A safe's dial passing a number: the soft tick", "mono", False, 3, safe_tick, -18.0),
+    Sound("block.safe.click", "Level progress", "A safe's dial on the right number: a low clack under the tick", "mono", False, 2, safe_click, -6.0),
+    Sound("block.safe.open", "Level progress", "A safe giving way (bolts, hinge)", "mono", False, 1, safe_open, -4.0),
     Sound("block.shutter.close", "Level progress", "The rolling shutter closing behind the player (rattle down, slam)", "mono", False, 1,
           shutter_close, -1.0, attenuation=32),
     Sound("event.level_transition", "Level progress", "Going from Level 1 to Level 2", "stereo", False, 1, level_transition, -1.0),

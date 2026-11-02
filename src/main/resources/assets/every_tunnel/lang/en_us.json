@@ -234,6 +234,12 @@
   "item.every_tunnel.reel_102": "Film Reel: 102 minutes",
   "item.every_tunnel.reel_120": "Film Reel: 120 minutes",
   "item.every_tunnel.dart": "Dart",
+  "note.every_tunnel.menu.0": "House old fashioned",
+  "note.every_tunnel.menu.1": "Sparkling water",
+  "note.every_tunnel.menu.2": "Still water",
+  "note.every_tunnel.menu.3": "Chef's plate (for two)",
+  "message.every_tunnel.no_power": "No power",
+  "screen.every_tunnel.safe.controls": "A / D or the mouse wheel to turn. Listen. Esc to leave.",
   "item.every_tunnel.master_card": "Master Card",
   "item.every_tunnel.master_key": "Master Key",
   "item.every_tunnel.master_card_nw": "Master Card: top left",
@@ -265,5 +271,9 @@
   "block.every_tunnel.wet_floor_sign": "Wet Floor Sign",
   "block.every_tunnel.security_monitor": "Security Monitor",
   "block.every_tunnel.big_door": "Big Door",
-  "block.every_tunnel.calm_door": "Calm Room Door"
+  "block.every_tunnel.calm_door": "Calm Room Door",
+  "block.every_tunnel.breaker_lever": "Breaker Lever",
+  "block.every_tunnel.breaker_button": "Breaker Button",
+  "block.every_tunnel.breaker_counter": "Breaker Counter",
+  "block.every_tunnel.suite_safe": "Safe"
 }

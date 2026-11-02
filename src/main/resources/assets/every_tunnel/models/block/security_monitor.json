@@ -1,9 +1,9 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "b": "every_tunnel:block/monitor_body",
+    "b": "every_tunnel:block/rack_dark",
     "s": "every_tunnel:block/monitor_fog",
-    "particle": "every_tunnel:block/monitor_body"
+    "particle": "every_tunnel:block/rack_dark"
   },
   "elements": [
     {
@@ -18,6 +18,9 @@
         16
       ],
       "faces": {
+        "north": {
+          "texture": "#b"
+        },
         "east": {
           "texture": "#b"
         },
@@ -37,65 +40,24 @@
     },
     {
       "from": [
-        1,
-        1,
-        2
+        2,
+        2,
+        2.75
       ],
       "to": [
-        15,
-        15,
+        14,
+        14,
         3
       ],
       "faces": {
         "north": {
-          "texture": "#b"
-        },
-        "east": {
-          "texture": "#b"
-        },
-        "south": {
-          "texture": "#b"
-        },
-        "west": {
-          "texture": "#b"
-        },
-        "up": {
-          "texture": "#b"
-        },
-        "down": {
-          "texture": "#b"
-        }
-      }
-    },
-    {
-      "from": [
-        2,
-        2,
-        1.75
-      ],
-      "to": [
-        14,
-        14,
-        2
-      ],
-      "faces": {
-        "north": {
-          "texture": "#s"
-        },
-        "east": {
-          "texture": "#s"
-        },
-        "south": {
-          "texture": "#s"
-        },
-        "west": {
-          "texture": "#s"
-        },
-        "up": {
-          "texture": "#s"
-        },
-        "down": {
-          "texture": "#s"
+          "texture": "#s",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ]
         }
       }
     }

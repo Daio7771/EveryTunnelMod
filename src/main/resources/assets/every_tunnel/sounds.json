@@ -277,6 +277,24 @@
       "every_tunnel:block/puddle/step_4"
     ]
   },
+  "block.safe.click": {
+    "sounds": [
+      "every_tunnel:block/safe/click_1",
+      "every_tunnel:block/safe/click_2"
+    ]
+  },
+  "block.safe.open": {
+    "sounds": [
+      "every_tunnel:block/safe/open_1"
+    ]
+  },
+  "block.safe.tick": {
+    "sounds": [
+      "every_tunnel:block/safe/tick_1",
+      "every_tunnel:block/safe/tick_2",
+      "every_tunnel:block/safe/tick_3"
+    ]
+  },
   "block.sheet_metal.impact": {
     "sounds": [
       {

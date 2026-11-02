@@ -14,6 +14,12 @@ class NoteTextTest {
     }
 
     @Test
+    fun `a menu placeholder gives its line`() {
+        val lines = listOf("Soup", "Tea")
+        assertEquals("Tea\nSoup", NoteText.fill("{A:menu}\n{B:menu}", mapOf("A" to 1, "B" to 0), { lines[it] }) { words[it] })
+    }
+
+    @Test
     fun `a placeholder without a value shows a question mark, other braces stay`() {
         assertEquals("Valve C: ? {not one", NoteText.fill("Valve C: {C:word} {not one", emptyMap()) { words[it] })
     }

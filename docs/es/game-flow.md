@@ -339,24 +339,36 @@ La reconstrucción del mapa, cada vez que se abre el mundo, devuelve el nivel 3 
 momento el nivel 4 son sus salas, muebles, nueve notas, botín y reglas (un nivel `safe`, ver
 [Sistemas del jugador](player.md#niveles-seguros)), sus cuatro puzles (abajo) y su cierre.
 
-Cada puzle da una esquina de la tarjeta maestra dorada, que guarda `ProgressService`. Fallar no
-cuesta nada, y tras 3 fallos brilla lo siguiente correcto (`core.puzzle.OrderPuzzle`,
+Cada puzle da una esquina de la tarjeta maestra dorada, que guarda `ProgressService`. Las respuestas
+del Bar, el Cinema y los dardos se sortean en cada partida, y el log las dice (`Level 4 this game`,
+`Level 4's darts this game`). Fallar no cuesta nada, y tras 3 fallos brilla lo siguiente correcto (`core.puzzle.OrderPuzzle`,
 `platform.LoungePuzzleHooks`):
 
 - **Bar:** cuatro discos, llevados de uno en uno desde sus estantes al tocadiscos, en el orden de
-  las líneas de la carta. Uno equivocado los devuelve todos.
-- **Cinema:** cuatro carretes por duración, en la cabina. El de 94 minutos (lo dice el registro) se
+  las líneas de la carta, sorteado en cada partida (`{R0:menu}` en su nota). Uno equivocado los devuelve todos.
+- **Cinema:** cuatro carretes por duración, en la cabina. El que nombra el registro (`{FILM}`, sorteado en cada partida) se
   pone en el proyector y espera a que alguien salga de la cabina a la sala. Entonces la película corre
   en la pantalla, una sola vez, y solo se oye el proyector (`client.effects.FilmPlayer`), y al acabar
   la pieza queda junto al proyector.
 - **Spa:** la pieza está en el fondo de la piscina, a 6 de hondo. Al ser un nivel seguro, nadie se
   ahoga.
-- **Game room:** un tablero de dardos de 3 bloques de ancho, una placa al lado con `20 - 5 - 12` y una
+- **Game room:** un tablero de dardos de 3 bloques de ancho, una placa al lado con tres números sorteados en cada partida y una
   bandeja con 3 dardos (`platform.DartHooks`, `core.puzzle.darts.DartboardGeometry`). Clic derecho
   lanza. Solo cuenta el número, no su anillo; cualquier otra cosa devuelve los dardos a la bandeja. El
   tercer acierto abre una portezuela de latón bajo el tablero con la pieza dentro y añade una línea a
   la hoja de puntuaciones de la pared (`ch1_l4_note_score_sheet_won`). La línea del suelo es solo una
   guía.
+
+Dos cosas más, que no dan pieza:
+
+- **Sala de mantenimiento** (`platform.BreakerHooks`, `core.puzzle.BreakerCode`), tras la puerta este de
+  Reception, de hormigón: cinco palancas y un código sorteado en cada partida (`Level 4's breakers this game`
+  en el log). Al pulsar el botón, un contador dice cuántas están bien, no cuáles. Con cinco, el lector de la
+  Calm room tiene corriente, así que es obligatoria.
+- **Cajas fuertes** en las Suites (`platform.SafeHooks`, `core.puzzle.SafeDial`, `client.screen.SafeScreen`),
+  opcionales, con un diario en cada una. Tres números en un dial de 40, a oído: un tic por número, un clic grave
+  en el correcto, y cambiar de sentido ahí lo fija. Cada número correcto sacude el dial un momento. Cambiar de sentido en otro sitio
+  vuelve a empezar; tras 3 fallos el dial sigue temblando en los números correctos.
 
 ### El cierre
 
@@ -366,7 +378,8 @@ cuesta nada, y tras 3 fallos brilla lo siguiente correcto (`core.puzzle.OrderPuz
    del inventario, forman la tarjeta (`data/every_tunnel/recipes/master_card.json`). Las piezas, la
    tarjeta y la llave que se dejan en el suelo no desaparecen nunca.
 2. **La Calm room:** una puerta arriba de los escalones, con un lector que la abre a quien lleve la
-   tarjeta. Sin ella, el lector no hace nada.
+   tarjeta, una vez que la sala de mantenimiento le da corriente (sin ella: "No power", y una nota al lado).
+   Sin la tarjeta, no hace nada.
 3. **El apagón:** coger la Master Key de la mesa de la sala apaga todas las lámparas a la vez y enciende
    las luces rojas de emergencia del camino de vuelta. Aparece un cartel de suelo mojado en medio del
    Hall. El nivel sigue siendo seguro y los monitores de la Security room siguen encendidos (`blackout`

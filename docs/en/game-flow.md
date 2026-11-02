@@ -317,22 +317,34 @@ The map's rebuild, whenever the world opens, puts Level 3 back and clears Level 
 rooms, furniture, nine notes, loot and rules (a `safe` level, see
 [Player systems](player.md#safe-levels)), its four puzzles (below) and its closing.
 
-Each puzzle gives a corner of the golden master card, kept by `ProgressService`. Failing costs
-nothing, and after 3 failures the next right thing glows (`core.puzzle.OrderPuzzle`,
+Each puzzle gives a corner of the golden master card, kept by `ProgressService`. The answers of the
+Bar, the Cinema and the darts are drawn each game, and the log says them (`Level 4 this game`, `Level 4's
+darts this game`). Failing costs nothing, and after 3 failures the next right thing glows (`core.puzzle.OrderPuzzle`,
 `platform.LoungePuzzleHooks`):
 
 - **Bar:** four records, carried one at a time from their racks to the record player, in the order
-  of the menu's lines. A wrong one sends them all back.
-- **Cinema:** four reels by running time, in the projection booth. The 94-minute one (the log says
-  so) in the projector waits until someone steps out of the booth into the auditorium. Then the film
+  of the menu's lines, drawn each game (`{R0:menu}` in its note). A wrong one sends them all back.
+- **Cinema:** four reels by running time, in the projection booth. The one the log names (`{FILM}`,
+  drawn each game) in the projector waits until someone steps out of the booth into the auditorium. Then the film
   runs on the screen, once, with only the projector to hear (`client.effects.FilmPlayer`), and when
   it ends the piece lies by the projector.
 - **Spa:** the piece lies at the bottom of the pool, 6 deep. Being a safe level, nobody drowns.
-- **Game room:** a dartboard 3 blocks across, a plate beside it with `20 - 5 - 12` and a tray with
+- **Game room:** a dartboard 3 blocks across, a plate beside it with three numbers drawn each game, and a tray with
   3 darts (`platform.DartHooks`, `core.puzzle.darts.DartboardGeometry`). Right-click throws. Only
   the number counts, not its ring; anything else sends the darts back to the tray. The third hit
   opens a brass hatch under the board with the piece inside, and adds a line to the score sheet on
   the wall (`ch1_l4_note_score_sheet_won`). The line on the floor is only a guide.
+
+Two more things, neither of which gives a piece:
+
+- **Maintenance room** (`platform.BreakerHooks`, `core.puzzle.BreakerCode`), by Reception's east door, in
+  bare concrete: five levers, a code drawn each game (`Level 4's breakers this game` in the log). Press the
+  button and a counter says how many are right, not which. Five powers the Calm room's reader, so it is
+  required.
+- **Safes** in the Suites (`platform.SafeHooks`, `core.puzzle.SafeDial`, `client.screen.SafeScreen`), optional,
+  a diary in each. Three numbers on a dial of 40, cracked by ear: a tick per number, a low click on the right
+  one, and changing direction there fixes it. Each right number shakes the dial a moment. Changing direction elsewhere starts
+  over; after 3 failures the dial keeps trembling on the right numbers.
 
 ### The closing
 
@@ -342,7 +354,8 @@ nothing, and after 3 failures the next right thing glows (`core.puzzle.OrderPuzz
    make the card (`data/every_tunnel/recipes/master_card.json`). Pieces, card and key left on the floor
    never vanish.
 2. **The Calm room:** a door at the top of the steps, with a reader that opens it for someone carrying
-   the card. Without it the reader does nothing.
+   the card, once the Maintenance room has given it power (without power: "No power", and a note beside it).
+   Without the card it does nothing.
 3. **The blackout:** taking the Master Key from the room's table puts out every lamp at once and lights
    the red emergency lamps on the way back. A wet floor sign now stands in the middle of the Hall. The
    level stays safe, and the Security room's monitors stay on (`blackout` is there for the music of the

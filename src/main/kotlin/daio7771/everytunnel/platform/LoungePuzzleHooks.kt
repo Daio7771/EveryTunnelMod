@@ -32,10 +32,10 @@ import net.minecraft.util.math.Box
  * Level 4's Bar and Cinema puzzles, and the pieces of the master card.
  *
  * - **Bar:** four records wait on their racks ([PuzzleRackBlock]). One is carried at a time to the
- *   record player ([PuzzleDeviceBlock]). They go on in the menu's order; a wrong one sends them all
- *   back. Solved, the piece lies by the player.
- * - **Cinema:** four reels, by running time. Another than the one of 94 minutes (the projection log
- *   says so) comes back out. That one in the projector waits until someone stands in the auditorium,
+ *   record player ([PuzzleDeviceBlock]). They go on in the menu's order, drawn each game ([noteValues]);
+ *   a wrong one sends them all back. Solved, the piece lies by the player.
+ * - **Cinema:** four reels, by running time. Another than the one the projection log names, drawn each
+ *   game, comes back out. That one in the projector waits until someone stands in the auditorium,
  *   out of the booth: then the film runs on the screen, once (`client.effects.FilmPlayer`), and when
  *   it ends the piece lies by the projector. "Do not rewind."
  * - **Hints:** after 3 failures the next right one glows ([OrderPuzzle.hint], [PuzzleRackBlock.HINT]).
@@ -58,6 +58,9 @@ object LoungePuzzleHooks {
     val FILM_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "film")
     private const val SYNC_TICKS = 20
 
+    /** The running time of each reel, as their items say ([ModItems.REELS]). */
+    private val REEL_MINUTES = listOf(87, 94, 102, 120)
+
     /** One puzzle: its items, the block they are put into, where the piece lies when it is solved. */
     private class Puzzle(
         val items: List<Item>,
@@ -65,18 +68,25 @@ object LoungePuzzleHooks {
         val device: () -> Block,
         val pieceSpot: String,
         val pieceBlock: () -> Block,
-        answer: List<Int>,
+        private val draw: () -> List<Int>,
         val delayTicks: Int,
     ) {
-        val order = OrderPuzzle(answer)
+        /** Drawn anew each game. */
+        var order = OrderPuzzle(draw())
+            private set
         var finishIn = -1
+
+        fun redraw() {
+            order = OrderPuzzle(draw())
+            finishIn = -1
+        }
     }
 
     private val BAR = Puzzle(
-        ModItems.RECORDS, "record_rack", { ModBlocks.RECORD_PLAYER }, "piece_bar", { ModBlocks.LOOT_CARD_NW }, listOf(0, 1, 2, 3), 0,
+        ModItems.RECORDS, "record_rack", { ModBlocks.RECORD_PLAYER }, "piece_bar", { ModBlocks.LOOT_CARD_NW }, { listOf(0, 1, 2, 3).shuffled() }, 0,
     )
     private val CINEMA = Puzzle(
-        ModItems.REELS, "reel_rack", { ModBlocks.PROJECTOR }, "piece_cinema", { ModBlocks.LOOT_CARD_NE }, listOf(1), -1,
+        ModItems.REELS, "reel_rack", { ModBlocks.PROJECTOR }, "piece_cinema", { ModBlocks.LOOT_CARD_NE }, { listOf((0..3).random()) }, -1,
     )
     private val PUZZLES = listOf(BAR, CINEMA)
 
@@ -108,14 +118,21 @@ object LoungePuzzleHooks {
 
     /** A new game, or the map rebuilt. */
     fun reset() {
-        for (puzzle in PUZZLES) {
-            puzzle.order.reset()
-            puzzle.finishIn = -1
-        }
+        PUZZLES.forEach(Puzzle::redraw)
+        EveryTunnel.LOGGER.info("Level 4 this game: records {}, reel {} minutes", BAR.order.answer, REEL_MINUTES[CINEMA.order.answer[0]])
         filmWaiting = false
         filmTicks = -1
         DartHooks.reset()
+        BreakerHooks.reset()
+        SafeHooks.reset()
         LoungeClosingHooks.reset()
+    }
+
+    /** For the notes of [level]: the menu's lines in this game's order, and the film's length. */
+    fun noteValues(level: LevelDefinition): Map<String, Int> {
+        if (level.id != LEVEL_ID) return emptyMap()
+        val lines = BAR.order.answer.withIndex().associate { (i, record) -> "R$i" to record }
+        return lines + ("FILM" to REEL_MINUTES[CINEMA.order.answer[0]])
     }
 
     /** A piece was picked up: kept in the player's progress. */

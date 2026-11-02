@@ -3,17 +3,21 @@ package daio7771.everytunnel.core.puzzle
 /**
  * The text of a note read in game (`client.screen.NoteScreen`), in plain Kotlin (unit tested).
  * The first line is the note's title; blank lines separate paragraphs. A placeholder is filled
- * from [fill]'s values: `{A}` gives the value as digits, `{A:word}` as a word ("seven"); one
- * without a value shows `?`.
+ * from [fill]'s values: `{A}` gives the value as digits, `{A:word}` as a word ("seven"),
+ * `{A:menu}` as a line of the Bar's menu (the value is its record); one without a value shows `?`.
  */
 object NoteText {
 
-    private val PLACEHOLDER = Regex("""\{([A-Za-z0-9_]+)(?::(word))?\}""")
+    private val PLACEHOLDER = Regex("""\{([A-Za-z0-9_]+)(?::(word|menu))?\}""")
 
-    fun fill(text: String, values: Map<String, Int>, word: (Int) -> String): String =
+    fun fill(text: String, values: Map<String, Int>, menu: (Int) -> String = Int::toString, word: (Int) -> String): String =
         PLACEHOLDER.replace(text) { match ->
             val value = values[match.groupValues[1]] ?: return@replace "?"
-            if (match.groupValues[2] == "word") word(value) else value.toString()
+            when (match.groupValues[2]) {
+                "word" -> word(value)
+                "menu" -> menu(value)
+                else -> value.toString()
+            }
         }
 
     /** (title, paragraphs): the first non-blank line, then the rest split at blank lines. */

@@ -28,7 +28,7 @@ object NoteHooks {
             NOTE_TAG in it.tags && BlockPos.ofFloored(it.position.x, it.position.y, it.position.z) == pos
         } ?: return
         ProgressService.get().markNoteRead(player, note.id)
-        val values = ValveHooks.values(level)
+        val values = ValveHooks.values(level) + LoungePuzzleHooks.noteValues(level)
         val buf = PacketByteBufs.create()
         buf.writeString(DartHooks.noteShown(note.id))
         buf.writeVarInt(values.size)

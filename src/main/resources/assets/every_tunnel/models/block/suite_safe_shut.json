@@ -1,0 +1,135 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m": "every_tunnel:block/rack_dark",
+    "b": "every_tunnel:block/lounge_brass",
+    "particle": "every_tunnel:block/rack_dark"
+  },
+  "elements": [
+    {
+      "from": [
+        1,
+        0,
+        3
+      ],
+      "to": [
+        15,
+        14,
+        16
+      ],
+      "faces": {
+        "east": {
+          "texture": "#m"
+        },
+        "south": {
+          "texture": "#m"
+        },
+        "west": {
+          "texture": "#m"
+        },
+        "up": {
+          "texture": "#m"
+        },
+        "down": {
+          "texture": "#m"
+        }
+      }
+    },
+    {
+      "from": [
+        1,
+        0,
+        2
+      ],
+      "to": [
+        15,
+        14,
+        3
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m"
+        },
+        "east": {
+          "texture": "#m"
+        },
+        "south": {
+          "texture": "#m"
+        },
+        "west": {
+          "texture": "#m"
+        },
+        "up": {
+          "texture": "#m"
+        },
+        "down": {
+          "texture": "#m"
+        }
+      }
+    },
+    {
+      "from": [
+        6,
+        5,
+        1
+      ],
+      "to": [
+        10,
+        9,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#b"
+        },
+        "east": {
+          "texture": "#b"
+        },
+        "south": {
+          "texture": "#b"
+        },
+        "west": {
+          "texture": "#b"
+        },
+        "up": {
+          "texture": "#b"
+        },
+        "down": {
+          "texture": "#b"
+        }
+      }
+    },
+    {
+      "from": [
+        11,
+        6,
+        1.5
+      ],
+      "to": [
+        13,
+        8,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#b"
+        },
+        "east": {
+          "texture": "#b"
+        },
+        "south": {
+          "texture": "#b"
+        },
+        "west": {
+          "texture": "#b"
+        },
+        "up": {
+          "texture": "#b"
+        },
+        "down": {
+          "texture": "#b"
+        }
+      }
+    }
+  ]
+}

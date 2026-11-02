@@ -385,6 +385,11 @@ LEVEL_4 = dict(
     ],
     # Down to the Calm room, west to east: one cell of landing, then one step down per cell.
     STEPS=("ch1_l4_steps", (86, 34, 90, 40)),
+    # Behind Reception's east wall, by a passage 2 high: the Maintenance room, bare concrete and fluorescents.
+    MAINTENANCE=dict(id="ch1_l4_maintenance", name="Maintenance", box=(60, 47, 70, 57), height=4, door_id="ch1_l4_door_maintenance",
+                     passage=(58, 54, 60, 55), door=(58, 54), lights=[(63, 52), (67, 52)]),
+    # Not stand-ins of its own: Level 3's bare concrete, the same look on purpose.
+    SERVICE=dict(service_floor="minecraft:deepslate_tiles", service_wall="minecraft:smooth_basalt"),
     # The wall at the top of the steps, on its landing, with the Calm room's double door.
     CALM_WALL=dict(x=86, z0=34, z1=40, door=(36, 37)),
     # Openings through the one-block walls: (id, axis of the wall's line, line, first cell, width, height, kind).

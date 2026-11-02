@@ -337,9 +337,8 @@ DART_FONT = {
     "W": "1000110001101011010101010", "T": "111010010010010", "F": "111100110100100", "D": "110101101101110",
     "N": "1000111001101011001110001",
 }
-# As in core/puzzle/darts: DartboardGeometry.ORDER, DartHooks.SEQUENCE.
+# As in core/puzzle/darts: DartboardGeometry.ORDER.
 DART_ORDER = (20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5)
-DART_SEQUENCE = (20, 5, 12)
 DART_BOARD_PX = 96
 DART_SCORING_PX = 38                                                   # DartboardGeometry.SCORING_RADIUS_BLOCKS
 DART_RIM_PX = 47.5
@@ -399,19 +398,12 @@ def dartboard_tex(rng, hint):
     return img
 
 
-def dart_plate_tex(rng):
-    """The plate by the board, two blocks wide: 96 x 32."""
-    img = Image.new("RGB", (96, 32), (178, 140, 72))
-    for x in range(96):
-        for y in range(32):
-            if min(x, y, 95 - x, 31 - y) == 0:
-                img.putpixel((x, y), (112, 84, 40))
-            elif rng.random() < 0.15:
-                img.putpixel((x, y), (168, 130, 66))
-    ink = (38, 28, 18)
-    numbers = " - ".join(str(n) for n in DART_SEQUENCE)
-    dart_text(img, (96 - dart_text_width("HOUSE GAME:", 2)) // 2, 4, "HOUSE GAME:", ink, 2)
-    dart_text(img, (96 - dart_text_width(numbers, 2)) // 2, 18, numbers, ink, 2)
+def counter_tex(rng, count):
+    """The breakers' counter: black glass, a red digit, green at 5. Blank with None."""
+    img = new((14, 12, 12))
+    noise(img, rng, 2)
+    if count is not None:
+        dart_text(img, 5, 3, str(count), (90, 220, 110) if count == 5 else (226, 62, 44), 2)
     return img
 
 
@@ -474,10 +466,10 @@ def big_door_tex(rng):
 
 def fog_frames(rng, frames=8):
     """A monitor's picture, no camera behind it: grey fog drifting, a bar of signal rolling up."""
-    grid = [[rng.randint(70, 150) for _ in range(8)] for _ in range(8)]
+    grid = [[rng.randint(36, 92) for _ in range(8)] for _ in range(8)]
     out = []
     for f in range(frames):
-        img = new((60, 64, 66))
+        img = new((34, 38, 40))
         for y in range(16):
             for x in range(16):
                 gx, gy = (x / 2 + f) % 8, y / 2
@@ -485,8 +477,8 @@ def fog_frames(rng, frames=8):
                 t = gx - int(gx)
                 v = a + (b - a) * t + rng.randint(-12, 12)
                 if y == 15 - (f * 2):
-                    v += 40
-                img.putpixel((x, y), (int(v), int(v + 3), int(v + 4)))
+                    v += 26
+                img.putpixel((x, y), (int(v), int(v + 4), int(v + 6)))
         out.append(img)
     return out
 
@@ -2197,6 +2189,38 @@ def build():
     prop("projector", "Projector", {"m": "rack_metal", "d": "rack_dark"},
          [el((7, 0, 7), (9, 8, 9), "m"), el((3, 8, 3), (13, 15, 13), "m"), el((6, 10, 0), (10, 14, 3), "d")])
     prop("cinema_screen", "Cinema Screen", {"s": "screen_white"}, [el((0, 0, 15), (16, 16, 16), "s")])
+    # Level 4's Maintenance room.
+    lever_textures = {"d": "rack_dark", "m": "rack_metal", "h": "record_sleeve_3"}
+    a.models["breaker_lever_off"] = model(lever_textures, [el((4, 1, 15), (12, 15, 16), "d"), el((7, 4, 12), (9, 6, 15), "m"), el((6, 2, 11), (10, 5, 13), "h")])
+    a.models["breaker_lever_on"] = model(lever_textures, [el((4, 1, 15), (12, 15, 16), "d"), el((7, 10, 12), (9, 12, 15), "m"), el((6, 11, 11), (10, 14, 13), "h")])
+    a.block("breaker_lever", "Breaker Lever", {"variants": {
+        f"facing={f},on={o}": {"model": f"{NS}:block/breaker_lever_{'on' if o == 'true' else 'off'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for o in ("true", "false")}}, {"parent": f"{NS}:block/breaker_lever_off"})
+    prop("breaker_button", "Breaker Button", {"d": "rack_dark", "h": "record_sleeve_3"},
+         [el((4, 4, 15), (12, 12, 16), "d"), el((6, 6, 13.5), (10, 10, 15), "h")])
+    variants = {}
+    a.texture("breaker_counter_blank", counter_tex(r("counter"), None), T.PLASTIC.but(smoothness=0.6, relief=0.0), tiles=False)
+    a.models["breaker_counter_blank"] = model({"f": "breaker_counter_blank", "d": "rack_dark"}, [el((3, 3, 14), (13, 13, 16), "d", north=("f", (0, 0, 16, 16)))])
+    for count in range(6):
+        a.texture(f"breaker_counter_{count}", counter_tex(r("counter"), count), T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]), tiles=False)
+        a.models[f"breaker_counter_{count}"] = model({"f": f"breaker_counter_{count}", "d": "rack_dark"}, [el((3, 3, 14), (13, 13, 16), "d", north=("f", (0, 0, 16, 16)))])
+    for facing, y in HORIZONTAL.items():
+        for count in range(6):
+            for lit in ("true", "false"):
+                name = f"breaker_counter_{count}" if lit == "true" else "breaker_counter_blank"
+                variants[f"count={count},facing={facing},lit={lit}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("breaker_counter", "Breaker Counter", {"variants": variants}, {"parent": f"{NS}:block/breaker_counter_blank"})
+    # The safes in the Suites: the dial on a dark door; open, the door swung aside and paper inside.
+    a.texture("safe_paper", plastic_tex(r("safe_paper"), (214, 204, 176)), T.PAPER, tiles=False)
+    a.models["suite_safe_shut"] = model({"m": "rack_dark", "b": "lounge_brass"}, [
+        el((1, 0, 3), (15, 14, 16), "m", north=None), el((1, 0, 2), (15, 14, 3), "m"), el((6, 5, 1), (10, 9, 2), "b"), el((11, 6, 1.5), (13, 8, 2), "b")])
+    a.models["suite_safe_open"] = model({"m": "rack_dark", "p": "safe_paper"}, [
+        el((1, 0, 15), (15, 14, 16), "m"), el((1, 0, 3), (2, 14, 15), "m"), el((14, 0, 3), (15, 14, 15), "m"),
+        el((2, 0, 3), (14, 2, 15), "m"), el((2, 12, 3), (14, 14, 15), "m"), el((1, 0, 0), (2, 14, 3), "m"),
+        el((4, 2, 6), (12, 3, 13), "p")])
+    a.block("suite_safe", "Safe", {"variants": {
+        f"facing={f},open={o}": {"model": f"{NS}:block/suite_safe_{'open' if o == 'true' else 'shut'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for o in ("true", "false")}}, {"parent": f"{NS}:block/suite_safe_shut"})
     # Level 4's closing.
     plate = calm_plate_tex(r("calm_plate"))
     for side, x0 in (("left", 0), ("right", 48)):
@@ -2210,19 +2234,19 @@ def build():
     a.block("emergency_lamp", "Emergency Lamp", {"variants": {
         f"facing={f},lit={l}": {"model": f"{NS}:block/emergency_lamp_{'lit' if l == 'true' else 'off'}", **({"y": y} if y else {})}
         for f, y in HORIZONTAL.items() for l in ("true", "false")}}, {"parent": f"{NS}:block/emergency_lamp_off"})
-    for state, tex in (("locked", "rack_dark"), ("open", "card_gold")):
+    for state, tex in (("dead", "rack_dark"), ("locked", "lamp_red_lit"), ("open", "card_gold")):
         a.models[f"calm_reader_{state}"] = model({"b": "lounge_brass", "l": tex}, [el((5, 4, 15), (11, 12, 16), "b"), el((6, 8, 14.5), (10, 11, 15), "l")])
     a.block("calm_reader", "Master Card Reader", {"variants": {
-        f"facing={f},unlocked={u}": {"model": f"{NS}:block/calm_reader_{'open' if u == 'true' else 'locked'}", **({"y": y} if y else {})}
-        for f, y in HORIZONTAL.items() for u in ("true", "false")}}, {"parent": f"{NS}:block/calm_reader_locked"})
+        f"facing={f},powered={p},unlocked={u}": {"model": f"{NS}:block/calm_reader_{'open' if u == 'true' else 'locked' if p == 'true' else 'dead'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for p in ("true", "false") for u in ("true", "false")}}, {"parent": f"{NS}:block/calm_reader_dead"})
     a.texture("wet_floor_front", wet_floor_tex(r("wet_floor")), T.PLASTIC.but(smoothness=0.5, relief=0.0), tiles=False)
     a.texture("wet_floor_side", plastic_tex(r("wet_floor_side"), (232, 196, 40)), T.PLASTIC.but(smoothness=0.5, relief=0.0))
     full_uv = (0, 0, 16, 16)
     prop("wet_floor_sign", "Wet Floor Sign", {"f": "wet_floor_front", "s": "wet_floor_side"},
          [el((2, 1, 7), (14, 15, 9), "s", north=("f", full_uv), south=("f", full_uv)), el((2, 0, 5), (14, 1, 11), "s")])
     a.animated["monitor_fog"] = (fog_frames(r("monitor_fog")), 3)
-    a.models["security_monitor"] = model({"b": "monitor_body", "s": "monitor_fog"}, [
-        el((0, 0, 3), (16, 16, 16), "b", north=None), el((1, 1, 2), (15, 15, 3), "b"), el((2, 2, 1.75), (14, 14, 2), "s")], ao=False)
+    a.models["security_monitor"] = model({"b": "rack_dark", "s": "monitor_fog"}, [
+        el((0, 0, 3), (16, 16, 16), "b"), el((2, 2, 2.75), (14, 14, 3), "s", east=None, west=None, up=None, down=None, south=None, north=("s", (2, 2, 14, 14)))], ao=False)
     a.block("security_monitor", "Security Monitor", horizontal_blockstate("security_monitor"), {"parent": f"{NS}:block/security_monitor"})
     door_front = big_door_tex(r("big_door"))
     a.texture("big_door_back", plastic_tex(r("big_door_back"), (52, 54, 58)), T.STEEL.but(smoothness=0.4, metal=255, relief=0.3))
@@ -2237,7 +2261,7 @@ def build():
     a.block("big_door", "Big Door", {"variants": variants}, {"parent": f"{NS}:block/big_door_2_1"})
     # The darts. The board's picture is cut in nine; a part the hint does not touch keeps its texture.
     board_material = T.PLASTIC.but(smoothness=0.2, relief=0.1)
-    board_images = {hint: dartboard_tex(r("dartboard"), number) for hint, number in enumerate((None,) + DART_SEQUENCE)}
+    board_images = {number: dartboard_tex(r("dartboard"), number or None) for number in range(21)}
     variants = {}
     for col in range(3):
         for row_ in range(3):
@@ -2254,12 +2278,6 @@ def build():
                 for facing, y in HORIZONTAL.items():
                     variants[f"col={col},facing={facing},hint={hint},row={row_}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
     a.block("dartboard", "Dartboard", {"variants": variants}, {"parent": f"{NS}:block/dartboard_1_1"})
-    plate = dart_plate_tex(r("dart_plate"))
-    plate_metal = T.STEEL.but(smoothness=0.7, metal=231, relief=0.1)
-    for side, x0 in (("left", 0), ("right", 48)):
-        a.texture(f"dart_plate_{side}", plate.crop((x0, 0, x0 + 48, 32)), plate_metal, tiles=False)
-        prop(f"dart_plate_{side}", "Dart Plate", {"p": f"dart_plate_{side}", "b": "lounge_brass"},
-             [el((0, 2.67, 15.5), (16, 13.33, 16), "b", north=("p", (0, 0, 16, 16)))])
     prop("throw_line", "Throwing Line", {"b": "lounge_brass"}, [el((0, 0, 7), (16, 0.25, 9), "b")])
     a.texture("card_gold", plastic_tex(r("card_gold"), (232, 192, 84)), T.STEEL.but(smoothness=0.8, metal=231, relief=0.0))
     tray = [el((2, 0, 4), (14, 1, 12), "w"), el((2, 1, 4), (14, 2, 5), "w"), el((2, 1, 11), (14, 2, 12), "w")]

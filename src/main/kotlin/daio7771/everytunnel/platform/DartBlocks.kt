@@ -21,8 +21,7 @@ import net.minecraft.world.World
 
 /**
  * One of the nine parts of the Game room's dartboard ([DartHooks]), a plate flat on the wall: [COL] 0
- * on the left as seen from the front, [ROW] 0 at the bottom. [HINT] above 0 lights the number at that
- * place of the sequence. Set by the map generator; models and textures in tools/blocks/generate.py.
+ * on the left as seen from the front, [ROW] 0 at the bottom. [HINT] above 0 lights that number. Set by the map generator; models and textures in tools/blocks/generate.py.
  */
 class DartboardBlock(settings: Settings) : Block(settings) {
 
@@ -42,7 +41,7 @@ class DartboardBlock(settings: Settings) : Block(settings) {
         val FACING: DirectionProperty = Properties.HORIZONTAL_FACING
         val COL: IntProperty = IntProperty.of("col", 0, 2)
         val ROW: IntProperty = IntProperty.of("row", 0, 2)
-        val HINT: IntProperty = IntProperty.of("hint", 0, 3)
+        val HINT: IntProperty = IntProperty.of("hint", 0, 20)
 
         private val SHAPES = BlockShapes.horizontal(listOf(BlockShapes.box(0, 0, 14, 16, 16, 16)))
     }

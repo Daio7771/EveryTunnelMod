@@ -1,0 +1,184 @@
+{
+  "variants": {
+    "count=0,facing=north,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_0"
+    },
+    "count=0,facing=north,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank"
+    },
+    "count=1,facing=north,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_1"
+    },
+    "count=1,facing=north,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank"
+    },
+    "count=2,facing=north,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_2"
+    },
+    "count=2,facing=north,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank"
+    },
+    "count=3,facing=north,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_3"
+    },
+    "count=3,facing=north,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank"
+    },
+    "count=4,facing=north,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_4"
+    },
+    "count=4,facing=north,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank"
+    },
+    "count=5,facing=north,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_5"
+    },
+    "count=5,facing=north,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank"
+    },
+    "count=0,facing=east,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_0",
+      "y": 90
+    },
+    "count=0,facing=east,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 90
+    },
+    "count=1,facing=east,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_1",
+      "y": 90
+    },
+    "count=1,facing=east,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 90
+    },
+    "count=2,facing=east,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_2",
+      "y": 90
+    },
+    "count=2,facing=east,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 90
+    },
+    "count=3,facing=east,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_3",
+      "y": 90
+    },
+    "count=3,facing=east,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 90
+    },
+    "count=4,facing=east,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_4",
+      "y": 90
+    },
+    "count=4,facing=east,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 90
+    },
+    "count=5,facing=east,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_5",
+      "y": 90
+    },
+    "count=5,facing=east,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 90
+    },
+    "count=0,facing=south,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_0",
+      "y": 180
+    },
+    "count=0,facing=south,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 180
+    },
+    "count=1,facing=south,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_1",
+      "y": 180
+    },
+    "count=1,facing=south,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 180
+    },
+    "count=2,facing=south,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_2",
+      "y": 180
+    },
+    "count=2,facing=south,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 180
+    },
+    "count=3,facing=south,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_3",
+      "y": 180
+    },
+    "count=3,facing=south,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 180
+    },
+    "count=4,facing=south,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_4",
+      "y": 180
+    },
+    "count=4,facing=south,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 180
+    },
+    "count=5,facing=south,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_5",
+      "y": 180
+    },
+    "count=5,facing=south,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 180
+    },
+    "count=0,facing=west,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_0",
+      "y": 270
+    },
+    "count=0,facing=west,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 270
+    },
+    "count=1,facing=west,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_1",
+      "y": 270
+    },
+    "count=1,facing=west,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 270
+    },
+    "count=2,facing=west,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_2",
+      "y": 270
+    },
+    "count=2,facing=west,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 270
+    },
+    "count=3,facing=west,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_3",
+      "y": 270
+    },
+    "count=3,facing=west,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 270
+    },
+    "count=4,facing=west,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_4",
+      "y": 270
+    },
+    "count=4,facing=west,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 270
+    },
+    "count=5,facing=west,lit=true": {
+      "model": "every_tunnel:block/breaker_counter_5",
+      "y": 270
+    },
+    "count=5,facing=west,lit=false": {
+      "model": "every_tunnel:block/breaker_counter_blank",
+      "y": 270
+    }
+  }
+}

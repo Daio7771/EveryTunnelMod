@@ -13,7 +13,7 @@ from offices.furnish import ROW, STACK, TILE, WALK_THROUGH
 TILES = TILE | {"pool_table", "lounge_desk"}
 RACKS = {"record_rack", "reel_rack"}
 THROUGH = WALK_THROUGH | {"cinema_seat", "bar_stool", "served_glass", "diploma", "office_chair", "cinema_screen",
-                         "throw_line", "dart_plate_left", "dart_plate_right", "wall_sheet", "calm_reader", "calm_plate_left", "calm_plate_right", "emergency_lamp"}
+                         "throw_line", "wall_sheet", "calm_reader", "breaker_lever", "breaker_button", "breaker_counter", "pipe", "calm_plate_left", "calm_plate_right", "emergency_lamp"}
 WORLD_FACING = {"north": "west", "west": "south", "south": "east", "east": "north"}
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
 LOOT_COLOUR = {"battery": (235, 205, 70), "water": (90, 215, 235), "food_plate": (225, 80, 70),
@@ -100,7 +100,7 @@ NOTES = [
 ]
 
 # (note id, x, z, y): a sheet taped to the wall behind it, looking west.
-WALL_NOTES = [("ch1_l4_note_score_sheet", 83, 17, 3)]
+WALL_NOTES = [("ch1_l4_note_score_sheet", 83, 17, 3), ("ch1_l4_note_reader", 85, 39, 2), ("ch1_l4_note_breakers", 69, 56, 2)]
 
 # (tag, x, z, y): loot on the furniture there (y 2) or the floor (y 1).
 LOOT = [
@@ -138,12 +138,22 @@ PIECE_SPOTS = [("piece_bar", 61, 30), ("piece_cinema", 26, 32)]
 # The Game room's far wall: the board, 3 x 3 (col 0 on the left as seen from the room, at the lower z;
 # row 0 at the bottom), the hatch under its middle, the plate to its right.
 BOARD = [(83, 19 + col, 2 + row, col, row) for col in range(3) for row in range(3)]
-DART_THINGS = [("dart_hatch", 83, 20, 1), ("dart_plate_left", 83, 22, 3), ("dart_plate_right", 83, 23, 3)]
-DART_SPOTS = [("dartboard", 83, 20, 3), ("dart_tray", 78, 23, 2), ("dart_hatch", 83, 20, 1)]
+DART_THINGS = [("dart_hatch", 83, 20, 1), ("wall_text", 83, 23, 3)]
+DART_SPOTS = [("dartboard", 83, 20, 3), ("dart_tray", 78, 23, 2), ("dart_hatch", 83, 20, 1), ("dart_plate", 83, 23, 3)]
 # Level 4's closing: the Calm room's reader and plate, on the Spa's side of the wall at the top of the steps.
 CLOSING_THINGS = [("calm_reader", 85, 38, 2), ("calm_plate_left", 85, 36, 3), ("calm_plate_right", 85, 37, 3)]
+# The Maintenance room's east wall: levers, the counter over them, the button. Panels on its north wall,
+# pipes under the ceiling.
+BREAKERS = [(69, z) for z in range(49, 54)]
+MAINTENANCE_THINGS = [("breaker_counter", 69, 51, 3), ("breaker_button", 69, 54, 2)]
+PANELS = [(x, 47) for x in (61, 63, 65, 67)]
+PIPES = [(x, z) for x in range(60, 70) for z in (48, 55)]
+PIPE_STATE = "every_tunnel:pipe[down=false,east=true,north=false,south=false,up=false,west=true]"
+# The safes in the Suites, in Rowan's room and Daniel's: (the note inside, x, z, facing).
+SAFES = [("ch1_l4_note_diary_rowan", 16, 13, "east"), ("ch1_l4_note_diary_daniel", 23, 26, "west")]
 # big_door: its bottom left part. wet_sign: nothing stands there until the blackout.
-CLOSING_SPOTS = [("big_door", 47, -1, 1), ("wet_sign", 50, 20, 1)]
+CLOSING_SPOTS = [("big_door", 47, -1, 1), ("wet_sign", 50, 20, 1), ("calm_reader", 85, 38, 2), ("breaker_counter", 69, 51, 3)] + [
+    (f"breaker_{i}", x, z, 2) for i, (x, z) in enumerate(BREAKERS)]
 # The emergency lamps on the way back, on the walls, every 6 or so: (x, z, facing), at y 2 over their floor.
 EMERGENCY = [(90, 33, "east"), (90, 40, "east"), (88, 34, "south"),                                  # Calm room, steps
              (85, 33, "west"), (84, 30, "south"), (78, 30, "south"), (72, 30, "south"),              # the Spa
@@ -196,6 +206,16 @@ class Furnish:
             self.put(name, x, z, "west", y, in_gap=True)
         for name, x, z, y in CLOSING_THINGS:
             self.put(name, x, z, "west", y, in_gap=True)
+        for x, z in BREAKERS:
+            self.put("breaker_lever", x, z, "west", 2, in_gap=True)
+        for name, x, z, y in MAINTENANCE_THINGS:
+            self.put(name, x, z, "west", y, in_gap=True)
+        for x, z in PANELS:
+            self.put("electrical_panel", x, z, "south", 2, in_gap=True)
+        for x, z in PIPES:
+            self.put("pipe", x, z, "north", 4, in_gap=True)
+        for _, x, z, facing in SAFES:
+            self.put("suite_safe", x, z, facing, in_gap=True)
         for x, z, facing in EMERGENCY:
             self.put("emergency_lamp", x, z, facing, 2, in_gap=True)
         for _, x, z, y in WALL_NOTES:
@@ -249,6 +269,8 @@ class Furnish:
                 lx, lz = DIRS[{"north": "east", "east": "south", "south": "west", "west": "north"}[facing]]
                 left, right = same((x + lx, y, z + lz), name, facing), same((x - lx, y, z - lz), name, facing)
                 state = f"{bid}[facing={facing},left={str(left).lower()},right={str(right).lower()}]"
+            elif name == "pipe":
+                state = PIPE_STATE
             elif name == "dartboard":
                 col, row = self.board[plan]
                 state = f"{bid}[col={col},facing={facing},hint=0,row={row}]"
@@ -273,6 +295,8 @@ class Furnish:
             out.append((nid, self.centre(x, y, z), "note"))
         for nid, x, z, y in WALL_NOTES:
             out.append((nid, self.centre(x, self.lv.floors[(x, z)] + y, z), "note"))
+        for nid, x, z, _ in SAFES:
+            out.append((nid, self.centre(x, 1, z), "note"))
         for sid, x, z, y in DART_SPOTS + CLOSING_SPOTS:
             out.append((sid, self.centre(x, y, z), "puzzle"))
         for k, (tag, x, z, y) in enumerate(LOOT):
@@ -298,7 +322,7 @@ class Furnish:
 
     def plan_cells(self):
         """For the preview: (x, z) -> what stands there, without the notes on top."""
-        return {(x, z): it[0] for (x, y, z), it in self.items.items() if it[0] not in ("note_paper", "diploma", "dart_tray", "dart_plate_left", "dart_plate_right",
+        return {(x, z): it[0] for (x, y, z), it in self.items.items() if it[0] not in ("note_paper", "diploma", "dart_tray", "wall_text", "pipe", "breaker_counter",
                                                                                          "calm_plate_left", "calm_plate_right", "emergency_lamp", "security_monitor")}
 
     def dots(self):

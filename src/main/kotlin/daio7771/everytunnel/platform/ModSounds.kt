@@ -56,6 +56,9 @@ object ModSounds {
 
     /** A Level 3 locker's door, getting in or out ([HidingHooks]); it makes no noise for enemies. */
     val LOCKER_DOOR = event("block.locker.door")
+    val SAFE_TICK = event("block.safe.tick")
+    val SAFE_CLICK = event("block.safe.click")
+    val SAFE_OPEN = event("block.safe.open")
 
     /** Level 3: something far off noticed a box going on the shelf (stereo; a placeholder for the observant guard, [BoxHooks]). */
     val OBSERVER_ALERT = event("event.observer.alert")

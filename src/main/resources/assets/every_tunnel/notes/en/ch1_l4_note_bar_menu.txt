@@ -1,7 +1,8 @@
 TODAY'S SELECTION
 
-House old fashioned
-Sparkling water, still water
-Chef's plate (for two)
+{R0:menu}
+{R1:menu}
+{R2:menu}
+{R3:menu}
 
 Plate for the guard on duty: left at the end of the bar, as always.

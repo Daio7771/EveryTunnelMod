@@ -92,6 +92,8 @@ object LoungeClosingHooks {
                 if (state.isOf(ModBlocks.WARM_LAMP) && state.get(WarmLampBlock.LIT)) {
                     world.setBlockState(pos, state.with(WarmLampBlock.LIT, false))
                     lamps++
+                } else if (state.isOf(ModBlocks.FLUORESCENT_LIGHT)) {
+                    world.setBlockState(pos, FluorescentLightBlock.withMode(state, LightMode.OFF))
                 } else if (state.isOf(ModBlocks.EMERGENCY_LAMP) && !state.get(EmergencyLampBlock.LIT)) {
                     world.setBlockState(pos, state.with(EmergencyLampBlock.LIT, true))
                 }

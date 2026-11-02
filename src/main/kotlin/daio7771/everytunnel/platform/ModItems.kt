@@ -61,7 +61,7 @@ object ModItems {
     @JvmField
     val FOOD_SNACK: Item = FoodItem(Item.Settings().maxCount(16))
 
-    /** In the order the Bar's menu lists them, which is the order they are played in. */
+    /** The Bar's menu lists them in an order drawn each game ([LoungePuzzleHooks]). */
     val RECORDS: List<Item> = List(4) { Item(Item.Settings().maxCount(1)) }
     private val RECORD_IDS = listOf("record_old_fashioned", "record_sparkling_water", "record_still_water", "record_chefs_plate")
 

@@ -48,7 +48,10 @@ class Lounge:
         self.diplomas = Space(sid, name, "diplomas", box, height)
         sid, name, box, height = p["EXIT_STRETCH"]
         self.exit = Space(sid, name, "exit", box, height)
-        self.spaces = self.rooms + self.corridors + [self.steps, self.diplomas, self.exit]
+        m = p["MAINTENANCE"]
+        self.maintenance = Space(m["id"], m["name"], "service", m["box"], m["height"])
+        self.maintenance_door = Space(m["door_id"], "", "corridor", m["passage"], 2)
+        self.spaces = self.rooms + self.corridors + [self.steps, self.diplomas, self.exit, self.maintenance, self.maintenance_door]
         self.openings = list(p["OPENINGS"])
         self.floors = self.carve()
 
@@ -94,7 +97,7 @@ class Lounge:
         return air
 
     def state(self, role):
-        return self.p["STAND_INS"][role]
+        return self.p["SERVICE"].get(role) or self.p["STAND_INS"][role]
 
     def shell(self, air):
         """Every cell next to the air becomes solid: carpet under it, ceiling over it, and beside
@@ -188,6 +191,11 @@ class Lounge:
         for c, r in roles.items():
             if calm[0] - 1 <= c[0] <= calm[2] and calm[1] - 1 <= c[2] <= calm[3]:
                 roles[c] = {"carpet": "calm_carpet", "cream": "calm_wall", "walnut": "calm_wall", "rail": "calm_wall"}.get(r, r)
+        # Past Reception's wall the lounge stops: bare concrete.
+        x0, z0, x1, z1 = self.maintenance.box
+        for c, r in roles.items():
+            if x0 - 1 <= c[0] <= x1 and z0 - 1 <= c[2] <= z1:
+                roles[c] = "service_floor" if r == "carpet" else "service_wall"
         self.lounge_blocks = {self.at(*c): self.state(r) for c, r in roles.items()}
         self.corridor_blocks = {self.at(*c): self.state(r) for c, r in corridor_roles.items()}
         for x, y, z, st in self.door_cells("door"):
@@ -195,6 +203,12 @@ class Lounge:
         for x, y, z, st in self.door_cells("steel_door"):
             self.lounge_blocks[self.at(x, y, z)] = st
             self.corridor_blocks[self.at(x, y, z)] = st
+        m = p["MAINTENANCE"]
+        for x, z in m["lights"]:
+            self.lounge_blocks[self.at(x, m["height"], z)] = "every_tunnel:fluorescent_light[facing=down,axis=x,mode=on,lit=true]"
+        for y, half in ((1, "lower"), (2, "upper")):
+            self.lounge_blocks[self.at(m["door"][0], y, m["door"][1])] = (
+                f"every_tunnel:electrical_door[facing=south,half={half},hinge=left,open=false,powered=false]")
         # The Calm room's door, across the way east: someone coming looks at the world's south. Its
         # hinges outward too: the leaf at the lower z is the world's west.
         for z, hinge in zip(wall["door"], ("right", "left")):

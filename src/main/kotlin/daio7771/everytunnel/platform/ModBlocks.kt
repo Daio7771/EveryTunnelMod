@@ -65,8 +65,20 @@ object ModBlocks {
     val PROJECTOR: Block = register("projector", PuzzleDeviceBlock(props(MapColor.GRAY, ModSoundGroups.SHEET_METAL), listOf(box(2, 0, 2, 14, 16, 14))))
     val CINEMA_SCREEN: Block = register("cinema_screen", PropBlock(props(MapColor.WHITE, BlockSoundGroup.WOOL).noCollision(), listOf(box(0, 0, 15, 16, 16, 16))))
 
+    // Level 4's Maintenance room (BreakerHooks) and safes (SafeHooks).
+    val BREAKER_LEVER: Block = register("breaker_lever", BreakerLeverBlock(props(MapColor.GRAY, ModSoundGroups.SHEET_METAL).noCollision()))
+    val BREAKER_BUTTON: Block = register("breaker_button", BreakerButtonBlock(props(MapColor.RED, ModSoundGroups.PLASTIC).noCollision()))
+    val BREAKER_COUNTER: Block = register(
+        "breaker_counter",
+        BreakerCounterBlock(
+            props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision().luminance { if (it.get(BreakerCounterBlock.LIT)) 4 else 0 }
+                .emissiveLighting { state, _, _ -> state.get(BreakerCounterBlock.LIT) },
+        ),
+    )
+    val SUITE_SAFE: Block = register("suite_safe", SuiteSafeBlock(props(MapColor.BLACK, ModSoundGroups.SHEET_METAL)))
+
     // Level 4's closing (LoungeClosingHooks).
-    val CALM_READER: Block = register("calm_reader", CalmReaderBlock(props(MapColor.GOLD, ModSoundGroups.PLASTIC).noCollision().luminance { 2 }))
+    val CALM_READER: Block = register("calm_reader", CalmReaderBlock(props(MapColor.GOLD, ModSoundGroups.PLASTIC).noCollision().luminance { if (it.get(CalmReaderBlock.POWERED)) 3 else 0 }))
     val CALM_PLATE_LEFT: Block = register("calm_plate_left", PropBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(0, 5, 15, 16, 11, 16))))
     val CALM_PLATE_RIGHT: Block = register("calm_plate_right", PropBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(0, 5, 15, 16, 11, 16))))
     val EMERGENCY_LAMP: Block = register(
@@ -78,15 +90,13 @@ object ModBlocks {
     )
     val WET_FLOOR_SIGN: Block = register("wet_floor_sign", PropBlock(props(MapColor.YELLOW, ModSoundGroups.PLASTIC), listOf(box(2, 0, 5, 14, 15, 11))))
     /** Their screens show signal fog, in the dark too. */
-    val SECURITY_MONITOR: Block = register("security_monitor", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 6 }.emissiveLighting { _, _, _ -> true }, listOf(box(0, 0, 2, 16, 16, 16))))
+    val SECURITY_MONITOR: Block = register("security_monitor", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 6 }.emissiveLighting { _, _, _ -> true }, listOf(box(0, 0, 3, 16, 16, 16))))
     val BIG_DOOR: Block = register("big_door", BigDoorBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
 
     // The darts (DartHooks).
     val DARTBOARD: Block = register("dartboard", DartboardBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).luminance { if (it.get(DartboardBlock.HINT) > 0) 7 else 0 }))
     val DART_TRAY: Block = register("dart_tray", DartTrayBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision()))
     val DART_HATCH: Block = register("dart_hatch", DartHatchBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL)))
-    val DART_PLATE_LEFT: Block = register("dart_plate_left", PropBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(0, 3, 15, 16, 13, 16))))
-    val DART_PLATE_RIGHT: Block = register("dart_plate_right", PropBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(0, 3, 15, 16, 13, 16))))
     val THROW_LINE: Block = register("throw_line", PropBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(0, 0, 7, 16, 1, 9))))
     /** The score sheet, taped to the wall by the board; read like a note on a board. */
     val WALL_SHEET: Block = register("wall_sheet", NoteBoardBlock(props(MapColor.WHITE, BlockSoundGroup.WOOL).noCollision()))
@@ -409,7 +419,7 @@ object ModBlocks {
         }
         LOOT_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "loot"),
-            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK, LOOT_CARD_NW, LOOT_CARD_NE, LOOT_CARD_SW, LOOT_CARD_SE).build(),
+            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK, LOOT_CARD_NW, LOOT_CARD_NE, LOOT_CARD_SW, LOOT_CARD_SE, LOOT_MASTER_KEY).build(),
         )
         BOX_SHELF_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),

@@ -33,6 +33,8 @@ con un comentario KDoc que cuenta más.
 | `achievement/Achievement.kt` | Los ocho logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
 | `puzzle/OrderPuzzle.kt` | Un puzle de cosas en orden: intentos, fallos, la pista |
+| `puzzle/BreakerCode.kt` | Las cinco palancas del nivel 4: el código, cuántas están bien |
+| `puzzle/SafeDial.kt` | El dial de una caja: tics, clics, fijar un número cambiando de sentido |
 | `puzzle/darts/DartboardGeometry.kt` | Dónde cayó un dardo en el tablero: número y anillo, en las 4 orientaciones |
 | `film/FilmInfo.kt` | La película del Cinema: fotogramas, velocidad, qué fotograma en cada momento |
 | `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint |
@@ -160,6 +162,8 @@ con un comentario KDoc que cuenta más.
 | `DartEntity.kt` | Un dardo lanzado, sobre la flecha de vanilla; nunca se guarda |
 | `LoungeClosingHooks.kt` | El cierre del nivel 4: el apagón, las luces de emergencia, la puerta grande |
 | `LoungeClosingBlocks.kt` | La puerta grande, el lector de la Calm room, la luz de emergencia |
+| `BreakerHooks.kt` | La sala de mantenimiento del nivel 4: palancas, botón, contador, corriente del lector |
+| `SafeHooks.kt` | Las cajas fuertes de las Suites: combinaciones, bloque, resultado del cliente |
 | `SafeLevelHooks.kt` | Niveles sin riesgo: sin daño (el nivel 4) |
 | `SuiteBedHooks.kt` | Descansar en una cama: fundido a negro, vida y estamina llenas |
 | `BookPhaseHooks.kt` | Mientras los libros están fuera: el reloj en la cabeza y el aviso "He's near. Hide." |
@@ -251,6 +255,7 @@ con un comentario KDoc que cuenta más.
 | `Paper.kt` | Papel gastado (mosaico, manchas, bordes, tintas) para la guía y los logros |
 | `GuideScreen.kt` | La guía del jugador: una hoja de papel con scroll y pestañas |
 | `NoteScreen.kt` | Una nota leída en el papel de la guía sobre el juego, con los huecos rellenos |
+| `SafeScreen.kt` | El dial de una caja fuerte, que se gira y se escucha |
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |
 | `LoadingTips.kt` | Consejos que van cambiando, con las teclas del jugador |
 | `EndOfDemoScreen.kt` | "End of demo" y los créditos que suben |

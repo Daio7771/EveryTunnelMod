@@ -34,7 +34,7 @@ class NoteScreen(private val noteId: String, private val values: Map<String, Int
     override fun init() {
         val client = client ?: return
         val raw = loadText(client, noteId)
-        val filled = NoteText.fill(raw, values) { Text.translatable("note.every_tunnel.number.$it").string }
+        val filled = NoteText.fill(raw, values, { Text.translatable("note.every_tunnel.menu.$it").string }) { Text.translatable("note.every_tunnel.number.$it").string }
         val (heading, paragraphs) = NoteText.split(filled)
         val width = sheetWidth() - PAD_X * 2
         val out = mutableListOf<Pair<OrderedText, Boolean>>()
