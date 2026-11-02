@@ -69,6 +69,7 @@ Un ejemplo completo (todas las claves):
 | `entry` | no | nada | Lo que recibe el jugador al llegar desde un nivel anterior |
 | `intro` | no | ninguna | La escena de partida nueva (el ascensor) |
 | `build` | no | ninguna | Función que construye los bloques del nivel, ejecutada cada vez que se abre el mundo |
+| `safe` | no | `false` | Aquí nada hace daño (salvo `/kill` y el vacío); la sed y la batería no bajan y correr no cuesta nada |
 
 ### Zonas
 

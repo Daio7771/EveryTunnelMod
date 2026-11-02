@@ -31,6 +31,14 @@ del estado, la entrada y la configuración (`step`, `toggleFlashlight`, `insertB
 los estados con el mundo (`every_tunnel_resources.dat`) y los sincroniza con el cliente
 (`ResourceSyncPacket`, ver [Arquitectura](architecture.md#paquetes)).
 
+### Niveles seguros
+
+En un nivel marcado como `safe` (el nivel 4; `platform.SafeLevelHooks`) nada sale mal: solo hacen
+daño `/kill` y el vacío, la sed y la batería se quedan como están, y correr y saltar no gastan
+estamina, que sigue recuperándose. El HUD atenúa las filas de sed y batería. Una cama de las Suites
+(`platform.SuiteBedHooks`) funde a negro en silencio y llena vida y estamina; no es un guardado y no
+cambia nada más.
+
 ### Stamina
 
 - Baja al esprintar (12/s) y con cada salto (8). Se regenera a 15/s tras 1,5 s sin usarla.

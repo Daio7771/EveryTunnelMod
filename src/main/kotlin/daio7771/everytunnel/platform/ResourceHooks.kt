@@ -28,6 +28,8 @@ import java.util.UUID
  * - Sprinting comes from the player's sprint flag; jumps from the vanilla jump
  *   statistic, which the server increments for every jump.
  * - Empty thirst deals "dehydration" damage (vanilla `dryOut` damage source).
+ * - In a safe level ([SafeLevelHooks]) thirst and the battery do not run down and sprinting costs
+ *   nothing ([ResourceSystem]); the client is told, to dim those bars.
  * - Vanilla hunger is held full: thirst replaces it, and a low food level would
  *   otherwise block sprinting without the player seeing why.
  * - Death resets resources to full (full battery, flashlight off).
@@ -78,7 +80,8 @@ object ResourceHooks {
                 sync(player, packetOf(false, state, config))
                 continue
             }
-            val input = ResourceInput(player.isSprinting, jumpCount)
+            val safe = SafeLevelHooks.isSafe(player)
+            val input = ResourceInput(player.isSprinting, jumpCount, safe)
             val step = ResourceSystem.tick(player.uuid, input, TICK_SECONDS, config)
             save.markDirty()
 
@@ -86,14 +89,14 @@ object ResourceHooks {
             if (step.damage > 0.0) player.damage(player.damageSources.dryOut(), step.damage.toFloat())
             if (step.batteryDied) FlashlightHooks.batteryDied(player)
 
-            sync(player, packetOf(true, step.state, config))
+            sync(player, packetOf(true, step.state, config, safe))
         }
     }
 
-    private fun packetOf(active: Boolean, s: ResourceState, config: GameplayConfig) =
+    private fun packetOf(active: Boolean, s: ResourceState, config: GameplayConfig, safe: Boolean = false) =
         ResourceSyncPacket.of(
             active, s.stamina, config.stamina.max, s.thirst, config.thirst.max, s.exhausted,
-            s.flashlightOn, s.battery, config.flashlight.batteryMaxSeconds,
+            s.flashlightOn, s.battery, config.flashlight.batteryMaxSeconds, safe,
         )
 
     private fun sync(player: ServerPlayerEntity, packet: ResourceSyncPacket) {

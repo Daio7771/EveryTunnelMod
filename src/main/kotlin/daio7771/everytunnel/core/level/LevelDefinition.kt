@@ -31,6 +31,8 @@ data class LevelDefinition(
      * built together name the same function, which runs once.
      */
     val build: String? = null,
+    /** Nothing can go wrong here: nothing hurts, and thirst and the battery do not run down. */
+    val safe: Boolean = false,
 ) {
     fun zone(id: String): Zone? = zones.firstOrNull { it.id == id }
 

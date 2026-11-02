@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,head=true": {
+      "model": "every_tunnel:block/suite_bed_head"
+    },
+    "facing=north,head=false": {
+      "model": "every_tunnel:block/suite_bed_foot"
+    },
+    "facing=east,head=true": {
+      "model": "every_tunnel:block/suite_bed_head",
+      "y": 90
+    },
+    "facing=east,head=false": {
+      "model": "every_tunnel:block/suite_bed_foot",
+      "y": 90
+    },
+    "facing=south,head=true": {
+      "model": "every_tunnel:block/suite_bed_head",
+      "y": 180
+    },
+    "facing=south,head=false": {
+      "model": "every_tunnel:block/suite_bed_foot",
+      "y": 180
+    },
+    "facing=west,head=true": {
+      "model": "every_tunnel:block/suite_bed_head",
+      "y": 270
+    },
+    "facing=west,head=false": {
+      "model": "every_tunnel:block/suite_bed_foot",
+      "y": 270
+    }
+  }
+}

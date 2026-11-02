@@ -89,6 +89,7 @@ con un comentario KDoc que cuenta más.
 | `ConnectingPropBlock.kt` | Tuberías, conductos y bandejas de cables que se conectan con sus vecinos |
 | `FluorescentLightBlock.kt` | La luz: encendida, parpadeante, apagada; nivel de luz 13, dibujada a brillo máximo |
 | `WarmLampBlock.kt` | La luz de techo del nivel 4: cálida y silenciosa, nivel de luz 12 |
+| `SuiteBedBlock.kt` | Una cama de las Suites del nivel 4, en dos bloques |
 | `SurfaceMarkBlocks.kt` | Manchas y charcos en cualquier cara |
 | `SignTileBlock.kt` | Textos pintados por ranura numerada (el pack del mundo los asigna) |
 | `ElevatorDoorBlock.kt` | Etapas de la puerta corredera del ascensor |
@@ -145,6 +146,8 @@ con un comentario KDoc que cuenta más.
 | `BookHooks.kt` | El puzle de los libros del nivel 3: aparecen, se entregan en el mostrador, se abre la trampilla, depuración |
 | `CollapseHooks.kt` | El derrumbe del túnel del nivel 3: sonido, temblor, escombros, polvo, luces parpadeando; se deshace al morir o en partida nueva |
 | `LoungeHooks.kt` | Del nivel 3 al 4: la puerta a B4, borrar y construir por tandas, la puerta de Reception |
+| `SafeLevelHooks.kt` | Niveles sin riesgo: sin daño (el nivel 4) |
+| `SuiteBedHooks.kt` | Descansar en una cama: fundido a negro, vida y estamina llenas |
 | `BookPhaseHooks.kt` | Mientras los libros están fuera: el reloj en la cabeza y el aviso "He's near. Hide." |
 | `BoxHooks.kt` | El puzle de las cajas del nivel 3: cajas al azar, llevarlas, la estantería, la muerte, depuración |
 | `HidingHooks.kt` | Esconderse en taquillas: entrar, salir, sin ruido dentro, salir en partida nueva |

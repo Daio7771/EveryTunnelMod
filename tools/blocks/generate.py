@@ -1313,6 +1313,24 @@ def build():
             {"variants": {f"lit={lit}": {"model": f"{NS}:block/warm_lamp_{'on' if lit == 'true' else 'off'}"} for lit in ("true", "false")}},
             {"parent": f"{NS}:block/warm_lamp_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
 
+    # --- Suite bed: Level 4's, walnut frame and burgundy cover, in two blocks ---------------
+    a.texture("suite_bed_frame", plastic_tex(r("bed_frame"), (58, 38, 26)), T.PLASTIC.but(smoothness=0.5, relief=0.3))
+    a.texture("suite_bed_cover", plastic_tex(r("bed_cover"), (92, 26, 38), "fabric"), T.PLASTIC.but(smoothness=0.08, relief=0.3))
+    a.texture("suite_bed_pillow", plastic_tex(r("bed_pillow"), (232, 222, 200), "fabric"), T.PLASTIC.but(smoothness=0.08, relief=0.3))
+    bed = {"f": "suite_bed_frame", "c": "suite_bed_cover", "p": "suite_bed_pillow"}
+    a.models["suite_bed_head"] = model(bed, [
+        element((0, 2, 2), (16, 5, 16), "f"), element((0, 5, 2), (16, 9, 16), "p"),
+        element((0, 9, 10), (16, 10, 16), "c"), element((2, 9, 3), (14, 11, 9), "p"),
+        element((0, 0, 0), (16, 15, 2), "f")])
+    a.models["suite_bed_foot"] = model(bed, [
+        element((0, 2, 0), (16, 5, 14), "f"), element((0, 5, 0), (16, 10, 14), "c"),
+        element((0, 0, 14), (16, 8, 16), "f")])
+    variants = {}
+    for facing, y_rot in {"north": 0, "east": 90, "south": 180, "west": 270}.items():
+        for head, part in (("true", "head"), ("false", "foot")):
+            variants[f"facing={facing},head={head}"] = {"model": f"{NS}:block/suite_bed_{part}", **({"y": y_rot} if y_rot else {})}
+    a.block("suite_bed", "Bed", {"variants": variants}, {"parent": f"{NS}:block/suite_bed_foot"})
+
     # --- Floor props ------------------------------------------------------------------
     a.texture("cardboard_box_top", T.cardboard_tex(r("box_top"), "top"), T.CARDBOARD)
     a.texture("cardboard_box_side", T.cardboard_tex(r("box_side"), "side"),

@@ -80,6 +80,13 @@ class JsonFields(
         return intValue
     }
 
+    fun boolean(key: String, default: Boolean): Boolean {
+        val element = take(key) ?: return default
+        if (element.isJsonPrimitive && element.asJsonPrimitive.isBoolean) return element.asBoolean
+        problems += "${pathOf(key)}: expected true or false, using $default"
+        return default
+    }
+
     fun string(key: String, default: String): String {
         val element = take(key) ?: return default
         if (element is JsonPrimitive && element.isString) return element.asString

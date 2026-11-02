@@ -30,6 +30,14 @@ functions of state, input and config (`step`, `toggleFlashlight`, `insertBattery
 states with the world (`every_tunnel_resources.dat`) and syncs them to the client
 (`ResourceSyncPacket`, see [Architecture](architecture.md#packets)).
 
+### Safe levels
+
+In a level marked `safe` (Level 4; `platform.SafeLevelHooks`) nothing goes wrong: nothing hurts
+but `/kill` and the void, thirst and the battery stay as they are, and sprinting and jumping cost
+no stamina, which keeps recovering. The HUD dims the thirst and battery rows. A bed in the Suites
+(`platform.SuiteBedHooks`) fades to black in silence and fills health and stamina; it is not a
+save, and it changes nothing else.
+
 ### Stamina
 
 - Drains while sprinting (12/s) and per jump (8). Regenerates at 15/s after 1.5 s without

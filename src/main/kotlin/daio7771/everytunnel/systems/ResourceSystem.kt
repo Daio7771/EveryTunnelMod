@@ -25,8 +25,8 @@ data class ResourceState(
     }
 }
 
-/** What the player did during one tick. */
-data class ResourceInput(val sprinting: Boolean, val jumps: Int)
+/** What the player did during one tick. [safe]: in a level without risk (`LevelDefinition.safe`). */
+data class ResourceInput(val sprinting: Boolean, val jumps: Int, val safe: Boolean = false)
 
 /**
  * The state after one tick, the health damage to deal (0 if none), and whether the
@@ -48,6 +48,8 @@ enum class BatteryInsert { REFILLED, ALREADY_FULL }
  *   recovers to a configured percentage.
  * - Thirst drains slowly all the time (faster while sprinting). When empty, the
  *   player takes damage at a fixed interval.
+ * - In a safe level nothing runs down: sprinting and jumping cost no stamina, which keeps
+ *   recovering; thirst and the battery stay as they are; there is no thirst damage.
  * - The flashlight is built-in equipment (no item, nothing in the hand). Its battery
  *   drains one second per second while it is on; at 0 it switches off, and a
  *   battery item refills it.
@@ -103,9 +105,11 @@ object ResourceSystem {
         // Stamina
         var stamina = state.stamina.coerceAtMost(s.max)
         var cooldown = state.regenCooldown
-        val used = input.sprinting || input.jumps > 0
-        if (input.sprinting) stamina -= s.sprintDrainPerSecond * dtSeconds
-        stamina -= s.jumpCost * input.jumps
+        val used = !input.safe && (input.sprinting || input.jumps > 0)
+        if (used) {
+            if (input.sprinting) stamina -= s.sprintDrainPerSecond * dtSeconds
+            stamina -= s.jumpCost * input.jumps
+        }
         if (used) {
             cooldown = s.regenDelaySeconds
         } else if (cooldown > 0.0) {
@@ -123,11 +127,11 @@ object ResourceSystem {
 
         // Thirst
         val drainMultiplier = if (input.sprinting) t.sprintDrainMultiplier else 1.0
-        val thirst = (state.thirst.coerceAtMost(t.max) - t.drainPerMinute / 60.0 * dtSeconds * drainMultiplier)
-            .coerceAtLeast(0.0)
+        val thirstDrain = if (input.safe) 0.0 else t.drainPerMinute / 60.0 * dtSeconds * drainMultiplier
+        val thirst = (state.thirst.coerceAtMost(t.max) - thirstDrain).coerceAtLeast(0.0)
         var damageTimer = 0.0
         var damage = 0.0
-        if (thirst <= 0.0) {
+        if (thirst <= 0.0 && !input.safe) {
             damageTimer = state.thirstDamageTimer + dtSeconds
             if (damageTimer >= t.damageIntervalSeconds) {
                 damageTimer -= t.damageIntervalSeconds
@@ -139,7 +143,7 @@ object ResourceSystem {
         var battery = state.battery.coerceIn(0.0, f.batteryMaxSeconds)
         var flashlightOn = state.flashlightOn
         var batteryDied = false
-        if (flashlightOn) {
+        if (flashlightOn && !input.safe) {
             battery = (battery - dtSeconds).coerceAtLeast(0.0)
             if (battery <= 0.0) {
                 flashlightOn = false
@@ -150,6 +154,10 @@ object ResourceSystem {
         val next = ResourceState(stamina, thirst, battery, flashlightOn, exhausted, cooldown, damageTimer)
         return ResourceStep(next, damage, batteryDied)
     }
+
+    /** Rested in a bed: stamina full and no longer exhausted. */
+    fun rested(state: ResourceState, config: GameplayConfig): ResourceState =
+        state.copy(stamina = config.stamina.max, exhausted = false, regenCooldown = 0.0)
 
     /** Flashlight switched off from outside (e.g. the player became a spectator); no-op if already off. */
     fun switchOff(state: ResourceState): ResourceState =

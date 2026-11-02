@@ -26,6 +26,8 @@ data class ResourceSyncPacket(
     /** Seconds of light left. */
     val battery: Float,
     val batteryMax: Float,
+    /** In a safe level: thirst and the battery are paused, and the HUD dims them. */
+    val safe: Boolean = false,
 ) {
     fun write(buf: PacketByteBuf) {
         buf.writeBoolean(active)
@@ -37,6 +39,7 @@ data class ResourceSyncPacket(
         buf.writeBoolean(flashlightOn)
         buf.writeFloat(battery)
         buf.writeFloat(batteryMax)
+        buf.writeBoolean(safe)
     }
 
     /** True while the battery is below the low battery warning percentage. */
@@ -57,6 +60,7 @@ data class ResourceSyncPacket(
             flashlightOn: Boolean,
             battery: Double,
             batteryMax: Double,
+            safe: Boolean = false,
         ) = ResourceSyncPacket(
             active,
             if (active) round(stamina) else 0f,
@@ -67,6 +71,7 @@ data class ResourceSyncPacket(
             flashlightOn,
             round(battery),
             round(batteryMax),
+            active && safe,
         )
 
         fun read(buf: PacketByteBuf) = ResourceSyncPacket(
@@ -79,6 +84,7 @@ data class ResourceSyncPacket(
             flashlightOn = buf.readBoolean(),
             battery = buf.readFloat(),
             batteryMax = buf.readFloat(),
+            safe = buf.readBoolean(),
         )
 
         private fun round(value: Double): Float = Math.round(value * 10.0) / 10f

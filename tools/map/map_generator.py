@@ -411,6 +411,8 @@ LEVEL_4 = dict(
         ceiling="minecraft:pink_terracotta",
         stairs="minecraft:red_nether_brick_stairs",
     ),
+    # Beds in the Suites: the head's cell and the way it points, the foot on the far side.
+    BEDS=[(11, 19, "north"), (23, 19, "north"), (11, 38, "south"), (23, 38, "south")],
     LAMP="every_tunnel:warm_lamp[lit=true]",
     LAMP_SPACING=6,
     DOORS=dict(door="minecraft:dark_oak_door", steel_door="every_tunnel:emergency_door"),
@@ -1004,6 +1006,7 @@ def level4_json(lv4):
         "zones": zones,
         "spawn_points": [{"id": "player_start", "pos": [wx + 0.5, p["FLOOR_Y"] + 1, wz + 0.5], "yaw": 90, "tags": ["player"]}],
         "entry": {"title": p["TITLE"], "subtitle": "", "sound": "every_tunnel:event.level_transition"},
+        "safe": True,
     }, indent=1) + "\n"
 
 

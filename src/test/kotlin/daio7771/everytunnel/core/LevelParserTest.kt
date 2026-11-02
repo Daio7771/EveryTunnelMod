@@ -176,4 +176,14 @@ class LevelParserTest {
         assertEquals(LevelEntry("B2", "", null), broken.level?.entry)
         assertEquals(2, broken.problems.size, broken.problems.toString())
     }
+
+    @Test
+    fun `a level is not safe unless it says so, and a bad value is reported`() {
+        val zones = """"order": 4, "zones": [{ "id": "a", "from": [0, 0, 0], "to": [1, 1, 1] }]"""
+        assertFalse(LevelParser.parse("l", "{ $zones }").level!!.safe)
+        assertTrue(LevelParser.parse("l", """{ $zones, "safe": true }""").level!!.safe)
+        val bad = LevelParser.parse("l", """{ $zones, "safe": "yes" }""")
+        assertFalse(bad.level!!.safe)
+        assertTrue(bad.problems.any { "safe" in it })
+    }
 }

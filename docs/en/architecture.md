@@ -118,7 +118,7 @@ All ids are `every_tunnel:<name>`. Fabric networking API (1.20.1 style,
 
 | Id | Direction | Sent by | What it carries |
 |---|---|---|---|
-| `resources` | server → client | `ResourceSyncPacket` | Stamina, thirst, battery, flashlight on, exhausted, active; rounded to 0.1, sent only on change |
+| `resources` | server → client | `ResourceSyncPacket` | Stamina, thirst, battery, flashlight on, exhausted, active, safe; rounded to 0.1, sent only on change |
 | `toggle_flashlight` | client → server | `FlashlightControls` | The Flashlight key was pressed |
 | `ambience` | server → client | `AmbienceHooks` | The ambience of the player's current level |
 | `intro_music` | server → client | `IntroHooks` | Start or end (distort and fade) the intro song |

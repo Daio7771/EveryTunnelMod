@@ -27,6 +27,7 @@ import kotlin.math.ceil
  * - Hearts shake when health is low.
  * - Stamina (lungs) turns grey while exhausted.
  * - The battery row blinks red below `flashlight.low_battery_warning_percent`.
+ * - In a safe level thirst and the battery are paused: both rows are dimmed, without the blink.
  *
  * Icons come from `textures/gui/hud_icons.png`, painted by `tools/gui/hud_icons.py`.
  * Layout of that file, 9x9 icons at (u, v):
@@ -50,6 +51,9 @@ object StatusHud {
     private const val BATTERY_V = 18
     private const val HEALTH_V = 27
     private const val ALTERNATE_U = 27
+
+    /** Brightness and opacity of a paused row. */
+    private const val PAUSED_SHADE = 0.55f
 
     fun register() {
         HudRenderCallback.EVENT.register { context, _ -> render(context) }
@@ -82,14 +86,17 @@ object StatusHud {
         // Stamina, top left.
         drawBar(context, left, topRow, fraction(resources.stamina, resources.staminaMax), STAMINA_V, alternate = resources.exhausted, rightToLeft = false)
 
+        if (resources.safe) RenderSystem.setShaderColor(PAUSED_SHADE, PAUSED_SHADE, PAUSED_SHADE, PAUSED_SHADE)
+
         // Thirst, bottom right.
         drawBar(context, right, bottomRow, fraction(resources.thirst, resources.thirstMax), THIRST_V, alternate = false, rightToLeft = true)
 
         // Flashlight battery, top right.
         val low = resources.batteryLow(ConfigManager.gameplay.flashlight.lowBatteryWarningPercent)
         val blinkOn = (time / 8) % 2 == 0
-        drawBar(context, right, topRow, fraction(resources.battery, resources.batteryMax), BATTERY_V, alternate = low && blinkOn, rightToLeft = true)
+        drawBar(context, right, topRow, fraction(resources.battery, resources.batteryMax), BATTERY_V, alternate = low && blinkOn && !resources.safe, rightToLeft = true)
 
+        RenderSystem.setShaderColor(1f, 1f, 1f, 1f)
         RenderSystem.disableBlend()
     }
 

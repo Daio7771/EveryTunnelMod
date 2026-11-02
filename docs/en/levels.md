@@ -68,6 +68,7 @@ A full example (every key):
 | `entry` | no | nothing | What a player gets on walking in from an earlier level |
 | `intro` | no | none | The new-game scene (the elevator) |
 | `build` | no | none | Function that builds the level's blocks, run every time the world opens |
+| `safe` | no | `false` | Nothing hurts here (but `/kill` and the void); thirst and the battery stay as they are and sprinting costs nothing |
 
 ### Zones
 

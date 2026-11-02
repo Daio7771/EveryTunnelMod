@@ -32,7 +32,8 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  *   },
  *   "entry": { "title": "Level 1", "subtitle": "", "sound": "every_tunnel:event.level_transition" },
  *   "intro": { "seconds": 25, "music": "every_tunnel:music.elevator" },
- *   "build": "garage:build"
+ *   "build": "garage:build",
+ *   "safe": false
  * }
  * ```
  *
@@ -89,6 +90,7 @@ object LevelParser {
         val entry = parseEntry(fields, problems)
         val intro = parseIntro(fields, problems)
         val build = parseBuild(fields, problems)
+        val safe = fields.boolean("safe", false)
         fields.reportUnknownKeys()
 
         if (!hasOrder || zones.isEmpty()) {
@@ -96,7 +98,7 @@ object LevelParser {
             problems += "level skipped"
             return Result(null, problems.toList())
         }
-        return Result(LevelDefinition(levelId, name, order, dimension, zones, spawnPoints, ambience, entry, intro, build), problems.toList())
+        return Result(LevelDefinition(levelId, name, order, dimension, zones, spawnPoints, ambience, entry, intro, build, safe), problems.toList())
     }
 
     private fun parseBuild(fields: JsonFields, problems: MutableList<String>): String? {

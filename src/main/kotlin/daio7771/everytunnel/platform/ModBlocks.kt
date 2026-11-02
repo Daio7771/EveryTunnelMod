@@ -47,6 +47,8 @@ object ModBlocks {
         ),
     )
 
+    val SUITE_BED: Block = register("suite_bed", SuiteBedBlock(props(MapColor.DULL_RED, BlockSoundGroup.WOOL)))
+
     val WARM_LAMP: Block = register(
         "warm_lamp",
         WarmLampBlock(

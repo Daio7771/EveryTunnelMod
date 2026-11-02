@@ -153,4 +153,36 @@ class ResourceSystemTest {
         assertEquals(0.0, drunk.thirstDamageTimer)
         assertEquals(config.thirst.max, ResourceSystem.drink(full.copy(thirst = 90.0), config).thirst)
     }
+
+    @Test
+    fun `in a safe level nothing runs down and stamina recovers`() {
+        val safeSprint = ResourceInput(sprinting = true, jumps = 1, safe = true)
+        val tired = ResourceState(stamina = 50.0, thirst = 40.0, battery = 5.0, flashlightOn = true)
+        val step = ResourceSystem.step(tired, safeSprint, 1.0, config)
+        assertEquals(70.0, step.state.stamina, 1e-9, "sprinting and jumping cost nothing, and it keeps recovering")
+        assertEquals(40.0, step.state.thirst, 1e-9)
+        assertEquals(5.0, step.state.battery, 1e-9)
+        assertTrue(step.state.flashlightOn)
+    }
+
+    @Test
+    fun `in a safe level empty thirst does no damage and an exhausted player recovers`() {
+        val state = ResourceState(stamina = 0.0, thirst = 0.0, battery = 5.0, exhausted = true, thirstDamageTimer = 4.9)
+        val step = ResourceSystem.step(state, ResourceInput(sprinting = false, jumps = 0, safe = true), 1.0, config)
+        assertEquals(0.0, step.damage, 1e-9)
+        assertEquals(0.0, step.state.thirst, 1e-9)
+        assertEquals(20.0, step.state.stamina, 1e-9)
+        assertTrue(step.state.exhausted, "20 of 100 is under the 30% to recover")
+        assertFalse(ResourceSystem.step(step.state, ResourceInput(false, 0, safe = true), 1.0, config).state.exhausted)
+    }
+
+    @Test
+    fun `resting fills stamina and nothing else`() {
+        val state = ResourceState(stamina = 10.0, thirst = 40.0, battery = 5.0, exhausted = true, regenCooldown = 1.0)
+        val rested = ResourceSystem.rested(state, config)
+        assertEquals(100.0, rested.stamina, 1e-9)
+        assertFalse(rested.exhausted)
+        assertEquals(40.0, rested.thirst, 1e-9)
+        assertEquals(5.0, rested.battery, 1e-9)
+    }
 }

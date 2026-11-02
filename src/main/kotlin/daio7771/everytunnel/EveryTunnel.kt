@@ -33,6 +33,8 @@ import daio7771.everytunnel.platform.PathingRules
 import daio7771.everytunnel.platform.PlaytestLog
 import daio7771.everytunnel.platform.ResourceHooks
 import daio7771.everytunnel.platform.RespawnHooks
+import daio7771.everytunnel.platform.SafeLevelHooks
+import daio7771.everytunnel.platform.SuiteBedHooks
 import daio7771.everytunnel.platform.ValveHooks
 import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ModInitializer
@@ -88,6 +90,8 @@ object EveryTunnel : ModInitializer {
         WaterDispenserHooks.register()
         CollapseHooks.register()
         LoungeHooks.register()
+        SafeLevelHooks.register()
+        SuiteBedHooks.register()
         AchievementHooks.register()
         EndingHooks.register()
         RespawnHooks.register()

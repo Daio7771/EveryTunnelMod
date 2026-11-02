@@ -177,6 +177,12 @@ class Lounge:
             for z in range(z0, z1):
                 self.lounge_blocks[self.at(x, self.floors[(x, z)] + 1, z)] = (
                     f"{self.state('stairs')}[facing=south,half=bottom,shape=straight,waterlogged=false]")
+        # The beds: the plan's north is the world's west.
+        world_facing = {"north": "west", "west": "south", "south": "east", "east": "north"}
+        for x, z, facing in p["BEDS"]:
+            dx, dz = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}[facing]
+            for cell, head in (((x, z), "true"), ((x - dx, z - dz), "false")):
+                self.lounge_blocks[self.at(cell[0], 1, cell[1])] = f"every_tunnel:suite_bed[facing={world_facing[facing]},head={head}]"
         self.corridor_top = max(y for _, y, _ in self.corridor_blocks)
         self.box = self.bounds(self.lounge_blocks)
         return self

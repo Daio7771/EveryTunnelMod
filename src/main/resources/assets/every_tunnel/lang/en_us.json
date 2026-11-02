@@ -205,5 +205,6 @@
   "block.every_tunnel.wall_text": "Wall Text",
   "block.every_tunnel.hazard_steel": "Hazard Steel",
   "block.every_tunnel.blast_door": "Blast Door",
-  "block.every_tunnel.warm_lamp": "Warm Lamp"
+  "block.every_tunnel.warm_lamp": "Warm Lamp",
+  "block.every_tunnel.suite_bed": "Bed"
 }

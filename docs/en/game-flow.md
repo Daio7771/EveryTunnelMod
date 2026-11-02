@@ -314,8 +314,9 @@ The corridor already belongs to Level 4, so "Level 4" shows as the door to B4 sh
 into the corridor from Reception does not count as Level 3 again.
 
 The map's rebuild, whenever the world opens, puts Level 3 back and clears Level 4. So far Level 4
-is its rooms, textures and lights: no furniture, rules or puzzles yet, and its big door is a wall,
-so **the demo has no ending for now**.
+is its rooms, textures, lights, beds and its rules (a `safe` level, see
+[Player systems](player.md#safe-levels)): no other furniture or puzzles yet, and its big door is a
+wall, so **the demo has no ending for now**.
 
 ## 11. The end
 
