@@ -37,6 +37,7 @@ object LootSpawner {
         "food_plate" to { ModBlocks.LOOT_FOOD_PLATE },
         "food_popcorn" to { ModBlocks.LOOT_FOOD_POPCORN },
         "food_snack" to { ModBlocks.LOOT_FOOD_SNACK },
+        "master_card_sw" to { ModBlocks.LOOT_CARD_SW },
     )
 
     private var server: MinecraftServer? = null
@@ -71,7 +72,8 @@ object LootSpawner {
             val pos = BlockPos.ofFloored(point.position.x, point.position.y, point.position.z)
             val there = world.getBlockState(pos)
             if (there.isAir || there.isReplaceable || there.block is LootBlock) {
-                world.setBlockState(pos, block.defaultState.with(LootBlock.FACING, Direction.fromRotation(point.yaw.toDouble())))
+                val state = block.defaultState.with(LootBlock.FACING, Direction.fromRotation(point.yaw.toDouble()))
+                world.setBlockState(pos, state.with(LootBlock.WATERLOGGED, there.fluidState.isStill))
                 count++
             } else {
                 EveryTunnel.LOGGER.warn("Loot {} not placed: {} is taken by {}", key, pos, there)

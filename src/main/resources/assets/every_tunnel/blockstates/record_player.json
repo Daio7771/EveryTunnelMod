@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/record_player"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/record_player",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/record_player",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/record_player",
+      "y": 270
+    }
+  }
+}

@@ -97,7 +97,7 @@ generador basta con abrir el mundo. `/function garage:build` reconstruye a mano.
 
 ## Bloques
 
-`tools/blocks/generate.py` hace los recursos de los 88 bloques del mod. Los bloques en sí
+`tools/blocks/generate.py` hace los recursos de los 97 bloques del mod. Los bloques en sí
 (propiedades, formas, sonidos) se registran en Kotlin (`platform/ModBlocks.kt`); la
 herramienta **se detiene si las dos listas de ids no coinciden**. Las rotaciones de los
 modelos deben coincidir con las formas de `platform/BlockShapes.kt`. Las texturas reutilizan

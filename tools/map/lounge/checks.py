@@ -7,6 +7,8 @@ the plan is wrong, so a bad LEVEL_4 never reaches a world.
 - walled(): every two spaces are kept apart by at least one block, unless a corridor or an opening
   joins them on purpose (a slip in the numbers fails here).
 - steps(): three steps down to the Calm room, ending level with its floor.
+- zoned(): everywhere a player can be, the pool's water too, lies in one of the level's zones, or
+  they would be out of the level, and of its safe rules.
 """
 
 from collections import deque
@@ -54,3 +56,20 @@ def steps(lv):
     if line[-1] != calm or drops != [1] * (len(line) - 1):
         raise SystemExit(f"Level 4: the steps go {line}, the Calm room is at {calm}")
     return [f"Steps: {len(drops)} down, floor heights {line}, Calm room {calm}"]
+
+
+def zoned(lv):
+    zones = [box for _, box, _ in lv.zones()]
+
+    def inside(pos):
+        return any(b[0] <= pos[0] <= b[3] and b[1] <= pos[1] <= b[4] and b[2] <= pos[2] <= b[5] for b in zones)
+
+    # A door's own cell can be another level's (the door to B4 is Level 3's).
+    door = lv.p["B4_DOOR"]
+    cells = [lv.at(x, floor + 1, z) for (x, z), floor in lv.floors.items() if (x, z) != door]
+    x0, z0, x1, z1 = lv.p["POOL"]["box"]
+    cells += [lv.at(x, y, z) for x in range(x0, x1) for z in range(z0, z1) for y in range(1 - lv.p["POOL"]["depth"], 1)]
+    outside = [c for c in cells if not inside(c)]
+    if outside:
+        raise SystemExit(f"Level 4: {len(outside)} cells lie in no zone, e.g. {outside[:3]}")
+    return [f"Zones: all {len(cells)} cells a player can be in lie in a zone"]

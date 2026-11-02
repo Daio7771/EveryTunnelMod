@@ -32,6 +32,7 @@ KDoc comment that says more.
 | `menu/BlockLight.kt` | Block light for a box of blocks with no world (the menu scene) |
 | `achievement/Achievement.kt` | The eight achievements, in list order, by id |
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
+| `puzzle/OrderPuzzle.kt` | A puzzle of things in order: attempts, failures, the hint |
 | `progress/PlayerProgress.kt` | What a player has done: pieces, notes read, scenes seen, Level 3's books, checkpoint |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 | `hiding/LookLimit.kt` | How far the head turns inside a locker |
@@ -90,6 +91,8 @@ KDoc comment that says more.
 | `FluorescentLightBlock.kt` | The light: on, flicker, off; light level 13, drawn full bright |
 | `WarmLampBlock.kt` | Level 4's ceiling light: warm and silent, light level 14 |
 | `SuiteBedBlock.kt` | A bed in Level 4's Suites, in two blocks |
+| `PuzzleRackBlock.kt` | A rack holding a record or a reel, with its glow |
+| `PuzzleDeviceBlock.kt` | The record player and the projector |
 | `SurfaceMarkBlocks.kt` | Stains and puddles on any face |
 | `SignTileBlock.kt` | Painted texts by numbered slot (the world pack maps them) |
 | `ElevatorDoorBlock.kt` | Sliding elevator door stages |
@@ -147,6 +150,7 @@ KDoc comment that says more.
 | `BookHooks.kt` | Level 3's book puzzle: books appear, handed in at the counter, the hatch opens, debug |
 | `CollapseHooks.kt` | Level 3's tunnel collapse: sound, shake, rubble, dust, flickering lights; undone on a death or new game |
 | `LoungeHooks.kt` | From Level 3 to Level 4: the door to B4, erasing and building in steps, Reception's door |
+| `LoungePuzzleHooks.kt` | Level 4's Bar and Cinema puzzles, hints, and the pieces of the master card |
 | `SafeLevelHooks.kt` | Levels without risk: no damage (Level 4) |
 | `SuiteBedHooks.kt` | Resting in a bed: fade to black, health and stamina full |
 | `BookPhaseHooks.kt` | While the books are out: the clock in the head and the "He's near. Hide." warning |

@@ -11,7 +11,8 @@ offices/furnish.py, since `/setblock` takes a state as given.
 from offices.furnish import ROW, STACK, TILE, WALK_THROUGH
 
 TILES = TILE | {"pool_table", "lounge_desk"}
-THROUGH = WALK_THROUGH | {"cinema_seat", "bar_stool", "served_glass", "diploma", "office_chair"}
+RACKS = {"record_rack", "reel_rack"}
+THROUGH = WALK_THROUGH | {"cinema_seat", "bar_stool", "served_glass", "diploma", "office_chair", "cinema_screen"}
 WORLD_FACING = {"north": "west", "west": "south", "south": "east", "east": "north"}
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
 LOOT_COLOUR = {"battery": (235, 205, 70), "water": (90, 215, 235), "food_plate": (225, 80, 70),
@@ -118,6 +119,16 @@ RESERVED = {
     "monitors": (52, 1, 59, 4),
 }
 
+# Level 4's puzzles: (name, x, z, facing, y, what it holds or None). The records stand out of the
+# menu's order, and so do the reels out of their running time. Read by LoungePuzzleHooks by their ids.
+PUZZLE_RACKS = [("record_rack", 59, 29, "south", 3), ("record_rack", 60, 29, "south", 2),
+                ("record_rack", 62, 29, "south", 0), ("record_rack", 63, 29, "south", 1),
+                ("reel_rack", 27, 30, "south", 2), ("reel_rack", 28, 30, "south", 0),
+                ("reel_rack", 30, 30, "south", 3), ("reel_rack", 30, 31, "west", 1)]
+PUZZLE_DEVICES = [("record_player", 61, 29, "south"), ("projector", 27, 32, "west")]
+PIECE_SPOTS = [("piece_bar", 61, 30), ("piece_cinema", 28, 31)]
+SCREEN = [(15, z, y) for z in range(33, 42) for y in range(1, 5)]
+
 DIPLOMAS = [(49, z, "east") for z in range(62, 79, 4)] + [(52, z, "west") for z in range(62, 79, 4)]
 
 
@@ -127,14 +138,15 @@ class Furnish:
     def __init__(self, lv, air):
         self.lv, self.air = lv, air
         self.items = {}        # (x, y, z) -> (name, plan facing)
+        self.holds = {}        # (x, y, z) -> what a rack holds (its index)
 
-    def put(self, name, x, z, facing, y=1):
+    def put(self, name, x, z, facing, y=1, in_gap=False):
         floor = self.lv.floors.get((x, z), 0)
         y += floor
         if (x, y, z) not in self.air or (x, y, z) in self.items:
             raise SystemExit(f"Level 4: {name} at {(x, y, z)}: the cell is not free")
         for what, (x0, z0, x1, z1) in RESERVED.items():
-            if x0 <= x < x1 and z0 <= z < z1 and name != "diploma":
+            if x0 <= x < x1 and z0 <= z < z1 and name != "diploma" and not in_gap:
                 raise SystemExit(f"Level 4: {name} at {(x, z)} is in the gap for the {what}")
         self.items[(x, y, z)] = (name, facing)
         if y == floor + 1 and name not in THROUGH:
@@ -145,6 +157,13 @@ class Furnish:
             self.put(name, x, z, facing)
         for name, x, z, facing, y in STACKED:
             self.put(name, x, z, facing, y)
+        for name, x, z, facing, index in PUZZLE_RACKS:
+            self.put(name, x, z, facing, in_gap=True)
+            self.holds[(x, self.lv.floors[(x, z)] + 1, z)] = index
+        for name, x, z, facing in PUZZLE_DEVICES:
+            self.put(name, x, z, facing, in_gap=True)
+        for x, z, y in SCREEN:
+            self.put("cinema_screen", x, z, "east", y, in_gap=True)
         for _, x, z in NOTES:
             self.on_top("note_paper", x, z)
         for x, z, facing in DIPLOMAS:
@@ -194,6 +213,8 @@ class Furnish:
                 lx, lz = DIRS[{"north": "east", "east": "south", "south": "west", "west": "north"}[facing]]
                 left, right = same((x + lx, y, z + lz), name, facing), same((x - lx, y, z - lz), name, facing)
                 state = f"{bid}[facing={facing},left={str(left).lower()},right={str(right).lower()}]"
+            elif name in RACKS:
+                state = f"{bid}[facing={facing},has=true,hint=false,index={self.holds[plan]}]"
             elif name in TILES:
                 sides = {s: same((x + d[0], y, z + d[1]), name, None) for s, d in DIRS.items()}
                 state = bid + "[" + ",".join(f"{s}={str(sides[s]).lower()}" for s in ("east", "north", "south", "west")) + "]"
@@ -213,6 +234,15 @@ class Furnish:
             out.append((nid, self.centre(x, y, z), "note"))
         for k, (tag, x, z, y) in enumerate(LOOT):
             out.append((f"ch1_l4_loot_{k + 1}", self.centre(x, self.lv.floors[(x, z)] + y, z), tag))
+        # The ids say which: record_rack_<index>, reel_rack_<index>, record_player, projector, piece_bar, piece_cinema.
+        for name, x, z, _, index in PUZZLE_RACKS:
+            out.append((f"{name}_{index}", self.centre(x, 1, z), "puzzle"))
+        for name, x, z, _ in PUZZLE_DEVICES:
+            out.append((name, self.centre(x, 1, z), "puzzle"))
+        for sid, x, z in PIECE_SPOTS:
+            out.append((sid, self.centre(x, 1, z), "puzzle"))
+        px, pz = self.lv.p["POOL"]["piece"]
+        out.append(("ch1_l4_piece_spa", self.centre(px, 1 - self.lv.p["POOL"]["depth"], pz), "master_card_sw"))
         return out
 
     def centre(self, x, y, z):

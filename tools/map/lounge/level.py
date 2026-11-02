@@ -209,10 +209,29 @@ class Lounge:
         for x, z, facing in p["BEDS"]:
             dx, dz = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}[facing]
             self.blocked |= {(x, z), (x - dx, z - dz)}
+        self.dig_pool()
         self.furnish = Furnish(self, {**air, **corridor_air}).lay()
         self.corridor_top = max(y for _, y, _ in self.corridor_blocks)
         self.box = self.bounds(self.lounge_blocks)
         return self
+
+    def dig_pool(self):
+        """The Spa's pool: water down from the floor's own level, tiles round and under it."""
+        pool = self.p["POOL"]
+        x0, z0, x1, z1 = pool["box"]
+        depth = pool["depth"]
+        tile, water = self.state("pool_tile"), "minecraft:water[level=0]"
+        for x in range(x0 - 1, x1 + 1):
+            for z in range(z0 - 1, z1 + 1):
+                inside = x0 <= x < x1 and z0 <= z < z1
+                self.lounge_blocks[self.at(x, -depth, z)] = tile
+                for y in range(1 - depth, 1):
+                    if inside:
+                        self.lounge_blocks[self.at(x, y, z)] = water
+                    elif y < 0:
+                        self.lounge_blocks[self.at(x, y, z)] = tile
+                if inside:
+                    self.blocked.add((x, z))
 
     @staticmethod
     def bounds(blocks):
@@ -244,6 +263,11 @@ class Lounge:
         out = [(s.id, self.space_zone(s), ["end"] if s is self.exit else []) for s in self.spaces]
         out.append((f"{self.diplomas.id}_build", self.build_zone(), ["lounge_build"]))
         y = self.p["FLOOR_Y"]
+        # The pool's water: without it a swimmer would be out of the level, and of its safe rules.
+        px0, pz0, px1, pz1 = self.p["POOL"]["box"]
+        ax, _, az = self.at(px0, 0, pz0)
+        bx, _, bz = self.at(px1 - 1, 0, pz1 - 1)
+        out.append(("ch1_l4_pool", (min(ax, bx), y + 1 - self.p["POOL"]["depth"], min(az, bz), max(ax, bx), y, max(az, bz)), []))
         for oid, _, line, first, width, height, kind in self.openings:
             ax, _, az = self.at(first, 0, line)
             bx, _, bz = self.at(first + width - 1, 0, line)

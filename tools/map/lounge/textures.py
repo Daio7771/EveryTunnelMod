@@ -107,6 +107,17 @@ def calm_wall_tex(rng, kind):
     return img
 
 
+def pool_tile_tex(rng, kind):
+    """The pool's basin: small pale blue tiles."""
+    img = T.new((142, 192, 204))
+    T.noise(img, rng, 3)
+    for i in range(16):
+        for j in (0, 8):
+            T.px(img, i, j, (96, 138, 150), 0.8)
+            T.px(img, j, i, (96, 138, 150), 0.8)
+    return img
+
+
 def material_for(name):
     if name.startswith(("b4_carpet", "b4_calm_carpet")):
         return CARPET
@@ -126,6 +137,7 @@ ROLES = {
     "ceiling": ("b4_ceiling", ["panel"], ceiling_tex, True),
     "calm_carpet": ("b4_calm_carpet", ["a", "a"], calm_carpet_tex, True),
     "calm_wall": ("b4_calm_wall", ["a"], calm_wall_tex, False),
+    "pool_tile": ("b4_pool_tile", ["a"], pool_tile_tex, False),
 }
 
 

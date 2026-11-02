@@ -58,6 +58,13 @@ object ModBlocks {
     val POOL_TABLE: Block = register("pool_table", TileFurnitureBlock(props(MapColor.DARK_GREEN, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 13, 16))))
     /** As high as a block, so what lies on it (a note, loot) does not float. */
     val LOUNGE_DESK: Block = register("lounge_desk", TileFurnitureBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 16, 16))))
+    // Level 4's puzzles (LoungePuzzleHooks).
+    val RECORD_RACK: Block = register("record_rack", PuzzleRackBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).emissiveLighting { state, _, _ -> state.get(PuzzleRackBlock.HINT) }.luminance { if (it.get(PuzzleRackBlock.HINT)) 7 else 0 }))
+    val REEL_RACK: Block = register("reel_rack", PuzzleRackBlock(props(MapColor.GRAY, ModSoundGroups.SHEET_METAL).emissiveLighting { state, _, _ -> state.get(PuzzleRackBlock.HINT) }.luminance { if (it.get(PuzzleRackBlock.HINT)) 7 else 0 }))
+    val RECORD_PLAYER: Block = register("record_player", PuzzleDeviceBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(1, 0, 1, 15, 16, 15))))
+    val PROJECTOR: Block = register("projector", PuzzleDeviceBlock(props(MapColor.GRAY, ModSoundGroups.SHEET_METAL), listOf(box(2, 0, 2, 14, 16, 14))))
+    val CINEMA_SCREEN: Block = register("cinema_screen", PropBlock(props(MapColor.WHITE, BlockSoundGroup.WOOL).noCollision(), listOf(box(0, 0, 15, 16, 16, 16))))
+
     val SERVED_GLASS: Block = register("served_glass", PropBlock(props(MapColor.CLEAR, BlockSoundGroup.GLASS).noCollision(), listOf(box(6, 0, 6, 10, 6, 10))))
     val DIPLOMA: Block = register("diploma", PropBlock(props(MapColor.WHITE, ModSoundGroups.WOOD).noCollision(), listOf(box(2, 2, 15, 14, 14, 16))))
 
@@ -174,6 +181,11 @@ object ModBlocks {
     val LOOT_FOOD_PLATE: Block = register("loot_food_plate", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FOOD_PLATE })
     val LOOT_FOOD_POPCORN: Block = register("loot_food_popcorn", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FOOD_POPCORN })
     val LOOT_FOOD_SNACK: Block = register("loot_food_snack", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FOOD_SNACK })
+
+    val LOOT_CARD_NW: Block = register("loot_master_card_nw", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.CARD_NW })
+    val LOOT_CARD_NE: Block = register("loot_master_card_ne", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.CARD_NE })
+    val LOOT_CARD_SW: Block = register("loot_master_card_sw", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.CARD_SW })
+    val LOOT_CARD_SE: Block = register("loot_master_card_se", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.CARD_SE })
 
     val LOOT_KEYCARD: Block = register(
         "loot_keycard",
@@ -367,7 +379,7 @@ object ModBlocks {
         }
         LOOT_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "loot"),
-            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK).build(),
+            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK, LOOT_CARD_NW, LOOT_CARD_NE, LOOT_CARD_SW, LOOT_CARD_SE).build(),
         )
         BOX_SHELF_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),

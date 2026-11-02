@@ -413,6 +413,7 @@ LEVEL_4 = dict(
         stairs="minecraft:red_nether_brick_stairs",
         calm_carpet="minecraft:cyan_terracotta",
         calm_wall="minecraft:purple_terracotta",
+        pool_tile="minecraft:light_blue_terracotta",
     ),
     # Thin walls inside rooms, (x0, z0, x1, z1): the Suites' four rooms round an inner corridor, and the
     # Cinema's projection booth. A door in one: (x, z, open), on a wall along x. The furniture is in furnish.py.
@@ -420,6 +421,8 @@ LEVEL_4 = dict(
     PARTITION_DOORS=[(20, 17, False), (28, 17, False), (20, 22, False), (28, 22, True), (28, 33, False)],
     # Beds in the Suites: the head's cell and the way it points, the foot on the far side.
     BEDS=[(19, 13, "north"), (27, 13, "north"), (19, 26, "south"), (27, 26, "south")],
+    # The Spa's pool: its water's box, how deep, and the cell of the piece on its floor.
+    POOL=dict(box=(74, 33, 83, 41), depth=6, piece=(78, 37)),
     LAMP="every_tunnel:warm_lamp[lit=true]",
     LAMP_SPACING=5,
     LAMP_SPACING_BAR=4,              # the Bar has the highest ceiling, so more of them
@@ -1193,7 +1196,7 @@ def main():
     shared4 = sorted({s.split("[")[0] for s in LEVEL_4["STAND_INS"].values()} & used)
     if shared4:
         raise SystemExit(f"LEVEL_4 STAND_INS: other levels use {', '.join(shared4)}; pick blocks they never use")
-    report4 = LC.walled(lv4) + LC.steps(lv4) + LC.walk(lv4)
+    report4 = LC.walled(lv4) + LC.steps(lv4) + LC.walk(lv4) + LC.zoned(lv4)
     if gv.wall != gm.wall or gv.pillar != gm.pillar or gv.pieces != gm.pieces:
         raise SystemExit("internal error: sign texts differ between the vanilla and mod builds")
 

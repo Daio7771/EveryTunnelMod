@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "facing=north,has=true,index=0": {
+      "model": "every_tunnel:block/reel_rack_0"
+    },
+    "facing=north,has=true,index=1": {
+      "model": "every_tunnel:block/reel_rack_1"
+    },
+    "facing=north,has=true,index=2": {
+      "model": "every_tunnel:block/reel_rack_2"
+    },
+    "facing=north,has=true,index=3": {
+      "model": "every_tunnel:block/reel_rack_3"
+    },
+    "facing=north,has=false,index=0": {
+      "model": "every_tunnel:block/reel_rack_empty"
+    },
+    "facing=north,has=false,index=1": {
+      "model": "every_tunnel:block/reel_rack_empty"
+    },
+    "facing=north,has=false,index=2": {
+      "model": "every_tunnel:block/reel_rack_empty"
+    },
+    "facing=north,has=false,index=3": {
+      "model": "every_tunnel:block/reel_rack_empty"
+    },
+    "facing=east,has=true,index=0": {
+      "model": "every_tunnel:block/reel_rack_0",
+      "y": 90
+    },
+    "facing=east,has=true,index=1": {
+      "model": "every_tunnel:block/reel_rack_1",
+      "y": 90
+    },
+    "facing=east,has=true,index=2": {
+      "model": "every_tunnel:block/reel_rack_2",
+      "y": 90
+    },
+    "facing=east,has=true,index=3": {
+      "model": "every_tunnel:block/reel_rack_3",
+      "y": 90
+    },
+    "facing=east,has=false,index=0": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 90
+    },
+    "facing=east,has=false,index=1": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 90
+    },
+    "facing=east,has=false,index=2": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 90
+    },
+    "facing=east,has=false,index=3": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 90
+    },
+    "facing=south,has=true,index=0": {
+      "model": "every_tunnel:block/reel_rack_0",
+      "y": 180
+    },
+    "facing=south,has=true,index=1": {
+      "model": "every_tunnel:block/reel_rack_1",
+      "y": 180
+    },
+    "facing=south,has=true,index=2": {
+      "model": "every_tunnel:block/reel_rack_2",
+      "y": 180
+    },
+    "facing=south,has=true,index=3": {
+      "model": "every_tunnel:block/reel_rack_3",
+      "y": 180
+    },
+    "facing=south,has=false,index=0": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 180
+    },
+    "facing=south,has=false,index=1": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 180
+    },
+    "facing=south,has=false,index=2": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 180
+    },
+    "facing=south,has=false,index=3": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 180
+    },
+    "facing=west,has=true,index=0": {
+      "model": "every_tunnel:block/reel_rack_0",
+      "y": 270
+    },
+    "facing=west,has=true,index=1": {
+      "model": "every_tunnel:block/reel_rack_1",
+      "y": 270
+    },
+    "facing=west,has=true,index=2": {
+      "model": "every_tunnel:block/reel_rack_2",
+      "y": 270
+    },
+    "facing=west,has=true,index=3": {
+      "model": "every_tunnel:block/reel_rack_3",
+      "y": 270
+    },
+    "facing=west,has=false,index=0": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 270
+    },
+    "facing=west,has=false,index=1": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 270
+    },
+    "facing=west,has=false,index=2": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 270
+    },
+    "facing=west,has=false,index=3": {
+      "model": "every_tunnel:block/reel_rack_empty",
+      "y": 270
+    }
+  }
+}

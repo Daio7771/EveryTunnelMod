@@ -325,6 +325,59 @@ def diploma_tex(rng):
     return img
 
 
+def record_tex(rng, label):
+    """Item: a black record seen from above, its label in the colour of its name."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            if d <= 7.5:
+                groove = 16 if int(d * 2) % 2 else 26
+                img.putpixel((x, y), (groove, groove, groove + 2, 255))
+            if d <= 3.2:
+                img.putpixel((x, y), (*label, 255))
+            if d <= 0.8:
+                img.putpixel((x, y), (10, 10, 10, 255))
+    return img
+
+
+def reel_tex(rng):
+    """Item: a film reel from the side, grey metal with its round holes and a white label."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            if d <= 7.5:
+                img.putpixel((x, y), (150, 152, 156, 255) if d > 6.2 else (112, 114, 118, 255))
+            if d <= 1.4:
+                img.putpixel((x, y), (40, 40, 44, 255))
+    for cx, cy in ((7, 3), (11, 7), (7, 11), (3, 7)):
+        for a, b in ((0, 0), (1, 0), (0, 1), (1, 1)):
+            img.putpixel((cx + a, cy + b), (40, 40, 44, 255))
+    return img
+
+
+def card_tex(rng, col, row):
+    """Item: one corner of the golden master card. All four are cut from one picture 32 x 32 (a card
+    with a brass stripe and a dark chip), so they fit each other edge to edge."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            X, Y = x + col * 16, y + row * 16
+            if not (2 <= X < 30 and 6 <= Y < 26):
+                continue
+            edge = X in (2, 29) or Y in (6, 25)
+            c = (150, 112, 40) if edge else (216, 176, 78)
+            if 10 <= Y < 13:
+                c = (120, 88, 30)
+            if 6 <= X < 12 and 16 <= Y < 22:
+                c = (58, 44, 30)
+            if not edge and rng.random() < 0.08:
+                c = (238, 206, 120)
+            img.putpixel((x, y), (*c, 255))
+    return img
+
+
 def water_bottle_tex(rng):
     """Item: a small clear plastic water bottle, three quarters full: a ridged blue cap and
     neck ring, white label with a blue wave, cold reflections on the plastic."""
@@ -1542,7 +1595,11 @@ def build():
                                  ("loot_keycard", "Keycard (Loot)", "keycard"),
                                  ("loot_food_plate", "Plate of Food (Loot)", "food_plate"),
                                  ("loot_food_popcorn", "Popcorn (Loot)", "food_popcorn"),
-                                 ("loot_food_snack", "Snack (Loot)", "food_snack")):
+                                 ("loot_food_snack", "Snack (Loot)", "food_snack"),
+                                 ("loot_master_card_nw", "Master Card (Loot)", "master_card_nw"),
+                                 ("loot_master_card_ne", "Master Card (Loot)", "master_card_ne"),
+                                 ("loot_master_card_sw", "Master Card (Loot)", "master_card_sw"),
+                                 ("loot_master_card_se", "Master Card (Loot)", "master_card_se")):
         a.models[block_id] = {"textures": {"particle": f"{NS}:item/{item}"}}
         a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:item/{item}"})
 
@@ -1886,6 +1943,30 @@ def build():
     tile("pool_table", "Pool Table", {"f": "pool_felt", "w": "suite_bed_frame"},
          [el((0, 10, 0), (16, 12, 16), "w"), el((0, 12, 0), (16, 13, 16), "f")], (10, "w"))
     tile("lounge_desk", "Lounge Desk", {"w": "suite_bed_frame"}, [el((0, 14, 0), (16, 16, 16), "w")], (14, "w"))
+    # Level 4's puzzles.
+    a.texture("rack_metal", plastic_tex(r("rack_metal"), (112, 114, 118)), T.STEEL.but(smoothness=0.5, metal=255, relief=0.2))
+    a.texture("rack_dark", plastic_tex(r("rack_dark"), (22, 22, 24)), T.PLASTIC.but(smoothness=0.6, relief=0.1))
+    a.texture("screen_white", plastic_tex(r("screen_white"), (226, 224, 216), "fabric"), T.PLASTIC.but(smoothness=0.05, relief=0.1))
+    for i, colour in enumerate(((196, 120, 50), (120, 190, 220), (70, 110, 190), (150, 50, 60))):
+        a.texture(f"record_sleeve_{i}", plastic_tex(r(f"sleeve{i}"), colour), T.PLASTIC.but(smoothness=0.3, relief=0.1))
+    rack_states = lambda block: {"variants": {
+        f"facing={f},has={h},index={i}": {"model": f"{NS}:block/{block}_{i if h == 'true' else 'empty'}", **({"y": y} if y else {})}
+        for f, y in {"north": 0, "east": 90, "south": 180, "west": 270}.items() for h in ("true", "false") for i in range(4)}}
+    shelf = [el((1, 0, 1), (15, 2, 15), "w"), el((1, 2, 13), (15, 14, 15), "w"), el((1, 2, 1), (2, 14, 15), "w"), el((14, 2, 1), (15, 14, 15), "w")]
+    a.models["record_rack_empty"] = model({"w": "suite_bed_frame"}, shelf)
+    for i in range(4):
+        a.models[f"record_rack_{i}"] = model({"w": "suite_bed_frame", "s": f"record_sleeve_{i}"}, shelf + [el((3, 2, 6), (13, 13, 8), "s")])
+    a.block("record_rack", "Record Rack", rack_states("record_rack"), {"parent": f"{NS}:block/record_rack_0"})
+    cans = [el((1, 0, 1), (15, 2, 15), "m")]
+    a.models["reel_rack_empty"] = model({"m": "rack_metal"}, cans)
+    for i in range(4):
+        a.models[f"reel_rack_{i}"] = model({"m": "rack_metal", "d": "rack_dark"}, cans + [el((3, 2, 3), (13, 5, 13), "m"), el((6, 5, 6), (10, 6, 10), "d")])
+    a.block("reel_rack", "Film Can", rack_states("reel_rack"), {"parent": f"{NS}:block/reel_rack_0"})
+    prop("record_player", "Record Player", {"w": "suite_bed_frame", "d": "rack_dark", "b": "lounge_brass"},
+         [el((1, 0, 1), (15, 13, 15), "w"), el((2, 13, 2), (14, 14, 14), "d"), el((11, 14, 3), (12, 15, 12), "b")])
+    prop("projector", "Projector", {"m": "rack_metal", "d": "rack_dark"},
+         [el((7, 0, 7), (9, 8, 9), "m"), el((3, 8, 3), (13, 15, 13), "m"), el((6, 10, 0), (10, 14, 3), "d")])
+    prop("cinema_screen", "Cinema Screen", {"s": "screen_white"}, [el((0, 0, 15), (16, 16, 16), "s")])
     prop("served_glass", "Served Glass", {"g": "served_glass"}, [el((6, 0, 6), (10, 6, 10), "g")])
     prop("diploma", "Diploma", {"d": "diploma", "w": "suite_bed_frame"},
          [el((2, 2, 15.5), (14, 14, 16), "w", north="d")])
@@ -2146,7 +2227,12 @@ def main():
     for name, img in a.item_textures.items():
         (item_dir / f"{name}.png").write_bytes(png(img))
     for item, painter in (("battery", battery_tex), ("water_bottle", water_bottle_tex), ("keycard", keycard_tex),
-                          ("food_plate", food_plate_tex), ("food_popcorn", food_popcorn_tex), ("food_snack", food_snack_tex)):
+                          ("food_plate", food_plate_tex), ("food_popcorn", food_popcorn_tex), ("food_snack", food_snack_tex),
+                          ("record_old_fashioned", lambda g: record_tex(g, (196, 120, 50))), ("record_sparkling_water", lambda g: record_tex(g, (120, 190, 220))),
+                          ("record_still_water", lambda g: record_tex(g, (70, 110, 190))), ("record_chefs_plate", lambda g: record_tex(g, (150, 50, 60))),
+                          ("reel_87", reel_tex), ("reel_94", reel_tex), ("reel_102", reel_tex), ("reel_120", reel_tex),
+                          ("master_card_nw", lambda g: card_tex(g, 0, 0)), ("master_card_ne", lambda g: card_tex(g, 1, 0)),
+                          ("master_card_sw", lambda g: card_tex(g, 0, 1)), ("master_card_se", lambda g: card_tex(g, 1, 1))):
         (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))
         write_json(ASSETS / "models" / "item" / f"{item}.json",
                    {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{item}"}})

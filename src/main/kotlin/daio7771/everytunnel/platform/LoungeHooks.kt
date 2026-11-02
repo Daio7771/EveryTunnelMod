@@ -109,10 +109,12 @@ object LoungeHooks {
     /** The map was rebuilt: Level 3 stands, with its door shut, and Level 4 does not. */
     fun levelsRebuilt() {
         phase = Phase.NOT_STARTED
+        LoungePuzzleHooks.reset()
     }
 
     /** A new game in the same world: the door shut, and Level 3 back if it was erased. */
     fun newGame(server: MinecraftServer) {
+        LoungePuzzleHooks.reset()
         if (phase == Phase.NOT_STARTED) {
             setDoor(server, open = false)
             return

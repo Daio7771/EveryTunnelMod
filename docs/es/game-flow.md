@@ -337,8 +337,19 @@ volver al pasillo desde Reception no cuenta como regresar al nivel 3.
 
 La reconstrucción del mapa, cada vez que se abre el mundo, devuelve el nivel 3 y limpia el 4. De
 momento el nivel 4 son sus salas, muebles, nueve notas, botín y reglas (un nivel `safe`, ver
-[Sistemas del jugador](player.md#niveles-seguros)): aún no tiene puzles, y su puerta grande es una
-pared, así que **por ahora la demo no tiene final**.
+[Sistemas del jugador](player.md#niveles-seguros)), y tres de sus cuatro puzles (abajo). Su puerta
+grande es una pared, así que **por ahora la demo no tiene final**.
+
+Cada puzle da una esquina de la tarjeta maestra dorada, que guarda `ProgressService`. Fallar no
+cuesta nada, y tras 3 fallos brilla lo siguiente correcto (`core.puzzle.OrderPuzzle`,
+`platform.LoungePuzzleHooks`):
+
+- **Bar:** cuatro discos, llevados de uno en uno desde sus estantes al tocadiscos, en el orden de
+  las líneas de la carta. Uno equivocado los devuelve todos.
+- **Cinema:** cuatro carretes por duración, en la cabina. El de 94 minutos (lo dice el registro) se
+  proyecta, y la pieza queda a su lado. Lo que muestra la película aún está por llegar.
+- **Spa:** la pieza está en el fondo de la piscina, a 6 de hondo. Al ser un nivel seguro, nadie se
+  ahoga.
 
 ## 11. El final
 

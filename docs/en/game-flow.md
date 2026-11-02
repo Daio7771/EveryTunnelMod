@@ -315,8 +315,18 @@ into the corridor from Reception does not count as Level 3 again.
 
 The map's rebuild, whenever the world opens, puts Level 3 back and clears Level 4. So far Level 4
 is its rooms, furniture, nine notes, loot and rules (a `safe` level, see
-[Player systems](player.md#safe-levels)): no puzzles yet, and its big door is a wall, so **the demo
-has no ending for now**.
+[Player systems](player.md#safe-levels)), and three of its four puzzles (below). Its big door is a
+wall, so **the demo has no ending for now**.
+
+Each puzzle gives a corner of the golden master card, kept by `ProgressService`. Failing costs
+nothing, and after 3 failures the next right thing glows (`core.puzzle.OrderPuzzle`,
+`platform.LoungePuzzleHooks`):
+
+- **Bar:** four records, carried one at a time from their racks to the record player, in the order
+  of the menu's lines. A wrong one sends them all back.
+- **Cinema:** four reels by running time, in the projection booth. The 94-minute one (the log says
+  so) runs in the projector, and the piece lies beside it. What the film shows is still to come.
+- **Spa:** the piece lies at the bottom of the pool, 6 deep. Being a safe level, nobody drowns.
 
 ## 11. The end
 

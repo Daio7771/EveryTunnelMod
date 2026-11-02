@@ -12,8 +12,12 @@ import net.minecraft.item.ItemPlacementContext
 import net.minecraft.item.ItemStack
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.SoundCategory
+import net.minecraft.block.Waterloggable
+import net.minecraft.fluid.FluidState
+import net.minecraft.fluid.Fluids
 import net.minecraft.sound.SoundEvents
 import net.minecraft.state.StateManager
+import net.minecraft.state.property.BooleanProperty
 import net.minecraft.state.property.DirectionProperty
 import net.minecraft.state.property.Properties
 import net.minecraft.util.ActionResult
@@ -32,22 +36,27 @@ import net.minecraft.world.World
  *
  * Levels place them at their spawn points tagged for loot ([LootSpawner]).
  */
-class LootBlock(settings: Settings, private val itemOf: () -> Item) : BlockWithEntity(settings) {
+class LootBlock(settings: Settings, private val itemOf: () -> Item) : BlockWithEntity(settings), Waterloggable {
 
     val item: Item get() = itemOf()
 
     init {
-        defaultState = stateManager.defaultState.with(FACING, net.minecraft.util.math.Direction.NORTH)
+        defaultState = stateManager.defaultState.with(FACING, net.minecraft.util.math.Direction.NORTH).with(WATERLOGGED, false)
     }
 
     override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
-        builder.add(FACING)
+        builder.add(FACING, WATERLOGGED)
     }
 
     override fun getPlacementState(ctx: ItemPlacementContext): BlockState =
         defaultState.with(FACING, ctx.horizontalPlayerFacing.opposite)
 
     override fun createBlockEntity(pos: BlockPos, state: BlockState): BlockEntity = LootBlockEntity(pos, state)
+
+    /** Under water it stays under water (the Spa's pool), without a pocket of air round it. */
+    @Deprecated("Deprecated in Java")
+    override fun getFluidState(state: BlockState): FluidState =
+        if (state.get(WATERLOGGED)) Fluids.WATER.getStill(false) else super.getFluidState(state)
 
     @Deprecated("Deprecated in Java")
     override fun getRenderType(state: BlockState): BlockRenderType = BlockRenderType.INVISIBLE
@@ -64,12 +73,14 @@ class LootBlock(settings: Settings, private val itemOf: () -> Item) : BlockWithE
             if (player is ServerPlayerEntity) PlaytestLog.pickedUp(player, item, pos)
             world.playSound(null, pos, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.3f, 1.2f + world.random.nextFloat() * 0.4f)
             if (item == ModItems.KEYCARD && player is ServerPlayerEntity) KeycardHooks.pickedUp(player, pos)
+            if (player is ServerPlayerEntity) LoungePuzzleHooks.pieceTaken(player, item)
         }
         return ActionResult.success(world.isClient)
     }
 
     companion object {
         val FACING: DirectionProperty = Properties.HORIZONTAL_FACING
+        val WATERLOGGED: BooleanProperty = Properties.WATERLOGGED
         private val SHAPE: VoxelShape = createCuboidShape(3.0, 0.0, 3.0, 13.0, 3.0, 13.0)
     }
 }

@@ -32,6 +32,7 @@ con un comentario KDoc que cuenta más.
 | `menu/BlockLight.kt` | Luz de bloque para una caja de bloques sin mundo (la escena del menú) |
 | `achievement/Achievement.kt` | Los ocho logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
+| `puzzle/OrderPuzzle.kt` | Un puzle de cosas en orden: intentos, fallos, la pista |
 | `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
@@ -90,6 +91,8 @@ con un comentario KDoc que cuenta más.
 | `FluorescentLightBlock.kt` | La luz: encendida, parpadeante, apagada; nivel de luz 13, dibujada a brillo máximo |
 | `WarmLampBlock.kt` | La luz de techo del nivel 4: cálida y silenciosa, nivel de luz 14 |
 | `SuiteBedBlock.kt` | Una cama de las Suites del nivel 4, en dos bloques |
+| `PuzzleRackBlock.kt` | Un estante con un disco o un carrete, y su brillo |
+| `PuzzleDeviceBlock.kt` | El tocadiscos y el proyector |
 | `SurfaceMarkBlocks.kt` | Manchas y charcos en cualquier cara |
 | `SignTileBlock.kt` | Textos pintados por ranura numerada (el pack del mundo los asigna) |
 | `ElevatorDoorBlock.kt` | Etapas de la puerta corredera del ascensor |
@@ -147,6 +150,7 @@ con un comentario KDoc que cuenta más.
 | `BookHooks.kt` | El puzle de los libros del nivel 3: aparecen, se entregan en el mostrador, se abre la trampilla, depuración |
 | `CollapseHooks.kt` | El derrumbe del túnel del nivel 3: sonido, temblor, escombros, polvo, luces parpadeando; se deshace al morir o en partida nueva |
 | `LoungeHooks.kt` | Del nivel 3 al 4: la puerta a B4, borrar y construir por tandas, la puerta de Reception |
+| `LoungePuzzleHooks.kt` | Los puzles del Bar y el Cinema del nivel 4, las pistas y las piezas de la tarjeta maestra |
 | `SafeLevelHooks.kt` | Niveles sin riesgo: sin daño (el nivel 4) |
 | `SuiteBedHooks.kt` | Descansar en una cama: fundido a negro, vida y estamina llenas |
 | `BookPhaseHooks.kt` | Mientras los libros están fuera: el reloj en la cabeza y el aviso "He's near. Hide." |

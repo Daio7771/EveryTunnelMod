@@ -34,6 +34,9 @@ import net.minecraft.world.World
  *   `food.eat_seconds` to eat it and get `food.heal` health back (see [FoodHooks]); the same
  *   effect in all three. Consumed outside Creative.
  *
+ * - Level 4's puzzle items ([LoungePuzzleHooks]): four records, four film reels, and the four
+ *   corners of the golden master card. One each.
+ *
  * - Keycard: the night guard's security card. Lost in Level 2; the exit's card reader
  *   ([CardReaderBlock]) only opens for a player carrying it.
  *
@@ -54,6 +57,20 @@ object ModItems {
     @JvmField
     val FOOD_SNACK: Item = FoodItem(Item.Settings().maxCount(16))
 
+    /** In the order the Bar's menu lists them, which is the order they are played in. */
+    val RECORDS: List<Item> = List(4) { Item(Item.Settings().maxCount(1)) }
+    private val RECORD_IDS = listOf("record_old_fashioned", "record_sparkling_water", "record_still_water", "record_chefs_plate")
+
+    /** By running time: 87, 94, 102 and 120 minutes. */
+    val REELS: List<Item> = List(4) { Item(Item.Settings().maxCount(1)) }
+    private val REEL_IDS = listOf("reel_87", "reel_94", "reel_102", "reel_120")
+
+    /** The golden master card's corners: Bar, Cinema, Spa, Game room. */
+    val CARD_NW: Item = Item(Item.Settings().maxCount(1))
+    val CARD_NE: Item = Item(Item.Settings().maxCount(1))
+    val CARD_SW: Item = Item(Item.Settings().maxCount(1))
+    val CARD_SE: Item = Item(Item.Settings().maxCount(1))
+
     fun register() {
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "battery"), BATTERY)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "water_bottle"), WATER_BOTTLE)
@@ -61,6 +78,10 @@ object ModItems {
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_plate"), FOOD_PLATE)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_popcorn"), FOOD_POPCORN)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_snack"), FOOD_SNACK)
+        val puzzleItems = RECORD_IDS.zip(RECORDS) + REEL_IDS.zip(REELS) + listOf(
+            "master_card_nw" to CARD_NW, "master_card_ne" to CARD_NE, "master_card_sw" to CARD_SW, "master_card_se" to CARD_SE,
+        )
+        for ((id, item) in puzzleItems) Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, id), item)
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register { entries ->
             entries.add(BATTERY)
             entries.add(WATER_BOTTLE)
@@ -68,6 +89,7 @@ object ModItems {
             entries.add(FOOD_PLATE)
             entries.add(FOOD_POPCORN)
             entries.add(FOOD_SNACK)
+            for ((_, item) in puzzleItems) entries.add(item)
         }
     }
 }
