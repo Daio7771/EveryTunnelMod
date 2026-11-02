@@ -42,6 +42,22 @@ Short recipes for the changes people make most. Each one lists every file to tou
 5. Try it in game: `/playsound every_tunnel:<id> master @s`.
 6. Add it to the table in [Audio](audio.md#sound-events).
 
+## Replace the Cinema's film
+
+The film is a recording made in game, on a set away from the levels: a parking corridor in perfect
+order (`FILM_SET` in the map generator) and a figure in a suit and an evil mask (`tools/entity/film_walker.py`).
+`/everytunnel film set` builds it and takes you there in Spectator, F1 hides the HUD,
+`/everytunnel film walk` sets him walking and `/everytunnel film back` puts him back for another take. Then:
+
+1. `python3 tools/film/film.py recording.mp4` (needs ffmpeg): turns it into old film, 288 x 128 at 12
+   frames a second, cropped from the middle of the picture to the screen's shape, in
+   `assets/every_tunnel/film/`. It replaces what was there and prints its size. `--test` writes a test
+   pattern instead.
+2. `./gradlew build`.
+
+The film's length comes from the recording: the piece appears when it ends. The one in the game is
+`tools/film/recording/film_take_2.mp4`, seconds 8 to 22 (`--start 8 --end 22`).
+
 ## Add a block
 
 1. Register it in `platform/ModBlocks.kt` (properties, shape in pixels via `BlockShapes`,

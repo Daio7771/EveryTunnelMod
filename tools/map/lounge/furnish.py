@@ -52,7 +52,8 @@ FURNITURE = (
     + [("reading_table", 56, 40, "north"), ("wooden_chair", 56, 41, "north"), ("wooden_chair", 59, 43, "west")]
     + row("sofa", 39, 42, 44, "north") + row("sofa", 53, 57, 29, "south")
     # The Cinema: rows of seats looking at the screen's wall, either side of the aisle; the booth; the kiosk.
-    + [("cinema_seat", x, z, "west") for x in (19, 22, 25) for z in (31, 32, 33, 34, 35, 39, 40, 41, 42, 43)]
+    + [("cinema_seat", x, z, "west") for x in (19, 22) for z in (31, 32, 33, 34, 35)]
+    + [("cinema_seat", x, z, "west") for x in (19, 22, 25) for z in (39, 40, 41, 42, 43)]
     + [("lounge_desk", 29, 30, "north"), ("wooden_chair", 29, 31, "north")]
     + row("library_counter", 27, 30, 42, "north")
     # The Spa: its desk, the loungers, a nightstand for the water.
@@ -112,21 +113,22 @@ LOOT = [
 # the Calm room's central table, beside its card.
 RESERVED = {
     "record player": (59, 29, 64, 32),
-    "projector": (27, 31, 29, 33),
+    "projector": (24, 31, 27, 34),
     "cinema screen": (15, 32, 17, 42),
     "pool": (74, 33, 83, 41),
     "dartboard": (79, 16, 84, 24),
     "monitors": (52, 1, 59, 4),
 }
 
-# Level 4's puzzles: (name, x, z, facing, y, what it holds or None). The records stand out of the
-# menu's order, and so do the reels out of their running time. Read by LoungePuzzleHooks by their ids.
-PUZZLE_RACKS = [("record_rack", 59, 29, "south", 3), ("record_rack", 60, 29, "south", 2),
-                ("record_rack", 62, 29, "south", 0), ("record_rack", 63, 29, "south", 1),
-                ("reel_rack", 27, 30, "south", 2), ("reel_rack", 28, 30, "south", 0),
-                ("reel_rack", 30, 30, "south", 3), ("reel_rack", 30, 31, "west", 1)]
-PUZZLE_DEVICES = [("record_player", 61, 29, "south"), ("projector", 27, 32, "west")]
-PIECE_SPOTS = [("piece_bar", 61, 30), ("piece_cinema", 28, 31)]
+# Level 4's puzzles: (name, x, z, facing, y, what it holds). The records stand out of the menu's order,
+# and so do the reels out of their running time; the reels are on a shelf on the booth's north wall, at
+# eye height. Read by LoungePuzzleHooks by their ids.
+PUZZLE_RACKS = [("record_rack", 59, 29, "south", 1, 3), ("record_rack", 60, 29, "south", 1, 2),
+                ("record_rack", 62, 29, "south", 1, 0), ("record_rack", 63, 29, "south", 1, 1),
+                ("reel_rack", 25, 30, "south", 2, 2), ("reel_rack", 26, 30, "south", 2, 0),
+                ("reel_rack", 27, 30, "south", 2, 3), ("reel_rack", 28, 30, "south", 2, 1)]
+PUZZLE_DEVICES = [("record_player", 61, 29, "south"), ("projector", 25, 32, "west")]
+PIECE_SPOTS = [("piece_bar", 61, 30), ("piece_cinema", 26, 32)]
 SCREEN = [(15, z, y) for z in range(33, 42) for y in range(1, 5)]
 
 DIPLOMAS = [(49, z, "east") for z in range(62, 79, 4)] + [(52, z, "west") for z in range(62, 79, 4)]
@@ -157,9 +159,9 @@ class Furnish:
             self.put(name, x, z, facing)
         for name, x, z, facing, y in STACKED:
             self.put(name, x, z, facing, y)
-        for name, x, z, facing, index in PUZZLE_RACKS:
-            self.put(name, x, z, facing, in_gap=True)
-            self.holds[(x, self.lv.floors[(x, z)] + 1, z)] = index
+        for name, x, z, facing, y, index in PUZZLE_RACKS:
+            self.put(name, x, z, facing, y, in_gap=True)
+            self.holds[(x, self.lv.floors[(x, z)] + y, z)] = index
         for name, x, z, facing in PUZZLE_DEVICES:
             self.put(name, x, z, facing, in_gap=True)
         for x, z, y in SCREEN:
@@ -235,12 +237,16 @@ class Furnish:
         for k, (tag, x, z, y) in enumerate(LOOT):
             out.append((f"ch1_l4_loot_{k + 1}", self.centre(x, self.lv.floors[(x, z)] + y, z), tag))
         # The ids say which: record_rack_<index>, reel_rack_<index>, record_player, projector, piece_bar, piece_cinema.
-        for name, x, z, _, index in PUZZLE_RACKS:
-            out.append((f"{name}_{index}", self.centre(x, 1, z), "puzzle"))
+        for name, x, z, _, y, index in PUZZLE_RACKS:
+            out.append((f"{name}_{index}", self.centre(x, y, z), "puzzle"))
         for name, x, z, _ in PUZZLE_DEVICES:
             out.append((name, self.centre(x, 1, z), "puzzle"))
         for sid, x, z in PIECE_SPOTS:
             out.append((sid, self.centre(x, 1, z), "puzzle"))
+        # The screen's corners, for the film.
+        (x0, z0, y0), (x1, z1, y1) = SCREEN[0], SCREEN[-1]
+        out.append(("film_screen_a", self.centre(x0, y0, z0), "puzzle"))
+        out.append(("film_screen_b", self.centre(x1, y1, z1), "puzzle"))
         px, pz = self.lv.p["POOL"]["piece"]
         out.append(("ch1_l4_piece_spa", self.centre(px, 1 - self.lv.p["POOL"]["depth"], pz), "master_card_sw"))
         return out

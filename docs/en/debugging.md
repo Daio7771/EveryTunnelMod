@@ -24,6 +24,9 @@ the answers. The spawn eggs are in the Every Tunnel tab only in dev runs too.
 | `/everytunnel valves` | This game's valve digits for Level 3 (A to E) |
 | `/everytunnel progress` | What you have kept: pieces, notes read, scenes seen, books, checkpoint |
 | `/everytunnel progress addpiece <level> <piece>` | Gives you a piece, to try the progress out |
+| `/everytunnel film set` | Builds the set for filming the Cinema's film, away from the levels, and takes you there in Spectator |
+| `/everytunnel film walk` | Sets the figure walking |
+| `/everytunnel film back` | Puts the figure back at the start, for another take |
 | `/everytunnel boxes` | Level 3's box puzzle: how many are on the shelf, where the others lie |
 | `/everytunnel books` | Level 3's book puzzle: how many are on the counter, where the others lie |
 | `/everytunnel books fill` | Finishes the boxes and puts the books out with all but one already on the desk (to test the last) |

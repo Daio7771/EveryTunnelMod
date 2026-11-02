@@ -23,6 +23,7 @@ git).
 |---|---|---|
 | `tools/map/map_generator.py` | Datapacks de los niveles, resource pack del mundo, lo instala en `run/saves/noname_complex`; la escena del menú en el mod | el mapa o la escena del menú |
 | `tools/blocks/generate.py` | Modelos de bloque y objeto, blockstates, texturas + mapas LabPBR, nombres, loot tables | un bloque del mod |
+| `tools/film/film.py` | La película del Cinema: una grabación convertida en fotogramas de cine viejo | la película |
 | `tools/entity/pale_man.py` | Geometría, animaciones, textura y máscara de brillo del Pale man, modelo del huevo | el Pale man |
 | `tools/entity/observer.py` | Geometría, animaciones y textura del Observer, modelo del huevo | el Observer |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (la skin del uniforme) | el uniforme |

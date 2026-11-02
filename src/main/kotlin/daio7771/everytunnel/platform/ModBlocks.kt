@@ -60,7 +60,7 @@ object ModBlocks {
     val LOUNGE_DESK: Block = register("lounge_desk", TileFurnitureBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 16, 16))))
     // Level 4's puzzles (LoungePuzzleHooks).
     val RECORD_RACK: Block = register("record_rack", PuzzleRackBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).emissiveLighting { state, _, _ -> state.get(PuzzleRackBlock.HINT) }.luminance { if (it.get(PuzzleRackBlock.HINT)) 7 else 0 }))
-    val REEL_RACK: Block = register("reel_rack", PuzzleRackBlock(props(MapColor.GRAY, ModSoundGroups.SHEET_METAL).emissiveLighting { state, _, _ -> state.get(PuzzleRackBlock.HINT) }.luminance { if (it.get(PuzzleRackBlock.HINT)) 7 else 0 }))
+    val REEL_RACK: Block = register("reel_rack", PuzzleRackBlock(props(MapColor.GRAY, ModSoundGroups.SHEET_METAL).noCollision().emissiveLighting { state, _, _ -> state.get(PuzzleRackBlock.HINT) }.luminance { if (it.get(PuzzleRackBlock.HINT)) 7 else 0 }))
     val RECORD_PLAYER: Block = register("record_player", PuzzleDeviceBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(1, 0, 1, 15, 16, 15))))
     val PROJECTOR: Block = register("projector", PuzzleDeviceBlock(props(MapColor.GRAY, ModSoundGroups.SHEET_METAL), listOf(box(2, 0, 2, 14, 16, 14))))
     val CINEMA_SCREEN: Block = register("cinema_screen", PropBlock(props(MapColor.WHITE, BlockSoundGroup.WOOL).noCollision(), listOf(box(0, 0, 15, 16, 16, 16))))

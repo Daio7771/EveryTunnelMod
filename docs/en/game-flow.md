@@ -325,7 +325,9 @@ nothing, and after 3 failures the next right thing glows (`core.puzzle.OrderPuzz
 - **Bar:** four records, carried one at a time from their racks to the record player, in the order
   of the menu's lines. A wrong one sends them all back.
 - **Cinema:** four reels by running time, in the projection booth. The 94-minute one (the log says
-  so) runs in the projector, and the piece lies beside it. What the film shows is still to come.
+  so) in the projector waits until someone steps out of the booth into the auditorium. Then the film
+  runs on the screen, once, with only the projector to hear (`client.effects.FilmPlayer`), and when
+  it ends the piece lies by the projector.
 - **Spa:** the piece lies at the bottom of the pool, 6 deep. Being a safe level, nobody drowns.
 
 ## 11. The end

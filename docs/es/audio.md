@@ -35,7 +35,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | Ambiente del nivel 3 | `ambient.offices.room_tone` (bucle), `ambient.library.clock` (bucle), `ambient.offices.phone` (2-4 timbrazos) | síntesis |
 | Fluorescentes | `block.fluorescent.hum` (bucle), `.flicker`, `.start`, `.off` | síntesis |
 | Materiales (pasos e impactos de los props) | `block.cardboard`, `block.hollow_metal`, `block.metal_pipe`, `block.plastic`, `block.puddle`, `block.sheet_metal`, `block.wire_mesh`, `block.wood`, cada uno `.step` e `.impact` | síntesis |
-| Eventos del mapa | `block.elevator.ding`, `block.elevator.doors`, `block.shutter.close`, `block.card_reader.accept`, `block.card_reader.deny`, `block.valve.turn`, `block.valve.release`, `block.locker.door`, `block.hatch.open` | síntesis |
+| Eventos del mapa | `block.projector.run`, `block.elevator.ding`, `block.elevator.doors`, `block.shutter.close`, `block.card_reader.accept`, `block.card_reader.deny`, `block.valve.turn`, `block.valve.release`, `block.locker.door`, `block.hatch.open` | síntesis |
 | Linterna y batería | `item.flashlight.on`, `.off`, `.dead`, `.flicker`, `item.battery.open`, `.close` | síntesis |
 | Jugador | `player.heartbeat` (4 variaciones), `player.tinnitus`, `player.breathing_exhausted`, `player.drink` | síntesis / CC0 (respiración, tragos) |
 | El Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | síntesis / CC0 (respiración) |

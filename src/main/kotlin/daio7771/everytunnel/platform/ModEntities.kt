@@ -39,6 +39,13 @@ object ModEntities {
         .trackRangeBlocks(16)
         .build()
 
+    /** The figure in the Cinema's film, on its set only ([FilmSetHooks]). Never saved. */
+    val FILM_WALKER: EntityType<FilmWalkerEntity> = FabricEntityTypeBuilder.create(SpawnGroup.MISC, ::FilmWalkerEntity)
+        .dimensions(EntityDimensions.fixed(0.6f, 1.8f))
+        .disableSaving()
+        .trackRangeBlocks(96)
+        .build()
+
     val PALE_MAN_SPAWN_EGG: Item = SpawnEggItem(PALE_MAN, 0xCECCC4, 0x282E3E, Item.Settings())
 
     /** The Observer (Level 3): a 1.9-block hitbox like the Pale man's; the model stands 2.5. */
@@ -54,6 +61,8 @@ object ModEntities {
         FabricDefaultAttributeRegistry.register(PALE_MAN, PaleManEntity.createAttributes())
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "pale_man_spawn_egg"), PALE_MAN_SPAWN_EGG)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "locker_seat"), LOCKER_SEAT)
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "film_walker"), FILM_WALKER)
+        FabricDefaultAttributeRegistry.register(FILM_WALKER, FilmWalkerEntity.createAttributes())
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "observer"), OBSERVER)
         FabricDefaultAttributeRegistry.register(OBSERVER, ObserverEntity.createAttributes())
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "observer_spawn_egg"), OBSERVER_SPAWN_EGG)

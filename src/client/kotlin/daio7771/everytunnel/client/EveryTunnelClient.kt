@@ -5,6 +5,7 @@ import daio7771.everytunnel.client.effects.AmbiencePlayer
 import daio7771.everytunnel.client.effects.BreathingEffect
 import daio7771.everytunnel.client.effects.FlashlightEffect
 import daio7771.everytunnel.client.effects.CameraShake
+import daio7771.everytunnel.client.effects.FilmPlayer
 import daio7771.everytunnel.client.effects.HeartbeatEffect
 import daio7771.everytunnel.client.effects.IntroMusic
 import daio7771.everytunnel.client.effects.FluorescentHum
@@ -15,6 +16,7 @@ import daio7771.everytunnel.client.hud.FlashlightOverlay
 import daio7771.everytunnel.client.hud.LockerView
 import daio7771.everytunnel.client.hud.AchievementToast
 import daio7771.everytunnel.client.hud.StatusHud
+import daio7771.everytunnel.client.render.FilmWalkerRenderer
 import daio7771.everytunnel.client.render.BoxShelfRenderer
 import daio7771.everytunnel.client.render.WallTextRenderer
 import daio7771.everytunnel.client.render.LootRenderer
@@ -70,6 +72,7 @@ object EveryTunnelClient : ClientModInitializer {
         BreathingEffect.register()
         HeartbeatEffect.register()
         CameraShake.register()
+        FilmPlayer.register()
         TensionMusic.register()
         IntroMusic.register()
         AmbiencePlayer.register()
@@ -88,6 +91,7 @@ object EveryTunnelClient : ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.PALE_MAN, ::PaleManRenderer)
         EntityRendererRegistry.register(ModEntities.OBSERVER, ::ObserverRenderer)
         EntityRendererRegistry.register(ModEntities.LOCKER_SEAT, ::EmptyEntityRenderer)
+        EntityRendererRegistry.register(ModEntities.FILM_WALKER, ::FilmWalkerRenderer)
         AchievementToast.register()
         SprintCheck.register()
         BlockEntityRendererFactories.register(ModBlocks.LOOT_ENTITY, ::LootRenderer)

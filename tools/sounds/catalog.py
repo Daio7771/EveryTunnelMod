@@ -886,6 +886,39 @@ def valve_turn(rng, variant):
     return fade(lowpass(y, 7000.0), 0.0, 0.08)
 
 
+def projector_run(rng, variant):
+    """Level 4's projector, an old one cranked by hand, in a seamless loop: no motor and no hum. The
+    claw snatches the film through the gate about 16 times a second, a double metal clack, never quite
+    even as the arm tires and catches up; the sprockets rattle, the film flutters over its loops, and
+    the whole tin housing rings a little. Thin, dry and mechanical."""
+    seconds = 6.0
+    n = samples(seconds)
+    y = np.zeros(n)
+    # The cranking's speed wanders slowly, and comes back to where it began.
+    grid = np.linspace(0.0, seconds, 2400, endpoint=False)
+    rate = 16.0 * (1.0 + 0.07 * np.sin(TAU * grid / seconds + 0.6) + 0.035 * np.sin(TAU * 3 * grid / seconds + 2.1))
+    beats = np.cumsum(rate) * (grid[1] - grid[0])
+    clicks = int(round(beats[-1]))
+    beats *= clicks / beats[-1]
+    for k in range(clicks):
+        at = float(np.interp(k, beats, grid))
+        # A stronger pull of the claw every second frame of the crank's turn.
+        strength = (1.0 if k % 4 == 0 else 0.72 if k % 2 == 0 else 0.55) * rng.uniform(0.85, 1.1)
+        clack = knock(samples(0.045), rng, 0.0, rng.uniform(2300, 3100), [1.0, 1.73, 2.61], [0.4, 0.24, 0.12], [0.005, 0.003, 0.002],
+                      click=0.6, click_hi=9000.0) * strength
+        place(y, clack, at, circular=True)
+        release = knock(samples(0.03), rng, 0.0, rng.uniform(1100, 1500), [1.0, 2.2], [0.2, 0.08], [0.004, 0.002],
+                        click=0.25, click_hi=6000.0) * strength * 0.7
+        place(y, release, at + 0.022, circular=True)
+    # The film over its sprockets: a dry flutter following the same beat.
+    gate = np.interp(np.arange(n) / n * seconds, grid, 0.55 + 0.45 * np.cos(TAU * beats))
+    y += 0.09 * shaped_noise(n, rng, lo=1500.0, hi=7000.0) * gate
+    # The crank's gears, faint and uneven, and the tin box ringing.
+    y += 0.05 * shaped_noise(n, rng, 1.0, 180.0, 900.0) * (1.0 + 0.5 * smooth_random(n, 2.0, rng, True))
+    y += 0.16 * resonator(y, 1450.0, 7.0)
+    return fft_filter(y, 180.0, 8500.0, order=2)
+
+
 def valve_release(rng, variant):
     """All five valves right: a water hammer bangs through the pipe, the pipe rings and knocks
     as the pressure drops, a long hiss fades out and the last bubbles settle."""
@@ -1314,6 +1347,8 @@ SOUNDS = [
     Sound("block.card_reader.accept", "Level progress", "The exit's card reader taking the keycard (beeps, lock opens)", "mono", False, 1,
           card_reader_accept, -3.0),
     Sound("block.card_reader.deny", "Level progress", "The card reader refusing (no keycard)", "mono", False, 1, card_reader_deny, -6.0),
+    Sound("block.projector.run", "Level progress", "Level 4's projector while the film runs, a seamless loop", "mono", True, 1,
+          projector_run, -6.0, attenuation=28),
     Sound("block.valve.turn", "Level progress", "One full turn of a Level 3 valve (ratchet, clunk, water in the pipe)", "mono", False, 3,
           valve_turn, -4.0),
     Sound("block.valve.release", "Level progress", "Level 3's valves all right: water hammer, the pipe settles, the door unlocks", "mono",

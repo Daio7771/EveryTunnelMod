@@ -45,6 +45,8 @@ import net.minecraft.util.Identifier
  *   loaded: its build goes on ([LoungeHooks]).
  * - `/everytunnel rebuilt`: run by the map's `garage:build` after rebuilding the levels:
  *   puts the loot back ([NewGame.levelsRebuilt]).
+ * - `/everytunnel film set|walk|back`: for filming the Cinema's film ([FilmSetHooks]): builds its set and
+ *   takes you there in Spectator, sets the figure walking, or puts him back at the start.
  * - `/everytunnel progress [addpiece <level> <piece>]`: what the player has kept
  *   ([ProgressService]), or give them a piece to try it out.
  * - `/everytunnel devworld save|forget`: make this world start from
@@ -58,6 +60,7 @@ object DebugCommands {
                 .requires { it.hasPermissionLevel(2) }
                 .then(CommandManager.literal("rebuilt").executes(::rebuilt))
                 .then(CommandManager.literal("loungeready").executes(::loungeReady))
+                .then(CommandManager.literal("filmready").executes(::filmReady))
             if (!DevWorlds.enabled) {
                 dispatcher.register(root)
                 return@register
@@ -86,6 +89,7 @@ object DebugCommands {
                         .then(CommandManager.argument("number", IntegerArgumentType.integer(1)).executes(::setLevel)),
                 )
                 .then(CommandManager.literal("valves").executes(::valves))
+                .then(filmCommands())
                 .then(
                     CommandManager.literal("progress").executes(::progress)
                         .then(
@@ -294,6 +298,27 @@ object DebugCommands {
         player.stopRiding()
         player.teleport(world, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
         reply(context, "At the start of level $number (${level.id}).")
+        return 1
+    }
+
+    private fun filmCommands() = CommandManager.literal("film")
+        .then(CommandManager.literal("set").executes { context ->
+            FilmSetHooks.begin(context.source.playerOrThrow)
+            reply(context, "The set is being built. F1 hides the HUD. /everytunnel film walk, /everytunnel film back for another take.")
+            1
+        })
+        .then(CommandManager.literal("walk").executes { context ->
+            val walking = FilmSetHooks.walk(context.source.server)
+            if (!walking) reply(context, "Nobody there: /everytunnel film set first.")
+            if (walking) 1 else 0
+        })
+        .then(CommandManager.literal("back").executes { context ->
+            FilmSetHooks.back(context.source.server)
+            1
+        })
+
+    private fun filmReady(context: CommandContext<ServerCommandSource>): Int {
+        FilmSetHooks.ready(context.source.server)
         return 1
     }
 

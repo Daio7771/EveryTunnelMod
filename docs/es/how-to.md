@@ -44,6 +44,23 @@ que tocar.
 5. Pruébalo en el juego: `/playsound every_tunnel:<id> master @s`.
 6. Añádelo a la tabla de [Audio](audio.md#eventos-de-sonido).
 
+## Cambiar la película del Cinema
+
+La película es una grabación hecha en el juego, en un escenario aparte de los niveles: un pasillo de
+aparcamiento en perfecto estado (`FILM_SET` en el generador del mapa) y una figura con traje y máscara
+malvada (`tools/entity/film_walker.py`). `/everytunnel film set` lo construye y te lleva allí en
+Espectador, F1 oculta el HUD, `/everytunnel film walk` la pone a andar y `/everytunnel film back` la
+devuelve para otra toma. Después:
+
+1. `python3 tools/film/film.py grabacion.mp4` (necesita ffmpeg): la convierte en cine viejo, 288 x 128 a
+   12 fotogramas por segundo, recortada desde el centro de la imagen a la forma de la pantalla, en
+   `assets/every_tunnel/film/`. Sustituye lo que hubiera e indica su peso. `--test` escribe en su lugar
+   una imagen de prueba.
+2. `./gradlew build`.
+
+La duración sale de la grabación: la pieza aparece al acabar. La del juego es
+`tools/film/recording/film_take_2.mp4`, del segundo 8 al 22 (`--start 8 --end 22`).
+
 ## Añadir un bloque
 
 1. Regístralo en `platform/ModBlocks.kt` (propiedades, forma en píxeles con `BlockShapes`,

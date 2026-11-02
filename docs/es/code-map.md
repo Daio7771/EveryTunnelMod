@@ -33,6 +33,7 @@ con un comentario KDoc que cuenta más.
 | `achievement/Achievement.kt` | Los ocho logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
 | `puzzle/OrderPuzzle.kt` | Un puzle de cosas en orden: intentos, fallos, la pista |
+| `film/FilmInfo.kt` | La película del Cinema: fotogramas, velocidad, qué fotograma en cada momento |
 | `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
@@ -150,6 +151,8 @@ con un comentario KDoc que cuenta más.
 | `BookHooks.kt` | El puzle de los libros del nivel 3: aparecen, se entregan en el mostrador, se abre la trampilla, depuración |
 | `CollapseHooks.kt` | El derrumbe del túnel del nivel 3: sonido, temblor, escombros, polvo, luces parpadeando; se deshace al morir o en partida nueva |
 | `LoungeHooks.kt` | Del nivel 3 al 4: la puerta a B4, borrar y construir por tandas, la puerta de Reception |
+| `FilmSetHooks.kt` | El escenario para rodar la película del Cinema, aparte de los niveles |
+| `FilmWalkerEntity.kt` | La figura que anda por él |
 | `LoungePuzzleHooks.kt` | Los puzles del Bar y el Cinema del nivel 4, las pistas y las piezas de la tarjeta maestra |
 | `SafeLevelHooks.kt` | Niveles sin riesgo: sin daño (el nivel 4) |
 | `SuiteBedHooks.kt` | Descansar en una cama: fundido a negro, vida y estamina llenas |
@@ -193,6 +196,7 @@ con un comentario KDoc que cuenta más.
 | `FluorescentHum.kt` | Zumbido de las 4 luces más cercanas |
 | `HeartbeatEffect.kt` | Latido según la distancia al Pale man |
 | `CameraShake.kt` | La cámara temblando en el derrumbe del túnel del nivel 3 |
+| `FilmPlayer.kt` | La película del Cinema en su pantalla, y el sonido del proyector |
 | `BreathingEffect.kt` | Respiración fuerte agotado |
 | `TensionMusic.kt` | Capas de música según el estado de los Pale men |
 | `IntroMusic.kt` | La canción del ascensor y su parada de cinta |
@@ -215,6 +219,7 @@ con un comentario KDoc que cuenta más.
 | Archivo | Qué hace |
 |---|---|
 | `PaleManRenderer.kt` | Renderizador de GeckoLib con la máscara de brillo de los ojos |
+| `FilmWalkerRenderer.kt` | La figura de la película del Cinema, con el modelo del jugador |
 | `ObserverRenderer.kt` | Renderizador de GeckoLib del Observer; su cabeza gira con la de la entidad |
 | `PaleManModel.kt` | Su modelo de GeckoLib, más la postura encorvada bajo techos bajos |
 | `BoxShelfRenderer.kt` | Las cajas moradas en la estantería, a brillo completo |

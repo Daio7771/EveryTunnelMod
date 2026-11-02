@@ -417,8 +417,9 @@ LEVEL_4 = dict(
     ),
     # Thin walls inside rooms, (x0, z0, x1, z1): the Suites' four rooms round an inner corridor, and the
     # Cinema's projection booth. A door in one: (x, z, open), on a wall along x. The furniture is in furnish.py.
-    PARTITIONS=[(16, 17, 32, 18), (16, 22, 32, 23), (24, 13, 25, 17), (24, 23, 25, 27), (26, 30, 27, 33), (26, 33, 31, 34)],
-    PARTITION_DOORS=[(20, 17, False), (28, 17, False), (20, 22, False), (28, 22, True), (28, 33, False)],
+    PARTITIONS=[(16, 17, 32, 18), (16, 22, 32, 23), (24, 13, 25, 17), (24, 23, 25, 27), (23, 30, 24, 34), (23, 34, 31, 35)],
+    PARTITION_DOORS=[(20, 17, False), (28, 17, False), (20, 22, False), (28, 22, True), (27, 34, False)],
+    BOOTH=(24, 30, 31, 35),          # the Cinema's projection booth with its door's row
     # Beds in the Suites: the head's cell and the way it points, the foot on the far side.
     BEDS=[(19, 13, "north"), (27, 13, "north"), (19, 26, "south"), (27, 26, "south")],
     # The Spa's pool: its water's box, how deep, and the cell of the piece on its floor.
@@ -432,6 +433,10 @@ LEVEL_4 = dict(
     STEP_COMMANDS=40,
     STEP_VOLUME=33000,
 )
+
+# The set for filming the Cinema's film, away from the levels (`/everytunnel film set`): a parking
+# corridor in perfect order, along x. FilmSetHooks knows where the figure starts: keep them together.
+FILM_SET = dict(x=300, y=64, z=300, length=60, width=8, height=4, light_every=6, stall_every=3)
 
 MENU_SCENE = dict(LENGTH=40, WIDTH=20, SEED=41, WEAR=0.5, DEAD_LIGHT_SHARE=0.1, GAP_SHARE=0.04,
                   DARK_ZONES=0, ODDITIES=0, HANGING_CABLES=4, CARTS=0)
@@ -949,6 +954,31 @@ def attach_level_3(level, offset, lv3, door):
     return place, blocks, box
 
 
+def film_set_commands(p):
+    """The corridor: floor with its bays painted along both walls, plain walls with their band, every
+    light on, not a stain anywhere."""
+    x0, y0, z0 = p["x"], p["y"], p["z"]
+    length, width, height = p["length"], p["width"], p["height"]
+    blocks = {}
+    for x in range(-1, length + 1):
+        for z in range(-1, width + 1):
+            edge = x in (-1, length) or z in (-1, width)
+            blocks[(x0 + x, y0, z0 + z)] = STAND_INS["floor"]
+            blocks[(x0 + x, y0 + height + 1, z0 + z)] = STAND_INS["ceiling"]
+            for y in range(1, height + 1):
+                if edge:
+                    blocks[(x0 + x, y0 + y, z0 + z)] = STAND_INS["wall_base"] if y == 1 else STAND_INS["paint_band"] if y == 2 else STAND_INS["wall"]
+    for x in range(0, length, p["stall_every"]):
+        for z in (0, 1, width - 2, width - 1):
+            blocks[(x0 + x, y0, z0 + z)] = STAND_INS["line_white"]
+    for x in range(p["light_every"] // 2, length, p["light_every"]):
+        for z in (width // 2 - 1, width // 2):
+            blocks[(x0 + x, y0 + height, z0 + z)] = MOD_LIGHT % ("on", "true")
+    c = fills(x0 - 1, y0 + 1, z0 - 1, x0 + length, y0 + height, z0 + width, "minecraft:air")
+    place_rects(c, blocks)
+    return c
+
+
 def split_steps(cmds, max_commands, max_volume):
     """Commands into lists that each change at most `max_volume` blocks and hold at most
     `max_commands` commands, in order: a tick's worth of work (see LoungeHooks)."""
@@ -1118,6 +1148,13 @@ def write_pack(name, cmds, box, previous, level=None, offset=None, level2=None, 
         (functions / "level4_begin.mcfunction").write_text("\n".join(
             [f"forceload add {area4[0]} {area4[2]} {area4[3]} {area4[5]}", "schedule function garage:level4_wait 5t replace"]) + "\n")
         wait_and_go(functions, "level4", area4, b3[1], ["everytunnel loungeready"], release=False)
+        # The film's set, only built when asked for (`/everytunnel film set`).
+        fs = FILM_SET
+        area = (fs["x"] - 1, 0, fs["z"] - 1, fs["x"] + fs["length"], 0, fs["z"] + fs["width"])
+        (functions / "film_set.mcfunction").write_text("\n".join(
+            [f"forceload add {area[0]} {area[2]} {area[3]} {area[5]}", "schedule function garage:film_set_wait 5t replace"]) + "\n")
+        wait_and_go(functions, "film_set", area, fs["y"], ["function garage:film_set_now", "everytunnel filmready"], release=False)
+        (functions / "film_set_now.mcfunction").write_text("\n".join(film_set_commands(fs)) + "\n")
         for k, step in enumerate(stage3["steps4"]):
             (functions / f"level4_step_{k}.mcfunction").write_text("\n".join(step) + "\n")
     tags = pack / "data" / "minecraft" / "tags" / "functions"

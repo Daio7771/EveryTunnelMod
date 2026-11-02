@@ -33,7 +33,7 @@ registered in `platform.ModSounds`. Any of them can be tried with
 | Level 3 ambience | `ambient.offices.room_tone` (loop), `ambient.library.clock` (loop), `ambient.offices.phone` (2-4 rings) | synth |
 | Fluorescent lights | `block.fluorescent.hum` (loop), `.flicker`, `.start`, `.off` | synth |
 | Materials (prop steps and impacts) | `block.cardboard`, `block.hollow_metal`, `block.metal_pipe`, `block.plastic`, `block.puddle`, `block.sheet_metal`, `block.wire_mesh`, `block.wood`, each `.step` and `.impact` | synth |
-| Map events | `block.elevator.ding`, `block.elevator.doors`, `block.shutter.close`, `block.card_reader.accept`, `block.card_reader.deny`, `block.valve.turn`, `block.valve.release`, `block.locker.door`, `block.hatch.open` | synth |
+| Map events | `block.projector.run`, `block.elevator.ding`, `block.elevator.doors`, `block.shutter.close`, `block.card_reader.accept`, `block.card_reader.deny`, `block.valve.turn`, `block.valve.release`, `block.locker.door`, `block.hatch.open` | synth |
 | Flashlight and battery | `item.flashlight.on`, `.off`, `.dead`, `.flicker`, `item.battery.open`, `.close` | synth |
 | Player | `player.heartbeat` (4 variations), `player.tinnitus`, `player.breathing_exhausted`, `player.drink` | synth / CC0 (breathing, gulps) |
 | The Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | synth / CC0 (breathing) |

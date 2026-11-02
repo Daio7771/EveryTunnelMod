@@ -25,6 +25,9 @@ en la pestaña Every Tunnel al desarrollar.
 | `/everytunnel valves` | Las cifras de las válvulas del nivel 3 en esta partida (A a E) |
 | `/everytunnel progress` | Lo que has conservado: piezas, notas leídas, escenas vistas, libros, checkpoint |
 | `/everytunnel progress addpiece <nivel> <pieza>` | Te da una pieza, para probar el progreso |
+| `/everytunnel film set` | Construye el escenario para rodar la película del Cinema, aparte de los niveles, y te lleva allí en Espectador |
+| `/everytunnel film walk` | Pone a la figura a andar |
+| `/everytunnel film back` | Devuelve la figura al inicio, para otra toma |
 | `/everytunnel boxes` | El puzle de las cajas del nivel 3: cuántas hay en la estantería y dónde están las demás |
 | `/everytunnel books` | El puzle de los libros del nivel 3: cuántos hay en el mostrador y dónde están los demás |
 | `/everytunnel books fill` | Completa las cajas y saca los libros con todos menos uno ya en la mesa (para probar el último) |

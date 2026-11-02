@@ -45,6 +45,9 @@ object ModSounds {
     val ELEVATOR_DING = event("block.elevator.ding")
     val ELEVATOR_DOORS = event("block.elevator.doors")
 
+    /** Level 4's projector while the film runs, in a loop from its place. */
+    val PROJECTOR_RUN = event("block.projector.run")
+
     /** The exit's card reader: card accepted (beeps, lock opens), or refused (buzz). */
     val CARD_READER_ACCEPT = event("block.card_reader.accept")
     val CARD_READER_DENY = event("block.card_reader.deny")

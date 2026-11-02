@@ -347,7 +347,9 @@ cuesta nada, y tras 3 fallos brilla lo siguiente correcto (`core.puzzle.OrderPuz
 - **Bar:** cuatro discos, llevados de uno en uno desde sus estantes al tocadiscos, en el orden de
   las líneas de la carta. Uno equivocado los devuelve todos.
 - **Cinema:** cuatro carretes por duración, en la cabina. El de 94 minutos (lo dice el registro) se
-  proyecta, y la pieza queda a su lado. Lo que muestra la película aún está por llegar.
+  pone en el proyector y espera a que alguien salga de la cabina a la sala. Entonces la película corre
+  en la pantalla, una sola vez, y solo se oye el proyector (`client.effects.FilmPlayer`), y al acabar
+  la pieza queda junto al proyector.
 - **Spa:** la pieza está en el fondo de la piscina, a 6 de hondo. Al ser un nivel seguro, nadie se
   ahoga.
 

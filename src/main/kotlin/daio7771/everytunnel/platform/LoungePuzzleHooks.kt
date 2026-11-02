@@ -2,10 +2,13 @@ package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
+import daio7771.everytunnel.core.film.FilmInfo
 import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.core.puzzle.OrderPuzzle
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.entity.ItemEntity
@@ -31,22 +34,28 @@ import net.minecraft.util.math.Box
  * - **Bar:** four records wait on their racks ([PuzzleRackBlock]). One is carried at a time to the
  *   record player ([PuzzleDeviceBlock]). They go on in the menu's order; a wrong one sends them all
  *   back. Solved, the piece lies by the player.
- * - **Cinema:** four reels, by running time. The one of 94 minutes (the projection log says so) put
- *   into the projector runs for [PROJECTION_TICKS], then the piece lies by it. Another comes back out.
+ * - **Cinema:** four reels, by running time. Another than the one of 94 minutes (the projection log
+ *   says so) comes back out. That one in the projector waits until someone stands in the auditorium,
+ *   out of the booth: then the film runs on the screen, once (`client.effects.FilmPlayer`), and when
+ *   it ends the piece lies by the projector. "Do not rewind."
  * - **Hints:** after 3 failures the next right one glows ([OrderPuzzle.hint], [PuzzleRackBlock.HINT]).
  * - **The items stay in play:** a rack shows what nobody carries and is not on the device, so one
  *   dropped goes back to its rack.
  *
  * Racks, devices and the places for the pieces are the level's spawn points tagged `puzzle`
  * (`record_rack_<index>`, `record_player`, `piece_bar`...). A piece taken ([pieceTaken]; the third
- * lies in the pool, the fourth comes with the darts) is kept by [ProgressService]. Sounds are
- * vanilla's for now. What the film shows on the screen is still to come.
+ * lies in the pool, the fourth comes with the darts) is kept by [ProgressService]. Most sounds are
+ * vanilla's for now.
  */
 object LoungePuzzleHooks {
 
     const val PIECE_LEVEL = "level_4"
     private const val LEVEL_ID = "level_4"
-    private const val PROJECTION_TICKS = 100
+    /** A film that cannot be read still gives the piece, after this long. */
+    private const val FALLBACK_FILM_TICKS = 100
+
+    /** To the client: the film starts. Payload: screen corners x0, x1, y0, y1 and its z, then the projector's x, y, z. */
+    val FILM_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "film")
     private const val SYNC_TICKS = 20
 
     /** One puzzle: its items, the block they are put into, where the piece lies when it is solved. */
@@ -67,7 +76,7 @@ object LoungePuzzleHooks {
         ModItems.RECORDS, "record_rack", { ModBlocks.RECORD_PLAYER }, "piece_bar", { ModBlocks.LOOT_CARD_NW }, listOf(0, 1, 2, 3), 0,
     )
     private val CINEMA = Puzzle(
-        ModItems.REELS, "reel_rack", { ModBlocks.PROJECTOR }, "piece_cinema", { ModBlocks.LOOT_CARD_NE }, listOf(1), PROJECTION_TICKS,
+        ModItems.REELS, "reel_rack", { ModBlocks.PROJECTOR }, "piece_cinema", { ModBlocks.LOOT_CARD_NE }, listOf(1), -1,
     )
     private val PUZZLES = listOf(BAR, CINEMA)
 
@@ -78,6 +87,15 @@ object LoungePuzzleHooks {
     )
 
     private var server: MinecraftServer? = null
+
+    /** The right reel is in the projector, and nobody has come out to see it yet. */
+    private var filmWaiting = false
+
+    /** Ticks the film has left, or -1. For the level's music to wait (nothing plays in Level 4 yet). */
+    private var filmTicks = -1
+
+    val filmRunning: Boolean
+        get() = filmTicks >= 0
 
     fun register() {
         ServerLifecycleEvents.SERVER_STARTED.register { server = it }
@@ -94,6 +112,8 @@ object LoungePuzzleHooks {
             puzzle.order.reset()
             puzzle.finishIn = -1
         }
+        filmWaiting = false
+        filmTicks = -1
     }
 
     /** A piece was picked up: kept in the player's progress. */
@@ -134,7 +154,7 @@ object LoungePuzzleHooks {
             OrderPuzzle.Result.WRONG -> play(player, SoundEvents.BLOCK_GRINDSTONE_USE)
             OrderPuzzle.Result.SOLVED -> {
                 play(player, SoundEvents.BLOCK_NOTE_BLOCK_CHIME.value())
-                puzzle.finishIn = puzzle.delayTicks
+                if (puzzle === CINEMA) filmWaiting = true else puzzle.finishIn = puzzle.delayTicks
                 EveryTunnel.LOGGER.info("{} solved a puzzle of Level 4 ({})", player.name.string, puzzle.pieceSpot)
             }
         }
@@ -152,7 +172,46 @@ object LoungePuzzleHooks {
         return null
     }
 
+    private fun filmInfo(): FilmInfo? =
+        javaClass.classLoader.getResourceAsStream("assets/every_tunnel/film/film.json")?.use { FilmInfo.parse(it.reader().readText()) }
+
+    /** Someone is in the auditorium: in the Cinema's zone, out of its booth's. */
+    private fun someoneWatches(server: MinecraftServer, level: LevelDefinition): Boolean {
+        val cinema = level.zone("ch1_l4_cinema")?.box ?: return false
+        val booth = level.zone("ch1_l4_booth")?.box ?: return false
+        return server.playerManager.playerList.any { cinema.contains(it.x, it.y, it.z) && !booth.contains(it.x, it.y, it.z) }
+    }
+
+    private fun startFilm(server: MinecraftServer, level: LevelDefinition) {
+        filmWaiting = false
+        val info = filmInfo()
+        if (info == null) EveryTunnel.LOGGER.warn("No film to show (assets/every_tunnel/film/film.json)")
+        filmTicks = info?.ticks ?: FALLBACK_FILM_TICKS
+        EveryTunnel.LOGGER.info("The film runs, {} s", filmTicks / 20)
+        val a = level.spawnPoint("film_screen_a")?.position ?: return
+        val b = level.spawnPoint("film_screen_b")?.position ?: return
+        val projector = level.spawnPoint("projector")?.position ?: return
+        for (player in server.playerManager.playerList) {
+            if (!ServerPlayNetworking.canSend(player, FILM_PACKET_ID)) continue
+            val buf = PacketByteBufs.create()
+            buf.writeDouble(minOf(a.x, b.x) - 0.5)
+            buf.writeDouble(maxOf(a.x, b.x) + 0.5)
+            buf.writeDouble(minOf(a.y, b.y))
+            buf.writeDouble(maxOf(a.y, b.y) + 1.0)
+            buf.writeDouble(a.z - 0.5)
+            buf.writeDouble(projector.x)
+            buf.writeDouble(projector.y)
+            buf.writeDouble(projector.z)
+            ServerPlayNetworking.send(player, FILM_PACKET_ID, buf)
+        }
+    }
+
     private fun tick(server: MinecraftServer) {
+        if (filmWaiting) {
+            val level = LevelManager.get(LEVEL_ID)
+            if (level != null && someoneWatches(server, level)) startFilm(server, level)
+        }
+        if (filmTicks >= 0 && filmTicks-- == 0) putPiece(server, CINEMA)
         for (puzzle in PUZZLES) {
             if (puzzle.finishIn < 0) continue
             if (puzzle.finishIn-- == 0) putPiece(server, puzzle)

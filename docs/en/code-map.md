@@ -33,6 +33,7 @@ KDoc comment that says more.
 | `achievement/Achievement.kt` | The eight achievements, in list order, by id |
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
 | `puzzle/OrderPuzzle.kt` | A puzzle of things in order: attempts, failures, the hint |
+| `film/FilmInfo.kt` | The Cinema's film: frames, speed, which frame at what time |
 | `progress/PlayerProgress.kt` | What a player has done: pieces, notes read, scenes seen, Level 3's books, checkpoint |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 | `hiding/LookLimit.kt` | How far the head turns inside a locker |
@@ -150,6 +151,8 @@ KDoc comment that says more.
 | `BookHooks.kt` | Level 3's book puzzle: books appear, handed in at the counter, the hatch opens, debug |
 | `CollapseHooks.kt` | Level 3's tunnel collapse: sound, shake, rubble, dust, flickering lights; undone on a death or new game |
 | `LoungeHooks.kt` | From Level 3 to Level 4: the door to B4, erasing and building in steps, Reception's door |
+| `FilmSetHooks.kt` | The set for filming the Cinema's film, away from the levels |
+| `FilmWalkerEntity.kt` | The figure who walks along it |
 | `LoungePuzzleHooks.kt` | Level 4's Bar and Cinema puzzles, hints, and the pieces of the master card |
 | `SafeLevelHooks.kt` | Levels without risk: no damage (Level 4) |
 | `SuiteBedHooks.kt` | Resting in a bed: fade to black, health and stamina full |
@@ -193,6 +196,7 @@ KDoc comment that says more.
 | `FluorescentHum.kt` | Hum of the 4 nearest lights |
 | `HeartbeatEffect.kt` | Heartbeat by distance to the Pale man |
 | `CameraShake.kt` | The camera shaking in Level 3's tunnel collapse |
+| `FilmPlayer.kt` | The Cinema's film on its screen, and the projector's sound |
 | `BreathingEffect.kt` | Heavy breathing when exhausted |
 | `TensionMusic.kt` | Music layers from the Pale men's state |
 | `IntroMusic.kt` | The elevator song and its tape-stop fade |
@@ -215,6 +219,7 @@ KDoc comment that says more.
 | File | What it does |
 |---|---|
 | `PaleManRenderer.kt` | GeckoLib renderer with the eye glow mask |
+| `FilmWalkerRenderer.kt` | The figure in the Cinema's film, on the player's model |
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
 | `PaleManModel.kt` | His GeckoLib model, plus the stoop under low ceilings |
 | `BoxShelfRenderer.kt` | The purple boxes on the box shelf, full bright |

@@ -1957,10 +1957,12 @@ def build():
     for i in range(4):
         a.models[f"record_rack_{i}"] = model({"w": "suite_bed_frame", "s": f"record_sleeve_{i}"}, shelf + [el((3, 2, 6), (13, 13, 8), "s")])
     a.block("record_rack", "Record Rack", rack_states("record_rack"), {"parent": f"{NS}:block/record_rack_0"})
-    cans = [el((1, 0, 1), (15, 2, 15), "m")]
-    a.models["reel_rack_empty"] = model({"m": "rack_metal"}, cans)
+    # A length of metal shelf on a wall, and a film can standing on it; shelves side by side make one.
+    shelf_metal = [el((0, 0, 7), (16, 1, 16), "m"), el((2, 0, 15), (3, 8, 16), "m"), el((13, 0, 15), (14, 8, 16), "m")]
+    a.models["reel_rack_empty"] = model({"m": "rack_metal"}, shelf_metal)
     for i in range(4):
-        a.models[f"reel_rack_{i}"] = model({"m": "rack_metal", "d": "rack_dark"}, cans + [el((3, 2, 3), (13, 5, 13), "m"), el((6, 5, 6), (10, 6, 10), "d")])
+        a.models[f"reel_rack_{i}"] = model({"m": "rack_metal", "d": "rack_dark"}, shelf_metal + [
+            el((3, 1, 11), (13, 11, 14), "m"), el((6, 4, 10.5), (10, 8, 11), "d")])
     a.block("reel_rack", "Film Can", rack_states("reel_rack"), {"parent": f"{NS}:block/reel_rack_0"})
     prop("record_player", "Record Player", {"w": "suite_bed_frame", "d": "rack_dark", "b": "lounge_brass"},
          [el((1, 0, 1), (15, 13, 15), "w"), el((2, 13, 2), (14, 14, 14), "d"), el((11, 14, 3), (12, 15, 12), "b")])
@@ -2248,8 +2250,12 @@ def main():
     stale = [p for p in (ASSETS / "models" / "block").glob("*.json") if p.stem not in a.models]
     stale += [p for p in tex_dir.glob("*.png")
               if re.sub(r"_[ns]$", "", p.stem) not in a.textures and p.stem not in a.animated]
+    # A block gone leaves its blockstate, item model and loot table behind as well.
+    for p in (ASSETS / "blockstates").glob("*.json"):
+        if p.stem not in a.blockstates:
+            stale += [p, ASSETS / "models" / "item" / p.name, ASSETS.parent.parent / "data" / NS / "loot_tables" / "blocks" / p.name]
     for p in stale:
-        p.unlink()
+        p.unlink(missing_ok=True)
 
     OUT.mkdir(exist_ok=True)
     preview.write_pbr_sheet(OUT / "blocks_sheet.png", sheet)

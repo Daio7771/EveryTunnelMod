@@ -245,6 +245,14 @@
       "every_tunnel:block/plastic/step_4"
     ]
   },
+  "block.projector.run": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/projector/run_1",
+        "attenuation_distance": 28
+      }
+    ]
+  },
   "block.puddle.impact": {
     "sounds": [
       {
