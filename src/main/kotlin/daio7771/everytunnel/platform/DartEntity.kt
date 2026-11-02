@@ -5,6 +5,7 @@ import net.minecraft.entity.EntityType
 import net.minecraft.entity.LivingEntity
 import net.minecraft.entity.projectile.PersistentProjectileEntity
 import net.minecraft.item.ItemStack
+import net.minecraft.sound.SoundEvent
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.world.World
 
@@ -30,6 +31,8 @@ class DartEntity : PersistentProjectileEntity {
     override fun asItemStack(): ItemStack = ItemStack(ModItems.DART)
 
     override fun canHit(entity: Entity): Boolean = false
+
+    override fun getHitSound(): SoundEvent = ModSounds.DART_HIT
 
     /** Vanilla takes an arrow away after a minute in the ground. */
     override fun age() {}

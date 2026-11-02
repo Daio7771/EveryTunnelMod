@@ -39,7 +39,7 @@ class Cut:
     # distance in blocks at which a positioned sound fades out (None = Minecraft's 16).
     game_volume: float = 1.0
     attenuation: Optional[int] = None
-    folder: str = "cc0"                             # "cc0" or "licensed" (credited in CREDITS.md)
+    folder: str = "cc0"                             # "cc0", "licensed" (credited in CREDITS.md) or "own"
 
 
 def loudest_windows(length_seconds):
@@ -101,4 +101,7 @@ CUTS = [
     Cut("music.elevator", "local_forecast_elevator.mp3",
         "The song in the elevator at the start of a new game (Kevin MacLeod, \"Local Forecast - Elevator\")",
         "stereo", segments=[(0.0, 30.0)], fade_in=0.0, fade_out=1.0, folder="licensed"),
+    # Mono: it comes out of Level 4's ceiling speakers. Own work, see own/SOURCES.md.
+    Cut("music.lounge", "everytunnel_nivel4_jazz.wav", "Level 4's jazz, without piano, by the project's author", "mono",
+        segments=[(0.0, 112.6)], fade_in=0.0, fade_out=0.0, peak_db=-1.0, attenuation=64, folder="own"),
 ]

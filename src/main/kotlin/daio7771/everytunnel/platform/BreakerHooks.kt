@@ -13,7 +13,6 @@ import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
-import net.minecraft.sound.SoundEvents
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.BooleanProperty
 import net.minecraft.state.property.DirectionProperty
@@ -33,7 +32,7 @@ import net.minecraft.world.World
  * Level 4's Maintenance room: five levers ([BreakerLeverBlock]), a code drawn each game ([BreakerCode]),
  * a button ([BreakerButtonBlock]) and a counter ([BreakerCounterBlock]) saying how many are right. All
  * five give power to the Calm room's reader ([CalmReaderBlock.POWERED]). Places are the level's spawn
- * points tagged `puzzle` (`breaker_<index>`, `breaker_counter`, `calm_reader`). Sounds are vanilla's for now.
+ * points tagged `puzzle` (`breaker_<index>`, `breaker_counter`, `calm_reader`).
  */
 object BreakerHooks {
 
@@ -54,7 +53,7 @@ object BreakerHooks {
 
     fun press(player: ServerPlayerEntity, pos: BlockPos) {
         val world = player.serverWorld
-        world.playSound(null, pos, SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, SoundCategory.BLOCKS, 0.8f, 0.8f)
+        world.playSound(null, pos, ModSounds.BREAKER_BUTTON, SoundCategory.BLOCKS, 0.8f, 1f)
         if (powered) return
         val level = LevelManager.get(LEVEL_ID) ?: return
         if (world.registryKey != RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) return
@@ -69,12 +68,12 @@ object BreakerHooks {
                 world.setBlockState(at, counter.with(BreakerCounterBlock.COUNT, count).with(BreakerCounterBlock.LIT, true))
             }
         }
-        if (code.solvedBy(levers)) powerOn(world, level, pos) else world.playSound(null, pos, SoundEvents.BLOCK_NOTE_BLOCK_BASS.value(), SoundCategory.BLOCKS, 0.6f, 0.6f)
+        if (code.solvedBy(levers)) powerOn(world, level, pos) else world.playSound(null, pos, ModSounds.BREAKER_COUNT, SoundCategory.BLOCKS, 0.8f, 1f)
     }
 
     private fun powerOn(world: ServerWorld, level: LevelDefinition, pos: BlockPos) {
         powered = true
-        world.playSound(null, pos, SoundEvents.BLOCK_BEACON_ACTIVATE, SoundCategory.BLOCKS, 1f, 0.7f)
+        world.playSound(null, pos, ModSounds.BREAKER_POWER, SoundCategory.BLOCKS, 1f, 1f)
         pointOf(level, "calm_reader")?.let { at ->
             val reader = world.getBlockState(at)
             if (reader.isOf(ModBlocks.CALM_READER)) world.setBlockState(at, reader.with(CalmReaderBlock.POWERED, true))
@@ -106,7 +105,7 @@ class BreakerLeverBlock(settings: Settings) : Block(settings) {
         if (world.isClient) return ActionResult.SUCCESS
         if (!BreakerHooks.powered) {
             world.setBlockState(pos, state.cycle(ON))
-            world.playSound(null, pos, SoundEvents.BLOCK_LEVER_CLICK, SoundCategory.BLOCKS, 0.8f, if (state.get(ON)) 0.7f else 0.9f)
+            world.playSound(null, pos, ModSounds.BREAKER_LEVER, SoundCategory.BLOCKS, 0.8f, if (state.get(ON)) 0.85f else 1f)
         }
         return ActionResult.CONSUME
     }

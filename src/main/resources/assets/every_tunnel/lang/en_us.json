@@ -275,5 +275,6 @@
   "block.every_tunnel.breaker_lever": "Breaker Lever",
   "block.every_tunnel.breaker_button": "Breaker Button",
   "block.every_tunnel.breaker_counter": "Breaker Counter",
-  "block.every_tunnel.suite_safe": "Safe"
+  "block.every_tunnel.suite_safe": "Safe",
+  "block.every_tunnel.ceiling_speaker": "Ceiling Speaker"
 }

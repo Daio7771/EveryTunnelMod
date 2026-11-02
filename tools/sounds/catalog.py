@@ -8,10 +8,12 @@ every run produces the same files. Sound ids follow the planned Minecraft sound 
 """
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Callable, Optional
 
 import numpy as np
 
+import audio_io
 import menu_piano
 from scipy import signal as sp_signal
 from dsp import (
@@ -1216,6 +1218,165 @@ def observer_alert(rng, variant):
     return fade(pan(body, side) + pan(creak, side * 0.7), 0.002, 0.6)
 
 
+def lounge_far(rng, variant):
+    """Level 4's jazz as heard in the Calm room: only its middle, as from behind several walls."""
+    x, _ = audio_io.read(Path(__file__).resolve().parent / "own" / "everytunnel_nivel4_jazz.wav")
+    return bandpass(x.mean(axis=1) if x.ndim == 2 else x, 110.0, 620.0)
+
+
+def _noise(n, rng, lo, hi):
+    return bandpass(rng.normal(0.0, 1.0, n), lo, hi)
+
+
+def puzzle_solved(rng, variant):
+    """A puzzle solved: two warm, slow vibraphone-like notes, a fifth apart, kindly. The lounge is pleased."""
+    n = samples(2.0)
+    y = damped_partials(n, [392.0, 392.0 * 4.0], [1.0, 0.25], [0.9, 0.2], rng, 0.0)
+    return y + damped_partials(n, [587.3, 587.3 * 4.0], [1.0, 0.25], [1.0, 0.2], rng, 0.32)
+
+
+def record_handle(rng, variant):
+    """A record slid out of its sleeve, or back: card and vinyl."""
+    n = samples(0.4)
+    y = _noise(n, rng, 1500.0, 7000.0) * envelope(n, [(0.0, 0.0), (0.05, 0.25), (0.22, 0.18), (0.32, 0.0)])
+    return y + knock(n, rng, 0.3, rng.uniform(900, 1100), [1.0, 2.2], [0.25, 0.1], [0.02, 0.01], click=0.15)
+
+
+def record_right(rng, variant):
+    """Set on the platter: a soft knock, the needle's tick, a moment of crackle and a low warm note."""
+    n = samples(1.2)
+    y = knock(n, rng, 0.02, rng.uniform(170, 200), [1.0, 2.4], [0.7, 0.2], [0.06, 0.03], click=0.3, click_hi=3000.0)
+    y += knock(n, rng, 0.3, rng.uniform(3000, 3600), [1.0], [0.25], [0.004], click=0.3, click_hi=9000.0)
+    crackle = (rng.random(n) > 0.9992) * rng.normal(0.0, 1.0, n)
+    y += highpass(crackle, 1500.0) * 0.9 * envelope(n, [(0.0, 0.0), (0.3, 0.0), (0.35, 1.0), (1.0, 0.6), (1.2, 0.0)])
+    return y + damped_partials(n, [196.0, 392.0], [0.4, 0.12], [0.5, 0.3], rng, 0.4)
+
+
+def record_wrong(rng, variant):
+    """The needle dragged across the record: the wrong one, and they all come off."""
+    n = samples(0.8)
+    t = time_axis(n)
+    tear = _noise(n, rng, 900.0, 6000.0) * envelope(n, [(0.0, 0.0), (0.02, 0.9), (0.28, 0.5), (0.36, 0.0)])
+    tear *= 0.6 + 0.4 * np.sin(TAU * (60.0 - 90.0 * t) * t)
+    return tear + knock(n, rng, 0.42, rng.uniform(120, 150), [1.0, 2.1], [0.7, 0.3], [0.08, 0.05], click=0.5, click_hi=2500.0)
+
+
+def reel_handle(rng, variant):
+    """A film can lifted or put down: a thin metal lid rattling."""
+    n = samples(0.45)
+    y = knock(n, rng, 0.01, rng.uniform(1100, 1400), [1.0, 1.6, 2.7, 3.9], [0.6, 0.4, 0.25, 0.15], [0.08, 0.06, 0.04, 0.03], click=0.4)
+    return y + knock(n, rng, 0.14, rng.uniform(1300, 1600), [1.0, 1.7, 2.9], [0.3, 0.2, 0.1], [0.05, 0.04, 0.03], click=0.2)
+
+
+def reel_wrong(rng, variant):
+    """The wrong reel: the projector's gate refuses it, a clack and the film flapping out."""
+    n = samples(0.7)
+    y = knock(n, rng, 0.01, rng.uniform(500, 600), [1.0, 2.3], [0.7, 0.3], [0.05, 0.03], click=0.6)
+    flap = (np.sin(TAU * 24.0 * time_axis(n)) > 0.7) * _noise(n, rng, 800.0, 4000.0)
+    return y + flap * envelope(n, [(0.0, 0.0), (0.1, 0.0), (0.14, 0.5), (0.5, 0.25), (0.65, 0.0)])
+
+
+def dart_throw(rng, variant):
+    """A dart leaving the hand: a short rising whisper of air."""
+    n = samples(0.22)
+    return _noise(n, rng, 1200.0, 5000.0) * envelope(n, [(0.0, 0.0), (0.08, 1.0), (0.2, 0.0)])
+
+
+def dart_hit(rng, variant):
+    """A dart in something: a dry, short thock with a little ring from the shaft."""
+    n = samples(0.25)
+    y = knock(n, rng, 0.001, rng.uniform(420, 520), [1.0, 2.3], [0.8, 0.3], [0.025, 0.015], click=0.7, click_hi=5000.0)
+    return y + damped_partials(n, [rng.uniform(1900, 2300)], [0.14], [0.09], rng, 0.002)
+
+
+def dart_right(rng, variant):
+    """The right number: one soft bell-like note, as polite as a hotel's lift."""
+    n = samples(1.1)
+    return damped_partials(n, [523.3, 523.3 * 3.0], [1.0, 0.2], [0.6, 0.15], rng, 0.0)
+
+
+def dart_wrong(rng, variant):
+    """The wrong number: two low, flat notes, a small disappointed sound."""
+    n = samples(0.8)
+    y = damped_partials(n, [174.6, 349.2], [1.0, 0.25], [0.2, 0.1], rng, 0.0)
+    return y + damped_partials(n, [164.8, 329.6], [1.0, 0.25], [0.3, 0.1], rng, 0.2)
+
+
+def hatch_open(rng, variant):
+    """The brass hatch: a catch let go, a small hinge."""
+    n = samples(0.7)
+    y = knock(n, rng, 0.01, rng.uniform(1500, 1800), [1.0, 1.8, 2.9], [0.6, 0.3, 0.15], [0.05, 0.03, 0.02], click=0.5, click_hi=8000.0)
+    f0 = rng.uniform(1000, 1200)
+    t = time_axis(n)
+    squeak = glide_tone(f0 + 300.0 * np.clip((t - 0.1) / 0.4, 0.0, 1.0), harmonics=(1.0, 0.5))
+    return y + bandpass(squeak, 700.0, 5000.0) * envelope(n, [(0.0, 0.0), (0.1, 0.0), (0.15, 0.1), (0.45, 0.06), (0.55, 0.0)])
+
+
+def breaker_lever(rng, variant):
+    """A heavy knife switch thrown: a spring's stretch and a big steel clack."""
+    n = samples(0.35)
+    y = _noise(n, rng, 2000.0, 7000.0) * envelope(n, [(0.0, 0.0), (0.02, 0.12), (0.07, 0.05), (0.08, 0.0)])
+    return y + knock(n, rng, 0.08, rng.uniform(340, 420), [1.0, 2.4, 3.8], [1.0, 0.5, 0.25], [0.05, 0.03, 0.02], click=0.9, click_hi=6000.0)
+
+
+def breaker_button(rng, variant):
+    """A stiff industrial push button, down and up."""
+    n = samples(0.25)
+    y = knock(n, rng, 0.005, rng.uniform(900, 1100), [1.0, 2.1], [0.5, 0.2], [0.02, 0.012], click=0.6)
+    return y + knock(n, rng, 0.12, rng.uniform(1100, 1300), [1.0, 2.1], [0.3, 0.1], [0.015, 0.01], click=0.4)
+
+
+def breaker_count(rng, variant):
+    """Relays counting, then the counter's dull buzz: not enough."""
+    n = samples(0.65)
+    t = time_axis(n)
+    y = np.zeros(n)
+    for k in range(3):
+        y += knock(n, rng, 0.01 + k * 0.07, rng.uniform(1500, 1900), [1.0, 2.2], [0.25, 0.1], [0.012, 0.008], click=0.4, click_hi=8000.0)
+    buzz = np.sign(np.sin(TAU * 100.0 * t))
+    return y + lowpass(buzz, 1200.0) * 0.14 * envelope(n, [(0.0, 0.0), (0.26, 0.0), (0.3, 1.0), (0.55, 1.0), (0.62, 0.0)])
+
+
+def breaker_power(rng, variant):
+    """The power comes on: a contactor slammed in, and a mains hum swelling behind the wall."""
+    n = samples(3.0)
+    t = time_axis(n)
+    y = knock(n, rng, 0.02, rng.uniform(150, 190), [1.0, 2.2, 3.6], [1.0, 0.5, 0.3], [0.15, 0.09, 0.05], click=0.9, click_hi=5000.0)
+    hum = sum(a * np.sin(TAU * f * t) for f, a in ((50.0, 0.6), (100.0, 0.5), (150.0, 0.25), (200.0, 0.12)))
+    return y + hum * 0.45 * envelope(n, [(0.0, 0.0), (0.1, 0.0), (1.0, 1.0), (2.2, 0.8), (3.0, 0.0)])
+
+
+def lounge_blackout(rng, variant):
+    """Every lamp at once: a heavy breaker dropping somewhere far below, and the building's hum dying."""
+    n = samples(3.5)
+    t = time_axis(n)
+    y = knock(n, rng, 0.005, rng.uniform(60, 75), [1.0, 1.9, 3.1, 4.7], [1.0, 0.7, 0.4, 0.2], [0.5, 0.3, 0.15, 0.08], click=0.8, click_hi=2200.0)
+    f = 100.0 - 70.0 * np.clip(t / 2.2, 0.0, 1.0)
+    hum = glide_tone(f, harmonics=(1.0, 0.5, 0.3)) * envelope(n, [(0.0, 0.4), (0.1, 0.4), (2.4, 0.0)])
+    return y + hum * 0.5
+
+
+def big_door_open(rng, variant):
+    """The big door: the lock's bolts, then a motor dragging tons of steel along a rail for 3 s, ending in a stop."""
+    n = samples(3.6)
+    t = time_axis(n)
+    y = knock(n, rng, 0.01, rng.uniform(90, 110), [1.0, 2.1, 3.3], [1.0, 0.6, 0.3], [0.2, 0.12, 0.08], click=0.8, click_hi=2500.0)
+    y += knock(n, rng, 0.18, rng.uniform(110, 130), [1.0, 2.3], [0.7, 0.3], [0.15, 0.08], click=0.5, click_hi=2500.0)
+    f = 48.0 + 8.0 * smooth_random(n, 3.0, rng)
+    motor = glide_tone(f, harmonics=(1.0, 0.7, 0.5, 0.3, 0.2)) * envelope(n, [(0.0, 0.0), (0.35, 0.0), (0.7, 0.5), (3.0, 0.5), (3.15, 0.0)])
+    rail = _noise(n, rng, 300.0, 2200.0) * (0.5 + 0.5 * smooth_random(n, 14.0, rng)) * envelope(n, [(0.0, 0.0), (0.4, 0.0), (0.8, 0.35), (3.0, 0.3), (3.15, 0.0)])
+    stop = knock(n, rng, 3.12, rng.uniform(70, 85), [1.0, 2.2, 3.5], [0.9, 0.5, 0.25], [0.3, 0.15, 0.08], click=0.6, click_hi=2000.0)
+    return y + motor + rail + stop
+
+
+def big_door_slam(rng, variant):
+    """It shuts behind you, at once: an enormous steel boom, its ring dying along the corridor."""
+    n = samples(4.0)
+    ratios = sorted(rng.uniform(1.0, 7.0, 10))
+    y = knock(n, rng, 0.005, rng.uniform(46, 56), ratios, [1.0 / (1 + i * 0.3) for i in range(10)], [1.3 / (1 + i * 0.4) for i in range(10)], click=1.0, click_hi=3000.0)
+    return y + _noise(n, rng, 60.0, 800.0) * envelope(n, [(0.0, 0.0), (0.01, 0.9), (0.3, 0.2), (1.4, 0.0)])
+
+
 def safe_tick(rng, variant):
     """A safe's dial passing a number: a tiny dry tick, high and short."""
     n = samples(0.05)
@@ -1401,6 +1562,26 @@ SOUNDS = [
           "stereo", False, 2, observer_clock(True), -6.0, stream=False),
     Sound("block.locker.door", "Level progress", "A Level 3 locker's door, getting in or out (latch, hinge, clang); no noise for enemies",
           "mono", False, 3, locker_door, -4.0),
+    Sound("music.lounge.far", "Level progress", "Level 4's jazz in the Calm room, as from far away (music.lounge, filtered)", "mono", False, 1,
+          lounge_far, -6.0, stream=True, attenuation=64),
+    Sound("event.puzzle.solved", "Level progress", "A Level 4 puzzle solved", "mono", False, 1, puzzle_solved, -6.0, attenuation=32),
+    Sound("block.record.handle", "Level progress", "A record taken from its rack, or put back", "mono", False, 3, record_handle, -8.0),
+    Sound("block.record.right", "Level progress", "A record set on the player, the right one", "mono", False, 2, record_right, -6.0),
+    Sound("block.record.wrong", "Level progress", "The wrong record: the needle dragged", "mono", False, 2, record_wrong, -5.0),
+    Sound("block.reel.handle", "Level progress", "A film can taken or put back", "mono", False, 3, reel_handle, -8.0),
+    Sound("block.reel.wrong", "Level progress", "The wrong reel, refused", "mono", False, 2, reel_wrong, -5.0),
+    Sound("item.dart.throw", "Level progress", "A dart thrown", "mono", False, 3, dart_throw, -12.0),
+    Sound("block.dart.hit", "Level progress", "A dart sticking in something", "mono", False, 3, dart_hit, -6.0),
+    Sound("event.dart.right", "Level progress", "The right number", "mono", False, 1, dart_right, -8.0),
+    Sound("event.dart.wrong", "Level progress", "The wrong number", "mono", False, 1, dart_wrong, -7.0),
+    Sound("block.dart_hatch.open", "Level progress", "The brass hatch under the board", "mono", False, 1, hatch_open, -6.0),
+    Sound("block.breaker.lever", "Level progress", "A Maintenance room lever", "mono", False, 3, breaker_lever, -5.0),
+    Sound("block.breaker.button", "Level progress", "The breakers' button", "mono", False, 2, breaker_button, -8.0),
+    Sound("event.breaker.count", "Level progress", "The counter shows a number: not five", "mono", False, 1, breaker_count, -7.0),
+    Sound("event.breaker.power", "Level progress", "Five: the power comes on", "mono", False, 1, breaker_power, -3.0, attenuation=32),
+    Sound("event.lounge.blackout", "Level progress", "Taking the Master Key: every lamp at once", "mono", False, 1, lounge_blackout, -1.0, attenuation=48),
+    Sound("block.big_door.open", "Level progress", "The big door opening (lock, motor, rail, stop)", "mono", False, 1, big_door_open, -2.0, attenuation=40),
+    Sound("block.big_door.slam", "Level progress", "The big door slamming behind the player", "mono", False, 1, big_door_slam, -1.0, attenuation=48),
     Sound("block.safe.tick", "Level progress", "A safe's dial passing a number: the soft tick", "mono", False, 3, safe_tick, -18.0),
     Sound("block.safe.click", "Level progress", "A safe's dial on the right number: a low clack under the tick", "mono", False, 2, safe_click, -6.0),
     Sound("block.safe.open", "Level progress", "A safe giving way (bolts, hinge)", "mono", False, 1, safe_open, -4.0),

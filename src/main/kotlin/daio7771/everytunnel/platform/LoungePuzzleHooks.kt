@@ -21,7 +21,6 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
-import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import net.minecraft.util.Hand
 import net.minecraft.util.Identifier
@@ -44,8 +43,7 @@ import net.minecraft.util.math.Box
  *
  * Racks, devices and the places for the pieces are the level's spawn points tagged `puzzle`
  * (`record_rack_<index>`, `record_player`, `piece_bar`...). A piece taken ([pieceTaken]; the third
- * lies in the pool, the fourth comes with the darts, [DartHooks]) is kept by [ProgressService]. Most sounds are
- * vanilla's for now.
+ * lies in the pool, the fourth comes with the darts, [DartHooks]) is kept by [ProgressService].
  */
 object LoungePuzzleHooks {
 
@@ -157,7 +155,7 @@ object LoungePuzzleHooks {
             player.setStackInHand(Hand.MAIN_HAND, ItemStack(item))
             player.sendMessage(item.name, true)
         }
-        play(player, SoundEvents.ITEM_BOOK_PAGE_TURN)
+        play(player, if (puzzle === BAR) ModSounds.RECORD_HANDLE else ModSounds.REEL_HANDLE)
         sync(player.server)
     }
 
@@ -169,10 +167,10 @@ object LoungePuzzleHooks {
         if (index < 0) return
         stack.decrement(1)
         when (puzzle.order.attempt(index)) {
-            OrderPuzzle.Result.RIGHT -> play(player, SoundEvents.BLOCK_NOTE_BLOCK_HARP.value())
-            OrderPuzzle.Result.WRONG -> play(player, SoundEvents.BLOCK_GRINDSTONE_USE)
+            OrderPuzzle.Result.RIGHT -> play(player, ModSounds.RECORD_RIGHT)
+            OrderPuzzle.Result.WRONG -> play(player, if (puzzle === BAR) ModSounds.RECORD_WRONG else ModSounds.REEL_WRONG)
             OrderPuzzle.Result.SOLVED -> {
-                play(player, SoundEvents.BLOCK_NOTE_BLOCK_CHIME.value())
+                play(player, ModSounds.PUZZLE_SOLVED)
                 if (puzzle === CINEMA) filmWaiting = true else puzzle.finishIn = puzzle.delayTicks
                 EveryTunnel.LOGGER.info("{} solved a puzzle of Level 4 ({})", player.name.string, puzzle.pieceSpot)
             }

@@ -13,7 +13,7 @@ from offices.furnish import ROW, STACK, TILE, WALK_THROUGH
 TILES = TILE | {"pool_table", "lounge_desk"}
 RACKS = {"record_rack", "reel_rack"}
 THROUGH = WALK_THROUGH | {"cinema_seat", "bar_stool", "served_glass", "diploma", "office_chair", "cinema_screen",
-                         "throw_line", "wall_sheet", "calm_reader", "breaker_lever", "breaker_button", "breaker_counter", "pipe", "calm_plate_left", "calm_plate_right", "emergency_lamp"}
+                         "throw_line", "wall_sheet", "calm_reader", "breaker_lever", "breaker_button", "breaker_counter", "pipe", "ceiling_speaker", "calm_plate_left", "calm_plate_right", "emergency_lamp"}
 WORLD_FACING = {"north": "west", "west": "south", "south": "east", "east": "north"}
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
 LOOT_COLOUR = {"battery": (235, 205, 70), "water": (90, 215, 235), "food_plate": (225, 80, 70),
@@ -151,6 +151,8 @@ PIPES = [(x, z) for x in range(60, 70) for z in (48, 55)]
 PIPE_STATE = "every_tunnel:pipe[down=false,east=true,north=false,south=false,up=false,west=true]"
 # The safes in the Suites, in Rowan's room and Daniel's: (the note inside, x, z, facing).
 SAFES = [("ch1_l4_note_diary_rowan", 16, 13, "east"), ("ch1_l4_note_diary_daniel", 23, 26, "west")]
+# The ceiling speakers Level 4's jazz comes out of (LoungeMusicHooks): none in the Suites or Maintenance.
+SPEAKERS = [(50, 54), (44, 37), (57, 38), (50, 20), (78, 31), (76, 21), (50, 6), (97, 38), (23, 37)]
 # big_door: its bottom left part. wet_sign: nothing stands there until the blackout.
 # cinema_glow: along the Cinema's aisle, where the screen's light is during the blackout.
 CLOSING_SPOTS = [("big_door", 47, -1, 1), ("wet_sign", 50, 20, 1), ("calm_reader", 85, 38, 2), ("breaker_counter", 69, 51, 3),
@@ -208,6 +210,11 @@ class Furnish:
             self.put(name, x, z, "west", y, in_gap=True)
         for name, x, z, y in CLOSING_THINGS:
             self.put(name, x, z, "west", y, in_gap=True)
+        for x, z in SPEAKERS:
+            room = next(s for s in self.lv.rooms if s.box[0] <= x < s.box[2] and s.box[1] <= z < s.box[3])
+            if (x, room.height + room.floor, z) in self.lv.lamps:
+                raise SystemExit(f"Level 4: the speaker at {(x, z)} is where a lamp is")
+            self.put("ceiling_speaker", x, z, "north", room.height, in_gap=True)
         for x, z in BREAKERS:
             self.put("breaker_lever", x, z, "west", 2, in_gap=True)
         for name, x, z, y in MAINTENANCE_THINGS:
@@ -299,6 +306,9 @@ class Furnish:
             out.append((nid, self.centre(x, self.lv.floors[(x, z)] + y, z), "note"))
         for nid, x, z, _ in SAFES:
             out.append((nid, self.centre(x, 1, z), "note"))
+        for k, (x, z) in enumerate(SPEAKERS):
+            room = next(s for s in self.lv.rooms if s.box[0] <= x < s.box[2] and s.box[1] <= z < s.box[3])
+            out.append((f"speaker_{k}", self.centre(x, room.floor + room.height, z), "speaker"))
         for sid, x, z, y in DART_SPOTS + CLOSING_SPOTS:
             out.append((sid, self.centre(x, y, z), "puzzle"))
         for k, (tag, x, z, y) in enumerate(LOOT):
@@ -324,7 +334,7 @@ class Furnish:
 
     def plan_cells(self):
         """For the preview: (x, z) -> what stands there, without the notes on top."""
-        return {(x, z): it[0] for (x, y, z), it in self.items.items() if it[0] not in ("note_paper", "diploma", "dart_tray", "wall_text", "pipe", "breaker_counter",
+        return {(x, z): it[0] for (x, y, z), it in self.items.items() if it[0] not in ("note_paper", "diploma", "dart_tray", "wall_text", "pipe", "breaker_counter", "ceiling_speaker",
                                                                                          "calm_plate_left", "calm_plate_right", "emergency_lamp", "security_monitor")}
 
     def dots(self):

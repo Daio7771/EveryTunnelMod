@@ -2189,6 +2189,8 @@ def build():
     prop("projector", "Projector", {"m": "rack_metal", "d": "rack_dark"},
          [el((7, 0, 7), (9, 8, 9), "m"), el((3, 8, 3), (13, 15, 13), "m"), el((6, 10, 0), (10, 14, 3), "d")])
     prop("cinema_screen", "Cinema Screen", {"s": "screen_white"}, [el((0, 0, 15), (16, 16, 16), "s")])
+    prop("ceiling_speaker", "Ceiling Speaker", {"d": "rack_dark", "b": "lounge_brass"},
+         [el((3, 15, 3), (13, 16, 13), "b"), el((4, 14.5, 4), (12, 15, 12), "d")])
     # Level 4's Maintenance room.
     lever_textures = {"d": "rack_dark", "m": "rack_metal", "h": "record_sleeve_3"}
     a.models["breaker_lever_off"] = model(lever_textures, [el((4, 1, 15), (12, 15, 16), "d"), el((7, 4, 12), (9, 6, 15), "m"), el((6, 2, 11), (10, 5, 13), "h")])

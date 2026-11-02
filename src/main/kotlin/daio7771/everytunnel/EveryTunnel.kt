@@ -24,6 +24,7 @@ import daio7771.everytunnel.platform.LootSpawner
 import daio7771.everytunnel.platform.LoungeHooks
 import daio7771.everytunnel.platform.DartHooks
 import daio7771.everytunnel.platform.LoungeClosingHooks
+import daio7771.everytunnel.platform.LoungeMusicHooks
 import daio7771.everytunnel.platform.SafeHooks
 import daio7771.everytunnel.platform.LoungePuzzleHooks
 import daio7771.everytunnel.platform.ModBlocks
@@ -98,6 +99,7 @@ object EveryTunnel : ModInitializer {
         DartHooks.register()
         LoungeClosingHooks.register()
         SafeHooks.register()
+        LoungeMusicHooks.register()
         SafeLevelHooks.register()
         SuiteBedHooks.register()
         AchievementHooks.register()

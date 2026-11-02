@@ -50,6 +50,7 @@ Server side (positioned in the world, heard by everyone near):
 - The Pale man's steps, breathing, stinger and the tinnitus (`PaleManEntity`).
 - Flashlight and battery sounds at the player (`FlashlightHooks`), gulps (`DrinkHooks`).
 - The death sound (`DeathHooks`).
+- Level 4's jazz, out of its ceiling speakers (`client.effects.LoungeMusic`, `LoungeMusicHooks`, `core.audio.LoungeMix`): one sound at the nearest speaker, silent in Maintenance and during the film, low in the Suites, muffled in the Calm room, its pitch sliding between 0.6 and 1.2 in the blackout. The source is `tools/sounds/own/`.
 
 Client side (`client.effects`), per player and not positioned unless noted:
 

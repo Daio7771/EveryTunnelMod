@@ -39,7 +39,7 @@ import net.minecraft.util.math.Direction
  *
  * The state is kept in memory, like the other puzzles of the level: every opening of the world is a
  * new game. Places are the level's spawn points tagged `puzzle` (`dartboard`, its middle part;
- * `dart_tray`; `dart_hatch`; `dart_plate`). Most sounds are vanilla's for now.
+ * `dart_tray`; `dart_hatch`; `dart_plate`).
  */
 object DartHooks {
 
@@ -111,14 +111,14 @@ object DartHooks {
         val centre = pointOf(level, "dartboard") ?: return
         val number = if (world.getBlockState(hit.blockPos).block == ModBlocks.DARTBOARD) numberAt(world, centre, hit) else 0
         when (puzzle.attempt(number)) {
-            OrderPuzzle.Result.RIGHT -> play(world, hit.blockPos, SoundEvents.BLOCK_NOTE_BLOCK_HARP.value())
+            OrderPuzzle.Result.RIGHT -> play(world, hit.blockPos, ModSounds.DART_RIGHT)
             OrderPuzzle.Result.WRONG -> {
-                play(world, hit.blockPos, SoundEvents.BLOCK_GRINDSTONE_USE)
+                play(world, hit.blockPos, ModSounds.DART_WRONG)
                 server.playerManager.playerList.forEach(::removeCarried)
                 clearIn = CLEAR_TICKS
             }
             OrderPuzzle.Result.SOLVED -> {
-                play(world, hit.blockPos, SoundEvents.BLOCK_NOTE_BLOCK_CHIME.value())
+                play(world, hit.blockPos, ModSounds.PUZZLE_SOLVED)
                 openHatch(world, level)
                 server.playerManager.playerList.forEach(::removeCarried)
                 EveryTunnel.LOGGER.info("The darts of Level 4 are solved")
@@ -153,7 +153,7 @@ object DartHooks {
         val state = world.getBlockState(pos)
         if (state.block != ModBlocks.DART_HATCH) return
         world.setBlockState(pos, state.with(DartHatchBlock.OPEN, true).with(DartHatchBlock.PIECE, true))
-        play(world, pos, SoundEvents.BLOCK_IRON_TRAPDOOR_OPEN)
+        play(world, pos, ModSounds.DART_HATCH_OPEN)
     }
 
     private fun tick(server: MinecraftServer) {

@@ -83,6 +83,35 @@
       }
     ]
   },
+  "block.big_door.open": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/big_door/open_1",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "block.big_door.slam": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/big_door/slam_1",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "block.breaker.button": {
+    "sounds": [
+      "every_tunnel:block/breaker/button_1",
+      "every_tunnel:block/breaker/button_2"
+    ]
+  },
+  "block.breaker.lever": {
+    "sounds": [
+      "every_tunnel:block/breaker/lever_1",
+      "every_tunnel:block/breaker/lever_2",
+      "every_tunnel:block/breaker/lever_3"
+    ]
+  },
   "block.card_reader.accept": {
     "sounds": [
       "every_tunnel:block/card_reader/accept_1"
@@ -115,6 +144,18 @@
       "every_tunnel:block/cardboard/step_2",
       "every_tunnel:block/cardboard/step_3",
       "every_tunnel:block/cardboard/step_4"
+    ]
+  },
+  "block.dart.hit": {
+    "sounds": [
+      "every_tunnel:block/dart/hit_1",
+      "every_tunnel:block/dart/hit_2",
+      "every_tunnel:block/dart/hit_3"
+    ]
+  },
+  "block.dart_hatch.open": {
+    "sounds": [
+      "every_tunnel:block/dart_hatch/open_1"
     ]
   },
   "block.elevator.ding": {
@@ -275,6 +316,38 @@
       "every_tunnel:block/puddle/step_2",
       "every_tunnel:block/puddle/step_3",
       "every_tunnel:block/puddle/step_4"
+    ]
+  },
+  "block.record.handle": {
+    "sounds": [
+      "every_tunnel:block/record/handle_1",
+      "every_tunnel:block/record/handle_2",
+      "every_tunnel:block/record/handle_3"
+    ]
+  },
+  "block.record.right": {
+    "sounds": [
+      "every_tunnel:block/record/right_1",
+      "every_tunnel:block/record/right_2"
+    ]
+  },
+  "block.record.wrong": {
+    "sounds": [
+      "every_tunnel:block/record/wrong_1",
+      "every_tunnel:block/record/wrong_2"
+    ]
+  },
+  "block.reel.handle": {
+    "sounds": [
+      "every_tunnel:block/reel/handle_1",
+      "every_tunnel:block/reel/handle_2",
+      "every_tunnel:block/reel/handle_3"
+    ]
+  },
+  "block.reel.wrong": {
+    "sounds": [
+      "every_tunnel:block/reel/wrong_1",
+      "every_tunnel:block/reel/wrong_2"
     ]
   },
   "block.safe.click": {
@@ -462,9 +535,32 @@
       }
     ]
   },
+  "event.breaker.count": {
+    "sounds": [
+      "every_tunnel:event/breaker/count_1"
+    ]
+  },
+  "event.breaker.power": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/breaker/power_1",
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "event.collapse": {
     "sounds": [
       "every_tunnel:event/collapse_1"
+    ]
+  },
+  "event.dart.right": {
+    "sounds": [
+      "every_tunnel:event/dart/right_1"
+    ]
+  },
+  "event.dart.wrong": {
+    "sounds": [
+      "every_tunnel:event/dart/wrong_1"
     ]
   },
   "event.death": {
@@ -476,6 +572,14 @@
   "event.level_transition": {
     "sounds": [
       "every_tunnel:event/level_transition_1"
+    ]
+  },
+  "event.lounge.blackout": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/lounge/blackout_1",
+        "attenuation_distance": 48
+      }
     ]
   },
   "event.observer.alert": {
@@ -496,6 +600,14 @@
       "every_tunnel:event/observer/tock_2"
     ]
   },
+  "event.puzzle.solved": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/puzzle/solved_1",
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "item.battery.close": {
     "sounds": [
       "every_tunnel:item/battery/close_1",
@@ -506,6 +618,13 @@
     "sounds": [
       "every_tunnel:item/battery/open_1",
       "every_tunnel:item/battery/open_2"
+    ]
+  },
+  "item.dart.throw": {
+    "sounds": [
+      "every_tunnel:item/dart/throw_1",
+      "every_tunnel:item/dart/throw_2",
+      "every_tunnel:item/dart/throw_3"
     ]
   },
   "item.flashlight.dead": {
@@ -549,6 +668,24 @@
       {
         "name": "every_tunnel:music/elevator_1",
         "stream": true
+      }
+    ]
+  },
+  "music.lounge": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/lounge_1",
+        "stream": true,
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "music.lounge.far": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/lounge/far_1",
+        "stream": true,
+        "attenuation_distance": 64
       }
     ]
   },

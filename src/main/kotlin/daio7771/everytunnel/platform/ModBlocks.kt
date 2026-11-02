@@ -65,6 +65,8 @@ object ModBlocks {
     val PROJECTOR: Block = register("projector", PuzzleDeviceBlock(props(MapColor.GRAY, ModSoundGroups.SHEET_METAL), listOf(box(2, 0, 2, 14, 16, 14))))
     val CINEMA_SCREEN: Block = register("cinema_screen", PropBlock(props(MapColor.WHITE, BlockSoundGroup.WOOL).noCollision(), listOf(box(0, 0, 15, 16, 16, 16))))
 
+    /** Where Level 4's jazz comes from (LoungeMusicHooks). */
+    val CEILING_SPEAKER: Block = register("ceiling_speaker", PropBlock(props(MapColor.BLACK, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(3, 14, 3, 13, 16, 13))))
     // Level 4's Maintenance room (BreakerHooks) and safes (SafeHooks).
     val BREAKER_LEVER: Block = register("breaker_lever", BreakerLeverBlock(props(MapColor.GRAY, ModSoundGroups.SHEET_METAL).noCollision()))
     val BREAKER_BUTTON: Block = register("breaker_button", BreakerButtonBlock(props(MapColor.RED, ModSoundGroups.PLASTIC).noCollision()))

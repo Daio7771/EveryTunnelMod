@@ -13,7 +13,6 @@ import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.SoundCategory
-import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.util.Hand
@@ -118,7 +117,7 @@ private class DartItem(settings: Settings) : Item(settings) {
             dart.setPosition(user.x, user.eyeY, user.z)
             dart.setVelocity(user, user.pitch, user.yaw, 0f, THROW_SPEED, 0f)
             world.spawnEntity(dart)
-            world.playSound(null, user.x, user.y, user.z, SoundEvents.ENTITY_SNOWBALL_THROW, SoundCategory.PLAYERS, 0.5f, 1.4f)
+            world.playSound(null, user.x, user.y, user.z, ModSounds.DART_THROW, SoundCategory.PLAYERS, 0.8f, 1f)
         }
         user.itemCooldownManager.set(this, COOLDOWN_TICKS)
         stack.decrement(1)

@@ -54,6 +54,7 @@ Lado del servidor (con posición en el mundo, lo oye todo el que esté cerca):
 - Los sonidos de linterna y batería en el jugador (`FlashlightHooks`), los tragos
   (`DrinkHooks`).
 - El sonido de muerte (`DeathHooks`).
+- El jazz del nivel 4, por sus altavoces de techo (`client.effects.LoungeMusic`, `LoungeMusicHooks`, `core.audio.LoungeMix`): un sonido en el altavoz más cercano, callado en Mantenimiento y durante la película, bajo en las Suites, apagado en la Calm room, con el pitch deslizándose entre 0,6 y 1,2 en el apagón. La fuente está en `tools/sounds/own/`.
 
 Lado del cliente (`client.effects`), por jugador y sin posición salvo que se indique:
 

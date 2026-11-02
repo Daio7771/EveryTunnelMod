@@ -38,7 +38,6 @@ import net.minecraft.util.math.Direction
  *   behind the player. [EndingHooks] does the rest, at the end of the stretch.
  *
  * What it changes in the world is not undone here: a new game rebuilds the level ([LoungeHooks.newGame]).
- * Sounds are vanilla's for now.
  */
 object LoungeClosingHooks {
 
@@ -115,7 +114,7 @@ object LoungeClosingHooks {
         }
         // Looking the way someone coming up the Hall would come from.
         pointOf(level, "wet_sign")?.let { world.setBlockState(it, ModBlocks.WET_FLOOR_SIGN.defaultState.with(PropBlock.FACING, Direction.EAST)) }
-        world.playSound(null, player.blockPos, ModSounds.FLUORESCENT_OFF, SoundCategory.BLOCKS, 2f, 0.6f)
+        world.playSound(null, player.blockPos, ModSounds.LOUNGE_BLACKOUT, SoundCategory.BLOCKS, 2f, 1f)
         EveryTunnel.LOGGER.info("The Master Key is taken: {} lamps go out", lamps)
     }
 
@@ -166,9 +165,7 @@ object LoungeClosingHooks {
         for (col in cols) {
             for (row in 0..3) world.setBlockState(partAt(origin, facing, col, row), Blocks.AIR.defaultState)
         }
-        val at = partAt(origin, facing, cols[0], 1)
-        world.playSound(null, at, SoundEvents.BLOCK_PISTON_CONTRACT, SoundCategory.BLOCKS, 1.5f, 0.5f)
-        world.playSound(null, at, SoundEvents.BLOCK_IRON_DOOR_OPEN, SoundCategory.BLOCKS, 1f, 0.5f)
+        if (cols === OPENING[0]) world.playSound(null, partAt(origin, facing, 2, 1), ModSounds.BIG_DOOR_OPEN, SoundCategory.BLOCKS, 2f, 1f)
     }
 
     private fun slam(server: MinecraftServer) {
@@ -184,7 +181,7 @@ object LoungeClosingHooks {
                 world.setBlockState(partAt(origin, facing, col, row), state)
             }
         }
-        world.playSound(null, partAt(origin, facing, 2, 1), SoundEvents.BLOCK_ANVIL_LAND, SoundCategory.BLOCKS, 3f, 0.5f)
+        world.playSound(null, partAt(origin, facing, 2, 1), ModSounds.BIG_DOOR_SLAM, SoundCategory.BLOCKS, 3f, 1f)
     }
 
     /** To the right of someone looking at the door's front is [facing] turned counterclockwise. */
