@@ -22,6 +22,8 @@ the answers. The spawn eggs are in the Every Tunnel tab only in dev runs too.
 | `/everytunnel newgame` | Starts the game over in this world |
 | `/everytunnel setlevel <number>` | Takes you to the start of level 1, 2, 3... (its `order`), as if you walked in (its title, its enemies); puzzles stay as they are |
 | `/everytunnel valves` | This game's valve digits for Level 3 (A to E) |
+| `/everytunnel progress` | What you have kept: pieces, notes read, scenes seen, books, checkpoint |
+| `/everytunnel progress addpiece <level> <piece>` | Gives you a piece, to try the progress out |
 | `/everytunnel boxes` | Level 3's box puzzle: how many are on the shelf, where the others lie |
 | `/everytunnel books` | Level 3's book puzzle: how many are on the counter, where the others lie |
 | `/everytunnel books fill` | Finishes the boxes and puts the books out with all but one already on the desk (to test the last) |

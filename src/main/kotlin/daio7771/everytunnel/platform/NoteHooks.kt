@@ -27,6 +27,7 @@ object NoteHooks {
         val note = level.spawnPoints.firstOrNull {
             NOTE_TAG in it.tags && BlockPos.ofFloored(it.position.x, it.position.y, it.position.z) == pos
         } ?: return
+        ProgressService.get().markNoteRead(player, note.id)
         val values = ValveHooks.values(level)
         val buf = PacketByteBufs.create()
         buf.writeString(note.id)

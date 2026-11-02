@@ -23,6 +23,8 @@ en la pestaña Every Tunnel al desarrollar.
 | `/everytunnel newgame` | Empieza la partida de nuevo en este mundo |
 | `/everytunnel setlevel <número>` | Te lleva al inicio del nivel 1, 2, 3... (su `order`), como si entraras andando (su título, sus enemigos); los puzles se quedan como estén |
 | `/everytunnel valves` | Las cifras de las válvulas del nivel 3 en esta partida (A a E) |
+| `/everytunnel progress` | Lo que has conservado: piezas, notas leídas, escenas vistas, libros, checkpoint |
+| `/everytunnel progress addpiece <nivel> <pieza>` | Te da una pieza, para probar el progreso |
 | `/everytunnel boxes` | El puzle de las cajas del nivel 3: cuántas hay en la estantería y dónde están las demás |
 | `/everytunnel books` | El puzle de los libros del nivel 3: cuántos hay en el mostrador y dónde están los demás |
 | `/everytunnel books fill` | Completa las cajas y saca los libros con todos menos uno ya en la mesa (para probar el último) |

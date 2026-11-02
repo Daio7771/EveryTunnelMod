@@ -32,6 +32,7 @@ KDoc comment that says more.
 | `menu/BlockLight.kt` | Block light for a box of blocks with no world (the menu scene) |
 | `achievement/Achievement.kt` | The eight achievements, in list order, by id |
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
+| `progress/PlayerProgress.kt` | What a player has done: pieces, notes read, scenes seen, Level 3's books, checkpoint |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 | `hiding/LookLimit.kt` | How far the head turns inside a locker |
 
@@ -131,6 +132,8 @@ KDoc comment that says more.
 | `DeathHooks.kt` | Death as fade to black and level restart |
 | `LoadingHooks.kt` | Rebuild on open, loading state, new game, safety timeouts |
 | `NewGame.kt` | Resets the world and the player for a new game |
+| `ProgressService.kt` | The player's progress as the rest of the mod sees it |
+| `CardinalProgress.kt` | `ProgressService` on Cardinal Components, the only class that touches that library |
 | `IntroHooks.kt` | The elevator intro: doors, song, floor indicators, title |
 | `LevelEntryHooks.kt` | Level titles and closing shutters behind the player |
 | `LootSpawner.kt` | Places and restocks loot at tagged spawn points |

@@ -36,6 +36,7 @@ platform/                                           everything that touches Mine
 | `core.level` | `LevelDefinition` and the level JSON parser |
 | `core.guide` | `GuideMarkdown`, the reader of the player guide pages |
 | `core.puzzle` | Level 3's valve code and the notes' text |
+| `core.progress` | `PlayerProgress`, what a player has done (pieces, notes, scenes) |
 | `core.achievement` | `Achievement`, the eight achievements |
 | `core.hiding` | `LookLimit`, how far the head turns in a locker |
 | `systems` | `ResourceSystem` (stamina, thirst, battery), `NoiseSystem`, `FlashlightBeam` (beam math) |
@@ -75,6 +76,7 @@ Declared in `src/main/resources/fabric.mod.json`:
 | `client` | `client.EveryTunnelClient` | Registers the client effects, HUD, screens, key, packets |
 | `fabric-datagen` | `client.EveryTunnelDataGenerator` | Empty: assets are made by the Python tools instead |
 | `lambdynlights:initializer` | `client.compat.LambDynamicLightsCompat` | Adds the flashlight beam as a dynamic light |
+| `cardinal-components-entity` | `platform.CardinalProgress` | Gives every player the progress component |
 
 `EveryTunnel.onInitialize()` is the table of contents of the server side. The order
 matters only in that registries (items, blocks, entities, sounds) come first.
@@ -142,6 +144,10 @@ What the mod remembers is saved with the world, in `<world>/data/`, as vanilla
 | `every_tunnel_lights.dat` | `KeycardHooks` | The lights the keycard put out, to restore them |
 
 `packMapWorld` leaves all of these out of the release jar, so a fresh install starts clean.
+
+The player's progress is kept apart, with the player's own data: `platform.ProgressService`,
+on Cardinal Components (`platform.CardinalProgress`, the only class that touches the library).
+It survives death and reaches that player's client; a new game clears it.
 
 Outside the world, in the game's `config/` folder: `every_tunnel/gameplay.json` (the
 gameplay config) and `every_tunnel/shader_settings_applied.txt` (which shader packs

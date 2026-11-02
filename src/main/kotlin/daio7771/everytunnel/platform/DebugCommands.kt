@@ -2,6 +2,7 @@ package daio7771.everytunnel.platform
 
 import com.mojang.brigadier.arguments.DoubleArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
+import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.context.CommandContext
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.core.LevelManager
@@ -42,6 +43,8 @@ import net.minecraft.util.Identifier
  *   where things are; `fill` does all but the last step (see [BoxHooks], [BookHooks]).
  * - `/everytunnel rebuilt`: run by the map's `garage:build` after rebuilding the levels:
  *   puts the loot back ([NewGame.levelsRebuilt]).
+ * - `/everytunnel progress [addpiece <level> <piece>]`: what the player has kept
+ *   ([ProgressService]), or give them a piece to try it out.
  * - `/everytunnel devworld save|forget`: make this world start from
  *   how it is when you quit, on every launch, or stop doing that (see [DevWorlds]).
  */
@@ -80,6 +83,16 @@ object DebugCommands {
                         .then(CommandManager.argument("number", IntegerArgumentType.integer(1)).executes(::setLevel)),
                 )
                 .then(CommandManager.literal("valves").executes(::valves))
+                .then(
+                    CommandManager.literal("progress").executes(::progress)
+                        .then(
+                            CommandManager.literal("addpiece")
+                                .then(
+                                    CommandManager.argument("level", StringArgumentType.word())
+                                        .then(CommandManager.argument("piece", StringArgumentType.word()).executes(::addPiece)),
+                                ),
+                        ),
+                )
                 .then(
                     CommandManager.literal("boxes").executes(::boxes)
                         .then(CommandManager.literal("fill").executes(::fillBoxes)),
@@ -272,6 +285,19 @@ object DebugCommands {
         player.teleport(world, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
         reply(context, "At the start of level $number (${level.id}).")
         return 1
+    }
+
+    private fun progress(context: CommandContext<ServerCommandSource>): Int {
+        reply(context, ProgressService.get().describe(context.source.playerOrThrow))
+        return 1
+    }
+
+    private fun addPiece(context: CommandContext<ServerCommandSource>): Int {
+        val level = StringArgumentType.getString(context, "level")
+        val piece = StringArgumentType.getString(context, "piece")
+        val added = ProgressService.get().addPiece(context.source.playerOrThrow, level, piece)
+        reply(context, if (added) "Piece $piece of $level kept." else "You already had piece $piece of $level.")
+        return if (added) 1 else 0
     }
 
     private fun valves(context: CommandContext<ServerCommandSource>): Int {

@@ -33,7 +33,16 @@
         "adapter": "kotlin",
         "value": "daio7771.everytunnel.client.compat.LambDynamicLightsCompat"
       }
+    ],
+    "cardinal-components-entity": [
+      {
+        "adapter": "kotlin",
+        "value": "daio7771.everytunnel.platform.CardinalProgress"
+      }
     ]
+  },
+  "custom": {
+    "cardinal-components": ["every_tunnel:progress"]
   },
   "mixins": [
     "every_tunnel.mixins.json",
@@ -49,7 +58,9 @@
     "minecraft": "${minecraft_version}",
     "java": ">=17",
     "geckolib": ">=4.8.4",
-    "lambdynlights": ">=4.4.0"
+    "lambdynlights": ">=4.4.0",
+    "cardinal-components-base": ">=5.2.3",
+    "cardinal-components-entity": ">=5.2.3"
   },
   "recommends": {
     "sound_physics_remastered": "*",

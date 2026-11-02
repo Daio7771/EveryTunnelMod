@@ -53,6 +53,6 @@ These pages are also shown in game (main menu, GUIDE):
 | Mod id | `every_tunnel` |
 | Package | `daio7771.everytunnel` |
 | Required (bundled in the jar) | Fabric API, Fabric Language Kotlin, GeckoLib |
-| Required (installed by the player) | LambDynamicLights |
+| Required (installed by the player) | LambDynamicLights, Cardinal Components |
 | Recommended | Sound Physics Remastered, Sodium + Iris + Indium |
 | Licence | All rights reserved (everything own; MIT up to 0.2.0), CC0 recordings, one CC BY song |

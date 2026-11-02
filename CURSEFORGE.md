@@ -37,8 +37,9 @@ something in the library watches. It never hears you. It only needs to see you o
 ## Requirements
 
 - **Minecraft 1.20.1** with **Fabric Loader 0.19.5** or newer.
-- **LambDynamicLights** (4.4.0 or newer for 1.20.1): it gives your flashlight its light. The
-  CurseForge app installs it with Every Tunnel.
+- **LambDynamicLights** (4.4.0 or newer for 1.20.1): it gives your flashlight its light.
+- **Cardinal Components API** (5.2.3 or newer for 1.20.1): it keeps your progress. The
+  CurseForge app installs both with Every Tunnel.
 - Nothing else. Fabric API, Fabric Language Kotlin and GeckoLib come inside the mod's file,
   and so does the map. You don't need to install them separately.
 
@@ -46,7 +47,7 @@ something in the library watches. It never hears you. It only needs to see you o
 
 1. Install Fabric Loader for Minecraft 1.20.1 (or create a Fabric 1.20.1 profile in your
    launcher).
-2. Put the Every Tunnel `.jar` and LambDynamicLights in the `mods` folder (the CurseForge
+2. Put the Every Tunnel `.jar`, LambDynamicLights and Cardinal Components API in the `mods` folder (the CurseForge
    app does this for you).
 3. Start the game and press **BEGIN**. New to the game? Open **GUIDE** first.
 

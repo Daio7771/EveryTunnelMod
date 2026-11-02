@@ -133,6 +133,12 @@ repositories {
             includeGroup("com.eliotlash.mclib")
         }
     }
+    // Cardinal Components (the player's progress), published by its authors. Versions for
+    // 1.20.1 still use the old group name.
+    maven("https://maven.ladysnake.org/releases") {
+        name = "Ladysnake"
+        content { includeGroup("dev.onyxstudios.cardinal-components-api") }
+    }
     // Sound Physics Remastered (reverb and occlusion), only for dev runs.
     exclusiveContent {
         forRepository { maven("https://api.modrinth.com/maven") { name = "Modrinth" } }
@@ -160,6 +166,12 @@ dependencies {
     // jar without the author's written approval, so players install it themselves.
     modCompileOnly("dev.lambdaurora.lambdynamiclights:lambdynamiclights-api:${prop("lambdynamiclights_version")}")
     modLocalRuntime("dev.lambdaurora.lambdynamiclights:lambdynamiclights-runtime:${prop("lambdynamiclights_version")}")
+
+    // Cardinal Components: the player's progress (platform.CardinalProgress). Only the two
+    // modules it uses. Required, but not bundled (the project's choice; its licence, MIT,
+    // would allow it): players install it themselves.
+    modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${prop("cardinal_components_version")}")
+    modImplementation("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${prop("cardinal_components_version")}")
 
     // The rest of what a player needs comes in the one jar (jar-in-jar; Apache 2.0): Fabric
     // API and Fabric Language Kotlin. Fabric Loader uses a newer copy if the player also
@@ -275,7 +287,7 @@ tasks.jar {
     }
 }
 
-// The jar to hand out: everything inside but LambDynamicLights (map world, GeckoLib, Fabric
+// The jar to hand out: everything inside but LambDynamicLights and Cardinal Components (map world, GeckoLib, Fabric
 // API, Kotlin). ./gradlew everytunnerBuild -> build/libs/everytunnel-<mod_version>.jar: the version
 // in the name, so a player can tell which one they downloaded.
 tasks.register<Copy>("everytunnerBuild") {

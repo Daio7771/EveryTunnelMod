@@ -38,6 +38,7 @@ platform/                                           todo lo que toca Minecraft o
 | `core.level` | `LevelDefinition` y el parser del JSON de niveles |
 | `core.guide` | `GuideMarkdown`, el lector de las páginas de la guía del jugador |
 | `core.puzzle` | El código de las válvulas del nivel 3 y el texto de las notas |
+| `core.progress` | `PlayerProgress`, lo que ha hecho un jugador (piezas, notas, escenas) |
 | `core.achievement` | `Achievement`, los ocho logros |
 | `core.hiding` | `LookLimit`, cuánto gira la cabeza en una taquilla |
 | `systems` | `ResourceSystem` (stamina, sed, batería), `NoiseSystem`, `FlashlightBeam` (matemática del haz) |
@@ -77,6 +78,7 @@ Declarados en `src/main/resources/fabric.mod.json`:
 | `client` | `client.EveryTunnelClient` | Registra los efectos, HUD, pantallas, tecla y paquetes del cliente |
 | `fabric-datagen` | `client.EveryTunnelDataGenerator` | Vacío: los recursos los hacen las herramientas Python |
 | `lambdynlights:initializer` | `client.compat.LambDynamicLightsCompat` | Añade el haz de la linterna como luz dinámica |
+| `cardinal-components-entity` | `platform.CardinalProgress` | Da a cada jugador el componente de progreso |
 
 `EveryTunnel.onInitialize()` es el índice del lado del servidor. El orden solo importa en
 que los registros (objetos, bloques, entidades, sonidos) van primero.
@@ -147,6 +149,10 @@ Lo que el mod recuerda se guarda con el mundo, en `<mundo>/data/`, como archivos
 
 `packMapWorld` deja todos estos fuera del jar de release, así que una instalación nueva
 empieza limpia.
+
+El progreso del jugador va aparte, con los datos propios del jugador: `platform.ProgressService`,
+sobre Cardinal Components (`platform.CardinalProgress`, la única clase que toca la librería).
+Sobrevive a la muerte y llega al cliente de ese jugador; una partida nueva lo borra.
 
 Fuera del mundo, en la carpeta `config/` del juego: `every_tunnel/gameplay.json` (la
 configuración de juego) y `every_tunnel/shader_settings_applied.txt` (qué packs de shaders

@@ -38,3 +38,6 @@ Each one carries its own licence file inside its jar.
 **LambDynamicLights** by LambdAurora gives the flashlight its light. Its licence (the Lambda
 License) does not allow sharing its jar without permission, so it is not bundled: install it
 yourself (version 4.4.0 or newer for Minecraft 1.20.1).
+
+**Cardinal Components API** by Ladysnake and OnyxStudios (MIT) keeps the player's progress.
+It is not bundled: install it yourself (version 5.2.3 or newer for Minecraft 1.20.1).

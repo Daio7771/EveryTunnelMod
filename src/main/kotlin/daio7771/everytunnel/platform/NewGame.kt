@@ -22,7 +22,7 @@ import net.minecraft.world.GameMode
  *   locked ([KeycardHooks]), Level 3's valves back on 0 with new digits and their door shut
  *   ([ValveHooks]), and every Pale man goes back to his spawn point (also the ones in unloaded chunks, when they load:
  *   [PaleManSpawner.startNewGame]).
- * - The player: every achievement can be earned again ([AchievementHooks]), empty inventory, full health and resources, Survival, and back at the
+ * - The player: every achievement can be earned again ([AchievementHooks]), no progress ([ProgressService]), empty inventory, full health and resources, Survival, and back at the
  *   start of the first level with an intro, which plays again ([IntroHooks.replay]); without
  *   one, at the start of the first level.
  */
@@ -71,6 +71,7 @@ object NewGame {
         player.hungerManager.foodLevel = 20
         player.hungerManager.saturationLevel = 5f
         ResourceSystem.reset(player.uuid)
+        ProgressService.get().reset(player)
         player.changeGameMode(GameMode.SURVIVAL)
 
         PlaytestLog.newGame(player)

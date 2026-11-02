@@ -47,7 +47,7 @@ arriba; `python3 tools/map/map_generator.py`; `./gradlew runClientMapWorld`.
 ## El jar de release
 
 `./gradlew everytunnerBuild` → `build/libs/everytunnel-<version>.jar` (unos 26 MB). Un solo jar
-con todo menos Fabric Loader y LambDynamicLights:
+con todo menos Fabric Loader, LambDynamicLights y Cardinal Components:
 
 | Dentro | Cómo |
 |---|---|
@@ -71,12 +71,15 @@ No van dentro, por licencias:
   permite compartir su jar sin permiso por escrito del autor. Lo instala el jugador; sin él,
   Fabric Loader se para al arrancar y lo nombra. (La 0.1.0 y la 0.2.0 llevaban la 4.4.0
   dentro; la 2.3.2, MIT, tiene otra API.)
+- **Cardinal Components**, obligatorio (`depends`): es MIT, así que podría ir dentro, pero se
+  deja fuera por decisión propia y lo instala el jugador. El mod compila contra dos módulos
+  (base y entity); en Modrinth vienen como un solo archivo.
 - Sodium, Iris, Indium, Sound Physics Remastered, en `recommends` en `fabric.mod.json`.
 
 ### Lo que hace un jugador
 
 1. Instalar Fabric Loader 0.19.5 o más nuevo para Minecraft 1.20.1.
-2. Poner `everytunnel-<version>.jar` y LambDynamicLights (4.4.0 o más nuevo) en `mods/`.
+2. Poner `everytunnel-<version>.jar`, LambDynamicLights (4.4.0 o más nuevo) y Cardinal Components (5.2.3 o más nuevo) en `mods/`.
 3. Opcional: Sodium + Iris + Indium y un shader pack Complementary, y Sound Physics
    Remastered.
 4. Arrancar el juego y pulsar BEGIN.
@@ -101,7 +104,7 @@ Al subir:
 | Versión del juego | 1.20.1 |
 | Mod loader | Fabric |
 | Java | 17 |
-| Relations: Required Dependency | LambDynamicLights |
+| Relations: Required Dependency | LambDynamicLights, Cardinal Components |
 | Relations: Embedded Library | Fabric API, Fabric Language Kotlin, GeckoLib (van dentro del jar) |
 | Relations: Optional Dependency | Sound Physics Remastered, Sodium, Iris, Indium |
 | Licencia | All Rights Reserved. El crédito CC BY 4.0 de la música debe seguir en la descripción |
@@ -125,6 +128,7 @@ Todas en `gradle.properties`:
 | Fabric Language Kotlin | 1.14.2+kotlin.2.4.21 |
 | GeckoLib | 4.8.4 |
 | LambDynamicLights | 4.4.0+1.20.1 |
+| Cardinal Components | 5.2.3 |
 | Sound Physics Remastered (desarrollo) | fabric-1.20.1-1.5.1 |
 | Sodium / Iris / Indium (desarrollo) | 0.5.13 / 1.7.6 / 1.0.36 |
 | Versión del mod | `mod_version` (0.3; el menú principal muestra "v0.3 Beta (Level 3)") |

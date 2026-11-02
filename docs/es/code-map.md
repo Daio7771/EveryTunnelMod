@@ -32,6 +32,7 @@ con un comentario KDoc que cuenta más.
 | `menu/BlockLight.kt` | Luz de bloque para una caja de bloques sin mundo (la escena del menú) |
 | `achievement/Achievement.kt` | Los ocho logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
+| `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
 
@@ -131,6 +132,8 @@ con un comentario KDoc que cuenta más.
 | `DeathHooks.kt` | La muerte como fundido a negro y reinicio del nivel |
 | `LoadingHooks.kt` | Reconstruir al abrir, estado de carga, partida nueva, tiempos límite de seguridad |
 | `NewGame.kt` | Reinicia el mundo y el jugador para una partida nueva |
+| `ProgressService.kt` | El progreso del jugador tal como lo ve el resto del mod |
+| `CardinalProgress.kt` | `ProgressService` sobre Cardinal Components, la única clase que toca esa librería |
 | `IntroHooks.kt` | La intro del ascensor: puertas, canción, indicadores de planta, título |
 | `LevelEntryHooks.kt` | Títulos de nivel y persianas que se cierran tras el jugador |
 | `LootSpawner.kt` | Coloca y repone el botín en los puntos con etiqueta |

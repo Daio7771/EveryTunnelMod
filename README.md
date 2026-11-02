@@ -48,6 +48,7 @@ something in the library watches. It never hears you. It only needs to see you o
 - **Fabric Loader 0.19.5** or newer
 - **[LambDynamicLights](https://modrinth.com/mod/lambdynamiclights)** 4.4.0 or newer for
   1.20.1: it gives your flashlight its light.
+- **[Cardinal Components API](https://modrinth.com/mod/cardinal-components-api/versions?g=1.20.1)** 5.2.3 or newer for 1.20.1: it keeps your progress.
 - That's it. Fabric API, Fabric Language Kotlin and GeckoLib come inside the mod's file, and
   so does the map.
 
@@ -58,7 +59,7 @@ something in the library watches. It never hears you. It only needs to see you o
    [Releases](https://github.com/Daio7771/EveryTunnelMod/releases) and put it in your `mods`
    folder.
 3. Download [LambDynamicLights](https://modrinth.com/mod/lambdynamiclights/versions?g=1.20.1)
-   for 1.20.1 and put it in the same folder.
+   and [Cardinal Components API](https://modrinth.com/mod/cardinal-components-api/versions?g=1.20.1) for 1.20.1, and put them in the same folder.
 4. Start the game and press **BEGIN**.
 
 Step-by-step instructions, recommended mods, shader setup and troubleshooting:

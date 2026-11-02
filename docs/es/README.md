@@ -56,6 +56,6 @@ Estas páginas también se ven dentro del juego (menú principal, GUIDE):
 | Id del mod | `every_tunnel` |
 | Paquete | `daio7771.everytunnel` |
 | Requeridos (dentro del jar) | Fabric API, Fabric Language Kotlin, GeckoLib |
-| Requeridos (los instala el jugador) | LambDynamicLights |
+| Requeridos (los instala el jugador) | LambDynamicLights, Cardinal Components |
 | Recomendados | Sound Physics Remastered, Sodium + Iris + Indium |
 | Licencia | Todos los derechos reservados (todo lo propio; MIT hasta la 0.2.0), grabaciones CC0, una canción CC BY |
