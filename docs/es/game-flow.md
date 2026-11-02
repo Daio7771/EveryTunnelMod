@@ -20,7 +20,9 @@ flowchart TD
     K -->|tarjeta| L[Se apagan todas las luces]
     L -->|puerta EXIT| M[Escalera de caracol a B3]
     M --> P[Nivel 3, B3: oficinas, biblioteca, búnker]
-    P -->|puerta a B4| N[Fin de la demo: pasos detrás, créditos]
+    P -->|puerta a B4| Q[Pasillo de diplomas: se borra el nivel 3, se construye el 4]
+    Q --> R[Nivel 4, B4: VIP lounge]
+    R -->|puerta grande, aún no| N[Fin de la demo: pasos detrás, créditos]
     N --> C
     I -.->|muerte| O[Fundido a negro, reinicia el nivel]
     K -.->|muerte| O
@@ -307,8 +309,8 @@ silencio.
   **túnel del búnker**: unos 90 bloques de hormigón iluminado, de 3 de ancho, en cuatro tramos
   en ángulo recto (`BUNKER["path"]`), con tuberías por el techo a un lado y una bandeja de
   cables al otro, que pasa por dos puertas blindadas abiertas (un marco de acero con franjas,
-  `hazard_steel`, y la hoja plegada contra la pared, `blast_door`) hasta la puerta a B4, donde
-  termina la demo. El Observer nunca baja detrás de nadie (el pozo y el túnel tienen la
+  `hazard_steel`, y la hoja plegada contra la pared, `blast_door`) hasta la puerta a B4. El
+  Observer nunca baja detrás de nadie (el pozo y el túnel tienen la
   etiqueta `observer_never`).
 - **El derrumbe** (`CollapseHooks`, tiempos en `systems.CollapseSchedule`): unos 13 bloques
   antes de la puerta, el techo del túnel cae detrás del jugador: un crujido, grietas y el
@@ -318,10 +320,29 @@ silencio.
   muerte en el nivel 3 (el jugador vuelve a empezar en la antesala), una partida nueva y la
   reconstrucción del mapa quitan los escombros.
 
-## 10. El final
+## 10. Del nivel 3 al nivel 4
 
-`platform.EndingHooks`: al final del pasillo del búnker del nivel 3, delante de la puerta a
-B4, el jugador entra en una zona con la etiqueta `end`.
+`platform.LoungeHooks`. El nivel 4 ocupa el espacio del nivel 3, así que se construye en plena
+partida:
+
+- Al acercarse a la puerta a B4, se abre. Al entrar en el pasillo de diplomas que hay detrás (4
+  de ancho, 20 de largo, construido con el nivel 3, debajo de su suelo) se cierra para siempre.
+- `garage:level4_begin` fuerza la carga de la zona; `/everytunnel loungeready` avisa de que los
+  chunks están. Luego se ejecuta un `garage:level4_step_<n>` cada 2 ticks: se va el nivel 3 y se
+  levanta el 4, en tandas pequeñas para que el juego no se atasque.
+- Tras la última tanda se abre la puerta de Reception.
+
+El pasillo ya pertenece al nivel 4, así que "Level 4" aparece cuando se cierra la puerta a B4, y
+volver al pasillo desde Reception no cuenta como regresar al nivel 3.
+
+La reconstrucción del mapa, cada vez que se abre el mundo, devuelve el nivel 3 y limpia el 4. De
+momento el nivel 4 son sus salas, texturas y luces: aún no tiene muebles, reglas ni puzles, y su
+puerta grande es una pared, así que **por ahora la demo no tiene final**.
+
+## 11. El final
+
+`platform.EndingHooks`: tras la puerta grande del nivel 4, en un tramo oscuro, el jugador entra en
+una zona con la etiqueta `end`.
 
 1. Cinco pasos descalzos se acercan por detrás del jugador, cada uno algo más cerca y más
    bajo (el sonido de paso del propio Pale man).

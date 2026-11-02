@@ -88,6 +88,7 @@ KDoc comment that says more.
 | `PropBlock.kt` | A floor prop facing one of four sides |
 | `ConnectingPropBlock.kt` | Pipes, ducts and cable trays that connect to neighbours |
 | `FluorescentLightBlock.kt` | The light: on, flicker, off; light level 13, drawn full bright |
+| `WarmLampBlock.kt` | Level 4's ceiling light: warm and silent, light level 12 |
 | `SurfaceMarkBlocks.kt` | Stains and puddles on any face |
 | `SignTileBlock.kt` | Painted texts by numbered slot (the world pack maps them) |
 | `ElevatorDoorBlock.kt` | Sliding elevator door stages |
@@ -143,6 +144,7 @@ KDoc comment that says more.
 | `CarryHooks.kt` | Carrying a box or a book: in the hand, never dropped, no sprint, back on death |
 | `BookHooks.kt` | Level 3's book puzzle: books appear, handed in at the counter, the hatch opens, debug |
 | `CollapseHooks.kt` | Level 3's tunnel collapse: sound, shake, rubble, dust, flickering lights; undone on a death or new game |
+| `LoungeHooks.kt` | From Level 3 to Level 4: the door to B4, erasing and building in steps, Reception's door |
 | `BookPhaseHooks.kt` | While the books are out: the clock in the head and the "He's near. Hide." warning |
 | `BoxHooks.kt` | Level 3's box puzzle: boxes out at random, carrying, the shelf, death, debug |
 | `HidingHooks.kt` | Hiding in lockers: in, out, no noise inside, out on a new game |

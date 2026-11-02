@@ -465,7 +465,7 @@ class Offices:
         (t0, t1), (b0, b1) = p.COLLAPSE["trigger"], p.COLLAPSE["blocks"]
         self.zone("collapse", self.bunker_from_door(t0, t1), floor + 1, floor + bh, ["collapse"])
         self.zone("collapse_blocks", self.bunker_from_door(b0, b1), floor + 1, floor + bh, ["collapse_blocks"])
-        self.zone("end", self.bunker_from_door(3, 1), floor + 1, floor + 3, ["end"])
+        self.zone("b4_approach", self.bunker_from_door(3, 1), floor + 1, floor + 3, ["b4_door_open"])
 
         sx, sz, facing = p.PLAYER_START
         self.spawn("player_start", sx, 1, sz, facing, ["player"])

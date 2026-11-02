@@ -68,6 +68,15 @@ the offices.
 | `furnish.py` | The furniture: a template per kind of room (`FURNISH` in `LEVEL_3`), worked out in the room's own frame from its main door, kept off the doors; the library's rows, clearing and the librarian's desk round the hatch (`LIBRARY_LAYOUT`); the ring's plants and clocks; the joined states |
 | `preview.py` | Top-down plan of Level 3 read from its blocks, furniture included, with the bunker beside it |
 
+- **Level 4** has its own modules in `tools/map/lounge/` (mod pack only):
+
+| Module | Job |
+|---|---|
+| `level.py` | The level from `LEVEL_4`: its spaces, the shell round them, lamps, doors and steps, in two sets of blocks (the corridor, built with Level 3; the rest, built in play) |
+| `checks.py` | A walk from Reception reaching every cell, a wall between all rooms, three steps down to the Calm room; they stop the generator |
+| `textures.py` | Level 4's own textures (burgundy carpet, walnut with a brass strip, cream walls and ceiling), added to the world's pack |
+| `preview.py` | Top-down plan of Level 4 with sizes and openings. `python3 -m lounge.preview` from `tools/map` draws it alone, installing nothing |
+
 - **Output** (`tools/map/output/`): the mod datapack `every_tunnel_level1_mod` (level JSON
   files and `garage:build`), the vanilla datapack `every_tunnel_level1_vanilla`,
   `level_resources.zip`, `level_preview.png`, `level3_preview.png`, `texture_sheet.png`,
@@ -83,7 +92,7 @@ just open the world. `/function garage:build` rebuilds by hand. See [Levels](lev
 
 ## Blocks
 
-`tools/blocks/generate.py` makes the assets of the mod's 74 blocks. The blocks themselves
+`tools/blocks/generate.py` makes the assets of the mod's 75 blocks. The blocks themselves
 (properties, shapes, sounds) are registered in Kotlin (`platform/ModBlocks.kt`); the tool
 **stops if the two id lists disagree**. Model rotations must match the shapes in
 `platform/BlockShapes.kt`. Textures reuse the map's painters (`garage/textures.py`), so

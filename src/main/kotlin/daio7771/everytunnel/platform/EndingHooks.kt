@@ -16,8 +16,8 @@ import net.minecraft.util.math.Vec3d
 import java.util.UUID
 
 /**
- * The end of the demo: walking into a zone tagged [END_TAG] (in front of the door to Level 4
- * at the end of Level 3's bunker corridor) while the world rules apply. Not while loading
+ * The end of the demo: walking into a zone tagged [END_TAG] (past Level 4's big door) while the
+ * world rules apply. Not while loading
  * ([LoadingHooks.isLoading]): a game saved after the end opens with the player still in that
  * zone, until the new game takes them to the elevator.
  *

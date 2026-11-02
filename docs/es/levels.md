@@ -138,6 +138,9 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `keycard_door` | `KeycardHooks` | Las puertas de hierro que abre un lector de tarjetas; una partida nueva las cierra y bloquea los lectores |
 | `lights_stay` | `KeycardHooks` | Sus luces siguen encendidas al coger la tarjeta (el pozo de escaleras a B3) |
 | `end` | `EndingHooks` | Entrar termina la demo |
+| `b4_door_open` | `LoungeHooks` | Entrar abre la puerta a B4 |
+| `lounge_build` | `LoungeHooks` | Entrar cierra esa puerta, borra el nivel 3 y construye el 4 |
+| `lounge_door` | `LoungeHooks` | Sus puertas se abren cuando el nivel 4 está en pie (la de Reception) |
 | `exit` | (nadie aún) | Marca la salida de un nivel; reservada para sistemas futuros |
 | `valve_door` | `ValveHooks` | Las puertas que abren las válvulas cuando todas están bien; una partida nueva las cierra |
 | `observer_home` | `ObserverEntity` | La zona que patrulla el Observer y a la que vuelve (la biblioteca del nivel 3) |
@@ -178,7 +181,7 @@ sistemas que vienen:
   `open_office_nw`, `open_office_ne`), `library`, el anillo en cuatro
   (`inner_corridor_north`, `_south`, `_west`, `_east`), `guard_area` (la biblioteca y el
   anillo juntos), `valve_corridor`, `checkpoint`, `checkpoint_door` (con la etiqueta `valve_door`), `antechamber`, `bunker_shaft`,
-  `bunker_corridor`, `hatch` (sus trampillas, con la etiqueta `book_hatch`), una zona por cada hueco de puerta (`door_...`, `library_door_...`: cruzar una puerta nunca te saca del nivel), `collapse`, `collapse_blocks` y `end` (delante de la puerta a B4). Las
+  `bunker_corridor`, `hatch` (sus trampillas, con la etiqueta `book_hatch`), una zona por cada hueco de puerta (`door_...`, `library_door_...`: cruzar una puerta nunca te saca del nivel), `collapse`, `collapse_blocks`, `b4_approach` (delante de la puerta a B4, con la etiqueta `b4_door_open`) y `b4_door` (su celda). El pasillo de diplomas que hay detrás es del nivel 4 (`ch1_l4_diplomas`, y `ch1_l4_diplomas_build` con la etiqueta `lounge_build`). Las
   escaleras desde B2 no pertenecen a ninguna zona, así que "Level 3" aparece al entrar en
   la antesala.
 - **Puntos de spawn:** `player_start` (la antesala), `checkpoint`, `observant_guard`,

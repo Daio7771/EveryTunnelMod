@@ -1299,6 +1299,20 @@ def build():
     a.block("fluorescent_light", "Fluorescent Light", {"variants": variants},
             {"parent": f"{NS}:block/fluorescent_light_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
 
+    # --- Warm lamp: Level 4's brass ceiling light, a frosted glass under a round of brass ---
+    a.texture("warm_lamp_frame", plastic_tex(r("lamp_frame"), (172, 134, 68)), T.STEEL.but(smoothness=0.7, metal=231, relief=0.1))
+    a.texture("warm_lamp_on", plastic_tex(r("lamp_on"), (255, 226, 170)),
+              T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    a.texture("warm_lamp_off", plastic_tex(r("lamp_off"), (104, 92, 72)), T.PLASTIC.but(smoothness=0.6, relief=0.2))
+    for state in ("on", "off"):
+        a.models[f"warm_lamp_{state}"] = model(
+            {"frame": "warm_lamp_frame", "glass": f"warm_lamp_{state}"},
+            [element((4, 15, 4), (12, 16, 12), "frame"),
+             element((5, 13, 5), (11, 15, 11), "glass", shade=state == "off")])
+    a.block("warm_lamp", "Warm Lamp",
+            {"variants": {f"lit={lit}": {"model": f"{NS}:block/warm_lamp_{'on' if lit == 'true' else 'off'}"} for lit in ("true", "false")}},
+            {"parent": f"{NS}:block/warm_lamp_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+
     # --- Floor props ------------------------------------------------------------------
     a.texture("cardboard_box_top", T.cardboard_tex(r("box_top"), "top"), T.CARDBOARD)
     a.texture("cardboard_box_side", T.cardboard_tex(r("box_side"), "side"),

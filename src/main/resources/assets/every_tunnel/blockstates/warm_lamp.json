@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=true": {
+      "model": "every_tunnel:block/warm_lamp_on"
+    },
+    "lit=false": {
+      "model": "every_tunnel:block/warm_lamp_off"
+    }
+  }
+}

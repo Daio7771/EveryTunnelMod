@@ -135,6 +135,9 @@ the server starts (levels built together name the same one). The function must e
 | `shutter` | `LevelEntryHooks` | The opening a rolling shutter closes behind the player who walks in from the previous level |
 | `keycard_door` | `KeycardHooks` | The iron doors a card reader opens; a new game closes them and locks the readers |
 | `end` | `EndingHooks` | Walking in ends the demo |
+| `b4_door_open` | `LoungeHooks` | Walking in opens the door to B4 |
+| `lounge_build` | `LoungeHooks` | Walking in shuts that door, erases Level 3 and builds Level 4 |
+| `lounge_door` | `LoungeHooks` | Its doors open once Level 4 stands (Reception's) |
 | `lights_stay` | `KeycardHooks` | Its lights stay on when the keycard is taken (the stair shaft down to B3) |
 | `exit` | (none yet) | Marks a level's way out; kept for later systems |
 | `valve_door` | `ValveHooks` | The doors the valves open when all are right; a new game shuts them |
@@ -175,7 +178,7 @@ will read:
   `open_office_nw`, `open_office_ne`), `library`, the ring in four (`inner_corridor_north`,
   `_south`, `_west`, `_east`), `guard_area` (the library and the ring together),
   `valve_corridor`, `checkpoint`, `checkpoint_door` (tagged `valve_door`), `antechamber`, `bunker_shaft`, `bunker_corridor`,
-  `hatch` (its trapdoors, tagged `book_hatch`), a zone per doorway (`door_...`, `library_door_...`: walking through a door never leaves the level), `collapse`, `collapse_blocks` and `end` (in front of the door to B4). The stairs from B2
+  `hatch` (its trapdoors, tagged `book_hatch`), a zone per doorway (`door_...`, `library_door_...`: walking through a door never leaves the level), `collapse`, `collapse_blocks`, `b4_approach` (in front of the door to B4, tagged `b4_door_open`) and `b4_door` (its cell). The diploma corridor behind it is Level 4's (`ch1_l4_diplomas`, and `ch1_l4_diplomas_build` tagged `lounge_build`). The stairs from B2
   belong to no zone, so "Level 3" shows on walking into the antechamber.
 - **Spawn points:** `player_start` (the antechamber), `checkpoint`, `observant_guard`,
   `book_1` to `book_13` (in the library, `LIBRARY_LAYOUT["books"]`: on carts, the floor, the

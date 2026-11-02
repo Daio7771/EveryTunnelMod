@@ -71,6 +71,15 @@ las oficinas.
 | `furnish.py` | Los muebles: una plantilla por tipo de sala (`FURNISH` en `LEVEL_3`), calculada en el marco propio de la sala desde su puerta principal y lejos de las puertas; las filas, el claro y la mesa del bibliotecario alrededor de la trampilla (`LIBRARY_LAYOUT`); las plantas y relojes del anillo; los estados de las uniones |
 | `preview.py` | Plano visto desde arriba del nivel 3 leído de sus bloques, con los muebles y el búnker al lado |
 
+- **El nivel 4** tiene sus propios módulos en `tools/map/lounge/` (solo en el pack del mod):
+
+| Módulo | Función |
+|---|---|
+| `level.py` | El nivel a partir de `LEVEL_4`: sus espacios, la carcasa a su alrededor, lámparas, puertas y escalones, en dos conjuntos de bloques (el pasillo, construido con el nivel 3; el resto, en plena partida) |
+| `checks.py` | Un recorrido desde Reception que llega a cada celda, una pared entre todas las salas, tres escalones hasta la Calm room; detienen el generador |
+| `textures.py` | Las texturas propias del nivel 4 (moqueta burdeos, nogal con banda de latón, paredes y techo crema), añadidas al pack del mundo |
+| `preview.py` | Plano visto desde arriba del nivel 4 con medidas y aberturas. `python3 -m lounge.preview` desde `tools/map` lo dibuja solo, sin instalar nada |
+
 - **Salida** (`tools/map/output/`): el datapack del mod `every_tunnel_level1_mod` (archivos
   JSON de los niveles y `garage:build`), el datapack vanilla `every_tunnel_level1_vanilla`,
   `level_resources.zip`, `level_preview.png`, `level3_preview.png`, `texture_sheet.png`,
@@ -87,7 +96,7 @@ generador basta con abrir el mundo. `/function garage:build` reconstruye a mano.
 
 ## Bloques
 
-`tools/blocks/generate.py` hace los recursos de los 74 bloques del mod. Los bloques en sí
+`tools/blocks/generate.py` hace los recursos de los 75 bloques del mod. Los bloques en sí
 (propiedades, formas, sonidos) se registran en Kotlin (`platform/ModBlocks.kt`); la
 herramienta **se detiene si las dos listas de ids no coinciden**. Las rotaciones de los
 modelos deben coincidir con las formas de `platform/BlockShapes.kt`. Las texturas reutilizan

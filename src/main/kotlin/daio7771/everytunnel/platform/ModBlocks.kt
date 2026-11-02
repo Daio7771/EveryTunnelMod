@@ -47,6 +47,14 @@ object ModBlocks {
         ),
     )
 
+    val WARM_LAMP: Block = register(
+        "warm_lamp",
+        WarmLampBlock(
+            props(MapColor.TERRACOTTA_YELLOW, BlockSoundGroup.GLASS).luminance { WarmLampBlock.luminance(it) }
+                .emissiveLighting { state, _, _ -> state.get(WarmLampBlock.LIT) },
+        ),
+    )
+
     // --- Things standing on the floor ---------------------------------------------------
 
     val CARDBOARD_BOX: Block = register(

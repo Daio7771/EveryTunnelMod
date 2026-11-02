@@ -15,7 +15,7 @@ import net.minecraft.world.GameMode
  * Starts the game over for a player, in the same world: every time the world opens
  * ([LoadingHooks]) and with `/everytunnel newgame`.
  *
- * - The world: everyone out of the lockers ([HidingHooks]), nothing carried any more
+ * - The world: Level 3 back if Level 4 had replaced it ([LoungeHooks]), everyone out of the lockers ([HidingHooks]), nothing carried any more
  *   ([CarryHooks]), Level 3's boxes put out at random and their shelf emptied ([BoxHooks]), its
  *   books off the cabinets and the counter and its hatch shut ([BookHooks]), every shutter opens ([LevelEntryHooks.openAll]), all the loot is back
  *   ([LootSpawner.restock]), the lights the keycard put out are back and the card readers
@@ -39,6 +39,7 @@ object NewGame {
         LevelEntryHooks.openAll(server)
         KeycardHooks.forgetLights(server)
         ValveHooks.levelsRebuilt()
+        LoungeHooks.levelsRebuilt()
         CarryHooks.forgetAll()
         LootSpawner.restock(server)
         CollapseHooks.resetAll(server)
@@ -56,6 +57,7 @@ object NewGame {
         BoxHooks.newGame(server)
         BookHooks.newGame(server)
         CollapseHooks.resetAll(server)
+        LoungeHooks.newGame(server)
         LevelEntryHooks.openAll(server)
         LootSpawner.restock(server)
         KeycardHooks.restoreLights(server)

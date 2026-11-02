@@ -52,6 +52,10 @@ from garage.level import Level         # noqa: E402
 from offices import checks as OC       # noqa: E402
 from offices import level as OF        # noqa: E402
 from offices import preview as OV      # noqa: E402
+from lounge.level import Lounge        # noqa: E402
+from lounge import checks as LC        # noqa: E402
+from lounge import preview as LV       # noqa: E402
+from lounge import textures as LT      # noqa: E402
 from offices import textures as OT     # noqa: E402
 
 # =====================================================================================
@@ -351,6 +355,71 @@ LEVEL_3 = dict(
 # One hall like the level's (these values over the general ones below), drawn behind the menu
 # from a fixed camera at the west end of its aisle, looking east to a closed emergency door
 # under a lit EXIT sign (garage/menu_scene.py). Its lamps flicker now and then in the menu.
+# Level 4 (B4), the VIP lounge. Plan coordinates as in Level 3: x east, z south, boxes (x0, z0, x1, z1)
+# with x1 and z1 exclusive, the sizes are of the air inside. The rooms that touch in the user's table
+# (Security, Hall, Bar) are moved apart for a wall: Hall and its side rooms 1 south, the rest 2.
+LEVEL_4 = dict(
+    TITLE="Level 4",
+    FLOOR_Y=9,                       # the world y of the main floor's blocks (the B4 door's floor)
+    # (id, name, box, height, kind); kinds: "piece" gives a piece, "rest", "key", "neutral".
+    ROOMS=[
+        ("ch1_l4_security", "Security room", (35, 0, 65, 16), 5, "neutral"),
+        ("ch1_l4_hall", "Hall", (43, 17, 57, 41), 5, "neutral"),
+        ("ch1_l4_bar", "Bar lounge", (30, 42, 70, 66), 7, "piece"),
+        ("ch1_l4_cinema", "Cinema", (0, 44, 24, 64), 5, "piece"),
+        ("ch1_l4_spa", "Spa and pool", (76, 44, 100, 64), 5, "piece"),
+        ("ch1_l4_suites", "Suites", (6, 19, 30, 39), 5, "rest"),
+        ("ch1_l4_game", "Game room", (70, 19, 94, 39), 5, "piece"),
+        ("ch1_l4_reception", "Reception", (38, 72, 62, 84), 5, "neutral"),
+    ],
+    # Lower than the rest: (id, name, box, height, kind, floor relative to the main floor).
+    CALM_ROOM=("ch1_l4_calm", "Calm room", (104, 44, 124, 64), 5, "key", -3),
+    # Corridors 6 wide, open onto the rooms they join; height as the rooms'.
+    CORRIDORS=[
+        ("ch1_l4_corridor_reception", (47, 66, 53, 72)),
+        ("ch1_l4_corridor_cinema", (24, 51, 30, 57)),
+        ("ch1_l4_corridor_spa", (70, 51, 76, 57)),
+        ("ch1_l4_corridor_suites", (30, 26, 43, 32)),
+        ("ch1_l4_corridor_game", (57, 26, 70, 32)),
+    ],
+    # Down to the Calm room, west to east: one cell of landing, then one step down per cell.
+    STEPS=("ch1_l4_steps", (100, 51, 104, 57)),
+    # Openings through the one-block walls: (id, axis of the wall's line, line, first cell, width, height, kind).
+    OPENINGS=[
+        ("ch1_l4_arch_bar", "z", 41, 47, 6, 4, "arch"),
+        ("ch1_l4_door_security", "z", 16, 49, 2, 2, "door"),
+        ("ch1_l4_door_reception", "z", 84, 50, 2, 2, "steel_door"),
+        ("ch1_l4_door_big", "z", -1, 47, 6, 5, "big_door"),      # a plain wall until the level's closing phase
+    ],
+    # Between the door to B4 and Reception: 4 wide, 20 long, diplomas on its walls.
+    DIPLOMA_CORRIDOR=("ch1_l4_diplomas", "Diploma corridor", (49, 85, 53, 105), 4),
+    B4_DOOR=(50, 105),               # its cell (x, z) in the corridor's far wall; world (33, 10, 119)
+    # Past the big door, dark: walking it starts the credits (the end of v0.4).
+    EXIT_STRETCH=("ch1_l4_exit", "Dark stretch", (47, -17, 53, -1), 5),
+    START=(50, 80),                  # the checkpoint, in Reception, facing north
+    # Plan to world: the plan's north is the world's west, so the level meets the corridor from B4:
+    # world x = z + PLACE_X, world z = PLACE_Z - x.
+    PLACE_X=-72,
+    PLACE_Z=169,
+    # Stand-in blocks re-skinned by Level 4's textures (lounge/textures.py). Never a block another
+    # level uses: the world's resource pack re-skins a block everywhere.
+    STAND_INS=dict(
+        carpet="minecraft:red_wool",
+        walnut="minecraft:brown_terracotta",
+        rail="minecraft:orange_terracotta",
+        cream="minecraft:lime_terracotta",
+        ceiling="minecraft:pink_terracotta",
+        stairs="minecraft:red_nether_brick_stairs",
+    ),
+    LAMP="every_tunnel:warm_lamp[lit=true]",
+    LAMP_SPACING=6,
+    DOORS=dict(door="minecraft:dark_oak_door", steel_door="every_tunnel:emergency_door"),
+    # Level 3's door to B4 and the corridor behind it (the corridor is built with Level 3, the rest
+    # in play: see level4_steps). A step holds at most so many commands and blocks changed.
+    STEP_COMMANDS=40,
+    STEP_VOLUME=33000,
+)
+
 MENU_SCENE = dict(LENGTH=40, WIDTH=20, SEED=41, WEAR=0.5, DEAD_LIGHT_SHARE=0.1, GAP_SHARE=0.04,
                   DARK_ZONES=0, ODDITIES=0, HANGING_CABLES=4, CARTS=0)
 # x: blocks from the west wall's outer face; eye: eye height over the floor; yaw/pitch in
@@ -593,10 +662,11 @@ def place_rects(c, blocks):
                     c.append(f"fill {x0} {y} {za} {x1} {y} {zb} {state}")
 
 
-def level3_commands(blocks, box, previous_box):
-    """The second stage of the mod's build: Level 3 alone, in its own force-loaded area."""
-    c = ["# Clear the previous Level 3 build and this one."]
-    boxes = sorted({previous_box, box} - {None})
+def level3_commands(blocks, box, previous_box, extra_clear=()):
+    """The second stage of the mod's build: Level 3 alone, in its own force-loaded area. Whatever
+    was built in play over it goes too (`extra_clear`: Level 4's boxes)."""
+    c = ["# Clear the previous Level 3 build and this one, and Level 4."]
+    boxes = sorted({previous_box, box, *extra_clear} - {None})
     for b in boxes:
         c += fills(*b, "minecraft:air")
     c.append("# Blocks, layer by layer from the bottom, merged into rectangles")
@@ -866,11 +936,82 @@ def attach_level_3(level, offset, lv3, door):
     return place, blocks, box
 
 
+def split_steps(cmds, max_commands, max_volume):
+    """Commands into lists that each change at most `max_volume` blocks and hold at most
+    `max_commands` commands, in order: a tick's worth of work (see LoungeHooks)."""
+    steps, current, volume = [], [], 0
+    for cmd in cmds:
+        words = cmd.split()
+        size = 1
+        if words[0] == "fill":
+            x1, y1, z1, x2, y2, z2 = map(int, words[1:7])
+            size = (abs(x2 - x1) + 1) * (abs(y2 - y1) + 1) * (abs(z2 - z1) + 1)
+        if current and (len(current) >= max_commands or volume + size > max_volume):
+            steps.append(current)
+            current, volume = [], 0
+        current.append(cmd)
+        volume += size
+    return steps + [current] if current else steps
+
+
+def level4_steps(lv4, box3):
+    """What walking into the diploma corridor runs, one step at a time (LoungeHooks): Level 3 goes
+    but for the corridor (under its floor, and west of the door to B4), and Level 4 goes up in the
+    space. Reception's door stays shut: LoungeHooks opens it after the last step (a /setblock
+    cannot, as it takes a door's state from its other half)."""
+    p = lv4.p
+    x0, y0, z0, x1, y1, z1 = box3
+    door_x = lv4.world(*p["B4_DOOR"])[0]
+    corridor_top = lv4.corridor_top
+    c = [f"execute store result score #drops {SCORE} run gamerule doTileDrops", "gamerule doTileDrops false"]
+    c += fills(x0, corridor_top + 1, z0, x1, y1, z1, "minecraft:air")
+    c += fills(door_x + 1, y0, z0, x1, corridor_top, z1, "minecraft:air")
+    c += kill_observers(box3)
+    place_rects(c, {pos: st for pos, st in lv4.lounge_blocks.items() if not needs_support(st)})
+    place_rects(c, {pos: st for pos, st in lv4.lounge_blocks.items() if needs_support(st)})
+    a, b = box3, lv4.box
+    c += [f"kill @e[type=minecraft:item,x={k[0]},y={k[1]},z={k[2]},dx={k[3] - k[0]},dy={k[4] - k[1]},dz={k[5] - k[2]}]" for k in (a, b)]
+    c.append(f"execute if score #drops {SCORE} matches 1 run gamerule doTileDrops true")
+    c.append(f"forceload remove {lv4.area(box3)[0]} {lv4.area(box3)[2]} {lv4.area(box3)[3]} {lv4.area(box3)[5]}")
+    return split_steps(c, p["STEP_COMMANDS"], p["STEP_VOLUME"])
+
+
+def level3_extras(json_text, lv4, door):
+    """Level 3's file with what joins it to Level 4: the door to B4 (its own zone, so that going
+    through never leaves the level) and the place in the corridor behind it."""
+    data = json.loads(json_text)
+    x, y, z = door
+    zone = lv4.build_zone()
+    data["zones"].append({"id": "b4_door", "from": [x, y, z], "to": [x, y + 1, z], "ambience": {}})
+    data["spawn_points"] += [
+        {"id": "b4_door", "pos": [x + 0.5, y, z + 0.5], "yaw": 90, "tags": ["b4_door"]},
+        {"id": "b4_corridor", "pos": [zone[3] + 0.5, y, z + 0.5], "yaw": 90, "tags": ["b4_corridor"]},
+    ]
+    return json.dumps(data, indent=1) + "\n"
+
+
+def level4_json(lv4):
+    """Level 4: from the corridor behind the door to B4, so Level 3 is left behind for good and
+    its title shows as that door shuts. It has no `build`: LoungeHooks builds it in play."""
+    p = lv4.p
+    sx, sz = p["START"]
+    wx, wz = lv4.world(sx, sz)
+    zones = [{"id": zid, "from": list(b[:3]), "to": list(b[3:]), **({"tags": tags} if tags else {})} for zid, b, tags in lv4.zones()]
+    return json.dumps({
+        "name": "Level 4 - VIP lounge B4 (generated)",
+        "order": 4,
+        "dimension": "minecraft:overworld",
+        "zones": zones,
+        "spawn_points": [{"id": "player_start", "pos": [wx + 0.5, p["FLOOR_Y"] + 1, wz + 0.5], "yaw": 90, "tags": ["player"]}],
+        "entry": {"title": p["TITLE"], "subtitle": "", "sound": "every_tunnel:event.level_transition"},
+    }, indent=1) + "\n"
+
+
 def chunk_count(box):
     return (box[3] // 16 - box[0] // 16 + 1) * (box[5] // 16 - box[2] // 16 + 1)
 
 
-def wait_and_go(functions, name, area, y, work):
+def wait_and_go(functions, name, area, y, work, release=True):
     """`<name>_wait`, run by a schedule once `area` (x0, _, z0, x1, _, z1) is being force-loaded:
     it asks for another look in 5 ticks first, then, if every corner is loaded (at height y),
     runs `<name>_go`, which calls that look off, runs the `work` commands and releases the
@@ -883,7 +1024,7 @@ def wait_and_go(functions, name, area, y, work):
         f"execute {loaded} run function garage:{name}_go",
     ]) + "\n")
     (functions / f"{name}_go.mcfunction").write_text("\n".join(
-        [f"schedule clear garage:{name}_wait"] + work + [f"forceload remove {area[0]} {area[2]} {area[3]} {area[5]}"]) + "\n")
+        [f"schedule clear garage:{name}_wait"] + work + ([f"forceload remove {area[0]} {area[2]} {area[3]} {area[5]}"] if release else [])) + "\n")
 
 
 def write_pack(name, cmds, box, previous, level=None, offset=None, level2=None, joint=None, stage3=None):
@@ -942,8 +1083,8 @@ def write_pack(name, cmds, box, previous, level=None, offset=None, level2=None, 
         # The second stage, Level 3, the same way in its own area: build_now schedules
         # level3_build, which ends with `/everytunnel rebuilt`; clear_now schedules level3_clear.
         b3 = stage3["box"]
-        area3 = b3 if stage3["previous"] is None else (min(b3[0], stage3["previous"][0]), 0, min(b3[2], stage3["previous"][2]),
-                                                       max(b3[3], stage3["previous"][3]), 0, max(b3[5], stage3["previous"][5]))
+        joined = [b for b in (b3, stage3["previous"], *stage3["extra_clear"]) if b is not None]
+        area3 = (min(b[0] for b in joined), 0, min(b[2] for b in joined), max(b[3] for b in joined), 0, max(b[5] for b in joined))
         if chunk_count(area3) > 256:
             raise SystemExit(f"Level 3 spans {chunk_count(area3)} chunks; /forceload takes at most 256: make it smaller")
         forceload3 = f"forceload add {area3[0]} {area3[2]} {area3[3]} {area3[5]}"
@@ -953,8 +1094,17 @@ def write_pack(name, cmds, box, previous, level=None, offset=None, level2=None, 
             wait_and_go(functions, f"level3_{stage}", area3, b3[1], [f"function garage:level3_{now}"])
         (functions / "level3_now.mcfunction").write_text("\n".join(stage3["cmds"]) + "\n")
         (functions / "level3_clear_now.mcfunction").write_text("\n".join(
-            without_drops(fills(*b3, "minecraft:air"), [b3]) + kill_observers(b3) + [cleared]) + "\n")
+            without_drops([f for b in (b3, *stage3["extra_clear"]) for f in fills(*b, "minecraft:air")], [b3, *stage3["extra_clear"]])
+            + kill_observers(b3) + [cleared]) + "\n")
         stage3["chunks"] = chunk_count(area3)
+        # Level 4, built in play: LoungeHooks runs level4_begin, the wait says when the chunks are
+        # there (`everytunnel loungeready`), and then it runs the steps in turn.
+        area4 = stage3["area4"]
+        (functions / "level4_begin.mcfunction").write_text("\n".join(
+            [f"forceload add {area4[0]} {area4[2]} {area4[3]} {area4[5]}", "schedule function garage:level4_wait 5t replace"]) + "\n")
+        wait_and_go(functions, "level4", area4, b3[1], ["everytunnel loungeready"], release=False)
+        for k, step in enumerate(stage3["steps4"]):
+            (functions / f"level4_step_{k}.mcfunction").write_text("\n".join(step) + "\n")
     tags = pack / "data" / "minecraft" / "tags" / "functions"
     tags.mkdir(parents=True)
     for tag in ("load",) if mod else ("load", "tick"):
@@ -966,6 +1116,7 @@ def write_pack(name, cmds, box, previous, level=None, offset=None, level2=None, 
         (levels / "level_2.json").write_text(next_level_json(level, level2, offset, joint))
         if stage3:
             (levels / "level_3.json").write_text(stage3["json"])
+            (levels / "level_4.json").write_text(stage3["json4"])
     with zipfile.ZipFile(OUT / f"{name}.zip", "w", zipfile.ZIP_DEFLATED) as z:
         for f in sorted(pack.rglob("*")):
             if f.is_file():
@@ -1000,6 +1151,7 @@ def main():
     last = json.loads(state_file.read_text()) if state_file.exists() else {}
     previous = tuple(last["box"]) if "box" in last else None
     previous3 = tuple(last["box3"]) if "box3" in last else None
+    previous4 = tuple(last["box4"]) if "box4" in last else None
 
     p2 = SimpleNamespace(**dict(vars(p), **LEVEL_2))
     levels, levels2, joints = {}, {}, {}
@@ -1022,6 +1174,14 @@ def main():
     if shared:
         raise SystemExit(f"LEVEL_3 STAND_INS: Levels 1 and 2 use {', '.join(shared)}; pick blocks they never use")
     report3 = OC.walk(lv3) + OC.enclosed(lv3)
+
+    # Level 4, mod only: its plan and blocks; its stand-ins must be its own as well.
+    lv4 = Lounge(LEVEL_4).compose()
+    used |= {s.split("[")[0] for s in p3.STAND_INS.values()} | {s.split("[")[0] for s in lv3.world.blocks.values()}
+    shared4 = sorted({s.split("[")[0] for s in LEVEL_4["STAND_INS"].values()} & used)
+    if shared4:
+        raise SystemExit(f"LEVEL_4 STAND_INS: other levels use {', '.join(shared4)}; pick blocks they never use")
+    report4 = LC.walled(lv4) + LC.steps(lv4) + LC.walk(lv4)
     if gv.wall != gm.wall or gv.pillar != gm.pillar or gv.pieces != gm.pieces:
         raise SystemExit("internal error: sign texts differ between the vanilla and mod builds")
 
@@ -1043,8 +1203,25 @@ def main():
     outside = [pos for pos in blocks3 if pos[2] == door[2] and not (box[0] <= pos[0] <= box[3] and box[1] <= pos[1] <= box[4])]
     if outside:
         raise SystemExit(f"Level 3: blocks in the joint's wall row outside the first stage's clear box, e.g. {outside[:3]}")
-    cmds3 = level3_commands(blocks3, box3, previous3)
-    stage3 = dict(cmds=cmds3, box=box3, previous=previous3, json=level3_json(lv3, place3))
+    # The diploma corridor stands with Level 3, behind the door to B4. In that door's wall Level 3 wins.
+    door4 = place3.cell(*lv3.l4_door)
+    if door4[0] != lv4.world(*LEVEL_4["B4_DOOR"])[0] or door4[2] != lv4.world(*LEVEL_4["B4_DOOR"])[1] or door4[1] != LEVEL_4["FLOOR_Y"] + 1:
+        raise SystemExit(f"Level 4: Level 3's door to B4 is at {door4}; LEVEL_4's B4_DOOR, PLACE_X, PLACE_Z and FLOOR_Y say otherwise")
+    clashes4 = [pos for pos in lv4.corridor_blocks if pos in blocks3 and pos[0] != door4[0]]
+    if clashes4:
+        raise SystemExit(f"Level 4's corridor overlaps Level 3 at {len(clashes4)} blocks, e.g. {clashes4[:3]}")
+    if lv4.box[4] >= box[1]:
+        raise SystemExit(f"Level 4 reaches y {lv4.box[4]}, into the first stage's clear box from y {box[1]}")
+    for pos, st in lv4.corridor_blocks.items():
+        blocks3.setdefault(pos, st)
+    clear4 = sorted({lv4.box, previous4} - {None})
+    cmds3 = level3_commands(blocks3, box3, previous3, clear4)
+    steps4 = level4_steps(lv4, box3)
+    area4 = lv4.area(box3)
+    if chunk_count(area4) > 256:
+        raise SystemExit(f"Level 4's build spans {chunk_count(area4)} chunks; /forceload takes at most 256")
+    stage3 = dict(cmds=cmds3, box=box3, previous=previous3, json=level3_extras(level3_json(lv3, place3), lv4, door4),
+                  extra_clear=clear4, area4=area4, steps4=steps4, json4=level4_json(lv4))
 
     counts = {}
     for variant, level in levels.items():
@@ -1063,6 +1240,7 @@ def main():
 
     resource_zip, textures = T.build_pack(p, v.glyphs)
     resource_zip, textures3 = OT.add_to_pack(resource_zip, p3)
+    resource_zip, textures4 = LT.add_to_pack(resource_zip, LEVEL_4, TEXTURE_SEED, PBR["RELIEF"])
     (OUT / "level_resources.zip").write_bytes(resource_zip)
     size3 = (box3[3] - box3[0] + 1, box3[5] - box3[2] + 1)
     stats3 = [
@@ -1076,6 +1254,12 @@ def main():
     OV.write(OUT / "level3_preview.png", lv3, stats3)
     OV.write(OUT / "level3_furniture.png", lv3, stats3[:1], s=9)
     V.write_texture_sheet(OUT / "level3_texture_sheet.png", textures3)
+    stats4 = report4 + [
+        f"B4: {len(lv4.lounge_blocks)} blocks, corridor {len(lv4.corridor_blocks)}, {len(lv4.lamps)} lamps; world box {lv4.box}; "
+        f"{len(steps4)} steps over {chunk_count(area4)} chunks",
+    ]
+    LV.write(OUT / "level4_preview.png", lv4, stats4)
+    V.write_texture_sheet(OUT / "level4_texture_sheet.png", textures4)
     lights = {}
     for _, _, state in v.fixtures:
         lights[state] = lights.get(state, 0) + 1
@@ -1101,11 +1285,11 @@ def main():
     V.write_level(OUT / "level_preview.png", v, stats)
     V.write_texture_sheet(OUT / "texture_sheet.png", textures)
     V.write_pbr_sheet(OUT / "pbr_sheet.png", textures)
-    state_file.write_text(json.dumps({"box": box, "box3": box3}) + "\n")
+    state_file.write_text(json.dumps({"box": box, "box3": box3, "box4": lv4.box}) + "\n")
 
     stats.append(MS.write(p, REPO / "src" / "main" / "resources" / "assets" / "every_tunnel"))
 
-    for line in stats + stats3 + report3[1:]:
+    for line in stats + stats3 + report3[1:] + stats4:
         print(line)
     if min(r["line_of_sight"] for r in reports) < 30:
         print("WARNING: a hall has a clear line of sight under 30 blocks")

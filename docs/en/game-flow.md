@@ -20,7 +20,9 @@ flowchart TD
     K -->|keycard| L[Every light goes out]
     L -->|EXIT door| M[Spiral stairs down to B3]
     M --> P[Level 3, B3: offices, library, bunker]
-    P -->|door to B4| N[End of demo: footsteps behind, credits]
+    P -->|door to B4| Q[Diploma corridor: Level 3 erased, Level 4 built]
+    Q --> R[Level 4, B4: VIP lounge]
+    R -->|big door, not yet| N[End of demo: footsteps behind, credits]
     N --> C
     I -.->|death| O[Fade to black, restart level]
     K -.->|death| O
@@ -287,7 +289,7 @@ silent.
   about 90 blocks of lit concrete, 3 wide, in four legs at right angles (`BUNKER["path"]`),
   pipes along the ceiling on one side and a cable tray on the other, through two open blast
   doors (a hazard-striped steel frame, `hazard_steel`, and the leaf folded back against the
-  wall, `blast_door`), to the door to B4, where the demo ends. The Observer never follows
+  wall, `blast_door`), to the door to B4. The Observer never follows
   anyone down (the shaft and tunnel are tagged `observer_never`).
 - **The collapse** (`CollapseHooks`, timing in `systems.CollapseSchedule`): about 13 blocks
   before the door, the tunnel's ceiling comes down behind the player: a groan, cracks and the
@@ -297,10 +299,28 @@ silent.
   Level 3 (the player starts again at the antechamber), a new game and the map's rebuild clear
   the rubble.
 
-## 10. The end
+## 10. From Level 3 to Level 4
 
-`platform.EndingHooks`: at the end of Level 3's bunker corridor, in front of the door to
-B4, the player walks into a zone tagged `end`.
+`platform.LoungeHooks`. Level 4 stands in the space of Level 3, so it is built in play:
+
+- Walking up to the door to B4 opens it. Walking into the diploma corridor behind it (4 wide,
+  20 long, built with Level 3 under its floor) shuts it for good.
+- `garage:level4_begin` force-loads the area; `/everytunnel loungeready` says the chunks are
+  there. Then one `garage:level4_step_<n>` runs every 2 ticks: Level 3 goes and Level 4 goes up,
+  in small steps so the game does not stall.
+- After the last step the door to Reception opens.
+
+The corridor already belongs to Level 4, so "Level 4" shows as the door to B4 shuts, and going back
+into the corridor from Reception does not count as Level 3 again.
+
+The map's rebuild, whenever the world opens, puts Level 3 back and clears Level 4. So far Level 4
+is its rooms, textures and lights: no furniture, rules or puzzles yet, and its big door is a wall,
+so **the demo has no ending for now**.
+
+## 11. The end
+
+`platform.EndingHooks`: past Level 4's big door, on a dark stretch, the player walks into a zone
+tagged `end`.
 
 1. Five bare footsteps come down behind the player, each a little closer and lower (the
    Pale man's own step sound).

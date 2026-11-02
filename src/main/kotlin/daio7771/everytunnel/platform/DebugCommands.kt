@@ -41,6 +41,8 @@ import net.minecraft.util.Identifier
  * - `/everytunnel valves`: this game's valve digits, per level with valves (see [ValveHooks]).
  * - `/everytunnel boxes [fill]`, `/everytunnel books [fill]`: Level 3's box and book puzzles,
  *   where things are; `fill` does all but the last step (see [BoxHooks], [BookHooks]).
+ * - `/everytunnel loungeready`: run by the map's `garage:level4_go` when Level 4's chunks are
+ *   loaded: its build goes on ([LoungeHooks]).
  * - `/everytunnel rebuilt`: run by the map's `garage:build` after rebuilding the levels:
  *   puts the loot back ([NewGame.levelsRebuilt]).
  * - `/everytunnel progress [addpiece <level> <piece>]`: what the player has kept
@@ -55,6 +57,7 @@ object DebugCommands {
             val root = CommandManager.literal("everytunnel")
                 .requires { it.hasPermissionLevel(2) }
                 .then(CommandManager.literal("rebuilt").executes(::rebuilt))
+                .then(CommandManager.literal("loungeready").executes(::loungeReady))
             if (!DevWorlds.enabled) {
                 dispatcher.register(root)
                 return@register
@@ -275,6 +278,13 @@ object DebugCommands {
             reply(context, "No level $number. Levels: " + LevelManager.all().joinToString(", ") { "${it.order} (${it.id})" })
             return 0
         }
+        if (LoungeHooks.notBuiltYet(level)) {
+            // Level 4 does not stand until the corridor before it is walked into, which builds it.
+            if (LoungeHooks.toCorridor(player)) {
+                reply(context, "Level 4 is built from here: wait for the door at the end to open.")
+                return 1
+            }
+        }
         val start = level.spawnPoints.firstOrNull { RespawnHooks.TAG in it.tags }
         val world = context.source.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension)))
         if (start == null || world == null) {
@@ -336,6 +346,11 @@ object DebugCommands {
         val levels = BookHooks.fillAllButOne(context.source.server)
         reply(context, if (levels == 0) "No level has a book desk." else "The boxes are done and the books out, all but one already on the desk.")
         return levels
+    }
+
+    private fun loungeReady(context: CommandContext<ServerCommandSource>): Int {
+        LoungeHooks.chunksReady()
+        return 1
     }
 
     private fun rebuilt(context: CommandContext<ServerCommandSource>): Int {

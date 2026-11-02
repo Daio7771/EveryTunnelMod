@@ -53,7 +53,8 @@ object ObserverHooks {
         }
         LevelTriggers.register { change ->
             val levelId = change.current.levelId
-            if (change.levelChanged && levelId != null) spawnFor(levelId)
+            // Nobody to watch once Level 3 is erased (a spectator can still fly through its zones).
+            if (change.levelChanged && levelId != null && !LoungeHooks.levelThreeErased) spawnFor(levelId)
         }
     }
 
