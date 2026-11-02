@@ -357,7 +357,9 @@ Two more things, neither of which gives a piece:
    the card, once the Maintenance room has given it power (without power: "No power", and a note beside it).
    Without the card it does nothing.
 3. **The blackout:** taking the Master Key from the room's table puts out every lamp at once and lights
-   the red emergency lamps on the way back. A wet floor sign now stands in the middle of the Hall. The
+   the red emergency lamps on the way back. A wet floor sign now stands in the middle of the Hall, and, once the player has come round the pool (zone tag `cinema_wakes`), the Cinema
+   lights up by itself: an eye and INTRUDER DETECTED on its screen in a loop (`tools/film/eye.py`), the projector heard from
+   the Bar. The
    level stays safe, and the Security room's monitors stay on (`blackout` is there for the music of the
    audio phase).
 4. **The big door:** a dull knock without the key. With it the key is used and the door opens from the

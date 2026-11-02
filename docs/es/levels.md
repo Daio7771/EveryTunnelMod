@@ -140,6 +140,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `lights_stay` | `KeycardHooks` | Sus luces siguen encendidas al coger la tarjeta (el pozo de escaleras a B3) |
 | `end` | `EndingHooks` | Entrar termina la demo |
 | `big_door_shut` | `LoungeClosingHooks` | Al entrar se cierra de golpe la puerta grande, una vez abierta |
+| `cinema_wakes` | `LoungeClosingHooks` | Al entrar durante el apagón empieza el ojo del Cinema |
 | `b4_door_open` | `LoungeHooks` | Entrar abre la puerta a B4 |
 | `lounge_build` | `LoungeHooks` | Entrar cierra esa puerta, borra el nivel 3 y construye el 4 |
 | `lounge_door` | `LoungeHooks` | Sus puertas se abren cuando el nivel 4 está en pie (la de Reception) |

@@ -27,4 +27,13 @@ class FilmInfoTest {
         assertNull(FilmInfo.parse("""{ "fps": 12 }"""))
         assertNull(FilmInfo.parse("not json"))
     }
+
+    @Test
+    fun `a looped film goes round`() {
+        val film = FilmInfo(12, 24)
+        assertEquals(1, film.loopedFrameAt(0f))
+        assertEquals(24, film.loopedFrameAt(39.9f))
+        assertEquals(1, film.loopedFrameAt(40f))
+        assertEquals(1, film.loopedFrameAt(-3f))
+    }
 }

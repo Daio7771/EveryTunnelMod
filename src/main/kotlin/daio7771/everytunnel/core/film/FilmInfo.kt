@@ -22,6 +22,13 @@ data class FilmInfo(val fps: Int, val frames: Int) {
         return frame.takeIf { it <= frames }
     }
 
+    /** The frame (1 to [frames]) at [ticks] since it started, round and round. */
+    fun loopedFrameAt(ticks: Float): Int {
+        if (fps <= 0 || frames <= 0) return 1
+        val frame = (ticks.coerceAtLeast(0f) * fps / TICKS_PER_SECOND).toInt()
+        return frame % frames + 1
+    }
+
     companion object {
         private const val TICKS_PER_SECOND = 20
 

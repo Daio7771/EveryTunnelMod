@@ -152,7 +152,9 @@ PIPE_STATE = "every_tunnel:pipe[down=false,east=true,north=false,south=false,up=
 # The safes in the Suites, in Rowan's room and Daniel's: (the note inside, x, z, facing).
 SAFES = [("ch1_l4_note_diary_rowan", 16, 13, "east"), ("ch1_l4_note_diary_daniel", 23, 26, "west")]
 # big_door: its bottom left part. wet_sign: nothing stands there until the blackout.
-CLOSING_SPOTS = [("big_door", 47, -1, 1), ("wet_sign", 50, 20, 1), ("calm_reader", 85, 38, 2), ("breaker_counter", 69, 51, 3)] + [
+# cinema_glow: along the Cinema's aisle, where the screen's light is during the blackout.
+CLOSING_SPOTS = [("big_door", 47, -1, 1), ("wet_sign", 50, 20, 1), ("calm_reader", 85, 38, 2), ("breaker_counter", 69, 51, 3),
+                 ("cinema_glow_0", 18, 37, 2), ("cinema_glow_1", 24, 37, 2), ("cinema_glow_2", 30, 37, 2)] + [
     (f"breaker_{i}", x, z, 2) for i, (x, z) in enumerate(BREAKERS)]
 # The emergency lamps on the way back, on the walls, every 6 or so: (x, z, facing), at y 2 over their floor.
 EMERGENCY = [(90, 33, "east"), (90, 40, "east"), (88, 34, "south"),                                  # Calm room, steps

@@ -382,7 +382,9 @@ Dos cosas más, que no dan pieza:
    Sin la tarjeta, no hace nada.
 3. **El apagón:** coger la Master Key de la mesa de la sala apaga todas las lámparas a la vez y enciende
    las luces rojas de emergencia del camino de vuelta. Aparece un cartel de suelo mojado en medio del
-   Hall. El nivel sigue siendo seguro y los monitores de la Security room siguen encendidos (`blackout`
+   Hall, y, cuando el jugador ha rodeado la piscina (etiqueta de zona `cinema_wakes`), el Cinema se
+   enciende solo: un ojo e INTRUDER DETECTED en bucle en su pantalla (`tools/film/eye.py`),
+   con el proyector oyéndose desde el Bar. El nivel sigue siendo seguro y los monitores de la Security room siguen encendidos (`blackout`
    queda para la música de la fase de audio).
 4. **La puerta grande:** un golpe sordo sin la llave. Con ella, la llave se gasta y la puerta se abre del
    centro hacia fuera en 3 s.

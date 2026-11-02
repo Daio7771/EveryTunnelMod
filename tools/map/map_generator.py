@@ -388,6 +388,9 @@ LEVEL_4 = dict(
     # Behind Reception's east wall, by a passage 2 high: the Maintenance room, bare concrete and fluorescents.
     MAINTENANCE=dict(id="ch1_l4_maintenance", name="Maintenance", box=(60, 47, 70, 57), height=4, door_id="ch1_l4_door_maintenance",
                      passage=(58, 54, 60, 55), door=(58, 54), lights=[(63, 52), (67, 52)]),
+    # On the way back from the Calm room, the Cinema wakes on coming round the pool: its west side, the
+    # corridor and the Bar. A box (x0, z0, x1, z1), exclusive at the far side.
+    PAST_POOL=(37, 29, 74, 45),
     # Not stand-ins of its own: Level 3's bare concrete, the same look on purpose.
     SERVICE=dict(service_floor="minecraft:deepslate_tiles", service_wall="minecraft:smooth_basalt"),
     # The wall at the top of the steps, on its landing, with the Calm room's double door.

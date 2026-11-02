@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
+import net.minecraft.block.LightBlock
 import net.minecraft.entity.ItemEntity
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
@@ -27,7 +28,10 @@ import net.minecraft.util.math.Direction
  * - **The blackout:** taking the Master Key on the Calm room's table ([keyTaken], from [LootBlock]) puts
  *   out every lamp of the level at once and lights the emergency lamps ([EmergencyLampBlock]) on the way
  *   back to the Security room. A wet floor sign stands now in the middle of the Hall (`wet_sign`). The
- *   level stays safe, and the monitors stay on. [blackout] is for the music of the audio phase.
+ *   Cinema, off the way back, lights up by itself once the player has come round the pool (a zone tagged
+ *   [CINEMA_TAG]): an eye and INTRUDER DETECTED on its screen in a loop, the
+ *   projector heard from the Bar, its light flickering out of the door (`cinema_glow_<n>`). The level stays
+ *   safe, and the monitors stay on. [blackout] is for the music of the audio phase.
  * - **The big door** ([BigDoorBlock], `big_door`, its bottom left part): a dull knock, until the key
  *   is tried. Then the key is used and it opens from the centre out, over 3 s ([OPENING]).
  * - **The way out:** walking on into a zone tagged [SHUT_TAG], halfway along the dark stretch, slams it
@@ -39,10 +43,14 @@ import net.minecraft.util.math.Direction
 object LoungeClosingHooks {
 
     const val SHUT_TAG = "big_door_shut"
+    const val CINEMA_TAG = "cinema_wakes"
     private const val LEVEL_ID = "level_4"
     private const val STEP_TICKS = 30
     private const val KEEP_TICKS = 40
     private const val SEARCH_BLOCKS = 100.0
+    private const val GLOW_TICKS = 4
+    private const val GLOWS = 3
+    private val GLOW_LEVELS = 7..10
 
     /** Which columns go at each step, from the centre out. */
     private val OPENING = listOf(listOf(2, 3), listOf(1, 4), listOf(0, 5))
@@ -53,6 +61,8 @@ object LoungeClosingHooks {
     private var doorFacing: Direction? = null
     private var openingTicks = -1
     private var shut = false
+
+    private var cinemaAwake = false
 
     /** The lights went out. */
     var blackout = false
@@ -68,13 +78,17 @@ object LoungeClosingHooks {
             val tags = change.enteredZones.flatMap { key -> LevelManager.get(key.levelId)?.zone(key.zoneId)?.tags ?: emptyList() }
             val server = server
             if (SHUT_TAG in tags && server != null) slam(server)
+            if (CINEMA_TAG in tags && server != null && blackout && !cinemaAwake) wakeCinema(server)
         }
         ServerTickEvents.END_SERVER_TICK.register(::tick)
     }
 
     /** A new game, or the map rebuilt. */
     fun reset() {
+        val running = server?.takeIf { it.isRunning }
+        if (cinemaAwake && running != null) LevelManager.get(LEVEL_ID)?.let { LoungePuzzleHooks.sendFilm(running, it, "", false) }
         blackout = false
+        cinemaAwake = false
         doorFacing = null
         openingTicks = -1
         shut = false
@@ -126,6 +140,23 @@ object LoungeClosingHooks {
             openingTicks = if (step < OPENING.size) openingTicks + 1 else -1
         }
         if (server.ticks % KEEP_TICKS == 0) keepDropped(server)
+        if (cinemaAwake && server.ticks % GLOW_TICKS == 0) flicker(server)
+    }
+
+    private fun wakeCinema(server: MinecraftServer) {
+        val level = LevelManager.get(LEVEL_ID) ?: return
+        cinemaAwake = true
+        LoungePuzzleHooks.sendFilm(server, level, "film_eye", true)
+        EveryTunnel.LOGGER.info("The Cinema wakes")
+    }
+
+    /** The screen's light on the Cinema, uneven as a film's: invisible light blocks along its aisle. */
+    private fun flicker(server: MinecraftServer) {
+        val (level, world) = place(server) ?: return
+        for (i in 0 until GLOWS) {
+            val at = pointOf(level, "cinema_glow_$i") ?: continue
+            world.setBlockState(at, Blocks.LIGHT.defaultState.with(LightBlock.LEVEL_15, GLOW_LEVELS.random()))
+        }
     }
 
     private fun openStep(server: MinecraftServer, cols: List<Int>) {

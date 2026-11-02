@@ -306,6 +306,11 @@ class Lounge:
         ax, _, az = self.at(px0, 0, pz0)
         bx, _, bz = self.at(px1 - 1, 0, pz1 - 1)
         out.append(("ch1_l4_pool", (min(ax, bx), y + 1 - self.p["POOL"]["depth"], min(az, bz), max(ax, bx), y, max(az, bz)), []))
+        # Round the pool, on the way back: the Cinema wakes.
+        x0, z0, x1, z1 = self.p["PAST_POOL"]
+        ax, _, az = self.at(x0, 0, z0)
+        bx, _, bz = self.at(x1 - 1, 0, z1 - 1)
+        out.append(("ch1_l4_past_pool", (min(ax, bx), y + 1, min(az, bz), max(ax, bx), y + 5, max(az, bz)), ["cinema_wakes"]))
         # The projection booth: to be out of it is to be where the film is seen.
         ax, _, az = self.at(*self.p["BOOTH"][:1], 0, self.p["BOOTH"][1])
         bx, _, bz = self.at(self.p["BOOTH"][2] - 1, 0, self.p["BOOTH"][3] - 1)

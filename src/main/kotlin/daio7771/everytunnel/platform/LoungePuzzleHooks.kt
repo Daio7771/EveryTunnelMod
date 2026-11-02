@@ -54,7 +54,7 @@ object LoungePuzzleHooks {
     /** A film that cannot be read still gives the piece, after this long. */
     private const val FALLBACK_FILM_TICKS = 100
 
-    /** To the client: the film starts. Payload: screen corners x0, x1, y0, y1 and its z, then the projector's x, y, z. */
+    /** To the client: a film starts. Payload: screen corners x0, x1, y0, y1 and its z, the projector's x, y, z, the folder of its frames (empty: stop), whether it loops. */
     val FILM_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "film")
     private const val SYNC_TICKS = 20
 
@@ -207,6 +207,11 @@ object LoungePuzzleHooks {
         if (info == null) EveryTunnel.LOGGER.warn("No film to show (assets/every_tunnel/film/film.json)")
         filmTicks = info?.ticks ?: FALLBACK_FILM_TICKS
         EveryTunnel.LOGGER.info("The film runs, {} s", filmTicks / 20)
+        sendFilm(server, level, "film", false)
+    }
+
+    /** The blackout: the eye on the screen, round and round. Empty [folder]: nothing any more. */
+    fun sendFilm(server: MinecraftServer, level: LevelDefinition, folder: String, loop: Boolean) {
         val a = level.spawnPoint("film_screen_a")?.position ?: return
         val b = level.spawnPoint("film_screen_b")?.position ?: return
         val projector = level.spawnPoint("projector")?.position ?: return
@@ -221,6 +226,8 @@ object LoungePuzzleHooks {
             buf.writeDouble(projector.x)
             buf.writeDouble(projector.y)
             buf.writeDouble(projector.z)
+            buf.writeString(folder)
+            buf.writeBoolean(loop)
             ServerPlayNetworking.send(player, FILM_PACKET_ID, buf)
         }
     }
