@@ -22,9 +22,9 @@ import net.minecraft.world.GameRules
  *   bone meal, hoes, ...): survival players get the `allowModifyWorld` ability set
  *   to false, the same flag Adventure mode uses. Doors, buttons and levers still
  *   work.
- * - Mob spawning: spawn related gamerules are set to false when a world with
- *   levels starts and after `/reload`. They are not restored automatically if the
- *   levels are removed (change them with /gamerule).
+ * - Mob spawning and health: spawn related gamerules and natural regeneration are set to
+ *   false when a world with levels starts and after `/reload`. They are not restored
+ *   automatically if the levels are removed (change them with /gamerule).
  * - Difficulty: set to Normal and locked at the same moments. On Peaceful vanilla
  *   discards hostile mobs (the Pale man) the tick they spawn, mob hits deal no damage
  *   and health regenerates, so the levels are only balanced for one difficulty. The
@@ -32,12 +32,14 @@ import net.minecraft.world.GameRules
  */
 object WorldRulesHooks {
 
-    private val SPAWN_GAMERULES = listOf(
+    private val GAMERULES_OFF = listOf(
         GameRules.DO_MOB_SPAWNING,
         GameRules.DO_PATROL_SPAWNING,
         GameRules.DO_TRADER_SPAWNING,
         GameRules.DO_INSOMNIA,
         GameRules.DO_WARDEN_SPAWNING,
+        // Hunger is held full (ResourceHooks), so health would come back by itself: only food and beds heal.
+        GameRules.NATURAL_REGENERATION,
     )
 
     private val DIFFICULTY = Difficulty.NORMAL
@@ -80,7 +82,7 @@ object WorldRulesHooks {
     private fun applyGameRules(server: MinecraftServer) {
         if (!WorldRules.active) return
         val changed = mutableListOf<String>()
-        for (key in SPAWN_GAMERULES) {
+        for (key in GAMERULES_OFF) {
             val rule = server.gameRules.get(key)
             if (rule.get()) {
                 rule.set(false, server)

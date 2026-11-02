@@ -30,8 +30,8 @@ class WarmLampBlock(settings: Settings) : Block(settings) {
     companion object {
         val LIT: BooleanProperty = BooleanProperty.of("lit")
 
-        /** A little under the fluorescents' 13: the lounge is soft, not bright. */
-        private const val LIGHT_LEVEL = 12
+        /** A little over the fluorescents' 13: the lounge is the one place that feels well lit. */
+        private const val LIGHT_LEVEL = 14
 
         private val SHAPE: VoxelShape = createCuboidShape(4.0, 13.0, 4.0, 12.0, 16.0, 12.0)
 

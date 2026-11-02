@@ -57,6 +57,7 @@ object GameplayConfigParser {
             configVersion = GameplayConfig.CURRENT_VERSION,
             stamina = stamina(fields.child("stamina"), defaults.stamina),
             thirst = thirst(fields.child("thirst"), defaults.thirst),
+            food = food(fields.child("food"), defaults.food),
             flashlight = flashlight(fields.child("flashlight"), defaults.flashlight),
             noise = noise(fields.child("noise"), defaults.noise),
             paleMan = paleMan(fields.child("pale_man"), defaults.paleMan),
@@ -72,6 +73,11 @@ object GameplayConfigParser {
         regenPerSecond = f.double("regen_per_second", d.regenPerSecond, min = 0.0),
         regenDelaySeconds = f.double("regen_delay_seconds", d.regenDelaySeconds, min = 0.0),
         exhaustedRecoverPercent = f.double("exhausted_recover_percent", d.exhaustedRecoverPercent, min = 0.0, max = 100.0),
+    ).also { f.reportUnknownKeys() }
+
+    private fun food(f: JsonFields, d: FoodConfig) = FoodConfig(
+        heal = f.double("heal", d.heal, min = 0.0),
+        eatSeconds = f.double("eat_seconds", d.eatSeconds, min = 0.05, max = 10.0),
     ).also { f.reportUnknownKeys() }
 
     private fun thirst(f: JsonFields, d: ThirstConfig) = ThirstConfig(

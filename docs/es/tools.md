@@ -76,6 +76,7 @@ las oficinas.
 | Módulo | Función |
 |---|---|
 | `level.py` | El nivel a partir de `LEVEL_4`: sus espacios, la carcasa a su alrededor, lámparas, puertas y escalones, en dos conjuntos de bloques (el pasillo, construido con el nivel 3; el resto, en plena partida) |
+| `furnish.py` | Los muebles, las nueve notas y el botín, sala por sala, con huecos libres para lo que traen los puzles |
 | `checks.py` | Un recorrido desde Reception que llega a cada celda, una pared entre todas las salas, tres escalones hasta la Calm room; detienen el generador |
 | `textures.py` | Las texturas propias del nivel 4 (moqueta burdeos, nogal con banda de latón, paredes y techo crema), añadidas al pack del mundo |
 | `preview.py` | Plano visto desde arriba del nivel 4 con medidas y aberturas. `python3 -m lounge.preview` desde `tools/map` lo dibuja solo, sin instalar nada |
@@ -96,7 +97,7 @@ generador basta con abrir el mundo. `/function garage:build` reconstruye a mano.
 
 ## Bloques
 
-`tools/blocks/generate.py` hace los recursos de los 76 bloques del mod. Los bloques en sí
+`tools/blocks/generate.py` hace los recursos de los 88 bloques del mod. Los bloques en sí
 (propiedades, formas, sonidos) se registran en Kotlin (`platform/ModBlocks.kt`); la
 herramienta **se detiene si las dos listas de ids no coinciden**. Las rotaciones de los
 modelos deben coincidir con las formas de `platform/BlockShapes.kt`. Las texturas reutilizan

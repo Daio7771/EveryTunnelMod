@@ -73,6 +73,7 @@ the offices.
 | Module | Job |
 |---|---|
 | `level.py` | The level from `LEVEL_4`: its spaces, the shell round them, lamps, doors and steps, in two sets of blocks (the corridor, built with Level 3; the rest, built in play) |
+| `furnish.py` | The furniture, the nine notes and the loot, room by room, with gaps kept clear for what the puzzles bring |
 | `checks.py` | A walk from Reception reaching every cell, a wall between all rooms, three steps down to the Calm room; they stop the generator |
 | `textures.py` | Level 4's own textures (burgundy carpet, walnut with a brass strip, cream walls and ceiling), added to the world's pack |
 | `preview.py` | Top-down plan of Level 4 with sizes and openings. `python3 -m lounge.preview` from `tools/map` draws it alone, installing nothing |
@@ -92,7 +93,7 @@ just open the world. `/function garage:build` rebuilds by hand. See [Levels](lev
 
 ## Blocks
 
-`tools/blocks/generate.py` makes the assets of the mod's 76 blocks. The blocks themselves
+`tools/blocks/generate.py` makes the assets of the mod's 88 blocks. The blocks themselves
 (properties, shapes, sounds) are registered in Kotlin (`platform/ModBlocks.kt`); the tool
 **stops if the two id lists disagree**. Model rotations must match the shapes in
 `platform/BlockShapes.kt`. Textures reuse the map's painters (`garage/textures.py`), so

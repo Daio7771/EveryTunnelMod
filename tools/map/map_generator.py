@@ -356,50 +356,51 @@ LEVEL_3 = dict(
 # from a fixed camera at the west end of its aisle, looking east to a closed emergency door
 # under a lit EXIT sign (garage/menu_scene.py). Its lamps flicker now and then in the menu.
 # Level 4 (B4), the VIP lounge. Plan coordinates as in Level 3: x east, z south, boxes (x0, z0, x1, z1)
-# with x1 and z1 exclusive, the sizes are of the air inside. The rooms that touch in the user's table
-# (Security, Hall, Bar) are moved apart for a wall: Hall and its side rooms 1 south, the rest 2.
+# with x1 and z1 exclusive, the sizes are of the air inside. The user's table, with its rooms at 2/3 (its
+# corridors kept) and a wall between the rooms that touched (Security, Hall, Bar).
 LEVEL_4 = dict(
     TITLE="Level 4",
     FLOOR_Y=9,                       # the world y of the main floor's blocks (the B4 door's floor)
     # (id, name, box, height, kind); kinds: "piece" gives a piece, "rest", "key", "neutral".
     ROOMS=[
-        ("ch1_l4_security", "Security room", (35, 0, 65, 16), 5, "neutral"),
-        ("ch1_l4_hall", "Hall", (43, 17, 57, 41), 5, "neutral"),
-        ("ch1_l4_bar", "Bar lounge", (30, 42, 70, 66), 7, "piece"),
-        ("ch1_l4_cinema", "Cinema", (0, 44, 24, 64), 5, "piece"),
-        ("ch1_l4_spa", "Spa and pool", (76, 44, 100, 64), 5, "piece"),
-        ("ch1_l4_suites", "Suites", (6, 19, 30, 39), 5, "rest"),
-        ("ch1_l4_game", "Game room", (70, 19, 94, 39), 5, "piece"),
-        ("ch1_l4_reception", "Reception", (38, 72, 62, 84), 5, "neutral"),
+        ("ch1_l4_security", "Security room", (40, 0, 60, 11), 4, "neutral"),
+        ("ch1_l4_hall", "Hall", (45, 12, 55, 28), 4, "neutral"),
+        ("ch1_l4_bar", "Bar lounge", (37, 29, 64, 45), 5, "piece"),
+        ("ch1_l4_cinema", "Cinema", (15, 30, 31, 44), 4, "piece"),
+        ("ch1_l4_spa", "Spa and pool", (70, 30, 86, 44), 4, "piece"),
+        ("ch1_l4_suites", "Suites", (16, 13, 32, 27), 4, "rest"),
+        ("ch1_l4_game", "Game room", (68, 13, 84, 27), 4, "piece"),
+        ("ch1_l4_reception", "Reception", (42, 51, 58, 59), 4, "neutral"),
     ],
     # Lower than the rest: (id, name, box, height, kind, floor relative to the main floor).
-    CALM_ROOM=("ch1_l4_calm", "Calm room", (104, 44, 124, 64), 5, "key", -3),
+    CALM_ROOM=("ch1_l4_calm", "Calm room", (90, 30, 104, 44), 4, "key", -3),
     # Corridors 6 wide, open onto the rooms they join; height as the rooms'.
+    CORRIDOR_HEIGHT=4,
     CORRIDORS=[
-        ("ch1_l4_corridor_reception", (47, 66, 53, 72)),
-        ("ch1_l4_corridor_cinema", (24, 51, 30, 57)),
-        ("ch1_l4_corridor_spa", (70, 51, 76, 57)),
-        ("ch1_l4_corridor_suites", (30, 26, 43, 32)),
-        ("ch1_l4_corridor_game", (57, 26, 70, 32)),
+        ("ch1_l4_corridor_reception", (47, 45, 53, 51)),
+        ("ch1_l4_corridor_cinema", (31, 34, 37, 40)),
+        ("ch1_l4_corridor_spa", (64, 34, 70, 40)),
+        ("ch1_l4_corridor_suites", (32, 17, 45, 23)),
+        ("ch1_l4_corridor_game", (55, 17, 68, 23)),
     ],
     # Down to the Calm room, west to east: one cell of landing, then one step down per cell.
-    STEPS=("ch1_l4_steps", (100, 51, 104, 57)),
+    STEPS=("ch1_l4_steps", (86, 34, 90, 40)),
     # Openings through the one-block walls: (id, axis of the wall's line, line, first cell, width, height, kind).
     OPENINGS=[
-        ("ch1_l4_arch_bar", "z", 41, 47, 6, 4, "arch"),
-        ("ch1_l4_door_security", "z", 16, 49, 2, 2, "door"),
-        ("ch1_l4_door_reception", "z", 84, 50, 2, 2, "steel_door"),
-        ("ch1_l4_door_big", "z", -1, 47, 6, 5, "big_door"),      # a plain wall until the level's closing phase
+        ("ch1_l4_arch_bar", "z", 28, 47, 6, 4, "arch"),
+        ("ch1_l4_door_security", "z", 11, 49, 2, 2, "door"),
+        ("ch1_l4_door_reception", "z", 59, 50, 2, 2, "steel_door"),
+        ("ch1_l4_door_big", "z", -1, 47, 6, 4, "big_door"),      # a plain wall until the level's closing phase
     ],
     # Between the door to B4 and Reception: 4 wide, 20 long, diplomas on its walls.
-    DIPLOMA_CORRIDOR=("ch1_l4_diplomas", "Diploma corridor", (49, 85, 53, 105), 4),
-    B4_DOOR=(50, 105),               # its cell (x, z) in the corridor's far wall; world (33, 10, 119)
+    DIPLOMA_CORRIDOR=("ch1_l4_diplomas", "Diploma corridor", (49, 60, 53, 80), 4),
+    B4_DOOR=(50, 80),                # its cell (x, z) in the corridor's far wall; world (33, 10, 119)
     # Past the big door, dark: walking it starts the credits (the end of v0.4).
-    EXIT_STRETCH=("ch1_l4_exit", "Dark stretch", (47, -17, 53, -1), 5),
-    START=(50, 80),                  # the checkpoint, in Reception, facing north
+    EXIT_STRETCH=("ch1_l4_exit", "Dark stretch", (47, -17, 53, -1), 4),
+    START=(50, 55),                  # the checkpoint, in Reception, facing north
     # Plan to world: the plan's north is the world's west, so the level meets the corridor from B4:
     # world x = z + PLACE_X, world z = PLACE_Z - x.
-    PLACE_X=-72,
+    PLACE_X=-47,
     PLACE_Z=169,
     # Stand-in blocks re-skinned by Level 4's textures (lounge/textures.py). Never a block another
     # level uses: the world's resource pack re-skins a block everywhere.
@@ -410,11 +411,18 @@ LEVEL_4 = dict(
         cream="minecraft:lime_terracotta",
         ceiling="minecraft:pink_terracotta",
         stairs="minecraft:red_nether_brick_stairs",
+        calm_carpet="minecraft:cyan_terracotta",
+        calm_wall="minecraft:purple_terracotta",
     ),
+    # Thin walls inside rooms, (x0, z0, x1, z1): the Suites' four rooms round an inner corridor, and the
+    # Cinema's projection booth. A door in one: (x, z, open), on a wall along x. The furniture is in furnish.py.
+    PARTITIONS=[(16, 17, 32, 18), (16, 22, 32, 23), (24, 13, 25, 17), (24, 23, 25, 27), (26, 30, 27, 33), (26, 33, 31, 34)],
+    PARTITION_DOORS=[(20, 17, False), (28, 17, False), (20, 22, False), (28, 22, True), (28, 33, False)],
     # Beds in the Suites: the head's cell and the way it points, the foot on the far side.
-    BEDS=[(11, 19, "north"), (23, 19, "north"), (11, 38, "south"), (23, 38, "south")],
+    BEDS=[(19, 13, "north"), (27, 13, "north"), (19, 26, "south"), (27, 26, "south")],
     LAMP="every_tunnel:warm_lamp[lit=true]",
-    LAMP_SPACING=6,
+    LAMP_SPACING=5,
+    LAMP_SPACING_BAR=4,              # the Bar has the highest ceiling, so more of them
     DOORS=dict(door="minecraft:dark_oak_door", steel_door="every_tunnel:emergency_door"),
     # Level 3's door to B4 and the corridor behind it (the corridor is built with Level 3, the rest
     # in play: see level4_steps). A step holds at most so many commands and blocks changed.
@@ -1004,7 +1012,8 @@ def level4_json(lv4):
         "order": 4,
         "dimension": "minecraft:overworld",
         "zones": zones,
-        "spawn_points": [{"id": "player_start", "pos": [wx + 0.5, p["FLOOR_Y"] + 1, wz + 0.5], "yaw": 90, "tags": ["player"]}],
+        "spawn_points": [{"id": "player_start", "pos": [wx + 0.5, p["FLOOR_Y"] + 1, wz + 0.5], "yaw": 90, "tags": ["player"]}]
+        + [{"id": sid, "pos": list(pos), "yaw": 0, "tags": [tag]} for sid, pos, tag in lv4.furnish.spawn_points()],
         "entry": {"title": p["TITLE"], "subtitle": "", "sound": "every_tunnel:event.level_transition"},
         "safe": True,
     }, indent=1) + "\n"
@@ -1261,7 +1270,9 @@ def main():
         f"B4: {len(lv4.lounge_blocks)} blocks, corridor {len(lv4.corridor_blocks)}, {len(lv4.lamps)} lamps; world box {lv4.box}; "
         f"{len(steps4)} steps over {chunk_count(area4)} chunks",
     ]
-    LV.write(OUT / "level4_preview.png", lv4, stats4)
+    LV.write(OUT / "level4_preview.png", lv4, stats4 + [
+        "Green: open arch. Orange: door. Violet: big door. Red: door to B4. Blue dot: checkpoint. Black: furniture. "
+        "White boxes: gaps for puzzles. Dots: white notes, yellow batteries, cyan water, red food."])
     V.write_texture_sheet(OUT / "level4_texture_sheet.png", textures4)
     lights = {}
     for _, _, state in v.fixtures:

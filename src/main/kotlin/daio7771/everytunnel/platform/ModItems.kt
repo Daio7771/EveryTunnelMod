@@ -30,6 +30,10 @@ import net.minecraft.world.World
  * - Water bottle (`/give @s every_tunnel:water_bottle`): hold use for
  *   `thirst.drink_seconds` to drink it (see [DrinkHooks]); consumed outside Creative.
  *
+ * - Food (a plate, popcorn, a snack; `/give @s every_tunnel:food_plate`): hold use for
+ *   `food.eat_seconds` to eat it and get `food.heal` health back (see [FoodHooks]); the same
+ *   effect in all three. Consumed outside Creative.
+ *
  * - Keycard: the night guard's security card. Lost in Level 2; the exit's card reader
  *   ([CardReaderBlock]) only opens for a player carrying it.
  *
@@ -43,15 +47,27 @@ object ModItems {
     val WATER_BOTTLE: Item = WaterBottleItem(Item.Settings().maxCount(16))
     @JvmField
     val KEYCARD: Item = KeycardItem(Item.Settings().maxCount(1))
+    @JvmField
+    val FOOD_PLATE: Item = FoodItem(Item.Settings().maxCount(16))
+    @JvmField
+    val FOOD_POPCORN: Item = FoodItem(Item.Settings().maxCount(16))
+    @JvmField
+    val FOOD_SNACK: Item = FoodItem(Item.Settings().maxCount(16))
 
     fun register() {
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "battery"), BATTERY)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "water_bottle"), WATER_BOTTLE)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "keycard"), KEYCARD)
+        Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_plate"), FOOD_PLATE)
+        Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_popcorn"), FOOD_POPCORN)
+        Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_snack"), FOOD_SNACK)
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register { entries ->
             entries.add(BATTERY)
             entries.add(WATER_BOTTLE)
             entries.add(KEYCARD)
+            entries.add(FOOD_PLATE)
+            entries.add(FOOD_POPCORN)
+            entries.add(FOOD_SNACK)
         }
     }
 }
@@ -127,6 +143,36 @@ private class WaterBottleItem(settings: Settings) : Item(settings) {
     private companion object {
         const val FIRST_GULP_TICK = 3
         const val GULP_TICKS = 11
+    }
+}
+
+private class FoodItem(settings: Settings) : Item(settings) {
+
+    /** Read once per use from the config (which only changes on restart). */
+    private fun eatTicks(): Int = Math.round(ConfigManager.gameplay.food.eatSeconds * 20.0).toInt().coerceAtLeast(1)
+
+    override fun use(world: World, user: PlayerEntity, hand: Hand): TypedActionResult<ItemStack> {
+        val stack = user.getStackInHand(hand)
+        if (!FoodHooks.canEat(user)) {
+            if (user is ServerPlayerEntity) FoodHooks.explainRefused(user)
+            return TypedActionResult.fail(stack)
+        }
+        user.setCurrentHand(hand)
+        return TypedActionResult.consume(stack)
+    }
+
+    override fun getMaxUseTime(stack: ItemStack): Int = eatTicks()
+
+    // The eating pose, with vanilla's chewing sound and crumbs.
+    override fun getUseAction(stack: ItemStack): UseAction = UseAction.EAT
+
+    override fun finishUsing(stack: ItemStack, world: World, user: LivingEntity): ItemStack {
+        if (user is ServerPlayerEntity) FoodHooks.eat(user, stack)
+        return stack
+    }
+
+    override fun appendTooltip(stack: ItemStack, world: World?, tooltip: MutableList<Text>, context: TooltipContext) {
+        tooltip += Text.translatable("item.every_tunnel.food.tooltip").formatted(Formatting.GRAY)
     }
 }
 

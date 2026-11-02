@@ -88,7 +88,7 @@ con un comentario KDoc que cuenta más.
 | `PropBlock.kt` | Un prop de suelo orientado a uno de cuatro lados |
 | `ConnectingPropBlock.kt` | Tuberías, conductos y bandejas de cables que se conectan con sus vecinos |
 | `FluorescentLightBlock.kt` | La luz: encendida, parpadeante, apagada; nivel de luz 13, dibujada a brillo máximo |
-| `WarmLampBlock.kt` | La luz de techo del nivel 4: cálida y silenciosa, nivel de luz 12 |
+| `WarmLampBlock.kt` | La luz de techo del nivel 4: cálida y silenciosa, nivel de luz 14 |
 | `SuiteBedBlock.kt` | Una cama de las Suites del nivel 4, en dos bloques |
 | `SurfaceMarkBlocks.kt` | Manchas y charcos en cualquier cara |
 | `SignTileBlock.kt` | Textos pintados por ranura numerada (el pack del mundo los asigna) |
@@ -126,6 +126,7 @@ con un comentario KDoc que cuenta más.
 | `ResourceSyncPacket.kt` | El paquete de recursos al cliente |
 | `FlashlightHooks.kt` | La petición de encender la linterna, las baterías, los avisos |
 | `DrinkHooks.kt` | Beber botellas de agua |
+| `FoodHooks.kt` | Comer: devuelve vida |
 | `WaterDispenserHooks.kt` | Beber en un dispensador de agua que da agua (la cocina del nivel 3) |
 | `JumpCounter.kt` | Saltos por jugador a partir de la estadística de vanilla |
 | `NoiseHooks.kt` | Convierte pasos, saltos, aterrizajes, jadeos y game events en ruidos |

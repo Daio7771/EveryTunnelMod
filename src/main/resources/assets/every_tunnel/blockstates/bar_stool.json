@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/bar_stool"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/bar_stool",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/bar_stool",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/bar_stool",
+      "y": 270
+    }
+  }
+}

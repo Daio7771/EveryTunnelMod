@@ -27,7 +27,8 @@ import net.minecraft.util.math.BlockPos
  *   (`/everytunnel loungeready`, [chunksReady]) one function `garage:level4_step_<n>` runs every
  *   [STEP_TICKS], in order, until there is no next: Level 3 goes and Level 4 goes up. Small steps,
  *   written by the map generator, so the game does not stall while the player walks the corridor.
- *   Then the doors in zones tagged [LOUNGE_DOOR_TAG] open: the way into Reception.
+ *   Then its loot goes out ([LootSpawner]) and the doors in zones tagged [LOUNGE_DOOR_TAG] open:
+ *   the way into Reception.
  *
  * What stands is not saved: the map is rebuilt whenever the world opens ([levelsRebuilt]). A new
  * game in the same world (`/everytunnel newgame`) rebuilds it too, if any of this has begun.
@@ -98,6 +99,7 @@ object LoungeHooks {
             return
         }
         phase = Phase.BUILT
+        LevelManager.get(LEVEL_ID)?.let { LootSpawner.place(server, it) }
         openLoungeDoors(server)
         EveryTunnel.LOGGER.info(
             "Level 4 built in {} steps, {} s", nextStep, "%.1f".format(java.util.Locale.ROOT, (server.ticks - startTick) / 20.0),

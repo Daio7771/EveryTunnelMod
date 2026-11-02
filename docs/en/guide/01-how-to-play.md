@@ -8,7 +8,7 @@ is simple: get through the levels. Nobody said it would be easy.
 - **Move, jump, sprint, sneak:** your usual Minecraft keys.
 - **Flashlight:** the Flashlight key, F by default. You can change it in Options, Controls,
   Every Tunnel.
-- **Pick something up:** right-click it. Batteries and water bottles lie on the floor.
+- **Pick something up:** right-click it. Batteries, water bottles and food lie on the floor and on furniture.
 - **Drink or change the battery:** hold the use button (right-click by default) with the
   bottle or the battery in your hand.
 - **Doors and buttons:** right-click, as usual. You cannot break or place blocks.
@@ -19,11 +19,13 @@ is simple: get through the levels. Nobody said it would be easy.
 
 Four rows sit above your hotbar.
 
-- **Health** (hearts, bottom left). They shake when you are close to the end.
+- **Health** (hearts, bottom left). They shake when you are close to the end. They do not come
+  back by themselves.
 - **Stamina** (lungs, top left). Sprinting and jumping use it. Run it dry and you are out of
   breath: you cannot sprint until it comes back, and you pant. The lungs turn grey.
 - **Thirst** (drops, bottom right). It goes down slowly, faster while you sprint. Empty, it
   starts to hurt. Drink a water bottle, or from a dispenser that works, to fill it up.
+- **Food:** hold Use with it in your hand to eat. It brings health back.
 - **Battery** (top right). Your flashlight runs on it. When it blinks red, it is nearly
   dead and the light starts to fail. Put in a new battery before it dies.
 

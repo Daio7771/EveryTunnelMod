@@ -87,8 +87,28 @@ def ceiling_tex(rng, kind):
     return img
 
 
+def calm_carpet_tex(rng, kind):
+    """The Calm room's floor: a deep teal, with flecks of every colour."""
+    img = T.new((36, 104, 112))
+    T.noise(img, rng, 5)
+    for colour in ((214, 160, 60), (180, 70, 110), (120, 170, 210), (120, 80, 170)):
+        T.speckle(img, rng, 6, colour, 0.7)
+    return img
+
+
+def calm_wall_tex(rng, kind):
+    """The Calm room's walls: soft upright stripes in pastels."""
+    colours = ((226, 176, 186), (176, 206, 226), (196, 226, 190), (232, 214, 160))
+    img = T.new(colours[0])
+    for x in range(16):
+        for y in range(16):
+            T.px(img, x, y, colours[x // 4], 1.0)
+    T.noise(img, rng, 2)
+    return img
+
+
 def material_for(name):
-    if name.startswith("b4_carpet"):
+    if name.startswith(("b4_carpet", "b4_calm_carpet")):
         return CARPET
     if name.startswith("b4_rail"):
         return lambda x, y, c: BRASS if y < 3 else WALNUT
@@ -104,6 +124,8 @@ ROLES = {
     "rail": ("b4_rail", ["rail"], walnut_tex, False),
     "cream": ("b4_cream", ["plain", "plain", "figure"], cream_tex, False),
     "ceiling": ("b4_ceiling", ["panel"], ceiling_tex, True),
+    "calm_carpet": ("b4_calm_carpet", ["a", "a"], calm_carpet_tex, True),
+    "calm_wall": ("b4_calm_wall", ["a"], calm_wall_tex, False),
 }
 
 

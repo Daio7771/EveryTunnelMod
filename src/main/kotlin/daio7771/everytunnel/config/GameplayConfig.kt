@@ -16,6 +16,7 @@ data class GameplayConfig(
     val configVersion: Int = CURRENT_VERSION,
     val stamina: StaminaConfig = StaminaConfig(),
     val thirst: ThirstConfig = ThirstConfig(),
+    val food: FoodConfig = FoodConfig(),
     val flashlight: FlashlightConfig = FlashlightConfig(),
     val noise: NoiseConfig = NoiseConfig(),
     val paleMan: PaleManConfig = PaleManConfig(),
@@ -41,6 +42,13 @@ data class StaminaConfig(
      * has regenerated to this percentage of [max].
      */
     val exhaustedRecoverPercent: Double = 30.0,
+)
+
+data class FoodConfig(
+    /** Health points one food gives back (a player has 20: 8 is 4 hearts). */
+    val heal: Double = 8.0,
+    /** Seconds the use key is held to eat. */
+    val eatSeconds: Double = 1.5,
 )
 
 data class ThirstConfig(

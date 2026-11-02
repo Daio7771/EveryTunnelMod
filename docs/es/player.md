@@ -17,6 +17,8 @@ construir el mapa a mano.
   marca que usa Aventura. Puertas, botones y palancas siguen funcionando.
 - **Sin aparición de mobs de vanilla.** Las gamerules de aparición se ponen en false al
   arrancar el mundo y tras `/reload`. No se restauran si se quitan los niveles.
+- **Sin regeneración natural.** Igual: el hambre se mantiene llena, así que la vida volvería sola.
+  Solo curan la comida y las camas.
 - **Dificultad fijada en Normal.** En Pacífico vanilla borraría al Pale man en el mismo tick
   en que aparece, los golpes de mobs no harían daño y la vida se regeneraría.
 - **El uniforme del vigilante.** La skin de cada jugador es el uniforme
@@ -65,6 +67,12 @@ un trago cada medio segundo más o menos (`player.drink`, de una grabación CC0;
 `LivingEntityMixin` silencia el sorbo de vanilla) y un ruido para el Pale man. Un jugador
 lleno no puede beber ("You are not thirsty"). Se gasta fuera de Creativo.
 
+### Comer
+
+`ModItems` (`food_plate`, `food_popcorn`, `food_snack`, con el mismo efecto los tres),
+`platform.FoodHooks`: mantén pulsado usar 1,5 s para comer, +8 de vida (4 corazones). Hace un ruido
+como beber; con la vida llena no se puede comer ("You are not hurt"). Se consume fuera de Creativo.
+
 ### La linterna
 
 La linterna es **equipo integrado, no un objeto**: cada jugador tiene una y no se ve nada
@@ -92,8 +100,9 @@ La luz en sí se dibuja en el cliente, ver [Gráficos](graphics.md#la-linterna).
 `platform.LootSpawner` y `platform.LootBlock`:
 
 - La primera vez que un jugador entra en un nivel, se coloca un `LootBlock` en cada punto
-  de aparición con la etiqueta `battery`, `water` o `keycard`. El cliente lo dibuja como el
-  propio objeto, tumbado (`client.render.LootRenderer`); no tiene colisión.
+  de aparición con la etiqueta `battery`, `water`, `keycard`, `food_plate`, `food_popcorn` o `food_snack`. El cliente lo dibuja como el
+  propio objeto, tumbado (`client.render.LootRenderer`); no tiene colisión. El nivel 4, construido
+  en plena partida, recibe su botín cuando está en pie.
 - **Clic derecho** lo recoge; el sitio queda vacío.
 - Cada sitio se llena una vez por mundo (`every_tunnel_loot.dat`): lo recogido sigue
   recogido tras morir o reabrir el mundo, hasta que una partida nueva lo repone todo.
@@ -154,6 +163,9 @@ Cada clave y su valor por defecto:
 | `damage_interval_seconds` | 10 | ...cada tantos segundos |
 | `drink_restore` | 40 | Sed que devuelve una botella |
 | `drink_seconds` | 1.5 | Tiempo que se tarda en beber |
+| **`food`** | | |
+| `heal` | 8 | Vida que devuelve una comida |
+| `eat_seconds` | 1,5 | Tiempo que se tarda en comer |
 | **`flashlight`** | | |
 | `battery_max_seconds` | 180 | Segundos de luz de una batería llena |
 | `low_battery_warning_percent` | 20 | Por debajo, el HUD parpadea y el haz falla |

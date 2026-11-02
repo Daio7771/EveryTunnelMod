@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/nightstand"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/nightstand",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/nightstand",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/nightstand",
+      "y": 270
+    }
+  }
+}

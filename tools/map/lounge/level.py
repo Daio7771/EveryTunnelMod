@@ -11,6 +11,8 @@ The diploma corridor is built with Level 3 and the rest in play, when Level 3 is
 blocks come in two sets: corridor_blocks (with the wall and the door to Reception) and lounge_blocks.
 """
 
+from lounge.furnish import Furnish
+
 AROUND = [(dx, dy, dz) for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1) if (dx, dy, dz) != (0, 0, 0)]
 
 
@@ -38,7 +40,7 @@ class Lounge:
         self.rooms = [Space(sid, name, kind, box, height) for sid, name, box, height, kind in p["ROOMS"]]
         sid, name, box, height, kind, floor = p["CALM_ROOM"]
         self.rooms.append(Space(sid, name, kind, box, height, floor))
-        height = 5
+        height = p["CORRIDOR_HEIGHT"]
         self.corridors = [Space(sid, "", "corridor", box, height) for sid, box in p["CORRIDORS"]]
         sid, box = p["STEPS"]
         self.steps = Space(sid, "", "steps", box, height)
@@ -145,6 +147,17 @@ class Lounge:
                 for y in range(1, height + 1):
                     air[(k, y, line)] = 0
         corridor_air = self.carve_air([self.diplomas])
+        self.blocked = set()         # plan cells (x, z) nobody walks over: thin walls and solid furniture
+        partition_doors = {(x, z) for x, z, _ in p["PARTITION_DOORS"]}
+        for x0, z0, x1, z1 in p["PARTITIONS"]:
+            for x in range(x0, x1):
+                for z in range(z0, z1):
+                    door = (x, z) in partition_doors
+                    if not door:
+                        self.blocked.add((x, z))
+                    top = next(s.height for s in self.rooms if s.box[0] <= x < s.box[2] and s.box[1] <= z < s.box[3])
+                    for y in range(3 if door else 1, top + 1):
+                        air.pop((x, y, z), None)
         steel = {(x, y, z) for x, y, z, _ in self.door_cells("steel_door")}
         for c in steel:
             air.pop(c, None)             # shut until the level stands: a wall for both shells
@@ -158,10 +171,16 @@ class Lounge:
             return [(x, self.floors[(x, z)] + space.height, z) for x, z in cells]
 
         for s in self.rooms + self.corridors:
-            self.lamps += lamps(s, p["LAMP_SPACING"])
+            spacing = p["LAMP_SPACING_BAR"] if s.id == "ch1_l4_bar" else p["LAMP_SPACING"]
+            self.lamps += [c for c in lamps(s, spacing) if c in air]
         corridor_lamps = lamps(self.diplomas, 5)
         self.lamps += corridor_lamps
 
+        # The Calm room is the one colourful room.
+        calm = self.rooms[-1].box
+        for c, r in roles.items():
+            if calm[0] - 1 <= c[0] <= calm[2] and calm[1] - 1 <= c[2] <= calm[3]:
+                roles[c] = {"carpet": "calm_carpet", "cream": "calm_wall", "walnut": "calm_wall", "rail": "calm_wall"}.get(r, r)
         self.lounge_blocks = {self.at(*c): self.state(r) for c, r in roles.items()}
         self.corridor_blocks = {self.at(*c): self.state(r) for c, r in corridor_roles.items()}
         for x, y, z, st in self.door_cells("door"):
@@ -169,6 +188,10 @@ class Lounge:
         for x, y, z, st in self.door_cells("steel_door"):
             self.lounge_blocks[self.at(x, y, z)] = st
             self.corridor_blocks[self.at(x, y, z)] = st
+        for x, z, open_ in p["PARTITION_DOORS"]:
+            for y, half in ((1, "lower"), (2, "upper")):
+                self.lounge_blocks[self.at(x, y, z)] = (
+                    f"{p['DOORS']['door']}[facing=west,half={half},hinge=left,open={str(open_).lower()},powered=false]")
         for c in self.lamps:
             (self.corridor_blocks if c in corridor_lamps else self.lounge_blocks)[self.at(*c)] = p["LAMP"]
         # The steps down: the world's south is the plan's west, the way they climb.
@@ -183,6 +206,10 @@ class Lounge:
             dx, dz = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}[facing]
             for cell, head in (((x, z), "true"), ((x - dx, z - dz), "false")):
                 self.lounge_blocks[self.at(cell[0], 1, cell[1])] = f"every_tunnel:suite_bed[facing={world_facing[facing]},head={head}]"
+        for x, z, facing in p["BEDS"]:
+            dx, dz = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}[facing]
+            self.blocked |= {(x, z), (x - dx, z - dz)}
+        self.furnish = Furnish(self, {**air, **corridor_air}).lay()
         self.corridor_top = max(y for _, y, _ in self.corridor_blocks)
         self.box = self.bounds(self.lounge_blocks)
         return self

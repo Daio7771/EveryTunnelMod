@@ -49,6 +49,18 @@ object ModBlocks {
 
     val SUITE_BED: Block = register("suite_bed", SuiteBedBlock(props(MapColor.DULL_RED, BlockSoundGroup.WOOL)))
 
+    // --- Level 4's furniture: walnut, burgundy and brass --------------------------------
+    val CINEMA_SEAT: Block = register("cinema_seat", PropBlock(props(MapColor.DULL_RED, BlockSoundGroup.WOOL).noCollision(), listOf(box(2, 0, 2, 14, 8, 14), box(2, 8, 12, 14, 16, 15))))
+    val BAR_STOOL: Block = register("bar_stool", PropBlock(props(MapColor.DULL_RED, BlockSoundGroup.WOOL).noCollision(), listOf(box(4, 0, 4, 12, 11, 12))))
+    val ARMCHAIR: Block = register("armchair", PropBlock(props(MapColor.DULL_RED, BlockSoundGroup.WOOL), listOf(box(1, 0, 1, 15, 8, 15), box(1, 8, 12, 15, 15, 15))))
+    val NIGHTSTAND: Block = register("nightstand", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(1, 0, 1, 15, 16, 15))))
+    val LOUNGER: Block = register("lounger", PropBlock(props(MapColor.WHITE_GRAY, BlockSoundGroup.WOOL), listOf(box(0, 0, 1, 16, 7, 15))))
+    val POOL_TABLE: Block = register("pool_table", TileFurnitureBlock(props(MapColor.DARK_GREEN, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 13, 16))))
+    /** As high as a block, so what lies on it (a note, loot) does not float. */
+    val LOUNGE_DESK: Block = register("lounge_desk", TileFurnitureBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 16, 16))))
+    val SERVED_GLASS: Block = register("served_glass", PropBlock(props(MapColor.CLEAR, BlockSoundGroup.GLASS).noCollision(), listOf(box(6, 0, 6, 10, 6, 10))))
+    val DIPLOMA: Block = register("diploma", PropBlock(props(MapColor.WHITE, ModSoundGroups.WOOD).noCollision(), listOf(box(2, 2, 15, 14, 14, 16))))
+
     val WARM_LAMP: Block = register(
         "warm_lamp",
         WarmLampBlock(
@@ -158,6 +170,10 @@ object ModBlocks {
         "loot_water_bottle",
         LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.WATER_BOTTLE },
     )
+
+    val LOOT_FOOD_PLATE: Block = register("loot_food_plate", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FOOD_PLATE })
+    val LOOT_FOOD_POPCORN: Block = register("loot_food_popcorn", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FOOD_POPCORN })
+    val LOOT_FOOD_SNACK: Block = register("loot_food_snack", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FOOD_SNACK })
 
     val LOOT_KEYCARD: Block = register(
         "loot_keycard",
@@ -351,7 +367,7 @@ object ModBlocks {
         }
         LOOT_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "loot"),
-            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD).build(),
+            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK).build(),
         )
         BOX_SHELF_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),

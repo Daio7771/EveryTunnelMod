@@ -16,6 +16,7 @@ en el archivo config/every_tunnel/gameplay.json.
 - El doble de rápido al esprintar.
 - Vacía: 1 de daño (medio corazón) cada 10 segundos.
 - Una botella de agua devuelve 40 y se tarda 1,5 segundos en beberla.
+- La comida devuelve 8 de vida (4 corazones) y se tarda 1,5 segundos en comerla.
 - Un dispensador de agua que funcione devuelve 40 por trago, un trago cada 1,5 segundos,
   cuantas veces quieras.
 

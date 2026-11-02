@@ -2,8 +2,8 @@
 Checks on Level 4's plan (see level.py). Each returns its report lines and raises SystemExit when
 the plan is wrong, so a bad LEVEL_4 never reaches a world.
 
-- walk(): from the start in Reception, a walk over the plan's cells, up or down one block at most,
-  must reach every space, and no cell may be left out.
+- walk(): from the start in Reception, a walk over the plan's cells, round thin walls and solid
+  furniture, up or down one block at most, must reach every space, and no cell may be left out.
 - walled(): every two spaces are kept apart by at least one block, unless a corridor or an opening
   joins them on purpose (a slip in the numbers fails here).
 - steps(): three steps down to the Calm room, ending level with its floor.
@@ -20,13 +20,13 @@ def walk(lv):
         x, z = queue.popleft()
         for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             c = (x + dx, z + dz)
-            if c in lv.floors and c not in seen and abs(lv.floors[c] - lv.floors[(x, z)]) <= 1:
+            if c in lv.floors and c not in lv.blocked and c not in seen and abs(lv.floors[c] - lv.floors[(x, z)]) <= 1:
                 seen.add(c)
                 queue.append(c)
-    missing = set(lv.floors) - seen
+    missing = set(lv.floors) - lv.blocked - seen
     if missing:
         raise SystemExit(f"Level 4: {len(missing)} cells cannot be reached, e.g. {sorted(missing)[:3]}")
-    return [f"Walk: all {len(seen)} cells reached from Reception"]
+    return [f"Walk: all {len(seen)} free cells reached from Reception, round {len(lv.blocked)} of walls and furniture"]
 
 
 JOINED_BY_DESIGN = ("corridor", "steps")

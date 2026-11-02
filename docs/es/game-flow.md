@@ -336,9 +336,9 @@ El pasillo ya pertenece al nivel 4, así que "Level 4" aparece cuando se cierra 
 volver al pasillo desde Reception no cuenta como regresar al nivel 3.
 
 La reconstrucción del mapa, cada vez que se abre el mundo, devuelve el nivel 3 y limpia el 4. De
-momento el nivel 4 son sus salas, texturas, luces, camas y sus reglas (un nivel `safe`, ver
-[Sistemas del jugador](player.md#niveles-seguros)): aún no tiene más muebles ni puzles, y su puerta
-grande es una pared, así que **por ahora la demo no tiene final**.
+momento el nivel 4 son sus salas, muebles, nueve notas, botín y reglas (un nivel `safe`, ver
+[Sistemas del jugador](player.md#niveles-seguros)): aún no tiene puzles, y su puerta grande es una
+pared, así que **por ahora la demo no tiene final**.
 
 ## 11. El final
 

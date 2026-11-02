@@ -156,6 +156,7 @@ the server starts (levels built together name the same one). The function must e
 | `player` | `RespawnHooks`, `DeathHooks`, `NewGame` | The level start: where a player restarts. The first one is used |
 | `pale_man` | `PaleManSpawner` | A Pale man spawns here the first time a player enters the level |
 | `battery` | `LootSpawner` | A battery lying on the floor |
+| `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Food, on furniture |
 | `water` | `LootSpawner` | A water bottle |
 | `keycard` | `LootSpawner` | The keycard |
 | `checkpoint` | (none yet) | Level 3: where a death past the checkpoint will restart |

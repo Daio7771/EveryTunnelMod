@@ -158,6 +158,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `player` | `RespawnHooks`, `DeathHooks`, `NewGame` | El inicio del nivel: donde reinicia el jugador. Se usa el primero |
 | `pale_man` | `PaleManSpawner` | Aquí aparece un Pale man la primera vez que un jugador entra en el nivel |
 | `battery` | `LootSpawner` | Una batería en el suelo |
+| `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Comida, sobre muebles |
 | `water` | `LootSpawner` | Una botella de agua |
 | `keycard` | `LootSpawner` | La tarjeta |
 | `checkpoint` | (nadie aún) | Nivel 3: donde reiniciará una muerte pasado el checkpoint |

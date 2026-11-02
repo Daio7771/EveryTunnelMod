@@ -88,7 +88,7 @@ KDoc comment that says more.
 | `PropBlock.kt` | A floor prop facing one of four sides |
 | `ConnectingPropBlock.kt` | Pipes, ducts and cable trays that connect to neighbours |
 | `FluorescentLightBlock.kt` | The light: on, flicker, off; light level 13, drawn full bright |
-| `WarmLampBlock.kt` | Level 4's ceiling light: warm and silent, light level 12 |
+| `WarmLampBlock.kt` | Level 4's ceiling light: warm and silent, light level 14 |
 | `SuiteBedBlock.kt` | A bed in Level 4's Suites, in two blocks |
 | `SurfaceMarkBlocks.kt` | Stains and puddles on any face |
 | `SignTileBlock.kt` | Painted texts by numbered slot (the world pack maps them) |
@@ -126,6 +126,7 @@ KDoc comment that says more.
 | `ResourceSyncPacket.kt` | The resources packet to the client |
 | `FlashlightHooks.kt` | The flashlight toggle request, battery items, feedback |
 | `DrinkHooks.kt` | Drinking water bottles |
+| `FoodHooks.kt` | Eating: health back |
 | `WaterDispenserHooks.kt` | Drinking at a water dispenser that gives water (Level 3's kitchen) |
 | `JumpCounter.kt` | Jumps per player from the vanilla statistic |
 | `NoiseHooks.kt` | Turns steps, jumps, landings, panting and game events into noises |

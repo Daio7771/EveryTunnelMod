@@ -8,7 +8,7 @@ trabajo es sencillo: atravesar los niveles. Nadie dijo que fuera fácil.
 - **Moverse, saltar, esprintar, agacharse:** tus teclas de siempre en Minecraft.
 - **Linterna:** la tecla Linterna, F por defecto. Puedes cambiarla en Opciones, Controles,
   Every Tunnel.
-- **Recoger algo:** clic derecho. Las baterías y las botellas de agua están en el suelo.
+- **Recoger algo:** clic derecho. Las baterías, las botellas de agua y la comida están en el suelo y sobre los muebles.
 - **Beber o cambiar la batería:** mantén pulsado el botón de usar (clic derecho por
   defecto) con la botella o la batería en la mano.
 - **Puertas y botones:** clic derecho, como siempre. No puedes romper ni colocar bloques.
@@ -21,12 +21,14 @@ trabajo es sencillo: atravesar los niveles. Nadie dijo que fuera fácil.
 
 Encima de tu barra rápida hay cuatro filas.
 
-- **Vida** (corazones, abajo a la izquierda). Tiemblan cuando estás cerca del final.
+- **Vida** (corazones, abajo a la izquierda). Tiemblan cuando estás cerca del final. No vuelven
+  solos.
 - **Stamina** (pulmones, arriba a la izquierda). Esprintar y saltar la gastan. Si la
   agotas te quedas sin aliento: no puedes esprintar hasta que vuelva, y jadeas. Los
   pulmones se ponen grises.
 - **Sed** (gotas, abajo a la derecha). Baja despacio, más rápido si esprintas. Si se vacía,
   empieza a doler. Bebe una botella de agua, o de un dispensador que funcione, para llenarla.
+- **Comida:** mantén pulsado Usar con ella en la mano para comer. Devuelve vida.
 - **Batería** (arriba a la derecha). Tu linterna funciona con ella. Cuando parpadea en
   rojo, está casi agotada y la luz empieza a fallar. Pon una batería nueva antes de que se
   muera.

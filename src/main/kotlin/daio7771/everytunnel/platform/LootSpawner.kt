@@ -20,7 +20,8 @@ import net.minecraft.world.PersistentState
 
 /**
  * Puts the loot of a level in place: a [LootBlock] at every spawn point tagged with a key
- * of [LOOT] (`battery`, `water`, `keycard`), the first time a player enters that level.
+ * of [LOOT] (`battery`, `water`, `keycard`, the three foods), the first time a player enters that
+ * level. A level built in play ([LoungeHooks]) gets its loot once it stands.
  *
  * Each spot is filled once per world: the world remembers it
  * (`data/every_tunnel_loot.dat`), so what was picked up stays picked up, also after
@@ -33,6 +34,9 @@ object LootSpawner {
         "battery" to { ModBlocks.LOOT_BATTERY },
         "water" to { ModBlocks.LOOT_WATER_BOTTLE },
         "keycard" to { ModBlocks.LOOT_KEYCARD },
+        "food_plate" to { ModBlocks.LOOT_FOOD_PLATE },
+        "food_popcorn" to { ModBlocks.LOOT_FOOD_POPCORN },
+        "food_snack" to { ModBlocks.LOOT_FOOD_SNACK },
     )
 
     private var server: MinecraftServer? = null
@@ -55,7 +59,8 @@ object LootSpawner {
         for (level in LevelManager.all()) place(server, level)
     }
 
-    private fun place(server: MinecraftServer, level: LevelDefinition) {
+    fun place(server: MinecraftServer, level: LevelDefinition) {
+        if (LoungeHooks.notBuiltYet(level)) return
         val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: return
         val state = state(server)
         var count = 0

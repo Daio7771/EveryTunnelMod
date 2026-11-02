@@ -17,6 +17,8 @@ built by hand.
   uses. Doors, buttons and levers still work.
 - **No vanilla mob spawning.** Spawn gamerules are set to false when the world starts and
   after `/reload`. They are not restored if the levels are removed.
+- **No natural regeneration.** The same way: hunger is held full, so health would come back by
+  itself. Only food and the beds heal.
 - **Difficulty locked on Normal.** On Peaceful vanilla would delete the Pale man the tick
   he spawns, mob hits would deal no damage and health would regenerate.
 - **The guard uniform.** Every player's skin is the uniform (`client.render.GuardUniform`,
@@ -64,6 +66,12 @@ gulp about every half second (`player.drink`, from a CC0 recording;
 `LivingEntityMixin` silences vanilla's sipping), and a noise for the Pale man. A full
 player cannot drink ("You are not thirsty"). Consumed outside Creative.
 
+### Eating
+
+`ModItems` (`food_plate`, `food_popcorn`, `food_snack`, the same effect in all three),
+`platform.FoodHooks`: hold use for 1.5 s to eat, +8 health (4 hearts). A noise like drinking; a
+player at full health cannot eat ("You are not hurt"). Consumed outside Creative.
+
 ### The flashlight
 
 The flashlight is **built-in equipment, not an item**: every player has one, nothing is
@@ -88,8 +96,9 @@ The light itself is drawn on the client, see [Graphics](graphics.md#the-flashlig
 `platform.LootSpawner` and `platform.LootBlock`:
 
 - The first time a player enters a level, a `LootBlock` is placed at every spawn point
-  tagged `battery`, `water` or `keycard`. The client draws it as the item itself, lying
-  flat (`client.render.LootRenderer`); it has no collision.
+  tagged `battery`, `water`, `keycard`, `food_plate`, `food_popcorn` or `food_snack`. The client draws it as the item itself, lying
+  flat (`client.render.LootRenderer`); it has no collision. Level 4, built in play, gets its loot
+  once it stands.
 - **Right-click** picks it up; the spot is empty.
 - Each spot is filled once per world (`every_tunnel_loot.dat`): what was picked up stays
   picked up, after dying or reopening the world, until a new game restocks everything.
@@ -149,6 +158,9 @@ Every key and its default:
 | `damage_interval_seconds` | 10 | ...every this many seconds |
 | `drink_restore` | 40 | Thirst one bottle gives back |
 | `drink_seconds` | 1.5 | Time spent drinking |
+| **`food`** | | |
+| `heal` | 8 | Health one food gives back |
+| `eat_seconds` | 1.5 | Time spent eating |
 | **`flashlight`** | | |
 | `battery_max_seconds` | 180 | Seconds of light from a full battery |
 | `low_battery_warning_percent` | 20 | Below this the HUD blinks and the beam flickers |

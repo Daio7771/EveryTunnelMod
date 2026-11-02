@@ -1,0 +1,7 @@
+CLIENT FILES
+
+Rows of cards. Every name is crossed out in the same blue pen.
+
+Remaining line on each: "Treatment: rest. Duration: open."
+
+The last card has no name at all, just a number: 14.

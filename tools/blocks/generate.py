@@ -265,6 +265,66 @@ def battery_tex(rng):
     return img
 
 
+def food_plate_tex(rng):
+    """Item: a white plate seen from above, with something brown and something green on it."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            if d <= 7.5:
+                img.putpixel((x, y), (232, 230, 222, 255) if d > 5.5 else (244, 242, 236, 255))
+            if d <= 3.6 and x < 9:
+                img.putpixel((x, y), (120, 76, 44, 255))
+            if d <= 4.2 and x >= 9:
+                img.putpixel((x, y), (86, 140, 62, 255))
+    return img
+
+
+def food_popcorn_tex(rng):
+    """Item: a red and white striped box, full of popcorn."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(6, 16):
+        for x in range(4, 12):
+            img.putpixel((x, y), (196, 40, 44, 255) if (x - 4) // 2 % 2 == 0 else (238, 234, 226, 255))
+    for y in range(1, 7):
+        for x in range(3, 13):
+            if rng.random() < 0.8:
+                img.putpixel((x, y), rng.choice(((246, 226, 150, 255), (252, 244, 206, 255), (232, 200, 110, 255))))
+    return img
+
+
+def food_snack_tex(rng):
+    """Item: a small crinkled wrapped bar, in a plain gold foil."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(5, 11):
+        for x in range(1, 15):
+            shade = 18 if x in (1, 14) else 0
+            img.putpixel((x, y), (206 - shade + rng.randint(-10, 10), 164 - shade, 70, 255))
+    for y in range(6, 10):
+        for x in range(5, 11):
+            img.putpixel((x, y), (92, 26, 38, 255))
+    return img
+
+
+def diploma_tex(rng):
+    """A framed diploma: cream paper, a heading, lines too small to read, a brass seal."""
+    img = new((226, 216, 190))
+    noise(img, rng, 2)
+    for x in range(16):
+        for y in (0, 15):
+            px(img, x, y, (58, 38, 26))
+            px(img, y, x, (58, 38, 26))
+    for x in range(5, 11):
+        px(img, x, 3, (70, 60, 50), 0.9)
+    for y in (6, 8, 10):
+        for x in range(3, 13):
+            if rng.random() < 0.8:
+                px(img, x, y, (110, 100, 88), 0.7)
+    for x, y in ((11, 12), (12, 12), (11, 13), (12, 13)):
+        px(img, x, y, (186, 146, 74))
+    return img
+
+
 def water_bottle_tex(rng):
     """Item: a small clear plastic water bottle, three quarters full: a ridged blue cap and
     neck ring, white label with a blue wave, cold reflections on the plastic."""
@@ -1479,7 +1539,10 @@ def build():
     # (only a particle texture); the block item looks like the item.
     for block_id, name, item in (("loot_battery", "Battery (Loot)", "battery"),
                                  ("loot_water_bottle", "Water Bottle (Loot)", "water_bottle"),
-                                 ("loot_keycard", "Keycard (Loot)", "keycard")):
+                                 ("loot_keycard", "Keycard (Loot)", "keycard"),
+                                 ("loot_food_plate", "Plate of Food (Loot)", "food_plate"),
+                                 ("loot_food_popcorn", "Popcorn (Loot)", "food_popcorn"),
+                                 ("loot_food_snack", "Snack (Loot)", "food_snack")):
         a.models[block_id] = {"textures": {"particle": f"{NS}:item/{item}"}}
         a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:item/{item}"})
 
@@ -1801,6 +1864,31 @@ def build():
     sheet_uv = (0, 0, 16, 16)
     prop("note_paper", "Note Paper", {"p": "note_paper"},
          [el((3, 0, 1.5), (13, 0.25, 14.5), "p", up=("p", sheet_uv), down=("p", sheet_uv))])
+    # Level 4's furniture.
+    a.texture("lounge_brass", plastic_tex(r("lounge_brass"), (172, 134, 68)), T.STEEL.but(smoothness=0.7, metal=231, relief=0.1))
+    a.texture("lounge_towel", plastic_tex(r("lounge_towel"), (226, 222, 210), "fabric"), T.PLASTIC.but(smoothness=0.08, relief=0.3))
+    a.texture("pool_felt", plastic_tex(r("pool_felt"), (34, 92, 60), "fabric"), T.PLASTIC.but(smoothness=0.08, relief=0.2))
+    a.texture("served_glass", plastic_tex(r("served_glass"), (196, 150, 90)), T.PLASTIC.but(smoothness=0.8, relief=0.0))
+    a.texture("diploma", diploma_tex(r("diploma")), T.PAPER, tiles=False)
+    w4 = {"w": "suite_bed_frame", "c": "suite_bed_cover", "b": "lounge_brass"}
+    prop("cinema_seat", "Cinema Seat", w4,
+         [el((2, 0, 3), (14, 2, 13), "b"), el((2, 4, 2), (14, 8, 12), "c"), el((2, 2, 12), (14, 16, 15), "c"),
+          el((1, 0, 2), (2, 11, 15), "w"), el((14, 0, 2), (15, 11, 15), "w")])
+    prop("bar_stool", "Bar Stool", w4,
+         [el((7, 0, 7), (9, 9, 9), "b"), el((5, 0, 5), (11, 1, 11), "b"), el((4, 9, 4), (12, 11, 12), "c")])
+    prop("armchair", "Armchair", w4,
+         [el((1, 0, 1), (15, 2, 15), "w"), el((2, 2, 2), (14, 7, 12), "c"), el((1, 2, 12), (15, 15, 15), "c"),
+          el((1, 2, 2), (3, 10, 12), "c"), el((13, 2, 2), (15, 10, 12), "c")])
+    prop("nightstand", "Nightstand", w4,
+         [el((1, 0, 1), (15, 16, 15), "w"), el((7, 9, 0), (9, 10, 1), "b"), el((7, 3, 0), (9, 4, 1), "b")])
+    prop("lounger", "Lounger", {"t": "lounge_towel", "w": "suite_bed_frame"},
+         [el((0, 0, 2), (16, 3, 14), "w"), el((0, 3, 1), (16, 7, 15), "t")])
+    tile("pool_table", "Pool Table", {"f": "pool_felt", "w": "suite_bed_frame"},
+         [el((0, 10, 0), (16, 12, 16), "w"), el((0, 12, 0), (16, 13, 16), "f")], (10, "w"))
+    tile("lounge_desk", "Lounge Desk", {"w": "suite_bed_frame"}, [el((0, 14, 0), (16, 16, 16), "w")], (14, "w"))
+    prop("served_glass", "Served Glass", {"g": "served_glass"}, [el((6, 0, 6), (10, 6, 10), "g")])
+    prop("diploma", "Diploma", {"d": "diploma", "w": "suite_bed_frame"},
+         [el((2, 2, 15.5), (14, 14, 16), "w", north="d")])
     # The shelf: 2 blocks wide, 3 high (BoxShelfBlock: col 0 on the left as seen from the front,
     # the east of a model facing north; row 0 at the bottom). Five boards 8 pixels apart from the
     # floor, a top, a back and the two outer sides; the boxes stand on the boards (drawn by
@@ -2057,7 +2145,8 @@ def main():
     item_dir.mkdir(parents=True, exist_ok=True)
     for name, img in a.item_textures.items():
         (item_dir / f"{name}.png").write_bytes(png(img))
-    for item, painter in (("battery", battery_tex), ("water_bottle", water_bottle_tex), ("keycard", keycard_tex)):
+    for item, painter in (("battery", battery_tex), ("water_bottle", water_bottle_tex), ("keycard", keycard_tex),
+                          ("food_plate", food_plate_tex), ("food_popcorn", food_popcorn_tex), ("food_snack", food_snack_tex)):
         (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))
         write_json(ASSETS / "models" / "item" / f"{item}.json",
                    {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{item}"}})

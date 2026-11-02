@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/loot_food_snack"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/loot_food_snack",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/loot_food_snack",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/loot_food_snack",
+      "y": 270
+    }
+  }
+}

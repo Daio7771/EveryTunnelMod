@@ -16,6 +16,7 @@ the file config/every_tunnel/gameplay.json.
 - Twice as fast while sprinting.
 - Empty: 1 damage (half a heart) every 10 seconds.
 - A water bottle gives back 40 and takes 1.5 seconds to drink.
+- Food gives back 8 health (4 hearts) and takes 1.5 seconds to eat.
 - A working water dispenser gives back 40 each drink, one drink every 1.5 seconds, as often
   as you like.
 
