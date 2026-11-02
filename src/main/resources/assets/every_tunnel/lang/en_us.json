@@ -28,6 +28,7 @@
   "block.every_tunnel.sign_tile": "Sign Tile",
   "block.every_tunnel.stain": "Stain",
   "block.every_tunnel.puddle": "Puddle",
+  "entity.every_tunnel.dart": "Dart",
   "entity.every_tunnel.pale_man": "Pale Man",
   "item.every_tunnel.pale_man_spawn_egg": "Pale Man Spawn Egg",
   "block.every_tunnel.shutter": "Rolling Shutter",
@@ -232,6 +233,7 @@
   "item.every_tunnel.reel_94": "Film Reel: 94 minutes",
   "item.every_tunnel.reel_102": "Film Reel: 102 minutes",
   "item.every_tunnel.reel_120": "Film Reel: 120 minutes",
+  "item.every_tunnel.dart": "Dart",
   "item.every_tunnel.master_card_nw": "Master Card: top left",
   "item.every_tunnel.master_card_ne": "Master Card: top right",
   "item.every_tunnel.master_card_sw": "Master Card: bottom left",
@@ -245,5 +247,12 @@
   "block.every_tunnel.reel_rack": "Film Can",
   "block.every_tunnel.record_player": "Record Player",
   "block.every_tunnel.projector": "Projector",
-  "block.every_tunnel.cinema_screen": "Cinema Screen"
+  "block.every_tunnel.cinema_screen": "Cinema Screen",
+  "block.every_tunnel.dartboard": "Dartboard",
+  "block.every_tunnel.dart_plate_left": "Dart Plate",
+  "block.every_tunnel.dart_plate_right": "Dart Plate",
+  "block.every_tunnel.throw_line": "Throwing Line",
+  "block.every_tunnel.dart_tray": "Dart Tray",
+  "block.every_tunnel.dart_hatch": "Dart Hatch",
+  "block.every_tunnel.wall_sheet": "Score Sheet"
 }

@@ -33,6 +33,7 @@ con un comentario KDoc que cuenta más.
 | `achievement/Achievement.kt` | Los ocho logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
 | `puzzle/OrderPuzzle.kt` | Un puzle de cosas en orden: intentos, fallos, la pista |
+| `puzzle/darts/DartboardGeometry.kt` | Dónde cayó un dardo en el tablero: número y anillo, en las 4 orientaciones |
 | `film/FilmInfo.kt` | La película del Cinema: fotogramas, velocidad, qué fotograma en cada momento |
 | `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
@@ -154,6 +155,9 @@ con un comentario KDoc que cuenta más.
 | `FilmSetHooks.kt` | El escenario para rodar la película del Cinema, aparte de los niveles |
 | `FilmWalkerEntity.kt` | La figura que anda por él |
 | `LoungePuzzleHooks.kt` | Los puzles del Bar y el Cinema del nivel 4, las pistas y las piezas de la tarjeta maestra |
+| `DartHooks.kt` | Los dardos del nivel 4: la bandeja, cada acierto, la pista, la portezuela con la pieza |
+| `DartBlocks.kt` | Las nueve partes del tablero, la bandeja y la portezuela |
+| `DartEntity.kt` | Un dardo lanzado, sobre la flecha de vanilla; nunca se guarda |
 | `SafeLevelHooks.kt` | Niveles sin riesgo: sin daño (el nivel 4) |
 | `SuiteBedHooks.kt` | Descansar en una cama: fundido a negro, vida y estamina llenas |
 | `BookPhaseHooks.kt` | Mientras los libros están fuera: el reloj en la cabeza y el aviso "He's near. Hide." |
@@ -220,6 +224,7 @@ con un comentario KDoc que cuenta más.
 |---|---|
 | `PaleManRenderer.kt` | Renderizador de GeckoLib con la máscara de brillo de los ojos |
 | `FilmWalkerRenderer.kt` | La figura de la película del Cinema, con el modelo del jugador |
+| `DartRenderer.kt` | Un dardo lanzado: la flecha de vanilla, más pequeña, con su textura |
 | `ObserverRenderer.kt` | Renderizador de GeckoLib del Observer; su cabeza gira con la de la entidad |
 | `PaleManModel.kt` | Su modelo de GeckoLib, más la postura encorvada bajo techos bajos |
 | `BoxShelfRenderer.kt` | Las cajas moradas en la estantería, a brillo completo |

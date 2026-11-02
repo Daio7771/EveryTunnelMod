@@ -65,6 +65,16 @@ object ModBlocks {
     val PROJECTOR: Block = register("projector", PuzzleDeviceBlock(props(MapColor.GRAY, ModSoundGroups.SHEET_METAL), listOf(box(2, 0, 2, 14, 16, 14))))
     val CINEMA_SCREEN: Block = register("cinema_screen", PropBlock(props(MapColor.WHITE, BlockSoundGroup.WOOL).noCollision(), listOf(box(0, 0, 15, 16, 16, 16))))
 
+    // The darts (DartHooks).
+    val DARTBOARD: Block = register("dartboard", DartboardBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).luminance { if (it.get(DartboardBlock.HINT) > 0) 7 else 0 }))
+    val DART_TRAY: Block = register("dart_tray", DartTrayBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision()))
+    val DART_HATCH: Block = register("dart_hatch", DartHatchBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL)))
+    val DART_PLATE_LEFT: Block = register("dart_plate_left", PropBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(0, 3, 15, 16, 13, 16))))
+    val DART_PLATE_RIGHT: Block = register("dart_plate_right", PropBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(0, 3, 15, 16, 13, 16))))
+    val THROW_LINE: Block = register("throw_line", PropBlock(props(MapColor.GOLD, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(0, 0, 7, 16, 1, 9))))
+    /** The score sheet, taped to the wall by the board; read like a note on a board. */
+    val WALL_SHEET: Block = register("wall_sheet", NoteBoardBlock(props(MapColor.WHITE, BlockSoundGroup.WOOL).noCollision()))
+
     val SERVED_GLASS: Block = register("served_glass", PropBlock(props(MapColor.CLEAR, BlockSoundGroup.GLASS).noCollision(), listOf(box(6, 0, 6, 10, 6, 10))))
     val DIPLOMA: Block = register("diploma", PropBlock(props(MapColor.WHITE, ModSoundGroups.WOOD).noCollision(), listOf(box(2, 2, 15, 14, 14, 16))))
 

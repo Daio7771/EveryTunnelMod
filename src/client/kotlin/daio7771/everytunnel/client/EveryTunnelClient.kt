@@ -16,6 +16,7 @@ import daio7771.everytunnel.client.hud.FlashlightOverlay
 import daio7771.everytunnel.client.hud.LockerView
 import daio7771.everytunnel.client.hud.AchievementToast
 import daio7771.everytunnel.client.hud.StatusHud
+import daio7771.everytunnel.client.render.DartRenderer
 import daio7771.everytunnel.client.render.FilmWalkerRenderer
 import daio7771.everytunnel.client.render.BoxShelfRenderer
 import daio7771.everytunnel.client.render.WallTextRenderer
@@ -92,6 +93,7 @@ object EveryTunnelClient : ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.OBSERVER, ::ObserverRenderer)
         EntityRendererRegistry.register(ModEntities.LOCKER_SEAT, ::EmptyEntityRenderer)
         EntityRendererRegistry.register(ModEntities.FILM_WALKER, ::FilmWalkerRenderer)
+        EntityRendererRegistry.register(ModEntities.DART, ::DartRenderer)
         AchievementToast.register()
         SprintCheck.register()
         BlockEntityRendererFactories.register(ModBlocks.LOOT_ENTITY, ::LootRenderer)

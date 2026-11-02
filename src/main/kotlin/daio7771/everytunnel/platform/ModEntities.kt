@@ -46,6 +46,15 @@ object ModEntities {
         .trackRangeBlocks(96)
         .build()
 
+    /** A thrown dart ([DartHooks]). Never saved: a new game starts with them all on the tray. */
+    val DART: EntityType<DartEntity> = FabricEntityTypeBuilder.create<DartEntity>(SpawnGroup.MISC) { type, world -> DartEntity(type, world) }
+        .dimensions(EntityDimensions.fixed(0.25f, 0.25f))
+        .disableSaving()
+        .disableSummon()
+        .trackRangeBlocks(64)
+        .trackedUpdateRate(20)
+        .build()
+
     val PALE_MAN_SPAWN_EGG: Item = SpawnEggItem(PALE_MAN, 0xCECCC4, 0x282E3E, Item.Settings())
 
     /** The Observer (Level 3): a 1.9-block hitbox like the Pale man's; the model stands 2.5. */
@@ -61,6 +70,7 @@ object ModEntities {
         FabricDefaultAttributeRegistry.register(PALE_MAN, PaleManEntity.createAttributes())
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "pale_man_spawn_egg"), PALE_MAN_SPAWN_EGG)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "locker_seat"), LOCKER_SEAT)
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "dart"), DART)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "film_walker"), FILM_WALKER)
         FabricDefaultAttributeRegistry.register(FILM_WALKER, FilmWalkerEntity.createAttributes())
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "observer"), OBSERVER)

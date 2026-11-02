@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,has=true": {
+      "model": "every_tunnel:block/dart_tray_full"
+    },
+    "facing=north,has=false": {
+      "model": "every_tunnel:block/dart_tray_empty"
+    },
+    "facing=east,has=true": {
+      "model": "every_tunnel:block/dart_tray_full",
+      "y": 90
+    },
+    "facing=east,has=false": {
+      "model": "every_tunnel:block/dart_tray_empty",
+      "y": 90
+    },
+    "facing=south,has=true": {
+      "model": "every_tunnel:block/dart_tray_full",
+      "y": 180
+    },
+    "facing=south,has=false": {
+      "model": "every_tunnel:block/dart_tray_empty",
+      "y": 180
+    },
+    "facing=west,has=true": {
+      "model": "every_tunnel:block/dart_tray_full",
+      "y": 270
+    },
+    "facing=west,has=false": {
+      "model": "every_tunnel:block/dart_tray_empty",
+      "y": 270
+    }
+  }
+}

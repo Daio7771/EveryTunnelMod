@@ -1,0 +1,48 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "p": "every_tunnel:block/dart_plate_right",
+    "b": "every_tunnel:block/lounge_brass",
+    "particle": "every_tunnel:block/dart_plate_right"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        2.67,
+        15.5
+      ],
+      "to": [
+        16,
+        13.33,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#p",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#b"
+        },
+        "south": {
+          "texture": "#b"
+        },
+        "west": {
+          "texture": "#b"
+        },
+        "up": {
+          "texture": "#b"
+        },
+        "down": {
+          "texture": "#b"
+        }
+      }
+    }
+  ]
+}

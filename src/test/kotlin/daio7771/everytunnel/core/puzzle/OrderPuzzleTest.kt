@@ -20,6 +20,16 @@ class OrderPuzzleTest {
     }
 
     @Test
+    fun `a restart keeps the failures`() {
+        val puzzle = OrderPuzzle(listOf(0, 1))
+        puzzle.attempt(1)
+        puzzle.attempt(0)
+        puzzle.restart()
+        assertEquals(emptyList(), puzzle.placed)
+        assertEquals(1, puzzle.failures)
+    }
+
+    @Test
     fun `a wrong one starts it over`() {
         val puzzle = OrderPuzzle(listOf(0, 1))
         puzzle.attempt(0)

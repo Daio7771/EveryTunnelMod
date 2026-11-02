@@ -33,6 +33,7 @@ KDoc comment that says more.
 | `achievement/Achievement.kt` | The eight achievements, in list order, by id |
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
 | `puzzle/OrderPuzzle.kt` | A puzzle of things in order: attempts, failures, the hint |
+| `puzzle/darts/DartboardGeometry.kt` | Where a dart landed on the board: number and ring, in the 4 orientations |
 | `film/FilmInfo.kt` | The Cinema's film: frames, speed, which frame at what time |
 | `progress/PlayerProgress.kt` | What a player has done: pieces, notes read, scenes seen, Level 3's books, checkpoint |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
@@ -154,6 +155,9 @@ KDoc comment that says more.
 | `FilmSetHooks.kt` | The set for filming the Cinema's film, away from the levels |
 | `FilmWalkerEntity.kt` | The figure who walks along it |
 | `LoungePuzzleHooks.kt` | Level 4's Bar and Cinema puzzles, hints, and the pieces of the master card |
+| `DartHooks.kt` | Level 4's darts: the tray, each hit, the hint, the hatch with the piece |
+| `DartBlocks.kt` | The dartboard's nine parts, the tray and the hatch |
+| `DartEntity.kt` | A thrown dart, built on vanilla's arrow; never saved |
 | `SafeLevelHooks.kt` | Levels without risk: no damage (Level 4) |
 | `SuiteBedHooks.kt` | Resting in a bed: fade to black, health and stamina full |
 | `BookPhaseHooks.kt` | While the books are out: the clock in the head and the "He's near. Hide." warning |
@@ -220,6 +224,7 @@ KDoc comment that says more.
 |---|---|
 | `PaleManRenderer.kt` | GeckoLib renderer with the eye glow mask |
 | `FilmWalkerRenderer.kt` | The figure in the Cinema's film, on the player's model |
+| `DartRenderer.kt` | A thrown dart: vanilla's arrow, smaller, with its own texture |
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
 | `PaleManModel.kt` | His GeckoLib model, plus the stoop under low ceilings |
 | `BoxShelfRenderer.kt` | The purple boxes on the box shelf, full bright |

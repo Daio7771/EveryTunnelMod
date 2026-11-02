@@ -1,0 +1,544 @@
+{
+  "variants": {
+    "col=0,facing=north,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0"
+    },
+    "col=0,facing=east,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 90
+    },
+    "col=0,facing=south,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 180
+    },
+    "col=0,facing=west,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 270
+    },
+    "col=0,facing=north,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0"
+    },
+    "col=0,facing=east,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 90
+    },
+    "col=0,facing=south,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 180
+    },
+    "col=0,facing=west,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 270
+    },
+    "col=0,facing=north,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0"
+    },
+    "col=0,facing=east,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 90
+    },
+    "col=0,facing=south,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 180
+    },
+    "col=0,facing=west,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 270
+    },
+    "col=0,facing=north,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0"
+    },
+    "col=0,facing=east,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 90
+    },
+    "col=0,facing=south,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 180
+    },
+    "col=0,facing=west,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_0_0",
+      "y": 270
+    },
+    "col=0,facing=north,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1"
+    },
+    "col=0,facing=east,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 90
+    },
+    "col=0,facing=south,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 180
+    },
+    "col=0,facing=west,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 270
+    },
+    "col=0,facing=north,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1"
+    },
+    "col=0,facing=east,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 90
+    },
+    "col=0,facing=south,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 180
+    },
+    "col=0,facing=west,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 270
+    },
+    "col=0,facing=north,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1"
+    },
+    "col=0,facing=east,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 90
+    },
+    "col=0,facing=south,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 180
+    },
+    "col=0,facing=west,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 270
+    },
+    "col=0,facing=north,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1"
+    },
+    "col=0,facing=east,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 90
+    },
+    "col=0,facing=south,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 180
+    },
+    "col=0,facing=west,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_0_1",
+      "y": 270
+    },
+    "col=0,facing=north,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2"
+    },
+    "col=0,facing=east,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2",
+      "y": 90
+    },
+    "col=0,facing=south,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2",
+      "y": 180
+    },
+    "col=0,facing=west,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2",
+      "y": 270
+    },
+    "col=0,facing=north,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2"
+    },
+    "col=0,facing=east,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2",
+      "y": 90
+    },
+    "col=0,facing=south,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2",
+      "y": 180
+    },
+    "col=0,facing=west,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2",
+      "y": 270
+    },
+    "col=0,facing=north,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2_h2"
+    },
+    "col=0,facing=east,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2_h2",
+      "y": 90
+    },
+    "col=0,facing=south,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2_h2",
+      "y": 180
+    },
+    "col=0,facing=west,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2_h2",
+      "y": 270
+    },
+    "col=0,facing=north,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2_h3"
+    },
+    "col=0,facing=east,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2_h3",
+      "y": 90
+    },
+    "col=0,facing=south,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2_h3",
+      "y": 180
+    },
+    "col=0,facing=west,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_0_2_h3",
+      "y": 270
+    },
+    "col=1,facing=north,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0"
+    },
+    "col=1,facing=east,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 90
+    },
+    "col=1,facing=south,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 180
+    },
+    "col=1,facing=west,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 270
+    },
+    "col=1,facing=north,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0"
+    },
+    "col=1,facing=east,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 90
+    },
+    "col=1,facing=south,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 180
+    },
+    "col=1,facing=west,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 270
+    },
+    "col=1,facing=north,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0"
+    },
+    "col=1,facing=east,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 90
+    },
+    "col=1,facing=south,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 180
+    },
+    "col=1,facing=west,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 270
+    },
+    "col=1,facing=north,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0"
+    },
+    "col=1,facing=east,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 90
+    },
+    "col=1,facing=south,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 180
+    },
+    "col=1,facing=west,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_1_0",
+      "y": 270
+    },
+    "col=1,facing=north,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1"
+    },
+    "col=1,facing=east,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1",
+      "y": 90
+    },
+    "col=1,facing=south,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1",
+      "y": 180
+    },
+    "col=1,facing=west,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1",
+      "y": 270
+    },
+    "col=1,facing=north,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h1"
+    },
+    "col=1,facing=east,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h1",
+      "y": 90
+    },
+    "col=1,facing=south,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h1",
+      "y": 180
+    },
+    "col=1,facing=west,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h1",
+      "y": 270
+    },
+    "col=1,facing=north,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h2"
+    },
+    "col=1,facing=east,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h2",
+      "y": 90
+    },
+    "col=1,facing=south,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h2",
+      "y": 180
+    },
+    "col=1,facing=west,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h2",
+      "y": 270
+    },
+    "col=1,facing=north,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h3"
+    },
+    "col=1,facing=east,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h3",
+      "y": 90
+    },
+    "col=1,facing=south,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h3",
+      "y": 180
+    },
+    "col=1,facing=west,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_1_1_h3",
+      "y": 270
+    },
+    "col=1,facing=north,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2"
+    },
+    "col=1,facing=east,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2",
+      "y": 90
+    },
+    "col=1,facing=south,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2",
+      "y": 180
+    },
+    "col=1,facing=west,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2",
+      "y": 270
+    },
+    "col=1,facing=north,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h1"
+    },
+    "col=1,facing=east,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h1",
+      "y": 90
+    },
+    "col=1,facing=south,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h1",
+      "y": 180
+    },
+    "col=1,facing=west,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h1",
+      "y": 270
+    },
+    "col=1,facing=north,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h2"
+    },
+    "col=1,facing=east,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h2",
+      "y": 90
+    },
+    "col=1,facing=south,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h2",
+      "y": 180
+    },
+    "col=1,facing=west,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h2",
+      "y": 270
+    },
+    "col=1,facing=north,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h3"
+    },
+    "col=1,facing=east,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h3",
+      "y": 90
+    },
+    "col=1,facing=south,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h3",
+      "y": 180
+    },
+    "col=1,facing=west,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_1_2_h3",
+      "y": 270
+    },
+    "col=2,facing=north,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0"
+    },
+    "col=2,facing=east,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 90
+    },
+    "col=2,facing=south,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 180
+    },
+    "col=2,facing=west,hint=0,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 270
+    },
+    "col=2,facing=north,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0"
+    },
+    "col=2,facing=east,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 90
+    },
+    "col=2,facing=south,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 180
+    },
+    "col=2,facing=west,hint=1,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 270
+    },
+    "col=2,facing=north,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0"
+    },
+    "col=2,facing=east,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 90
+    },
+    "col=2,facing=south,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 180
+    },
+    "col=2,facing=west,hint=2,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 270
+    },
+    "col=2,facing=north,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0"
+    },
+    "col=2,facing=east,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 90
+    },
+    "col=2,facing=south,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 180
+    },
+    "col=2,facing=west,hint=3,row=0": {
+      "model": "every_tunnel:block/dartboard_2_0",
+      "y": 270
+    },
+    "col=2,facing=north,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1"
+    },
+    "col=2,facing=east,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 90
+    },
+    "col=2,facing=south,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 180
+    },
+    "col=2,facing=west,hint=0,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 270
+    },
+    "col=2,facing=north,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1"
+    },
+    "col=2,facing=east,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 90
+    },
+    "col=2,facing=south,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 180
+    },
+    "col=2,facing=west,hint=1,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 270
+    },
+    "col=2,facing=north,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1"
+    },
+    "col=2,facing=east,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 90
+    },
+    "col=2,facing=south,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 180
+    },
+    "col=2,facing=west,hint=2,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 270
+    },
+    "col=2,facing=north,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1"
+    },
+    "col=2,facing=east,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 90
+    },
+    "col=2,facing=south,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 180
+    },
+    "col=2,facing=west,hint=3,row=1": {
+      "model": "every_tunnel:block/dartboard_2_1",
+      "y": 270
+    },
+    "col=2,facing=north,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2"
+    },
+    "col=2,facing=east,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 90
+    },
+    "col=2,facing=south,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 180
+    },
+    "col=2,facing=west,hint=0,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 270
+    },
+    "col=2,facing=north,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2"
+    },
+    "col=2,facing=east,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 90
+    },
+    "col=2,facing=south,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 180
+    },
+    "col=2,facing=west,hint=1,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 270
+    },
+    "col=2,facing=north,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2"
+    },
+    "col=2,facing=east,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 90
+    },
+    "col=2,facing=south,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 180
+    },
+    "col=2,facing=west,hint=2,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 270
+    },
+    "col=2,facing=north,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2"
+    },
+    "col=2,facing=east,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 90
+    },
+    "col=2,facing=south,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 180
+    },
+    "col=2,facing=west,hint=3,row=2": {
+      "model": "every_tunnel:block/dartboard_2_2",
+      "y": 270
+    }
+  }
+}

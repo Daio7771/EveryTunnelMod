@@ -30,7 +30,7 @@ object NoteHooks {
         ProgressService.get().markNoteRead(player, note.id)
         val values = ValveHooks.values(level)
         val buf = PacketByteBufs.create()
-        buf.writeString(note.id)
+        buf.writeString(DartHooks.noteShown(note.id))
         buf.writeVarInt(values.size)
         for ((name, value) in values) {
             buf.writeString(name)

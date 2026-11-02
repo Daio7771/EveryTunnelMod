@@ -12,6 +12,8 @@ import net.minecraft.item.ItemStack
 import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvents
 import net.minecraft.text.Text
 import net.minecraft.util.Formatting
 import net.minecraft.util.Hand
@@ -36,6 +38,8 @@ import net.minecraft.world.World
  *
  * - Level 4's puzzle items ([LoungePuzzleHooks]): four records, four film reels, and the four
  *   corners of the golden master card. One each.
+ *
+ * - Darts ([DartHooks]): three from the Game room's tray; right-click throws one straight away.
  *
  * - Keycard: the night guard's security card. Lost in Level 2; the exit's card reader
  *   ([CardReaderBlock]) only opens for a player carrying it.
@@ -71,7 +75,11 @@ object ModItems {
     val CARD_SW: Item = Item(Item.Settings().maxCount(1))
     val CARD_SE: Item = Item(Item.Settings().maxCount(1))
 
+    @JvmField
+    val DART: Item = DartItem(Item.Settings().maxCount(DartHooks.DART_COUNT))
+
     fun register() {
+        Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "dart"), DART)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "battery"), BATTERY)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "water_bottle"), WATER_BOTTLE)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "keycard"), KEYCARD)
@@ -89,8 +97,33 @@ object ModItems {
             entries.add(FOOD_PLATE)
             entries.add(FOOD_POPCORN)
             entries.add(FOOD_SNACK)
+            entries.add(DART)
             for ((_, item) in puzzleItems) entries.add(item)
         }
+    }
+}
+
+private class DartItem(settings: Settings) : Item(settings) {
+
+    override fun use(world: World, user: PlayerEntity, hand: Hand): TypedActionResult<ItemStack> {
+        val stack = user.getStackInHand(hand)
+        if (!world.isClient) {
+            val dart = DartEntity(world, user)
+            // From the eyes, not vanilla's a little under them: it goes where the crosshair says, but for the drop.
+            dart.setPosition(user.x, user.eyeY, user.z)
+            dart.setVelocity(user, user.pitch, user.yaw, 0f, THROW_SPEED, 0f)
+            world.spawnEntity(dart)
+            world.playSound(null, user.x, user.y, user.z, SoundEvents.ENTITY_SNOWBALL_THROW, SoundCategory.PLAYERS, 0.5f, 1.4f)
+        }
+        user.itemCooldownManager.set(this, COOLDOWN_TICKS)
+        stack.decrement(1)
+        return TypedActionResult.success(stack, world.isClient)
+    }
+
+    private companion object {
+        /** Blocks per tick: from the line, 5 blocks away, it drops about a tenth of a block. */
+        const val THROW_SPEED = 2.5f
+        const val COOLDOWN_TICKS = 8
     }
 }
 

@@ -44,7 +44,7 @@ import net.minecraft.util.math.Box
  *
  * Racks, devices and the places for the pieces are the level's spawn points tagged `puzzle`
  * (`record_rack_<index>`, `record_player`, `piece_bar`...). A piece taken ([pieceTaken]; the third
- * lies in the pool, the fourth comes with the darts) is kept by [ProgressService]. Most sounds are
+ * lies in the pool, the fourth comes with the darts, [DartHooks]) is kept by [ProgressService]. Most sounds are
  * vanilla's for now.
  */
 object LoungePuzzleHooks {
@@ -114,6 +114,7 @@ object LoungePuzzleHooks {
         }
         filmWaiting = false
         filmTicks = -1
+        DartHooks.reset()
     }
 
     /** A piece was picked up: kept in the player's progress. */

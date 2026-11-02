@@ -39,6 +39,11 @@ class OrderPuzzle(val answer: List<Int>, private val hintAfter: Int = 3) {
         return if (solved) Result.SOLVED else Result.RIGHT
     }
 
+    /** From the start again, without it counting as a failure. */
+    fun restart() {
+        done = 0
+    }
+
     /** A new game. */
     fun reset() {
         done = 0

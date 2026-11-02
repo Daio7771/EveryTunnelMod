@@ -337,7 +337,7 @@ volver al pasillo desde Reception no cuenta como regresar al nivel 3.
 
 La reconstrucción del mapa, cada vez que se abre el mundo, devuelve el nivel 3 y limpia el 4. De
 momento el nivel 4 son sus salas, muebles, nueve notas, botín y reglas (un nivel `safe`, ver
-[Sistemas del jugador](player.md#niveles-seguros)), y tres de sus cuatro puzles (abajo). Su puerta
+[Sistemas del jugador](player.md#niveles-seguros)), y sus cuatro puzles (abajo). Su puerta
 grande es una pared, así que **por ahora la demo no tiene final**.
 
 Cada puzle da una esquina de la tarjeta maestra dorada, que guarda `ProgressService`. Fallar no
@@ -352,6 +352,12 @@ cuesta nada, y tras 3 fallos brilla lo siguiente correcto (`core.puzzle.OrderPuz
   la pieza queda junto al proyector.
 - **Spa:** la pieza está en el fondo de la piscina, a 6 de hondo. Al ser un nivel seguro, nadie se
   ahoga.
+- **Game room:** un tablero de dardos de 3 bloques de ancho, una placa al lado con `20 - 5 - 12` y una
+  bandeja con 3 dardos (`platform.DartHooks`, `core.puzzle.darts.DartboardGeometry`). Clic derecho
+  lanza. Solo cuenta el número, no su anillo; cualquier otra cosa devuelve los dardos a la bandeja. El
+  tercer acierto abre una portezuela de latón bajo el tablero con la pieza dentro y añade una línea a
+  la hoja de puntuaciones de la pared (`ch1_l4_note_score_sheet_won`). La línea del suelo es solo una
+  guía.
 
 ## 11. El final
 

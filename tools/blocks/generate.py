@@ -22,6 +22,7 @@ materials (tools/map/garage/textures.py), so the props look like the level aroun
 
 import io
 import json
+import math
 import random
 import re
 import sys
@@ -322,6 +323,114 @@ def diploma_tex(rng):
                 px(img, x, y, (110, 100, 88), 0.7)
     for x, y in ((11, 12), (12, 12), (11, 13), (12, 13)):
         px(img, x, y, (186, 146, 74))
+    return img
+
+
+# The darts' 3 x 5 letters, one string of 15 per character, row by row.
+DART_FONT = {
+    "0": "111101101101111", "1": "010110010010111", "2": "111001111100111", "3": "111001111001111",
+    "4": "101101111001001", "5": "111100111001111", "6": "111100111101111", "7": "111001001001001",
+    "8": "111101111101111", "9": "111101111001111", "-": "000000111000000", ":": "000010000010000",
+    " ": "000000000000000", "H": "101101111101101", "O": "111101101101111", "U": "101101101101111",
+    "S": "111100111001111", "E": "111100110100111", "G": "111100101101111", "A": "111101111101101",
+    "M": "101111111101101",
+}
+# As in core/puzzle/darts: DartboardGeometry.ORDER, DartHooks.SEQUENCE.
+DART_ORDER = (20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5)
+DART_SEQUENCE = (20, 5, 12)
+DART_BOARD_PX = 96
+DART_SCORING_PX = 38                                                   # DartboardGeometry.SCORING_RADIUS_BLOCKS
+DART_RIM_PX = 47.5
+
+
+def dart_text(img, x, y, text, colour, scale=1):
+    for k, ch in enumerate(text):
+        for i, bit in enumerate(DART_FONT[ch]):
+            if bit == "1":
+                for dx in range(scale):
+                    for dy in range(scale):
+                        img.putpixel((x + k * 4 * scale + (i % 3) * scale + dx, y + (i // 3) * scale + dy), colour)
+
+
+def dartboard_tex(rng, hint):
+    """The whole board, 96 pixels across: a walnut cabinet, the black band with the numbers, the
+    sectors. `hint` is a number whose sector and label are lit, or None."""
+    img = Image.new("RGB", (DART_BOARD_PX, DART_BOARD_PX))
+    c = DART_BOARD_PX / 2
+    for py in range(DART_BOARD_PX):
+        for ax in range(DART_BOARD_PX):
+            x, y = ax + 0.5 - c, c - (py + 0.5)
+            r = math.hypot(x, y)
+            if r > DART_RIM_PX:
+                col = (62, 40, 26) if min(ax, py, 95 - ax, 95 - py) > 1 else (44, 28, 18)
+            elif r > DART_SCORING_PX:
+                col = (20, 19, 18)
+            else:
+                u = r / DART_SCORING_PX
+                sector = int(((math.degrees(math.atan2(x, y)) % 360) + 9) / 18) % 20
+                odd = sector % 2 == 1
+                if u < 0.037:
+                    col = (178, 40, 36)
+                elif u < 0.094:
+                    col = (36, 112, 62)
+                elif 0.582 <= u <= 0.629 or u >= 0.953:
+                    col = (36, 112, 62) if odd else (178, 40, 36)
+                else:
+                    col = (222, 206, 170) if odd else (28, 26, 24)
+                if u >= 0.094 and DART_ORDER[sector] == hint:
+                    col = mix(col, (255, 196, 92), 0.72)
+            img.putpixel((ax, py), mix(col, (rng.randint(0, 255),) * 3, 0.03))
+    for k, number in enumerate(DART_ORDER):
+        text = str(number)
+        angle = math.radians(k * 18)
+        width = len(text) * 4 - 1
+        x = round(c + 42.8 * math.sin(angle) - width / 2)
+        y = round(c - 42.8 * math.cos(angle) - 2.5)
+        dart_text(img, x, y, text, (255, 214, 120) if number == hint else (214, 208, 190))
+    return img
+
+
+def dart_plate_tex(rng):
+    """The plate by the board, two blocks wide: 96 x 32."""
+    img = Image.new("RGB", (96, 32), (178, 140, 72))
+    for x in range(96):
+        for y in range(32):
+            if min(x, y, 95 - x, 31 - y) == 0:
+                img.putpixel((x, y), (112, 84, 40))
+            elif rng.random() < 0.15:
+                img.putpixel((x, y), (168, 130, 66))
+    ink = (38, 28, 18)
+    dart_text(img, 5, 4, "HOUSE GAME:", ink, 2)
+    dart_text(img, 5, 18, " - ".join(str(n) for n in DART_SEQUENCE), ink, 2)
+    return img
+
+
+def dart_tex(rng):
+    """Item: a dart aimed up and to the right, as vanilla's arrow is."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for k in range(5, 11):
+        px(img, k, 15 - k, (112, 114, 118))
+    for k in range(11, 14):
+        px(img, k, 15 - k, (200, 202, 206))
+    for x, y in ((2, 13), (3, 12), (4, 11), (3, 13), (2, 12), (4, 12), (3, 11), (5, 11), (4, 10)):
+        px(img, x, y, (150, 40, 36))
+    return img
+
+
+def dart_entity_tex(rng):
+    """In the layout of vanilla's arrow: 32 x 32, the side in (0, 0)-(16, 5), the tail end in
+    (0, 5)-(5, 10). The tail is to the left, the tip to the right."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    for x in range(4, 11):
+        img.putpixel((x, 2), (112, 114, 118, 255))
+    for x in range(11, 15):
+        img.putpixel((x, 2), (200, 202, 206, 255))
+    for x in range(0, 4):
+        for y in range(1, 4):
+            img.putpixel((x, y), (150, 40, 36, 255))
+    for x in range(1, 4):
+        for y in range(6, 9):
+            img.putpixel((x, y), (150, 40, 36, 255))
     return img
 
 
@@ -1969,6 +2078,52 @@ def build():
     prop("projector", "Projector", {"m": "rack_metal", "d": "rack_dark"},
          [el((7, 0, 7), (9, 8, 9), "m"), el((3, 8, 3), (13, 15, 13), "m"), el((6, 10, 0), (10, 14, 3), "d")])
     prop("cinema_screen", "Cinema Screen", {"s": "screen_white"}, [el((0, 0, 15), (16, 16, 16), "s")])
+    # The darts. The board's picture is cut in nine; a part the hint does not touch keeps its texture.
+    board_material = T.PLASTIC.but(smoothness=0.2, relief=0.1)
+    board_images = {hint: dartboard_tex(r("dartboard"), number) for hint, number in enumerate((None,) + DART_SEQUENCE)}
+    variants = {}
+    for col in range(3):
+        for row_ in range(3):
+            cut = (col * 32, (2 - row_) * 32, (col + 1) * 32, (3 - row_) * 32)
+            base = board_images[0].crop(cut)
+            for hint, whole in board_images.items():
+                part = whole.crop(cut)
+                name = f"dartboard_{col}_{row_}"
+                if hint and part.tobytes() != base.tobytes():
+                    name += f"_h{hint}"
+                if name not in a.models:
+                    a.texture(name, part, board_material, tiles=False)
+                    a.models[name] = model({"f": name, "w": "suite_bed_frame"}, [el((0, 0, 14), (16, 16, 16), "w", north="f")])
+                for facing, y in HORIZONTAL.items():
+                    variants[f"col={col},facing={facing},hint={hint},row={row_}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("dartboard", "Dartboard", {"variants": variants}, {"parent": f"{NS}:block/dartboard_1_1"})
+    plate = dart_plate_tex(r("dart_plate"))
+    plate_metal = T.STEEL.but(smoothness=0.7, metal=231, relief=0.1)
+    for side, x0 in (("left", 0), ("right", 48)):
+        a.texture(f"dart_plate_{side}", plate.crop((x0, 0, x0 + 48, 32)), plate_metal, tiles=False)
+        prop(f"dart_plate_{side}", "Dart Plate", {"p": f"dart_plate_{side}", "b": "lounge_brass"},
+             [el((0, 2.67, 15.5), (16, 13.33, 16), "b", north=("p", (0, 0, 16, 16)))])
+    prop("throw_line", "Throwing Line", {"b": "lounge_brass"}, [el((0, 0, 7), (16, 0.25, 9), "b")])
+    a.texture("card_gold", plastic_tex(r("card_gold"), (232, 192, 84)), T.STEEL.but(smoothness=0.8, metal=231, relief=0.0))
+    tray = [el((2, 0, 4), (14, 1, 12), "w"), el((2, 1, 4), (14, 2, 5), "w"), el((2, 1, 11), (14, 2, 12), "w")]
+    a.models["dart_tray_empty"] = model({"w": "suite_bed_frame"}, tray)
+    a.models["dart_tray_full"] = model({"w": "suite_bed_frame", "m": "rack_metal", "f": "record_sleeve_3"}, tray + [
+        e for z in (6, 7.75, 9.5) for e in (el((6, 1, z), (13, 1.75, z + 0.75), "m"), el((3, 1, z - 0.25), (6, 2, z + 1), "f"))])
+    a.block("dart_tray", "Dart Tray", {"variants": {
+        f"facing={f},has={h}": {"model": f"{NS}:block/dart_tray_{'full' if h == 'true' else 'empty'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for h in ("true", "false")}}, {"parent": f"{NS}:block/dart_tray_full"})
+    hatch_frame = [el((3, 2, 15), (13, 3, 16), "b"), el((3, 11, 15), (13, 12, 16), "b"), el((3, 3, 15), (4, 11, 16), "b"),
+                   el((12, 3, 15), (13, 11, 16), "b"), el((4, 3, 15.75), (12, 11, 16), "d")]
+    hatch_open = hatch_frame + [el((12, 3, 9), (13, 11, 15), "b")]
+    hatch_textures = {"b": "lounge_brass", "d": "rack_dark", "g": "card_gold"}
+    a.models["dart_hatch_shut"] = model(hatch_textures, hatch_frame + [el((4, 3, 15), (12, 11, 15.75), "b"), el((5, 6, 14.5), (6, 8, 15), "d")])
+    a.models["dart_hatch_open"] = model(hatch_textures, hatch_open)
+    a.models["dart_hatch_piece"] = model(hatch_textures, hatch_open + [el((5, 5, 15.25), (11, 9, 15.75), "g")])
+    a.block("dart_hatch", "Dart Hatch", {"variants": {
+        f"facing={f},open={o},piece={p}": {"model": f"{NS}:block/dart_hatch_{'shut' if o == 'false' else 'piece' if p == 'true' else 'open'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for o in ("true", "false") for p in ("true", "false")}}, {"parent": f"{NS}:block/dart_hatch_shut"})
+    prop("wall_sheet", "Score Sheet", {"p": "note_paper", "t": "screen_white"},
+         [el((3, 1, 15.75), (13, 15, 16), "p", north=("p", (0, 0, 16, 16))), el((6, 14, 15.5), (10, 15.5, 15.75), "t")])
     prop("served_glass", "Served Glass", {"g": "served_glass"}, [el((6, 0, 6), (10, 6, 10), "g")])
     prop("diploma", "Diploma", {"d": "diploma", "w": "suite_bed_frame"},
          [el((2, 2, 15.5), (14, 14, 16), "w", north="d")])
@@ -2233,11 +2388,16 @@ def main():
                           ("record_old_fashioned", lambda g: record_tex(g, (196, 120, 50))), ("record_sparkling_water", lambda g: record_tex(g, (120, 190, 220))),
                           ("record_still_water", lambda g: record_tex(g, (70, 110, 190))), ("record_chefs_plate", lambda g: record_tex(g, (150, 50, 60))),
                           ("reel_87", reel_tex), ("reel_94", reel_tex), ("reel_102", reel_tex), ("reel_120", reel_tex),
+                          ("dart", dart_tex),
                           ("master_card_nw", lambda g: card_tex(g, 0, 0)), ("master_card_ne", lambda g: card_tex(g, 1, 0)),
                           ("master_card_sw", lambda g: card_tex(g, 0, 1)), ("master_card_se", lambda g: card_tex(g, 1, 1))):
         (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))
         write_json(ASSETS / "models" / "item" / f"{item}.json",
                    {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{item}"}})
+
+    entity_dir = ASSETS / "textures" / "entity"
+    entity_dir.mkdir(parents=True, exist_ok=True)
+    (entity_dir / "dart.png").write_bytes(png(dart_entity_tex(rng_for("dart_entity"))))
 
     lang_path = ASSETS / "lang" / "en_us.json"
     lang = json.loads(lang_path.read_text(encoding="utf-8"))

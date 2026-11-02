@@ -315,7 +315,7 @@ into the corridor from Reception does not count as Level 3 again.
 
 The map's rebuild, whenever the world opens, puts Level 3 back and clears Level 4. So far Level 4
 is its rooms, furniture, nine notes, loot and rules (a `safe` level, see
-[Player systems](player.md#safe-levels)), and three of its four puzzles (below). Its big door is a
+[Player systems](player.md#safe-levels)), and its four puzzles (below). Its big door is a
 wall, so **the demo has no ending for now**.
 
 Each puzzle gives a corner of the golden master card, kept by `ProgressService`. Failing costs
@@ -329,6 +329,11 @@ nothing, and after 3 failures the next right thing glows (`core.puzzle.OrderPuzz
   runs on the screen, once, with only the projector to hear (`client.effects.FilmPlayer`), and when
   it ends the piece lies by the projector.
 - **Spa:** the piece lies at the bottom of the pool, 6 deep. Being a safe level, nobody drowns.
+- **Game room:** a dartboard 3 blocks across, a plate beside it with `20 - 5 - 12` and a tray with
+  3 darts (`platform.DartHooks`, `core.puzzle.darts.DartboardGeometry`). Right-click throws. Only
+  the number counts, not its ring; anything else sends the darts back to the tray. The third hit
+  opens a brass hatch under the board with the piece inside, and adds a line to the score sheet on
+  the wall (`ch1_l4_note_score_sheet_won`). The line on the floor is only a guide.
 
 ## 11. The end
 
