@@ -85,6 +85,13 @@ object LoungeHooks {
         }
     }
 
+    /** A game continued in Level 4: up it goes again, for [ContinueGame.loungeBuilt]. False if it cannot. */
+    fun beginAgain(server: MinecraftServer): Boolean {
+        if (phase != Phase.NOT_STARTED) return false
+        begin(server)
+        return phase != Phase.NOT_STARTED
+    }
+
     /** `/everytunnel loungeready`: the chunks are loaded, the steps can start. */
     fun chunksReady() {
         if (phase != Phase.WAITING_FOR_CHUNKS) return
@@ -101,6 +108,7 @@ object LoungeHooks {
         phase = Phase.BUILT
         LevelManager.get(LEVEL_ID)?.let { LootSpawner.place(server, it) }
         openLoungeDoors(server)
+        ContinueGame.loungeBuilt(server)
         EveryTunnel.LOGGER.info(
             "Level 4 built in {} steps, {} s", nextStep, "%.1f".format(java.util.Locale.ROOT, (server.ticks - startTick) / 20.0),
         )

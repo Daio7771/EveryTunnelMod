@@ -37,7 +37,7 @@ something in the library watches. It never hears you. It only needs to see you o
 - **Survival on a budget.** Stamina, thirst and a flashlight battery, with a few batteries
   and water bottles left lying around by previous guards.
 - **A complete demo.** Its own main menu, an elevator intro, three levels, 8 achievements,
-  an ending and credits. Every time you open the world, a new shift starts.
+  an ending and credits. The game saves at the start of each level.
 - **An in-game guide** (main menu, GUIDE), in English and Spanish.
 - **Looks right with or without shaders.** Tuned for Complementary Reimagined, with material
   maps for every texture. Plays fine on plain Minecraft too.
@@ -60,7 +60,7 @@ something in the library watches. It never hears you. It only needs to see you o
    folder.
 3. Download [LambDynamicLights](https://modrinth.com/mod/lambdynamiclights/versions?g=1.20.1)
    and [Cardinal Components API](https://modrinth.com/mod/cardinal-components-api/versions?g=1.20.1) for 1.20.1, and put them in the same folder.
-4. Start the game and press **BEGIN**.
+4. Start the game and press **NEW GAME**.
 
 Step-by-step instructions, recommended mods, shader setup and troubleshooting:
 **[INSTALL.md](INSTALL.md)**.

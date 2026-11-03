@@ -43,6 +43,9 @@ object LootSpawner {
 
     private var server: MinecraftServer? = null
 
+    /** The loot picked up this game, as `level/point`: Level 4's, for a game continued ([ContinueGame]). */
+    val taken: MutableSet<String> = linkedSetOf()
+
     fun register() {
         ServerLifecycleEvents.SERVER_STARTED.register { server = it }
         ServerLifecycleEvents.SERVER_STOPPED.register { server = null }
@@ -55,6 +58,7 @@ object LootSpawner {
 
     /** Every level's loot back in place (a new game). */
     fun restock(server: MinecraftServer) {
+        taken.clear()
         val state = state(server)
         state.placed.clear()
         state.markDirty()
@@ -83,6 +87,26 @@ object LootSpawner {
             state.markDirty()
         }
         if (count > 0) EveryTunnel.LOGGER.info("Loot placed in {}: {}", level.id, count)
+    }
+
+    /** The loot block at [pos] was picked up. */
+    fun noteTaken(world: net.minecraft.server.world.ServerWorld, pos: BlockPos) {
+        val level = LevelManager.levelAt(world.registryKey.value.toString(), pos.x + 0.5, pos.y + 0.5, pos.z + 0.5) ?: return
+        val point = level.spawnPoints.firstOrNull { BlockPos.ofFloored(it.position.x, it.position.y, it.position.z) == pos } ?: return
+        taken += "${level.id}/${point.id}"
+    }
+
+    /** A game continued: what had been taken in [level] goes again, but for the Master Key ([LoungeClosingHooks.undoKey]). */
+    fun restoreTaken(keys: List<String>, world: net.minecraft.server.world.ServerWorld, level: LevelDefinition) {
+        for (key in keys) {
+            val point = level.spawnPoints.firstOrNull { "${level.id}/${it.id}" == key } ?: continue
+            if ("master_key" in point.tags) continue
+            taken += key
+            val pos = BlockPos.ofFloored(point.position.x, point.position.y, point.position.z)
+            val there = world.getBlockState(pos)
+            if (there.block !is LootBlock) continue
+            world.setBlockState(pos, if (there.get(LootBlock.WATERLOGGED)) net.minecraft.block.Blocks.WATER.defaultState else net.minecraft.block.Blocks.AIR.defaultState)
+        }
     }
 
     private fun state(server: MinecraftServer): PlacedState =

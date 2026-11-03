@@ -9,7 +9,7 @@ nombra el código que hay detrás de cada paso.
 flowchart TD
     A[Arranca el juego] --> B[MapWorldInstaller: desempaqueta Noname Complex]
     B --> C[Menú principal]
-    C -->|BEGIN| D[Pantalla de carga]
+    C -->|NEW GAME o CONTINUE| D[Pantalla de carga]
     D --> E[Servidor: ejecuta garage:build]
     E --> F[NewGame.start]
     F --> G[El cliente dibuja el ascensor, fundido de entrada]
@@ -49,7 +49,7 @@ flowchart TD
 juego la abriría (`MinecraftClientMixin`): al arrancar, al salir de un mundo, tras los
 créditos y al cerrarse una pantalla sin mundo abierto (Escape en las opciones).
 
-- **BEGIN** abre Noname Complex. Si el mundo falta, dice "The map is missing. Reinstall the
+- **NEW GAME** abre Noname Complex; con una partida guardada lo sustituye **CONTINUE** (`platform.ContinueGame`), y Ctrl+Shift+D borra esa partida tras preguntar (`EraseSaveScreen`). Una partida guardada tiene: puntos de control al inicio de cada nivel, el nivel 4 como se dejó (`core.save.LoungeSave`), salvo coger la llave, y se borra con los créditos. Si el mundo falta, dice "The map is missing. Reinstall the
   mod."
 - **OPTIONS** abre las opciones de vanilla.
 - **GUIDE** abre la [guía del jugador](guide/01-how-to-play.md) (`GuideScreen`): una hoja de
@@ -403,7 +403,7 @@ de golpe a espaldas del jugador. Al fondo, `platform.EndingHooks`: una zona con 
 3. Cualquier tecla tras un momento, Esc o un tiempo límite guardan el mundo y vuelven al
    menú principal.
 
-Abrir el mundo otra vez empieza una partida nueva, como siempre.
+La partida guardada se borra: solo queda NEW GAME.
 
 ## Muerte
 
@@ -424,10 +424,8 @@ en el inicio del nivel actual, como respaldo.
 ## Logros
 
 Ocho logros (`core.achievement.Achievement`, en el orden de la lista). El servidor dice cuándo
-se consigue uno (`platform.AchievementHooks`, solo en mundos con niveles), una vez por partida:
-volver a conseguirlo en la misma partida (morir otra vez por un Pale man) no muestra nada, y una
-partida nueva deja que salgan todos otra vez. El cliente muestra el aviso "Achievement
-Unlocked!", dibujado como el de desafío de vanilla con su fanfarria
+se consigue uno (`platform.AchievementHooks`, solo en mundos con niveles), como mucho una vez por partida. El cliente muestra el aviso "Achievement Unlocked!" solo la primera
+vez, porque siguen desbloqueados hasta que Ctrl+Shift+D en la pantalla ACHIEVEMENTS los reinicia, dibujado como el de desafío de vanilla con su fanfarria
 (`client.hud.AchievementToast`), y lo recuerda para siempre en
 `config/every_tunnel/achievements.json` (`client.AchievementStore`), entre partidas y mundos.
 Los logros de vanilla no se tocan.

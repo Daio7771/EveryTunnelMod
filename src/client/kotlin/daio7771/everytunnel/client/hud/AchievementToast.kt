@@ -75,8 +75,8 @@ class AchievementToast(private val achievement: Achievement) : Toast {
             ClientPlayNetworking.registerGlobalReceiver(AchievementHooks.PACKET_ID) { client, _, buf, _ ->
                 val achievement = Achievement.byId(buf.readString()) ?: return@registerGlobalReceiver
                 client.execute {
-                    AchievementStore.unlock(achievement)
-                    client.toastManager.add(AchievementToast(achievement))
+                    // Only the first time ever: it stays unlocked, game after game.
+                    if (AchievementStore.unlock(achievement)) client.toastManager.add(AchievementToast(achievement))
                 }
             }
         }

@@ -56,11 +56,11 @@ Every Tunnel. If you already have newer copies of them, that is fine too.
 ## 3. Play
 
 1. Start the `fabric-loader-1.20.1` profile (or your Fabric 1.20.1 profile).
-2. The Every Tunnel main menu replaces Minecraft's title screen. Press **BEGIN**.
+2. The Every Tunnel main menu replaces Minecraft's title screen. Press **NEW GAME**.
 
-The first start puts the map in your worlds as **Noname Complex**. Opening it always starts a
-new shift: the map is rebuilt behind the loading screen, which takes a moment, and you begin
-in the elevator.
+The first start puts the map in your worlds as **Noname Complex**. The map is rebuilt behind the
+loading screen each time, which takes a moment. The game saves at the start of each level:
+**CONTINUE** takes you back to the last one. To start over, press **Ctrl+Shift+D** in the main menu.
 
 New to the game? Open **GUIDE** in the main menu first.
 

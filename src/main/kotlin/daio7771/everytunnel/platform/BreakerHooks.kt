@@ -4,6 +4,7 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.core.puzzle.BreakerCode
+import daio7771.everytunnel.core.save.LoungeSave
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.ShapeContext
@@ -69,6 +70,45 @@ object BreakerHooks {
             }
         }
         if (code.solvedBy(levers)) powerOn(world, level, pos) else world.playSound(null, pos, ModSounds.BREAKER_COUNT, SoundCategory.BLOCKS, 0.8f, 1f)
+    }
+
+    /** For [ContinueGame]: the code, the levers as they stand, the counter, the reader. */
+    fun save(save: LoungeSave, world: ServerWorld, level: LevelDefinition) {
+        save.breakers = code.answer
+        save.levers = (0 until BreakerCode.LEVERS).map { i ->
+            val lever = pointOf(level, "breaker_$i")?.let(world::getBlockState)
+            lever != null && lever.isOf(ModBlocks.BREAKER_LEVER) && lever.get(BreakerLeverBlock.ON)
+        }
+        val counter = pointOf(level, "breaker_counter")?.let(world::getBlockState)
+        save.counter = if (counter != null && counter.isOf(ModBlocks.BREAKER_COUNTER) && counter.get(BreakerCounterBlock.LIT)) counter.get(BreakerCounterBlock.COUNT) else -1
+        save.powered = powered
+        val reader = pointOf(level, "calm_reader")?.let(world::getBlockState)
+        save.readerUnlocked = reader != null && reader.isOf(ModBlocks.CALM_READER) && reader.get(CalmReaderBlock.UNLOCKED)
+    }
+
+    fun restore(save: LoungeSave, world: ServerWorld, level: LevelDefinition) {
+        if (save.breakers.isEmpty()) return
+        code = BreakerCode(save.breakers)
+        powered = save.powered
+        save.levers.forEachIndexed { i, on ->
+            pointOf(level, "breaker_$i")?.let { at ->
+                val lever = world.getBlockState(at)
+                if (lever.isOf(ModBlocks.BREAKER_LEVER)) world.setBlockState(at, lever.with(BreakerLeverBlock.ON, on))
+            }
+        }
+        if (save.counter >= 0) {
+            pointOf(level, "breaker_counter")?.let { at ->
+                val counter = world.getBlockState(at)
+                if (counter.isOf(ModBlocks.BREAKER_COUNTER)) world.setBlockState(at, counter.with(BreakerCounterBlock.COUNT, save.counter).with(BreakerCounterBlock.LIT, true))
+            }
+        }
+        pointOf(level, "calm_reader")?.let { at ->
+            val reader = world.getBlockState(at)
+            if (reader.isOf(ModBlocks.CALM_READER)) {
+                world.setBlockState(at, reader.with(CalmReaderBlock.POWERED, save.powered).with(CalmReaderBlock.UNLOCKED, save.readerUnlocked))
+                if (save.readerUnlocked) CardReaderBlock.setDoors(world, at, open = true)
+            }
+        }
     }
 
     private fun powerOn(world: ServerWorld, level: LevelDefinition, pos: BlockPos) {

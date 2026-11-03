@@ -2,6 +2,7 @@ package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.puzzle.SafeDial
+import daio7771.everytunnel.core.save.LoungeSave
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.block.Block
@@ -9,6 +10,7 @@ import net.minecraft.block.BlockState
 import net.minecraft.block.ShapeContext
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.BooleanProperty
@@ -54,6 +56,25 @@ object SafeHooks {
     fun reset() {
         combinations.clear()
         failures.clear()
+    }
+
+    /** For [ContinueGame]. */
+    fun save(save: LoungeSave, world: ServerWorld) {
+        save.safes = combinations.map { (pos, combination) ->
+            val state = world.getBlockState(pos)
+            val open = state.isOf(ModBlocks.SUITE_SAFE) && state.get(SuiteSafeBlock.OPEN)
+            LoungeSave.Safe(pos.x, pos.y, pos.z, combination, failures[pos] ?: 0, open)
+        }
+    }
+
+    fun restore(save: LoungeSave, world: ServerWorld) {
+        for (safe in save.safes) {
+            val pos = BlockPos(safe.x, safe.y, safe.z)
+            combinations[pos] = safe.combination
+            failures[pos] = safe.failures
+            val state = world.getBlockState(pos)
+            if (safe.open && state.isOf(ModBlocks.SUITE_SAFE)) world.setBlockState(pos, state.with(SuiteSafeBlock.OPEN, true))
+        }
     }
 
     fun use(player: ServerPlayerEntity, pos: BlockPos) {

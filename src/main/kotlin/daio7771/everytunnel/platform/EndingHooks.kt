@@ -53,6 +53,7 @@ object EndingHooks {
             val player = server?.playerManager?.getPlayer(change.playerId) ?: return@register
             if (!WorldRules.appliesTo(player.isCreative, player.isSpectator) || LoadingHooks.isLoading(player)) return@register
             endings[player.uuid] = Ending()
+            ContinueGame.finished(player)
             EveryTunnel.LOGGER.info("{} reached the end of the demo", player.name.string)
             PlaytestLog.endOfDemo(player)
         }

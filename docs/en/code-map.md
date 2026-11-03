@@ -33,6 +33,7 @@ KDoc comment that says more.
 | `achievement/Achievement.kt` | The eight achievements, in list order, by id |
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
 | `puzzle/OrderPuzzle.kt` | A puzzle of things in order: attempts, failures, the hint |
+| `save/LoungeSave.kt` | Level 4 as it was left, as text |
 | `wall/WallMessageState.kt` | A wall message's triggers: fixed, on approach, changing when looked away from |
 | `puzzle/BreakerCode.kt` | Level 4's five levers: the code, how many are right |
 | `puzzle/SafeDial.kt` | A safe's dial: ticks, clicks, fixing a number by changing direction |
@@ -165,6 +166,7 @@ KDoc comment that says more.
 | `LoungeClosingBlocks.kt` | The big door, the Calm room's reader, the emergency lamp |
 | `BreakerHooks.kt` | Level 4's Maintenance room: levers, button, counter, power for the reader |
 | `SafeHooks.kt` | The safes in the Suites: the combinations, the block, the result from the client |
+| `ContinueGame.kt` | The saved game: checkpoints, CONTINUE, putting Level 4 back |
 | `WallMessageBlock.kt` | A message painted on a wall: the block and its data |
 | `SafeLevelHooks.kt` | Levels without risk: no damage (Level 4) |
 | `SuiteBedHooks.kt` | Resting in a bed: fade to black, health and stamina full |
@@ -259,6 +261,7 @@ KDoc comment that says more.
 | `GuideScreen.kt` | The player guide: a scrolling paper sheet with tabs |
 | `NoteScreen.kt` | A note read on the guide's paper over the game, placeholders filled |
 | `SafeScreen.kt` | A safe's dial, turned and listened to |
+| `EraseSaveScreen.kt` | The warning before Ctrl+Shift+D erases the saved game |
 | `LoadingScreen.kt` | The loading screen and `LoadingCover`, which draws it over everything |
 | `LoadingTips.kt` | Rotating tips with the player's keys |
 | `EndOfDemoScreen.kt` | "End of demo" and the rolling credits |

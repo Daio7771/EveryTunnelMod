@@ -51,19 +51,8 @@ object NewGame {
     /** The level the new game starts in, or null if the world has no level with a start. */
     fun start(player: ServerPlayerEntity): LevelDefinition? {
         val server = player.server
-        HidingHooks.newGame(server)
         AchievementHooks.newGame(player)
-        CarryHooks.forgetAll()
-        BoxHooks.newGame(server)
-        BookHooks.newGame(server)
-        CollapseHooks.resetAll(server)
-        LoungeHooks.newGame(server)
-        LevelEntryHooks.openAll(server)
-        LootSpawner.restock(server)
-        KeycardHooks.restoreLights(server)
-        KeycardHooks.resetReaders(server)
-        ValveHooks.newGame(server)
-        PaleManSpawner.startNewGame(server)
+        resetWorld(server)
 
         player.inventory.clear()
         player.clearStatusEffects()
@@ -78,8 +67,25 @@ object NewGame {
 
         PlaytestLog.newGame(player)
         val level = IntroHooks.replay(player) ?: firstLevelStart(player)
+        ContinueGame.newGame(player, level)
         EveryTunnel.LOGGER.info("{}: new game in {}", player.name.string, level?.id)
         return level
+    }
+
+    /** Everything in the world back as a game starts. A game continued starts from here too ([ContinueGame]). */
+    fun resetWorld(server: MinecraftServer) {
+        HidingHooks.newGame(server)
+        CarryHooks.forgetAll()
+        BoxHooks.newGame(server)
+        BookHooks.newGame(server)
+        CollapseHooks.resetAll(server)
+        LoungeHooks.newGame(server)
+        LevelEntryHooks.openAll(server)
+        LootSpawner.restock(server)
+        KeycardHooks.restoreLights(server)
+        KeycardHooks.resetReaders(server)
+        ValveHooks.newGame(server)
+        PaleManSpawner.startNewGame(server)
     }
 
     private fun firstLevelStart(player: ServerPlayerEntity): LevelDefinition? {

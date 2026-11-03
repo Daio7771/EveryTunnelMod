@@ -44,6 +44,12 @@ class OrderPuzzle(val answer: List<Int>, private val hintAfter: Int = 3) {
         done = 0
     }
 
+    /** Back as it was left (a game continued). */
+    fun restore(done: Int, failures: Int) {
+        this.done = done.coerceIn(0, answer.size)
+        this.failures = failures.coerceAtLeast(0)
+    }
+
     /** A new game. */
     fun reset() {
         done = 0

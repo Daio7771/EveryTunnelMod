@@ -10,6 +10,7 @@ import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.block.LightBlock
 import net.minecraft.entity.ItemEntity
+import net.minecraft.item.ItemStack
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.MinecraftServer
@@ -116,6 +117,14 @@ object LoungeClosingHooks {
         pointOf(level, "wet_sign")?.let { world.setBlockState(it, ModBlocks.WET_FLOOR_SIGN.defaultState.with(PropBlock.FACING, Direction.EAST)) }
         world.playSound(null, player.blockPos, ModSounds.LOUNGE_BLACKOUT, SoundCategory.BLOCKS, 2f, 1f)
         EveryTunnel.LOGGER.info("The Master Key is taken: {} lamps go out", lamps)
+    }
+
+    /** A game continued: the key is on its table again, not on the player. */
+    fun undoKey(player: ServerPlayerEntity) {
+        val inventory = player.inventory
+        for (slot in 0 until inventory.size()) {
+            if (inventory.getStack(slot).isOf(ModItems.MASTER_KEY)) inventory.setStack(slot, ItemStack.EMPTY)
+        }
     }
 
     fun useBigDoor(player: ServerPlayerEntity, state: BlockState) {

@@ -217,7 +217,7 @@ val packMapWorld = tasks.register<Zip>("packMapWorld") {
     description = "Packs run/saves/noname_complex into the mod's resources."
     onlyIf { mapWorld.resolve("level.dat").isFile }
     from(mapWorld) {
-        exclude("session.lock", "level.dat_old", "playerdata/**", "stats/**", "advancements/**")
+        exclude("session.lock", "level.dat_old", "playerdata/**", "stats/**", "advancements/**", "every_tunnel_continue")
         exclude("data/every_tunnel_*", "data/chunks.dat")
         // No saved mobs or items: the mod spawns its creatures itself and remembers it in
         // data/every_tunnel_*, left out above, so a packed one would come as a second one.

@@ -9,7 +9,7 @@ and names the code behind each step.
 flowchart TD
     A[Game starts] --> B[MapWorldInstaller: unpack Noname Complex]
     B --> C[Main menu]
-    C -->|BEGIN| D[Loading screen]
+    C -->|NEW GAME or CONTINUE| D[Loading screen]
     D --> E[Server: run garage:build]
     E --> F[NewGame.start]
     F --> G[Client draws the elevator, fades in]
@@ -49,7 +49,7 @@ flowchart TD
 it (`MinecraftClientMixin`): at start-up, after leaving a world, after the credits, and when a
 screen closes with no world open (Escape in the options).
 
-- **BEGIN** opens Noname Complex. If the world is missing it says "The map is missing.
+- **NEW GAME** opens Noname Complex; with a saved game **CONTINUE** takes its place (`platform.ContinueGame`), and Ctrl+Shift+D erases that game after asking (`EraseSaveScreen`). A saved game has: checkpoints at each level's start, Level 4 kept as it was left (`core.save.LoungeSave`), but for taking the key, and erased by the credits. If the world is missing it says "The map is missing.
   Reinstall the mod."
 - **OPTIONS** opens vanilla's options.
 - **GUIDE** opens the [player guide](guide/01-how-to-play.md) (`GuideScreen`): one sheet of
@@ -377,7 +377,7 @@ the player. At the far end, `platform.EndingHooks`: a zone tagged `end`.
    then the credits roll (the CC BY music credit among them) until "Thank you for playing."
 3. Any key after a moment, Esc, or a timeout saves the world and returns to the main menu.
 
-Opening the world again starts a new game, as always.
+The saved game is erased: only NEW GAME remains.
 
 ## Death
 
@@ -398,9 +398,8 @@ current level's start, as a fallback.
 ## Achievements
 
 Eight achievements (`core.achievement.Achievement`, in list order). The server says when one
-is earned (`platform.AchievementHooks`, only in worlds with levels), once per game: earning
-it again in the same game (a second death to a Pale man) shows nothing, and a new game lets
-them all come again. The client shows the "Achievement Unlocked!" toast, drawn like vanilla's
+is earned (`platform.AchievementHooks`, only in worlds with levels), once per game at most. The client shows the "Achievement Unlocked!" toast only the first time ever,
+as they stay unlocked until Ctrl+Shift+D on the ACHIEVEMENTS screen resets them, drawn like vanilla's
 challenge toast with its fanfare
 (`client.hud.AchievementToast`), and remembers it for good in
 `config/every_tunnel/achievements.json` (`client.AchievementStore`), across games and worlds.

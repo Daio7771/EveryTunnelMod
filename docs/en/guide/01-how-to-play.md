@@ -55,10 +55,14 @@ Each level has a way down to the next one. Follow the painted arrows on the floo
 doors stay shut until you have what they ask for. Once you go down to a new level, there
 is no way back.
 
-## A new shift
+## Saving
 
-Every time you open the world, a new game starts: the map is rebuilt, the supplies are
-back, and you start again in the elevator. Your shift always starts from the beginning.
+The game saves itself at the start of each level. **CONTINUE**, in the main menu, takes you
+back to the last one. In the VIP lounge everything stays as you left it, and you come back to
+Reception. Reaching the end erases your progress, and you can erase it yourself: press **Ctrl+Shift+D** in the
+main menu.
+
+To earn your achievements again, press **Ctrl+Shift+D** on the ACHIEVEMENTS screen.
 
 ## Tips
 

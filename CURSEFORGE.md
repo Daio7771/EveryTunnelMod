@@ -29,7 +29,7 @@ something in the library watches. It never hears you. It only needs to see you o
 - **Survival on a budget.** Stamina, thirst and a flashlight battery, with a few batteries
   and water bottles left lying around by previous guards.
 - **A complete demo.** Its own main menu, an elevator intro, three levels, 8 achievements,
-  an ending and credits. Every time you open the world, a new shift starts.
+  an ending and credits. The game saves at the start of each level.
 - **An in-game guide** (main menu, GUIDE), in English and Spanish.
 - **Looks right with or without shaders.** Tuned for Complementary Reimagined, with material
   maps for every texture. Plays fine on plain Minecraft too.
@@ -49,9 +49,9 @@ something in the library watches. It never hears you. It only needs to see you o
    launcher).
 2. Put the Every Tunnel `.jar`, LambDynamicLights and Cardinal Components API in the `mods` folder (the CurseForge
    app does this for you).
-3. Start the game and press **BEGIN**. New to the game? Open **GUIDE** first.
+3. Start the game and press **NEW GAME**. New to the game? Open **GUIDE** first.
 
-The map appears in your worlds as **Noname Complex**. Opening it always starts a new shift.
+The map appears in your worlds as **Noname Complex**. **CONTINUE** takes you back to your last level.
 
 Step-by-step instructions, shader setup and troubleshooting:
 [installation guide](https://github.com/Daio7771/EveryTunnelMod/blob/main/INSTALL.md).

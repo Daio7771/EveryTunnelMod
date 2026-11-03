@@ -33,6 +33,7 @@ con un comentario KDoc que cuenta más.
 | `achievement/Achievement.kt` | Los ocho logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
 | `puzzle/OrderPuzzle.kt` | Un puzle de cosas en orden: intentos, fallos, la pista |
+| `save/LoungeSave.kt` | El nivel 4 como se dejó, en texto |
 | `wall/WallMessageState.kt` | Los disparadores de un mensaje: fijo, al acercarse, cambia al dejar de mirarlo |
 | `puzzle/BreakerCode.kt` | Las cinco palancas del nivel 4: el código, cuántas están bien |
 | `puzzle/SafeDial.kt` | El dial de una caja: tics, clics, fijar un número cambiando de sentido |
@@ -165,6 +166,7 @@ con un comentario KDoc que cuenta más.
 | `LoungeClosingBlocks.kt` | La puerta grande, el lector de la Calm room, la luz de emergencia |
 | `BreakerHooks.kt` | La sala de mantenimiento del nivel 4: palancas, botón, contador, corriente del lector |
 | `SafeHooks.kt` | Las cajas fuertes de las Suites: combinaciones, bloque, resultado del cliente |
+| `ContinueGame.kt` | La partida guardada: puntos de control, CONTINUE, recuperar el nivel 4 |
 | `WallMessageBlock.kt` | Un mensaje pintado en la pared: el bloque y sus datos |
 | `SafeLevelHooks.kt` | Niveles sin riesgo: sin daño (el nivel 4) |
 | `SuiteBedHooks.kt` | Descansar en una cama: fundido a negro, vida y estamina llenas |
@@ -259,6 +261,7 @@ con un comentario KDoc que cuenta más.
 | `GuideScreen.kt` | La guía del jugador: una hoja de papel con scroll y pestañas |
 | `NoteScreen.kt` | Una nota leída en el papel de la guía sobre el juego, con los huecos rellenos |
 | `SafeScreen.kt` | El dial de una caja fuerte, que se gira y se escucha |
+| `EraseSaveScreen.kt` | El aviso antes de que Ctrl+Shift+D borre la partida guardada |
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |
 | `LoadingTips.kt` | Consejos que van cambiando, con las teclas del jugador |
 | `EndOfDemoScreen.kt` | "End of demo" y los créditos que suben |

@@ -21,6 +21,9 @@ class PlayerProgress {
     /** The id of the last checkpoint reached, or null before the first one. */
     var checkpoint: String? = null
 
+    /** Level 4 as it was left, as text (`core.save.LoungeSave`), or null. */
+    var lounge: String? = null
+
     /** The pieces of each level, as a copy (level id -> piece ids). */
     val pieces: Map<String, Set<String>>
         get() = piecesByLevel.mapValues { (_, pieces) -> pieces.toSet() }
@@ -55,6 +58,7 @@ class PlayerProgress {
         scenesSeen.clear()
         level3Books = 0
         checkpoint = null
+        lounge = null
     }
 
     /** One line for the debug command. */

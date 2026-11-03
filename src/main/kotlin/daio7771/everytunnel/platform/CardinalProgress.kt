@@ -60,7 +60,23 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
 
     override fun setCheckpoint(player: PlayerEntity, checkpointId: String?) = change(player) { it.checkpoint = checkpointId }
 
-    override fun reset(player: PlayerEntity) = change(player) { it.clear() }
+    override fun lounge(player: PlayerEntity) = of(player).lounge
+
+    override fun setLounge(player: PlayerEntity, text: String?) = change(player) { it.lounge = text }
+
+    override fun saveInventory(player: PlayerEntity) {
+        KEY.get(player).inventory = player.inventory.writeNbt(NbtList())
+    }
+
+    override fun restoreInventory(player: PlayerEntity) {
+        player.inventory.clear()
+        player.inventory.readNbt(KEY.get(player).inventory)
+    }
+
+    override fun reset(player: PlayerEntity) = change(player) {
+        it.clear()
+        KEY.get(player).inventory = NbtList()
+    }
 
     override fun describe(player: PlayerEntity) = of(player).describe()
 
@@ -78,6 +94,9 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
 
         val progress = PlayerProgress()
 
+        /** What the player carried at the checkpoint. */
+        var inventory = NbtList()
+
         override fun shouldSyncWith(player: ServerPlayerEntity): Boolean = player === owner
 
         override fun readFromNbt(tag: NbtCompound) {
@@ -90,6 +109,8 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             strings(tag, SCENES).forEach { progress.markSceneSeen(it) }
             progress.level3Books = tag.getInt(BOOKS)
             progress.checkpoint = if (tag.contains(CHECKPOINT, NbtElement.STRING_TYPE.toInt())) tag.getString(CHECKPOINT) else null
+            progress.lounge = if (tag.contains(LOUNGE, NbtElement.STRING_TYPE.toInt())) tag.getString(LOUNGE) else null
+            inventory = tag.getList(INVENTORY, NbtElement.COMPOUND_TYPE.toInt())
         }
 
         override fun writeToNbt(tag: NbtCompound) {
@@ -100,6 +121,8 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             tag.put(SCENES, list(progress.scenes))
             tag.putInt(BOOKS, progress.level3Books)
             progress.checkpoint?.let { tag.putString(CHECKPOINT, it) }
+            progress.lounge?.let { tag.putString(LOUNGE, it) }
+            tag.put(INVENTORY, inventory)
         }
 
         private fun strings(tag: NbtCompound, key: String): List<String> {
@@ -119,6 +142,8 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             const val SCENES = "scenes"
             const val BOOKS = "level3_books"
             const val CHECKPOINT = "checkpoint"
+            const val LOUNGE = "lounge"
+            const val INVENTORY = "checkpoint_inventory"
         }
     }
 }

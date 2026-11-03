@@ -5,6 +5,7 @@ import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.film.FilmInfo
 import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.core.puzzle.OrderPuzzle
+import daio7771.everytunnel.core.save.LoungeSave
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
@@ -78,6 +79,11 @@ object LoungePuzzleHooks {
             order = OrderPuzzle(draw())
             finishIn = -1
         }
+
+        fun restore(answer: List<Int>, done: Int, failures: Int) {
+            if (answer.isEmpty()) return
+            order = OrderPuzzle(answer).also { it.restore(done, failures) }
+        }
     }
 
     private val BAR = Puzzle(
@@ -95,6 +101,9 @@ object LoungePuzzleHooks {
     )
 
     private var server: MinecraftServer? = null
+
+    /** The film has been seen to its end. */
+    private var filmSeen = false
 
     /** The right reel is in the projector, and nobody has come out to see it yet. */
     private var filmWaiting = false
@@ -120,6 +129,7 @@ object LoungePuzzleHooks {
         EveryTunnel.LOGGER.info("Level 4 this game: records {}, reel {} minutes", BAR.order.answer, REEL_MINUTES[CINEMA.order.answer[0]])
         filmWaiting = false
         filmTicks = -1
+        filmSeen = false
         DartHooks.reset()
         BreakerHooks.reset()
         SafeHooks.reset()
@@ -131,6 +141,35 @@ object LoungePuzzleHooks {
         if (level.id != LEVEL_ID) return emptyMap()
         val lines = BAR.order.answer.withIndex().associate { (i, record) -> "R$i" to record }
         return lines + ("FILM" to REEL_MINUTES[CINEMA.order.answer[0]])
+    }
+
+    /** For [ContinueGame]. */
+    fun save(save: LoungeSave) {
+        save.records = BAR.order.answer
+        save.recordsDone = BAR.order.done
+        save.recordsFailures = BAR.order.failures
+        save.reel = CINEMA.order.answer
+        save.reelDone = CINEMA.order.done
+        save.reelFailures = CINEMA.order.failures
+        save.filmSeen = filmSeen
+    }
+
+    /** As it was left. What a solved puzzle left lying is put back; a film not seen to its end waits again. */
+    fun restore(save: LoungeSave, server: MinecraftServer, player: ServerPlayerEntity) {
+        BAR.restore(save.records, save.recordsDone, save.recordsFailures)
+        CINEMA.restore(save.reel, save.reelDone, save.reelFailures)
+        filmSeen = save.filmSeen
+        val inventory = player.inventory
+        for (slot in 0 until inventory.size()) {
+            val item = inventory.getStack(slot).item
+            if (item in ModItems.RECORDS || item in ModItems.REELS) inventory.setStack(slot, ItemStack.EMPTY)
+        }
+        val progress = ProgressService.get()
+        if (BAR.order.solved && !progress.hasPiece(player, PIECE_LEVEL, "ch1_l4_piece_bar")) putPiece(server, BAR)
+        if (CINEMA.order.solved) {
+            if (!filmSeen) filmWaiting = true
+            else if (!progress.hasPiece(player, PIECE_LEVEL, "ch1_l4_piece_cinema")) putPiece(server, CINEMA)
+        }
     }
 
     /** A piece was picked up: kept in the player's progress. */
@@ -235,7 +274,10 @@ object LoungePuzzleHooks {
             val level = LevelManager.get(LEVEL_ID)
             if (level != null && someoneWatches(server, level)) startFilm(server, level)
         }
-        if (filmTicks >= 0 && filmTicks-- == 0) putPiece(server, CINEMA)
+        if (filmTicks >= 0 && filmTicks-- == 0) {
+            filmSeen = true
+            putPiece(server, CINEMA)
+        }
         for (puzzle in PUZZLES) {
             if (puzzle.finishIn < 0) continue
             if (puzzle.finishIn-- == 0) putPiece(server, puzzle)

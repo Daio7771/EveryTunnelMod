@@ -70,6 +70,7 @@ class LootBlock(settings: Settings, private val itemOf: () -> Item) : BlockWithE
             val stack = ItemStack(item)
             if (!player.inventory.insertStack(stack)) player.dropItem(stack, false)
             world.removeBlock(pos, false)
+            if (world is net.minecraft.server.world.ServerWorld) LootSpawner.noteTaken(world, pos)
             if (player is ServerPlayerEntity) PlaytestLog.pickedUp(player, item, pos)
             world.playSound(null, pos, SoundEvents.ENTITY_ITEM_PICKUP, SoundCategory.PLAYERS, 0.3f, 1.2f + world.random.nextFloat() * 0.4f)
             if (item == ModItems.KEYCARD && player is ServerPlayerEntity) KeycardHooks.pickedUp(player, pos)

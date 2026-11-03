@@ -40,6 +40,13 @@ object AchievementStore {
         return true
     }
 
+    /** Forgets them all (Ctrl+Shift+D in the ACHIEVEMENTS screen). */
+    fun reset() {
+        ids = linkedSetOf()
+        save()
+        EveryTunnel.LOGGER.info("The achievements were reset")
+    }
+
     private fun load(): MutableSet<String> {
         val path = file
         if (!Files.exists(path)) return linkedSetOf()

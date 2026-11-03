@@ -59,11 +59,13 @@ Cada nivel tiene un camino hacia abajo, al siguiente. Sigue las flechas pintadas
 suelo. Algunas puertas no se abren hasta que tengas lo que piden. En cuanto bajas a un
 nivel nuevo, no hay vuelta atrás.
 
-## Un turno nuevo
+## Guardar
 
-Cada vez que abres el mundo empieza una partida nueva: el mapa se reconstruye, los
-suministros vuelven y empiezas otra vez en el ascensor. Tu turno siempre empieza desde el
-principio.
+La partida se guarda sola al empezar cada nivel. **CONTINUE**, en el menú principal, te lleva al
+último. En la zona VIP todo sigue como lo dejaste, y vuelves a Reception. Llegar al final borra tu
+progreso, y puedes borrarlo tú: pulsa **Ctrl+Shift+D** en el menú principal.
+
+Para volver a conseguir tus logros, pulsa **Ctrl+Shift+D** en la pantalla ACHIEVEMENTS.
 
 ## Consejos
 

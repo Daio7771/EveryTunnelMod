@@ -17,10 +17,9 @@ import java.util.UUID
 
 /**
  * Earning the achievements ([Achievement]): the server tells the client, which shows the
- * "Achievement Unlocked!" toast and remembers it (`client.hud.AchievementToast`,
- * `client.AchievementStore`). Each one is told **once per game**: dying to a Pale man a second
- * time shows nothing; a new game ([newGame]) lets them all come again. The vanilla
- * advancements are not touched. Only in worlds with levels.
+ * "Achievement Unlocked!" toast the first time and remembers it for good (`client.hud.AchievementToast`,
+ * `client.AchievementStore`, which Ctrl+Shift+D in the ACHIEVEMENTS screen resets). Each one is told
+ * once per game at most. The vanilla advancements are not touched. Only in worlds with levels.
  *
  * - First Day at Work: walking out of the start zone (tagged `start`, [IntroHooks.START_TAG])
  *   of a level with an intro: out of the elevator ([register], from [LevelTriggers]).

@@ -5,6 +5,7 @@ import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.core.puzzle.OrderPuzzle
 import daio7771.everytunnel.core.puzzle.darts.DartboardGeometry
+import daio7771.everytunnel.core.save.LoungeSave
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.block.BlockState
@@ -77,6 +78,27 @@ object DartHooks {
         if (!server.isRunning) return
         val (level, world) = place(server) ?: return
         if (pointOf(level, "dartboard") != null) discardDarts(level, world)
+    }
+
+    /** For [ContinueGame]. */
+    fun save(save: LoungeSave) {
+        save.darts = puzzle.answer
+        save.dartsDone = puzzle.done
+        save.dartsFailures = puzzle.failures
+    }
+
+    /** The numbers and how far it got. A try half thrown starts over, its darts back on the tray; solved, the hatch stands open. */
+    fun restore(save: LoungeSave, world: ServerWorld, level: LevelDefinition, player: ServerPlayerEntity) {
+        if (save.darts.isEmpty()) return
+        puzzle = OrderPuzzle(save.darts)
+        puzzle.restore(if (save.dartsDone >= save.darts.size) save.dartsDone else 0, save.dartsFailures)
+        removeCarried(player)
+        if (!puzzle.solved) return
+        val pos = pointOf(level, "dart_hatch") ?: return
+        val state = world.getBlockState(pos)
+        if (!state.isOf(ModBlocks.DART_HATCH)) return
+        val piece = !ProgressService.get().hasPiece(player, LoungePuzzleHooks.PIECE_LEVEL, "ch1_l4_piece_game")
+        world.setBlockState(pos, state.with(DartHatchBlock.OPEN, true).with(DartHatchBlock.PIECE, piece))
     }
 
     /** The note to show for a sheet read: winning writes the player on the score sheet. */

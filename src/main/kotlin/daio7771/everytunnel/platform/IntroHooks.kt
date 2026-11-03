@@ -107,6 +107,12 @@ object IntroHooks {
         return level
     }
 
+    /** A game continued in [level]: someone who has had the intro does not wait behind its doors. */
+    fun doorsOpenIfDone(player: ServerPlayerEntity, level: LevelDefinition) {
+        if (level.intro == null || player.uuid !in state(player.server).done) return
+        worldOf(player.server, level)?.let { opening += Opening(it, doors(level)) }
+    }
+
     private fun tick(server: MinecraftServer) {
         if (++checkTicks >= CHECK_TICKS) {
             checkTicks = 0

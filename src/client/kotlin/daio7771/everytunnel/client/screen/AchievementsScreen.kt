@@ -132,6 +132,10 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
     }
 
     override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        if (keyCode == GLFW.GLFW_KEY_D && hasShiftDown() && hasControlDown() && unlocked.isNotEmpty()) {
+            client?.setScreen(EraseSaveScreen(this, "screen.every_tunnel.achievements.erase") { AchievementStore.reset() })
+            return true
+        }
         val page = (viewBottom - viewTop - PAGE_KEEP).toDouble()
         when (keyCode) {
             GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> scrollBy(-KEY_STEP)

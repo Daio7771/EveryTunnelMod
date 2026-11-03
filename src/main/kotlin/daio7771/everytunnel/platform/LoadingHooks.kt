@@ -31,8 +31,9 @@ import java.util.UUID
  *   ([STATE_LOADING]), and the player cannot move, be hurt or make a noise, their
  *   resources do not drain, and no intro starts.
  * - Once the world is built, a Survival or Adventure player starts a new game
- *   ([NewGame.start]): every level is reset and they wait in the closed elevator. Creative
- *   and Spectator players stay where they are.
+ *   ([NewGame.start]): every level is reset and they wait in the closed elevator; or goes on
+ *   with the saved one, if the menu asked for it ([ContinueGame]). Creative and Spectator players
+ *   stay where they are.
  * - Then the light: the build runs while the player joins, so the chunks they were sent
  *   can carry light from before the build (the elevator with sky light and no lamp). Once
  *   the light engine has settled ([LIGHT_SETTLE_TICKS], at most [LIGHT_TIMEOUT_TICKS]),
@@ -163,7 +164,16 @@ object LoadingHooks {
             if (!state.prepared) {
                 state.prepared = true
                 state.preparedTick = now
-                if (WorldRules.appliesTo(player.isCreative, player.isSpectator)) NewGame.start(player)
+                if (WorldRules.appliesTo(player.isCreative, player.isSpectator)) {
+                    val continuing = ContinueGame.requested && ContinueGame.start(player)
+                    ContinueGame.requested = false
+                    if (!continuing) NewGame.start(player)
+                }
+            }
+            if (ContinueGame.waitingForLounge) {
+                // The light settles from when the player arrives, not before.
+                state.preparedTick = now
+                continue
             }
             if (!state.lightSent) {
                 val waited = now - state.preparedTick

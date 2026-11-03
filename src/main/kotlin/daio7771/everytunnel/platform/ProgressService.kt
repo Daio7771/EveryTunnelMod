@@ -36,6 +36,17 @@ interface ProgressService {
 
     fun setCheckpoint(player: PlayerEntity, checkpointId: String?)
 
+    /** Level 4 as it was left, as text (`core.save.LoungeSave`), or null. */
+    fun lounge(player: PlayerEntity): String?
+
+    fun setLounge(player: PlayerEntity, text: String?)
+
+    /** Notes what the player carries, for going back to a checkpoint. */
+    fun saveInventory(player: PlayerEntity)
+
+    /** What the player carried at the checkpoint. */
+    fun restoreInventory(player: PlayerEntity)
+
     /** A new game: the player's progress is forgotten. */
     fun reset(player: PlayerEntity)
 
