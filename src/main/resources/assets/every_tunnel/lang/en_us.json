@@ -240,6 +240,12 @@
   "note.every_tunnel.menu.3": "Chef's plate (for two)",
   "message.every_tunnel.no_power": "No power",
   "screen.every_tunnel.safe.controls": "A / D or the mouse wheel to turn. Listen. Esc to leave.",
+  "wall.every_tunnel.never_paid": "WE WERE NEVER PAID",
+  "wall.every_tunnel.face_to_work": "HE WEARS A FACE\nTO WORK",
+  "wall.every_tunnel.silence": "MANAGEMENT THANKS YOU\nFOR YOUR SILENCE",
+  "wall.every_tunnel.water_warm": "WHO KEEPS THE\nWATER WARM",
+  "wall.every_tunnel.dont_stay": "DON'T STAY",
+  "wall.every_tunnel.stay": "STAY",
   "item.every_tunnel.master_card": "Master Card",
   "item.every_tunnel.master_key": "Master Key",
   "item.every_tunnel.master_card_nw": "Master Card: top left",
@@ -276,5 +282,6 @@
   "block.every_tunnel.breaker_button": "Breaker Button",
   "block.every_tunnel.breaker_counter": "Breaker Counter",
   "block.every_tunnel.suite_safe": "Safe",
-  "block.every_tunnel.ceiling_speaker": "Ceiling Speaker"
+  "block.every_tunnel.ceiling_speaker": "Ceiling Speaker",
+  "block.every_tunnel.wall_message": "Wall Message"
 }

@@ -33,6 +33,7 @@ git).
 | `tools/gui/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | el foco sin shaders |
 | `tools/gui/locker_view.py` | `locker_view.png` | la vista desde dentro de una taquilla |
 | `tools/gui/safe_dial.py` | `safe_dial.png` | el dial de las cajas fuertes de las Suites |
+| `tools/gui/wall_font.py` | `wall_paint.png`, `wall_paint.json` | la fuente pintada de los mensajes en la pared |
 | `tools/gui/achievement_icons.py` | `achievement_icons.png` | los iconos de logro dibujados para el mod (placa, calavera, Pale man, bloqueado) |
 | `tools/gui/guide_paper.py` | `guide_paper.png` (mosaico sin costuras), `guide_stains.png` | el papel de la guía |
 | `tools/sounds/generate.py` | WAV de prueba y una página para escucharlos (`tools/sounds/out/index.html`) | un sonido, para oírlo |

@@ -261,6 +261,9 @@ object ModBlocks {
     lateinit var WALL_TEXT_ENTITY: BlockEntityType<WallTextBlockEntity>
         private set
 
+    lateinit var WALL_MESSAGE_ENTITY: BlockEntityType<WallMessageBlockEntity>
+        private set
+
     /** The boxes on a [BoxShelfBlock], at its foot; registered in [register]. */
     lateinit var BOX_SHELF_ENTITY: BlockEntityType<BoxShelfBlockEntity>
         private set
@@ -358,6 +361,7 @@ object ModBlocks {
     )
     /** Text on a wall in the game's font (Level 3's nameplates and entrance lettering), drawn by its block entity. */
     val WALL_TEXT: Block = register("wall_text", WallTextBlock(props(MapColor.CLEAR, ModSoundGroups.PLASTIC).noCollision()))
+    val WALL_MESSAGE: Block = register("wall_message", WallMessageBlock(props(MapColor.CLEAR, ModSoundGroups.PLASTIC).noCollision()))
     /** Steel painted in yellow and black stripes: the frames of Level 3's blast doors. */
     val HAZARD_STEEL: Block = register("hazard_steel", Block(solid(MapColor.YELLOW, ModSoundGroups.SHEET_METAL)))
     /** A piece of an open blast door's leaf, a thick plate against the wall (Level 3's bunker tunnel). */
@@ -426,6 +430,10 @@ object ModBlocks {
         BOX_SHELF_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),
             FabricBlockEntityTypeBuilder.create(::BoxShelfBlockEntity, BOX_SHELF).build(),
+        )
+        WALL_MESSAGE_ENTITY = Registry.register(
+            Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "wall_message"),
+            FabricBlockEntityTypeBuilder.create(::WallMessageBlockEntity, WALL_MESSAGE).build(),
         )
         WALL_TEXT_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "wall_text"),

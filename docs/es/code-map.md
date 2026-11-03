@@ -33,6 +33,7 @@ con un comentario KDoc que cuenta más.
 | `achievement/Achievement.kt` | Los ocho logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
 | `puzzle/OrderPuzzle.kt` | Un puzle de cosas en orden: intentos, fallos, la pista |
+| `wall/WallMessageState.kt` | Los disparadores de un mensaje: fijo, al acercarse, cambia al dejar de mirarlo |
 | `puzzle/BreakerCode.kt` | Las cinco palancas del nivel 4: el código, cuántas están bien |
 | `puzzle/SafeDial.kt` | El dial de una caja: tics, clics, fijar un número cambiando de sentido |
 | `puzzle/darts/DartboardGeometry.kt` | Dónde cayó un dardo en el tablero: número y anillo, en las 4 orientaciones |
@@ -164,6 +165,7 @@ con un comentario KDoc que cuenta más.
 | `LoungeClosingBlocks.kt` | La puerta grande, el lector de la Calm room, la luz de emergencia |
 | `BreakerHooks.kt` | La sala de mantenimiento del nivel 4: palancas, botón, contador, corriente del lector |
 | `SafeHooks.kt` | Las cajas fuertes de las Suites: combinaciones, bloque, resultado del cliente |
+| `WallMessageBlock.kt` | Un mensaje pintado en la pared: el bloque y sus datos |
 | `SafeLevelHooks.kt` | Niveles sin riesgo: sin daño (el nivel 4) |
 | `SuiteBedHooks.kt` | Descansar en una cama: fundido a negro, vida y estamina llenas |
 | `BookPhaseHooks.kt` | Mientras los libros están fuera: el reloj en la cabeza y el aviso "He's near. Hide." |
@@ -231,6 +233,7 @@ con un comentario KDoc que cuenta más.
 | `PaleManRenderer.kt` | Renderizador de GeckoLib con la máscara de brillo de los ojos |
 | `FilmWalkerRenderer.kt` | La figura de la película del Cinema, con el modelo del jugador |
 | `DartRenderer.kt` | Un dardo lanzado: la flecha de vanilla, más pequeña, con su textura |
+| `WallMessageRenderer.kt` | Dibuja un mensaje con la fuente pintada y recuerda lo que le ha pasado |
 | `ObserverRenderer.kt` | Renderizador de GeckoLib del Observer; su cabeza gira con la de la entidad |
 | `PaleManModel.kt` | Su modelo de GeckoLib, más la postura encorvada bajo techos bajos |
 | `BoxShelfRenderer.kt` | Las cajas moradas en la estantería, a brillo completo |

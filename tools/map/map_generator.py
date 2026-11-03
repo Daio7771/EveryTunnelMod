@@ -291,6 +291,8 @@ LEVEL_3 = dict(
                 (85, 191, "west"), (85, 193, "west"), (85, 195, "west"), (85, 197, "west")],
         cabinets=[(74, 199, "east"), (85, 199, "west")],
         note=dict(id="pressure_line", x=74, z=195, facing="east")),
+    # Painted on the walls (wall_messages.py): (id, x, y, z, the way it looks).
+    WALL_MESSAGES=[("never_paid", 131, 3, 68, "west"), ("face_to_work", 98, 3, 46, "south"), ("silence", 78, 3, 172, "east")],
     # Big lettering over the way into the antechamber, seen coming down the stairs (a wall_text
     # block in front of the wall: its lang key, (x, y, z) of the block, the way the text faces,
     # and how far right of the block's centre the text's centre is).

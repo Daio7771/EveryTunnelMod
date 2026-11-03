@@ -8,12 +8,13 @@ states (rows, table tiles, stacks) are worked out here the same way the game doe
 offices/furnish.py, since `/setblock` takes a state as given.
 """
 
+import wall_messages
 from offices.furnish import ROW, STACK, TILE, WALK_THROUGH
 
 TILES = TILE | {"pool_table", "lounge_desk"}
 RACKS = {"record_rack", "reel_rack"}
 THROUGH = WALK_THROUGH | {"cinema_seat", "bar_stool", "served_glass", "diploma", "office_chair", "cinema_screen",
-                         "throw_line", "wall_sheet", "calm_reader", "breaker_lever", "breaker_button", "breaker_counter", "pipe", "ceiling_speaker", "calm_plate_left", "calm_plate_right", "emergency_lamp"}
+                         "throw_line", "wall_sheet", "calm_reader", "breaker_lever", "breaker_button", "breaker_counter", "pipe", "ceiling_speaker", "wall_message", "calm_plate_left", "calm_plate_right", "emergency_lamp"}
 WORLD_FACING = {"north": "west", "west": "south", "south": "east", "east": "north"}
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
 LOOT_COLOUR = {"battery": (235, 205, 70), "water": (90, 215, 235), "food_plate": (225, 80, 70),
@@ -151,6 +152,8 @@ PIPES = [(x, z) for x in range(60, 70) for z in (48, 55)]
 PIPE_STATE = "every_tunnel:pipe[down=false,east=true,north=false,south=false,up=false,west=true]"
 # The safes in the Suites, in Rowan's room and Daniel's: (the note inside, x, z, facing).
 SAFES = [("ch1_l4_note_diary_rowan", 16, 13, "east"), ("ch1_l4_note_diary_daniel", 23, 26, "west")]
+# Painted on the walls (wall_messages.py): (id, x, z, y over its floor, the way it looks).
+WALL_MESSAGES = [("water_warm", 78, 43, 3, "north"), ("dont_stay", 103, 37, 3, "west")]
 # The ceiling speakers Level 4's jazz comes out of (LoungeMusicHooks): none in the Suites or Maintenance.
 SPEAKERS = [(50, 54), (44, 37), (57, 38), (50, 20), (78, 31), (76, 21), (50, 6), (97, 38), (23, 37)]
 # big_door: its bottom left part. wet_sign: nothing stands there until the blackout.
@@ -178,6 +181,7 @@ class Furnish:
         self.items = {}        # (x, y, z) -> (name, plan facing)
         self.holds = {}        # (x, y, z) -> what a rack holds (its index)
         self.board = {}        # (x, y, z) -> the part of the dartboard (col, row)
+        self.messages = {}     # (x, y, z) -> the id of the wall message there
 
     def put(self, name, x, z, facing, y=1, in_gap=False):
         floor = self.lv.floors.get((x, z), 0)
@@ -210,6 +214,9 @@ class Furnish:
             self.put(name, x, z, "west", y, in_gap=True)
         for name, x, z, y in CLOSING_THINGS:
             self.put(name, x, z, "west", y, in_gap=True)
+        for message_id, x, z, y, facing in WALL_MESSAGES:
+            self.put("wall_message", x, z, facing, y, in_gap=True)
+            self.messages[(x, self.lv.floors[(x, z)] + y, z)] = message_id
         for x, z in SPEAKERS:
             room = next(s for s in self.lv.rooms if s.box[0] <= x < s.box[2] and s.box[1] <= z < s.box[3])
             if (x, room.height + room.floor, z) in self.lv.lamps:
@@ -280,6 +287,8 @@ class Furnish:
                 state = f"{bid}[facing={facing},left={str(left).lower()},right={str(right).lower()}]"
             elif name == "pipe":
                 state = PIPE_STATE
+            elif name == "wall_message":
+                state = wall_messages.state(self.messages[plan], facing)
             elif name == "dartboard":
                 col, row = self.board[plan]
                 state = f"{bid}[col={col},facing={facing},hint=0,row={row}]"
@@ -334,7 +343,7 @@ class Furnish:
 
     def plan_cells(self):
         """For the preview: (x, z) -> what stands there, without the notes on top."""
-        return {(x, z): it[0] for (x, y, z), it in self.items.items() if it[0] not in ("note_paper", "diploma", "dart_tray", "wall_text", "pipe", "breaker_counter", "ceiling_speaker",
+        return {(x, z): it[0] for (x, y, z), it in self.items.items() if it[0] not in ("note_paper", "diploma", "dart_tray", "wall_text", "pipe", "breaker_counter", "ceiling_speaker", "wall_message",
                                                                                          "calm_plate_left", "calm_plate_right", "emergency_lamp", "security_monitor")}
 
     def dots(self):

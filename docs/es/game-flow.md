@@ -389,6 +389,8 @@ Dos cosas más, que no dan pieza:
 4. **La puerta grande:** un golpe sordo sin la llave. Con ella, la llave se gasta y la puerta se abre del
    centro hacia fuera en 3 s.
 
+- **Mensajes en la pared** (`WallMessageBlock`, `client.render.WallMessageRenderer`, `core.wall`, colocados por `tools/map/wall_messages.py`): pintura negra con una fuente irregular propia, sobre un parche claro en las paredes oscuras, en los niveles 3 y 4. Cada uno es fijo, aparece al acercarse o cambia cuando se ha visto y se deja de mirar. Sus textos están en `wall.every_tunnel.*` en el archivo de idioma.
+
 ## 11. El final
 
 A mitad del tramo oscuro tras la puerta grande, una zona con la etiqueta `big_door_shut` cierra la puerta

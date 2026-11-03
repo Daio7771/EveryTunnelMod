@@ -33,6 +33,7 @@ KDoc comment that says more.
 | `achievement/Achievement.kt` | The eight achievements, in list order, by id |
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
 | `puzzle/OrderPuzzle.kt` | A puzzle of things in order: attempts, failures, the hint |
+| `wall/WallMessageState.kt` | A wall message's triggers: fixed, on approach, changing when looked away from |
 | `puzzle/BreakerCode.kt` | Level 4's five levers: the code, how many are right |
 | `puzzle/SafeDial.kt` | A safe's dial: ticks, clicks, fixing a number by changing direction |
 | `puzzle/darts/DartboardGeometry.kt` | Where a dart landed on the board: number and ring, in the 4 orientations |
@@ -164,6 +165,7 @@ KDoc comment that says more.
 | `LoungeClosingBlocks.kt` | The big door, the Calm room's reader, the emergency lamp |
 | `BreakerHooks.kt` | Level 4's Maintenance room: levers, button, counter, power for the reader |
 | `SafeHooks.kt` | The safes in the Suites: the combinations, the block, the result from the client |
+| `WallMessageBlock.kt` | A message painted on a wall: the block and its data |
 | `SafeLevelHooks.kt` | Levels without risk: no damage (Level 4) |
 | `SuiteBedHooks.kt` | Resting in a bed: fade to black, health and stamina full |
 | `BookPhaseHooks.kt` | While the books are out: the clock in the head and the "He's near. Hide." warning |
@@ -231,6 +233,7 @@ KDoc comment that says more.
 | `PaleManRenderer.kt` | GeckoLib renderer with the eye glow mask |
 | `FilmWalkerRenderer.kt` | The figure in the Cinema's film, on the player's model |
 | `DartRenderer.kt` | A thrown dart: vanilla's arrow, smaller, with its own texture |
+| `WallMessageRenderer.kt` | Draws a wall message in the painted font; remembers what happened to it |
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
 | `PaleManModel.kt` | His GeckoLib model, plus the stoop under low ceilings |
 | `BoxShelfRenderer.kt` | The purple boxes on the box shelf, full bright |

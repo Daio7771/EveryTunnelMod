@@ -14,6 +14,7 @@ sides, stacks up and down) are worked out here the same way the game does, since
 takes a state as given.
 """
 
+import wall_messages
 import math
 import random
 
@@ -26,7 +27,7 @@ STACK = {"server_rack", "metal_shelf", "locker", "vending_machine", "bookshelf"}
 # Furniture with a full-block top a box can stand on (the box puzzle's spots).
 FLAT_TOPS = {"office_desk", "counter", "filing_cabinet", "library_counter"}
 # The ones a player walks through (ModBlocks: noCollision).
-WALK_THROUGH = {"wall_text", "desk_lamp", "whiteboard", "electrical_panel", "cafe_chair", "coffee_machine", "potted_plant", "wall_clock",
+WALK_THROUGH = {"wall_text", "wall_message", "desk_lamp", "whiteboard", "electrical_panel", "cafe_chair", "coffee_machine", "potted_plant", "wall_clock",
                 "wooden_chair", "desk_phone", "note_board", "note_paper"}
 
 
@@ -63,6 +64,7 @@ class Furnisher:
         self.reserved = set()      # (x, z) kept clear
         self.locker_fronts = set() # (x, z) in front of a locker's door, kept clear to step out
         self.texts = {}            # (x, y, z) -> (lang key, style, offset, align): the wall_text blocks' data
+        self.messages = {}         # (x, y, z) -> the id of the wall message there
 
     def free(self, x, y, z):
         lv = self.lv
@@ -356,6 +358,8 @@ class Furnisher:
             elif name == "box_shelf":
                 col, row_ = self.parts[(x, y, z)]
                 state = f"{bid}[col={col},facing={facing},row={row_}]"
+            elif name == "wall_message":
+                state = wall_messages.state(self.messages[(x, y, z)], facing)
             elif name == "wall_text":
                 key, style, offset, align = self.texts[(x, y, z)]
                 state = f'{bid}[facing={facing}]{{Text:"{key}",Style:"{style}",Offset:{offset}f,Align:"{align}"}}'
@@ -599,6 +603,10 @@ def furnish(lv):
     if not f.put(*sign["at"], "wall_text", sign["facing"]):
         raise SystemExit(f"LEVEL_3 ENTRANCE_SIGN: {sign['at']} is not free air")
     f.texts[sign["at"]] = (sign["text"], "letters", sign["offset"], "center")
+    for message_id, x, y, z, facing in p.WALL_MESSAGES:
+        if not f.put(x, y, z, "wall_message", facing, force=True):
+            raise SystemExit(f"LEVEL_3 WALL_MESSAGES: {message_id} at {(x, y, z)} is not free air")
+        f.messages[(x, y, z)] = message_id
     note_papers(f)
     lv.box_spots = box_spots(f)
     lv.loot = loot_spots(f)

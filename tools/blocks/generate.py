@@ -2097,6 +2097,8 @@ def build():
     # Text on a wall (WallTextBlock): nothing of its own to draw, its block entity writes the text.
     a.models["wall_text"] = model({"particle": "dark_metal"}, [])
     a.block("wall_text", "Wall Text", horizontal_blockstate("wall_text"), {"parent": f"{NS}:block/wall_text"})
+    a.models["wall_message"] = model({"particle": "dark_metal"}, [])
+    a.block("wall_message", "Wall Message", horizontal_blockstate("wall_message"), {"parent": f"{NS}:block/wall_message"})
     # A brass desk lamp with a green glass shade, on the librarian's desk (lit, ModBlocks).
     a.texture("brass", plastic_tex(r("brass"), (176, 140, 70)), T.STEEL.but(smoothness=0.6))
     a.texture("lamp_shade", plastic_tex(r("lamp_shade"), (40, 104, 60)), T.PLASTIC.but(smoothness=0.8, emission=GLOW["DIFFUSER_GLOW"]))

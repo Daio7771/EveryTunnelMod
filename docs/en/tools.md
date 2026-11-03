@@ -31,6 +31,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/gui/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | the no-shader spot |
 | `tools/gui/locker_view.py` | `locker_view.png` | the view from inside a locker |
 | `tools/gui/safe_dial.py` | `safe_dial.png` | the dial of the safes in the Suites |
+| `tools/gui/wall_font.py` | `wall_paint.png`, `wall_paint.json` | the painted font of the wall messages |
 | `tools/gui/achievement_icons.py` | `achievement_icons.png` | the achievement icons drawn for the mod (badge, skull, Pale man, locked) |
 | `tools/gui/guide_paper.py` | `guide_paper.png` (seamless tile), `guide_stains.png` | the guide's paper |
 | `tools/sounds/generate.py` | WAV previews and a listening page (`tools/sounds/out/index.html`) | a sound, to listen |

@@ -365,6 +365,8 @@ Two more things, neither of which gives a piece:
 4. **The big door:** a dull knock without the key. With it the key is used and the door opens from the
    centre out, over 3 s.
 
+- **Wall messages** (`WallMessageBlock`, `client.render.WallMessageRenderer`, `core.wall`, placed by `tools/map/wall_messages.py`): black paint in an uneven font of our own, on a pale patch over a dark wall, in Levels 3 and 4. Each is fixed, appears on approach, or changes once it has been seen and looked away from. Their text is under `wall.every_tunnel.*` in the lang file.
+
 ## 11. The end
 
 Halfway along the dark stretch past the big door, a zone tagged `big_door_shut` slams the door behind
