@@ -423,7 +423,7 @@ en el inicio del nivel actual, como respaldo.
 
 ## Logros
 
-Ocho logros (`core.achievement.Achievement`, en el orden de la lista). El servidor dice cuándo
+Diez logros (`core.achievement.Achievement`, en el orden de la lista). El servidor dice cuándo
 se consigue uno (`platform.AchievementHooks`, solo en mundos con niveles), como mucho una vez por partida. El cliente muestra el aviso "Achievement Unlocked!" solo la primera
 vez, porque siguen desbloqueados hasta que Ctrl+Shift+D en la pantalla ACHIEVEMENTS los reinicia, dibujado como el de desafío de vanilla con su fanfarria
 (`client.hud.AchievementToast`), y lo recuerda para siempre en

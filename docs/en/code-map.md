@@ -30,7 +30,7 @@ KDoc comment that says more.
 | `guide/GuideMarkdown.kt` | Reads a player guide page (the Markdown subset) into blocks |
 | `menu/LampFlicker.kt` | When the menu scene's lamps flicker |
 | `menu/BlockLight.kt` | Block light for a box of blocks with no world (the menu scene) |
-| `achievement/Achievement.kt` | The eight achievements, in list order, by id |
+| `achievement/Achievement.kt` | The ten achievements, in list order, by id |
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
 | `puzzle/OrderPuzzle.kt` | A puzzle of things in order: attempts, failures, the hint |
 | `save/LoungeSave.kt` | Level 4 as it was left, as text |

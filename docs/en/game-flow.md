@@ -397,7 +397,7 @@ current level's start, as a fallback.
 
 ## Achievements
 
-Eight achievements (`core.achievement.Achievement`, in list order). The server says when one
+Ten achievements (`core.achievement.Achievement`, in list order). The server says when one
 is earned (`platform.AchievementHooks`, only in worlds with levels), once per game at most. The client shows the "Achievement Unlocked!" toast only the first time ever,
 as they stay unlocked until Ctrl+Shift+D on the ACHIEVEMENTS screen resets them, drawn like vanilla's
 challenge toast with its fanfare

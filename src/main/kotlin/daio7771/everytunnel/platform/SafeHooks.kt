@@ -1,6 +1,7 @@
 package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.core.achievement.Achievement
 import daio7771.everytunnel.core.puzzle.SafeDial
 import daio7771.everytunnel.core.save.LoungeSave
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
@@ -96,6 +97,7 @@ object SafeHooks {
         if (!solved) return
         world.setBlockState(pos, state.with(SuiteSafeBlock.OPEN, true))
         world.playSound(null, pos, ModSounds.SAFE_OPEN, SoundCategory.BLOCKS, 1f, 1f)
+        AchievementHooks.earned(player, Achievement.PRIVACY_POLICY)
         EveryTunnel.LOGGER.info("{} opened a safe at {}", player.name.string, pos.toShortString())
     }
 }

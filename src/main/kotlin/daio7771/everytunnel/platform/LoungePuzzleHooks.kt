@@ -2,6 +2,7 @@ package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
+import daio7771.everytunnel.core.achievement.Achievement
 import daio7771.everytunnel.core.film.FilmInfo
 import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.core.puzzle.OrderPuzzle
@@ -176,6 +177,7 @@ object LoungePuzzleHooks {
     fun pieceTaken(player: ServerPlayerEntity, item: Item) {
         val piece = PIECES[item] ?: return
         ProgressService.get().addPiece(player, PIECE_LEVEL, piece)
+        AchievementHooks.earned(player, Achievement.BIG_BRAIN)
     }
 
     fun useRack(player: ServerPlayerEntity, state: BlockState) {

@@ -39,7 +39,7 @@ platform/                                           todo lo que toca Minecraft o
 | `core.guide` | `GuideMarkdown`, el lector de las páginas de la guía del jugador |
 | `core.puzzle` | El código de las válvulas del nivel 3 y el texto de las notas |
 | `core.progress` | `PlayerProgress`, lo que ha hecho un jugador (piezas, notas, escenas) |
-| `core.achievement` | `Achievement`, los ocho logros |
+| `core.achievement` | `Achievement`, los diez logros |
 | `core.hiding` | `LookLimit`, cuánto gira la cabeza en una taquilla |
 | `systems` | `ResourceSystem` (stamina, sed, batería), `NoiseSystem`, `FlashlightBeam` (matemática del haz) |
 | `entities` | `PaleManBrain` y `ObserverBrain`, las decisiones del Pale man y del Observer |

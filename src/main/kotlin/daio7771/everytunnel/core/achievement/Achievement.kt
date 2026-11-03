@@ -3,7 +3,7 @@ package daio7771.everytunnel.core.achievement
 /**
  * The mod's achievements, in the order the ACHIEVEMENTS screen lists them (roughly the order a
  * playthrough earns them). The server says when one is earned (`platform.AchievementHooks`);
- * the client shows the "Achievement Unlocked!" toast every time (`client.hud.AchievementToast`)
+ * the client shows the "Achievement Unlocked!" toast the first time (`client.hud.AchievementToast`)
  * and remembers it for good, across games and worlds (`client.AchievementStore`).
  *
  * [id] names an achievement in the packet, in the saved file and in its lang keys:
@@ -34,7 +34,13 @@ enum class Achievement(val id: String, val puzzle: Boolean = false) {
     BOXES("boxes", puzzle = true),
 
     /** Level 3: the five books back on the librarian's counter, the bunker hatch opens. */
-    BOOKS("books", puzzle = true);
+    BOOKS("books", puzzle = true),
+
+    /** Level 4: the first piece of the master card picked up. */
+    BIG_BRAIN("big_brain"),
+
+    /** Level 4: a safe in the Suites opened. */
+    PRIVACY_POLICY("privacy_policy");
 
     companion object {
         /** The achievement named [id], or null for an id this version does not know. */

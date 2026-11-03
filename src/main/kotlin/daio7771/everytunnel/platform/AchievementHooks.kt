@@ -26,6 +26,8 @@ import java.util.UUID
  * - Stay Hydrated: a water bottle drunk ([DrinkHooks]).
  * - Beware of Tall Men: walking into a level listed in [LEVEL_ENTRIES] ([LevelEntryHooks]).
  * - Ouch!: killed by a Pale man ([DeathHooks]).
+ * - Big Brain: the first piece of Level 4's master card ([LoungePuzzleHooks.pieceTaken]).
+ * - Privacy Policy: a safe opened in the Suites ([SafeHooks]).
  * - The puzzles, for every player in the world ([puzzleSolved]): the keycard in the reader
  *   ([CardReaderBlock]), the valves ([ValveHooks]); the boxes and the books to come.
  */

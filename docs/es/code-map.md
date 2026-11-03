@@ -30,7 +30,7 @@ con un comentario KDoc que cuenta más.
 | `guide/GuideMarkdown.kt` | Lee una página de la guía del jugador (el subconjunto de Markdown) en bloques |
 | `menu/LampFlicker.kt` | Cuándo parpadean las lámparas de la escena del menú |
 | `menu/BlockLight.kt` | Luz de bloque para una caja de bloques sin mundo (la escena del menú) |
-| `achievement/Achievement.kt` | Los ocho logros, en el orden de la lista, por id |
+| `achievement/Achievement.kt` | Los diez logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
 | `puzzle/OrderPuzzle.kt` | Un puzle de cosas en orden: intentos, fallos, la pista |
 | `save/LoungeSave.kt` | El nivel 4 como se dejó, en texto |

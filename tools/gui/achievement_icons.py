@@ -5,7 +5,7 @@ the toast's dark frame and on the ACHIEVEMENTS screen's paper.
 
 Run after changing anything here (from the repository root):   python3 tools/gui/achievement_icons.py
 
-Writes src/main/resources/assets/every_tunnel/textures/gui/achievement_icons.png (64x16,
+Writes src/main/resources/assets/every_tunnel/textures/gui/achievement_icons.png (96x16,
 committed) and tools/gui/output/achievement_icons_preview.png (git-ignored; enlarged, on the
 toast's grey and on paper).
 
@@ -14,6 +14,8 @@ Icons at u (what AchievementIcons expects):
 - u=16: the guard's badge (First Day at Work): a gold shield with the uniform's black and a star.
 - u=32: a skull (Ouch!), bone white with dark sockets.
 - u=48: the Pale man's silhouette (Beware of Tall Men): tall, thin, arms down to his knees.
+- u=64: a puzzle piece (Big Brain), warm orange.
+- u=80: a brass padlock (Privacy Policy).
 
 Each icon is a 16x16 mask: '#' outline, 'o' fill, 'h' highlight, 's' shade, 'k' dark, 'y' its
 mark (light), '.' transparent.
@@ -110,6 +112,46 @@ ICONS = [
         "..####o##o####..",
         ".....#o##o#.....",
         ".....##..##.....",
+    ]),
+    ("puzzle", {
+        "o": (214, 150, 60, 255), "h": (240, 190, 100, 255), "s": (150, 96, 34, 255),
+    }, [
+        "................",
+        "......####......",
+        ".....#hhoo#.....",
+        ".....#hoos#.....",
+        ".#####hoos#####.",
+        ".#hhhoooooooos#.",
+        ".#hoooooooooos#.",
+        ".###hooooooooos#",
+        "...#hooooooooos#",
+        ".###hooooooooos#",
+        ".#hoooooooooos#.",
+        ".#hoooooooooos#.",
+        ".#ssssssssssss#.",
+        ".##############.",
+        "................",
+        "................",
+    ]),
+    ("padlock", {
+        "o": (186, 146, 74, 255), "h": (228, 192, 116, 255), "s": (120, 88, 40, 255), "k": (34, 26, 16, 255),
+    }, [
+        "................",
+        ".....######.....",
+        "....#hoooos#....",
+        "...#hs####os#...",
+        "...#o#....#o#...",
+        "...#o#....#o#...",
+        "..############..",
+        "..#hhhhhhhhhs#..",
+        "..#hoookkooos#..",
+        "..#hoookkooos#..",
+        "..#hooookooos#..",
+        "..#hooookooos#..",
+        "..#hoooooooos#..",
+        "..#ssssssssss#..",
+        "..############..",
+        "................",
     ]),
 ]
 
