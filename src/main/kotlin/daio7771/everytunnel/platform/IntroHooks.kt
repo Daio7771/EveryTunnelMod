@@ -8,6 +8,7 @@ import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.systems.ResourceSystem
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
+import net.fabricmc.loader.api.FabricLoader
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
@@ -46,6 +47,9 @@ import java.util.UUID
  * The world remembers who has had it (`data/every_tunnel_intro.dat`), so dying in the level
  * later brings the player back to the elevator with its doors open. `/everytunnel intro`
  * plays it again.
+ *
+ * In a development run (`./gradlew runClient`) the wait is skipped: no song, the doors open at once.
+ * `/everytunnel intro` still plays it whole, to work on it. The jar always plays it.
  */
 object IntroHooks {
 
@@ -65,7 +69,7 @@ object IntroHooks {
     /** How far from the elevator doors floor indicators are looked for. */
     private const val INDICATOR_REACH = 3
 
-    private class Running(val levelId: String, var ticksLeft: Int, val totalTicks: Int, var shownFloor: Int = -1)
+    private class Running(val levelId: String, var ticksLeft: Int, val totalTicks: Int, val silent: Boolean, var shownFloor: Int = -1)
 
     /** Doors sliding open: [ticks] counts up from minus the delay; stages advance every [DOOR_STAGE_TICKS]. */
     private class Opening(val world: ServerWorld, val boxes: List<BlockBox>, var ticks: Int = -DOORS_DELAY_TICKS)
@@ -75,10 +79,14 @@ object IntroHooks {
     private val opening = mutableListOf<Opening>()
     private var checkTicks = 0
 
+    /** Asked for by `/everytunnel intro`: played whole even in a development run. */
+    private val replaying = HashSet<UUID>()
+
     fun register() {
         ServerTickEvents.END_SERVER_TICK.register(::tick)
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> running.remove(handler.player.uuid) }
         ServerLifecycleEvents.SERVER_STOPPED.register {
+            replaying.clear()
             running.clear()
             opening.clear()
         }
@@ -93,6 +101,7 @@ object IntroHooks {
         val state = state(player.server)
         if (state.done.remove(player.uuid)) state.markDirty()
         running.remove(player.uuid)
+        replaying += player.uuid
         teleportToStart(player, level)
         worldOf(player.server, level)?.let { closeDoors(it, level) }
         return level
@@ -126,7 +135,7 @@ object IntroHooks {
             }
             iterator.remove()
             val player = server.playerManager.getPlayer(id) ?: continue
-            LevelManager.get(intro.levelId)?.let { finish(player, it) }
+            LevelManager.get(intro.levelId)?.let { finish(player, it, intro.silent) }
         }
         opening.removeIf { doors ->
             val ticks = doors.ticks++
@@ -155,17 +164,18 @@ object IntroHooks {
         player.health = player.maxHealth
         ResourceSystem.reset(player.uuid)
         closeDoors(world, level)
-        intro.music?.let { sendMusic(player, MUSIC_START) { buf -> buf.writeString(it) } }
-        val ticks = (intro.seconds * 20.0).toInt().coerceAtLeast(1)
-        running[player.uuid] = Running(level.id, ticks, ticks)
+        val skip = FabricLoader.getInstance().isDevelopmentEnvironment && !replaying.remove(player.uuid)
+        if (!skip) intro.music?.let { sendMusic(player, MUSIC_START) { buf -> buf.writeString(it) } }
+        val ticks = if (skip) 1 else (intro.seconds * 20.0).toInt().coerceAtLeast(1)
+        running[player.uuid] = Running(level.id, ticks, ticks, skip)
         EveryTunnel.LOGGER.info("{}: intro of {} ({} s)", player.name.string, level.id, intro.seconds)
     }
 
-    private fun finish(player: ServerPlayerEntity, level: LevelDefinition) {
+    private fun finish(player: ServerPlayerEntity, level: LevelDefinition, silent: Boolean) {
         val state = state(player.server)
         state.done += player.uuid
         state.markDirty()
-        sendMusic(player, MUSIC_END) { it.writeFloat(MUSIC_FADE_SECONDS) }
+        if (!silent) sendMusic(player, MUSIC_END) { it.writeFloat(MUSIC_FADE_SECONDS) }
         val world = worldOf(player.server, level)
         val boxes = doors(level)
         world?.let { setIndicators(it, level, FloorIndicatorBlock.LABELS.lastIndex, moving = false) }

@@ -19,7 +19,7 @@ en la pestaña Every Tunnel al desarrollar.
 | `/everytunnel noise` | Los ruidos de los últimos 5 segundos cerca de ti |
 | `/everytunnel noise watch` | Activa o desactiva mostrar cada ruido tuyo en la barra de acción |
 | `/everytunnel paleman` | Los Pale men cercanos: estado y objetivo |
-| `/everytunnel intro` | Repite la intro del ascensor (Supervivencia o Aventura) |
+| `/everytunnel intro` | Repite la intro del ascensor (Supervivencia o Aventura). En una ejecución de desarrollo, una partida nueva se salta la espera del ascensor; esto la reproduce entera |
 | `/everytunnel newgame` | Empieza la partida de nuevo en este mundo |
 | `/everytunnel setlevel <número>` | Te lleva al inicio del nivel 1, 2, 3... (su `order`), como si entraras andando (su título, sus enemigos); los puzles se quedan como estén. El nivel 4, hasta que esté en pie: el pasillo de diplomas, que lo construye |
 | `/everytunnel valves` | Las cifras de las válvulas del nivel 3 en esta partida (A a E) |

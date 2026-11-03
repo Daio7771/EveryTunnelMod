@@ -18,7 +18,7 @@ the answers. The spawn eggs are in the Every Tunnel tab only in dev runs too.
 | `/everytunnel noise` | The noises of the last 5 seconds near you |
 | `/everytunnel noise watch` | Toggles showing each noise you make in the action bar |
 | `/everytunnel paleman` | The Pale men near you: state and target |
-| `/everytunnel intro` | Plays the elevator intro again (Survival or Adventure) |
+| `/everytunnel intro` | Plays the elevator intro again (Survival or Adventure). In a development run, a new game skips the wait in the elevator; this plays it whole |
 | `/everytunnel newgame` | Starts the game over in this world |
 | `/everytunnel setlevel <number>` | Takes you to the start of level 1, 2, 3... (its `order`), as if you walked in (its title, its enemies); puzzles stay as they are. Level 4, until it stands: the diploma corridor, which builds it |
 | `/everytunnel valves` | This game's valve digits for Level 3 (A to E) |
