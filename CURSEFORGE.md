@@ -1,16 +1,19 @@
 **A singleplayer psychological horror mod for Minecraft 1.20.1 (Fabric).**
-*Demo: Levels 1 to 3.*
+*Demo: Levels 1 to 4.*
 
 ![Every Tunnel](https://raw.githubusercontent.com/Daio7771/EveryTunnelMod/main/docs/media/logo.png)
 
 You are the new night-shift security guard of the **Noname Complex**, an abandoned
 underground facility. Your shift starts in the service elevator and goes down through its
-parking garage into the offices below.
+parking garage into the offices below, and on to the lounge under them.
 
 **Level 1** is empty. It teaches you to listen. **Level 2** adds the **Pale man**: tall,
 blind, and hunting by sound. Everything you do makes noise, and every noise tells him where
 you were. **Level 3** is the complex's offices round a vast library, spotless and empty, and
 something in the library watches. It never hears you. It only needs to see you once.
+
+**Level 4** is the VIP lounge: warm, expensive and perfectly kept. Nothing hunts you here. There
+is soft jazz, a bed if you need one, and everything is very glad you came.
 
 ## Features
 
@@ -24,12 +27,14 @@ something in the library watches. It never hears you. It only needs to see you o
   keep low, keep your light off, and hide in a locker, as long as nothing saw you get in.
 - **Puzzles and secrets.** Valves, boxes, books and a hatch to the bunker; company papers left
   on the desks say more than they should.
+- **A place that wants you to stay.** Level 4 has no enemies, only puzzles: records, film reels,
+  darts, breaker levers and safes cracked by ear, with answers that change every game.
 - **Your body is the warning system.** Your heartbeat speeds up as he gets closer, and the
   music follows what he is doing.
 - **Survival on a budget.** Stamina, thirst and a flashlight battery, with a few batteries
   and water bottles left lying around by previous guards.
-- **A complete demo.** Its own main menu, an elevator intro, three levels, 8 achievements,
-  an ending and credits. The game saves at the start of each level.
+- **A complete demo.** Its own main menu, an elevator intro, four levels, 10 achievements,
+  an ending and credits. The game saves as you go, and CONTINUE takes you back.
 - **An in-game guide** (main menu, GUIDE), in English and Spanish.
 - **Looks right with or without shaders.** Tuned for Complementary Reimagined, with material
   maps for every texture. Plays fine on plain Minecraft too.
@@ -72,7 +77,7 @@ Play with headphones, and keep the Music volume on: the music tells you things.
 ## Good to know
 
 - **Singleplayer**, Fabric only, Minecraft 1.20.1 only.
-- **This is a demo** of the first three levels. More of the Noname Complex is planned.
+- **This is a demo** of the first four levels. More of the Noname Complex is planned.
 - In the levels, Brightness always counts as "Moody". The dark is part of the game.
 - The mod replaces the title screen with its own menu. **Ctrl+Shift+V** switches to
   Minecraft's title screen and back (other worlds, multiplayer).

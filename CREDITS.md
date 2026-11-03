@@ -1,7 +1,7 @@
 # Credits
 
 Every Tunnel is made by Daio7771: design, code, the Python tools, textures, models, sounds,
-the main menu's music, the map, the story and the text. All rights reserved
+the music of the main menu and of Level 4, the map, the story and the text. All rights reserved
 (`LICENSE.txt`), except the work listed below, which keeps its own licence.
 
 ## Music

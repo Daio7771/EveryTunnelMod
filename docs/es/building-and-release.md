@@ -131,7 +131,7 @@ Todas en `gradle.properties`:
 | Cardinal Components | 5.2.3 |
 | Sound Physics Remastered (desarrollo) | fabric-1.20.1-1.5.1 |
 | Sodium / Iris / Indium (desarrollo) | 0.5.13 / 1.7.6 / 1.0.36 |
-| Versión del mod | `mod_version` (0.3; el menú principal muestra "v0.3 Beta (Level 3)") |
+| Versión del mod | `mod_version` (0.4; el menú principal muestra "v0.4 Beta (Level 4)") |
 
 ## Preguntas abiertas del release
 

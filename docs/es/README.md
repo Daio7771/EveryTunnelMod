@@ -2,10 +2,10 @@
 
 Every Tunnel es un mod de terror psicológico para un jugador en Minecraft 1.20.1 (Fabric,
 Kotlin). El jugador es el nuevo vigilante del turno de noche del Noname Complex, unas
-instalaciones subterráneas abandonadas. La primera versión es una demo de dos niveles en su
-aparcamiento: el Nivel 1 (B1) no tiene enemigos y enseña al jugador a escuchar; el Nivel 2
-(B2) añade al Pale man, que es ciego y caza por el sonido. El diseño de sonido es el
-núcleo del mod.
+instalaciones subterráneas abandonadas. La versión actual es una demo de cuatro niveles: el Nivel 1 (B1)
+no tiene enemigos y enseña al jugador a escuchar; el Nivel 2 (B2) añade al Pale man, que es ciego y
+caza por el sonido; el Nivel 3 (B3) tiene al Observer, que solo ve; el Nivel 4 (B4), la zona VIP, es
+todo puzles y sin riesgo. El diseño de sonido es el núcleo del mod.
 
 *[English version](../en/README.md)*
 
