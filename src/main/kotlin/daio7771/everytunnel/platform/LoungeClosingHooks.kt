@@ -36,7 +36,7 @@ import net.minecraft.util.math.Direction
  * - **The big door** ([BigDoorBlock], `big_door`, its bottom left part): a dull knock, until the key
  *   is tried. Then the key is used and it opens from the centre out, over 3 s ([OPENING]).
  * - **The way out:** walking on into a zone tagged [SHUT_TAG], halfway along the dark stretch, slams it
- *   behind the player. [EndingHooks] does the rest, at the end of the stretch.
+ *   behind the player. The stretch goes on into Level 5's entry corridor ([LabHooks]).
  *
  * What it changes in the world is not undone here: a new game rebuilds the level ([LoungeHooks.newGame]).
  */

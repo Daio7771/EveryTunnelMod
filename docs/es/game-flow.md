@@ -22,8 +22,8 @@ flowchart TD
     M --> P[Nivel 3, B3: oficinas, biblioteca, búnker]
     P -->|puerta a B4| Q[Pasillo de diplomas: se borra el nivel 3, se construye el 4]
     Q --> R[Nivel 4, B4: VIP lounge]
-    R -->|puerta grande, aún no| N[Fin de la demo: pasos detrás, créditos]
-    N --> C
+    R -->|puerta grande| S[Tramo oscuro, pasillo de entrada, esclusa: se construye el nivel 5]
+    S --> T[Nivel 5, B5: laboratorio, capas 1 y 2]
     I -.->|muerte| O[Fundido a negro, reinicia el nivel]
     K -.->|muerte| O
     P -.->|muerte| O
@@ -391,10 +391,43 @@ Dos cosas más, que no dan pieza:
 
 - **Mensajes en la pared** (`WallMessageBlock`, `client.render.WallMessageRenderer`, `core.wall`, colocados por `tools/map/wall_messages.py`): pintura negra con una fuente irregular propia, sobre un parche claro en las paredes oscuras, en los niveles 3 y 4. Cada uno es fijo, aparece al acercarse o cambia cuando se ha visto y se deja de mirar. Sus textos están en `wall.every_tunnel.*` en el archivo de idioma.
 
-## 11. El final
+## 11. Del nivel 4 al nivel 5
 
 A mitad del tramo oscuro tras la puerta grande, una zona con la etiqueta `big_door_shut` cierra la puerta
-de golpe a espaldas del jugador. Al fondo, `platform.EndingHooks`: una zona con la etiqueta `end`.
+de golpe a espaldas del jugador. Al entrar en el tramo (una zona con la etiqueta `lab_build`) ya ha empezado
+la construcción del nivel 5, en juego (`platform.LabHooks`), en un espacio propio al oeste del nivel 4:
+
+- `garage:level5_begin` fuerza la carga de la zona; `/everytunnel labready` avisa de que los chunks
+  están. Luego se ejecuta un `garage:level5_step_<n>` cada 2 ticks (46 pasos, unos 5 s). Los pasos ponen
+  también el aire del nivel, así que construirlo encima de uno anterior no deja nada de aquel.
+- Mientras, el jugador sigue andando a oscuras. El tramo, ahora más largo y del lounge hasta el final, tiene
+  un marco de acero en un lado junto a su fondo: al cruzarlo se entra en el nivel 5 (ahí sale su título), un
+  pasillo oscuro con el azulejo del laboratorio, construido con el nivel 4.
+- **La esclusa**, al final, de acero con suelo de chapa estriada (`LabHooks`, zonas con las etiquetas
+  `lab_airlock`, `lab_airlock_rear`, `lab_welcome`): al entrar, la puerta de atrás se cierra deslizándose con
+  un siseo (`block.airlock.close`), nunca encima de alguien que esté en el hueco, y se vuelve a abrir si el
+  jugador sale antes de que se cierre. Cuando el nivel está en pie, tras un momento a oscuras, la puerta de
+  delante, en la pared del Lobby, se abre deslizándose en unos 3 s (`block.airlock.open`) y aparece el Lobby,
+  blanco e iluminado. Cada puerta son dos hojas de `AirlockDoorBlock` que se mueven un cuarto de bloque por
+  paso (`core.door.SlidingDoor`).
+
+De momento el nivel 5 son sus dos capas de arriba, solo la estructura: un laboratorio limpio de azulejo
+blanco con una franja de azulejo verde pálido, vinilo gris, paneles blancos en el techo y todos los
+fluorescentes encendidos. Capa 1: el Lobby, un anillo de pasillos con el Workshop, la sala de espera y las
+taquillas, y una puerta de acero (cerrada) a las escaleras. Capa 2, 10 bloques más abajo: el pasillo de los
+sujetos con las salas S-1 a S-4, el Lab hall, un bucle al norte por la Office, un bucle al sur por Storage
+hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla. Tres puertas de acero están
+cerradas (escaleras, ruta sur, atajo): de momento nada las abre. Sus zonas están en
+[Niveles](levels.md#nivel-5).
+
+La reconstrucción del mapa al abrir el mundo no toca el nivel 5: la entrada se va con el nivel 4, y nadie
+puede llegar a lo que queda en pie hasta la siguiente construcción. Una partida continuada en el nivel 5
+lo construye tras la pantalla de carga, con el jugador esperando en el pasillo de diplomas (`ContinueGame`).
+
+## 12. El final
+
+Los créditos son para el final del nivel 5, que aún no está construido: de momento ninguna zona de los
+niveles tiene la etiqueta `end`. Lo que hace `platform.EndingHooks` con una:
 
 1. La pantalla funde a negro en 2,5 s.
 2. El servidor envía `ending`; el cliente abre `EndOfDemoScreen`: aparece "End of demo" y

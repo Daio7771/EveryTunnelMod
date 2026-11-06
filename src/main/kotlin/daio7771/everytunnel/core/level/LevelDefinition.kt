@@ -34,6 +34,7 @@ data class LevelDefinition(
     /** Nothing can go wrong here: nothing hurts, and thirst and the battery do not run down. */
     val safe: Boolean = false,
 ) {
+    /** The zone [id], or its first box when it has several (see [LevelParser]). */
     fun zone(id: String): Zone? = zones.firstOrNull { it.id == id }
 
     fun spawnPoint(id: String): SpawnPoint? = spawnPoints.firstOrNull { it.id == id }

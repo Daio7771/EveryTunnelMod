@@ -66,7 +66,7 @@ object LootSpawner {
     }
 
     fun place(server: MinecraftServer, level: LevelDefinition) {
-        if (LoungeHooks.notBuiltYet(level)) return
+        if (LoungeHooks.notBuiltYet(level) || LabHooks.notBuiltYet(level)) return
         val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: return
         val state = state(server)
         var count = 0

@@ -47,7 +47,6 @@ class LevelParserTest {
             "test",
             """{ "order": 1, "zones": [
                  { "id": "ok", "from": [0, 0, 0], "to": [1, 1, 1] },
-                 { "id": "ok", "from": [0, 0, 0], "to": [1, 1, 1] },
                  { "id": "Bad-Id", "from": [0, 0, 0], "to": [1, 1, 1] },
                  { "id": "half", "from": [0.5, 0, 0], "to": [1, 1, 1] },
                  { "id": "short", "from": [0, 0], "to": [1, 1, 1] }
@@ -57,7 +56,25 @@ class LevelParserTest {
         assertEquals(listOf("ok"), result.level!!.zones.map { it.id })
         assertEquals(emptyList(), result.level.spawnPoints)
         // Each broken entry reports its cause, plus a "skipped" line when the id was readable.
-        assertEquals(8, result.problems.size, result.problems.joinToString("\n"))
+        assertEquals(7, result.problems.size, result.problems.joinToString("\n"))
+    }
+
+    @Test
+    fun `a zone id given twice is one zone of two boxes`() {
+        val result = LevelParser.parse(
+            "test",
+            """{ "order": 1, "zones": [
+                 { "id": "ring", "from": [0, 0, 0], "to": [9, 3, 1], "tags": ["corridor"] },
+                 { "id": "ring", "from": [0, 0, 2], "to": [1, 3, 9], "tags": ["corridor"] }
+               ],
+               "spawn_points": [ { "id": "a", "pos": [0.5, 0, 0.5], "zone": "ring" }, { "id": "a", "pos": [1.5, 0, 0.5] } ] }""",
+        )
+        assertEquals(listOf(BlockBox(0, 0, 0, 9, 3, 1), BlockBox(0, 0, 2, 1, 3, 9)), result.level!!.zones.map { it.box })
+        assertEquals(listOf("ring", "ring"), result.level.zones.map { it.id })
+        assertEquals(BlockBox(0, 0, 0, 9, 3, 1), result.level.zone("ring")?.box)
+        // Spawn point ids stay unique.
+        assertEquals(listOf("a"), result.level.spawnPoints.map { it.id })
+        assertEquals(1, result.problems.size, result.problems.joinToString("\n"))
     }
 
     @Test

@@ -170,7 +170,7 @@ object LoadingHooks {
                     if (!continuing) NewGame.start(player)
                 }
             }
-            if (ContinueGame.waitingForLounge) {
+            if (ContinueGame.waitingForBuild) {
                 // The light settles from when the player arrives, not before.
                 state.preparedTick = now
                 continue

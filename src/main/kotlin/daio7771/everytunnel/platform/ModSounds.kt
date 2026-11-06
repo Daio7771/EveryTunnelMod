@@ -74,6 +74,8 @@ object ModSounds {
     val LOUNGE_BLACKOUT = event("event.lounge.blackout")
     val BIG_DOOR_OPEN = event("block.big_door.open")
     val BIG_DOOR_SLAM = event("block.big_door.slam")
+    val AIRLOCK_CLOSE = event("block.airlock.close")
+    val AIRLOCK_OPEN = event("block.airlock.open")
     val MUSIC_LOUNGE = event("music.lounge")
     val MUSIC_LOUNGE_FAR = event("music.lounge.far")
     val SAFE_TICK = event("block.safe.tick")

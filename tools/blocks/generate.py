@@ -1203,6 +1203,28 @@ def bunker_trapdoor_tex(rng):
     return img
 
 
+def airlock_leaf_tex(rng):
+    """A leaf of Level 5's airlock doors: pale painted steel, clean, with two grooves across. Nothing on it
+    changes along its width, so it looks the same however far it has slid."""
+    img = new((198, 202, 204))
+    noise(img, rng, 3)
+    for y, t in ((3, 0.8), (12, 0.8)):
+        for x in range(16):
+            px(img, x, y, (148, 152, 156), t)
+            px(img, x, y + 1, (228, 230, 232), 0.5)
+    for x in range(16):                                           # dirt gathered at the foot
+        for y in (14, 15):
+            px(img, x, y, (150, 152, 150), 0.25 + 0.1 * rng.random())
+    return img
+
+
+def airlock_edge_tex(rng):
+    """The leaves' edges: the black rubber seal they meet on."""
+    img = new((30, 32, 34))
+    noise(img, rng, 4)
+    return img
+
+
 def hazard_steel_tex(rng):
     """Worn steel painted in yellow and black diagonal stripes, 4 pixels wide: the frame of
     Level 3's blast doors. The stripes run on across neighbouring blocks."""
@@ -2263,6 +2285,17 @@ def build():
             for facing, y in HORIZONTAL.items():
                 variants[f"col={col},facing={facing},row={row_}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
     a.block("big_door", "Big Door", {"variants": variants}, {"parent": f"{NS}:block/big_door_2_1"})
+    # Level 5's airlock doors: each block is one column of a leaf, `width` quarters of it still across the
+    # opening, the rest slid into the wall on its `facing` side (AirlockDoorBlock). The models lean west.
+    a.texture("airlock_leaf", airlock_leaf_tex(r("airlock_leaf")), T.PAINTED_METAL.but(relief=0.3))
+    a.texture("airlock_edge", airlock_edge_tex(r("airlock_edge")), T.PLASTIC.but(smoothness=0.3, relief=0.2))
+    for width in range(1, 5):
+        a.models[f"airlock_door_{width}"] = model({"l": "airlock_leaf", "e": "airlock_edge"}, [
+            el((0, 0, 5), (4 * width, 16, 11), "l", east="e", up="e", down="e",
+               north=("l", (0, 0, 4 * width, 16)), south=("l", (16 - 4 * width, 0, 16, 16)))])
+    a.block("airlock_door", "Airlock Door", {"variants": {
+        f"facing={f},width={w}": {"model": f"{NS}:block/airlock_door_{w}", **({"y": (y - 270) % 360} if (y - 270) % 360 else {})}
+        for f, y in HORIZONTAL.items() for w in range(1, 5)}}, {"parent": f"{NS}:block/airlock_door_4"})
     # The darts. The board's picture is cut in nine; a part the hint does not touch keeps its texture.
     board_material = T.PLASTIC.but(smoothness=0.2, relief=0.1)
     board_images = {number: dartboard_tex(r("dartboard"), number or None) for number in range(21)}

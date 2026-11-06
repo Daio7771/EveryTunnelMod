@@ -12,7 +12,7 @@ data class LoungeMix(val main: Float, val far: Float) {
         private val SUITES = LoungeMix(0.25f, 0f)
         private val CALM = LoungeMix(0f, 1f)
 
-        private val QUIET = setOf("ch1_l4_maintenance", "ch1_l4_door_maintenance", "ch1_l4_exit", "ch1_l4_exit_far", "ch1_l4_exit_end", "ch1_l4_door_big")
+        private val QUIET = setOf("ch1_l4_maintenance", "ch1_l4_door_maintenance", "ch1_l4_exit", "ch1_l4_exit_far", "ch1_l4_door_big")
         private val CALM_ZONES = setOf("ch1_l4_calm", "ch1_l4_steps")
 
         /** [zones]: the ids of the level's zones the player is in. During the Cinema's film nothing plays. */

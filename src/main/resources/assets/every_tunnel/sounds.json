@@ -83,6 +83,22 @@
       }
     ]
   },
+  "block.airlock.close": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/airlock/close_1",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "block.airlock.open": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/airlock/open_1",
+        "attenuation_distance": 24
+      }
+    ]
+  },
   "block.big_door.open": {
     "sounds": [
       {

@@ -33,6 +33,7 @@ KDoc comment that says more.
 | `achievement/Achievement.kt` | The ten achievements, in list order, by id |
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
 | `puzzle/OrderPuzzle.kt` | A puzzle of things in order: attempts, failures, the hint |
+| `door/SlidingDoor.kt` | A door of two leaves sliding into the walls a quarter of a block at a time: how much of each column is left (Level 5's airlock) |
 | `save/LoungeSave.kt` | Level 4 as it was left, as text |
 | `wall/WallMessageState.kt` | A wall message's triggers: fixed, on approach, changing when looked away from |
 | `puzzle/BreakerCode.kt` | Level 4's five levers: the code, how many are right |
@@ -156,6 +157,7 @@ KDoc comment that says more.
 | `BookHooks.kt` | Level 3's book puzzle: books appear, handed in at the counter, the hatch opens, debug |
 | `CollapseHooks.kt` | Level 3's tunnel collapse: sound, shake, rubble, dust, flickering lights; undone on a death or new game |
 | `LoungeHooks.kt` | From Level 3 to Level 4: the door to B4, erasing and building in steps, Reception's door |
+| `LabHooks.kt` | Level 5 built in play from Level 4's dark stretch, in steps; the airlock's doors, behind and ahead |
 | `FilmSetHooks.kt` | The set for filming the Cinema's film, away from the levels |
 | `FilmWalkerEntity.kt` | The figure who walks along it |
 | `LoungePuzzleHooks.kt` | Level 4's Bar and Cinema puzzles, hints, and the pieces of the master card |
@@ -164,6 +166,7 @@ KDoc comment that says more.
 | `DartEntity.kt` | A thrown dart, built on vanilla's arrow; never saved |
 | `LoungeClosingHooks.kt` | Level 4's closing: the blackout, the emergency lamps, the big door |
 | `LoungeClosingBlocks.kt` | The big door, the Calm room's reader, the emergency lamp |
+| `LabBlocks.kt` | Level 5's airlock door: a column of a leaf, how much of it is across |
 | `BreakerHooks.kt` | Level 4's Maintenance room: levers, button, counter, power for the reader |
 | `SafeHooks.kt` | The safes in the Suites: the combinations, the block, the result from the client |
 | `ContinueGame.kt` | The saved game: checkpoints, CONTINUE, putting Level 4 back |

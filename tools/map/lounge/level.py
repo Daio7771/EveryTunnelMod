@@ -293,12 +293,12 @@ class Lounge:
     def zones(self):
         """(id, world box inclusive, tags): every space, the part of the corridor that starts the
         build, and the openings between them, so that going through a door never leaves the level."""
-        out = [(s.id, self.space_zone(s), []) for s in self.spaces]
-        # Along the dark stretch, from the far end: where the big door slams, and where it ends.
+        # Walking into the dark stretch starts Level 5's build (LabHooks), beyond its far end.
+        out = [(s.id, self.space_zone(s), ["lab_build"] if s is self.exit else []) for s in self.spaces]
+        # Along the dark stretch, from the far end: where the big door slams.
         x0, y0, z0, x1, y1, z1 = self.space_zone(self.exit)
         far_x, _, _ = self.at(0, 0, self.exit.box[1])
         out.append((f"{self.exit.id}_far", (x0, y0, z0, far_x + self.p["EXIT_SHUT_AT"], y1, z1), ["big_door_shut"]))
-        out.append((f"{self.exit.id}_end", (x0, y0, z0, far_x + self.p["EXIT_END_AT"], y1, z1), ["end"]))
         out.append((f"{self.diplomas.id}_build", self.build_zone(), ["lounge_build"]))
         y = self.p["FLOOR_Y"]
         # The pool's water: without it a swimmer would be out of the level, and of its safe rules.

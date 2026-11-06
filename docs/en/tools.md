@@ -82,10 +82,23 @@ the offices.
 | `textures.py` | Level 4's own textures (burgundy carpet, walnut with a brass strip, cream walls and ceiling), added to the world's pack |
 | `preview.py` | Top-down plan of Level 4 with sizes and openings. `python3 -m lounge.preview` from `tools/map` draws it alone, installing nothing |
 
+- **Level 5** has its own modules in `tools/map/lab/` (mod pack only), from `LEVEL_5`: the user's plan at
+  2/3, corridors 4 wide. Both layers share the plan coordinates; layer 2 lies `LAYER_DROP` (10) under layer 1.
+  The plan turns into the world so that its way in leaves Level 4's dark stretch (made longer, 44 blocks)
+  through a steel frame by its far end, west of every other level.
+
+| Module | Job |
+|---|---|
+| `level.py` | The level from `LEVEL_5`: spaces, openings, the flight of stairs, the shell round the air (white tiles, a green band at their foot, vinyl, ceiling panels; steel and checker plate round the airlock and the frame), lights, steel doors, the airlock's doors, the grate; two sets of blocks (the way in, built with Level 4; the rest, built in play, its air included); the level file's zones |
+| `checks.py` | A walk over both layers from the entry corridor reaching every cell, a wall between rooms, layer 2's ceilings under layer 1's floors, the frame opening from Level 4's stretch, every cell in a zone; they stop the generator |
+| `textures.py` | Level 5's own textures (`b5_*`), added to the world's pack |
+| `preview.py` | Both layers side by side with sizes, zones and openings. `python3 -m lab.preview` from `tools/map` draws it alone, installing nothing |
+
 - **Output** (`tools/map/output/`): the mod datapack `every_tunnel_level1_mod` (level JSON
   files and `garage:build`), the vanilla datapack `every_tunnel_level1_vanilla`,
   `level_resources.zip`, `level_preview.png`, `level3_preview.png`, `texture_sheet.png`,
-  `level3_furniture.png` (the same, bigger), `level3_texture_sheet.png`, `pbr_sheet.png`. The run prints both build stages' chunks and
+  `level3_furniture.png` (the same, bigger), `level3_texture_sheet.png`, `level4_preview.png`,
+  `level4_texture_sheet.png`, `level5_preview.png`, `level5_texture_sheet.png`, `pbr_sheet.png`. The run prints both build stages' chunks and
   commands. Into the
   mod (in git): the menu scene, `assets/every_tunnel/menu/scene.json` and the models and
   textures under `block/menu/`.
@@ -97,7 +110,7 @@ just open the world. `/function garage:build` rebuilds by hand. See [Levels](lev
 
 ## Blocks
 
-`tools/blocks/generate.py` makes the assets of the mod's 97 blocks. The blocks themselves
+`tools/blocks/generate.py` makes the assets of the mod's 118 blocks. The blocks themselves
 (properties, shapes, sounds) are registered in Kotlin (`platform/ModBlocks.kt`); the tool
 **stops if the two id lists disagree**. Model rotations must match the shapes in
 `platform/BlockShapes.kt`. Textures reuse the map's painters (`garage/textures.py`), so

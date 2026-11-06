@@ -1,0 +1,54 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "l": "every_tunnel:block/airlock_leaf",
+    "e": "every_tunnel:block/airlock_edge",
+    "particle": "every_tunnel:block/airlock_leaf"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        5
+      ],
+      "to": [
+        8,
+        16,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#l",
+          "uv": [
+            0,
+            0,
+            8,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#e"
+        },
+        "south": {
+          "texture": "#l",
+          "uv": [
+            8,
+            0,
+            16,
+            16
+          ]
+        },
+        "west": {
+          "texture": "#l"
+        },
+        "up": {
+          "texture": "#e"
+        },
+        "down": {
+          "texture": "#e"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,width=1": {
+      "model": "every_tunnel:block/airlock_door_1",
+      "y": 90
+    },
+    "facing=north,width=2": {
+      "model": "every_tunnel:block/airlock_door_2",
+      "y": 90
+    },
+    "facing=north,width=3": {
+      "model": "every_tunnel:block/airlock_door_3",
+      "y": 90
+    },
+    "facing=north,width=4": {
+      "model": "every_tunnel:block/airlock_door_4",
+      "y": 90
+    },
+    "facing=east,width=1": {
+      "model": "every_tunnel:block/airlock_door_1",
+      "y": 180
+    },
+    "facing=east,width=2": {
+      "model": "every_tunnel:block/airlock_door_2",
+      "y": 180
+    },
+    "facing=east,width=3": {
+      "model": "every_tunnel:block/airlock_door_3",
+      "y": 180
+    },
+    "facing=east,width=4": {
+      "model": "every_tunnel:block/airlock_door_4",
+      "y": 180
+    },
+    "facing=south,width=1": {
+      "model": "every_tunnel:block/airlock_door_1",
+      "y": 270
+    },
+    "facing=south,width=2": {
+      "model": "every_tunnel:block/airlock_door_2",
+      "y": 270
+    },
+    "facing=south,width=3": {
+      "model": "every_tunnel:block/airlock_door_3",
+      "y": 270
+    },
+    "facing=south,width=4": {
+      "model": "every_tunnel:block/airlock_door_4",
+      "y": 270
+    },
+    "facing=west,width=1": {
+      "model": "every_tunnel:block/airlock_door_1"
+    },
+    "facing=west,width=2": {
+      "model": "every_tunnel:block/airlock_door_2"
+    },
+    "facing=west,width=3": {
+      "model": "every_tunnel:block/airlock_door_3"
+    },
+    "facing=west,width=4": {
+      "model": "every_tunnel:block/airlock_door_4"
+    }
+  }
+}

@@ -22,8 +22,8 @@ flowchart TD
     M --> P[Level 3, B3: offices, library, bunker]
     P -->|door to B4| Q[Diploma corridor: Level 3 erased, Level 4 built]
     Q --> R[Level 4, B4: VIP lounge]
-    R -->|big door, not yet| N[End of demo: footsteps behind, credits]
-    N --> C
+    R -->|big door| S[Dark stretch, entry corridor, airlock: Level 5 built]
+    S --> T[Level 5, B5: laboratory, layers 1 and 2]
     I -.->|death| O[Fade to black, restart level]
     K -.->|death| O
     P -.->|death| O
@@ -367,10 +367,41 @@ Two more things, neither of which gives a piece:
 
 - **Wall messages** (`WallMessageBlock`, `client.render.WallMessageRenderer`, `core.wall`, placed by `tools/map/wall_messages.py`): black paint in an uneven font of our own, on a pale patch over a dark wall, in Levels 3 and 4. Each is fixed, appears on approach, or changes once it has been seen and looked away from. Their text is under `wall.every_tunnel.*` in the lang file.
 
-## 11. The end
+## 11. From Level 4 to Level 5
 
 Halfway along the dark stretch past the big door, a zone tagged `big_door_shut` slams the door behind
-the player. At the far end, `platform.EndingHooks`: a zone tagged `end`.
+the player. Walking into the stretch (a zone tagged `lab_build`) has already started Level 5's build,
+in play (`platform.LabHooks`), in a space of its own west of Level 4:
+
+- `garage:level5_begin` force-loads the area; `/everytunnel labready` says the chunks are there. Then
+  one `garage:level5_step_<n>` runs every 2 ticks (46 steps, about 5 s). The steps put back the level's
+  air as well, so a build over an older one leaves nothing of it.
+- Meanwhile the player walks on, in the dark. The stretch, longer now and the lounge's to its end, has a
+  steel frame in its side by its far end: through it is Level 5 (its title shows there), a dark corridor
+  of the lab's tiles, built with Level 4.
+- **The airlock** at its end, steel on a checker plate floor (`LabHooks`, zones tagged `lab_airlock`,
+  `lab_airlock_rear`, `lab_welcome`): walking in, the door behind slides shut with a hiss
+  (`block.airlock.close`), never on someone in the doorway, and opens again for someone who steps back out
+  before it shuts. Once the level stands, after a moment in the dark, the door ahead, in the Lobby's wall,
+  slides open over about 3 s (`block.airlock.open`) and the white, lit Lobby is there. Each door is two
+  leaves of `AirlockDoorBlock` moving a quarter of a block a step (`core.door.SlidingDoor`).
+
+Level 5 so far is its two upper layers, structure only: a clean laboratory of white tiles with a band
+of pale green ones, grey vinyl, white ceiling panels, every fluorescent light on. Layer 1: the Lobby, a
+ring of corridors with the Workshop, the Waiting room and the Lockers, and a steel door (shut) to the
+stairs down. Layer 2, 10 blocks lower: the subjects' corridor with rooms S-1 to S-4, the Lab hall, a
+loop north through the Office, a loop south past Storage to the chemical room, the shortcut and the
+drain hatch behind a grate. Three steel doors are shut (the stairs, the south route, the shortcut):
+nothing opens them yet. Its zones are listed in [Levels](levels.md#level-5).
+
+The map's rebuild when the world opens does not touch Level 5: the way in goes with Level 4, and
+nobody can reach what stands until the next build. A game continued in Level 5 builds it behind the
+loading screen, the player waiting in the diploma corridor (`ContinueGame`).
+
+## 12. The end
+
+The credits are for the end of Level 5, which is not built yet: for now no zone in the levels is
+tagged `end`. What `platform.EndingHooks` does with one:
 
 1. The screen fades to black over 2.5 s.
 2. The server sends `ending`; the client opens `EndOfDemoScreen`: "End of demo" fades in,

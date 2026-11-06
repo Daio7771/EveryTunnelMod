@@ -85,10 +85,24 @@ las oficinas.
 | `textures.py` | Las texturas propias del nivel 4 (moqueta burdeos, nogal con banda de latón, paredes y techo crema), añadidas al pack del mundo |
 | `preview.py` | Plano visto desde arriba del nivel 4 con medidas y aberturas. `python3 -m lounge.preview` desde `tools/map` lo dibuja solo, sin instalar nada |
 
+- **El nivel 5** tiene sus propios módulos en `tools/map/lab/` (solo en el pack del mod), a partir de `LEVEL_5`:
+  el plano del usuario a 2/3, pasillos de 4 de ancho. Las dos capas comparten las coordenadas del plano; la capa 2
+  está `LAYER_DROP` (10) bajo la capa 1. El plano se gira en el mundo para que su entrada salga del tramo oscuro
+  del nivel 4 (ahora más largo, 44 bloques) por un marco de acero junto a su fondo, al oeste de todos los demás
+  niveles.
+
+| Módulo | Función |
+|---|---|
+| `level.py` | El nivel a partir de `LEVEL_5`: espacios, aberturas, el tramo de escaleras, la cáscara alrededor del aire (azulejo blanco, una franja verde al pie, vinilo, paneles de techo; acero y chapa estriada en la esclusa y el marco), luces, puertas de acero, las puertas de la esclusa, la rejilla; dos juegos de bloques (la entrada, construida con el nivel 4; el resto, construido en juego, con su aire); las zonas del archivo del nivel |
+| `checks.py` | Un recorrido por las dos capas desde el pasillo de entrada que llega a todas las celdas, pared entre salas, los techos de la capa 2 bajo los suelos de la capa 1, el marco que se abre desde el tramo del nivel 4, cada celda en una zona; detienen el generador |
+| `textures.py` | Las texturas propias del nivel 5 (`b5_*`), añadidas al pack del mundo |
+| `preview.py` | Las dos capas lado a lado con medidas, zonas y aberturas. `python3 -m lab.preview` desde `tools/map` lo dibuja solo, sin instalar nada |
+
 - **Salida** (`tools/map/output/`): el datapack del mod `every_tunnel_level1_mod` (archivos
   JSON de los niveles y `garage:build`), el datapack vanilla `every_tunnel_level1_vanilla`,
   `level_resources.zip`, `level_preview.png`, `level3_preview.png`, `texture_sheet.png`,
-  `level3_furniture.png` (el mismo, más grande), `level3_texture_sheet.png`, `pbr_sheet.png`. La ejecución muestra los chunks y comandos de
+  `level3_furniture.png` (el mismo, más grande), `level3_texture_sheet.png`, `level4_preview.png`,
+  `level4_texture_sheet.png`, `level5_preview.png`, `level5_texture_sheet.png`, `pbr_sheet.png`. La ejecución muestra los chunks y comandos de
   las dos etapas del build. En el mod
   (en git): la escena del menú, `assets/every_tunnel/menu/scene.json` y los modelos y
   texturas de `block/menu/`.
@@ -101,7 +115,7 @@ generador basta con abrir el mundo. `/function garage:build` reconstruye a mano.
 
 ## Bloques
 
-`tools/blocks/generate.py` hace los recursos de los 97 bloques del mod. Los bloques en sí
+`tools/blocks/generate.py` hace los recursos de los 118 bloques del mod. Los bloques en sí
 (propiedades, formas, sonidos) se registran en Kotlin (`platform/ModBlocks.kt`); la
 herramienta **se detiene si las dos listas de ids no coinciden**. Las rotaciones de los
 modelos deben coincidir con las formas de `platform/BlockShapes.kt`. Las texturas reutilizan

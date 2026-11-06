@@ -56,6 +56,10 @@ from lounge.level import Lounge        # noqa: E402
 from lounge import checks as LC        # noqa: E402
 from lounge import preview as LV       # noqa: E402
 from lounge import textures as LT      # noqa: E402
+from lab.level import Lab, stretch_air  # noqa: E402
+from lab import checks as BC           # noqa: E402
+from lab import preview as BV          # noqa: E402
+from lab import textures as BT         # noqa: E402
 from offices import textures as OT     # noqa: E402
 
 # =====================================================================================
@@ -407,10 +411,10 @@ LEVEL_4 = dict(
     # Between the door to B4 and Reception: 4 wide, 20 long, diplomas on its walls.
     DIPLOMA_CORRIDOR=("ch1_l4_diplomas", "Diploma corridor", (49, 60, 53, 80), 4),
     B4_DOOR=(50, 80),                # its cell (x, z) in the corridor's far wall; world (33, 10, 119)
-    # Past the big door, dark: walking it starts the credits (the end of v0.4).
-    EXIT_STRETCH=("ch1_l4_exit", "Dark stretch", (47, -17, 53, -1), 4),
-    EXIT_SHUT_AT=7,                  # cells from its far end, inclusive: the door slams from here on,
-    EXIT_END_AT=2,                   # and from here on the credits start
+    # Past the big door, dark and the lounge's to its end: walking it starts Level 5's build, and a steel
+    # frame in its side by the far end opens onto Level 5's entry corridor (LEVEL_5; built with this level).
+    EXIT_STRETCH=("ch1_l4_exit", "Dark stretch", (47, -45, 53, -1), 4),
+    EXIT_SHUT_AT=35,                 # cells from its far end, inclusive: the door slams from here on
     START=(50, 55),                  # the checkpoint, in Reception, facing north
     # Plan to world: the plan's north is the world's west, so the level meets the corridor from B4:
     # world x = z + PLACE_X, world z = PLACE_Z - x.
@@ -444,6 +448,112 @@ LEVEL_4 = dict(
     DOORS=dict(door="minecraft:dark_oak_door", steel_door="every_tunnel:emergency_door", calm_door="every_tunnel:calm_door"),
     # Level 3's door to B4 and the corridor behind it (the corridor is built with Level 3, the rest
     # in play: see level4_steps). A step holds at most so many commands and blocks changed.
+    STEP_COMMANDS=40,
+    STEP_VOLUME=33000,
+)
+
+# Level 5 (B5), the laboratory: layers 1 and 2 (layer 3, the drain, comes later). Plan coordinates as in
+# Level 4: x east, z south, boxes (x0, z0, x1, z1) with x1 and z1 exclusive, the sizes are of the air
+# inside. The user's prototype at 2/3, corridors 4 wide, straight; layer 2 as two loops from the Lab hall
+# (north past the Office and back, south past Storage to the chemical room). Both layers share the plan:
+# layer 1 is the upper floor, layer 2 lies LAYER_DROP under it, so a cell may hold a space of each.
+LEVEL_5 = dict(
+    TITLE="Level 5",
+    FLOOR_Y=9,                       # the world y of layer 1's floor blocks (Level 4's floor)
+    LAYER_DROP=10,                   # layer 2's floor blocks are this much lower
+    ROOM_HEIGHT=5,
+    CORRIDOR_HEIGHT=4,
+    # (id, zone, name, layer, box, height or None for the kind's, kind). Kinds: "entry", "room",
+    # "equipment", "loot", "lore", "hub", "puzzle", "hatch", "stairs" and "corridor" (corridors and stairs
+    # open onto what they touch; any other two spaces keep a wall between them). The zone ids are the plan's.
+    SPACES=[
+        # Layer 1: in from Level 4's dark stretch through a steel frame, a dark corridor of the lab's tiles
+        # and the airlock, then the Lobby and a ring of corridors.
+        ("entry", "entry_corridor", "Entry corridor", 1, (-16, 12, -4, 16), None, "entry"),
+        ("airlock", "airlock", "Airlock", 1, (-3, 12, 1, 16), 4, "airlock"),
+        ("lobby", "lobby", "Lobby", 1, (2, 7, 21, 22), None, "room"),
+        ("workshop", "workshop", "Workshop", 1, (29, 2, 54, 13), None, "equipment"),
+        ("waiting", "waiting", "Waiting room", 1, (58, 2, 75, 13), None, "room"),
+        ("lockers", "lockers", "Lockers", 1, (24, 21, 44, 29), None, "loot"),
+        ("ring_north", "layer1_corridor", "", 1, (21, 14, 75, 18), None, "corridor"),
+        ("ring_east", "layer1_corridor", "", 1, (71, 18, 75, 33), None, "corridor"),
+        ("ring_south", "layer1_corridor", "", 1, (9, 33, 75, 37), None, "corridor"),
+        ("ring_west", "layer1_corridor", "", 1, (9, 22, 13, 33), None, "corridor"),
+        ("lockers_north", "layer1_corridor", "", 1, (32, 18, 36, 21), None, "corridor"),
+        ("lockers_south", "layer1_corridor", "", 1, (32, 29, 36, 33), None, "corridor"),
+        ("stairs_top", "layer1_stairs", "Stairs", 1, (6, 38, 16, 44), None, "stairs"),
+        # Layer 2: the subjects' corridor to the Lab hall, and the two loops round it.
+        ("stairs_bottom", "layer1_stairs", "Stairs", 2, (5, 54, 17, 63), None, "stairs"),
+        ("subjects", "subjects_corridor", "Subjects corridor", 2, (17, 57, 73, 61), None, "corridor"),
+        ("s1", "s1", "S-1", 2, (21, 45, 35, 56), None, "lore"),
+        ("s2", "s2", "S-2", 2, (29, 62, 43, 72), None, "lore"),
+        ("s3", "s3", "S-3", 2, (43, 45, 57, 56), None, "lore"),
+        ("s4", "s4", "S-4", 2, (51, 62, 65, 72), None, "lore"),
+        ("lab_hall", "lab_hall", "Lab hall", 2, (73, 50, 98, 71), 7, "hub"),
+        ("north_west", "north_route", "", 2, (75, 26, 79, 50), None, "corridor"),
+        ("north_east", "north_route", "", 2, (92, 26, 96, 50), None, "corridor"),
+        ("office", "office", "Office", 2, (74, 13, 97, 25), None, "lore"),
+        ("south_a", "south_route", "", 2, (76, 72, 80, 84), None, "corridor"),
+        ("south_b", "south_route", "", 2, (76, 84, 98, 88), None, "corridor"),
+        ("storage", "storage", "Storage", 2, (98, 80, 116, 90), None, "loot"),
+        ("south_c", "south_route", "", 2, (116, 70, 120, 84), None, "corridor"),
+        ("chemical_room", "chemical_room", "Chemical room", 2, (108, 50, 138, 70), None, "puzzle"),
+        ("shortcut", "shortcut", "Shortcut", 2, (99, 58, 108, 62), None, "corridor"),
+        ("drain_hatch", "drain_hatch", "Drain hatch", 2, (124, 71, 134, 79), None, "hatch"),
+    ],
+    # From layer 1's stairs down to layer 2's: one block down per cell along z, from the first cell on.
+    FLIGHT=("stairs_flight", "layer1_stairs", (9, 44, 13, 54)),
+    # Openings through the one-block walls: (id, layer, axis of the wall's line, line, first cell, width,
+    # height, kind). Kinds: "doorway" (open), "locked" (a steel double door, shut until a lever or an event
+    # opens it), "frame" (open, in steel: the way in from Level 4's dark stretch, in its side wall),
+    # "airlock_rear" and "airlock_front" (the airlock's sliding doors: the one behind stands open until the
+    # player is in, the one ahead shut until the level stands; LabHooks), "grate" (iron bars the chemical
+    # puzzle will dissolve).
+    OPENINGS=[
+        ("entry_frame", 1, "x", -17, 12, 4, 3, "frame"),
+        ("airlock_rear", 1, "x", -4, 12, 4, 3, "airlock_rear"),
+        ("welcome_door", 1, "x", 1, 12, 4, 3, "airlock_front"),
+        ("workshop_door", 1, "z", 13, 41, 2, 3, "doorway"),
+        ("waiting_door", 1, "z", 13, 66, 2, 3, "doorway"),
+        ("stairs_door", 1, "z", 37, 10, 2, 2, "locked"),            # the lever hidden in the ring
+        ("s1_door", 2, "z", 56, 27, 2, 3, "doorway"),
+        ("s3_door", 2, "z", 56, 49, 2, 3, "doorway"),
+        ("s2_door", 2, "z", 61, 35, 2, 3, "doorway"),
+        ("s4_door", 2, "z", 61, 57, 2, 3, "doorway"),
+        ("office_door_west", 2, "z", 25, 76, 2, 3, "doorway"),
+        ("office_door_east", 2, "z", 25, 93, 2, 3, "doorway"),
+        ("south_door", 2, "z", 71, 77, 2, 2, "locked"),             # opens on leaving the Office
+        ("shortcut_door", 2, "x", 98, 59, 2, 2, "locked"),          # the chemical room's lever, from inside
+        ("hatch_grate", 2, "z", 70, 127, 4, 3, "grate"),
+    ],
+    START=(-16, 13),                 # layer 1: the entry corridor's first cell, past the frame
+    CHECKPOINT=(77, 67),             # layer 2: in the Lab hall
+    # Plan to world: the plan's south is the world's west, so the entry corridor leaves Level 4's dark
+    # stretch at its far end, to its left: world x = PLACE_X - z, world z = PLACE_Z + x.
+    PLACE_X=-77,
+    PLACE_Z=140,
+    # The player's start (a death comes back here) and the checkpoint to be: (layer, x, z, plan facing).
+    PLAYER_START=(1, 4, 14, "east"),
+    CHECKPOINT_POINT=(2, 77, 67, "east"),
+    # Stand-in blocks re-skinned by Level 5's textures (lab/textures.py): white wall tiles, a pale green
+    # band of them at the foot of the walls, grey vinyl, a ceiling of white panels, vinyl stairs. Never a
+    # block another level uses: the world's resource pack re-skins a block everywhere.
+    STAND_INS=dict(
+        tile="minecraft:quartz_bricks",
+        band="minecraft:lime_concrete",
+        vinyl="minecraft:cyan_concrete",
+        ceiling="minecraft:smooth_quartz",
+        stairs="minecraft:polished_andesite_stairs",
+        steel="minecraft:waxed_cut_copper",
+    ),
+    CHECKER="every_tunnel:checker_plate",     # the airlock's floor and the thresholds of steel
+    AIRLOCK_DOOR="every_tunnel:airlock_door[facing={facing},width={width}]",
+    LIGHT="every_tunnel:fluorescent_light[facing=down,axis={axis},mode=on,lit=true]",
+    LIGHT_SPACING=5,
+    STEEL_DOOR="every_tunnel:emergency_door",
+    GRATE="minecraft:iron_bars[east={ew},north={ns},south={ns},west={ew},waterlogged=false]",
+    # Built in play while the player walks Level 4's dark stretch and the entry corridor (LabHooks): a step
+    # holds at most so many commands and blocks changed, one step every 2 ticks.
     STEP_COMMANDS=40,
     STEP_VOLUME=33000,
 )
@@ -1047,13 +1157,15 @@ def level3_extras(json_text, lv4, door):
     return json.dumps(data, indent=1) + "\n"
 
 
-def level4_json(lv4):
+def level4_json(lv4, extra_zones=()):
     """Level 4: from the corridor behind the door to B4, so Level 3 is left behind for good and
-    its title shows as that door shuts. It has no `build`: LoungeHooks builds it in play."""
+    its title shows as that door shuts. It has no `build`: LoungeHooks builds it in play.
+    `extra_zones`: (id, box, tags) of Level 5's entry corridor that belong to Level 4."""
     p = lv4.p
     sx, sz = p["START"]
     wx, wz = lv4.world(sx, sz)
-    zones = [{"id": zid, "from": list(b[:3]), "to": list(b[3:]), **({"tags": tags} if tags else {})} for zid, b, tags in lv4.zones()]
+    zones = [{"id": zid, "from": list(b[:3]), "to": list(b[3:]), **({"tags": tags} if tags else {})}
+             for zid, b, tags in list(lv4.zones()) + list(extra_zones)]
     return json.dumps({
         "name": "Level 4 - VIP lounge B4 (generated)",
         "order": 4,
@@ -1063,6 +1175,41 @@ def level4_json(lv4):
         + [{"id": sid, "pos": list(pos), "yaw": 0, "tags": [tag]} for sid, pos, tag in lv4.furnish.spawn_points()],
         "entry": {"title": p["TITLE"], "subtitle": "", "sound": "every_tunnel:event.level_transition"},
         "safe": True,
+    }, indent=1) + "\n"
+
+
+def level5_steps(lv5):
+    """What walking into Level 4's dark stretch runs, one step at a time (LabHooks): Level 5 goes up
+    beyond it, its air included, so that a build over an older one leaves nothing of it. The Lobby's
+    wall at the end of the entry corridor stays whole: LabHooks opens it after the last step."""
+    p = lv5.p
+    box = lv5.lab_box
+    c = [f"execute store result score #drops {SCORE} run gamerule doTileDrops", "gamerule doTileDrops false"]
+    c.append(f"kill @e[type=minecraft:item,x={box[0]},y={box[1]},z={box[2]},dx={box[3] - box[0]},dy={box[4] - box[1]},dz={box[5] - box[2]}]")
+    place_rects(c, {pos: st for pos, st in lv5.lab_blocks.items() if not needs_support(st)})
+    place_rects(c, {pos: st for pos, st in lv5.lab_blocks.items() if needs_support(st)})
+    c.append(f"execute if score #drops {SCORE} matches 1 run gamerule doTileDrops true")
+    c.append(f"forceload remove {box[0]} {box[2]} {box[3]} {box[5]}")
+    return split_steps(c, p["STEP_COMMANDS"], p["STEP_VOLUME"])
+
+
+def level5_json(lv5):
+    """Level 5: from the entry corridor's second leg, so its title shows on turning the corner. It
+    has no `build`: LabHooks builds it in play."""
+    p = lv5.p
+    zones = [{"id": zid, "from": list(b[:3]), "to": list(b[3:]), **({"tags": tags} if tags else {})} for zid, b, tags in lv5.zones()]
+    start, start_yaw = lv5.point(p["PLAYER_START"])
+    check, check_yaw = lv5.point(p["CHECKPOINT_POINT"])
+    return json.dumps({
+        "name": "Level 5 - Laboratory B5 (generated)",
+        "order": 5,
+        "dimension": "minecraft:overworld",
+        "zones": zones,
+        "spawn_points": [
+            {"id": "player_start", "pos": start, "yaw": start_yaw, "tags": ["player"]},
+            {"id": "checkpoint", "pos": check, "yaw": check_yaw, "tags": ["checkpoint"]},
+        ],
+        "entry": {"title": p["TITLE"], "subtitle": "", "sound": "every_tunnel:event.level_transition"},
     }, indent=1) + "\n"
 
 
@@ -1171,6 +1318,14 @@ def write_pack(name, cmds, box, previous, level=None, offset=None, level2=None, 
         (functions / "film_set_now.mcfunction").write_text("\n".join(film_set_commands(fs)) + "\n")
         for k, step in enumerate(stage3["steps4"]):
             (functions / f"level4_step_{k}.mcfunction").write_text("\n".join(step) + "\n")
+        # Level 5, built in play the same way: LabHooks runs level5_begin, `everytunnel labready` says
+        # the chunks are there, then the steps run in turn.
+        area5 = stage3["area5"]
+        (functions / "level5_begin.mcfunction").write_text("\n".join(
+            [f"forceload add {area5[0]} {area5[2]} {area5[3]} {area5[5]}", "schedule function garage:level5_wait 5t replace"]) + "\n")
+        wait_and_go(functions, "level5", area5, area5[1], ["everytunnel labready"], release=False)
+        for k, step in enumerate(stage3["steps5"]):
+            (functions / f"level5_step_{k}.mcfunction").write_text("\n".join(step) + "\n")
     tags = pack / "data" / "minecraft" / "tags" / "functions"
     tags.mkdir(parents=True)
     for tag in ("load",) if mod else ("load", "tick"):
@@ -1183,6 +1338,7 @@ def write_pack(name, cmds, box, previous, level=None, offset=None, level2=None, 
         if stage3:
             (levels / "level_3.json").write_text(stage3["json"])
             (levels / "level_4.json").write_text(stage3["json4"])
+            (levels / "level_5.json").write_text(stage3["json5"])
     with zipfile.ZipFile(OUT / f"{name}.zip", "w", zipfile.ZIP_DEFLATED) as z:
         for f in sorted(pack.rglob("*")):
             if f.is_file():
@@ -1248,6 +1404,23 @@ def main():
     if shared4:
         raise SystemExit(f"LEVEL_4 STAND_INS: other levels use {', '.join(shared4)}; pick blocks they never use")
     report4 = LC.walled(lv4) + LC.steps(lv4) + LC.walk(lv4) + LC.zoned(lv4)
+
+    # Level 5, mod only, beyond Level 4's dark stretch. Its entry corridor goes up with Level 4 (the
+    # player walks it while the rest is built in play): it opens the stretch's far end, and no wall of
+    # its own goes up across the stretch. Its stand-ins must be its own as well.
+    lv5 = Lab(LEVEL_5).compose(stretch_air(lv4, LEVEL_5))
+    used |= {s.split("[")[0] for s in LEVEL_4["STAND_INS"].values()} | {s.split("[")[0] for s in lv4.lounge_blocks.values()}
+    shared5 = sorted({s.split("[")[0] for s in LEVEL_5["STAND_INS"].values()} & used)
+    if shared5:
+        raise SystemExit(f"LEVEL_5 STAND_INS: other levels use {', '.join(shared5)}; pick blocks they never use")
+    report5 = BC.walk(lv5) + BC.walled(lv5) + BC.stacked(lv5) + BC.joins_level_4(lv5, lv4) + BC.zoned(lv5)
+    clashes5 = [pos for pos in lv5.lab_blocks if pos in lv4.lounge_blocks]
+    if clashes5:
+        raise SystemExit(f"Level 5 overlaps Level 4 at {len(clashes5)} blocks, e.g. {clashes5[:3]}")
+    for pos in lv5.entry_air:
+        lv4.lounge_blocks.pop(pos, None)
+    lv4.lounge_blocks.update(lv5.entry_blocks)
+    lv4.box = Lounge.bounds(lv4.lounge_blocks)
     if gv.wall != gm.wall or gv.pillar != gm.pillar or gv.pieces != gm.pieces:
         raise SystemExit("internal error: sign texts differ between the vanilla and mod builds")
 
@@ -1286,8 +1459,17 @@ def main():
     area4 = lv4.area(box3)
     if chunk_count(area4) > 256:
         raise SystemExit(f"Level 4's build spans {chunk_count(area4)} chunks; /forceload takes at most 256")
+    clashes5 = [pos for pos in lv5.lab_blocks if pos in blocks3]
+    if clashes5:
+        raise SystemExit(f"Level 5 overlaps Level 3 at {len(clashes5)} blocks, e.g. {clashes5[:3]}")
+    steps5 = level5_steps(lv5)
+    area5 = lv5.lab_box
+    if chunk_count(area5) > 256:
+        raise SystemExit(f"Level 5's build spans {chunk_count(area5)} chunks; /forceload takes at most 256")
     stage3 = dict(cmds=cmds3, box=box3, previous=previous3, json=level3_extras(level3_json(lv3, place3), lv4, door4),
-                  extra_clear=clear4, area4=area4, steps4=steps4, json4=level4_json(lv4))
+                  extra_clear=clear4, area4=area4, steps4=steps4,
+                  json4=level4_json(lv4),
+                  area5=area5, steps5=steps5, json5=level5_json(lv5))
 
     counts = {}
     for variant, level in levels.items():
@@ -1307,6 +1489,7 @@ def main():
     resource_zip, textures = T.build_pack(p, v.glyphs)
     resource_zip, textures3 = OT.add_to_pack(resource_zip, p3)
     resource_zip, textures4 = LT.add_to_pack(resource_zip, LEVEL_4, TEXTURE_SEED, PBR["RELIEF"])
+    resource_zip, textures5 = BT.add_to_pack(resource_zip, LEVEL_5, TEXTURE_SEED, PBR["RELIEF"])
     (OUT / "level_resources.zip").write_bytes(resource_zip)
     size3 = (box3[3] - box3[0] + 1, box3[5] - box3[2] + 1)
     stats3 = [
@@ -1328,6 +1511,14 @@ def main():
         "Green: open arch. Orange: door. Violet: big door. Red: door to B4. Blue dot: checkpoint. Black: furniture. "
         "White boxes: gaps for puzzles. Dots: white notes, yellow batteries, cyan water, red food."])
     V.write_texture_sheet(OUT / "level4_texture_sheet.png", textures4)
+    stats5 = report5 + [
+        f"B5 (layers 1 and 2): {len(lv5.lab_blocks)} blocks, entry corridor {len(lv5.entry_blocks)}, {len(lv5.lights)} lights; "
+        f"world box {lv5.box}; {len(steps5)} steps over {chunk_count(area5)} chunks",
+        "Green: open doorway. Red: locked door. Grey: the steel frame from Level 4's dark stretch. Violet: the airlock's sliding doors. Orange: the grate.",
+        "Blue dot: the start, through the frame from Level 4's dark stretch (top left). White ring: the Lab hall checkpoint. Faint: the other layer.",
+    ]
+    BV.write(OUT / "level5_preview.png", lv5, lv4, stats5)
+    V.write_texture_sheet(OUT / "level5_texture_sheet.png", textures5)
     lights = {}
     for _, _, state in v.fixtures:
         lights[state] = lights.get(state, 0) + 1
@@ -1357,7 +1548,7 @@ def main():
 
     stats.append(MS.write(p, REPO / "src" / "main" / "resources" / "assets" / "every_tunnel"))
 
-    for line in stats + stats3 + report3[1:] + stats4:
+    for line in stats + stats3 + report3[1:] + stats4 + stats5[:-2]:
         print(line)
     if min(r["line_of_sight"] for r in reports) < 30:
         print("WARNING: a hall has a clear line of sight under 30 blocks")

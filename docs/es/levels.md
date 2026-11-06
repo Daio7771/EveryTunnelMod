@@ -75,7 +75,7 @@ Un ejemplo completo (todas las claves):
 
 | Clave | Obligatoria | Significado |
 |---|---|---|
-| `id` | sí | Único dentro del nivel, `a-z0-9_` |
+| `id` | sí | `a-z0-9_`. Si se repite, sus cajas forman una sola zona: un jugador en cualquiera de ellas está en ella, y pasar de una a otra no es un cambio (ponles las mismas etiquetas) |
 | `from`, `to` | sí | Dos esquinas opuestas, coordenadas de bloque enteras, en cualquier orden. Las dos esquinas se incluyen, como en `/fill` |
 | `tags` | no | Cadenas que marcan zonas especiales (abajo) |
 | `ambience` | no | El [ambiente](#ambiente) propio de la zona, que suena en lugar del del nivel mientras el jugador está en ella (la primera zona así, en el orden del archivo); `{}` es silencio |
@@ -144,6 +144,10 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `b4_door_open` | `LoungeHooks` | Entrar abre la puerta a B4 |
 | `lounge_build` | `LoungeHooks` | Entrar cierra esa puerta, borra el nivel 3 y construye el 4 |
 | `lounge_door` | `LoungeHooks` | Sus puertas se abren cuando el nivel 4 está en pie (la de Reception) |
+| `lab_build` | `LabHooks` | Entrar empieza la construcción del nivel 5 (el tramo oscuro del nivel 4) |
+| `lab_airlock` | `LabHooks` | La esclusa del nivel 5: entrar cierra la puerta de atrás (`lab_airlock_rear`) y, cuando el nivel está en pie, abre la de delante |
+| `lab_airlock_rear` | `LabHooks` | La puerta de atrás de la esclusa: abierta hasta que el jugador entra |
+| `lab_welcome` | `LabHooks` | La puerta de delante de la esclusa, en la pared del Lobby: cerrada hasta que el nivel está en pie |
 | `exit` | (nadie aún) | Marca la salida de un nivel; reservada para sistemas futuros |
 | `valve_door` | `ValveHooks` | Las puertas que abren las válvulas cuando todas están bien; una partida nueva las cierra |
 | `observer_home` | `ObserverEntity` | La zona que patrulla el Observer y a la que vuelve (la biblioteca del nivel 3) |
@@ -199,6 +203,25 @@ sistemas que vienen:
   `water_source_cafeteria` (con la etiqueta `water_source`, el dispensador de la cocina,
   `WATER_SOURCES`).
 
+### Nivel 5
+
+El nivel 5, el laboratorio, se construye en juego (`LabHooks`), de momento las capas 1 y 2 (plano, herramientas
+y aspecto: [Herramientas en Python](tools.md)). Su archivo nombra las zonas como el plano; una zona de varias cajas
+repite su id:
+
+- **Capa 1:** `entry_corridor` (desde el marco de acero del tramo oscuro del nivel 4), `airlock` (con la
+  etiqueta `lab_airlock`), `lobby`,
+  `workshop`, `waiting`, `lockers`, `layer1_corridor` (el anillo, seis cajas), `layer1_stairs` (las dos salas
+  de escaleras y el tramo entre ellas).
+- **Capa 2:** `subjects_corridor`, `s1` a `s4`, `lab_hall`, `north_route` (dos cajas), `office`,
+  `south_route` (tres), `storage`, `chemical_room`, `shortcut`, `drain_hatch`.
+- **Aberturas,** cada una con su zona: `entry_frame` (el marco: cruzarlo es entrar en el nivel 5),
+  `airlock_rear` (con la etiqueta `lab_airlock_rear`), `welcome_door` (con la etiqueta `lab_welcome`), los huecos de puerta
+  (`workshop_door`, `waiting_door`, `s1_door` a `s4_door`, `office_door_west`, `office_door_east`), las puertas
+  de acero cerradas (`stairs_door`, `south_door`, `shortcut_door`) y `hatch_grate` (barrotes de hierro).
+- **Puntos de aparición:** `player_start` (el Lobby, junto a la entrada) y `checkpoint` (el Lab hall; aún no lo
+  usa nada).
+
 ## Cómo sigue el mod a los jugadores
 
 ```
@@ -222,7 +245,9 @@ Los niveles los genera `tools/map/map_generator.py` (ver
 [Herramientas Python](tools.md)). Escribe:
 
 - **`every_tunnel_level1_mod/`**, el datapack que usa el mod:
-  - `data/every_tunnel/levels/level_1.json`, `level_2.json` y `level_3.json`;
+  - `data/every_tunnel/levels/level_1.json` a `level_5.json`;
+  - `level4_begin` y `level4_step_<n>`, `level5_begin` y `level5_step_<n>`: los niveles 4 y 5, construidos
+    en juego por pasos pequeños (`LoungeHooks`, `LabHooks`);
   - `data/garage/functions/build.mcfunction`: fuerza la carga del área de los niveles 1 y 2 y programa
     `build_wait`, que pide otra comprobación a los 5 ticks y, cuando todas las esquinas
     están cargadas, ejecuta `build_go`: cancela esa comprobación, ejecuta `build_now` y libera

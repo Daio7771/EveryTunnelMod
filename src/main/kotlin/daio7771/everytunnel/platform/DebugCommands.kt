@@ -43,6 +43,7 @@ import net.minecraft.util.Identifier
  *   where things are; `fill` does all but the last step (see [BoxHooks], [BookHooks]).
  * - `/everytunnel loungeready`: run by the map's `garage:level4_go` when Level 4's chunks are
  *   loaded: its build goes on ([LoungeHooks]).
+ * - `/everytunnel labready`: the same for Level 5, by `garage:level5_go` ([LabHooks]).
  * - `/everytunnel rebuilt`: run by the map's `garage:build` after rebuilding the levels:
  *   puts the loot back ([NewGame.levelsRebuilt]).
  * - `/everytunnel film set|walk|back`: for filming the Cinema's film ([FilmSetHooks]): builds its set and
@@ -60,6 +61,7 @@ object DebugCommands {
                 .requires { it.hasPermissionLevel(2) }
                 .then(CommandManager.literal("rebuilt").executes(::rebuilt))
                 .then(CommandManager.literal("loungeready").executes(::loungeReady))
+                .then(CommandManager.literal("labready").executes(::labReady))
                 .then(CommandManager.literal("filmready").executes(::filmReady))
             if (!DevWorlds.enabled) {
                 dispatcher.register(root)
@@ -289,6 +291,13 @@ object DebugCommands {
                 return 1
             }
         }
+        if (LabHooks.notBuiltYet(level)) {
+            // Level 5 is built in play too; this takes you to its start once it stands.
+            if (LabHooks.buildFor(player)) {
+                reply(context, "Level 5 is being built: you go to its start in a few seconds.")
+                return 1
+            }
+        }
         val start = level.spawnPoints.firstOrNull { RespawnHooks.TAG in it.tags }
         val world = context.source.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension)))
         if (start == null || world == null) {
@@ -375,6 +384,11 @@ object DebugCommands {
 
     private fun loungeReady(context: CommandContext<ServerCommandSource>): Int {
         LoungeHooks.chunksReady()
+        return 1
+    }
+
+    private fun labReady(context: CommandContext<ServerCommandSource>): Int {
+        LabHooks.chunksReady()
         return 1
     }
 

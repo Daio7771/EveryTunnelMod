@@ -33,6 +33,7 @@ con un comentario KDoc que cuenta más.
 | `achievement/Achievement.kt` | Los diez logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
 | `puzzle/OrderPuzzle.kt` | Un puzle de cosas en orden: intentos, fallos, la pista |
+| `door/SlidingDoor.kt` | Una puerta de dos hojas que se meten en las paredes un cuarto de bloque cada vez: cuánto queda de cada columna (la esclusa del nivel 5) |
 | `save/LoungeSave.kt` | El nivel 4 como se dejó, en texto |
 | `wall/WallMessageState.kt` | Los disparadores de un mensaje: fijo, al acercarse, cambia al dejar de mirarlo |
 | `puzzle/BreakerCode.kt` | Las cinco palancas del nivel 4: el código, cuántas están bien |
@@ -156,6 +157,7 @@ con un comentario KDoc que cuenta más.
 | `BookHooks.kt` | El puzle de los libros del nivel 3: aparecen, se entregan en el mostrador, se abre la trampilla, depuración |
 | `CollapseHooks.kt` | El derrumbe del túnel del nivel 3: sonido, temblor, escombros, polvo, luces parpadeando; se deshace al morir o en partida nueva |
 | `LoungeHooks.kt` | Del nivel 3 al 4: la puerta a B4, borrar y construir por tandas, la puerta de Reception |
+| `LabHooks.kt` | El nivel 5 construido en juego desde el tramo oscuro del nivel 4, por pasos; las puertas de la esclusa, la de atrás y la de delante |
 | `FilmSetHooks.kt` | El escenario para rodar la película del Cinema, aparte de los niveles |
 | `FilmWalkerEntity.kt` | La figura que anda por él |
 | `LoungePuzzleHooks.kt` | Los puzles del Bar y el Cinema del nivel 4, las pistas y las piezas de la tarjeta maestra |
@@ -164,6 +166,7 @@ con un comentario KDoc que cuenta más.
 | `DartEntity.kt` | Un dardo lanzado, sobre la flecha de vanilla; nunca se guarda |
 | `LoungeClosingHooks.kt` | El cierre del nivel 4: el apagón, las luces de emergencia, la puerta grande |
 | `LoungeClosingBlocks.kt` | La puerta grande, el lector de la Calm room, la luz de emergencia |
+| `LabBlocks.kt` | La puerta de la esclusa del nivel 5: una columna de una hoja, cuánto de ella cruza el hueco |
 | `BreakerHooks.kt` | La sala de mantenimiento del nivel 4: palancas, botón, contador, corriente del lector |
 | `SafeHooks.kt` | Las cajas fuertes de las Suites: combinaciones, bloque, resultado del cliente |
 | `ContinueGame.kt` | La partida guardada: puntos de control, CONTINUE, recuperar el nivel 4 |

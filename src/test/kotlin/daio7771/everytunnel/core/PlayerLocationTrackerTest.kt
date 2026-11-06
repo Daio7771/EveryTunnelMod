@@ -37,6 +37,22 @@ class PlayerLocationTrackerTest {
     }
 
     @Test
+    fun `going from one box of a zone to another is no change`() {
+        val level = LevelParser.parse(
+            "level_1",
+            """{ "order": 1, "zones": [
+                 { "id": "ring", "from": [0, 0, 0], "to": [9, 3, 1] },
+                 { "id": "ring", "from": [0, 0, 2], "to": [1, 3, 9] } ] }""",
+        ).level!!
+        LevelManager.replaceAll(listOf(level))
+        val enter = PlayerLocationTracker.update(player, overworld, 5.5, 1.0, 0.5)!!
+        assertEquals(setOf(ZoneKey("level_1", "ring")), enter.enteredZones)
+        assertNull(PlayerLocationTracker.update(player, overworld, 0.5, 1.0, 5.5), "the other box of the same zone")
+        val out = PlayerLocationTracker.update(player, overworld, 5.5, 1.0, 5.5)!!
+        assertEquals(setOf(ZoneKey("level_1", "ring")), out.exitedZones)
+    }
+
+    @Test
     fun `entering, moving inside and leaving levels and overlapping zones`() {
         val enter = PlayerLocationTracker.update(player, overworld, 5.0, 1.0, 5.0)!!
         assertTrue(enter.levelChanged)

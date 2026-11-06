@@ -95,6 +95,10 @@ object ModBlocks {
     val SECURITY_MONITOR: Block = register("security_monitor", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 6 }.emissiveLighting { _, _, _ -> true }, listOf(box(0, 0, 3, 16, 16, 16))))
     val BIG_DOOR: Block = register("big_door", BigDoorBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
 
+    // Level 5.
+    /** The airlock's sliding doors, a column of a leaf each; LabHooks slides them. */
+    val AIRLOCK_DOOR: Block = register("airlock_door", AirlockDoorBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
+
     // The darts (DartHooks).
     val DARTBOARD: Block = register("dartboard", DartboardBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).luminance { if (it.get(DartboardBlock.HINT) > 0) 7 else 0 }))
     val DART_TRAY: Block = register("dart_tray", DartTrayBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision()))

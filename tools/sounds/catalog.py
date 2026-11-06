@@ -1377,6 +1377,29 @@ def big_door_slam(rng, variant):
     return y + _noise(n, rng, 60.0, 800.0) * envelope(n, [(0.0, 0.0), (0.01, 0.9), (0.3, 0.2), (1.4, 0.0)])
 
 
+def airlock_close(rng, variant):
+    """Level 5's airlock, the door behind: a pneumatic hiss as its leaves slide shut over a second, then
+    their seal thumping home."""
+    n = samples(1.9)
+    hiss = _noise(n, rng, 2500.0, 9000.0) * envelope(n, [(0.0, 0.0), (0.03, 0.8), (0.9, 0.5), (1.2, 0.0)])
+    slide = _noise(n, rng, 120.0, 900.0) * (0.6 + 0.4 * smooth_random(n, 10.0, rng)) * envelope(n, [(0.0, 0.0), (0.1, 0.4), (1.1, 0.4), (1.2, 0.0)])
+    thump = knock(n, rng, 1.2, rng.uniform(70, 90), [1.0, 2.3, 3.7], [1.0, 0.5, 0.25], [0.25, 0.12, 0.06], click=0.6, click_hi=2000.0)
+    return hiss * 0.6 + slide * 0.5 + thump
+
+
+def airlock_open(rng, variant):
+    """Level 5's airlock, the way in: the seal letting go with a long sigh of air, then a motor sliding the
+    leaves apart for three seconds, and a soft stop."""
+    n = samples(4.0)
+    release = knock(n, rng, 0.02, rng.uniform(110, 130), [1.0, 2.1], [0.8, 0.3], [0.15, 0.08], click=0.5, click_hi=3000.0)
+    sigh = _noise(n, rng, 1800.0, 7000.0) * envelope(n, [(0.0, 0.0), (0.05, 0.9), (0.6, 0.6), (1.6, 0.15), (3.4, 0.0)])
+    f = 62.0 + 6.0 * smooth_random(n, 2.0, rng)
+    motor = glide_tone(f, harmonics=(1.0, 0.6, 0.4, 0.2)) * envelope(n, [(0.0, 0.0), (0.3, 0.0), (0.6, 0.4), (3.4, 0.4), (3.6, 0.0)])
+    rail = _noise(n, rng, 250.0, 1600.0) * (0.5 + 0.5 * smooth_random(n, 12.0, rng)) * envelope(n, [(0.0, 0.0), (0.4, 0.0), (0.8, 0.25), (3.4, 0.2), (3.6, 0.0)])
+    stop = knock(n, rng, 3.55, rng.uniform(80, 95), [1.0, 2.2], [0.6, 0.3], [0.2, 0.1], click=0.4, click_hi=2000.0)
+    return release + sigh * 0.5 + motor + rail + stop
+
+
 def safe_tick(rng, variant):
     """A safe's dial passing a number: a tiny dry tick, high and short."""
     n = samples(0.05)
@@ -1582,6 +1605,8 @@ SOUNDS = [
     Sound("event.lounge.blackout", "Level progress", "Taking the Master Key: every lamp at once", "mono", False, 1, lounge_blackout, -1.0, attenuation=48),
     Sound("block.big_door.open", "Level progress", "The big door opening (lock, motor, rail, stop)", "mono", False, 1, big_door_open, -2.0, attenuation=40),
     Sound("block.big_door.slam", "Level progress", "The big door slamming behind the player", "mono", False, 1, big_door_slam, -1.0, attenuation=48),
+    Sound("block.airlock.close", "Level progress", "Level 5's airlock: the door behind shuts with a hiss of air", "mono", False, 1, airlock_close, -3.0, attenuation=24),
+    Sound("block.airlock.open", "Level progress", "Level 5's airlock: the way in opens slowly, air sighing out", "mono", False, 1, airlock_open, -3.0, attenuation=24),
     Sound("block.safe.tick", "Level progress", "A safe's dial passing a number: the soft tick", "mono", False, 3, safe_tick, -18.0),
     Sound("block.safe.click", "Level progress", "A safe's dial on the right number: a low clack under the tick", "mono", False, 2, safe_click, -6.0),
     Sound("block.safe.open", "Level progress", "A safe giving way (bolts, hinge)", "mono", False, 1, safe_open, -4.0),

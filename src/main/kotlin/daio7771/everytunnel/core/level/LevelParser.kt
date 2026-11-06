@@ -45,6 +45,10 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  * optional; `intro.seconds` defaults to 25. `order` and at least one valid zone are required. A broken zone, spawn
  * point or random sound is skipped with a problem; the level is rejected only when
  * it cannot be used at all.
+ *
+ * A zone id given more than once makes one zone of several boxes (a ring of corridors, say): a player
+ * in any of them is in that zone, and going from one box to another is no move at all. Each box keeps
+ * its own tags, so give them the same ones. Spawn point ids stay unique.
  */
 object LevelParser {
 
@@ -227,7 +231,6 @@ object LevelParser {
             entry.reportUnknownKeys()
             when {
                 from == null || to == null -> problems += "${entry.pathOf("id")} \"$id\": zone skipped"
-                zones.any { it.id == id } -> problems += "${entry.pathOf("id")}: duplicate zone id \"$id\", zone skipped"
                 else -> zones += Zone(id, BlockBox.ofCorners(from[0], from[1], from[2], to[0], to[1], to[2]), tags, ambience)
             }
         }

@@ -34,12 +34,17 @@ import java.nio.file.Path
  * place. Taking the Master Key is undone: the lights come back and the key is back on its table, the big door
  * shut, so that moment can be lived again. Levels 1 to 3 start over from their start, as they do on dying.
  *
+ * Level 5 starts over from its start too, but it does not stand when the world opens: on CONTINUE it is built
+ * behind the loading screen ([LabHooks.beginAgain]) while the player waits in Level 4's diploma corridor, which
+ * always stands.
+ *
  * Seeing the credits ([finished]) erases the saved game. Achievements are kept apart and stay.
  */
 object ContinueGame {
 
     const val MARKER = "every_tunnel_continue"
     private const val LEVEL_4 = "level_4"
+    private const val LEVEL_5 = "level_5"
 
     /** The next opening of the world continues the saved game. Set by the main menu. */
     @Volatile
@@ -47,11 +52,14 @@ object ContinueGame {
 
     private var server: MinecraftServer? = null
 
-    /** The player waiting behind the loading screen for Level 4 to stand again, or null. */
+    /** The player waiting behind the loading screen for a level built in play to stand again, or null. */
     private var waiting: ServerPlayerEntity? = null
 
-    /** Level 4 is being put back: the loading screen waits. */
-    val waitingForLounge: Boolean
+    /** Which level [waiting] waits for. */
+    private var waitingFor: String? = null
+
+    /** Level 4 or Level 5 is being put back: the loading screen waits. */
+    val waitingForBuild: Boolean
         get() = waiting != null
 
     fun register() {
@@ -59,6 +67,7 @@ object ContinueGame {
         ServerLifecycleEvents.SERVER_STOPPED.register {
             server = null
             waiting = null
+            waitingFor = null
             requested = false
         }
         LevelTriggers.register { change ->
@@ -133,7 +142,15 @@ object ContinueGame {
         if (level.id == LEVEL_4) {
             LoungeHooks.toCorridor(player)
             waiting = player
+            waitingFor = LEVEL_4
             if (!LoungeHooks.beginAgain(server)) loungeBuilt(server)
+            return true
+        }
+        if (level.id == LEVEL_5) {
+            LoungeHooks.toCorridor(player)
+            waiting = player
+            waitingFor = LEVEL_5
+            if (!LabHooks.beginAgain(server)) labBuilt(server)
             return true
         }
         progress.restoreInventory(player)
@@ -145,8 +162,10 @@ object ContinueGame {
 
     /** Level 4 stands again ([LoungeHooks]). */
     fun loungeBuilt(server: MinecraftServer) {
+        if (waitingFor != LEVEL_4) return
         val player = waiting ?: return
         waiting = null
+        waitingFor = null
         val level = LevelManager.get(LEVEL_4) ?: return
         val world = worldOf(server, level) ?: return
         val save = LoungeSave.fromText(ProgressService.get().lounge(player))
@@ -160,6 +179,18 @@ object ContinueGame {
         LoungeClosingHooks.undoKey(player)
         toStart(player, level)
         EveryTunnel.LOGGER.info("{}: Level 4 is back as it was", player.name.string)
+    }
+
+    /** Level 5 stands again ([LabHooks]): the player goes to its start with what they carried then. */
+    fun labBuilt(server: MinecraftServer) {
+        if (waitingFor != LEVEL_5) return
+        val player = waiting ?: return
+        waiting = null
+        waitingFor = null
+        val level = LevelManager.get(LEVEL_5) ?: return
+        ProgressService.get().restoreInventory(player)
+        toStart(player, level)
+        EveryTunnel.LOGGER.info("{}: Level 5 stands again", player.name.string)
     }
 
     private fun writeLounge(player: ServerPlayerEntity) {
