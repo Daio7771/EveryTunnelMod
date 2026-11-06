@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/loot_detector"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/loot_detector",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/loot_detector",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/loot_detector",
+      "y": 270
+    }
+  }
+}

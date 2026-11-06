@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/loot_wrench"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/loot_wrench",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/loot_wrench",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/loot_wrench",
+      "y": 270
+    }
+  }
+}

@@ -40,6 +40,9 @@ import net.minecraft.world.World
  *
  * - Darts ([DartHooks]): three from the Game room's tray; right-click throws one straight away.
  *
+ * - Level 5's wrench ([WrenchItem]), a heavy weapon that never wears out, and radiation detector: carried
+ *   anywhere in the inventory, it notices the Distortion Cloud (`client.effects.DetectorEffect`).
+ *
  * - Keycard: the night guard's security card. Lost in Level 2; the exit's card reader
  *   ([CardReaderBlock]) only opens for a player carrying it.
  *
@@ -81,6 +84,9 @@ object ModItems {
     @JvmField
     val DART: Item = DartItem(Item.Settings().maxCount(DartHooks.DART_COUNT))
 
+    val WRENCH: Item = WrenchItem(Item.Settings().maxCount(1))
+    val DETECTOR: Item = Item(Item.Settings().maxCount(1))
+
     fun register() {
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "dart"), DART)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "battery"), BATTERY)
@@ -89,6 +95,8 @@ object ModItems {
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_plate"), FOOD_PLATE)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_popcorn"), FOOD_POPCORN)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_snack"), FOOD_SNACK)
+        Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "wrench"), WRENCH)
+        Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "detector"), DETECTOR)
         val puzzleItems = RECORD_IDS.zip(RECORDS) + REEL_IDS.zip(REELS) + listOf(
             "master_card_nw" to CARD_NW, "master_card_ne" to CARD_NE, "master_card_sw" to CARD_SW, "master_card_se" to CARD_SE,
             "master_card" to MASTER_CARD, "master_key" to MASTER_KEY,
@@ -102,6 +110,8 @@ object ModItems {
             entries.add(FOOD_POPCORN)
             entries.add(FOOD_SNACK)
             entries.add(DART)
+            entries.add(WRENCH)
+            entries.add(DETECTOR)
             for ((_, item) in puzzleItems) entries.add(item)
         }
     }

@@ -41,6 +41,7 @@
   "item.every_tunnel.keycard": "Keycard",
   "item.every_tunnel.keycard.tooltip": "Your security keycard. Opens the exit's card reader",
   "message.every_tunnel.keycard_found": "Your keycard",
+  "message.every_tunnel.south_route_open": "The south route is open.",
   "message.every_tunnel.needs_keycard": "It needs a keycard",
   "screen.every_tunnel.end.title": "End of demo",
   "screen.every_tunnel.end.game": "Every Tunnel",
@@ -258,6 +259,8 @@
   "wall.every_tunnel.stay": "STAY",
   "item.every_tunnel.master_card": "Master Card",
   "item.every_tunnel.master_key": "Master Key",
+  "item.every_tunnel.wrench": "Wrench",
+  "item.every_tunnel.detector": "Radiation Detector",
   "item.every_tunnel.master_card_nw": "Master Card: top left",
   "item.every_tunnel.master_card_ne": "Master Card: top right",
   "item.every_tunnel.master_card_sw": "Master Card: bottom left",
@@ -294,5 +297,7 @@
   "block.every_tunnel.suite_safe": "Safe",
   "block.every_tunnel.ceiling_speaker": "Ceiling Speaker",
   "block.every_tunnel.wall_message": "Wall Message",
-  "block.every_tunnel.airlock_door": "Airlock Door"
+  "block.every_tunnel.airlock_door": "Airlock Door",
+  "block.every_tunnel.loot_wrench": "Wrench (Loot)",
+  "block.every_tunnel.loot_detector": "Radiation Detector (Loot)"
 }

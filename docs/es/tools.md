@@ -28,7 +28,7 @@ git).
 | `tools/entity/pale_man.py` | Geometría, animaciones, textura y máscara de brillo del Pale man, modelo del huevo | el Pale man |
 | `tools/entity/observer.py` | Geometría, animaciones y textura del Observer, modelo del huevo | el Observer |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (la skin del uniforme) | el uniforme |
-| `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png` | los iconos del HUD |
+| `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png` | los iconos del HUD, el detector del nivel 5 |
 | `tools/gui/logo.py` | `logo.png` | el logo |
 | `tools/gui/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | el foco sin shaders |
 | `tools/gui/locker_view.py` | `locker_view.png` | la vista desde dentro de una taquilla |

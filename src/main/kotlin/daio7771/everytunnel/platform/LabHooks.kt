@@ -8,8 +8,6 @@ import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
-import net.minecraft.block.Blocks
-import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.MinecraftServer
@@ -17,9 +15,6 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
-import net.minecraft.util.math.BlockPos
-import net.minecraft.util.math.Box
-import net.minecraft.util.math.Direction
 import java.util.UUID
 
 /**
@@ -34,7 +29,7 @@ import java.util.UUID
  * - **The airlock** (a zone tagged [AIRLOCK_TAG]): walking in slides the door behind shut (the zone tagged
  *   [REAR_TAG]) with a hiss, never on someone standing in it; stepping back out before it is shut opens it
  *   again. Once the level stands, after a moment in the dark, the door ahead (tagged [FRONT_TAG], in the
- *   Lobby's wall) slides open slowly onto the lit Lobby. Each door is two leaves of [AirlockDoorBlock]
+ *   Lobby's wall) slides open slowly onto the lit Lobby, and the level's title shows. Each door is two leaves of [AirlockDoorBlock]
  *   meeting in the middle, moved a quarter of a block a step ([SlidingDoor]).
  *   Then the level's loot goes out ([LootSpawner]).
  *
@@ -164,6 +159,7 @@ object LabHooks {
     fun levelsRebuilt() {
         phase = Phase.NOT_STARTED
         airlock = Airlock.WAITING
+        LabDoorHooks.reset()
     }
 
     /** A new game in the same world: the next walk down Level 4's dark stretch builds it again. */
@@ -171,6 +167,7 @@ object LabHooks {
         if (phase == Phase.WAITING_FOR_CHUNKS || phase == Phase.BUILDING) stale = true else phase = Phase.NOT_STARTED
         sendToStart.clear()
         airlock = Airlock.WAITING
+        LabDoorHooks.reset()
     }
 
     /** [level] is the one built in play, and it does not stand yet. */
@@ -182,9 +179,9 @@ object LabHooks {
         // Someone who came another way (a teleport) still gets a level to open onto.
         if (phase == Phase.NOT_STARTED) begin(server)
         airlock = Airlock.CLOSING
-        slide = doorBox(REAR_TAG)?.let { (_, box) -> SlidingDoor.steps(columns(box)) } ?: return
+        slide = doorBox(REAR_TAG)?.let { (_, box) -> SlidingDoors.steps(box) } ?: return
         airlockTick = 0
-        doorBox(REAR_TAG)?.let { (world, box) -> world.playSound(null, centre(box), ModSounds.AIRLOCK_CLOSE, SoundCategory.BLOCKS, 1.5f, 1f) }
+        doorBox(REAR_TAG)?.let { (world, box) -> world.playSound(null, SlidingDoors.centre(box), ModSounds.AIRLOCK_CLOSE, SoundCategory.BLOCKS, 1.5f, 1f) }
     }
 
     private fun tickAirlock(server: MinecraftServer) {
@@ -193,18 +190,18 @@ object LabHooks {
             Airlock.CLOSING -> {
                 if (airlockTick % REAR_STEP_TICKS != 0) return
                 val (world, box) = doorBox(REAR_TAG) ?: return
-                val inside = doorBox(AIRLOCK_TAG)?.let { (_, room) -> playersIn(world, room) } ?: false
+                val inside = doorBox(AIRLOCK_TAG)?.let { (_, room) -> SlidingDoors.playersIn(world, room) } ?: false
                 if (!inside) {
                     // Back out before it shut: it opens again, and walking in starts over.
                     slide++
-                    setDoor(world, box, slide)
-                    if (slide >= SlidingDoor.steps(columns(box))) airlock = Airlock.WAITING
+                    SlidingDoors.set(world, box, slide)
+                    if (slide >= SlidingDoors.steps(box)) airlock = Airlock.WAITING
                     return
                 }
                 // Never shut on someone: the leaves wait until the doorway is clear.
-                if (playersIn(world, box)) return
+                if (SlidingDoors.playersIn(world, box)) return
                 slide--
-                setDoor(world, box, slide)
+                SlidingDoors.set(world, box, slide)
                 if (slide == 0) {
                     airlock = Airlock.SHUT
                     airlockTick = 0
@@ -216,41 +213,22 @@ object LabHooks {
                 airlock = Airlock.OPENING
                 slide = 0
                 airlockTick = 0
-                world.playSound(null, centre(box), ModSounds.AIRLOCK_OPEN, SoundCategory.BLOCKS, 1.5f, 1f)
+                world.playSound(null, SlidingDoors.centre(box), ModSounds.AIRLOCK_OPEN, SoundCategory.BLOCKS, 1.5f, 1f)
+                // The level's title comes with the light (its entry is `manual`).
+                val level = LevelManager.get(LEVEL_ID) ?: return
+                val room = doorBox(AIRLOCK_TAG)?.second ?: return
+                for (player in world.getEntitiesByClass(ServerPlayerEntity::class.java, SlidingDoors.toBox(room)) { !it.isSpectator }) {
+                    LevelEntryHooks.announce(player, level)
+                }
             }
             Airlock.OPENING -> {
                 if (airlockTick % FRONT_STEP_TICKS != 0) return
                 val (world, box) = doorBox(FRONT_TAG) ?: return
                 slide++
-                setDoor(world, box, slide)
-                if (slide >= SlidingDoor.steps(columns(box))) airlock = Airlock.OPEN
+                SlidingDoors.set(world, box, slide)
+                if (slide >= SlidingDoors.steps(box)) airlock = Airlock.OPEN
             }
             Airlock.WAITING, Airlock.OPEN -> Unit
-        }
-    }
-
-    /**
-     * Sets a door [open] quarters open. Its columns run along the world axis of [box]: the lower half's leaf
-     * slides towards the lower coordinates, the other towards the higher.
-     */
-    private fun setDoor(world: ServerWorld, box: BlockBox, open: Int) {
-        val alongX = box.maxX > box.minX
-        val first = if (alongX) box.minX else box.minZ
-        val count = columns(box)
-        val widths = SlidingDoor.widths(count, open)
-        for (i in 0 until count) {
-            val width = widths[i]
-            val low = i < count / 2
-            val facing = if (alongX) (if (low) Direction.WEST else Direction.EAST) else (if (low) Direction.NORTH else Direction.SOUTH)
-            val state = if (width == 0) {
-                Blocks.AIR.defaultState
-            } else {
-                ModBlocks.AIRLOCK_DOOR.defaultState.with(AirlockDoorBlock.FACING, facing).with(AirlockDoorBlock.WIDTH, width)
-            }
-            for (y in box.minY..box.maxY) {
-                val pos = if (alongX) BlockPos(first + i, y, box.minZ) else BlockPos(box.minX, y, first + i)
-                world.setBlockState(pos, state)
-            }
         }
     }
 
@@ -261,16 +239,6 @@ object LabHooks {
         val world = worldOf(server, level) ?: return null
         return world to zone.box
     }
-
-    private fun columns(box: BlockBox): Int = maxOf(box.maxX - box.minX, box.maxZ - box.minZ) + 1
-
-    private fun playersIn(world: ServerWorld, box: BlockBox): Boolean =
-        world.getEntitiesByClass(PlayerEntity::class.java, toBox(box)) { !it.isSpectator }.isNotEmpty()
-
-    private fun toBox(box: BlockBox) =
-        Box(box.minX.toDouble(), box.minY.toDouble(), box.minZ.toDouble(), box.maxX + 1.0, box.maxY + 1.0, box.maxZ + 1.0)
-
-    private fun centre(box: BlockBox) = BlockPos((box.minX + box.maxX) / 2, box.minY + 1, (box.minZ + box.maxZ) / 2)
 
     // --- helpers -----------------------------------------------------------------------
 

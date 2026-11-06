@@ -100,6 +100,8 @@ data class LevelEntry(
     val subtitle: String,
     /** Sound event id, e.g. `every_tunnel:event.level_transition`, or null for none. */
     val sound: String?,
+    /** The title and sound wait for the level's own code to show them (Level 5's airlock), not the walk in. */
+    val manual: Boolean = false,
 )
 
 /**

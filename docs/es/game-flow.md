@@ -407,18 +407,28 @@ la construcción del nivel 5, en juego (`platform.LabHooks`), en un espacio prop
   `lab_airlock`, `lab_airlock_rear`, `lab_welcome`): al entrar, la puerta de atrás se cierra deslizándose con
   un siseo (`block.airlock.close`), nunca encima de alguien que esté en el hueco, y se vuelve a abrir si el
   jugador sale antes de que se cierre. Cuando el nivel está en pie, tras un momento a oscuras, la puerta de
-  delante, en la pared del Lobby, se abre deslizándose en unos 3 s (`block.airlock.open`) y aparece el Lobby,
-  blanco e iluminado. Cada puerta son dos hojas de `AirlockDoorBlock` que se mueven un cuarto de bloque por
-  paso (`core.door.SlidingDoor`).
+  delante, en la pared del Lobby, se abre deslizándose en unos 3 s (`block.airlock.open`), aparece el Lobby,
+  blanco e iluminado, y sale el título "Level 5" (la `entry` del nivel es `manual`: la muestra `LabHooks` en ese
+  momento). Cada puerta son dos hojas de `AirlockDoorBlock` que se mueven un cuarto de bloque por paso
+  (`core.door.SlidingDoor`, `platform.SlidingDoors`).
 
 De momento el nivel 5 son sus dos capas de arriba, solo la estructura: un laboratorio limpio de azulejo
 blanco con una franja de azulejo verde pálido, vinilo gris, paneles blancos en el techo y todos los
 fluorescentes encendidos. Capa 1: el Lobby, un anillo de pasillos con el Workshop, la sala de espera y las
 taquillas, y una puerta de acero (cerrada) a las escaleras. Capa 2, 10 bloques más abajo: el pasillo de los
 sujetos con las salas S-1 a S-4, el Lab hall, un bucle al norte por la Office, un bucle al sur por Storage
-hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla. Tres puertas de acero están
-cerradas (escaleras, ruta sur, atajo): de momento nada las abre. Sus zonas están en
-[Niveles](levels.md#nivel-5).
+hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla. Sus zonas están en
+[Niveles](levels.md#nivel-5). Lo que ya funciona:
+
+- **La llave inglesa y el detector** están en el Workshop (dónde, de momento: el contenido del nivel los colocará).
+  Ver [Sistemas del jugador](player.md#herramientas-del-nivel-5).
+- **Tres puertas bloqueadas** se abren deslizándose como las de la esclusa, para siempre (`platform.LabDoorHooks`):
+  la de las escaleras con una palanca en el anillo, la del atajo con una palanca en la sala de químicos (las palancas
+  del Maintenance del nivel 4; dónde están es provisional), y la de la ruta sur al salir de la Office, esté donde
+  esté el jugador: se oye a lo lejos un cerrojo que se suelta (`event.lab.unlock`) y sale "The south route is open."
+- **El checkpoint del Lab hall:** entrar en él lo hace checkpoint, en silencio (`ContinueGame`, una zona y un punto
+  de aparición con la etiqueta `restart_point`). Morir ahí o después reinicia en el Lab hall con lo que lleva el
+  jugador; CONTINUE le deja ahí con lo que llevaba al llegar.
 
 La reconstrucción del mapa al abrir el mundo no toca el nivel 5: la entrada se va con el nivel 4, y nadie
 puede llegar a lo que queda en pie hasta la siguiente construcción. Una partida continuada en el nivel 5
@@ -446,7 +456,8 @@ sigue vivo:
 1. Suena `event.death` y la pantalla funde a negro (`screen_fade`, 1,5 s). El jugador no
    puede moverse y nada le hace daño.
 2. A oscuras se le lleva al inicio del último nivel en el que estuvo (su primer punto con la
-   etiqueta `player`), con la vida y los recursos llenos. Los Pale men de ese nivel vuelven a
+   etiqueta `player`), o al punto de reinicio que alcanzó en él (el Lab hall del nivel 5), con la vida y los
+   recursos llenos. Los Pale men de ese nivel vuelven a
    sus puntos de aparición y empiezan de cero.
 3. La pantalla vuelve con un fundido.
 

@@ -29,7 +29,8 @@ import java.util.UUID
 /**
  * Walking from one level into the next (a higher `order`), as set by the level's `entry`:
  *
- * - The level's title and subtitle on screen, and its sound in the player's head.
+ * - The level's title and subtitle on screen, and its sound in the player's head; a `manual` entry
+ *   leaves them to the level's own code ([announce]: Level 5's airlock, [LabHooks]).
  * - Every zone of the new level tagged [SHUTTER_TAG] closes behind the player: once the
  *   player is in the new level and out of the zone's opening, the empty blocks of the
  *   zone fill with [ShutterBlock] row by row from the top, with a rattle and a slam
@@ -79,7 +80,7 @@ object LevelEntryHooks {
     private fun enter(player: ServerPlayerEntity, level: LevelDefinition) {
         if (level.entry == null) return
         EveryTunnel.LOGGER.info("{} walked into {}", player.name.string, level.id)
-        announce(player, level)
+        if (!level.entry.manual) announce(player, level)
         AchievementHooks.levelEntered(player, level.id)
         for (zone in level.zones) {
             if (SHUTTER_TAG in zone.tags) pending += Pending(player.uuid, level.id, level.dimension, zone.box)

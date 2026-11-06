@@ -7,7 +7,10 @@ Run after changing anything here (from the repository root):   python3 tools/gui
 Writes src/main/resources/assets/every_tunnel/textures/gui/hud_icons.png (64x36, committed)
 and tools/gui/output/hud_icons_preview.png (git-ignored; enlarged, on a dark background).
 Also writes textures/gui/vignette.png: black, transparent in the middle and darker towards
-the edges, for the exhaustion vignette (client/hud/ExhaustionVignette.kt).
+the edges, for the exhaustion vignette (client/hud/ExhaustionVignette.kt), and
+textures/gui/detector_icons.png (39x13) for Level 5's detector (client/hud/DetectorHud.kt):
+at u=0 the radiation sign greyed out, at u=13 the same in yellow and black (drawn over the grey
+from the bottom up, as far as the reading goes), at u=26 the red warning triangle.
 
 Layout (what StatusHud expects), icons at (u, v):
 - rows: v=0 stamina (lungs), v=9 thirst (water drop), v=18 battery, v=27 health (heart)
@@ -104,6 +107,59 @@ def draw(img, u, v, mask, part, colours, alternate_outline=None):
             img.putpixel((u + x, v + y), c)
 
 
+# The radiation sign, 13x13: three blades fanning out from a dot, on a disc lit from the top left
+# ('h' its lit rim, 'y' the disc, 's' its shaded rim, 'b' the sign, '#' outline).
+RADIATION = [
+    "....#####....",
+    "...#hhhhy#...",
+    "..#hbbbbby#..",
+    ".#hyybbbyyy#.",
+    "#hyyyyyyyyys#",
+    "#hyyyybyyyys#",
+    "#hbbybbbybbs#",
+    "#ybbbybybbbs#",
+    "#ybbbyyybbbs#",
+    ".#ybbyyybbs#.",
+    "..#yyyyyss#..",
+    "...#sssss#...",
+    "....#####....",
+]
+RADIATION_GREY = {"h": (152, 154, 160, 255), "y": (112, 114, 120, 255), "s": (82, 84, 90, 255), "b": (46, 48, 52, 255)}
+RADIATION_LIT = {"h": (255, 228, 110, 255), "y": (242, 192, 34, 255), "s": (194, 138, 18, 255), "b": (24, 22, 20, 255)}
+
+# The warning triangle, 13 wide: lit on its left, shaded on its right and foot, a white "!".
+TRIANGLE = [
+    "......#......",
+    ".....#h#.....",
+    ".....#h#.....",
+    "....#hrr#....",
+    "....#hwr#....",
+    "...#hrwrd#...",
+    "...#hrwrd#...",
+    "..#hrrwrrd#..",
+    "..#hrrrrrd#..",
+    ".#hrrrwrrrd#.",
+    ".#ddddddddd#.",
+    "#############",
+]
+TRIANGLE_COLOURS = {"h": (246, 110, 96, 255), "r": (214, 46, 40, 255), "d": (150, 24, 24, 255), "w": (250, 240, 232, 255)}
+
+
+def paint_mask(img, rows, colours, u, v):
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                img.putpixel((u + x, v + y), OUTLINE if ch == "#" else colours[ch])
+
+
+def detector_icons():
+    img = Image.new("RGBA", (39, 13), (0, 0, 0, 0))
+    paint_mask(img, RADIATION, RADIATION_GREY, 0, 0)
+    paint_mask(img, RADIATION, RADIATION_LIT, 13, 0)
+    paint_mask(img, TRIANGLE, TRIANGLE_COLOURS, 26, 1)
+    return img
+
+
 def vignette(size=256):
     """Black with an alpha that is 0 inside a soft oval and rises to full at the corners."""
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
@@ -118,6 +174,7 @@ def vignette(size=256):
 
 def main():
     vignette().save(TEXTURE.parent / "vignette.png")
+    detector_icons().save(TEXTURE.parent / "detector_icons.png")
     img = Image.new("RGBA", (64, 36), (0, 0, 0, 0))
     for name, v in ROWS.items():
         for alternate in (False, True):

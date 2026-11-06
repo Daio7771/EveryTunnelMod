@@ -18,6 +18,8 @@ data class GameplayConfig(
     val thirst: ThirstConfig = ThirstConfig(),
     val food: FoodConfig = FoodConfig(),
     val flashlight: FlashlightConfig = FlashlightConfig(),
+    val wrench: WrenchConfig = WrenchConfig(),
+    val detector: DetectorConfig = DetectorConfig(),
     val noise: NoiseConfig = NoiseConfig(),
     val paleMan: PaleManConfig = PaleManConfig(),
 ) {
@@ -49,6 +51,26 @@ data class FoodConfig(
     val heal: Double = 8.0,
     /** Seconds the use key is held to eat. */
     val eatSeconds: Double = 1.5,
+)
+
+/** Level 5's wrench, a heavy weapon (`platform.WrenchItem`). */
+data class WrenchConfig(
+    /** Health points a full blow takes (20 is a player's whole health). */
+    val damage: Double = 7.0,
+    /** Full blows a second: it is heavy. */
+    val attacksPerSecond: Double = 1.0,
+)
+
+/** Level 5's radiation detector: it notices the Distortion Cloud (`core.detector.Detector`). */
+data class DetectorConfig(
+    /** Blocks within which it notices one, never through a wall. */
+    val range: Double = 16.0,
+    /** Closer than this the warning triangle blinks. */
+    val dangerRange: Double = 8.0,
+    /** Seconds between beeps at the edge of its range... */
+    val slowestBeepSeconds: Double = 1.2,
+    /** ...and right next to one. */
+    val fastestBeepSeconds: Double = 0.1,
 )
 
 data class ThirstConfig(

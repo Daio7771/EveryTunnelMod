@@ -39,7 +39,9 @@ Useful vanilla commands:
 - `/function garage:build`: rebuild the map by hand.
 - `/playsound every_tunnel:<id> master @s`: try any sound.
 - `/summon every_tunnel:pale_man`, or the spawn egg in the Every Tunnel tab (dev runs).
-- `/give @s every_tunnel:<block or item>`: any mod block or item.
+- `/give @s every_tunnel:<block or item>`: any mod block or item (`wrench`, `detector`...).
+- `/summon minecraft:armor_stand`: something for Level 5's detector to notice, until the Distortion Cloud
+  exists (the type tag `every_tunnel:radiation_sources` holds the armor stand for now).
 - `/gamemode creative`: free from the world rules, to build or look around.
 
 ## The playtest log

@@ -178,21 +178,6 @@ class Lab:
             return self.p["CHECKER"]
         return self.p["STAND_INS"][role]
 
-    def door_cells(self, o):
-        """(plan x, y, z, state) of a locked opening's steel double door, shut, facing the way the player
-        comes (the plan's north or west) and hinged outward, so that its leaves part in the middle."""
-        facing = WORLD_FACING["north" if o.axis == "z" else "west"]
-        floor = self.layer_floor[o.layer]
-        cells = []
-        for i, (x, z) in enumerate(o.cells()):
-            # Facing east, the left hand is the world's north: the plan's lower x. Facing north, it is
-            # the world's west: the plan's higher z.
-            first = i < o.width // 2
-            hinge = "left" if first == (facing == "east") else "right"
-            for y, half in ((floor + 1, "lower"), (floor + 2, "upper")):
-                cells.append((x, y, z, f"{self.p['STEEL_DOOR']}[facing={facing},half={half},hinge={hinge},open=false,powered=false]"))
-        return cells
-
     def airlock_door(self, o):
         """{world position: state} of an airlock door, shut: four columns, two leaves, each column sliding
         open towards its end of the opening (the same order as LabHooks: along the world axis the opening
@@ -266,8 +251,7 @@ class Lab:
 
         for o in self.openings:
             if o.kind == "locked":
-                for x, y, z, st in self.door_cells(o):
-                    self.lab_blocks[self.at(x, y, z)] = st
+                self.lab_blocks.update(self.airlock_door(o))
             elif o.kind == "grate":
                 ew, ns = ("false", "true") if o.axis == "z" else ("true", "false")
                 floor = self.layer_floor[o.layer]
@@ -285,6 +269,9 @@ class Lab:
                     c = (x, s.floor + s.height, z)
                     self.lights.append(c)
                     self.lab_blocks[self.at(*c)] = p["LIGHT"].format(axis=axis)
+        # The levers on their walls.
+        for _, layer, x, z, facing in p["LEVERS"]:
+            self.lab_blocks[self.at(x, self.layer_floor[layer] + 2, z)] = p["LEVER"].format(facing=WORLD_FACING[facing])
         # The flight: a stair on each cell, climbing towards the plan's north.
         stairs = f"{self.state('stairs')}[facing={WORLD_FACING['north']},half=bottom,shape=straight,waterlogged=false]"
         for x, z in self.flight.cells():
@@ -315,8 +302,10 @@ class Lab:
         floors = [self.floors[(s.layer, x, z)] for x, z in s.cells()]
         return self.cells_zone(s.cells(), min(floors) + 1, max(floors) + s.height)
 
-    # Zone tags for LabHooks, by kind of space or opening.
-    TAGS = {"airlock": ["lab_airlock"], "airlock_rear": ["lab_airlock_rear"], "airlock_front": ["lab_welcome"]}
+    # Zone tags by kind of space or opening: the airlock's (LabHooks), the locked doors (LabDoorHooks), the
+    # Lab hall's restart point (ContinueGame).
+    TAGS = {"airlock": ["lab_airlock"], "airlock_rear": ["lab_airlock_rear"], "airlock_front": ["lab_welcome"],
+            "locked": ["lab_door"], "hub": ["restart_point"]}
 
     def zones(self):
         """(id, world box inclusive, tags) of Level 5's file: every space and every opening, so that
@@ -326,6 +315,19 @@ class Lab:
         for o in self.openings:
             floor = self.layer_floor[o.layer]
             out.append((o.id, self.cells_zone(o.cells(), floor + 1, floor + o.height), self.TAGS.get(o.kind, [])))
+        return out
+
+    def spawn_points(self):
+        """The level file's spawn points: the start, the Lab hall's restart point, the levers, the loot."""
+        p = self.p
+        start, start_yaw = self.point(p["PLAYER_START"])
+        check, check_yaw = self.point(p["CHECKPOINT_POINT"])
+        out = [{"id": "player_start", "pos": start, "yaw": start_yaw, "tags": ["player"]},
+               {"id": "checkpoint", "pos": check, "yaw": check_yaw, "tags": ["restart_point"]}]
+        for lid, layer, x, z, facing in p["LEVERS"]:
+            out.append({"id": lid, "pos": list(self.at(x, self.layer_floor[layer] + 2, z)), "yaw": 0, "tags": ["lab_lever"]})
+        for lid, tag, layer, x, z in p["LOOT"]:
+            out.append({"id": lid, "pos": list(self.at(x, self.layer_floor[layer] + 1, z)), "yaw": 0, "tags": [tag]})
         return out
 
     def point(self, spec):

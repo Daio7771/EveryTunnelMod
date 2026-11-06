@@ -100,13 +100,24 @@ La luz en sí se dibuja en el cliente, ver [Gráficos](graphics.md#la-linterna).
 `platform.LootSpawner` y `platform.LootBlock`:
 
 - La primera vez que un jugador entra en un nivel, se coloca un `LootBlock` en cada punto
-  de aparición con la etiqueta `battery`, `water`, `keycard`, `food_plate`, `food_popcorn` o `food_snack`. El cliente lo dibuja como el
+  de aparición con la etiqueta `battery`, `water`, `keycard`, `food_plate`, `food_popcorn`, `food_snack`, `wrench` o `detector`. El cliente lo dibuja como el
   propio objeto, tumbado (`client.render.LootRenderer`); no tiene colisión. El nivel 4, construido
   en plena partida, recibe su botín cuando está en pie.
 - **Clic derecho** lo recoge; el sitio queda vacío.
 - Cada sitio se llena una vez por mundo (`every_tunnel_loot.dat`): lo recogido sigue
   recogido tras morir o reabrir el mundo, hasta que una partida nueva lo repone todo.
 - Recoger la tarjeta además dispara la ola de apagado (`KeycardHooks.pickedUp`).
+
+## Herramientas del nivel 5
+
+- **La llave inglesa** (`platform.WrenchItem`): un arma pesada que se lleva como una espada. Un golpe completo
+  quita `wrench.damage` (7, tres corazones y medio), llega más o menos una vez por segundo
+  (`wrench.attacks_per_second`), empuja un poco y suena a metal (`item.wrench.hit`). No se desgasta nunca.
+- **El detector de radiación:** funciona desde cualquier sitio del inventario y no gasta nada. Nota la
+  Distortion Cloud más cercana a menos de `detector.range` (16) bloques, nunca a través de una pared, y pita en
+  la cabeza del jugador (`item.detector.beep`), de cada 1,2 s en el borde a cada 0,1 s pegado a ella
+  (`client.effects.DetectorEffect`, números en `core.detector.Detector`). Lo que nota es cualquier entidad de la
+  etiqueta de tipos `every_tunnel:radiation_sources`: de momento el soporte de armadura, hasta que exista la Cloud.
 
 ## HUD
 
@@ -126,10 +137,16 @@ armadura, el aire y la barra de experiencia de vanilla.
 
 Iconos: `textures/gui/hud_icons.png`, pintados por `tools/gui/hud_icons.py`.
 
+Mientras el jugador lleva el detector del nivel 5, `client.hud.DetectorHud` dibuja el símbolo de radiación a la
+derecha de las filas de la derecha, entre ellas: gris sin nada al alcance, y se llena de amarillo y negro de abajo
+arriba conforme se acerca una Cloud. A menos de `detector.danger_range` (8) parpadea rápido a su lado un triángulo
+rojo de peligro (`textures/gui/detector_icons.png`, de la misma herramienta).
+
 ## Muerte
 
 Ver [Flujo del juego](game-flow.md#muerte): sin pantalla de muerte, un fundido a negro y un
-reinicio en el inicio del nivel con los recursos llenos, conservando el inventario.
+reinicio en el inicio del nivel (o en un punto de reinicio alcanzado en él, como el Lab hall del nivel 5) con los
+recursos llenos, conservando el inventario.
 
 ## El archivo de configuración
 
@@ -175,6 +192,14 @@ Cada clave y su valor por defecto:
 | `beam_width_degrees` | 40 | Anchura del cono, de borde a borde (1..120) |
 | `beam_brightness` | 15 | Nivel de luz en el centro del haz (0..15) |
 | `glow_brightness` | 5 | Brillo tenue alrededor del jugador (0..15) |
+| **`wrench`** | | El arma del nivel 5 |
+| `damage` | 7 | Vida que quita un golpe completo (un jugador tiene 20) |
+| `attacks_per_second` | 1 | Golpes completos por segundo |
+| **`detector`** | | El detector de radiación del nivel 5 |
+| `range` | 16 | Bloques a los que nota la Cloud (nunca a través de una pared) |
+| `danger_range` | 8 | Más cerca de esto parpadea el triángulo de peligro |
+| `slowest_beep_seconds` | 1.2 | Entre pitidos en el borde de su alcance... |
+| `fastest_beep_seconds` | 0.1 | ...y pegado a la Cloud |
 | **`noise`** | | Radio en bloques; 0 lo hace silencioso |
 | `sneak_radius` | 2 | Por paso, agachado |
 | `walk_radius` | 6 | Por paso, andando |

@@ -515,6 +515,77 @@ def master_key_tex(rng):
     return img
 
 
+def item_from_mask(rows, colours):
+    """An item drawn pixel by pixel: one letter per pixel ('.' transparent), its colour from `colours`."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                img.putpixel((x, y), (*colours[ch], 255))
+    return img
+
+
+ITEM_OUTLINE = (22, 22, 26)
+
+# Level 5's wrench: an adjustable one, heavy. The fixed jaw on top, the movable one under the open mouth with its
+# worm screw ('k'), a red rubber grip; held at the grip, the head up to the right like vanilla's tools.
+WRENCH = [
+    "........####....",
+    ".......#hhhm#...",
+    "......#hmmml#...",
+    "......#hml##....",
+    "......#hml#..##.",
+    "......#hmh#.#hl#",
+    ".......#hmh#hml#",
+    "......#hmmmhmml#",
+    ".....#hmkkmmml#.",
+    "....#hml##lll#..",
+    "...#hml#.####...",
+    "..#Rrd#.........",
+    ".#Rrd#..........",
+    "#Rrd#...........",
+    "#Rd#............",
+    ".##.............",
+]
+WRENCH_COLOURS = {"#": ITEM_OUTLINE, "h": (218, 224, 232), "m": (160, 166, 176), "l": (102, 108, 118), "k": (64, 68, 76),
+                  "R": (236, 98, 84), "r": (186, 44, 40), "d": (118, 24, 26)}
+
+# Level 5's radiation detector: a yellow Geiger counter with its carrying handle, a meter (ticks, a red end, the
+# needle), a speaker's grille and a knob, and its probe on a lead at the side.
+DETECTOR = [
+    "................",
+    "......#######...",
+    ".....#hhhhhhh#..",
+    ".....#l#####l#..",
+    ".....#l.....l#..",
+    "...############.",
+    "####YYYYYYYYYY#.",
+    "#h##Y########s#.",
+    "#g##Y#CcCcnr#s#.",
+    "#g##Y#cccncr#s#.",
+    "#g##Y#ccnccc#s#.",
+    "#g##Y########s#.",
+    "####YykkkyKKys#.",
+    ".#.#Yysssykkys#.",
+    ".###Ysssssssss#.",
+    "...############.",
+]
+DETECTOR_COLOURS = {"#": ITEM_OUTLINE, "Y": (255, 222, 96), "y": (238, 186, 36), "s": (184, 128, 18),
+                    "h": (190, 194, 200), "l": (112, 116, 124), "g": (150, 154, 160),
+                    "c": (236, 232, 214), "C": (196, 190, 168), "n": (30, 30, 34), "r": (214, 50, 42),
+                    "k": (60, 62, 68), "K": (120, 124, 132)}
+
+
+def wrench_tex(rng):
+    """Item: Level 5's wrench (WRENCH)."""
+    return item_from_mask(WRENCH, WRENCH_COLOURS)
+
+
+def detector_tex(rng):
+    """Item: Level 5's radiation detector (DETECTOR)."""
+    return item_from_mask(DETECTOR, DETECTOR_COLOURS)
+
+
 def dart_tex(rng):
     """Item: a dart aimed up and to the right, as vanilla's arrow is."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
@@ -1841,7 +1912,9 @@ def build():
                                  ("loot_master_card_ne", "Master Card (Loot)", "master_card_ne"),
                                  ("loot_master_card_sw", "Master Card (Loot)", "master_card_sw"),
                                  ("loot_master_card_se", "Master Card (Loot)", "master_card_se"),
-                                 ("loot_master_key", "Master Key (Loot)", "master_key")):
+                                 ("loot_master_key", "Master Key (Loot)", "master_key"),
+                                 ("loot_wrench", "Wrench (Loot)", "wrench"),
+                                 ("loot_detector", "Radiation Detector (Loot)", "detector")):
         a.models[block_id] = {"textures": {"particle": f"{NS}:item/{item}"}}
         a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:item/{item}"})
 
@@ -2602,11 +2675,14 @@ def main():
                           ("record_still_water", lambda g: record_tex(g, (70, 110, 190))), ("record_chefs_plate", lambda g: record_tex(g, (150, 50, 60))),
                           ("reel_87", reel_tex), ("reel_94", reel_tex), ("reel_102", reel_tex), ("reel_120", reel_tex),
                           ("dart", dart_tex), ("master_card", master_card_tex), ("master_key", master_key_tex),
+                          ("wrench", wrench_tex), ("detector", detector_tex),
                           ("master_card_nw", lambda g: card_tex(g, 0, 0)), ("master_card_ne", lambda g: card_tex(g, 1, 0)),
                           ("master_card_sw", lambda g: card_tex(g, 0, 1)), ("master_card_se", lambda g: card_tex(g, 1, 1))):
         (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))
+        # The wrench is held like a tool, the rest like things.
         write_json(ASSETS / "models" / "item" / f"{item}.json",
-                   {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{item}"}})
+                   {"parent": "minecraft:item/handheld" if item == "wrench" else "minecraft:item/generated",
+                    "textures": {"layer0": f"{NS}:item/{item}"}})
 
     entity_dir = ASSETS / "textures" / "entity"
     entity_dir.mkdir(parents=True, exist_ok=True)

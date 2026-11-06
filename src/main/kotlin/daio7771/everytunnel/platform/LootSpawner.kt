@@ -20,7 +20,7 @@ import net.minecraft.world.PersistentState
 
 /**
  * Puts the loot of a level in place: a [LootBlock] at every spawn point tagged with a key
- * of [LOOT] (`battery`, `water`, `keycard`, the three foods), the first time a player enters that
+ * of [LOOT] (`battery`, `water`, `keycard`, the three foods, Level 5's `wrench` and `detector`...), the first time a player enters that
  * level. A level built in play ([LoungeHooks]) gets its loot once it stands.
  *
  * Each spot is filled once per world: the world remembers it
@@ -39,6 +39,8 @@ object LootSpawner {
         "food_snack" to { ModBlocks.LOOT_FOOD_SNACK },
         "master_card_sw" to { ModBlocks.LOOT_CARD_SW },
         "master_key" to { ModBlocks.LOOT_MASTER_KEY },
+        "wrench" to { ModBlocks.LOOT_WRENCH },
+        "detector" to { ModBlocks.LOOT_DETECTOR },
     )
 
     private var server: MinecraftServer? = null

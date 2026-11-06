@@ -143,6 +143,8 @@ class BreakerLeverBlock(settings: Settings) : Block(settings) {
     @Deprecated("Deprecated in Java")
     override fun onUse(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult): ActionResult {
         if (world.isClient) return ActionResult.SUCCESS
+        // Level 5 uses the same lever to open its locked doors.
+        if (LabDoorHooks.pull(player as ServerPlayerEntity, world as ServerWorld, pos, state)) return ActionResult.CONSUME
         if (!BreakerHooks.powered) {
             world.setBlockState(pos, state.cycle(ON))
             world.playSound(null, pos, ModSounds.BREAKER_LEVER, SoundCategory.BLOCKS, 0.8f, if (state.get(ON)) 0.85f else 1f)

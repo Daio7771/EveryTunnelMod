@@ -113,6 +113,7 @@ cualquier nivel.
 | `title` | Texto grande en pantalla ("Level 2"); vacío no muestra nada |
 | `subtitle` | Texto más pequeño debajo |
 | `sound` | Evento de sonido que suena en la cabeza del jugador |
+| `manual` | `true`: el título y el sonido esperan al código del propio nivel en vez de salir al entrar andando (el del nivel 5, al abrirse su esclusa) |
 
 ### Intro
 
@@ -148,6 +149,8 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `lab_airlock` | `LabHooks` | La esclusa del nivel 5: entrar cierra la puerta de atrás (`lab_airlock_rear`) y, cuando el nivel está en pie, abre la de delante |
 | `lab_airlock_rear` | `LabHooks` | La puerta de atrás de la esclusa: abierta hasta que el jugador entra |
 | `lab_welcome` | `LabHooks` | La puerta de delante de la esclusa, en la pared del Lobby: cerrada hasta que el nivel está en pie |
+| `lab_door` | `LabDoorHooks` | Una puerta corredera bloqueada del nivel 5: la abre una palanca, o salir de la Office la de la ruta sur |
+| `restart_point` | `ContinueGame` | Entrar hace checkpoint el punto de aparición del nivel con la misma etiqueta (el Lab hall del nivel 5) |
 | `exit` | (nadie aún) | Marca la salida de un nivel; reservada para sistemas futuros |
 | `valve_door` | `ValveHooks` | Las puertas que abren las válvulas cuando todas están bien; una partida nueva las cierra |
 | `observer_home` | `ObserverEntity` | La zona que patrulla el Observer y a la que vuelve (la biblioteca del nivel 3) |
@@ -164,6 +167,9 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `player` | `RespawnHooks`, `DeathHooks`, `NewGame` | El inicio del nivel: donde reinicia el jugador. Se usa el primero |
 | `pale_man` | `PaleManSpawner` | Aquí aparece un Pale man la primera vez que un jugador entra en el nivel |
 | `battery` | `LootSpawner` | Una batería en el suelo |
+| `wrench`, `detector` | `LootSpawner` | La llave inglesa y el detector de radiación del nivel 5, en el suelo |
+| `lab_lever` | `LabDoorHooks` | Una palanca del nivel 5 en ese bloque; si se llama `lever_<id de la zona de la puerta>`, abre esa puerta |
+| `restart_point` | `ContinueGame`, `DeathHooks` | Donde reinician una muerte o CONTINUE una vez se ha entrado en su zona (el Lab hall del nivel 5) |
 | `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Comida, sobre muebles |
 | `water` | `LootSpawner` | Una botella de agua |
 | `keycard` | `LootSpawner` | La tarjeta |
@@ -218,9 +224,12 @@ repite su id:
 - **Aberturas,** cada una con su zona: `entry_frame` (el marco: cruzarlo es entrar en el nivel 5),
   `airlock_rear` (con la etiqueta `lab_airlock_rear`), `welcome_door` (con la etiqueta `lab_welcome`), los huecos de puerta
   (`workshop_door`, `waiting_door`, `s1_door` a `s4_door`, `office_door_west`, `office_door_east`), las puertas
-  de acero cerradas (`stairs_door`, `south_door`, `shortcut_door`) y `hatch_grate` (barrotes de hierro).
-- **Puntos de aparición:** `player_start` (el Lobby, junto a la entrada) y `checkpoint` (el Lab hall; aún no lo
-  usa nada).
+  correderas bloqueadas (`stairs_door`, `south_door`, `shortcut_door`, con la etiqueta `lab_door`) y `hatch_grate`
+  (barrotes de hierro).
+- El Lab hall tiene la etiqueta `restart_point`.
+- **Puntos de aparición:** `player_start` (el Lobby, junto a la entrada), `checkpoint` (el Lab hall, con la
+  etiqueta `restart_point`), `lever_stairs_door` y `lever_shortcut_door` (con la etiqueta `lab_lever`), `wrench` y
+  `detector` (en el Workshop).
 
 ## Cómo sigue el mod a los jugadores
 

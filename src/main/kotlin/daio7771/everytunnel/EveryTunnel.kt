@@ -21,7 +21,9 @@ import daio7771.everytunnel.platform.LevelReloadListener
 import daio7771.everytunnel.platform.LevelTrackingHooks
 import daio7771.everytunnel.platform.LoadingHooks
 import daio7771.everytunnel.platform.LootSpawner
+import daio7771.everytunnel.platform.LabDoorHooks
 import daio7771.everytunnel.platform.LabHooks
+import daio7771.everytunnel.platform.SlidingDoors
 import daio7771.everytunnel.platform.LoungeHooks
 import daio7771.everytunnel.platform.ContinueGame
 import daio7771.everytunnel.platform.DartHooks
@@ -98,6 +100,8 @@ object EveryTunnel : ModInitializer {
         CollapseHooks.register()
         LoungeHooks.register()
         LabHooks.register()
+        LabDoorHooks.register()
+        SlidingDoors.register()
         LoungePuzzleHooks.register()
         DartHooks.register()
         ContinueGame.register()

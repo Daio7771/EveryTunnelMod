@@ -1,0 +1,99 @@
+package daio7771.everytunnel.client.effects
+
+import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.client.ClientResources
+import daio7771.everytunnel.config.ConfigManager
+import daio7771.everytunnel.core.detector.Detector
+import daio7771.everytunnel.platform.ModItems
+import daio7771.everytunnel.platform.ModSounds
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
+import net.minecraft.client.MinecraftClient
+import net.minecraft.client.network.ClientPlayerEntity
+import net.minecraft.client.sound.PositionedSoundInstance
+import net.minecraft.client.sound.SoundInstance
+import net.minecraft.client.world.ClientWorld
+import net.minecraft.entity.Entity
+import net.minecraft.entity.EntityType
+import net.minecraft.registry.RegistryKeys
+import net.minecraft.registry.tag.TagKey
+import net.minecraft.sound.SoundCategory
+import net.minecraft.util.Identifier
+import net.minecraft.util.hit.HitResult
+import net.minecraft.world.RaycastContext
+import kotlin.math.sqrt
+
+/**
+ * Level 5's radiation detector, working from anywhere in the inventory: it notices the nearest
+ * Distortion Cloud (an entity of the type tag `every_tunnel:radiation_sources`) within
+ * `detector.range` blocks, never through a wall (nothing solid between the player's eyes and it), and
+ * beeps in the player's head (`item.detector.beep`), faster as it comes nearer ([Detector]).
+ * [client.hud.DetectorHud] draws what it reads. Only while the world rules apply.
+ */
+object DetectorEffect {
+
+    private val SOURCES: TagKey<EntityType<*>> = TagKey.of(RegistryKeys.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "radiation_sources"))
+    private const val VOLUME = 0.6f
+
+    /** The player carries a detector. */
+    var carrying = false
+        private set
+
+    /** Distance to the Cloud it reads, or null for none. */
+    var distance: Double? = null
+        private set
+
+    private var untilBeep = 0
+
+    fun register() {
+        ClientTickEvents.END_CLIENT_TICK.register(::tick)
+        ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> stop() }
+    }
+
+    private fun stop() {
+        carrying = false
+        distance = null
+        untilBeep = 0
+    }
+
+    private fun tick(client: MinecraftClient) {
+        val player = client.player
+        val world = client.world
+        if (player == null || world == null || !ClientResources.current.active || player.isSpectator) return stop()
+        if (client.isPaused) return
+        carrying = (0 until player.inventory.size()).any { player.inventory.getStack(it).isOf(ModItems.DETECTOR) }
+        if (!carrying) {
+            distance = null
+            return
+        }
+        val detector = Detector(ConfigManager.gameplay.detector)
+        distance = nearest(world, player, ConfigManager.gameplay.detector.range)
+        val ticks = detector.beepTicks(detector.level(distance))
+        if (ticks == null) {
+            untilBeep = 0
+            return
+        }
+        if (--untilBeep > 0) return
+        untilBeep = ticks
+        client.soundManager.play(
+            PositionedSoundInstance(
+                ModSounds.DETECTOR_BEEP.id, SoundCategory.PLAYERS, VOLUME, 1.0f, SoundInstance.createRandom(),
+                false, 0, SoundInstance.AttenuationType.NONE, 0.0, 0.0, 0.0, true,
+            ),
+        )
+    }
+
+    /** Distance from the player's eyes to the nearest source in range with nothing solid in between. */
+    private fun nearest(world: ClientWorld, player: ClientPlayerEntity, range: Double): Double? {
+        val eyes = player.eyePos
+        return world.getEntitiesByClass(Entity::class.java, player.boundingBox.expand(range)) { it.isAlive && it.type.isIn(SOURCES) }
+            .map { it to sqrt(it.squaredDistanceTo(eyes)) }
+            .filter { (_, d) -> d <= range }
+            .sortedBy { it.second }
+            .firstOrNull { (entity, _) ->
+                val target = entity.boundingBox.center
+                world.raycast(RaycastContext(eyes, target, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, player)).type == HitResult.Type.MISS
+            }
+            ?.second
+    }
+}

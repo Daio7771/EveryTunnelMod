@@ -585,6 +585,11 @@
       "every_tunnel:event/death_2"
     ]
   },
+  "event.lab.unlock": {
+    "sounds": [
+      "every_tunnel:event/lab/unlock_1"
+    ]
+  },
   "event.level_transition": {
     "sounds": [
       "every_tunnel:event/level_transition_1"
@@ -643,6 +648,11 @@
       "every_tunnel:item/dart/throw_3"
     ]
   },
+  "item.detector.beep": {
+    "sounds": [
+      "every_tunnel:item/detector/beep_1"
+    ]
+  },
   "item.flashlight.dead": {
     "sounds": [
       "every_tunnel:item/flashlight/dead_1",
@@ -669,6 +679,22 @@
       "every_tunnel:item/flashlight/on_1",
       "every_tunnel:item/flashlight/on_2",
       "every_tunnel:item/flashlight/on_3"
+    ]
+  },
+  "item.wrench.hit": {
+    "sounds": [
+      {
+        "name": "every_tunnel:item/wrench/hit_1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "every_tunnel:item/wrench/hit_2",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "every_tunnel:item/wrench/hit_3",
+        "attenuation_distance": 16
+      }
     ]
   },
   "music.chase": {

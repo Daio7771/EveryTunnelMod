@@ -1400,6 +1400,31 @@ def airlock_open(rng, variant):
     return release + sigh * 0.5 + motor + rail + stop
 
 
+def wrench_hit(rng, variant):
+    """Level 5's wrench landing: a heavy steel tool striking, a dull thud under a short metal ring."""
+    n = samples(0.6)
+    ratios = sorted(rng.uniform(1.0, 5.5, 6))
+    ring = knock(n, rng, 0.003, rng.uniform(380, 520), ratios, [1.0 / (1 + i * 0.5) for i in range(6)],
+                 [0.12 / (1 + i * 0.3) for i in range(6)], click=0.9, click_hi=6000.0)
+    thud = knock(n, rng, 0.0, rng.uniform(70, 95), [1.0, 1.9], [1.0, 0.4], [0.06, 0.03], click=0.4, click_hi=1200.0)
+    return ring * 0.6 + thud
+
+
+def detector_beep(rng, variant):
+    """Level 5's radiation detector: one short, slightly harsh electronic beep; the game repeats it faster
+    as a Distortion Cloud comes near."""
+    n = samples(0.09)
+    return beep(n, 0.0, 1760.0, 0.06, 0.55) + beep(n, 0.0, 3520.0, 0.06, 0.12)
+
+
+def lab_unlock(rng, variant):
+    """Level 5: somewhere far off, a heavy lock lets go: a muffled bolt and the hiss of a door's seal."""
+    n = samples(1.6)
+    bolt = knock(n, rng, 0.02, rng.uniform(55, 70), [1.0, 2.1, 3.4], [1.0, 0.5, 0.2], [0.35, 0.18, 0.08], click=0.4, click_hi=900.0)
+    hiss = _noise(n, rng, 600.0, 2400.0) * envelope(n, [(0.0, 0.0), (0.15, 0.0), (0.3, 0.35), (1.3, 0.0)])
+    return bolt + hiss * 0.5
+
+
 def safe_tick(rng, variant):
     """A safe's dial passing a number: a tiny dry tick, high and short."""
     n = samples(0.05)
@@ -1607,6 +1632,9 @@ SOUNDS = [
     Sound("block.big_door.slam", "Level progress", "The big door slamming behind the player", "mono", False, 1, big_door_slam, -1.0, attenuation=48),
     Sound("block.airlock.close", "Level progress", "Level 5's airlock: the door behind shuts with a hiss of air", "mono", False, 1, airlock_close, -3.0, attenuation=24),
     Sound("block.airlock.open", "Level progress", "Level 5's airlock: the way in opens slowly, air sighing out", "mono", False, 1, airlock_open, -3.0, attenuation=24),
+    Sound("item.wrench.hit", "Level progress", "Level 5: the wrench landing a blow, metal on something", "mono", False, 3, wrench_hit, -3.0, attenuation=16),
+    Sound("item.detector.beep", "Level progress", "Level 5: the radiation detector's beep, repeated faster as the Cloud nears", "mono", False, 1, detector_beep, -6.0),
+    Sound("event.lab.unlock", "Level progress", "Level 5: a lock letting go far away (the south route opens)", "mono", False, 1, lab_unlock, -4.0),
     Sound("block.safe.tick", "Level progress", "A safe's dial passing a number: the soft tick", "mono", False, 3, safe_tick, -18.0),
     Sound("block.safe.click", "Level progress", "A safe's dial on the right number: a low clack under the tick", "mono", False, 2, safe_click, -6.0),
     Sound("block.safe.open", "Level progress", "A safe giving way (bolts, hinge)", "mono", False, 1, safe_open, -4.0),

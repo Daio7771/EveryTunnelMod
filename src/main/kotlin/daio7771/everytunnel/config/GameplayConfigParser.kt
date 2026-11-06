@@ -59,6 +59,8 @@ object GameplayConfigParser {
             thirst = thirst(fields.child("thirst"), defaults.thirst),
             food = food(fields.child("food"), defaults.food),
             flashlight = flashlight(fields.child("flashlight"), defaults.flashlight),
+            wrench = wrench(fields.child("wrench"), defaults.wrench),
+            detector = detector(fields.child("detector"), defaults.detector),
             noise = noise(fields.child("noise"), defaults.noise),
             paleMan = paleMan(fields.child("pale_man"), defaults.paleMan),
         )
@@ -78,6 +80,18 @@ object GameplayConfigParser {
     private fun food(f: JsonFields, d: FoodConfig) = FoodConfig(
         heal = f.double("heal", d.heal, min = 0.0),
         eatSeconds = f.double("eat_seconds", d.eatSeconds, min = 0.05, max = 10.0),
+    ).also { f.reportUnknownKeys() }
+
+    private fun wrench(f: JsonFields, d: WrenchConfig) = WrenchConfig(
+        damage = f.double("damage", d.damage, min = 0.0, max = 100.0),
+        attacksPerSecond = f.double("attacks_per_second", d.attacksPerSecond, min = 0.1, max = 20.0),
+    ).also { f.reportUnknownKeys() }
+
+    private fun detector(f: JsonFields, d: DetectorConfig) = DetectorConfig(
+        range = f.double("range", d.range, min = 1.0, max = 64.0),
+        dangerRange = f.double("danger_range", d.dangerRange, min = 0.0, max = 64.0),
+        slowestBeepSeconds = f.double("slowest_beep_seconds", d.slowestBeepSeconds, min = 0.05, max = 10.0),
+        fastestBeepSeconds = f.double("fastest_beep_seconds", d.fastestBeepSeconds, min = 0.05, max = 10.0),
     ).also { f.reportUnknownKeys() }
 
     private fun thirst(f: JsonFields, d: ThirstConfig) = ThirstConfig(

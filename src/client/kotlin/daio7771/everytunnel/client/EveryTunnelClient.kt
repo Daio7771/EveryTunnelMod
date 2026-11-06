@@ -7,6 +7,7 @@ import daio7771.everytunnel.client.effects.FlashlightEffect
 import daio7771.everytunnel.client.effects.CameraShake
 import daio7771.everytunnel.client.effects.FilmPlayer
 import daio7771.everytunnel.client.effects.LoungeMusic
+import daio7771.everytunnel.client.effects.DetectorEffect
 import daio7771.everytunnel.client.effects.HeartbeatEffect
 import daio7771.everytunnel.client.effects.IntroMusic
 import daio7771.everytunnel.client.effects.FluorescentHum
@@ -16,6 +17,7 @@ import daio7771.everytunnel.client.hud.ExhaustionVignette
 import daio7771.everytunnel.client.hud.FlashlightOverlay
 import daio7771.everytunnel.client.hud.LockerView
 import daio7771.everytunnel.client.hud.AchievementToast
+import daio7771.everytunnel.client.hud.DetectorHud
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.DartRenderer
 import daio7771.everytunnel.client.render.FilmWalkerRenderer
@@ -75,6 +77,7 @@ object EveryTunnelClient : ClientModInitializer {
         FlashlightEffect.register()
         BreathingEffect.register()
         HeartbeatEffect.register()
+        DetectorEffect.register()
         CameraShake.register()
         FilmPlayer.register()
         LoungeMusic.register()
@@ -86,6 +89,7 @@ object EveryTunnelClient : ClientModInitializer {
         LockerView.register() // over the beam's dark, under the HUD
         ExhaustionVignette.register() // before the HUD, so the icons stay on top
         StatusHud.register()
+        DetectorHud.register()
         ScreenFade.register() // after the HUD, so the black covers it
         EndOfDemoScreen.register()
         NoteScreen.register()

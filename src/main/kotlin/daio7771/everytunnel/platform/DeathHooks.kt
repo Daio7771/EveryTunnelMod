@@ -2,6 +2,7 @@ package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
+import daio7771.everytunnel.core.progress.Checkpoint
 import daio7771.everytunnel.systems.ResourceSystem
 import daio7771.everytunnel.world.LevelTriggers
 import daio7771.everytunnel.world.WorldRules
@@ -132,7 +133,9 @@ object DeathHooks {
 
     private fun restart(player: ServerPlayerEntity, levelId: String) {
         val level = LevelManager.get(levelId)
-        val start = startOf(levelId)
+        // A restart point reached in this level (Level 5's Lab hall) comes before its start.
+        val checkpoint = Checkpoint.parse(ProgressService.get().checkpoint(player))
+        val start = checkpoint?.takeIf { it.levelId == levelId }?.pointId?.let { level?.spawnPoint(it) } ?: startOf(levelId)
         val world = level?.let { player.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(it.dimension))) }
         if (start == null || world == null) {
             EveryTunnel.LOGGER.warn("Cannot restart {} for {}: the level or its start is gone", levelId, player.name.string)

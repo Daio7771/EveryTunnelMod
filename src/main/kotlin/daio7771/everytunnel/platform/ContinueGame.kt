@@ -3,6 +3,7 @@ package daio7771.everytunnel.platform
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.level.LevelDefinition
+import daio7771.everytunnel.core.progress.Checkpoint
 import daio7771.everytunnel.core.save.LoungeSave
 import daio7771.everytunnel.systems.ResourceSystem
 import daio7771.everytunnel.world.LevelTriggers
@@ -16,6 +17,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Identifier
 import net.minecraft.util.WorldSavePath
+import net.minecraft.util.math.BlockPos
 import net.minecraft.world.GameMode
 import java.nio.file.Files
 import java.nio.file.Path
@@ -38,11 +40,17 @@ import java.nio.file.Path
  * behind the loading screen ([LabHooks.beginAgain]) while the player waits in Level 4's diploma corridor, which
  * always stands.
  *
+ * A level may also have a restart point inside it (a zone tagged [RESTART_TAG], the spawn point tagged the same:
+ * Level 5's Lab hall). Walking in makes it the checkpoint, the same way ([Checkpoint]: `level/point`): what the
+ * player carries is noted, and a death ([DeathHooks]) or CONTINUE comes back there, not to the level's start.
+ * It is never taken back by an earlier one.
+ *
  * Seeing the credits ([finished]) erases the saved game. Achievements are kept apart and stay.
  */
 object ContinueGame {
 
     const val MARKER = "every_tunnel_continue"
+    const val RESTART_TAG = "restart_point"
     private const val LEVEL_4 = "level_4"
     private const val LEVEL_5 = "level_5"
 
@@ -77,6 +85,16 @@ object ContinueGame {
             if (LoadingHooks.isLoading(player) || !WorldRules.appliesTo(player.isCreative, player.isSpectator)) return@register
             reached(player, level)
         }
+        LevelTriggers.register { change ->
+            val key = change.enteredZones.firstOrNull { key ->
+                LevelManager.get(key.levelId)?.zone(key.zoneId)?.tags?.contains(RESTART_TAG) == true
+            } ?: return@register
+            val level = LevelManager.get(key.levelId) ?: return@register
+            val player = server?.playerManager?.getPlayer(change.playerId) ?: return@register
+            if (LoadingHooks.isLoading(player) || !WorldRules.appliesTo(player.isCreative, player.isSpectator)) return@register
+            val point = level.spawnPoints.firstOrNull { RESTART_TAG in it.tags } ?: return@register
+            restartPointReached(player, level, point.id)
+        }
         // Before the player's data is written, so this goes with it.
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> writeLounge(handler.player) }
     }
@@ -101,9 +119,27 @@ object ContinueGame {
     }
 
     private fun reached(player: ServerPlayerEntity, level: LevelDefinition) {
-        val current = ProgressService.get().checkpoint(player)?.let(LevelManager::get)
+        val current = Checkpoint.parse(ProgressService.get().checkpoint(player))?.let { LevelManager.get(it.levelId) }
         if (current != null && current.order >= level.order) return
         checkpoint(player, level)
+    }
+
+    private fun restartPointReached(player: ServerPlayerEntity, level: LevelDefinition, pointId: String) {
+        val progress = ProgressService.get()
+        val current = Checkpoint.parse(progress.checkpoint(player))
+        val currentLevel = current?.let { LevelManager.get(it.levelId) }
+        if (current != null && currentLevel != null) {
+            if (currentLevel.order > level.order || current == Checkpoint(level.id, pointId)) return
+        }
+        progress.setCheckpoint(player, Checkpoint(level.id, pointId).toString())
+        progress.saveInventory(player)
+        setMarker(player.server, true)
+        level.spawnPoint(pointId)?.let { point ->
+            val dimension = RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))
+            player.setSpawnPoint(dimension, BlockPos.ofFloored(point.position.x, point.position.y, point.position.z), point.yaw, true, false)
+        }
+        player.server.playerManager.saveAllPlayerData()
+        EveryTunnel.LOGGER.info("{}: checkpoint at {}, {}", player.name.string, level.id, pointId)
     }
 
     private fun checkpoint(player: ServerPlayerEntity, level: LevelDefinition) {
@@ -127,7 +163,8 @@ object ContinueGame {
     /** Takes the place of [NewGame.start]. False if there is nothing to continue: then a new game it is. */
     fun start(player: ServerPlayerEntity): Boolean {
         val progress = ProgressService.get()
-        val level = progress.checkpoint(player)?.let(LevelManager::get) ?: return false
+        val checkpoint = Checkpoint.parse(progress.checkpoint(player)) ?: return false
+        val level = LevelManager.get(checkpoint.levelId) ?: return false
         val server = player.server
         NewGame.resetWorld(server)
         player.clearStatusEffects()
@@ -155,7 +192,7 @@ object ContinueGame {
         }
         progress.restoreInventory(player)
         progress.setLevel3Books(player, 0)
-        toStart(player, level)
+        toStart(player, level, checkpoint.pointId)
         IntroHooks.doorsOpenIfDone(player, level)
         return true
     }
@@ -181,21 +218,22 @@ object ContinueGame {
         EveryTunnel.LOGGER.info("{}: Level 4 is back as it was", player.name.string)
     }
 
-    /** Level 5 stands again ([LabHooks]): the player goes to its start with what they carried then. */
+    /** Level 5 stands again ([LabHooks]): the player goes to its start, or the Lab hall, with what they carried then. */
     fun labBuilt(server: MinecraftServer) {
         if (waitingFor != LEVEL_5) return
         val player = waiting ?: return
         waiting = null
         waitingFor = null
         val level = LevelManager.get(LEVEL_5) ?: return
-        ProgressService.get().restoreInventory(player)
-        toStart(player, level)
+        val progress = ProgressService.get()
+        progress.restoreInventory(player)
+        toStart(player, level, Checkpoint.parse(progress.checkpoint(player))?.pointId)
         EveryTunnel.LOGGER.info("{}: Level 5 stands again", player.name.string)
     }
 
     private fun writeLounge(player: ServerPlayerEntity) {
         val progress = ProgressService.get()
-        if (progress.checkpoint(player) != LEVEL_4 || waiting != null) return
+        if (Checkpoint.parse(progress.checkpoint(player))?.levelId != LEVEL_4 || waiting != null) return
         val level = LevelManager.get(LEVEL_4) ?: return
         if (LoungeHooks.notBuiltYet(level)) return
         val world = worldOf(player.server, level) ?: return
@@ -208,8 +246,9 @@ object ContinueGame {
         progress.setLounge(player, save.toText())
     }
 
-    private fun toStart(player: ServerPlayerEntity, level: LevelDefinition) {
-        val start = level.spawnPoints.firstOrNull { RespawnHooks.TAG in it.tags } ?: return
+    /** To the level's start, or to its spawn point [pointId] when it has one by that name. */
+    private fun toStart(player: ServerPlayerEntity, level: LevelDefinition, pointId: String? = null) {
+        val start = pointId?.let(level::spawnPoint) ?: level.spawnPoints.firstOrNull { RespawnHooks.TAG in it.tags } ?: return
         val world = worldOf(player.server, level) ?: return
         player.teleport(world, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
     }

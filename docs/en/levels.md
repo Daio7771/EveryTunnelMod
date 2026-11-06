@@ -111,6 +111,7 @@ zone containing them; the player is "in" every zone containing them, from any le
 | `title` | Big text on screen ("Level 2"); empty shows nothing |
 | `subtitle` | Smaller text under it |
 | `sound` | Sound event played in the player's head |
+| `manual` | `true`: the title and sound wait for the level's own code instead of showing on walking in (Level 5's, as its airlock opens) |
 
 ### Intro
 
@@ -145,6 +146,8 @@ the server starts (levels built together name the same one). The function must e
 | `lab_airlock` | `LabHooks` | Level 5's airlock: walking in shuts the door behind (`lab_airlock_rear`) and, once the level stands, opens the one ahead |
 | `lab_airlock_rear` | `LabHooks` | The airlock's door behind: open until the player is in |
 | `lab_welcome` | `LabHooks` | The airlock's door ahead, in the Lobby's wall: shut until the level stands |
+| `lab_door` | `LabDoorHooks` | A locked sliding door of Level 5: a lever, or walking out of the Office for the south route's, opens it |
+| `restart_point` | `ContinueGame` | Walking in makes the level's spawn point tagged the same the checkpoint (Level 5's Lab hall) |
 | `lights_stay` | `KeycardHooks` | Its lights stay on when the keycard is taken (the stair shaft down to B3) |
 | `exit` | (none yet) | Marks a level's way out; kept for later systems |
 | `valve_door` | `ValveHooks` | The doors the valves open when all are right; a new game shuts them |
@@ -162,6 +165,9 @@ the server starts (levels built together name the same one). The function must e
 | `player` | `RespawnHooks`, `DeathHooks`, `NewGame` | The level start: where a player restarts. The first one is used |
 | `pale_man` | `PaleManSpawner` | A Pale man spawns here the first time a player enters the level |
 | `battery` | `LootSpawner` | A battery lying on the floor |
+| `wrench`, `detector` | `LootSpawner` | Level 5's wrench and radiation detector, lying on the floor |
+| `lab_lever` | `LabDoorHooks` | A lever of Level 5 at that block; named `lever_<door zone id>`, it opens that door |
+| `restart_point` | `ContinueGame`, `DeathHooks` | Where a death or CONTINUE restarts once its zone was walked into (Level 5's Lab hall) |
 | `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Food, on furniture |
 | `water` | `LootSpawner` | A water bottle |
 | `keycard` | `LootSpawner` | The keycard |
@@ -211,10 +217,12 @@ Level 5, the laboratory, is built in play (`LabHooks`), layers 1 and 2 so far (p
   `south_route` (three), `storage`, `chemical_room`, `shortcut`, `drain_hatch`.
 - **Openings,** each its own zone: `entry_frame` (the frame: crossing it is walking into Level 5),
   `airlock_rear` (tagged `lab_airlock_rear`), `welcome_door` (tagged `lab_welcome`), the doorways (`workshop_door`,
-  `waiting_door`, `s1_door` to `s4_door`, `office_door_west`, `office_door_east`), the shut steel doors
-  (`stairs_door`, `south_door`, `shortcut_door`) and `hatch_grate` (iron bars).
-- **Spawn points:** `player_start` (the Lobby, by the way in) and `checkpoint` (the Lab hall; nothing uses it
-  yet).
+  `waiting_door`, `s1_door` to `s4_door`, `office_door_west`, `office_door_east`), the locked sliding doors
+  (`stairs_door`, `south_door`, `shortcut_door`, tagged `lab_door`) and `hatch_grate` (iron bars).
+- The Lab hall is tagged `restart_point`.
+- **Spawn points:** `player_start` (the Lobby, by the way in), `checkpoint` (the Lab hall, tagged
+  `restart_point`), `lever_stairs_door` and `lever_shortcut_door` (tagged `lab_lever`), `wrench` and
+  `detector` (in the Workshop).
 
 ## How the mod tracks players
 

@@ -383,16 +383,26 @@ in play (`platform.LabHooks`), in a space of its own west of Level 4:
   `lab_airlock_rear`, `lab_welcome`): walking in, the door behind slides shut with a hiss
   (`block.airlock.close`), never on someone in the doorway, and opens again for someone who steps back out
   before it shuts. Once the level stands, after a moment in the dark, the door ahead, in the Lobby's wall,
-  slides open over about 3 s (`block.airlock.open`) and the white, lit Lobby is there. Each door is two
-  leaves of `AirlockDoorBlock` moving a quarter of a block a step (`core.door.SlidingDoor`).
+  slides open over about 3 s (`block.airlock.open`), the white, lit Lobby is there and the title "Level 5"
+  shows (the level's `entry` is `manual`: `LabHooks` shows it then). Each door is two leaves of
+  `AirlockDoorBlock` moving a quarter of a block a step (`core.door.SlidingDoor`, `platform.SlidingDoors`).
 
 Level 5 so far is its two upper layers, structure only: a clean laboratory of white tiles with a band
 of pale green ones, grey vinyl, white ceiling panels, every fluorescent light on. Layer 1: the Lobby, a
 ring of corridors with the Workshop, the Waiting room and the Lockers, and a steel door (shut) to the
 stairs down. Layer 2, 10 blocks lower: the subjects' corridor with rooms S-1 to S-4, the Lab hall, a
 loop north through the Office, a loop south past Storage to the chemical room, the shortcut and the
-drain hatch behind a grate. Three steel doors are shut (the stairs, the south route, the shortcut):
-nothing opens them yet. Its zones are listed in [Levels](levels.md#level-5).
+drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5). What works so far:
+
+- **The wrench and the detector** lie in the Workshop (where for now: the level's content will place them).
+  See [Player systems](player.md#level-5s-tools).
+- **Three locked doors** slide open like the airlock's, for good (`platform.LabDoorHooks`): the stairs' by a
+  lever in the ring, the shortcut's by a lever in the chemical room (Level 4's Maintenance levers; where
+  they stand is provisional), and the south route's on walking out of the Office, wherever the player is
+  then: a lock is heard letting go far off (`event.lab.unlock`) and "The south route is open." shows.
+- **The Lab hall's checkpoint:** walking in makes it the checkpoint, silently (`ContinueGame`, a zone and a
+  spawn point tagged `restart_point`). A death there or later restarts in the Lab hall with what the player
+  carries; CONTINUE puts them there with what they had on arriving.
 
 The map's rebuild when the world opens does not touch Level 5: the way in goes with Level 4, and
 nobody can reach what stands until the next build. A game continued in Level 5 builds it behind the
@@ -418,7 +428,8 @@ instead:
 1. `event.death` plays and the screen fades to black (`screen_fade`, 1.5 s). The player
    cannot move and nothing hurts them.
 2. In the dark they are moved to the start of the level they were last in (its first spawn
-   point tagged `player`), with full health and resources. That level's Pale men go back
+   point tagged `player`), or to the restart point they reached in it (Level 5's Lab hall), with full
+   health and resources. That level's Pale men go back
    to their spawn points and start over.
 3. The screen fades back in.
 

@@ -231,6 +231,9 @@ object ModBlocks {
 
     val LOOT_MASTER_KEY: Block = register("loot_master_key", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.MASTER_KEY })
 
+    val LOOT_WRENCH: Block = register("loot_wrench", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.WRENCH })
+    val LOOT_DETECTOR: Block = register("loot_detector", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.DETECTOR })
+
     val LOOT_KEYCARD: Block = register(
         "loot_keycard",
         LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.KEYCARD },
@@ -429,7 +432,7 @@ object ModBlocks {
         }
         LOOT_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "loot"),
-            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK, LOOT_CARD_NW, LOOT_CARD_NE, LOOT_CARD_SW, LOOT_CARD_SE, LOOT_MASTER_KEY).build(),
+            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK, LOOT_CARD_NW, LOOT_CARD_NE, LOOT_CARD_SW, LOOT_CARD_SE, LOOT_MASTER_KEY, LOOT_WRENCH, LOOT_DETECTOR).build(),
         )
         BOX_SHELF_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),

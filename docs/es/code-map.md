@@ -15,7 +15,7 @@ con un comentario KDoc que cuenta más.
 
 | Archivo | Qué hace |
 |---|---|
-| `GameplayConfig.kt` | Cada valor ajustable con su valor por defecto, por secciones (stamina, sed, linterna, ruido, Pale man) |
+| `GameplayConfig.kt` | Cada valor ajustable con su valor por defecto, por secciones (stamina, sed, comida, linterna, llave inglesa, detector, ruido, Pale man) |
 | `GameplayConfigParser.kt` | JSON ↔ configuración, rangos de valores, problemas y claves ausentes. Sin E/S de archivos |
 | `ConfigManager.kt` | Carga y escribe `config/every_tunnel/gameplay.json` de forma segura |
 
@@ -41,6 +41,8 @@ con un comentario KDoc que cuenta más.
 | `puzzle/darts/DartboardGeometry.kt` | Dónde cayó un dardo en el tablero: número y anillo, en las 4 orientaciones |
 | `film/FilmInfo.kt` | La película del Cinema: fotogramas, velocidad, qué fotograma en cada momento |
 | `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint |
+| `progress/Checkpoint.kt` | Un checkpoint como texto: el inicio de un nivel, o `nivel/punto` para un punto de reinicio dentro de él |
+| `detector/Detector.kt` | El detector del nivel 5: cuánto se llena su icono, cuándo sale el triángulo, a qué ritmo pita |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
 
@@ -82,6 +84,7 @@ con un comentario KDoc que cuenta más.
 |---|---|
 | `ModBlocks.kt` | Cada bloque: la luz, props, puertas, carteles, piezas del ascensor, botín, lector de tarjetas |
 | `ModItems.kt` | Batería, botella de agua, tarjeta; la pestaña creativa |
+| `LabItems.kt` | La llave inglesa del nivel 5: un arma pesada que no se desgasta |
 | `ModEntities.kt` | El tipo de entidad del Pale man y su huevo; el asiento de la taquilla |
 | `ModSounds.kt` | Eventos de sonido que reproduce el código |
 | `ModSoundGroups.kt` | Grupos de sonido de bloques por material de prop |
@@ -167,6 +170,8 @@ con un comentario KDoc que cuenta más.
 | `LoungeClosingHooks.kt` | El cierre del nivel 4: el apagón, las luces de emergencia, la puerta grande |
 | `LoungeClosingBlocks.kt` | La puerta grande, el lector de la Calm room, la luz de emergencia |
 | `LabBlocks.kt` | La puerta de la esclusa del nivel 5: una columna de una hoja, cuánto de ella cruza el hueco |
+| `SlidingDoors.kt` | Las puertas correderas del nivel 5 en el mundo: cuánto están abiertas, abrir una poco a poco |
+| `LabDoorHooks.kt` | Las puertas bloqueadas del nivel 5: las palancas, la ruta sur que se abre al salir de la Office |
 | `BreakerHooks.kt` | La sala de mantenimiento del nivel 4: palancas, botón, contador, corriente del lector |
 | `SafeHooks.kt` | Las cajas fuertes de las Suites: combinaciones, bloque, resultado del cliente |
 | `ContinueGame.kt` | La partida guardada: puntos de control, CONTINUE, recuperar el nivel 4 |
@@ -212,6 +217,7 @@ con un comentario KDoc que cuenta más.
 | `AmbiencePlayer.kt` | Bucle del nivel y sonidos aleatorios con posición |
 | `FluorescentHum.kt` | Zumbido de las 4 luces más cercanas |
 | `HeartbeatEffect.kt` | Latido según la distancia al Pale man |
+| `DetectorEffect.kt` | El detector del nivel 5: la Cloud más cercana a la vista, los pitidos |
 | `CameraShake.kt` | La cámara temblando en el derrumbe del túnel del nivel 3 |
 | `FilmPlayer.kt` | La película del Cinema en su pantalla, y el sonido del proyector |
 | `BreathingEffect.kt` | Respiración fuerte agotado |
@@ -226,6 +232,7 @@ con un comentario KDoc que cuenta más.
 | Archivo | Qué hace |
 |---|---|
 | `StatusHud.kt` | Filas de vida, stamina, sed y batería |
+| `DetectorHud.kt` | El símbolo de radiación que se llena y el triángulo de peligro |
 | `ExhaustionVignette.kt` | Bordes oscuros de pantalla agotado o sediento |
 | `FlashlightOverlay.kt` | El foco en pantalla sin shaders |
 | `LockerView.kt` | El interior de la puerta de la taquilla sobre la pantalla mientras te escondes |

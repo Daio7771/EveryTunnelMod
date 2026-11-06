@@ -40,7 +40,9 @@ Comandos de vanilla útiles:
 - `/function garage:build`: reconstruir el mapa a mano.
 - `/playsound every_tunnel:<id> master @s`: probar cualquier sonido.
 - `/summon every_tunnel:pale_man`, o el huevo de aparición de la pestaña Every Tunnel (al desarrollar).
-- `/give @s every_tunnel:<bloque u objeto>`: cualquier bloque u objeto del mod.
+- `/give @s every_tunnel:<bloque u objeto>`: cualquier bloque u objeto del mod (`wrench`, `detector`...).
+- `/summon minecraft:armor_stand`: algo que pueda notar el detector del nivel 5 mientras no exista la Distortion
+  Cloud (la etiqueta de tipos `every_tunnel:radiation_sources` tiene de momento el soporte de armadura).
 - `/gamemode creative`: libre de las reglas del mundo, para construir o mirar.
 
 ## El registro de playtest

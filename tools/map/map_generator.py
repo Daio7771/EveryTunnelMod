@@ -504,8 +504,8 @@ LEVEL_5 = dict(
     # From layer 1's stairs down to layer 2's: one block down per cell along z, from the first cell on.
     FLIGHT=("stairs_flight", "layer1_stairs", (9, 44, 13, 54)),
     # Openings through the one-block walls: (id, layer, axis of the wall's line, line, first cell, width,
-    # height, kind). Kinds: "doorway" (open), "locked" (a steel double door, shut until a lever or an event
-    # opens it), "frame" (open, in steel: the way in from Level 4's dark stretch, in its side wall),
+    # height, kind). Kinds: "doorway" (open), "locked" (a sliding steel door like the airlock's, shut until
+    # a lever or an event opens it: LabDoorHooks), "frame" (open, in steel: the way in from Level 4's dark stretch, in its side wall),
     # "airlock_rear" and "airlock_front" (the airlock's sliding doors: the one behind stands open until the
     # player is in, the one ahead shut until the level stands; LabHooks), "grate" (iron bars the chemical
     # puzzle will dissolve).
@@ -515,15 +515,15 @@ LEVEL_5 = dict(
         ("welcome_door", 1, "x", 1, 12, 4, 3, "airlock_front"),
         ("workshop_door", 1, "z", 13, 41, 2, 3, "doorway"),
         ("waiting_door", 1, "z", 13, 66, 2, 3, "doorway"),
-        ("stairs_door", 1, "z", 37, 10, 2, 2, "locked"),            # the lever hidden in the ring
+        ("stairs_door", 1, "z", 37, 10, 2, 3, "locked"),            # the lever hidden in the ring
         ("s1_door", 2, "z", 56, 27, 2, 3, "doorway"),
         ("s3_door", 2, "z", 56, 49, 2, 3, "doorway"),
         ("s2_door", 2, "z", 61, 35, 2, 3, "doorway"),
         ("s4_door", 2, "z", 61, 57, 2, 3, "doorway"),
         ("office_door_west", 2, "z", 25, 76, 2, 3, "doorway"),
         ("office_door_east", 2, "z", 25, 93, 2, 3, "doorway"),
-        ("south_door", 2, "z", 71, 77, 2, 2, "locked"),             # opens on leaving the Office
-        ("shortcut_door", 2, "x", 98, 59, 2, 2, "locked"),          # the chemical room's lever, from inside
+        ("south_door", 2, "z", 71, 77, 2, 3, "locked"),             # opens on leaving the Office
+        ("shortcut_door", 2, "x", 98, 59, 2, 3, "locked"),          # the chemical room's lever, from inside
         ("hatch_grate", 2, "z", 70, 127, 4, 3, "grate"),
     ],
     START=(-16, 13),                 # layer 1: the entry corridor's first cell, past the frame
@@ -532,9 +532,17 @@ LEVEL_5 = dict(
     # stretch at its far end, to its left: world x = PLACE_X - z, world z = PLACE_Z + x.
     PLACE_X=-77,
     PLACE_Z=140,
-    # The player's start (a death comes back here) and the checkpoint to be: (layer, x, z, plan facing).
+    # The player's start (a death comes back here) and the Lab hall's restart point, the checkpoint walking
+    # into the Lab hall makes: (layer, x, z, plan facing).
     PLAYER_START=(1, 4, 14, "east"),
     CHECKPOINT_POINT=(2, 77, 67, "east"),
+    # The levers that open locked doors, Level 4's Maintenance lever on a wall at chest height: (id, layer, x,
+    # z, plan facing, away from its wall); "lever_<door>" opens that door. Where they go for good is for the
+    # levels' content: for now the stairs' is on the ring's east wall, the shortcut's by the shortcut.
+    LEVERS=[("lever_stairs_door", 1, 74, 25, "west"), ("lever_shortcut_door", 2, 108, 55, "east")],
+    LEVER="every_tunnel:breaker_lever[facing={facing},on=false]",
+    # Loot on the floor: (id, tag, layer, x, z). The wrench and the detector lie in the Workshop for now.
+    LOOT=[("wrench", "wrench", 1, 38, 7), ("detector", "detector", 1, 44, 7)],
     # Stand-in blocks re-skinned by Level 5's textures (lab/textures.py): white wall tiles, a pale green
     # band of them at the foot of the walls, grey vinyl, a ceiling of white panels, vinyl stairs. Never a
     # block another level uses: the world's resource pack re-skins a block everywhere.
@@ -550,7 +558,6 @@ LEVEL_5 = dict(
     AIRLOCK_DOOR="every_tunnel:airlock_door[facing={facing},width={width}]",
     LIGHT="every_tunnel:fluorescent_light[facing=down,axis={axis},mode=on,lit=true]",
     LIGHT_SPACING=5,
-    STEEL_DOOR="every_tunnel:emergency_door",
     GRATE="minecraft:iron_bars[east={ew},north={ns},south={ns},west={ew},waterlogged=false]",
     # Built in play while the player walks Level 4's dark stretch and the entry corridor (LabHooks): a step
     # holds at most so many commands and blocks changed, one step every 2 ticks.
@@ -1194,22 +1201,18 @@ def level5_steps(lv5):
 
 
 def level5_json(lv5):
-    """Level 5: from the entry corridor's second leg, so its title shows on turning the corner. It
-    has no `build`: LabHooks builds it in play."""
+    """Level 5: from the steel frame in Level 4's dark stretch on, so that the checkpoint and its rules
+    start there; its title waits for the airlock to open. It has no `build`: LabHooks builds it in play."""
     p = lv5.p
     zones = [{"id": zid, "from": list(b[:3]), "to": list(b[3:]), **({"tags": tags} if tags else {})} for zid, b, tags in lv5.zones()]
-    start, start_yaw = lv5.point(p["PLAYER_START"])
-    check, check_yaw = lv5.point(p["CHECKPOINT_POINT"])
     return json.dumps({
         "name": "Level 5 - Laboratory B5 (generated)",
         "order": 5,
         "dimension": "minecraft:overworld",
         "zones": zones,
-        "spawn_points": [
-            {"id": "player_start", "pos": start, "yaw": start_yaw, "tags": ["player"]},
-            {"id": "checkpoint", "pos": check, "yaw": check_yaw, "tags": ["checkpoint"]},
-        ],
-        "entry": {"title": p["TITLE"], "subtitle": "", "sound": "every_tunnel:event.level_transition"},
+        "spawn_points": lv5.spawn_points(),
+        # The title waits for the airlock's door ahead to open (LabHooks).
+        "entry": {"title": p["TITLE"], "subtitle": "", "sound": "every_tunnel:event.level_transition", "manual": True},
     }, indent=1) + "\n"
 
 

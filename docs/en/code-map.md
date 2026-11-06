@@ -15,7 +15,7 @@ KDoc comment that says more.
 
 | File | What it does |
 |---|---|
-| `GameplayConfig.kt` | Every tunable value with its default, in sections (stamina, thirst, flashlight, noise, Pale man) |
+| `GameplayConfig.kt` | Every tunable value with its default, in sections (stamina, thirst, food, flashlight, wrench, detector, noise, Pale man) |
 | `GameplayConfigParser.kt` | JSON ↔ config, value ranges, problems and missing keys. No file IO |
 | `ConfigManager.kt` | Loads and writes `config/every_tunnel/gameplay.json` safely |
 
@@ -41,6 +41,8 @@ KDoc comment that says more.
 | `puzzle/darts/DartboardGeometry.kt` | Where a dart landed on the board: number and ring, in the 4 orientations |
 | `film/FilmInfo.kt` | The Cinema's film: frames, speed, which frame at what time |
 | `progress/PlayerProgress.kt` | What a player has done: pieces, notes read, scenes seen, Level 3's books, checkpoint |
+| `progress/Checkpoint.kt` | A checkpoint as text: a level's start, or `level/point` for a restart point inside it |
+| `detector/Detector.kt` | Level 5's detector: how full its icon is, when the triangle shows, how fast it beeps |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 | `hiding/LookLimit.kt` | How far the head turns inside a locker |
 
@@ -82,6 +84,7 @@ KDoc comment that says more.
 |---|---|
 | `ModBlocks.kt` | Every block: the light, props, doors, signs, elevator parts, loot, card reader |
 | `ModItems.kt` | Battery, water bottle, keycard; the creative tab |
+| `LabItems.kt` | Level 5's wrench: a heavy weapon that never wears out |
 | `ModEntities.kt` | The Pale man entity type and spawn egg; the locker seat |
 | `ModSounds.kt` | Sound events played from code |
 | `ModSoundGroups.kt` | Block sound groups per prop material |
@@ -167,6 +170,8 @@ KDoc comment that says more.
 | `LoungeClosingHooks.kt` | Level 4's closing: the blackout, the emergency lamps, the big door |
 | `LoungeClosingBlocks.kt` | The big door, the Calm room's reader, the emergency lamp |
 | `LabBlocks.kt` | Level 5's airlock door: a column of a leaf, how much of it is across |
+| `SlidingDoors.kt` | Level 5's sliding doors in the world: setting how open they are, sliding one open over time |
+| `LabDoorHooks.kt` | Level 5's locked doors: the levers, the south route opening on walking out of the Office |
 | `BreakerHooks.kt` | Level 4's Maintenance room: levers, button, counter, power for the reader |
 | `SafeHooks.kt` | The safes in the Suites: the combinations, the block, the result from the client |
 | `ContinueGame.kt` | The saved game: checkpoints, CONTINUE, putting Level 4 back |
@@ -212,6 +217,7 @@ KDoc comment that says more.
 | `AmbiencePlayer.kt` | Level loop and random positioned sounds |
 | `FluorescentHum.kt` | Hum of the 4 nearest lights |
 | `HeartbeatEffect.kt` | Heartbeat by distance to the Pale man |
+| `DetectorEffect.kt` | Level 5's detector: the nearest Cloud in sight, the beeps |
 | `CameraShake.kt` | The camera shaking in Level 3's tunnel collapse |
 | `FilmPlayer.kt` | The Cinema's film on its screen, and the projector's sound |
 | `BreathingEffect.kt` | Heavy breathing when exhausted |
@@ -226,6 +232,7 @@ KDoc comment that says more.
 | File | What it does |
 |---|---|
 | `StatusHud.kt` | Health, stamina, thirst and battery rows |
+| `DetectorHud.kt` | The radiation sign filling up and the warning triangle |
 | `ExhaustionVignette.kt` | Dark screen edges when exhausted or parched |
 | `FlashlightOverlay.kt` | The on-screen spot without shaders |
 | `LockerView.kt` | The inside of a locker's door over the screen while hiding |

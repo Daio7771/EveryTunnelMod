@@ -189,6 +189,9 @@ class LevelParserTest {
         assertEquals(LevelEntry("B2", "Level 2", "every_tunnel:event.level_transition"), full.level?.entry)
         assertEquals(emptyList(), full.problems)
 
+        val manual = LevelParser.parse("manual", """{ $zones, "entry": { "title": "B5", "manual": true } }""")
+        assertEquals(LevelEntry("B5", "", null, manual = true), manual.level?.entry)
+
         val broken = LevelParser.parse("broken", """{ $zones, "entry": { "title": "B2", "sound": "Not A Sound", "music": 1 } }""")
         assertEquals(LevelEntry("B2", "", null), broken.level?.entry)
         assertEquals(2, broken.problems.size, broken.problems.toString())

@@ -40,6 +40,7 @@ registered in `platform.ModSounds`. Any of them can be tried with
 | The Observer | `music.observer.approach`, `music.observer.chase` (no footsteps: his music gives him away); in the book phase `event.observer.tick` / `tock` (the library clock in the head, quicker as he nears) | synth |
 | Music | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | synth / CC BY (elevator) |
 | Events | `event.death`, `event.level_transition`, `event.observer.alert` (placeholder), `event.collapse` (Level 3's tunnel collapse) | synth |
+| Level 5 | `block.airlock.close`, `block.airlock.open` (the airlock's and the locked doors), `item.wrench.hit` (3 variations), `item.detector.beep`, `event.lab.unlock` (the south route opening, far off) | synth |
 
 ## Who plays what
 
@@ -59,6 +60,7 @@ Client side (`client.effects`), per player and not positioned unless noted:
 | `AmbiencePlayer` | The level's (or zone's) loop (fades over changes) and its random sounds at random spots around the player (positioned) | Ambient/Environment |
 | `FluorescentHum` | The hum of the 4 nearest lights within 10 blocks, each at a slightly different pitch (positioned) | Blocks |
 | `HeartbeatEffect` | One heartbeat at a time near the Pale man | Players |
+| `DetectorEffect` | Level 5's detector beeping, faster as a Cloud nears (in the head) | Players |
 | `BreathingEffect` | Heavy breathing when exhausted | Players |
 | `TensionMusic` | The Pale man's music layers, and the Observer's (walking your way, running at you), crossfaded | Music |
 | `IntroMusic` | The elevator song, then its tape-stop fade | Music |

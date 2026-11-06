@@ -40,7 +40,8 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  * `name` (defaults to the id), `dimension` (defaults to the overworld), `tags`,
  * `yaw`, `pitch`, a spawn point's `zone` (the zone what spawns there stays in),
  * `spawn_points`, `ambience` (the level's, and a zone's own, which replaces it inside that zone;
- * `{}` there means silence), `entry`, `intro` (and everything inside them) and `build`
+ * `{}` there means silence), `entry` (with `manual`: its title waits for the level's own code instead of
+ * showing on walking in), `intro` (and everything inside them) and `build`
  * (the function that builds the level's blocks, run every time the world opens) are
  * optional; `intro.seconds` defaults to 25. `order` and at least one valid zone are required. A broken zone, spawn
  * point or random sound is skipped with a problem; the level is rejected only when
@@ -149,8 +150,9 @@ object LevelParser {
             entry.stringList("sound") // marks the key as read; absent is fine
             null
         }
+        val manual = entry.boolean("manual", false)
         entry.reportUnknownKeys()
-        return LevelEntry(title, subtitle, sound)
+        return LevelEntry(title, subtitle, sound, manual)
     }
 
     private fun parseAmbience(fields: JsonFields, problems: MutableList<String>): Ambience {

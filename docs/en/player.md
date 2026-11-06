@@ -96,13 +96,24 @@ The light itself is drawn on the client, see [Graphics](graphics.md#the-flashlig
 `platform.LootSpawner` and `platform.LootBlock`:
 
 - The first time a player enters a level, a `LootBlock` is placed at every spawn point
-  tagged `battery`, `water`, `keycard`, `food_plate`, `food_popcorn` or `food_snack`. The client draws it as the item itself, lying
+  tagged `battery`, `water`, `keycard`, `food_plate`, `food_popcorn`, `food_snack`, `wrench` or `detector`. The client draws it as the item itself, lying
   flat (`client.render.LootRenderer`); it has no collision. Level 4, built in play, gets its loot
   once it stands.
 - **Right-click** picks it up; the spot is empty.
 - Each spot is filled once per world (`every_tunnel_loot.dat`): what was picked up stays
   picked up, after dying or reopening the world, until a new game restocks everything.
 - The keycard's pickup also triggers the lights-out wave (`KeycardHooks.pickedUp`).
+
+## Level 5's tools
+
+- **The wrench** (`platform.WrenchItem`): a heavy weapon held like a sword. A full blow takes
+  `wrench.damage` (7, three and a half hearts) and comes about once a second (`wrench.attacks_per_second`),
+  pushes a little, and rings out in metal (`item.wrench.hit`). It never wears out.
+- **The radiation detector:** it works from anywhere in the inventory and uses nothing. It notices the
+  nearest Distortion Cloud within `detector.range` (16) blocks, never through a wall, and beeps in the
+  player's head (`item.detector.beep`), from every 1.2 s at the edge to every 0.1 s right next to it
+  (`client.effects.DetectorEffect`, numbers in `core.detector.Detector`). What it notices is any entity of
+  the type tag `every_tunnel:radiation_sources`: the armor stand for now, until the Cloud exists.
 
 ## HUD
 
@@ -122,10 +133,16 @@ experience bar.
 
 Icons: `textures/gui/hud_icons.png`, painted by `tools/gui/hud_icons.py`.
 
+While the player carries Level 5's detector, `client.hud.DetectorHud` draws the radiation sign to the right
+of the right-hand rows, between them: grey with nothing in range, filled in yellow and black from the bottom
+up as a Cloud comes nearer. Within `detector.danger_range` (8) a red warning triangle blinks fast beside it
+(`textures/gui/detector_icons.png`, from the same tool).
+
 ## Death
 
 See [Game flow](game-flow.md#death): no death screen, a fade to black and a restart at the
-level start with full resources, keeping the inventory.
+level start (or at a restart point reached in it, like Level 5's Lab hall) with full resources, keeping
+the inventory.
 
 ## The config file
 
@@ -170,6 +187,14 @@ Every key and its default:
 | `beam_width_degrees` | 40 | Cone width, edge to edge (1..120) |
 | `beam_brightness` | 15 | Light level at the centre of the beam (0..15) |
 | `glow_brightness` | 5 | Faint glow around the player (0..15) |
+| **`wrench`** | | Level 5's weapon |
+| `damage` | 7 | Health a full blow takes (a player has 20) |
+| `attacks_per_second` | 1 | Full blows a second |
+| **`detector`** | | Level 5's radiation detector |
+| `range` | 16 | Blocks within which it notices the Cloud (never through a wall) |
+| `danger_range` | 8 | Closer than this the warning triangle blinks |
+| `slowest_beep_seconds` | 1.2 | Between beeps at the edge of its range... |
+| `fastest_beep_seconds` | 0.1 | ...and right next to the Cloud |
 | **`noise`** | | Radius in blocks; 0 makes it silent |
 | `sneak_radius` | 2 | Per step, sneaking |
 | `walk_radius` | 6 | Per step, walking |
