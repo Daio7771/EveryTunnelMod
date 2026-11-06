@@ -429,6 +429,28 @@ hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla.
 - **El checkpoint del Lab hall:** entrar en él lo hace checkpoint, en silencio (`ContinueGame`, una zona y un punto
   de aparición con la etiqueta `restart_point`). Morir ahí o después reinicia en el Lab hall con lo que lleva el
   jugador; CONTINUE le deja ahí con lo que llevaba al llegar.
+- **Sus enemigos** existen, aunque aún no hay ninguno en el nivel (los colocará su contenido; para probarlos,
+  `/everytunnel spawn hunters|junior|cloud`). `platform.DistortionHooks` los pone al construirse el nivel y
+  los devuelve a su sitio cuando el jugador muere en él; ninguno se guarda.
+  - **Los Hunters** (`HunterEntity`, decisiones en `entities.HunterBrain`), en grupos de tres en un punto de
+    aparición con la etiqueta `hunters`: humanoides pequeños y negros con bata, ojos blancos sin pupila.
+    Merodean cerca de él; el que ve al jugador (16 bloques, un cono de 140 grados, o a 3 bloques mire adonde
+    mire, nunca a través de una pared) chilla (`entity.hunter.shriek`) y carga el grupo entero. Medio corazón
+    por golpe, uno por segundo cada uno; un golpe de llave inglesa mata a uno. Sin verle 4 s, buscan y luego
+    vuelven andando. No oyen, ni siquiera la llave.
+  - **La Distortion Cloud** (`DistortionCloudEntity`): humo negro con glitches y un ojo morado enfadado, que
+    susurra (`entity.distortion_cloud.whisper`). Aparece ya formada (`entity.distortion_cloud.appear`) de 8 a 14
+    bloques delante del jugador, donde pueda verla, cada 2 a 4 minutos pasados en zonas con la etiqueta `cloud`
+    (si no hay otra cerca). Tenerla en cualquier parte por delante (a menos de 90 grados a cada lado, mire uno
+    arriba o abajo; las paredes la tapan) 1 s seguido mata (`entity.distortion_cloud.kill`), igual que meterse
+    en ella; la pantalla se distorsiona mientras dura la mirada (`client.effects.DistortionEffect`). Si nadie
+    mira hacia ella durante 6 s, se va (`entity.distortion_cloud.leave`) y el detector se calla. Hay que darse la
+    vuelta y volver por donde se vino.
+  - **El Distortion Junior** (`DistortionJuniorEntity`, en un punto de aparición con la etiqueta
+    `distortion_junior`): una Cloud pequeña que flota a la altura de la cara, donde la pusieron. Nunca mata: a
+    menos de 8 bloques de su ojo, sin nada en medio, la cámara tiembla y se desvía apartándose de él, y todos los
+    Hunters cercanos saben dónde está el jugador. Mirarle al ojo 4 s sin apartar la vista (el ojo se agrieta,
+    sube un zumbido de cristal) acaba con él (`entity.distortion_junior.die`).
 
 La reconstrucción del mapa al abrir el mundo no toca el nivel 5: la entrada se va con el nivel 4, y nadie
 puede llegar a lo que queda en pie hasta la siguiente construcción. Una partida continuada en el nivel 5
@@ -458,7 +480,8 @@ sigue vivo:
 2. A oscuras se le lleva al inicio del último nivel en el que estuvo (su primer punto con la
    etiqueta `player`), o al punto de reinicio que alcanzó en él (el Lab hall del nivel 5), con la vida y los
    recursos llenos. Los Pale men de ese nivel vuelven a
-   sus puntos de aparición y empiezan de cero.
+   sus puntos de aparición y empiezan de cero; igual los Hunters y los Juniors del nivel 5, también los
+   muertos, y si había una Distortion Cloud cerca, desaparece (`DistortionHooks.restart`).
 3. La pantalla vuelve con un fundido.
 
 El inventario se conserva: lo recogido sigue recogido. Un jugador que nunca entró en un

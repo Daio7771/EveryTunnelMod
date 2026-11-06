@@ -8,6 +8,7 @@ import daio7771.everytunnel.client.effects.CameraShake
 import daio7771.everytunnel.client.effects.FilmPlayer
 import daio7771.everytunnel.client.effects.LoungeMusic
 import daio7771.everytunnel.client.effects.DetectorEffect
+import daio7771.everytunnel.client.effects.DistortionEffect
 import daio7771.everytunnel.client.effects.HeartbeatEffect
 import daio7771.everytunnel.client.effects.IntroMusic
 import daio7771.everytunnel.client.effects.FluorescentHum
@@ -20,6 +21,8 @@ import daio7771.everytunnel.client.hud.AchievementToast
 import daio7771.everytunnel.client.hud.DetectorHud
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.DartRenderer
+import daio7771.everytunnel.client.render.DistortionRenderer
+import daio7771.everytunnel.client.render.HunterRenderer
 import daio7771.everytunnel.client.render.FilmWalkerRenderer
 import daio7771.everytunnel.client.render.BoxShelfRenderer
 import daio7771.everytunnel.client.render.WallMessageRenderer
@@ -78,6 +81,7 @@ object EveryTunnelClient : ClientModInitializer {
         BreathingEffect.register()
         HeartbeatEffect.register()
         DetectorEffect.register()
+        DistortionEffect.register()
         CameraShake.register()
         FilmPlayer.register()
         LoungeMusic.register()
@@ -103,6 +107,9 @@ object EveryTunnelClient : ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.LOCKER_SEAT, ::EmptyEntityRenderer)
         EntityRendererRegistry.register(ModEntities.FILM_WALKER, ::FilmWalkerRenderer)
         EntityRendererRegistry.register(ModEntities.DART, ::DartRenderer)
+        EntityRendererRegistry.register(ModEntities.HUNTER, ::HunterRenderer)
+        EntityRendererRegistry.register(ModEntities.DISTORTION_CLOUD) { DistortionRenderer(it, "distortion_cloud", 0) }
+        EntityRendererRegistry.register(ModEntities.DISTORTION_JUNIOR) { DistortionRenderer(it, "distortion_junior", 4) }
         AchievementToast.register()
         SprintCheck.register()
         BlockEntityRendererFactories.register(ModBlocks.LOOT_ENTITY, ::LootRenderer)

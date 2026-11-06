@@ -62,6 +62,9 @@ KDoc comment that says more.
 |---|---|
 | `PaleManBrain.kt` | The Pale man's state machine and loudness formula |
 | `ObserverBrain.kt` | The Observer's state machine (patrol, alerted, chase, search, grab) and his numbers |
+| `HunterBrain.kt` | The Hunters' state machine (wander, chase, search, return) and their hits |
+| `Gaze.kt` | Where a player looks: in front (the Cloud), on target (the Junior's eye) |
+| `DistortionClocks.kt` | The Cloud's clock (grace, going), the Junior's (the stare), when the next Cloud comes |
 | `Package.kt` | Package doc |
 
 ### `util/` and `world/`
@@ -119,7 +122,7 @@ KDoc comment that says more.
 | `ValveBlock.kt` | A gate valve inline in a wall pipe: facing, open, letter A to E (Level 3) |
 | `LootBlock.kt` | Loot lying on the floor, picked up with right-click |
 
-### `platform/`: the Pale man
+### `platform/`: the enemies
 
 | File | What it does |
 |---|---|
@@ -127,6 +130,11 @@ KDoc comment that says more.
 | `PaleManSpawner.kt` | Spawns one per `pale_man` spawn point, once per world; new-game counter |
 | `ObserverEntity.kt` | The Observer: sight (cone, range, walls), moving and looking round, catching, pulling out of lockers |
 | `ObserverHooks.kt` | Spawns the Observer, passes him the box alerts, sends him home on a death |
+| `HunterEntity.kt` | A Hunter: sight (cone, range, walls), telling its group, moving, hits, sounds, animations |
+| `DistortionEntity.kt` | What the Cloud and the Junior share: floating, untouchable, facing the player, stare and going synced, smoke |
+| `DistortionCloudEntity.kt` | The Distortion Cloud: who looks its way, killing, going |
+| `DistortionJuniorEntity.kt` | The Distortion Junior: whom it troubles and marks, the stare that ends it |
+| `DistortionHooks.kt` | Level 5's enemies: posts from spawn points, back on a death, telling the Hunters, when and where a Cloud comes, `/everytunnel spawn` |
 
 ### `platform/`: hooks (game logic driven by events)
 
@@ -218,6 +226,7 @@ KDoc comment that says more.
 | `FluorescentHum.kt` | Hum of the 4 nearest lights |
 | `HeartbeatEffect.kt` | Heartbeat by distance to the Pale man |
 | `DetectorEffect.kt` | Level 5's detector: the nearest Cloud in sight, the beeps |
+| `DistortionEffect.kt` | The Distortions on the senses: whispers, the screen distorting at a Cloud, the Junior's tremor and drift |
 | `CameraShake.kt` | The camera shaking in Level 3's tunnel collapse |
 | `FilmPlayer.kt` | The Cinema's film on its screen, and the projector's sound |
 | `BreathingEffect.kt` | Heavy breathing when exhausted |
@@ -247,6 +256,8 @@ KDoc comment that says more.
 | `DartRenderer.kt` | A thrown dart: vanilla's arrow, smaller, with its own texture |
 | `WallMessageRenderer.kt` | Draws a wall message in the painted font; remembers what happened to it |
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
+| `HunterRenderer.kt` | GeckoLib renderer for the Hunters, their eyes glowing |
+| `DistortionRenderer.kt` | GeckoLib renderer and model for the Distortions: turned to their yaw, the glitch, the Junior's cracking eye |
 | `PaleManModel.kt` | His GeckoLib model, plus the stoop under low ceilings |
 | `BoxShelfRenderer.kt` | The purple boxes on the box shelf, full bright |
 | `WallTextRenderer.kt` | A wall text: white on a dark plate, or big dark letters on the wall |

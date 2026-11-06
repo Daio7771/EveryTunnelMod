@@ -25,6 +25,8 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/film/eye.py` | `film_eye/` | what the Cinema shows during the blackout: an eye and INTRUDER DETECTED |
 | `tools/entity/pale_man.py` | Pale man geometry, animations, texture, glow mask, spawn egg model | the Pale man |
 | `tools/entity/observer.py` | The Observer's geometry, animations, texture, spawn egg model | the Observer |
+| `tools/entity/hunter.py` | The Hunters' geometry, animations, texture and eye glow mask | Level 5's Hunters |
+| `tools/entity/distortion.py` | The Distortion Cloud's and Junior's geometry, animations, textures and glow masks (the Junior's eye cracking in four stages) | Level 5's Distortions |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (the uniform skin) | the uniform |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png` | HUD icons, Level 5's detector |
 | `tools/gui/logo.py` | `logo.png` | the logo |

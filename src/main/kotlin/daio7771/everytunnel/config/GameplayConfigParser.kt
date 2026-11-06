@@ -61,6 +61,9 @@ object GameplayConfigParser {
             flashlight = flashlight(fields.child("flashlight"), defaults.flashlight),
             wrench = wrench(fields.child("wrench"), defaults.wrench),
             detector = detector(fields.child("detector"), defaults.detector),
+            hunter = hunter(fields.child("hunter"), defaults.hunter),
+            cloud = cloud(fields.child("cloud"), defaults.cloud),
+            junior = junior(fields.child("junior"), defaults.junior),
             noise = noise(fields.child("noise"), defaults.noise),
             paleMan = paleMan(fields.child("pale_man"), defaults.paleMan),
         )
@@ -92,6 +95,40 @@ object GameplayConfigParser {
         dangerRange = f.double("danger_range", d.dangerRange, min = 0.0, max = 64.0),
         slowestBeepSeconds = f.double("slowest_beep_seconds", d.slowestBeepSeconds, min = 0.05, max = 10.0),
         fastestBeepSeconds = f.double("fastest_beep_seconds", d.fastestBeepSeconds, min = 0.05, max = 10.0),
+    ).also { f.reportUnknownKeys() }
+
+    private fun hunter(f: JsonFields, d: HunterConfig) = HunterConfig(
+        health = f.double("health", d.health, min = 1.0, max = 1000.0),
+        damage = f.double("damage", d.damage, min = 0.0, max = 100.0),
+        attackSeconds = f.double("attack_seconds", d.attackSeconds, min = 0.05, max = 10.0),
+        attackRange = f.double("attack_range", d.attackRange, min = 0.5, max = 4.0),
+        sightRange = f.double("sight_range", d.sightRange, min = 0.0, max = 64.0),
+        fieldOfView = f.double("field_of_view", d.fieldOfView, min = 0.0, max = 360.0),
+        senseRange = f.double("sense_range", d.senseRange, min = 0.0, max = 64.0),
+        lostSeconds = f.double("lost_seconds", d.lostSeconds, min = 0.0, max = 60.0),
+        searchSeconds = f.double("search_seconds", d.searchSeconds, min = 0.0, max = 60.0),
+        wanderRadius = f.double("wander_radius", d.wanderRadius, min = 0.0, max = 32.0),
+        wanderPauseSeconds = f.double("wander_pause_seconds", d.wanderPauseSeconds, min = 0.0, max = 60.0),
+        walkSpeed = f.double("walk_speed", d.walkSpeed, min = 0.1, max = 5.0),
+        runSpeed = f.double("run_speed", d.runSpeed, min = 0.1, max = 5.0),
+    ).also { f.reportUnknownKeys() }
+
+    private fun cloud(f: JsonFields, d: CloudConfig) = CloudConfig(
+        graceSeconds = f.double("grace_seconds", d.graceSeconds, min = 0.05, max = 10.0),
+        leaveSeconds = f.double("leave_seconds", d.leaveSeconds, min = 0.5, max = 120.0),
+        minSeconds = f.double("min_seconds", d.minSeconds, min = 5.0, max = 3600.0),
+        maxSeconds = f.double("max_seconds", d.maxSeconds, min = 5.0, max = 3600.0),
+        nearest = f.double("nearest", d.nearest, min = 2.0, max = 32.0),
+        farthest = f.double("farthest", d.farthest, min = 2.0, max = 32.0),
+        touchRange = f.double("touch_range", d.touchRange, min = 0.0, max = 4.0),
+    ).also { f.reportUnknownKeys() }
+
+    private fun junior(f: JsonFields, d: JuniorConfig) = JuniorConfig(
+        range = f.double("range", d.range, min = 1.0, max = 32.0),
+        stareSeconds = f.double("stare_seconds", d.stareSeconds, min = 0.05, max = 60.0),
+        aimDegrees = f.double("aim_degrees", d.aimDegrees, min = 0.5, max = 45.0),
+        tremorDegrees = f.double("tremor_degrees", d.tremorDegrees, min = 0.0, max = 10.0),
+        driftDegreesPerSecond = f.double("drift_degrees_per_second", d.driftDegreesPerSecond, min = 0.0, max = 180.0),
     ).also { f.reportUnknownKeys() }
 
     private fun thirst(f: JsonFields, d: ThirstConfig) = ThirstConfig(

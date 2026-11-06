@@ -157,6 +157,7 @@ the server starts (levels built together name the same one). The function must e
 | `collapse` | `CollapseHooks` | Level 3: walking in brings the bunker tunnel's ceiling down behind the player (once per game) |
 | `collapse_blocks` | `CollapseHooks` | Level 3: the stretch of tunnel the collapse fills with rubble |
 | `observer_never` | `ObserverEntity` | Level 3's bunker shaft and tunnel: the Observer sees no one there, so never follows anyone down |
+| `cloud` | `DistortionHooks` | Level 5: where Distortion Clouds come (one every 2 to 4 minutes spent in such zones), and where they may appear |
 
 ### Spawn point tags
 
@@ -168,6 +169,8 @@ the server starts (levels built together name the same one). The function must e
 | `wrench`, `detector` | `LootSpawner` | Level 5's wrench and radiation detector, lying on the floor |
 | `lab_lever` | `LabDoorHooks` | A lever of Level 5 at that block; named `lever_<door zone id>`, it opens that door |
 | `restart_point` | `ContinueGame`, `DeathHooks` | Where a death or CONTINUE restarts once its zone was walked into (Level 5's Lab hall) |
+| `hunters` | `DistortionHooks` | Level 5: a group of three Hunters, round that point, facing its way |
+| `distortion_junior` | `DistortionHooks` | Level 5: a Distortion Junior, floating there |
 | `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Food, on furniture |
 | `water` | `LootSpawner` | A water bottle |
 | `keycard` | `LootSpawner` | The keycard |

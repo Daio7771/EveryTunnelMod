@@ -19,6 +19,7 @@ en la pestaña Every Tunnel al desarrollar.
 | `/everytunnel noise` | Los ruidos de los últimos 5 segundos cerca de ti |
 | `/everytunnel noise watch` | Activa o desactiva mostrar cada ruido tuyo en la barra de acción |
 | `/everytunnel paleman` | Los Pale men cercanos: estado y objetivo |
+| `/everytunnel spawn hunters\|junior\|cloud` | Los enemigos del nivel 5 delante de ti: un grupo de tres Hunters o un Distortion Junior (morir en su nivel los devuelve, como a los del nivel), o una Distortion Cloud, estés donde estés |
 | `/everytunnel intro` | Repite la intro del ascensor (Supervivencia o Aventura). En una ejecución de desarrollo, una partida nueva se salta la espera del ascensor; esto la reproduce entera |
 | `/everytunnel newgame` | Empieza la partida de nuevo en este mundo |
 | `/everytunnel setlevel <número>` | Te lleva al inicio del nivel 1, 2, 3... (su `order`), como si entraras andando (su título, sus enemigos); los puzles se quedan como estén. El nivel 4, hasta que esté en pie: el pasillo de diplomas, que lo construye. El nivel 5, hasta que esté en pie: se construye y luego vas a su inicio |
@@ -41,8 +42,6 @@ Comandos de vanilla útiles:
 - `/playsound every_tunnel:<id> master @s`: probar cualquier sonido.
 - `/summon every_tunnel:pale_man`, o el huevo de aparición de la pestaña Every Tunnel (al desarrollar).
 - `/give @s every_tunnel:<bloque u objeto>`: cualquier bloque u objeto del mod (`wrench`, `detector`...).
-- `/summon minecraft:armor_stand`: algo que pueda notar el detector del nivel 5 mientras no exista la Distortion
-  Cloud (la etiqueta de tipos `every_tunnel:radiation_sources` tiene de momento el soporte de armadura).
 - `/gamemode creative`: libre de las reglas del mundo, para construir o mirar.
 
 ## El registro de playtest
@@ -77,6 +76,7 @@ cuenta. Las partidas viven solo en memoria: reabrir el mundo empieza una nueva.
 - Cada cambio de estado del Observer (`Observer … PATROL -> CHASE`), a quién atrapó o vio
   meterse en una taquilla, y a qué velocidad corrió de verdad en cada carrera: `[observer] ran
   64.0 blocks in 9.8 s: 6.5 blocks/s (ALERT_RUN)`, para ajustar `ObserverSettings`.
+- `A Distortion Cloud appears 11 blocks in front of <jugador> at (x, y, z)` (`DistortionHooks`), cada vez que viene una.
 - `[sprint] held but not sprinting at (x, y, z): …` (`client.SprintCheck`): mientras se
   mantiene la tecla de correr andando hacia delante y el jugador no corre, cada 2 s, qué lo
   impide (agotado, llevando una caja o un libro, hambre, usando un objeto, agachado, chocando

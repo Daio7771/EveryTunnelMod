@@ -159,6 +159,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `collapse` | `CollapseHooks` | Nivel 3: al entrar, el techo del túnel del búnker cae detrás del jugador (una vez por partida) |
 | `collapse_blocks` | `CollapseHooks` | Nivel 3: el tramo de túnel que el derrumbe llena de escombros |
 | `observer_never` | `ObserverEntity` | El pozo y el túnel del búnker del nivel 3: el Observer no ve a nadie ahí, así que nunca baja detrás de nadie |
+| `cloud` | `DistortionHooks` | Nivel 5: donde vienen las Distortion Clouds (una cada 2 a 4 minutos pasados en esas zonas) y donde pueden aparecer |
 
 ### Etiquetas de punto de aparición
 
@@ -170,6 +171,8 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `wrench`, `detector` | `LootSpawner` | La llave inglesa y el detector de radiación del nivel 5, en el suelo |
 | `lab_lever` | `LabDoorHooks` | Una palanca del nivel 5 en ese bloque; si se llama `lever_<id de la zona de la puerta>`, abre esa puerta |
 | `restart_point` | `ContinueGame`, `DeathHooks` | Donde reinician una muerte o CONTINUE una vez se ha entrado en su zona (el Lab hall del nivel 5) |
+| `hunters` | `DistortionHooks` | Nivel 5: un grupo de tres Hunters, alrededor de ese punto, mirando hacia donde mira |
+| `distortion_junior` | `DistortionHooks` | Nivel 5: un Distortion Junior, flotando ahí |
 | `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Comida, sobre muebles |
 | `water` | `LootSpawner` | Una botella de agua |
 | `keycard` | `LootSpawner` | La tarjeta |

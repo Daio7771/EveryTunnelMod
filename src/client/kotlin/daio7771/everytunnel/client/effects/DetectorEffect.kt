@@ -4,6 +4,7 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.ClientResources
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.core.detector.Detector
+import daio7771.everytunnel.platform.DistortionEntity
 import daio7771.everytunnel.platform.ModItems
 import daio7771.everytunnel.platform.ModSounds
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
@@ -86,7 +87,7 @@ object DetectorEffect {
     /** Distance from the player's eyes to the nearest source in range with nothing solid in between. */
     private fun nearest(world: ClientWorld, player: ClientPlayerEntity, range: Double): Double? {
         val eyes = player.eyePos
-        return world.getEntitiesByClass(Entity::class.java, player.boundingBox.expand(range)) { it.isAlive && it.type.isIn(SOURCES) }
+        return world.getEntitiesByClass(Entity::class.java, player.boundingBox.expand(range)) { it.isAlive && it.type.isIn(SOURCES) && (it as? DistortionEntity)?.ending != true }
             .map { it to sqrt(it.squaredDistanceTo(eyes)) }
             .filter { (_, d) -> d <= range }
             .sortedBy { it.second }

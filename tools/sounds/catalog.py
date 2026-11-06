@@ -1529,6 +1529,197 @@ def material(fn, impact):
     return lambda rng, variant: fn(rng, variant, impact)
 
 
+
+# ---------------------------------------------------------------------------
+# Level 5's Hunters and Distortions
+
+VOWELS = [(300, 870, 2240), (360, 2000, 2550), (530, 1840, 2480), (640, 1190, 2390),
+          (440, 1020, 2240), (730, 1090, 2440), (570, 840, 2410), (390, 1990, 2550)]
+
+
+def whisper_voice(n, rng, rate=4.0, shift=1.0, density=0.75, hiss=0.4, start=0.0, end=None):
+    """One whispering voice: breath through a vowel's formants, a syllable at a time (about `rate` a
+    second, some left out, see `density`), now and then a sibilant hiss before one. `shift` scales the
+    formants (a smaller or bigger throat). Nothing voiced: no pitch, only air."""
+    y = np.zeros(n)
+    t = start
+    end = n / SR if end is None else end
+    while t < end - 0.05:
+        length = rng.uniform(0.6, 1.4) / rate
+        if rng.random() < density:
+            m = samples(length)
+            vowel = VOWELS[rng.integers(len(VOWELS))]
+            f1, f2, f3 = (f * shift * rng.uniform(0.93, 1.07) for f in vowel)
+            air = rng.normal(0.0, 1.0, m)
+            syllable = (bandpass(air, f1 * 0.8, f1 * 1.25, order=2) + 0.8 * bandpass(air, f2 * 0.88, f2 * 1.12, order=2)
+                        + 0.45 * bandpass(air, f3 * 0.9, min(f3 * 1.1, 15000.0), order=2) + 0.15 * bandpass(air, 200.0, 600.0, order=2))
+            syllable *= envelope(m, [(0.0, 0.0), (length * 0.18, 1.0), (length * 0.55, 0.7), (length, 0.0)])
+            syllable *= rng.uniform(0.5, 1.0)
+            place(y, syllable, t)
+            if rng.random() < hiss:
+                h = samples(rng.uniform(0.05, 0.12))
+                sibilant = bandpass(rng.normal(0.0, 1.0, h), min(4200.0 * shift, 8000.0), 11000.0, order=2)
+                sibilant *= envelope(h, [(0.0, 0.0), (h / SR * 0.3, 0.6), (h / SR, 0.0)])
+                place(y, sibilant, max(0.0, t - h / SR * 0.8))
+        t += length * rng.uniform(1.0, 1.35)
+    return y
+
+
+def stutter(y, rng, count, lo=0.03, hi=0.08):
+    """Digital glitches: `count` short slices each repeated a few times over what follows them, and a
+    stretch of it crushed to a few bits."""
+    y = y.copy()
+    for _ in range(count):
+        m = samples(rng.uniform(lo, hi))
+        at = int(rng.integers(0, max(1, len(y) - m * 6)))
+        piece = y[at:at + m].copy()
+        for k in range(1, int(rng.integers(3, 6))):
+            if at + (k + 1) * m <= len(y):
+                y[at + k * m:at + (k + 1) * m] = piece
+    m = samples(rng.uniform(0.06, 0.14))
+    at = int(rng.integers(0, max(1, len(y) - m)))
+    held = np.repeat(y[at:at + m:12], 12)[:m]
+    peak = max(1e-9, float(np.max(np.abs(held))))
+    y[at:at + len(held)] = np.round(held / peak * 3.0) / 3.0 * peak
+    return y
+
+
+def static_crackle(n, rng, rate, lo=1500.0, hi=9000.0):
+    """Static: noise gated on and off at random, about `rate` times a second."""
+    gate = (smooth_random(n, rate, rng) > 0.35).astype(float)
+    return bandpass(rng.normal(0.0, 1.0, n), lo, hi, order=2) * gate
+
+
+def cloud_whisper(rng, variant):
+    """The Distortion Cloud, all the while it is there: many whispering voices at once, none of them
+    clear, over a low dark breath, broken up now and then by digital glitches."""
+    loop, extra = 6.0, 0.5
+    n = samples(loop + extra)
+    voices = sum(whisper_voice(n, rng, rate=rng.uniform(3.5, 5.5), shift=s, density=0.7) * g
+                 for s, g in ((0.82, 1.0), (0.95, 0.8), (1.08, 0.9), (1.22, 0.6), (0.9, 0.5)))
+    voices *= 0.8 + 0.2 * smooth_random(n, 0.7, rng)
+    breath = lowpass(rng.normal(0.0, 1.0, n), 140.0) * 6.0 * (0.7 + 0.3 * smooth_random(n, 0.4, rng))
+    y = stutter(voices, rng, 4) + breath * 0.5 + static_crackle(n, rng, 3.0) * 0.08
+    return crossfade_loop(y, extra)
+
+
+def cloud_appear(rng, variant):
+    """A Distortion Cloud there all at once: a burst of static, a breath drawn in backwards that stops
+    short, and a low thud."""
+    n = samples(1.3)
+    crackle = static_crackle(n, rng, 40.0, 800.0, 10000.0) * envelope(n, [(0.0, 0.0), (0.02, 1.0), (0.35, 0.5), (0.7, 0.0)])
+    inhale = whisper_voice(n, rng, rate=6.0, shift=0.9, density=1.0, hiss=0.8, end=0.9)[::-1].copy()
+    inhale *= envelope(n, [(0.0, 0.0), (0.4, 0.2), (1.1, 1.0), (1.15, 0.0)])
+    thud = knock(n, rng, 0.0, rng.uniform(45, 60), [1.0, 1.7], [1.0, 0.4], [0.3, 0.15], click=0.3, click_hi=800.0)
+    return stutter(crackle * 0.6 + inhale * 1.4, rng, 2) + drive(thud, 2.0) * 0.8
+
+
+def cloud_kill(rng, variant):
+    """Looking at a Distortion Cloud too long: its whispers rush in from everywhere, higher and harsher,
+    torn by glitches into a screech, then cut dead over a low blow."""
+    n = samples(2.2)
+    y = np.zeros(n)
+    for k in range(6):
+        start = rng.uniform(0.0, 0.3)
+        voice = whisper_voice(n, rng, rate=rng.uniform(7.0, 10.0), shift=0.9 + 0.15 * k, density=1.0, hiss=0.6, start=start, end=1.8)
+        y += voice * envelope(n, [(0.0, 0.2), (1.2, 1.0), (1.75, 1.0), (1.8, 0.0)])
+    f = np.interp(time_axis(n), [0.0, 1.0, 1.8], [500.0, 1400.0, 3200.0])
+    screech = fft_filter(rng.normal(0.0, 1.0, n), 300.0, 6000.0)
+    screech = resonator(screech, 1800.0, 2.0) * 0.3 + glide_tone(f, harmonics=(0.4, 0.3, 0.25, 0.2, 0.1)) * 0.3
+    screech *= envelope(n, [(0.0, 0.0), (0.6, 0.1), (1.6, 1.0), (1.8, 0.0)])
+    blow = knock(n, rng, 1.8, rng.uniform(38, 48), [1.0, 1.6, 2.4], [1.0, 0.5, 0.25], [0.4, 0.2, 0.1], click=0.8, click_hi=1500.0)
+    return drive(stutter(y + screech, rng, 6), 2.5) * 0.8 + drive(blow, 2.0)
+
+
+def cloud_leave(rng, variant):
+    """A Distortion Cloud going: its whispers sinking away and thinning into static that dies out."""
+    n = samples(1.4)
+    voices = whisper_voice(n, rng, rate=5.0, shift=0.8, density=0.9, end=1.0) + whisper_voice(n, rng, rate=4.0, shift=0.7, density=0.8, end=1.0)
+    voices = lowpass(voices, 1800.0) * envelope(n, [(0.0, 1.0), (0.9, 0.0)])
+    crackle = static_crackle(n, rng, 20.0) * envelope(n, [(0.0, 0.4), (0.3, 0.6), (1.3, 0.0)])
+    return voices + crackle * 0.3
+
+
+def junior_whisper(rng, variant):
+    """A Distortion Junior: a small, quick whisper, higher than a Cloud's, and little ticks of glitch."""
+    loop, extra = 4.0, 0.4
+    n = samples(loop + extra)
+    voices = whisper_voice(n, rng, rate=6.0, shift=1.35, density=0.6) + 0.6 * whisper_voice(n, rng, rate=5.0, shift=1.5, density=0.5)
+    ticks = static_crackle(n, rng, 6.0, 3000.0, 12000.0) * 0.05
+    return crossfade_loop(stutter(voices, rng, 2, 0.02, 0.04) + ticks, extra)
+
+
+def junior_stare(rng, variant):
+    """Staring a Distortion Junior down: a thin, glassy hum, like a wet finger round a glass, that the game
+    raises in pitch as the stare goes on and its eye cracks."""
+    loop = 2.0
+    n = samples(loop)
+    t = time_axis(n)
+    f = loop_frequency(660.0, loop)
+    beat = loop_frequency(1.5, loop)
+    tone = np.sin(TAU * f * t) + 0.35 * np.sin(TAU * 2 * f * t) + 0.12 * np.sin(TAU * 3 * f * t)
+    tone *= 0.75 + 0.25 * np.sin(TAU * beat * t)
+    rub = shaped_noise(n, rng, lo=1800.0, hi=5000.0) * 0.08
+    return tone * 0.6 + rub
+
+
+def junior_die(rng, variant):
+    """A Distortion Junior ending: its eye cracking like glass, a soft pop, and a last whisper sighing out."""
+    n = samples(1.4)
+    ratios = sorted(rng.uniform(1.0, 6.0, 7))
+    crack = knock(n, rng, 0.0, rng.uniform(1900, 2400), ratios, [1.0 / (1 + i * 0.4) for i in range(7)],
+                  [0.05 / (1 + i * 0.2) for i in range(7)], click=1.0, click_hi=12000.0)
+    crack += knock(n, rng, 0.07, rng.uniform(2600, 3100), ratios[:4], [0.6, 0.4, 0.3, 0.2], [0.03, 0.02, 0.02, 0.01], click=0.8, click_hi=12000.0)
+    pop = burst(n, rng, 0.12, 0.05, lo=80.0, hi=900.0, tau=0.02, amp=1.2)
+    sigh = whisper_voice(n, rng, rate=3.0, shift=1.3, density=1.0, hiss=0.0, start=0.15, end=1.2)
+    sigh = lowpass(sigh, 2500.0) * envelope(n, [(0.0, 0.0), (0.2, 1.0), (1.3, 0.0)])
+    return crack * 0.7 + pop + sigh * 0.8
+
+
+def hunter_shriek(rng, variant):
+    """The Hunters spotting someone: a short, rasping, child-high shriek, rising then cracking."""
+    n = samples(rng.uniform(0.7, 0.9))
+    t = time_axis(n)
+    f0 = rng.uniform(820, 980)
+    f = f0 * np.interp(t, [0.0, 0.15, 0.6, t[-1]], [0.8, 1.15, 1.25, 0.9]) * (1 + 0.03 * np.sin(TAU * 13.0 * t)) * (1 + 0.01 * smooth_random(n, 40.0, rng))
+    voice = glide_tone(f, harmonics=(1.0, 0.7, 0.5, 0.35, 0.25, 0.15))
+    voice = bandpass(voice, 700.0, 4500.0, order=2) + 0.5 * resonator(voice, 2300.0, 4.0)
+    rasp = bandpass(rng.normal(0.0, 1.0, n), 1500.0, 6000.0, order=2) * 0.35
+    return drive((voice + rasp) * envelope(n, [(0.0, 0.0), (0.03, 1.0), (0.5, 0.8), (t[-1], 0.0)]), 3.0)
+
+
+def hunter_attack(rng, variant):
+    """A Hunter's swipe: a quick swish of a coat sleeve and a dry scratch."""
+    n = samples(0.35)
+    swish = bandpass(rng.normal(0.0, 1.0, n), 500.0, 3500.0, order=2) * envelope(n, [(0.0, 0.0), (0.08, 0.8), (0.16, 0.0)])
+    scratch = bandpass(rng.normal(0.0, 1.0, n), 1800.0, 7000.0, order=2) * (smooth_random(n, 80.0, rng) > 0.1)
+    scratch *= envelope(n, [(0.0, 0.0), (0.12, 0.0), (0.14, 1.0), (0.3, 0.0)])
+    return swish * 0.7 + scratch * 0.6
+
+
+def hunter_death(rng, variant):
+    """A Hunter struck down: a short wet crunch and a choked squeal falling away."""
+    n = samples(0.8)
+    t = time_axis(n)
+    crunch = burst(n, rng, 0.0, 0.08, lo=200.0, hi=3000.0, tau=0.03, amp=1.2)
+    crunch += knock(n, rng, 0.0, rng.uniform(140, 180), [1.0, 2.2], [0.8, 0.3], [0.08, 0.04], click=0.6)
+    f = rng.uniform(700, 850) * np.interp(t, [0.0, 0.5], [1.1, 0.45])
+    squeal = glide_tone(f, harmonics=(1.0, 0.5, 0.3, 0.2)) * envelope(n, [(0.0, 0.0), (0.04, 0.7), (0.4, 0.3), (0.6, 0.0)])
+    return crunch + drive(bandpass(squeal, 400.0, 4000.0, order=2), 2.0) * 0.6
+
+
+def hunter_ambient(rng, variant):
+    """A Hunter idling: quick wet clicks of the tongue and a thin wheeze, as if muttering to itself."""
+    n = samples(1.6)
+    y = np.zeros(n)
+    t = rng.uniform(0.05, 0.2)
+    while t < 1.2:
+        y += knock(n, rng, t, rng.uniform(1800, 2800), [1.0, 1.6], [0.4, 0.2], [0.012, 0.008], click=0.3, click_hi=6000.0)
+        t += rng.uniform(0.06, 0.2)
+    wheeze = whisper_voice(n, rng, rate=3.0, shift=1.6, density=1.0, hiss=0.0, start=0.2, end=1.4) * 0.5
+    return y + wheeze
+
+
 MATERIALS = [
     ("cardboard", cardboard, "Cardboard boxes"),
     ("plastic", plastic, "Traffic cones, bins, cables"),
@@ -1635,6 +1826,20 @@ SOUNDS = [
     Sound("item.wrench.hit", "Level progress", "Level 5: the wrench landing a blow, metal on something", "mono", False, 3, wrench_hit, -3.0, attenuation=16),
     Sound("item.detector.beep", "Level progress", "Level 5: the radiation detector's beep, repeated faster as the Cloud nears", "mono", False, 1, detector_beep, -6.0),
     Sound("event.lab.unlock", "Level progress", "Level 5: a lock letting go far away (the south route opens)", "mono", False, 1, lab_unlock, -4.0),
+    Sound("entity.hunter.shriek", "Level 5 / Hunters", "A group of Hunters spotting someone: a rasping child-high shriek", "mono", False, 3, hunter_shriek, -2.0, attenuation=32),
+    Sound("entity.hunter.attack", "Level 5 / Hunters", "A Hunter's swipe: a sleeve's swish and a scratch", "mono", False, 3, hunter_attack, -4.0),
+    Sound("entity.hunter.death", "Level 5 / Hunters", "A Hunter struck down: a wet crunch, a choked squeal", "mono", False, 3, hunter_death, -3.0),
+    Sound("entity.hunter.ambient", "Level 5 / Hunters", "A Hunter idling: tongue clicks and a thin wheeze", "mono", False, 3, hunter_ambient, -8.0, attenuation=12),
+    Sound("entity.distortion_cloud.whisper", "Level 5 / Distortions", "The Distortion Cloud while it is there: many whispers, glitching (loop)", "mono", True, 1, cloud_whisper, -4.0,
+          stream=False, attenuation=24),
+    Sound("entity.distortion_cloud.appear", "Level 5 / Distortions", "A Distortion Cloud there all at once: static, a breath drawn in backwards", "mono", False, 1, cloud_appear, -2.0, attenuation=32),
+    Sound("entity.distortion_cloud.kill", "Level 5 / Distortions", "Looking at the Cloud too long: whispers rushing into a screech, cut dead", "mono", False, 1, cloud_kill, -1.0, attenuation=32),
+    Sound("entity.distortion_cloud.leave", "Level 5 / Distortions", "A Distortion Cloud going: whispers sinking into dying static", "mono", False, 1, cloud_leave, -4.0, attenuation=24),
+    Sound("entity.distortion_junior.whisper", "Level 5 / Distortions", "A Distortion Junior: a small quick whisper (loop)", "mono", True, 1, junior_whisper, -6.0,
+          stream=False, attenuation=16),
+    Sound("entity.distortion_junior.stare", "Level 5 / Distortions", "Staring a Junior down: a glassy hum, raised in pitch by the game (loop)", "mono", True, 1, junior_stare, -6.0,
+          stream=False, attenuation=16),
+    Sound("entity.distortion_junior.die", "Level 5 / Distortions", "A Junior ending: its eye cracking like glass, a pop, a last sigh", "mono", False, 1, junior_die, -3.0, attenuation=24),
     Sound("block.safe.tick", "Level progress", "A safe's dial passing a number: the soft tick", "mono", False, 3, safe_tick, -18.0),
     Sound("block.safe.click", "Level progress", "A safe's dial on the right number: a low clack under the tick", "mono", False, 2, safe_click, -6.0),
     Sound("block.safe.open", "Level progress", "A safe giving way (bolts, hinge)", "mono", False, 1, safe_open, -4.0),

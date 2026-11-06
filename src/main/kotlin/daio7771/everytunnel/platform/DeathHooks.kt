@@ -33,7 +33,8 @@ import java.util.UUID
  * black ([FADE_OUT_TICKS]), they cannot move and nothing hurts them; in the dark they are
  * taken to the start of the level they were last in (its first spawn point tagged
  * `player`) with full health and resources, and the Pale men of that level go back to
- * their spawn points and start over. Then the screen fades back in ([FADE_IN_TICKS]).
+ * their spawn points and start over (the Observers too, and Level 5's Hunters and Distortions,
+ * [DistortionHooks.restart]). Then the screen fades back in ([FADE_IN_TICKS]).
  * The inventory is kept: what was picked up stays picked up.
  *
  * A player who never entered a level dies the vanilla way.
@@ -155,6 +156,7 @@ object DeathHooks {
             paleMan.returnHome(point.position.x, point.position.y, point.position.z, point.yaw)
         }
         ObserverHooks.sendHome(world, levelId)
+        DistortionHooks.restart(world, levelId)
         CollapseHooks.reset(player.server, levelId)
     }
 

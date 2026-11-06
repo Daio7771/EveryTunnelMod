@@ -1,0 +1,218 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.distortion_junior",
+        "texture_width": 64,
+        "texture_height": 64,
+        "visible_bounds_width": 3,
+        "visible_bounds_height": 2.5,
+        "visible_bounds_offset": [
+          0,
+          1.25,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "body",
+          "pivot": [
+            0,
+            24,
+            1
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -4.0,
+                20.0,
+                -2.5
+              ],
+              "size": [
+                8,
+                8,
+                7
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "top",
+          "pivot": [
+            0,
+            29,
+            1
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -3.0,
+                27.0,
+                -1.5
+              ],
+              "size": [
+                6,
+                4,
+                5
+              ],
+              "uv": [
+                18,
+                15
+              ]
+            }
+          ]
+        },
+        {
+          "name": "left",
+          "pivot": [
+            -4.5,
+            25,
+            1.5
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -6.5,
+                22.5,
+                -1.0
+              ],
+              "size": [
+                4,
+                5,
+                5
+              ],
+              "uv": [
+                30,
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "name": "right",
+          "pivot": [
+            4.5,
+            23,
+            1
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                2.5,
+                20.5,
+                -1.5
+              ],
+              "size": [
+                4,
+                5,
+                5
+              ],
+              "uv": [
+                0,
+                15
+              ]
+            }
+          ]
+        },
+        {
+          "name": "low",
+          "pivot": [
+            0,
+            19.5,
+            1
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -3.0,
+                18.0,
+                -1.5
+              ],
+              "size": [
+                6,
+                3,
+                5
+              ],
+              "uv": [
+                40,
+                15
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tail",
+          "pivot": [
+            1,
+            17,
+            1
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -0.5,
+                15.5,
+                -0.5
+              ],
+              "size": [
+                3,
+                3,
+                3
+              ],
+              "uv": [
+                0,
+                25
+              ]
+            }
+          ]
+        },
+        {
+          "name": "eye",
+          "pivot": [
+            0,
+            25,
+            -3
+          ],
+          "parent": "root",
+          "cubes": [
+            {
+              "origin": [
+                -3.0,
+                23.0,
+                -3.5
+              ],
+              "size": [
+                6,
+                4,
+                1
+              ],
+              "uv": [
+                12,
+                25
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

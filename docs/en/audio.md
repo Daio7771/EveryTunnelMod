@@ -41,6 +41,8 @@ registered in `platform.ModSounds`. Any of them can be tried with
 | Music | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | synth / CC BY (elevator) |
 | Events | `event.death`, `event.level_transition`, `event.observer.alert` (placeholder), `event.collapse` (Level 3's tunnel collapse) | synth |
 | Level 5 | `block.airlock.close`, `block.airlock.open` (the airlock's and the locked doors), `item.wrench.hit` (3 variations), `item.detector.beep`, `event.lab.unlock` (the south route opening, far off) | synth |
+| Level 5's Hunters | `entity.hunter.shriek` (a chase starts), `.attack`, `.death`, `.ambient` (3 variations each) | synth |
+| Level 5's Distortions | `entity.distortion_cloud.whisper` (loop), `.appear`, `.kill`, `.leave`; `entity.distortion_junior.whisper` (loop), `.stare` (loop, its pitch raised by the game), `.die`. The whispers are breath through moving vowel formants, no voice | synth |
 
 ## Who plays what
 
@@ -61,6 +63,7 @@ Client side (`client.effects`), per player and not positioned unless noted:
 | `FluorescentHum` | The hum of the 4 nearest lights within 10 blocks, each at a slightly different pitch (positioned) | Blocks |
 | `HeartbeatEffect` | One heartbeat at a time near the Pale man | Players |
 | `DetectorEffect` | Level 5's detector beeping, faster as a Cloud nears (in the head) | Players |
+| `DistortionEffect` | The Distortions' whisper loops, following them; the Cloud's louder as it is looked at, the Junior's stare hum higher as it is stared at | Hostile |
 | `BreathingEffect` | Heavy breathing when exhausted | Players |
 | `TensionMusic` | The Pale man's music layers, and the Observer's (walking your way, running at you), crossfaded | Music |
 | `IntroMusic` | The elevator song, then its tape-stop fade | Music |

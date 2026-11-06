@@ -299,5 +299,8 @@
   "block.every_tunnel.wall_message": "Wall Message",
   "block.every_tunnel.airlock_door": "Airlock Door",
   "block.every_tunnel.loot_wrench": "Wrench (Loot)",
-  "block.every_tunnel.loot_detector": "Radiation Detector (Loot)"
+  "block.every_tunnel.loot_detector": "Radiation Detector (Loot)",
+  "entity.every_tunnel.hunter": "Hunter",
+  "entity.every_tunnel.distortion_cloud": "Distortion Cloud",
+  "entity.every_tunnel.distortion_junior": "Distortion Junior"
 }

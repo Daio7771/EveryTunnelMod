@@ -117,7 +117,7 @@ La luz en sí se dibuja en el cliente, ver [Gráficos](graphics.md#la-linterna).
   Distortion Cloud más cercana a menos de `detector.range` (16) bloques, nunca a través de una pared, y pita en
   la cabeza del jugador (`item.detector.beep`), de cada 1,2 s en el borde a cada 0,1 s pegado a ella
   (`client.effects.DetectorEffect`, números en `core.detector.Detector`). Lo que nota es cualquier entidad de la
-  etiqueta de tipos `every_tunnel:radiation_sources`: de momento el soporte de armadura, hasta que exista la Cloud.
+  etiqueta de tipos `every_tunnel:radiation_sources` (la Cloud), hasta que empieza a irse.
 
 ## HUD
 
@@ -200,6 +200,31 @@ Cada clave y su valor por defecto:
 | `danger_range` | 8 | Más cerca de esto parpadea el triángulo de peligro |
 | `slowest_beep_seconds` | 1.2 | Entre pitidos en el borde de su alcance... |
 | `fastest_beep_seconds` | 0.1 | ...y pegado a la Cloud |
+| **`hunter`** | | Los Hunters del nivel 5 |
+| `health` | 6 | Su vida (un golpe de llave inglesa tiene que quitársela entera) |
+| `damage` | 1 | Vida que quita un golpe (medio corazón)... |
+| `attack_seconds` | 1 | ...como mucho cada tantos segundos cada uno... |
+| `attack_range` | 1.4 | ...desde como mucho tantos bloques |
+| `sight_range` | 16 | Bloques que ven, nunca a través de una pared... |
+| `field_of_view` | 140 | ...en un cono de tantos grados... |
+| `sense_range` | 3 | ...y más cerca de esto, miren adonde miren |
+| `lost_seconds` | 4 | Segundos sin saber del que persiguen antes de buscar... |
+| `search_seconds` | 3 | ...y cuánto buscan antes de volver andando |
+| `wander_radius` | 5 | Bloques alrededor de su punto de aparición por los que merodean |
+| `wander_pause_seconds` | 3 | Segundos que se quedan quietos entre paseo y paseo |
+| `walk_speed`, `run_speed` | 0.7, 1.5 | Velocidades al moverse (veces su velocidad base) |
+| **`cloud`** | | La Distortion Cloud del nivel 5 |
+| `grace_seconds` | 1 | Segundos mirando hacia ella antes de que mate |
+| `leave_seconds` | 6 | Segundos sin que nadie mire hacia ella antes de que se vaya |
+| `min_seconds`, `max_seconds` | 120, 240 | Viene una tras un tiempo al azar entre estos, pasado en zonas con la etiqueta `cloud` |
+| `nearest`, `farthest` | 8, 14 | Bloques por delante del jugador donde aparece |
+| `touch_range` | 1.2 | Más cerca de esto mata mire uno adonde mire |
+| **`junior`** | | El Distortion Junior del nivel 5 |
+| `range` | 8 | Bloques desde su ojo a los que molesta al jugador (nunca a través de una pared) |
+| `stare_seconds` | 4 | Segundos mirándole al ojo, sin apartar la vista, que acaban con él |
+| `aim_degrees` | 5 | Grados que puede apartarse la mira de su ojo (más de muy cerca) |
+| `tremor_degrees` | 0.6 | Cuánto tiembla la cámara |
+| `drift_degrees_per_second` | 14 | Lo deprisa que se desvía |
 | **`noise`** | | Radio en bloques; 0 lo hace silencioso |
 | `sneak_radius` | 2 | Por paso, agachado |
 | `walk_radius` | 6 | Por paso, andando |

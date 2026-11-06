@@ -33,6 +33,9 @@ import net.minecraft.util.Identifier
  * - `/everytunnel noise`: the noises of the last 5 seconds near you.
  * - `/everytunnel noise watch`: shows each noise you make in the action bar (toggle).
  * - `/everytunnel paleman`: the Pale men near you, what they are doing and where they are going.
+ * - `/everytunnel spawn hunters|junior|cloud`: Level 5's enemies in front of you: a group of three
+ *   Hunters or a Distortion Junior (dying in their level puts them back, like the level's own), or a
+ *   Distortion Cloud, wherever you are ([DistortionHooks.spawnForDebug]).
  * - `/everytunnel intro`: plays the new-game intro (the elevator) again for you (see [IntroHooks]).
  * - `/everytunnel newgame`: starts the game over in this world (see [NewGame]).
  * - `/everytunnel setlevel <number>`: takes you to the start of the level of that `order`
@@ -84,6 +87,12 @@ object DebugCommands {
                         .then(CommandManager.literal("watch").executes(::watchNoise)),
                 )
                 .then(CommandManager.literal("paleman").executes(::paleMen))
+                .then(
+                    CommandManager.literal("spawn")
+                        .then(CommandManager.literal("hunters").executes { spawn(it, "hunters") })
+                        .then(CommandManager.literal("junior").executes { spawn(it, "junior") })
+                        .then(CommandManager.literal("cloud").executes { spawn(it, "cloud") }),
+                )
                 .then(CommandManager.literal("intro").executes(::intro))
                 .then(CommandManager.literal("newgame").executes(::newGame))
                 .then(
@@ -254,6 +263,15 @@ object DebugCommands {
     }
 
     private const val PALE_MAN_LIST_RANGE = 128
+
+    private fun spawn(context: CommandContext<ServerCommandSource>, what: String): Int {
+        val player = context.source.playerOrThrow
+        if (!DistortionHooks.spawnForDebug(player, what)) {
+            reply(context, "No room for it in front of you.")
+            return 0
+        }
+        return 1
+    }
 
     private fun intro(context: CommandContext<ServerCommandSource>): Int {
         val player = context.source.playerOrThrow

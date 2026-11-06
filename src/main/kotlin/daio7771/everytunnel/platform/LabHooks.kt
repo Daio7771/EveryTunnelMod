@@ -31,7 +31,7 @@ import java.util.UUID
  *   again. Once the level stands, after a moment in the dark, the door ahead (tagged [FRONT_TAG], in the
  *   Lobby's wall) slides open slowly onto the lit Lobby, and the level's title shows. Each door is two leaves of [AirlockDoorBlock]
  *   meeting in the middle, moved a quarter of a block a step ([SlidingDoor]).
- *   Then the level's loot goes out ([LootSpawner]).
+ *   Then the level's loot goes out ([LootSpawner]), and its Hunters and Distortions ([DistortionHooks]).
  *
  * What stands is not undone when the world opens: nobody can reach it until its next build. A game
  * continued in Level 5 builds it behind the loading screen ([beginAgain], [ContinueGame]); the airlock is
@@ -150,6 +150,7 @@ object LabHooks {
         phase = Phase.BUILT
         val level = LevelManager.get(LEVEL_ID) ?: return
         LootSpawner.place(server, level)
+        DistortionHooks.levelBuilt(server, level)
         ContinueGame.labBuilt(server)
         for (id in sendToStart) server.playerManager.getPlayer(id)?.let { toStart(it, level) }
         sendToStart.clear()
@@ -160,6 +161,7 @@ object LabHooks {
         phase = Phase.NOT_STARTED
         airlock = Airlock.WAITING
         LabDoorHooks.reset()
+        DistortionHooks.clearAll()
     }
 
     /** A new game in the same world: the next walk down Level 4's dark stretch builds it again. */
@@ -168,6 +170,7 @@ object LabHooks {
         sendToStart.clear()
         airlock = Airlock.WAITING
         LabDoorHooks.reset()
+        DistortionHooks.clearAll()
     }
 
     /** [level] is the one built in play, and it does not stand yet. */

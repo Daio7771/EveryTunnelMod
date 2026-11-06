@@ -9,6 +9,7 @@ import daio7771.everytunnel.platform.CollapseHooks
 import daio7771.everytunnel.platform.WaterDispenserHooks
 import daio7771.everytunnel.platform.CarryHooks
 import daio7771.everytunnel.platform.DeathHooks
+import daio7771.everytunnel.platform.DistortionHooks
 import daio7771.everytunnel.platform.DebugCommands
 import daio7771.everytunnel.platform.DevWorlds
 import daio7771.everytunnel.platform.EndingHooks
@@ -102,6 +103,7 @@ object EveryTunnel : ModInitializer {
         LabHooks.register()
         LabDoorHooks.register()
         SlidingDoors.register()
+        DistortionHooks.register()
         LoungePuzzleHooks.register()
         DartHooks.register()
         ContinueGame.register()

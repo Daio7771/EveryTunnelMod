@@ -479,6 +479,108 @@
       "every_tunnel:block/wood/step_4"
     ]
   },
+  "entity.distortion_cloud.appear": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/distortion_cloud/appear_1",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "entity.distortion_cloud.kill": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/distortion_cloud/kill_1",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "entity.distortion_cloud.leave": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/distortion_cloud/leave_1",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "entity.distortion_cloud.whisper": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/distortion_cloud/whisper_1",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "entity.distortion_junior.die": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/distortion_junior/die_1",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "entity.distortion_junior.stare": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/distortion_junior/stare_1",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "entity.distortion_junior.whisper": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/distortion_junior/whisper_1",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "entity.hunter.ambient": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/hunter/ambient_1",
+        "attenuation_distance": 12
+      },
+      {
+        "name": "every_tunnel:entity/hunter/ambient_2",
+        "attenuation_distance": 12
+      },
+      {
+        "name": "every_tunnel:entity/hunter/ambient_3",
+        "attenuation_distance": 12
+      }
+    ]
+  },
+  "entity.hunter.attack": {
+    "sounds": [
+      "every_tunnel:entity/hunter/attack_1",
+      "every_tunnel:entity/hunter/attack_2",
+      "every_tunnel:entity/hunter/attack_3"
+    ]
+  },
+  "entity.hunter.death": {
+    "sounds": [
+      "every_tunnel:entity/hunter/death_1",
+      "every_tunnel:entity/hunter/death_2",
+      "every_tunnel:entity/hunter/death_3"
+    ]
+  },
+  "entity.hunter.shriek": {
+    "sounds": [
+      {
+        "name": "every_tunnel:entity/hunter/shriek_1",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "every_tunnel:entity/hunter/shriek_2",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "every_tunnel:entity/hunter/shriek_3",
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "entity.pale_man.breathing": {
     "sounds": [
       {

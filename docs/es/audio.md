@@ -43,6 +43,8 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | Música | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | síntesis / CC BY (ascensor) |
 | Eventos | `event.death`, `event.level_transition`, `event.observer.alert` (provisional), `event.collapse` (el derrumbe del túnel del nivel 3) | síntesis |
 | Nivel 5 | `block.airlock.close`, `block.airlock.open` (la esclusa y las puertas bloqueadas), `item.wrench.hit` (3 variaciones), `item.detector.beep`, `event.lab.unlock` (la ruta sur al abrirse, a lo lejos) | síntesis |
+| Los Hunters del nivel 5 | `entity.hunter.shriek` (empieza una persecución), `.attack`, `.death`, `.ambient` (3 variaciones cada uno) | síntesis |
+| Las Distortions del nivel 5 | `entity.distortion_cloud.whisper` (bucle), `.appear`, `.kill`, `.leave`; `entity.distortion_junior.whisper` (bucle), `.stare` (bucle, el juego le sube el tono), `.die`. Los susurros son aire a través de formantes de vocales que cambian, sin voz | síntesis |
 
 ## Quién reproduce qué
 
@@ -65,6 +67,7 @@ Lado del cliente (`client.effects`), por jugador y sin posición salvo que se in
 | `FluorescentHum` | El zumbido de las 4 luces más cercanas a 10 bloques o menos, cada una con un tono un poco distinto (con posición) | Bloques |
 | `HeartbeatEffect` | Un latido cada vez cerca del Pale man | Jugadores |
 | `DetectorEffect` | El detector del nivel 5 pitando, más deprisa al acercarse una Cloud (en la cabeza) | Jugadores |
+| `DistortionEffect` | Los bucles de susurros de las Distortions, que las siguen; el de la Cloud más fuerte cuanto más se la mira, el zumbido del Junior más agudo cuanto más se le mira al ojo | Hostiles |
 | `BreathingEffect` | Respiración fuerte agotado | Jugadores |
 | `TensionMusic` | Las capas de música del Pale man y las del Observer (viniendo hacia ti, corriendo a por ti), con fundido cruzado | Música |
 | `IntroMusic` | La canción del ascensor y luego su parada de cinta | Música |

@@ -62,6 +62,9 @@ con un comentario KDoc que cuenta más.
 |---|---|
 | `PaleManBrain.kt` | La máquina de estados del Pale man y la fórmula del volumen |
 | `ObserverBrain.kt` | La máquina de estados del Observer (patrulla, aviso, persecución, búsqueda, sacar de la taquilla) y sus números |
+| `HunterBrain.kt` | La máquina de estados de los Hunters (merodear, perseguir, buscar, volver) y sus golpes |
+| `Gaze.kt` | Adónde mira un jugador: por delante (la Cloud), en el blanco (el ojo del Junior) |
+| `DistortionClocks.kt` | El reloj de la Cloud (la gracia, irse), el del Junior (la mirada), cuándo viene la siguiente Cloud |
 | `Package.kt` | Documentación del paquete |
 
 ### `util/` y `world/`
@@ -119,7 +122,7 @@ con un comentario KDoc que cuenta más.
 | `ValveBlock.kt` | Una válvula de compuerta en línea en una tubería de pared: orientación, abierta, letra A a E (nivel 3) |
 | `LootBlock.kt` | Botín tirado en el suelo, se recoge con clic derecho |
 
-### `platform/`: el Pale man
+### `platform/`: los enemigos
 
 | Archivo | Qué hace |
 |---|---|
@@ -127,6 +130,11 @@ con un comentario KDoc que cuenta más.
 | `PaleManSpawner.kt` | Genera uno por cada punto `pale_man`, una vez por mundo; contador de partidas nuevas |
 | `ObserverEntity.kt` | El Observer: vista (cono, alcance, paredes), moverse y mirar alrededor, atrapar, sacar de las taquillas |
 | `ObserverHooks.kt` | Genera al Observer, le pasa los avisos de las cajas, lo devuelve a casa al morir el jugador |
+| `HunterEntity.kt` | Un Hunter: vista (cono, alcance, paredes), avisar a su grupo, moverse, golpes, sonidos, animaciones |
+| `DistortionEntity.kt` | Lo que comparten la Cloud y el Junior: flotar, que nada los toque, mirar al jugador, la mirada y el irse sincronizados, el humo |
+| `DistortionCloudEntity.kt` | La Distortion Cloud: quién mira hacia ella, matar, irse |
+| `DistortionJuniorEntity.kt` | El Distortion Junior: a quién molesta y marca, la mirada que acaba con él |
+| `DistortionHooks.kt` | Los enemigos del nivel 5: sus puestos según los puntos de aparición, de vuelta al morir, avisar a los Hunters, cuándo y dónde viene una Cloud, `/everytunnel spawn` |
 
 ### `platform/`: hooks (lógica de juego movida por eventos)
 
@@ -218,6 +226,7 @@ con un comentario KDoc que cuenta más.
 | `FluorescentHum.kt` | Zumbido de las 4 luces más cercanas |
 | `HeartbeatEffect.kt` | Latido según la distancia al Pale man |
 | `DetectorEffect.kt` | El detector del nivel 5: la Cloud más cercana a la vista, los pitidos |
+| `DistortionEffect.kt` | Las Distortions en los sentidos: susurros, la pantalla distorsionándose ante una Cloud, el temblor y la deriva del Junior |
 | `CameraShake.kt` | La cámara temblando en el derrumbe del túnel del nivel 3 |
 | `FilmPlayer.kt` | La película del Cinema en su pantalla, y el sonido del proyector |
 | `BreathingEffect.kt` | Respiración fuerte agotado |
@@ -247,6 +256,8 @@ con un comentario KDoc que cuenta más.
 | `DartRenderer.kt` | Un dardo lanzado: la flecha de vanilla, más pequeña, con su textura |
 | `WallMessageRenderer.kt` | Dibuja un mensaje con la fuente pintada y recuerda lo que le ha pasado |
 | `ObserverRenderer.kt` | Renderizador de GeckoLib del Observer; su cabeza gira con la de la entidad |
+| `HunterRenderer.kt` | Renderizador de GeckoLib de los Hunters, con los ojos brillando |
+| `DistortionRenderer.kt` | Renderizador y modelo de GeckoLib de las Distortions: giradas hacia su yaw, el glitch, el ojo del Junior agrietándose |
 | `PaleManModel.kt` | Su modelo de GeckoLib, más la postura encorvada bajo techos bajos |
 | `BoxShelfRenderer.kt` | Las cajas moradas en la estantería, a brillo completo |
 | `WallTextRenderer.kt` | Un texto de pared: blanco sobre una placa oscura, o letras grandes oscuras en la pared |

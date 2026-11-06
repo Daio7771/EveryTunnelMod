@@ -113,7 +113,7 @@ The light itself is drawn on the client, see [Graphics](graphics.md#the-flashlig
   nearest Distortion Cloud within `detector.range` (16) blocks, never through a wall, and beeps in the
   player's head (`item.detector.beep`), from every 1.2 s at the edge to every 0.1 s right next to it
   (`client.effects.DetectorEffect`, numbers in `core.detector.Detector`). What it notices is any entity of
-  the type tag `every_tunnel:radiation_sources`: the armor stand for now, until the Cloud exists.
+  the type tag `every_tunnel:radiation_sources` (the Cloud), until it starts to go.
 
 ## HUD
 
@@ -195,6 +195,31 @@ Every key and its default:
 | `danger_range` | 8 | Closer than this the warning triangle blinks |
 | `slowest_beep_seconds` | 1.2 | Between beeps at the edge of its range... |
 | `fastest_beep_seconds` | 0.1 | ...and right next to the Cloud |
+| **`hunter`** | | Level 5's Hunters |
+| `health` | 6 | Their health (one blow of the wrench must take it all) |
+| `damage` | 1 | Health a hit takes (half a heart)... |
+| `attack_seconds` | 1 | ...at most every this many seconds each... |
+| `attack_range` | 1.4 | ...from at most this many blocks |
+| `sight_range` | 16 | Blocks they see, never through a wall... |
+| `field_of_view` | 140 | ...in a cone this many degrees wide... |
+| `sense_range` | 3 | ...and closer than this whatever way they face |
+| `lost_seconds` | 4 | Seconds without news of the one they chase before they search... |
+| `search_seconds` | 3 | ...and how long they search before walking back |
+| `wander_radius` | 5 | Blocks from their spawn point they wander |
+| `wander_pause_seconds` | 3 | Seconds they stand between walks |
+| `walk_speed`, `run_speed` | 0.7, 1.5 | Pathfinding speeds (times their base speed) |
+| **`cloud`** | | Level 5's Distortion Cloud |
+| `grace_seconds` | 1 | Seconds of looking its way before it kills |
+| `leave_seconds` | 6 | Seconds with nobody looking its way before it goes |
+| `min_seconds`, `max_seconds` | 120, 240 | One comes after a random time between these, spent in zones tagged `cloud` |
+| `nearest`, `farthest` | 8, 14 | Blocks ahead of the player where it appears |
+| `touch_range` | 1.2 | Closer than this it kills whatever way one faces |
+| **`junior`** | | Level 5's Distortion Junior |
+| `range` | 8 | Blocks from its eye within which it troubles the player (never through a wall) |
+| `stare_seconds` | 4 | Seconds of staring at its eye, without looking away, that end it |
+| `aim_degrees` | 5 | Degrees off its eye the crosshair may be (more very close up) |
+| `tremor_degrees` | 0.6 | How far the camera trembles |
+| `drift_degrees_per_second` | 14 | How fast it drifts away |
 | **`noise`** | | Radius in blocks; 0 makes it silent |
 | `sneak_radius` | 2 | Per step, sneaking |
 | `walk_radius` | 6 | Per step, walking |

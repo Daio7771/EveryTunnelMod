@@ -27,6 +27,8 @@ git).
 | `tools/film/eye.py` | `film_eye/` | lo que muestra el Cinema durante el apagón: un ojo e INTRUDER DETECTED |
 | `tools/entity/pale_man.py` | Geometría, animaciones, textura y máscara de brillo del Pale man, modelo del huevo | el Pale man |
 | `tools/entity/observer.py` | Geometría, animaciones y textura del Observer, modelo del huevo | el Observer |
+| `tools/entity/hunter.py` | Geometría, animaciones, textura y máscara de brillo de los ojos de los Hunters | los Hunters del nivel 5 |
+| `tools/entity/distortion.py` | Geometría, animaciones, texturas y máscaras de brillo de la Distortion Cloud y el Junior (el ojo del Junior agrietándose en cuatro fases) | las Distortions del nivel 5 |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (la skin del uniforme) | el uniforme |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png` | los iconos del HUD, el detector del nivel 5 |
 | `tools/gui/logo.py` | `logo.png` | el logo |

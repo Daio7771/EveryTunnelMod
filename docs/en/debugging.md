@@ -18,6 +18,7 @@ the answers. The spawn eggs are in the Every Tunnel tab only in dev runs too.
 | `/everytunnel noise` | The noises of the last 5 seconds near you |
 | `/everytunnel noise watch` | Toggles showing each noise you make in the action bar |
 | `/everytunnel paleman` | The Pale men near you: state and target |
+| `/everytunnel spawn hunters\|junior\|cloud` | Level 5's enemies in front of you: a group of three Hunters or a Distortion Junior (a death in their level puts them back, like the level's own), or a Distortion Cloud, wherever you are |
 | `/everytunnel intro` | Plays the elevator intro again (Survival or Adventure). In a development run, a new game skips the wait in the elevator; this plays it whole |
 | `/everytunnel newgame` | Starts the game over in this world |
 | `/everytunnel setlevel <number>` | Takes you to the start of level 1, 2, 3... (its `order`), as if you walked in (its title, its enemies); puzzles stay as they are. Level 4, until it stands: the diploma corridor, which builds it. Level 5, until it stands: it is built, then you go to its start |
@@ -40,8 +41,6 @@ Useful vanilla commands:
 - `/playsound every_tunnel:<id> master @s`: try any sound.
 - `/summon every_tunnel:pale_man`, or the spawn egg in the Every Tunnel tab (dev runs).
 - `/give @s every_tunnel:<block or item>`: any mod block or item (`wrench`, `detector`...).
-- `/summon minecraft:armor_stand`: something for Level 5's detector to notice, until the Distortion Cloud
-  exists (the type tag `every_tunnel:radiation_sources` holds the armor stand for now).
 - `/gamemode creative`: free from the world rules, to build or look around.
 
 ## The playtest log
@@ -76,6 +75,7 @@ only: reopening the world starts a new one.
 - Every Observer state change (`Observer … PATROL -> CHASE`), whom he caught or saw get into a
   locker, and how fast each run really was: `[observer] ran 64.0 blocks in 9.8 s: 6.5 blocks/s
   (ALERT_RUN)`, to tune `ObserverSettings`.
+- `A Distortion Cloud appears 11 blocks in front of <player> at (x, y, z)` (`DistortionHooks`), each time one comes.
 - `[sprint] held but not sprinting at (x, y, z): …` (`client.SprintCheck`): while the sprint
   key is held walking forwards and the player does not sprint, every 2 s, what stands in the
   way (exhausted, carrying a box or book, hungry, using an item, crouching, bumping into

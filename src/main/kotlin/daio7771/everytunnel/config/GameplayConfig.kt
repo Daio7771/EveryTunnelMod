@@ -20,6 +20,9 @@ data class GameplayConfig(
     val flashlight: FlashlightConfig = FlashlightConfig(),
     val wrench: WrenchConfig = WrenchConfig(),
     val detector: DetectorConfig = DetectorConfig(),
+    val hunter: HunterConfig = HunterConfig(),
+    val cloud: CloudConfig = CloudConfig(),
+    val junior: JuniorConfig = JuniorConfig(),
     val noise: NoiseConfig = NoiseConfig(),
     val paleMan: PaleManConfig = PaleManConfig(),
 ) {
@@ -71,6 +74,61 @@ data class DetectorConfig(
     val slowestBeepSeconds: Double = 1.2,
     /** ...and right next to one. */
     val fastestBeepSeconds: Double = 0.1,
+)
+
+/** Level 5's Hunters, little ones in groups of three (`entities.HunterBrain`, `platform.HunterEntity`). */
+data class HunterConfig(
+    /** Their health points: one blow of the wrench ([WrenchConfig.damage]) must take them all. */
+    val health: Double = 6.0,
+    /** Health points one hit takes (1 is half a heart)... */
+    val damage: Double = 1.0,
+    /** ...at most once every this many seconds each, from at most this many blocks away. */
+    val attackSeconds: Double = 1.0,
+    val attackRange: Double = 1.4,
+    /** Blocks they see, never through a wall, in a cone this many degrees wide... */
+    val sightRange: Double = 16.0,
+    val fieldOfView: Double = 140.0,
+    /** ...and closer than this, whatever way they face. */
+    val senseRange: Double = 3.0,
+    /** Seconds without seeing (or being told of) the one they chase before they give up... */
+    val lostSeconds: Double = 4.0,
+    /** ...and stand looking round, before they walk back. */
+    val searchSeconds: Double = 3.0,
+    /** Blocks from their spawn point they wander, and seconds they stand between walks. */
+    val wanderRadius: Double = 5.0,
+    val wanderPauseSeconds: Double = 3.0,
+    /** Pathfinding speeds (times their base speed). */
+    val walkSpeed: Double = 0.7,
+    val runSpeed: Double = 1.5,
+)
+
+/** Level 5's Distortion Cloud: lethal to look at (`entities.CloudClock`, `platform.DistortionCloudEntity`). */
+data class CloudConfig(
+    /** Seconds of looking its way (anywhere in front, with nothing in between) before it kills. */
+    val graceSeconds: Double = 1.0,
+    /** Seconds without anyone looking its way before it goes. */
+    val leaveSeconds: Double = 6.0,
+    /** One appears after a random time between these, spent in zones tagged `cloud`. */
+    val minSeconds: Double = 120.0,
+    val maxSeconds: Double = 240.0,
+    /** Blocks ahead of the player where it appears, at the nearest and the farthest. */
+    val nearest: Double = 8.0,
+    val farthest: Double = 14.0,
+    /** Closer than this (walking into it backwards), it kills whatever way one faces. */
+    val touchRange: Double = 1.2,
+)
+
+/** Level 5's Distortion Junior: it never kills (`entities.JuniorClock`, `platform.DistortionJuniorEntity`). */
+data class JuniorConfig(
+    /** Blocks within which, with nothing in between, it shakes the camera and marks the player for the Hunters. */
+    val range: Double = 8.0,
+    /** Seconds of staring at its eye, without looking away, that end it. */
+    val stareSeconds: Double = 4.0,
+    /** Degrees off its eye the crosshair may be and still count as on it (more, very close). */
+    val aimDegrees: Double = 5.0,
+    /** How far the camera trembles (degrees) and how fast it drifts away (degrees a second). */
+    val tremorDegrees: Double = 0.6,
+    val driftDegreesPerSecond: Double = 14.0,
 )
 
 data class ThirstConfig(

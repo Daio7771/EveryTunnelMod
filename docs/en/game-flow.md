@@ -403,6 +403,27 @@ drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5).
 - **The Lab hall's checkpoint:** walking in makes it the checkpoint, silently (`ContinueGame`, a zone and a
   spawn point tagged `restart_point`). A death there or later restarts in the Lab hall with what the player
   carries; CONTINUE puts them there with what they had on arriving.
+- **Its enemies** exist, though none stands in the level yet (its content will place them; to try them,
+  `/everytunnel spawn hunters|junior|cloud`). `platform.DistortionHooks` puts them in when the level is built
+  and back when the player dies there; none is saved.
+  - **The Hunters** (`HunterEntity`, decisions in `entities.HunterBrain`), in groups of three at a spawn
+    point tagged `hunters`: black little humanoids in lab coats, blank white eyes. They wander near it; one
+    that sees the player (16 blocks, a 140-degree cone, or 3 blocks whatever way it faces, never through a
+    wall) shrieks (`entity.hunter.shriek`) and the whole group charges. Half a heart a hit, once a second each;
+    one blow of the wrench kills one. Out of sight for 4 s they search, then walk back. They do not hear, not
+    even the wrench.
+  - **The Distortion Cloud** (`DistortionCloudEntity`): black smoke with glitches and one angry purple eye,
+    whispering (`entity.distortion_cloud.whisper`). It appears already whole (`entity.distortion_cloud.appear`)
+    8 to 14 blocks in front of the player, where they can see it, every 2 to 4 minutes spent in zones tagged
+    `cloud` (with none about). Having it anywhere in front (within 90 degrees either side, however far up or
+    down one looks; walls hide it) for 1 s in a row kills (`entity.distortion_cloud.kill`), as does walking
+    into it; the screen distorts as the look goes on (`client.effects.DistortionEffect`). Nobody looking its
+    way for 6 s, it goes (`entity.distortion_cloud.leave`) and the detector falls quiet. Turn round and go back.
+  - **The Distortion Junior** (`DistortionJuniorEntity`, at a spawn point tagged `distortion_junior`): a small
+    Cloud floating at face height, where it was put. It never kills: within 8 blocks of its eye, with nothing
+    in between, the camera trembles and drifts away from it, and every Hunter about knows where the player is.
+    Staring at its eye 4 s without looking away (its eye cracks, a glassy hum rises) ends it
+    (`entity.distortion_junior.die`).
 
 The map's rebuild when the world opens does not touch Level 5: the way in goes with Level 4, and
 nobody can reach what stands until the next build. A game continued in Level 5 builds it behind the
@@ -430,7 +451,8 @@ instead:
 2. In the dark they are moved to the start of the level they were last in (its first spawn
    point tagged `player`), or to the restart point they reached in it (Level 5's Lab hall), with full
    health and resources. That level's Pale men go back
-   to their spawn points and start over.
+   to their spawn points and start over; so do Level 5's Hunters and Juniors, the dead ones too, and a
+   Distortion Cloud about is gone (`DistortionHooks.restart`).
 3. The screen fades back in.
 
 The inventory is kept: what was picked up stays picked up. A player who never entered a
