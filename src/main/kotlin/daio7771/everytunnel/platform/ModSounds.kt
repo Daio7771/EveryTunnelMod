@@ -90,6 +90,7 @@ object ModSounds {
     val JUNIOR_WHISPER = event("entity.distortion_junior.whisper")
     val JUNIOR_STARE = event("entity.distortion_junior.stare")
     val JUNIOR_DIE = event("entity.distortion_junior.die")
+    val DEATH_REVEAL = event("event.death.reveal")
     val MUSIC_LOUNGE = event("music.lounge")
     val MUSIC_LOUNGE_FAR = event("music.lounge.far")
     val SAFE_TICK = event("block.safe.tick")

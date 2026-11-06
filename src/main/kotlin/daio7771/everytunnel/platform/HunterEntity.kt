@@ -12,6 +12,7 @@ import net.minecraft.entity.data.DataTracker
 import net.minecraft.entity.data.TrackedData
 import net.minecraft.entity.data.TrackedDataHandlerRegistry
 import net.minecraft.entity.mob.HostileEntity
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundEvent
@@ -34,8 +35,9 @@ import kotlin.math.sqrt
 /**
  * A Hunter (Level 5): one of the little ones, black, in a lab coat, with blank white eyes. They come
  * in groups of three ([DistortionHooks] spawns them, all three round one spawn point, their [group]).
- * One blow of the wrench kills one ([daio7771.everytunnel.config.HunterConfig.health]); they hit for
- * half a heart a second each.
+ * One blow of the wrench kills one, however hurried (a blow before the wrench has swung back does less
+ * damage, but not to them); anything else takes [daio7771.everytunnel.config.HunterConfig.health]. They
+ * hit for half a heart a second each.
  *
  * Every tick one looks ([sight]): a player in Survival or Adventure, not dying nor hidden in a
  * locker, within its range and cone (or close by, whatever way it faces), with nothing solid in
@@ -177,6 +179,12 @@ class HunterEntity(type: EntityType<out HostileEntity>, world: World) : HostileE
         running = false
         refreshPositionAndAngles(home.x, home.y, home.z, yaw, 0f)
         velocity = Vec3d.ZERO
+    }
+
+    override fun damage(source: DamageSource, amount: Float): Boolean {
+        val attacker = source.attacker
+        val wrench = attacker is PlayerEntity && source.source == attacker && attacker.mainHandStack.isOf(ModItems.WRENCH)
+        return super.damage(source, if (wrench) maxOf(amount, health + 1f) else amount)
     }
 
     override fun getAmbientSound(): SoundEvent? = if (brain.state == HunterBrain.State.WANDER) ModSounds.HUNTER_AMBIENT else null

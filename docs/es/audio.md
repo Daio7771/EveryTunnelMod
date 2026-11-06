@@ -41,7 +41,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | El Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | síntesis / CC0 (respiración) |
 | El Observer | `music.observer.approach`, `music.observer.chase` (sin pasos: lo delata su música); en la fase de los libros `event.observer.tick` / `tock` (el reloj de la biblioteca en la cabeza, más rápido cuanto más cerca) | síntesis |
 | Música | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | síntesis / CC BY (ascensor) |
-| Eventos | `event.death`, `event.level_transition`, `event.observer.alert` (provisional), `event.collapse` (el derrumbe del túnel del nivel 3) | síntesis |
+| Eventos | `event.death`, `event.death.reveal` (al aparecer el texto de la pantalla de muerte), `event.level_transition`, `event.observer.alert` (provisional), `event.collapse` (el derrumbe del túnel del nivel 3) | síntesis |
 | Nivel 5 | `block.airlock.close`, `block.airlock.open` (la esclusa y las puertas bloqueadas), `item.wrench.hit` (3 variaciones), `item.detector.beep`, `event.lab.unlock` (la ruta sur al abrirse, a lo lejos) | síntesis |
 | Los Hunters del nivel 5 | `entity.hunter.shriek` (empieza una persecución), `.attack`, `.death`, `.ambient` (3 variaciones cada uno) | síntesis |
 | Las Distortions del nivel 5 | `entity.distortion_cloud.whisper` (bucle), `.appear`, `.kill`, `.leave`; `entity.distortion_junior.whisper` (bucle), `.stare` (bucle, el juego le sube el tono), `.die`. Los susurros son aire a través de formantes de vocales que cambian, sin voz | síntesis |

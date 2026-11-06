@@ -39,7 +39,7 @@ registered in `platform.ModSounds`. Any of them can be tried with
 | The Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | synth / CC0 (breathing) |
 | The Observer | `music.observer.approach`, `music.observer.chase` (no footsteps: his music gives him away); in the book phase `event.observer.tick` / `tock` (the library clock in the head, quicker as he nears) | synth |
 | Music | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | synth / CC BY (elevator) |
-| Events | `event.death`, `event.level_transition`, `event.observer.alert` (placeholder), `event.collapse` (Level 3's tunnel collapse) | synth |
+| Events | `event.death`, `event.death.reveal` (the death screen's words coming up), `event.level_transition`, `event.observer.alert` (placeholder), `event.collapse` (Level 3's tunnel collapse) | synth |
 | Level 5 | `block.airlock.close`, `block.airlock.open` (the airlock's and the locked doors), `item.wrench.hit` (3 variations), `item.detector.beep`, `event.lab.unlock` (the south route opening, far off) | synth |
 | Level 5's Hunters | `entity.hunter.shriek` (a chase starts), `.attack`, `.death`, `.ambient` (3 variations each) | synth |
 | Level 5's Distortions | `entity.distortion_cloud.whisper` (loop), `.appear`, `.kill`, `.leave`; `entity.distortion_junior.whisper` (loop), `.stare` (loop, its pitch raised by the game), `.die`. The whispers are breath through moving vowel formants, no voice | synth |

@@ -201,7 +201,7 @@ Cada clave y su valor por defecto:
 | `slowest_beep_seconds` | 1.2 | Entre pitidos en el borde de su alcance... |
 | `fastest_beep_seconds` | 0.1 | ...y pegado a la Cloud |
 | **`hunter`** | | Los Hunters del nivel 5 |
-| `health` | 6 | Su vida (un golpe de llave inglesa tiene que quitársela entera) |
+| `health` | 6 | Su vida contra todo menos la llave inglesa (cualquier golpe de llave mata a uno) |
 | `damage` | 1 | Vida que quita un golpe (medio corazón)... |
 | `attack_seconds` | 1 | ...como mucho cada tantos segundos cada uno... |
 | `attack_range` | 1.4 | ...desde como mucho tantos bloques |

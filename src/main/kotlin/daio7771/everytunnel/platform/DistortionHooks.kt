@@ -34,9 +34,9 @@ import kotlin.math.sqrt
  * - **Posts:** each spawn point tagged [HUNTERS_TAG] holds a group of three Hunters, each tagged
  *   [JUNIOR_TAG] a Junior. When the level is built ([levelBuilt], from [LabHooks]) they are put there;
  *   a player dying in it puts every one back, the dead too, and sends any Cloud away ([restart], from
- *   [DeathHooks]); a new game, or the levels rebuilt, clears them all ([clearAll]). None is saved. The
- *   debug command `/everytunnel spawn` adds posts of its own ([spawnForDebug]), which a death in their
- *   level puts back as well.
+ *   [DeathHooks]); a new game, or the levels rebuilt, clears them all ([clearAll]). None is saved. What
+ *   the debug command `/everytunnel spawn` puts in ([spawnForDebug]) holds no post: a death in its level
+ *   clears it, and it does not come back. Each one put in is logged.
  * - **Telling:** a Hunter that sees a player tells its group ([sighted]); a Junior marks the players it
  *   troubles ([mark]). Hunters ask both ([toldOf]): for a while after, they know where that player is,
  *   however far.
@@ -67,7 +67,7 @@ object DistortionHooks {
     private val marks = HashMap<UUID, Long>()
     private val schedules = HashMap<UUID, CloudSchedule>()
     private val clouds = mutableSetOf<DistortionCloudEntity>()
-    private var debugPosts = 0
+    private var debugSpawns = 0
 
     fun register() {
         ServerLifecycleEvents.SERVER_STARTED.register { server = it }
@@ -85,7 +85,7 @@ object DistortionHooks {
     fun levelBuilt(server: MinecraftServer, level: LevelDefinition) {
         val world = worldOf(server, level) ?: return
         discard(world, level.id)
-        posts.removeAll { it.levelId == level.id && !it.group.startsWith(DEBUG_GROUP) }
+        posts.removeAll { it.levelId == level.id }
         for (point in level.spawnPoints) {
             val kind = when {
                 HUNTERS_TAG in point.tags -> Kind.HUNTERS
@@ -97,7 +97,7 @@ object DistortionHooks {
         spawnPosts(world, level.id)
     }
 
-    /** A player died in [levelId]: every Hunter and Junior back at its post, the dead too; no Cloud about. */
+    /** A player died in [levelId]: every Hunter and Junior back at its post, the dead too; no Cloud about, nor any put in by hand. */
     fun restart(world: ServerWorld, levelId: String) {
         discard(world, levelId)
         for (cloud in clouds.toList()) if (cloud.world == world) cloud.discard()
@@ -134,6 +134,8 @@ object DistortionHooks {
     }
 
     private fun spawn(world: ServerWorld, post: Post) {
+        EveryTunnel.LOGGER.info("{} put in at ({}, {}, {}), {}", if (post.kind == Kind.HUNTERS) "Three Hunters" else "A Distortion Junior",
+            floor(post.position.x).toInt(), floor(post.position.y).toInt(), floor(post.position.z).toInt(), post.group)
         when (post.kind) {
             Kind.HUNTERS -> {
                 val yaw = Math.toRadians(post.yaw.toDouble())
@@ -261,8 +263,8 @@ object DistortionHooks {
 
     /**
      * `/everytunnel spawn hunters|junior|cloud`: a group of Hunters or a Junior a few blocks in front of
-     * [player], kept as a post of the level they stand in (or of none); or a Cloud in front of them,
-     * wherever they are. False if there was no room.
+     * [player], once (no post: a death in the level they stand in clears them, for good); or a Cloud in
+     * front of them, wherever they are. False if there was no room.
      */
     fun spawnForDebug(player: ServerPlayerEntity, what: String): Boolean {
         val world = player.serverWorld
@@ -275,9 +277,7 @@ object DistortionHooks {
         val feet = floorNear(world, tx, player.y, tz) ?: return false
         val levelId = LevelManager.levelAt(world.registryKey.value.toString(), tx, feet + 0.5, tz)?.id
         val facing = Gaze.yawTowards(Position(tx, feet, tz), Position(player.x, player.y, player.z)).toFloat()
-        val post = Post(kind, levelId, world.registryKey, Position(tx, feet, tz), facing, "$DEBUG_GROUP${++debugPosts}")
-        posts += post
-        spawn(world, post)
+        spawn(world, Post(kind, levelId, world.registryKey, Position(tx, feet, tz), facing, "$DEBUG_GROUP${++debugSpawns}"))
         return true
     }
 

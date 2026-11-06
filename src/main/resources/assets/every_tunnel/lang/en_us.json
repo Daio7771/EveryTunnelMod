@@ -302,5 +302,20 @@
   "block.every_tunnel.loot_detector": "Radiation Detector (Loot)",
   "entity.every_tunnel.hunter": "Hunter",
   "entity.every_tunnel.distortion_cloud": "Distortion Cloud",
-  "entity.every_tunnel.distortion_junior": "Distortion Junior"
+  "entity.every_tunnel.distortion_junior": "Distortion Junior",
+  "death.every_tunnel.killed_by": "Killed by",
+  "death.every_tunnel.you_died": "You died",
+  "death.every_tunnel.pale_man": "The Pale Man",
+  "death.every_tunnel.pale_man.tip": "He cannot see you. Make no noise near him: walk slowly, or crouch.",
+  "death.every_tunnel.observer": "The Observer",
+  "death.every_tunnel.observer.tip": "Hide where he cannot see you go in. A locker he saw you enter will not save you.",
+  "death.every_tunnel.hunters": "The Hunters",
+  "death.every_tunnel.hunters.tip": "They come in threes. Strike first with the wrench, and do not let them surround you.",
+  "death.every_tunnel.distortion_cloud": "The Distortion Cloud",
+  "death.every_tunnel.distortion_cloud.tip": "Never look its way. Turn around and go back the way you came.",
+  "death.every_tunnel.thirst": "Thirst",
+  "death.every_tunnel.thirst.tip": "Drink before it runs out: look for water as you go.",
+  "death.every_tunnel.fall": "The Fall",
+  "death.every_tunnel.fall.tip": "Watch your step.",
+  "death.every_tunnel.try_again": "Try again"
 }

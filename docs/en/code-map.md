@@ -43,6 +43,7 @@ KDoc comment that says more.
 | `progress/PlayerProgress.kt` | What a player has done: pieces, notes read, scenes seen, Level 3's books, checkpoint |
 | `progress/Checkpoint.kt` | A checkpoint as text: a level's start, or `level/point` for a restart point inside it |
 | `detector/Detector.kt` | Level 5's detector: how full its icon is, when the triangle shows, how fast it beeps |
+| `death/DeathCause.kt` | What the death screen names (the killer, thirst, the fall) and where it shows |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 | `hiding/LookLimit.kt` | How far the head turns inside a locker |
 
@@ -286,6 +287,7 @@ KDoc comment that says more.
 | `LoadingScreen.kt` | The loading screen and `LoadingCover`, which draws it over everything |
 | `LoadingTips.kt` | Rotating tips with the player's keys |
 | `EndOfDemoScreen.kt` | "End of demo" and the rolling credits |
+| `DeathScreen.kt` | The death screen: "Killed by", the killer and a tip on the black of dying, and "Try again" |
 
 ### Client mixins: `client/java/daio7771/everytunnel/mixin/client/`
 

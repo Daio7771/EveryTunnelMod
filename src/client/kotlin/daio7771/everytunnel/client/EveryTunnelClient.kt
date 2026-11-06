@@ -28,6 +28,7 @@ import daio7771.everytunnel.client.render.BoxShelfRenderer
 import daio7771.everytunnel.client.render.WallMessageRenderer
 import daio7771.everytunnel.client.render.WallTextRenderer
 import daio7771.everytunnel.client.render.LootRenderer
+import daio7771.everytunnel.client.screen.DeathScreen
 import daio7771.everytunnel.client.screen.EndOfDemoScreen
 import daio7771.everytunnel.client.screen.NoteScreen
 import daio7771.everytunnel.client.screen.SafeScreen
@@ -95,6 +96,7 @@ object EveryTunnelClient : ClientModInitializer {
         StatusHud.register()
         DetectorHud.register()
         ScreenFade.register() // after the HUD, so the black covers it
+        DeathScreen.register()
         EndOfDemoScreen.register()
         NoteScreen.register()
         SafeScreen.register()

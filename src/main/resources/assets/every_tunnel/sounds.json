@@ -687,6 +687,11 @@
       "every_tunnel:event/death_2"
     ]
   },
+  "event.death.reveal": {
+    "sounds": [
+      "every_tunnel:event/death/reveal_1"
+    ]
+  },
   "event.lab.unlock": {
     "sounds": [
       "every_tunnel:event/lab/unlock_1"

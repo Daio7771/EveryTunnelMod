@@ -690,6 +690,19 @@ def level_transition(rng, variant):
     return fade(y, 0.002, 0.5)
 
 
+def death_reveal(rng, variant):
+    """The death screen's words coming up on the black: one low, dull blow, felt more than heard, its
+    boom sinking away, a little wider in one ear than the other."""
+    n = samples(2.4)
+    t = time_axis(n)
+    f = np.interp(t, [0.0, 0.08, 1.5], [70.0, 46.0, 34.0])
+    boom = glide_tone(f, harmonics=(1.0, 0.35, 0.12)) * np.exp(-t / 0.55)
+    blow = knock(n, rng, 0.0, rng.uniform(52, 60), [1.0, 1.55, 2.3], [1.0, 0.45, 0.2], [0.5, 0.25, 0.12], click=0.25, click_hi=900.0)
+    air = lowpass(rng.normal(0.0, 1.0, n), 300.0) * 3.0 * envelope(n, [(0.0, 0.0), (0.01, 1.0), (0.5, 0.25), (2.0, 0.0)])
+    mono = drive(boom * 0.8 + blow + air * 0.3, 1.6)
+    return stereo(mono, lowpass(mono, 220.0) * 0.85 + mono * 0.15)
+
+
 def death(rng, variant):
     n = samples(5.0)
     t = time_axis(n)
@@ -1847,6 +1860,7 @@ SOUNDS = [
           shutter_close, -1.0, attenuation=32),
     Sound("event.level_transition", "Level progress", "Going from Level 1 to Level 2", "stereo", False, 1, level_transition, -1.0),
     Sound("event.death", "Level progress", "Death (1: short, 2: with collapse)", "stereo", False, 2, death, -1.0),
+    Sound("event.death.reveal", "Level progress", "The death screen: one low dull blow as \"Killed by\" comes up on the black", "stereo", False, 1, death_reveal, -2.0),
     # Peak -2.9 dB: about -16.8 LUFS, as loud as the earlier theme.
     Sound("music.menu", "Menu", "Main menu theme: slow, uneasy felt piano in 3/4 (plays once, 1:10)", "stereo", False, 1,
           lambda rng, variant: menu_theme(rng), -2.9, stream=True),

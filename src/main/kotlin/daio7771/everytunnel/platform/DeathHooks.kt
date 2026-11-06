@@ -2,6 +2,7 @@ package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
+import daio7771.everytunnel.core.death.DeathCause
 import daio7771.everytunnel.core.progress.Checkpoint
 import daio7771.everytunnel.systems.ResourceSystem
 import daio7771.everytunnel.world.LevelTriggers
@@ -16,6 +17,7 @@ import net.minecraft.entity.attribute.EntityAttributeModifier
 import net.minecraft.entity.attribute.EntityAttributes
 import net.minecraft.entity.damage.DamageSource
 import net.minecraft.network.PacketByteBuf
+import net.minecraft.registry.Registries
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.MinecraftServer
@@ -30,7 +32,10 @@ import java.util.UUID
  *
  * When a player would die while the world rules apply (Survival or Adventure in a world
  * with levels), they stay alive instead: they hear `event.death`, the screen fades to
- * black ([FADE_OUT_TICKS]), they cannot move and nothing hurts them; in the dark they are
+ * black ([FADE_OUT_TICKS]), they cannot move and nothing hurts them; on the black, but in Levels 1
+ * and 4, the death screen says what killed them, with a tip ([DeathCause], sent to the client's
+ * `DeathScreen`), and the black stays until they press its "Try again" (or Esc: [RETRY_PACKET_ID]);
+ * in the dark they are
  * taken to the start of the level they were last in (its first spawn point tagged
  * `player`) with full health and resources, and the Pale men of that level go back to
  * their spawn points and start over (the Observers too, and Level 5's Hunters and Distortions,
@@ -44,7 +49,13 @@ object DeathHooks {
     /** Screen fade, sent to the client: target darkness (0 to 1) and seconds to get there. */
     val FADE_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "screen_fade")
 
-    private const val FADE_OUT_TICKS = 30
+    /** What killed the player ([DeathCause.id]), sent to the client when they die, for the death screen. */
+    val CAUSE_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "death_cause")
+
+    /** From the client: the player pressed the death screen's "Try again". */
+    val RETRY_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "death_retry")
+
+    const val FADE_OUT_TICKS = 30
     /** Taken to the level start in the middle of the darkness. */
     private const val RESTART_TICK = 50
     private const val FADE_IN_START_TICK = 60
@@ -52,7 +63,14 @@ object DeathHooks {
 
     private val FREEZE_ID: UUID = UUID.fromString("5c0b8e8e-2f4c-4d0a-9a51-6f2b8f3d7a10")
 
-    private class Dying(val levelId: String, var ticks: Int = 0, var restarted: Boolean = false)
+    /** [waits]: a death screen shows, and the black stays until the player has [retried]. */
+    private class Dying(
+        val levelId: String,
+        val waits: Boolean,
+        var ticks: Int = 0,
+        var restarted: Boolean = false,
+        var retried: Boolean = false,
+    )
 
     // Server thread only.
     private val dying = HashMap<UUID, Dying>()
@@ -75,6 +93,9 @@ object DeathHooks {
         }
         ServerLivingEntityEvents.ALLOW_DAMAGE.register { entity, _, _ -> entity.uuid !in dying }
         ServerTickEvents.END_SERVER_TICK.register(::tick)
+        ServerPlayNetworking.registerGlobalReceiver(RETRY_PACKET_ID) { server, player, _, _, _ ->
+            server.execute { dying[player.uuid]?.retried = true }
+        }
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->
             // Leaving while dying: finish now, so they come back alive at the level start.
             val player = handler.player
@@ -95,7 +116,9 @@ object DeathHooks {
         CarryHooks.died(player)
         player.health = 1f
         player.isSprinting = false
-        dying[player.uuid] = Dying(levelId)
+        val cause = causeOf(levelId, source)
+        val shown = cause != null && ServerPlayNetworking.canSend(player, CAUSE_PACKET_ID)
+        dying[player.uuid] = Dying(levelId, waits = shown)
         player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)?.let { speed ->
             if (speed.getModifier(FREEZE_ID) == null) {
                 speed.addTemporaryModifier(
@@ -105,6 +128,7 @@ object DeathHooks {
         }
         player.playSound(ModSounds.DEATH, SoundCategory.PLAYERS, 1f, 1f)
         sendFade(player, 1f, FADE_OUT_TICKS / 20f)
+        if (shown) ServerPlayNetworking.send(player, CAUSE_PACKET_ID, PacketByteBufs.create().writeString(cause!!.id))
         EveryTunnel.LOGGER.info("{} died in {}: restarting the level", player.name.string, levelId)
         PlaytestLog.died(player, levelId, source)
         AchievementHooks.died(player, source)
@@ -124,7 +148,8 @@ object DeathHooks {
                 state.restarted = true
                 restart(player, state.levelId)
             }
-            if (state.ticks >= FADE_IN_START_TICK) {
+            val done = if (state.waits) state.restarted && state.retried else state.ticks >= FADE_IN_START_TICK
+            if (done) {
                 iterator.remove()
                 unfreeze(player)
                 sendFade(player, 0f, FADE_IN_TICKS / 20f)
@@ -158,6 +183,14 @@ object DeathHooks {
         ObserverHooks.sendHome(world, levelId)
         DistortionHooks.restart(world, levelId)
         CollapseHooks.reset(player.server, levelId)
+    }
+
+    /** What the death screen names for a death in [levelId] by [source], or null for none. */
+    private fun causeOf(levelId: String, source: DamageSource): DeathCause? {
+        val order = LevelManager.get(levelId)?.order ?: return null
+        val killer = (source.attacker ?: source.source)?.let { Registries.ENTITY_TYPE.getId(it.type).toString() }
+        val damage = source.typeRegistryEntry.key.map { it.value.toString() }.orElse("")
+        return DeathCause.of(order, killer, damage)
     }
 
     private fun unfreeze(player: ServerPlayerEntity) {

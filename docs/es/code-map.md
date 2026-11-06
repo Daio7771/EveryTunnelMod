@@ -43,6 +43,7 @@ con un comentario KDoc que cuenta más.
 | `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint |
 | `progress/Checkpoint.kt` | Un checkpoint como texto: el inicio de un nivel, o `nivel/punto` para un punto de reinicio dentro de él |
 | `detector/Detector.kt` | El detector del nivel 5: cuánto se llena su icono, cuándo sale el triángulo, a qué ritmo pita |
+| `death/DeathCause.kt` | Lo que nombra la pantalla de muerte (quién te mató, la sed, la caída) y dónde sale |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
 
@@ -286,6 +287,7 @@ con un comentario KDoc que cuenta más.
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |
 | `LoadingTips.kt` | Consejos que van cambiando, con las teclas del jugador |
 | `EndOfDemoScreen.kt` | "End of demo" y los créditos que suben |
+| `DeathScreen.kt` | La pantalla de muerte: "Killed by", quién te mató y un consejo sobre el negro al morir, y "Try again" |
 
 ### Mixins del cliente: `client/java/daio7771/everytunnel/mixin/client/`
 

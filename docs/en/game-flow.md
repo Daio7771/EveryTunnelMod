@@ -405,12 +405,12 @@ drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5).
   carries; CONTINUE puts them there with what they had on arriving.
 - **Its enemies** exist, though none stands in the level yet (its content will place them; to try them,
   `/everytunnel spawn hunters|junior|cloud`). `platform.DistortionHooks` puts them in when the level is built
-  and back when the player dies there; none is saved.
+  and back when the player dies there; none is saved. Those put in by the command come once: a death clears them.
   - **The Hunters** (`HunterEntity`, decisions in `entities.HunterBrain`), in groups of three at a spawn
     point tagged `hunters`: black little humanoids in lab coats, blank white eyes. They wander near it; one
     that sees the player (16 blocks, a 140-degree cone, or 3 blocks whatever way it faces, never through a
     wall) shrieks (`entity.hunter.shriek`) and the whole group charges. Half a heart a hit, once a second each;
-    one blow of the wrench kills one. Out of sight for 4 s they search, then walk back. They do not hear, not
+    one blow of the wrench kills one, even a hurried one. Out of sight for 4 s they search, then walk back. They do not hear, not
     even the wrench.
   - **The Distortion Cloud** (`DistortionCloudEntity`): black smoke with glitches and one angry purple eye,
     whispering (`entity.distortion_cloud.whisper`). It appears already whole (`entity.distortion_cloud.appear`)
@@ -448,12 +448,19 @@ instead:
 
 1. `event.death` plays and the screen fades to black (`screen_fade`, 1.5 s). The player
    cannot move and nothing hurts them.
-2. In the dark they are moved to the start of the level they were last in (its first spawn
+2. **The death screen,** in every level but Levels 1 and 4 (which have no enemies: there only thirst
+   is named): on the black, "Killed by", what killed them in big letters and a tip under it, in dark red,
+   come up with a low blow (`event.death.reveal`), and under them "Try again". The black stays until the
+   player presses it (or Enter, Space, Esc: `death_retry`); the game does not pause.
+   What it names (`core.death.DeathCause`, sent as `death_cause`, shown by `client.screen.DeathScreen`):
+   the Pale Man, the Observer, the Hunters, the Distortion Cloud, thirst, the fall; anything else says
+   only "You died". The texts are `death.every_tunnel.*` in the lang file.
+3. In the dark they are moved to the start of the level they were last in (its first spawn
    point tagged `player`), or to the restart point they reached in it (Level 5's Lab hall), with full
    health and resources. That level's Pale men go back
    to their spawn points and start over; so do Level 5's Hunters and Juniors, the dead ones too, and a
    Distortion Cloud about is gone (`DistortionHooks.restart`).
-3. The screen fades back in.
+4. The screen fades back in.
 
 The inventory is kept: what was picked up stays picked up. A player who never entered a
 level dies the vanilla way. `RespawnHooks` also sets the vanilla respawn point to the

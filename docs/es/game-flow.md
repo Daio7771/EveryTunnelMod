@@ -431,12 +431,12 @@ hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla.
   jugador; CONTINUE le deja ahí con lo que llevaba al llegar.
 - **Sus enemigos** existen, aunque aún no hay ninguno en el nivel (los colocará su contenido; para probarlos,
   `/everytunnel spawn hunters|junior|cloud`). `platform.DistortionHooks` los pone al construirse el nivel y
-  los devuelve a su sitio cuando el jugador muere en él; ninguno se guarda.
+  los devuelve a su sitio cuando el jugador muere en él; ninguno se guarda. Los que pone el comando son de un solo uso: una muerte los quita.
   - **Los Hunters** (`HunterEntity`, decisiones en `entities.HunterBrain`), en grupos de tres en un punto de
     aparición con la etiqueta `hunters`: humanoides pequeños y negros con bata, ojos blancos sin pupila.
     Merodean cerca de él; el que ve al jugador (16 bloques, un cono de 140 grados, o a 3 bloques mire adonde
     mire, nunca a través de una pared) chilla (`entity.hunter.shriek`) y carga el grupo entero. Medio corazón
-    por golpe, uno por segundo cada uno; un golpe de llave inglesa mata a uno. Sin verle 4 s, buscan y luego
+    por golpe, uno por segundo cada uno; un golpe de llave inglesa mata a uno, aunque sea con prisa. Sin verle 4 s, buscan y luego
     vuelven andando. No oyen, ni siquiera la llave.
   - **La Distortion Cloud** (`DistortionCloudEntity`): humo negro con glitches y un ojo morado enfadado, que
     susurra (`entity.distortion_cloud.whisper`). Aparece ya formada (`entity.distortion_cloud.appear`) de 8 a 14
@@ -477,12 +477,19 @@ sigue vivo:
 
 1. Suena `event.death` y la pantalla funde a negro (`screen_fade`, 1,5 s). El jugador no
    puede moverse y nada le hace daño.
-2. A oscuras se le lleva al inicio del último nivel en el que estuvo (su primer punto con la
+2. **La pantalla de muerte,** en todos los niveles menos el 1 y el 4 (que no tienen enemigos: allí solo se
+   nombra la sed): sobre el negro aparecen, en rojo oscuro, "Killed by", lo que le mató en letras grandes y un
+   consejo debajo, con un golpe grave (`event.death.reveal`), y debajo "Try again". El negro sigue hasta que el
+   jugador lo pulsa (o Enter, Espacio, Esc: `death_retry`); el juego no se pausa.
+   Lo que nombra (`core.death.DeathCause`, enviado como `death_cause`, mostrado por `client.screen.DeathScreen`):
+   el Pale Man, el Observer, los Hunters, la Distortion Cloud, la sed, la caída; cualquier otra cosa dice
+   solo "You died". Los textos son `death.every_tunnel.*` en el archivo de idioma.
+3. A oscuras se le lleva al inicio del último nivel en el que estuvo (su primer punto con la
    etiqueta `player`), o al punto de reinicio que alcanzó en él (el Lab hall del nivel 5), con la vida y los
    recursos llenos. Los Pale men de ese nivel vuelven a
    sus puntos de aparición y empiezan de cero; igual los Hunters y los Juniors del nivel 5, también los
    muertos, y si había una Distortion Cloud cerca, desaparece (`DistortionHooks.restart`).
-3. La pantalla vuelve con un fundido.
+4. La pantalla vuelve con un fundido.
 
 El inventario se conserva: lo recogido sigue recogido. Un jugador que nunca entró en un
 nivel muere como en vanilla. `RespawnHooks` además fija el punto de reaparición de vanilla

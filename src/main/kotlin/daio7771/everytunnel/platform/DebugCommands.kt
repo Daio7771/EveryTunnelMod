@@ -34,8 +34,8 @@ import net.minecraft.util.Identifier
  * - `/everytunnel noise watch`: shows each noise you make in the action bar (toggle).
  * - `/everytunnel paleman`: the Pale men near you, what they are doing and where they are going.
  * - `/everytunnel spawn hunters|junior|cloud`: Level 5's enemies in front of you: a group of three
- *   Hunters or a Distortion Junior (dying in their level puts them back, like the level's own), or a
- *   Distortion Cloud, wherever you are ([DistortionHooks.spawnForDebug]).
+ *   Hunters or a Distortion Junior (once: dying in their level clears them, and they do not come back),
+ *   or a Distortion Cloud, wherever you are ([DistortionHooks.spawnForDebug]).
  * - `/everytunnel intro`: plays the new-game intro (the elevator) again for you (see [IntroHooks]).
  * - `/everytunnel newgame`: starts the game over in this world (see [NewGame]).
  * - `/everytunnel setlevel <number>`: takes you to the start of the level of that `order`

@@ -60,7 +60,7 @@ class DistortionCloudEntity(type: EntityType<*>, world: World) : DistortionEntit
 
     private fun kill(player: ServerPlayerEntity) {
         world.playSound(null, player.x, player.y, player.z, ModSounds.CLOUD_KILL, SoundCategory.HOSTILE, 1.6f, 1f)
-        player.damage(damageSources.magic(), KILL_DAMAGE)
+        player.damage(damageSources.indirectMagic(this, this), KILL_DAMAGE)
     }
 
     /** It goes: its last animation plays, with a sound, then it is gone. */

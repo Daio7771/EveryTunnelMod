@@ -78,7 +78,7 @@ data class DetectorConfig(
 
 /** Level 5's Hunters, little ones in groups of three (`entities.HunterBrain`, `platform.HunterEntity`). */
 data class HunterConfig(
-    /** Their health points: one blow of the wrench ([WrenchConfig.damage]) must take them all. */
+    /** Their health points, against anything but the wrench (any blow of the wrench kills one). */
     val health: Double = 6.0,
     /** Health points one hit takes (1 is half a heart)... */
     val damage: Double = 1.0,

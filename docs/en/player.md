@@ -196,7 +196,7 @@ Every key and its default:
 | `slowest_beep_seconds` | 1.2 | Between beeps at the edge of its range... |
 | `fastest_beep_seconds` | 0.1 | ...and right next to the Cloud |
 | **`hunter`** | | Level 5's Hunters |
-| `health` | 6 | Their health (one blow of the wrench must take it all) |
+| `health` | 6 | Their health against anything but the wrench (any blow of the wrench kills one) |
 | `damage` | 1 | Health a hit takes (half a heart)... |
 | `attack_seconds` | 1 | ...at most every this many seconds each... |
 | `attack_range` | 1.4 | ...from at most this many blocks |
