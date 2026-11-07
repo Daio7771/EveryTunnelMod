@@ -1,0 +1,49 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "p": "every_tunnel:block/lab_poster",
+    "w": "every_tunnel:block/lab_white",
+    "particle": "every_tunnel:block/lab_poster"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        1,
+        15.5
+      ],
+      "to": [
+        14,
+        15,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#p",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#w"
+        },
+        "south": {
+          "texture": "#w"
+        },
+        "west": {
+          "texture": "#w"
+        },
+        "up": {
+          "texture": "#w"
+        },
+        "down": {
+          "texture": "#w"
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

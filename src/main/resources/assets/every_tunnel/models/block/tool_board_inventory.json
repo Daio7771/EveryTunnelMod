@@ -1,0 +1,36 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "p": "every_tunnel:block/lab_pegboard",
+    "s": "every_tunnel:block/lab_steel_dark",
+    "particle": "every_tunnel:block/lab_pegboard"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        1,
+        15
+      ],
+      "to": [
+        16,
+        15,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#p"
+        },
+        "south": {
+          "texture": "#s"
+        },
+        "up": {
+          "texture": "#p"
+        },
+        "down": {
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

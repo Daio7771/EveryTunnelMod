@@ -22,7 +22,8 @@ import net.minecraft.util.math.BlockPos
  *
  * - **Levers:** Level 4's Maintenance lever ([BreakerLeverBlock]) at a spawn point tagged [LEVER_TAG], named
  *   `lever_<the door's zone id>`. Pulled down, it stays down and opens its door: the layer 1 stairs' (a lever
- *   hidden in the ring) and the shortcut's (a lever in the chemical room, for the way back to the Lab hall).
+ *   in the ring, dead until the fuse box beside it is full: a dry click and "No power.", [FuseHolderBlock])
+ *   and the shortcut's (a lever in the chemical room, for the way back to the Lab hall).
  * - **The south route:** its door ([SOUTH_DOOR]) opens on walking out of the Office ([OFFICE]), wherever the
  *   player is: a lock is heard letting go far away (`event.lab.unlock`) and "The south route is open." shows.
  *
@@ -79,6 +80,12 @@ object LabDoorHooks {
             LEVER_TAG in it.tags && BlockPos.ofFloored(it.position.x, it.position.y, it.position.z) == pos
         } ?: return false
         if (state.get(BreakerLeverBlock.ON)) return true
+        // The stairs' lever is dead until its fuse box is full.
+        if (FuseHolderBlock.unpoweredNear(world, pos)) {
+            world.playSound(null, pos, ModSounds.LEVER_DEAD, SoundCategory.BLOCKS, 0.8f, 1f)
+            player.sendMessage(Text.translatable("message.every_tunnel.no_power"), true)
+            return true
+        }
         world.setBlockState(pos, state.with(BreakerLeverBlock.ON, true))
         world.playSound(null, pos, ModSounds.BREAKER_LEVER, SoundCategory.BLOCKS, 0.8f, 0.85f)
         val door = point.id.removePrefix(LEVER_PREFIX)

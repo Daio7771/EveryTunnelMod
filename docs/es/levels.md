@@ -173,6 +173,9 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `restart_point` | `ContinueGame`, `DeathHooks` | Donde reinician una muerte o CONTINUE una vez se ha entrado en su zona (el Lab hall del nivel 5) |
 | `hunters` | `DistortionHooks` | Nivel 5: un grupo de tres Hunters, alrededor de ese punto, mirando hacia donde mira |
 | `distortion_junior` | `DistortionHooks` | Nivel 5: un Distortion Junior, flotando ahí |
+| `harmless` | `DistortionHooks` | Con `hunters`: esos Hunters empujan y chillan pero nunca hacen daño (la capa 1 del nivel 5) |
+| `fuse_5a`, `fuse_10a`, `fuse_15a`, `fuse_20a`, `fuse_30a` | `LootSpawner` | Nivel 5: un fusible de ese amperaje ahí, para la caja de fusibles |
+| `lab_figure`, `lab_figure_exit` | `LabFigureHooks` | Nivel 5: donde está la figura que se ve desde el Lobby, una vez por partida, y adónde va cuando la ven |
 | `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Comida, sobre muebles |
 | `water` | `LootSpawner` | Una botella de agua |
 | `keycard` | `LootSpawner` | La tarjeta |
@@ -231,8 +234,10 @@ repite su id:
   (barrotes de hierro).
 - El Lab hall tiene la etiqueta `restart_point`.
 - **Puntos de aparición:** `player_start` (el Lobby, junto a la entrada), `checkpoint` (el Lab hall, con la
-  etiqueta `restart_point`), `lever_stairs_door` y `lever_shortcut_door` (con la etiqueta `lab_lever`), `wrench` y
-  `detector` (en el Workshop).
+  etiqueta `restart_point`), `lever_stairs_door` y `lever_shortcut_door` (con la etiqueta `lab_lever`), y los de la
+  capa 1 (`tools/map/lab/furnish.py`): `wrench` y `detector` (el banco central del Workshop), los fusibles `fuse_5a`,
+  `fuse_10a`, `fuse_20a`, `fuse_30a` (con la misma etiqueta), las fichas del tablón `ch1_l5_card_*` (etiqueta `note`),
+  `hunters_fuse_box` (etiquetas `hunters` y `harmless`), `lab_figure` y `lab_figure_exit`.
 
 ## Cómo sigue el mod a los jugadores
 

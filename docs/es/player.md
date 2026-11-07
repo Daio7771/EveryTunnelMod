@@ -100,7 +100,7 @@ La luz en sí se dibuja en el cliente, ver [Gráficos](graphics.md#la-linterna).
 `platform.LootSpawner` y `platform.LootBlock`:
 
 - La primera vez que un jugador entra en un nivel, se coloca un `LootBlock` en cada punto
-  de aparición con la etiqueta `battery`, `water`, `keycard`, `food_plate`, `food_popcorn`, `food_snack`, `wrench` o `detector`. El cliente lo dibuja como el
+  de aparición con la etiqueta `battery`, `water`, `keycard`, `food_plate`, `food_popcorn`, `food_snack`, `wrench`, `detector` o un fusible (`fuse_5a`...). El cliente lo dibuja como el
   propio objeto, tumbado (`client.render.LootRenderer`); no tiene colisión. El nivel 4, construido
   en plena partida, recibe su botín cuando está en pie.
 - **Clic derecho** lo recoge; el sitio queda vacío.

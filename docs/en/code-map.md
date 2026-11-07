@@ -89,6 +89,7 @@ KDoc comment that says more.
 | `ModBlocks.kt` | Every block: the light, props, doors, signs, elevator parts, loot, card reader |
 | `ModItems.kt` | Battery, water bottle, keycard; the creative tab |
 | `LabItems.kt` | Level 5's wrench: a heavy weapon that never wears out |
+| `FuseHolderBlock.kt` | A slot of Level 5's fuse box: takes only the fuse of its amperage; the box full, its lamps light and the lever beside it works |
 | `ModEntities.kt` | The Pale man entity type and spawn egg; the locker seat |
 | `ModSounds.kt` | Sound events played from code |
 | `ModSoundGroups.kt` | Block sound groups per prop material |
@@ -135,6 +136,8 @@ KDoc comment that says more.
 | `DistortionEntity.kt` | What the Cloud and the Junior share: floating, untouchable, facing the player, stare and going synced, smoke |
 | `DistortionCloudEntity.kt` | The Distortion Cloud: who looks its way, killing, going |
 | `DistortionJuniorEntity.kt` | The Distortion Junior: whom it troubles and marks, the stare that ends it |
+| `LabFigureEntity.kt` | The figure seen from Level 5's Lobby: once looked at, it walks off round the corner and is gone |
+| `LabFigureHooks.kt` | Puts the figure there when Level 5 is built, once a game |
 | `DistortionHooks.kt` | Level 5's enemies: posts from spawn points, back on a death, telling the Hunters, when and where a Cloud comes, `/everytunnel spawn` |
 
 ### `platform/`: hooks (game logic driven by events)
@@ -257,6 +260,7 @@ KDoc comment that says more.
 | `DartRenderer.kt` | A thrown dart: vanilla's arrow, smaller, with its own texture |
 | `WallMessageRenderer.kt` | Draws a wall message in the painted font; remembers what happened to it |
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
+| `LabFigureRenderer.kt` | The figure seen from Level 5's Lobby, on the player's model, a dark shape |
 | `HunterRenderer.kt` | GeckoLib renderer for the Hunters, their eyes glowing |
 | `DistortionRenderer.kt` | GeckoLib renderer and model for the Distortions: turned to their yaw, the glitch, the Junior's cracking eye |
 | `PaleManModel.kt` | His GeckoLib model, plus the stoop under low ceilings |

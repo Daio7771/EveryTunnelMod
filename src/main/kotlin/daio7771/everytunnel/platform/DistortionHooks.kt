@@ -31,7 +31,8 @@ import kotlin.math.sqrt
 /**
  * Level 5's Hunters ([HunterEntity]) and Distortions ([DistortionCloudEntity], [DistortionJuniorEntity]):
  *
- * - **Posts:** each spawn point tagged [HUNTERS_TAG] holds a group of three Hunters, each tagged
+ * - **Posts:** each spawn point tagged [HUNTERS_TAG] holds a group of three Hunters (harmless ones if it is
+ *   tagged [HARMLESS_TAG] too), each tagged
  *   [JUNIOR_TAG] a Junior. When the level is built ([levelBuilt], from [LabHooks]) they are put there;
  *   a player dying in it puts every one back, the dead too, and sends any Cloud away ([restart], from
  *   [DeathHooks]); a new game, or the levels rebuilt, clears them all ([clearAll]). None is saved. What
@@ -49,6 +50,8 @@ object DistortionHooks {
 
     /** Spawn points holding a group of three Hunters. */
     const val HUNTERS_TAG = "hunters"
+    /** With [HUNTERS_TAG]: Hunters that do no harm (layer 1's, the player's first with the wrench). */
+    const val HARMLESS_TAG = "harmless"
     /** Spawn points holding a Distortion Junior. */
     const val JUNIOR_TAG = "distortion_junior"
     /** Zones where Clouds come. */
@@ -56,7 +59,15 @@ object DistortionHooks {
 
     private enum class Kind { HUNTERS, JUNIOR }
 
-    private data class Post(val kind: Kind, val levelId: String?, val world: RegistryKey<net.minecraft.world.World>, val position: Position, val yaw: Float, val group: String)
+    private data class Post(
+        val kind: Kind,
+        val levelId: String?,
+        val world: RegistryKey<net.minecraft.world.World>,
+        val position: Position,
+        val yaw: Float,
+        val group: String,
+        val harmless: Boolean = false,
+    )
 
     private data class Sighting(val player: UUID, val position: Position, val tick: Long)
 
@@ -92,7 +103,7 @@ object DistortionHooks {
                 JUNIOR_TAG in point.tags -> Kind.JUNIOR
                 else -> continue
             }
-            posts += Post(kind, level.id, world.registryKey, point.position, point.yaw, "${level.id}/${point.id}")
+            posts += Post(kind, level.id, world.registryKey, point.position, point.yaw, "${level.id}/${point.id}", HARMLESS_TAG in point.tags)
         }
         spawnPosts(world, level.id)
     }
@@ -150,6 +161,7 @@ object DistortionHooks {
                     hunter.home = Position(px, feet, pz)
                     hunter.group = post.group
                     hunter.levelId = post.levelId
+                    hunter.harmless = post.harmless
                     world.spawnEntity(hunter)
                 }
             }

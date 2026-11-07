@@ -412,7 +412,7 @@ la construcción del nivel 5, en juego (`platform.LabHooks`), en un espacio prop
   momento). Cada puerta son dos hojas de `AirlockDoorBlock` que se mueven un cuarto de bloque por paso
   (`core.door.SlidingDoor`, `platform.SlidingDoors`).
 
-De momento el nivel 5 son sus dos capas de arriba, solo la estructura: un laboratorio limpio de azulejo
+De momento el nivel 5 son sus dos capas de arriba (la capa 1 amueblada, la 2 solo estructura): un laboratorio limpio de azulejo
 blanco con una franja de azulejo verde pálido, vinilo gris, paneles blancos en el techo y todos los
 fluorescentes encendidos. Capa 1: el Lobby, un anillo de pasillos con el Workshop, la sala de espera y las
 taquillas, y una puerta de acero (cerrada) a las escaleras. Capa 2, 10 bloques más abajo: el pasillo de los
@@ -420,12 +420,27 @@ sujetos con las salas S-1 a S-4, el Lab hall, un bucle al norte por la Office, u
 hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla. Sus zonas están en
 [Niveles](levels.md#nivel-5). Lo que ya funciona:
 
-- **La llave inglesa y el detector** están en el Workshop (dónde, de momento: el contenido del nivel los colocará).
-  Ver [Sistemas del jugador](player.md#herramientas-del-nivel-5).
+- **La capa 1, el tutorial.** Amueblada (`tools/map/lab/furnish.py`), fría y usada hasta hace poco: acero
+  inoxidable, melamina blanca, plástico verde quirófano. El Lobby: mostrador de recepción, asientos, plantas;
+  desde él, al fondo del pasillo hacia el anillo, una figura oscura mira hacia atrás y, cuando se la mira, se
+  gira y desaparece tras la esquina, una vez por partida (`LabFigureHooks`, `LabFigureEntity`). El Workshop:
+  bancos con paneles de herramientas, estanterías de frascos, cajas de herramientas; **la llave inglesa y el
+  detector** están en su banco central (ver [Sistemas del jugador](player.md#herramientas-del-nivel-5)). La sala
+  de espera: filas de asientos y, en su pared norte, el tablón, una ficha para los Hunters, la Cloud, el Junior
+  y el equipo (textos provisionales de momento). Las taquillas: taquillas para esconderse, como en el nivel 3.
+- **La caja de fusibles.** La palanca de las escaleras, en el lado este del anillo, no funciona ("No power.",
+  `block.breaker.dead`) hasta que la caja de fusibles de al lado está llena: cinco portafusibles
+  (`FuseHolderBlock`) marcados 5A, 10A, 15A, 20A y 30A, el de 15A ya puesto. Los otros cuatro fusibles están uno
+  en cada sala, a la vista: 10A en el mostrador del Lobby, 30A en una caja de herramientas del Workshop, 5A en el
+  mueble de la sala de espera, 20A en el mueble de las taquillas. Apuntando a un portafusibles con el fusible de su
+  amperaje, clic derecho lo mete (`block.fuse.insert`); cualquier otro rebota (`block.fuse.reject`). Con el quinto,
+  un relé y un zumbido (`block.fuse.power`), se encienden las luces y la palanca funciona. Junto a la caja merodean
+  tres Hunters inofensivos (empujan y chillan, nunca hacen daño): el primer uso de la llave.
 - **Tres puertas bloqueadas** se abren deslizándose como las de la esclusa, para siempre (`platform.LabDoorHooks`):
-  la de las escaleras con una palanca en el anillo, la del atajo con una palanca en la sala de químicos (las palancas
-  del Maintenance del nivel 4; dónde están es provisional), y la de la ruta sur al salir de la Office, esté donde
-  esté el jugador: se oye a lo lejos un cerrojo que se suelta (`event.lab.unlock`) y sale "The south route is open."
+  la de las escaleras con la palanca junto a la caja de fusibles, la del atajo con una palanca en la sala de
+  químicos (las palancas del Maintenance del nivel 4; dónde está esa es provisional), y la de la ruta sur al salir
+  de la Office, esté donde esté el jugador: se oye a lo lejos un cerrojo que se suelta (`event.lab.unlock`) y sale
+  "The south route is open."
 - **El checkpoint del Lab hall:** entrar en él lo hace checkpoint, en silencio (`ContinueGame`, una zona y un punto
   de aparición con la etiqueta `restart_point`). Morir ahí o después reinicia en el Lab hall con lo que lleva el
   jugador; CONTINUE le deja ahí con lo que llevaba al llegar.

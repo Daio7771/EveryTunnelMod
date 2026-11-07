@@ -387,18 +387,33 @@ in play (`platform.LabHooks`), in a space of its own west of Level 4:
   shows (the level's `entry` is `manual`: `LabHooks` shows it then). Each door is two leaves of
   `AirlockDoorBlock` moving a quarter of a block a step (`core.door.SlidingDoor`, `platform.SlidingDoors`).
 
-Level 5 so far is its two upper layers, structure only: a clean laboratory of white tiles with a band
-of pale green ones, grey vinyl, white ceiling panels, every fluorescent light on. Layer 1: the Lobby, a
+Level 5 so far is its two upper layers: a clean laboratory of white tiles with a band of pale green ones,
+grey vinyl, white ceiling panels, every fluorescent light on. Layer 1 is furnished (`tools/map/lab/furnish.py`),
+cold and used until recently: stainless steel, white melamine, surgical green plastic; layer 2 is structure
+only. Layer 1: the Lobby, a
 ring of corridors with the Workshop, the Waiting room and the Lockers, and a steel door (shut) to the
 stairs down. Layer 2, 10 blocks lower: the subjects' corridor with rooms S-1 to S-4, the Lab hall, a
 loop north through the Office, a loop south past Storage to the chemical room, the shortcut and the
 drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5). What works so far:
 
-- **The wrench and the detector** lie in the Workshop (where for now: the level's content will place them).
-  See [Player systems](player.md#level-5s-tools).
-- **Three locked doors** slide open like the airlock's, for good (`platform.LabDoorHooks`): the stairs' by a
-  lever in the ring, the shortcut's by a lever in the chemical room (Level 4's Maintenance levers; where
-  they stand is provisional), and the south route's on walking out of the Office, wherever the player is
+- **Layer 1, the tutorial.** The Lobby: a reception desk, seats, plants; seen from it, far down the corridor
+  to the ring, a dark figure stands looking back, and once looked at it turns and goes round the corner, once
+  a game (`LabFigureHooks`, `LabFigureEntity`). The Workshop: benches with pegboards, shelves of jars, tool
+  chests; **the wrench and the detector** lie on its island bench (see
+  [Player systems](player.md#level-5s-tools)). The Waiting room: rows of seats, and on its north wall the
+  noticeboard, a card for each of the Hunters, the Cloud, the Junior and the equipment (placeholder texts
+  for now). The Lockers: lockers to hide in, as in Level 3.
+- **The fuse box.** The stairs' lever, on the ring's east side, is dead ("No power.", `block.breaker.dead`)
+  until the fuse box beside it is full: five holders (`FuseHolderBlock`) marked 5A, 10A, 15A, 20A and 30A,
+  the 15A in already. The other four fuses lie one in each room, in plain sight: 10A on the Lobby's desk,
+  30A on a tool chest in the Workshop, 5A on the Waiting room's cabinet, 20A on the Lockers' cabinet. Aimed
+  at a holder with the fuse of its amperage, a right click puts it in (`block.fuse.insert`); any other snaps
+  back (`block.fuse.reject`). The fifth one in, a relay and a hum (`block.fuse.power`), the lamps light, and
+  the lever works. Three Hunters wander by the box, harmless (they push, shriek, never hurt): the first use
+  of the wrench.
+- **Three locked doors** slide open like the airlock's, for good (`platform.LabDoorHooks`): the stairs' by the
+  lever by the fuse box, the shortcut's by a lever in the chemical room (Level 4's Maintenance levers; where
+  that one stands is provisional), and the south route's on walking out of the Office, wherever the player is
   then: a lock is heard letting go far off (`event.lab.unlock`) and "The south route is open." shows.
 - **The Lab hall's checkpoint:** walking in makes it the checkpoint, silently (`ContinueGame`, a zone and a
   spawn point tagged `restart_point`). A death there or later restarts in the Lab hall with what the player

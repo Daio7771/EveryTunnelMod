@@ -96,7 +96,7 @@ The light itself is drawn on the client, see [Graphics](graphics.md#the-flashlig
 `platform.LootSpawner` and `platform.LootBlock`:
 
 - The first time a player enters a level, a `LootBlock` is placed at every spawn point
-  tagged `battery`, `water`, `keycard`, `food_plate`, `food_popcorn`, `food_snack`, `wrench` or `detector`. The client draws it as the item itself, lying
+  tagged `battery`, `water`, `keycard`, `food_plate`, `food_popcorn`, `food_snack`, `wrench`, `detector` or a fuse (`fuse_5a`...). The client draws it as the item itself, lying
   flat (`client.render.LootRenderer`); it has no collision. Level 4, built in play, gets its loot
   once it stands.
 - **Right-click** picks it up; the spot is empty.

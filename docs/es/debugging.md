@@ -79,6 +79,8 @@ cuenta. Las partidas viven solo en memoria: reabrir el mundo empieza una nueva.
 - `A Distortion Cloud appears 11 blocks in front of <jugador> at (x, y, z)` (`DistortionHooks`), cada vez que viene una;
   `Three Hunters put in at (x, y, z), <nivel/punto>` y `A Distortion Junior put in at ...`, cada vez que se ponen
   (al construirse el nivel, al morir, con `/everytunnel spawn`: entonces `debug/<n>`).
+- `The figure stands at lab_figure (...)` y `The figure was seen` (`LabFigureHooks`); `<jugador> completes the fuse box at ...`
+  (`FuseHolderBlock`).
 - `[sprint] held but not sprinting at (x, y, z): …` (`client.SprintCheck`): mientras se
   mantiene la tecla de correr andando hacia delante y el jugador no corre, cada 2 s, qué lo
   impide (agotado, llevando una caja o un libro, hambre, usando un objeto, agachado, chocando

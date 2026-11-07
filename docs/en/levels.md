@@ -171,6 +171,9 @@ the server starts (levels built together name the same one). The function must e
 | `restart_point` | `ContinueGame`, `DeathHooks` | Where a death or CONTINUE restarts once its zone was walked into (Level 5's Lab hall) |
 | `hunters` | `DistortionHooks` | Level 5: a group of three Hunters, round that point, facing its way |
 | `distortion_junior` | `DistortionHooks` | Level 5: a Distortion Junior, floating there |
+| `harmless` | `DistortionHooks` | With `hunters`: those Hunters push and shriek but never hurt (Level 5's layer 1) |
+| `fuse_5a`, `fuse_10a`, `fuse_15a`, `fuse_20a`, `fuse_30a` | `LootSpawner` | Level 5: a fuse of that amperage lying there, for the fuse box |
+| `lab_figure`, `lab_figure_exit` | `LabFigureHooks` | Level 5: where the figure seen from the Lobby stands, once a game, and where it goes once seen |
 | `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Food, on furniture |
 | `water` | `LootSpawner` | A water bottle |
 | `keycard` | `LootSpawner` | The keycard |
@@ -224,8 +227,10 @@ Level 5, the laboratory, is built in play (`LabHooks`), layers 1 and 2 so far (p
   (`stairs_door`, `south_door`, `shortcut_door`, tagged `lab_door`) and `hatch_grate` (iron bars).
 - The Lab hall is tagged `restart_point`.
 - **Spawn points:** `player_start` (the Lobby, by the way in), `checkpoint` (the Lab hall, tagged
-  `restart_point`), `lever_stairs_door` and `lever_shortcut_door` (tagged `lab_lever`), `wrench` and
-  `detector` (in the Workshop).
+  `restart_point`), `lever_stairs_door` and `lever_shortcut_door` (tagged `lab_lever`), and layer 1's
+  (`tools/map/lab/furnish.py`): `wrench` and `detector` (the Workshop's island bench), the fuses `fuse_5a`,
+  `fuse_10a`, `fuse_20a`, `fuse_30a` (tagged the same), the noticeboard's cards `ch1_l5_card_*` (tagged `note`),
+  `hunters_fuse_box` (tagged `hunters` and `harmless`), `lab_figure` and `lab_figure_exit`.
 
 ## How the mod tracks players
 

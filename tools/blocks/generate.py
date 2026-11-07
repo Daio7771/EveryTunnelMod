@@ -1471,6 +1471,185 @@ def plastic_tex(rng, colour, kind=None):
     return img
 
 
+# --- Level 5's laboratory: cold, clean, used until recently --------------------------------
+
+LAB_STEEL = (182, 188, 192)
+LAB_WHITE = (232, 234, 230)
+LAB_GREEN = (98, 160, 132)
+# Level 5's fuses (FuseHolderBlock), blade fuses in their usual colours: 5A tan, 10A red, 15A blue,
+# 20A yellow, 30A green.
+FUSE_AMPS = (5, 10, 15, 20, 30)
+FUSE_COLOURS = ((198, 170, 122), (200, 54, 46), (62, 106, 200), (230, 198, 52), (72, 164, 82))
+
+
+def brushed_steel_tex(rng, base=LAB_STEEL):
+    """Brushed stainless steel: fine streaks running along the texture."""
+    img = new(base)
+    for y in range(16):
+        shade = rng.uniform(-7, 7)
+        for x in range(16):
+            px(img, x, y, tuple(T.clamp(c + shade) for c in base), 0.6)
+    noise(img, rng, 2)
+    return img
+
+
+def melamine_tex(rng, base=LAB_WHITE):
+    """White melamine: smooth, a faint scuff or two."""
+    img = new(base)
+    noise(img, rng, 1)
+    for _ in range(2):
+        x, y = rng.randrange(2, 13), rng.randrange(2, 13)
+        for k in range(rng.randrange(2, 5)):
+            px(img, x + k, y, tuple(c - 18 for c in base), 0.35)
+    return img
+
+
+def lab_cabinet_tex(rng):
+    """A white base cabinet's front: two doors with a gap down the middle, a steel bar handle on each."""
+    img = melamine_tex(rng)
+    for y in range(16):
+        px(img, 7, y, (176, 180, 178), 0.9)
+        px(img, 8, y, (204, 206, 202), 0.6)
+    for i in range(16):
+        px(img, i, 15, (168, 172, 170), 0.8)
+    for y in range(3, 8):
+        px(img, 5, y, (150, 156, 160), 1.0)
+        px(img, 10, y, (150, 156, 160), 1.0)
+    return img
+
+
+def pegboard_tex(rng):
+    """The Workshop's pegboard: a grey-brown board, a grid of holes, the tools hung on it."""
+    img = new((156, 148, 132))
+    noise(img, rng, 3)
+    for x in range(1, 16, 2):
+        for y in range(1, 16, 2):
+            px(img, x, y, (110, 102, 90), 0.8)
+    steel, red, black = (196, 200, 204), (176, 52, 44), (40, 40, 44)
+    for k in range(6):                                  # a wrench, slanting
+        px(img, 2 + k, 12 - k, steel, 1.0)
+    for x, y in ((1, 13), (2, 13), (7, 6), (8, 6), (8, 7)):
+        px(img, x, y, steel, 1.0)
+    for y in range(4, 11):                              # a screwdriver
+        px(img, 11, y, steel if y < 8 else red, 1.0)
+    px(img, 11, 11, red, 1.0)
+    for x in range(12, 16):                             # a hammer's head and handle
+        px(img, x, 3, black, 1.0)
+    for y in range(4, 10):
+        px(img, 14, y, (130, 96, 60), 1.0)
+    return img
+
+
+def drawers_tex(rng):
+    """A steel tool chest's front: four drawers, a pull on each."""
+    base = (128, 134, 140)
+    img = powder_metal_tex(rng, base)
+    for y in (0, 4, 8, 12):
+        for x in range(16):
+            px(img, x, y, (84, 88, 94), 0.9)
+        for x in range(5, 11):
+            px(img, x, y + 2, (200, 204, 208), 0.9)
+    return img
+
+
+def jars_tex(rng):
+    """Glass jars and bottles in a row on a shelf: amber, green, clear, a white label each."""
+    img = new((52, 56, 60))
+    x = 0
+    while x < 15:
+        w = rng.choice((2, 3, 3))
+        h = rng.randrange(8, 14)
+        colour = rng.choice(((196, 132, 52), (120, 176, 120), (196, 214, 220), (150, 120, 190)))
+        for xx in range(x, min(16, x + w)):
+            for y in range(16 - h, 16):
+                px(img, xx, y, colour, 0.9)
+            px(img, xx, 16 - h, tuple(min(255, c + 40) for c in colour), 0.9)
+        for xx in range(x, min(16, x + w)):
+            px(img, xx, 16 - h // 2, (236, 236, 230), 0.9)
+        x += w + 1
+    return img
+
+
+def magazines_tex(rng):
+    """Magazines left on a low table, one over another."""
+    img = new(LAB_WHITE)
+    for _ in range(4):
+        x, y = rng.randrange(0, 8), rng.randrange(0, 8)
+        colour = rng.choice(((180, 60, 60), (60, 110, 170), (210, 180, 70), (90, 150, 110), (236, 236, 232)))
+        for xx in range(x, x + 7):
+            for yy in range(y, y + 9):
+                px(img, xx % 16, yy % 16, colour, 0.95)
+        for xx in range(x + 1, x + 6):
+            px(img, xx % 16, (y + 1) % 16, (250, 250, 248), 0.8)
+    return img
+
+
+def lab_poster_tex(rng):
+    """A safety poster: a red title bar of small white letters, a yellow warning sign with the radiation
+    trefoil, lines of small print."""
+    img = new((240, 240, 236))
+    for x in range(16):
+        for y in range(3):
+            px(img, x, y, (176, 40, 36), 1.0)
+    for x in range(2, 14, 2):
+        px(img, x, 1, (250, 250, 250), 0.9)
+    for y in range(4, 11):                              # the triangle
+        half = (y - 4) // 1
+        for x in range(8 - half // 2 - 1, 8 + half // 2 + 1):
+            px(img, x, y, (236, 196, 40), 1.0)
+    for x, y in ((7, 7), (8, 7), (6, 9), (9, 9), (7, 8), (8, 8)):
+        px(img, x, y, (24, 24, 24), 1.0)
+    for y in (12, 14):
+        for x in range(2, rng.randrange(10, 15)):
+            px(img, x, y, (90, 90, 90), 0.8)
+    return img
+
+
+def first_aid_tex(rng):
+    """A first aid box's front: white, a green cross (the usual sign for first aid)."""
+    img = new((236, 238, 234))
+    for i in range(4, 12):
+        for j in (7, 8):
+            px(img, i, j, (40, 150, 80), 1.0)
+            px(img, j, i, (40, 150, 80), 1.0)
+    return img
+
+
+def fuse_label_tex(rng, index):
+    """A fuse holder's plate: dark plastic, a white label at its foot with the amperage, a band of the
+    fuse's colour over it."""
+    img = new((44, 46, 50))
+    noise(img, rng, 2)
+    for x in range(2, 14):
+        for y in range(10, 15):
+            px(img, x, y, (236, 236, 230), 1.0)
+        px(img, x, 9, FUSE_COLOURS[index], 1.0)
+    text = f"{FUSE_AMPS[index]}A"
+    dart_text(img, (16 - dart_text_width(text)) // 2, 10, text, (20, 20, 22))
+    return img
+
+
+def fuse_item_tex(rng, index):
+    """A blade fuse: a coloured plastic body with its number, two metal prongs under it."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    colour = FUSE_COLOURS[index]
+    dark = tuple(max(0, c - 70) for c in colour)
+    light = tuple(min(255, c + 50) for c in colour)
+    for x in range(3, 13):
+        for y in range(1, 10):
+            edge = x in (3, 12) or y in (1, 9)
+            img.putpixel((x, y), (dark if edge else colour) + (255,))
+    for x in range(4, 12):
+        img.putpixel((x, 2), light + (255,))
+    text = str(FUSE_AMPS[index])
+    dart_text(img, (16 - dart_text_width(text)) // 2, 3, text, (250, 250, 246, 255))
+    for x in (5, 6, 9, 10):
+        for y in range(10, 15):
+            img.putpixel((x, y), ((214, 218, 222) if x in (5, 9) else (150, 156, 162)) + (255,))
+    return img
+
+
+
 def logbook_tex(rng, part):
     """The logbook: ruled pages with handwriting (pages) or its dark red cloth cover."""
     if part == "cover":
@@ -1914,7 +2093,8 @@ def build():
                                  ("loot_master_card_se", "Master Card (Loot)", "master_card_se"),
                                  ("loot_master_key", "Master Key (Loot)", "master_key"),
                                  ("loot_wrench", "Wrench (Loot)", "wrench"),
-                                 ("loot_detector", "Radiation Detector (Loot)", "detector")):
+                                 ("loot_detector", "Radiation Detector (Loot)", "detector"),
+                                 *((f"loot_fuse_{amps}a", f"Fuse {amps}A (Loot)", f"fuse_{amps}a") for amps in FUSE_AMPS)):
         a.models[block_id] = {"textures": {"particle": f"{NS}:item/{item}"}}
         a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:item/{item}"})
 
@@ -2605,6 +2785,78 @@ def build():
         variants[f"pattern={pattern}"] = {"model": f"{NS}:block/{picture}"}
     a.block("puddle", "Puddle", {"variants": variants},
             {"parent": "minecraft:item/generated", "textures": {"layer0": tex_ref("puddle_0")}})
+
+    # --- Level 5's laboratory furniture: stainless steel, white melamine, surgical green plastic -----
+    a.texture("lab_steel", brushed_steel_tex(r("lab_steel")), T.STEEL.but(smoothness=0.7, metal=230, relief=0.15))
+    a.texture("lab_steel_dark", brushed_steel_tex(r("lab_steel_dark"), (120, 126, 132)), T.STEEL.but(smoothness=0.6, metal=230, relief=0.2))
+    a.texture("lab_white", melamine_tex(r("lab_white")), T.PLASTIC.but(smoothness=0.6, relief=0.05))
+    a.texture("lab_green", plastic_tex(r("lab_green"), LAB_GREEN), T.PLASTIC.but(smoothness=0.55))
+    a.texture("lab_cabinet_front", lab_cabinet_tex(r("lab_cabinet_front")), T.PLASTIC.but(smoothness=0.6, relief=0.1))
+    a.texture("lab_pegboard", pegboard_tex(r("lab_pegboard")), T.Material(0.2, porosity=0.4, relief=0.5))
+    a.texture("lab_drawers", drawers_tex(r("lab_drawers")), T.PAINTED_METAL.but(smoothness=0.5))
+    a.texture("lab_jars", jars_tex(r("lab_jars")), T.Material(0.85, relief=0.0))
+    a.texture("lab_magazines", magazines_tex(r("lab_magazines")), T.PAPER)
+    a.texture("lab_poster", lab_poster_tex(r("lab_poster")), T.PAPER, tiles=False)
+    a.texture("first_aid_front", first_aid_tex(r("first_aid_front")), T.PLASTIC.but(smoothness=0.55), tiles=False)
+    lab = {"s": "lab_steel", "w": "lab_white", "g": "lab_green", "d": "lab_steel_dark"}
+    # A workbench: a white top a full block high (things lie on it), a steel shelf low down, steel legs at the ends.
+    row("lab_bench", "Lab Bench", lab,
+        [el((0, 14, 0), (16, 16, 16), "w"), el((0, 12, 0), (16, 14, 1), "s"), el((0, 3, 1), (16, 4, 15), "s")],
+        left=[el((14, 0, 1), (16, 14, 3), "s"), el((14, 0, 13), (16, 14, 15), "s")],
+        right=[el((0, 0, 1), (2, 14, 3), "s"), el((0, 0, 13), (2, 14, 15), "s")])
+    # Base cabinets under a steel worktop, for walls and the Lobby's desk.
+    row("lab_cabinet", "Lab Cabinet", {**lab, "f": "lab_cabinet_front"},
+        [el((0, 0, 1), (16, 15, 16), "w", north="f"), el((0, 15, 0), (16, 16, 16), "s")])
+    prop("lab_chair", "Lab Chair", lab,
+         [el((3, 7, 3), (13, 8, 13), "g"), el((3, 8, 12), (13, 16, 13), "g")]
+         + [el((x, 0, z), (x + 1, 7, z + 1), "s") for x in (3, 12) for z in (3, 12)])
+    # The Waiting room's seats: green shells on a steel beam, side by side.
+    row("lab_seats", "Waiting Seats", lab,
+        [el((0, 4, 6), (16, 5, 10), "s"), el((1, 6, 2), (15, 7, 13), "g"), el((1, 7, 12), (15, 15, 13), "g"),
+         el((7, 5, 7), (9, 6, 9), "s")],
+        left=[el((14, 0, 5), (15, 4, 11), "s")], right=[el((1, 0, 5), (2, 4, 11), "s")])
+    # A steel trolley, two shelves, a white box and a few bottles on the lower one; its top a full block high.
+    prop("lab_cart", "Lab Cart", {**lab, "j": "lab_jars"},
+         [el((x, 0, z), (x + 1, 15, z + 1), "s") for x in (1, 14) for z in (2, 13)]
+         + [el((1, 15, 2), (15, 16, 14), "s"), el((1, 4, 2), (15, 5, 14), "s"),
+            el((2, 5, 3), (8, 10, 9), "w"), el((9, 5, 6), (14, 11, 9), "d", north=("j", (0, 5, 16, 16)), south=("j", (0, 5, 16, 16)))])
+    row("tool_board", "Pegboard", {"p": "lab_pegboard", "s": "lab_steel_dark"},
+        [el((0, 1, 15), (16, 15, 16), "p", south="s", east=None, west=None)])
+    prop("tool_chest", "Tool Chest", {**lab, "f": "lab_drawers"},
+         [el((1, 0, 2), (15, 16, 15), "d", north="f")])
+    stack("lab_shelf", "Lab Shelf", {**lab, "j": "lab_jars"},
+          [el((0, 0, 2), (1, 16, 3), "s"), el((15, 0, 2), (16, 16, 3), "s"), el((0, 0, 15), (1, 16, 16), "s"),
+           el((15, 0, 15), (16, 16, 16), "s"), el((0, 7, 2), (16, 8, 16), "s"), el((0, 15, 2), (16, 16, 16), "s"),
+           el((1, 8, 5), (15, 14, 12), "d", north="j", south="j"), el((1, 1, 5), (15, 7, 12), "d", north="j", south="j")],
+          base=[el((0, 0, 2), (16, 1, 16), "s")])
+    prop("low_table", "Low Table", {**lab, "m": "lab_magazines"},
+         [el((1, 6, 1), (15, 7, 15), "w", up="m")] + [el((x, 0, z), (x + 1, 6, z + 1), "s") for x in (2, 13) for z in (2, 13)])
+    prop("lab_poster", "Safety Poster", {"p": "lab_poster", "w": "lab_white"},
+         [el((2, 1, 15.5), (14, 15, 16), "w", north=("p", (0, 0, 16, 16)))], ao=False)
+    prop("first_aid_box", "First Aid Box", {"f": "first_aid_front", "w": "lab_white"},
+         [el((4, 5, 14), (12, 12, 16), "w", north=("f", (0, 0, 16, 16)))])
+
+    # Level 5's fuse box: one holder a slot (FuseHolderBlock), side by side on a wall; each takes the fuse
+    # of the amperage on its label, and a lamp over it lights once the whole box is full.
+    a.texture("fuse_lamp_on", plastic_tex(r("fuse_lamp_on"), (120, 240, 140)), T.PLASTIC.but(smoothness=0.7, emission=GLOW["DIFFUSER_GLOW"]))
+    a.texture("fuse_lamp_off", plastic_tex(r("fuse_lamp_off"), (40, 56, 44)), T.PLASTIC.but(smoothness=0.7))
+    variants = {}
+    for i in range(len(FUSE_AMPS)):
+        a.texture(f"fuse_label_{i}", fuse_label_tex(r(f"fuse_label_{i}"), i), T.PLASTIC.but(smoothness=0.5), tiles=False)
+        a.texture(f"fuse_body_{i}", plastic_tex(r(f"fuse_body_{i}"), FUSE_COLOURS[i]), T.PLASTIC.but(smoothness=0.6))
+        for filled in ("false", "true"):
+            for lit in ("false", "true"):
+                name = f"fuse_holder_{i}_{'full' if filled == 'true' else 'empty'}_{'on' if lit == 'true' else 'off'}"
+                textures = {"p": f"fuse_label_{i}", "m": "lab_steel", "b": f"fuse_body_{i}", "l": f"fuse_lamp_{'on' if lit == 'true' else 'off'}"}
+                els = [el((1, 1, 15), (15, 15, 16), "m", north=("p", (1, 1, 15, 15))),
+                       el((6, 8, 14), (10, 9, 15), "m"), el((6, 3, 14), (10, 4, 15), "m"),
+                       el((7, 12, 14.5), (9, 14, 15), "l")]
+                if filled == "true":
+                    els.append(el((6, 4, 13), (10, 8, 14.5), "b"))
+                a.models[name] = model(textures, els)
+                for f, y in HORIZONTAL.items():
+                    variants[f"amps={i},facing={f},filled={filled},lit={lit}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("fuse_holder", "Fuse Holder", {"variants": variants}, {"parent": f"{NS}:block/fuse_holder_2_full_off"})
     return a
 
 
@@ -2676,6 +2928,7 @@ def main():
                           ("reel_87", reel_tex), ("reel_94", reel_tex), ("reel_102", reel_tex), ("reel_120", reel_tex),
                           ("dart", dart_tex), ("master_card", master_card_tex), ("master_key", master_key_tex),
                           ("wrench", wrench_tex), ("detector", detector_tex),
+                          *((f"fuse_{amps}a", lambda g, i=i: fuse_item_tex(g, i)) for i, amps in enumerate(FUSE_AMPS)),
                           ("master_card_nw", lambda g: card_tex(g, 0, 0)), ("master_card_ne", lambda g: card_tex(g, 1, 0)),
                           ("master_card_sw", lambda g: card_tex(g, 0, 1)), ("master_card_se", lambda g: card_tex(g, 1, 1))):
         (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))

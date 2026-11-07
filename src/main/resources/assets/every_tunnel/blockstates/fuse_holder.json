@@ -1,0 +1,304 @@
+{
+  "variants": {
+    "amps=0,facing=north,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_0_empty_off"
+    },
+    "amps=0,facing=east,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_0_empty_off",
+      "y": 90
+    },
+    "amps=0,facing=south,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_0_empty_off",
+      "y": 180
+    },
+    "amps=0,facing=west,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_0_empty_off",
+      "y": 270
+    },
+    "amps=0,facing=north,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_0_empty_on"
+    },
+    "amps=0,facing=east,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_0_empty_on",
+      "y": 90
+    },
+    "amps=0,facing=south,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_0_empty_on",
+      "y": 180
+    },
+    "amps=0,facing=west,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_0_empty_on",
+      "y": 270
+    },
+    "amps=0,facing=north,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_0_full_off"
+    },
+    "amps=0,facing=east,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_0_full_off",
+      "y": 90
+    },
+    "amps=0,facing=south,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_0_full_off",
+      "y": 180
+    },
+    "amps=0,facing=west,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_0_full_off",
+      "y": 270
+    },
+    "amps=0,facing=north,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_0_full_on"
+    },
+    "amps=0,facing=east,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_0_full_on",
+      "y": 90
+    },
+    "amps=0,facing=south,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_0_full_on",
+      "y": 180
+    },
+    "amps=0,facing=west,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_0_full_on",
+      "y": 270
+    },
+    "amps=1,facing=north,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_1_empty_off"
+    },
+    "amps=1,facing=east,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_1_empty_off",
+      "y": 90
+    },
+    "amps=1,facing=south,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_1_empty_off",
+      "y": 180
+    },
+    "amps=1,facing=west,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_1_empty_off",
+      "y": 270
+    },
+    "amps=1,facing=north,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_1_empty_on"
+    },
+    "amps=1,facing=east,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_1_empty_on",
+      "y": 90
+    },
+    "amps=1,facing=south,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_1_empty_on",
+      "y": 180
+    },
+    "amps=1,facing=west,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_1_empty_on",
+      "y": 270
+    },
+    "amps=1,facing=north,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_1_full_off"
+    },
+    "amps=1,facing=east,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_1_full_off",
+      "y": 90
+    },
+    "amps=1,facing=south,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_1_full_off",
+      "y": 180
+    },
+    "amps=1,facing=west,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_1_full_off",
+      "y": 270
+    },
+    "amps=1,facing=north,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_1_full_on"
+    },
+    "amps=1,facing=east,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_1_full_on",
+      "y": 90
+    },
+    "amps=1,facing=south,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_1_full_on",
+      "y": 180
+    },
+    "amps=1,facing=west,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_1_full_on",
+      "y": 270
+    },
+    "amps=2,facing=north,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_2_empty_off"
+    },
+    "amps=2,facing=east,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_2_empty_off",
+      "y": 90
+    },
+    "amps=2,facing=south,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_2_empty_off",
+      "y": 180
+    },
+    "amps=2,facing=west,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_2_empty_off",
+      "y": 270
+    },
+    "amps=2,facing=north,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_2_empty_on"
+    },
+    "amps=2,facing=east,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_2_empty_on",
+      "y": 90
+    },
+    "amps=2,facing=south,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_2_empty_on",
+      "y": 180
+    },
+    "amps=2,facing=west,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_2_empty_on",
+      "y": 270
+    },
+    "amps=2,facing=north,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_2_full_off"
+    },
+    "amps=2,facing=east,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_2_full_off",
+      "y": 90
+    },
+    "amps=2,facing=south,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_2_full_off",
+      "y": 180
+    },
+    "amps=2,facing=west,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_2_full_off",
+      "y": 270
+    },
+    "amps=2,facing=north,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_2_full_on"
+    },
+    "amps=2,facing=east,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_2_full_on",
+      "y": 90
+    },
+    "amps=2,facing=south,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_2_full_on",
+      "y": 180
+    },
+    "amps=2,facing=west,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_2_full_on",
+      "y": 270
+    },
+    "amps=3,facing=north,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_3_empty_off"
+    },
+    "amps=3,facing=east,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_3_empty_off",
+      "y": 90
+    },
+    "amps=3,facing=south,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_3_empty_off",
+      "y": 180
+    },
+    "amps=3,facing=west,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_3_empty_off",
+      "y": 270
+    },
+    "amps=3,facing=north,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_3_empty_on"
+    },
+    "amps=3,facing=east,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_3_empty_on",
+      "y": 90
+    },
+    "amps=3,facing=south,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_3_empty_on",
+      "y": 180
+    },
+    "amps=3,facing=west,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_3_empty_on",
+      "y": 270
+    },
+    "amps=3,facing=north,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_3_full_off"
+    },
+    "amps=3,facing=east,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_3_full_off",
+      "y": 90
+    },
+    "amps=3,facing=south,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_3_full_off",
+      "y": 180
+    },
+    "amps=3,facing=west,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_3_full_off",
+      "y": 270
+    },
+    "amps=3,facing=north,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_3_full_on"
+    },
+    "amps=3,facing=east,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_3_full_on",
+      "y": 90
+    },
+    "amps=3,facing=south,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_3_full_on",
+      "y": 180
+    },
+    "amps=3,facing=west,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_3_full_on",
+      "y": 270
+    },
+    "amps=4,facing=north,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_4_empty_off"
+    },
+    "amps=4,facing=east,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_4_empty_off",
+      "y": 90
+    },
+    "amps=4,facing=south,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_4_empty_off",
+      "y": 180
+    },
+    "amps=4,facing=west,filled=false,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_4_empty_off",
+      "y": 270
+    },
+    "amps=4,facing=north,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_4_empty_on"
+    },
+    "amps=4,facing=east,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_4_empty_on",
+      "y": 90
+    },
+    "amps=4,facing=south,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_4_empty_on",
+      "y": 180
+    },
+    "amps=4,facing=west,filled=false,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_4_empty_on",
+      "y": 270
+    },
+    "amps=4,facing=north,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_4_full_off"
+    },
+    "amps=4,facing=east,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_4_full_off",
+      "y": 90
+    },
+    "amps=4,facing=south,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_4_full_off",
+      "y": 180
+    },
+    "amps=4,facing=west,filled=true,lit=false": {
+      "model": "every_tunnel:block/fuse_holder_4_full_off",
+      "y": 270
+    },
+    "amps=4,facing=north,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_4_full_on"
+    },
+    "amps=4,facing=east,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_4_full_on",
+      "y": 90
+    },
+    "amps=4,facing=south,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_4_full_on",
+      "y": 180
+    },
+    "amps=4,facing=west,filled=true,lit=true": {
+      "model": "every_tunnel:block/fuse_holder_4_full_on",
+      "y": 270
+    }
+  }
+}

@@ -37,7 +37,7 @@ import kotlin.math.sqrt
  * in groups of three ([DistortionHooks] spawns them, all three round one spawn point, their [group]).
  * One blow of the wrench kills one, however hurried (a blow before the wrench has swung back does less
  * damage, but not to them); anything else takes [daio7771.everytunnel.config.HunterConfig.health]. They
- * hit for half a heart a second each.
+ * hit for half a heart a second each; harmless ones ([harmless]) only push.
  *
  * Every tick one looks ([sight]): a player in Survival or Adventure, not dying nor hidden in a
  * locker, within its range and cone (or close by, whatever way it faces), with nothing solid in
@@ -61,6 +61,9 @@ class HunterEntity(type: EntityType<out HostileEntity>, world: World) : HostileE
     var group: String = ""
     /** The level it belongs to, if it came with one ([DistortionHooks]). */
     var levelId: String? = null
+
+    /** It does no harm: its hits only push (layer 1's Hunters, the first ones the player meets). */
+    var harmless = false
 
     private var pathTarget: Position? = null
     private var wanderPoint: Position? = null
@@ -167,6 +170,11 @@ class HunterEntity(type: EntityType<out HostileEntity>, world: World) : HostileE
     private fun hit(player: ServerPlayerEntity) {
         triggerAnim("main", "attack")
         playSound(ModSounds.HUNTER_ATTACK, 1f, 0.9f + random.nextFloat() * 0.2f)
+        if (harmless) {
+            player.takeKnockback(HARMLESS_PUSH, x - player.x, z - player.z)
+            player.velocityModified = true
+            return
+        }
         player.damage(damageSources.mobAttack(this), config.damage.toFloat())
     }
 
@@ -218,6 +226,8 @@ class HunterEntity(type: EntityType<out HostileEntity>, world: World) : HostileE
         private const val WANDER_TRIES = 8
         private const val WANDER_POINT_TICKS = 10L
         private const val AMBIENT_DELAY_TICKS = 160
+        /** How hard a harmless one's hit pushes. */
+        private const val HARMLESS_PUSH = 0.45
 
         val IDLE: RawAnimation = RawAnimation.begin().thenLoop("animation.hunter.idle")
         val WALK: RawAnimation = RawAnimation.begin().thenLoop("animation.hunter.walk")

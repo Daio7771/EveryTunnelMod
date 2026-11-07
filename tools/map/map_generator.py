@@ -515,7 +515,7 @@ LEVEL_5 = dict(
         ("welcome_door", 1, "x", 1, 12, 4, 3, "airlock_front"),
         ("workshop_door", 1, "z", 13, 41, 2, 3, "doorway"),
         ("waiting_door", 1, "z", 13, 66, 2, 3, "doorway"),
-        ("stairs_door", 1, "z", 37, 10, 2, 3, "locked"),            # the lever hidden in the ring
+        ("stairs_door", 1, "z", 37, 10, 2, 3, "locked"),            # the lever by the fuse box in the ring
         ("s1_door", 2, "z", 56, 27, 2, 3, "doorway"),
         ("s3_door", 2, "z", 56, 49, 2, 3, "doorway"),
         ("s2_door", 2, "z", 61, 35, 2, 3, "doorway"),
@@ -542,7 +542,6 @@ LEVEL_5 = dict(
     LEVERS=[("lever_stairs_door", 1, 74, 25, "west"), ("lever_shortcut_door", 2, 108, 55, "east")],
     LEVER="every_tunnel:breaker_lever[facing={facing},on=false]",
     # Loot on the floor: (id, tag, layer, x, z). The wrench and the detector lie in the Workshop for now.
-    LOOT=[("wrench", "wrench", 1, 38, 7), ("detector", "detector", 1, 44, 7)],
     # Stand-in blocks re-skinned by Level 5's textures (lab/textures.py): white wall tiles, a pale green
     # band of them at the foot of the walls, grey vinyl, a ceiling of white panels, vinyl stairs. Never a
     # block another level uses: the world's resource pack re-skins a block everywhere.

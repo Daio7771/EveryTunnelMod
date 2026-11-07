@@ -16,6 +16,8 @@ ahead, in the Lobby's wall, stays shut until the level is built (lab_blocks, in 
 one behind stands open until the player is in.
 """
 
+from lab.furnish import Furnish
+
 # Plan directions in the world: the plan's south is the world's west.
 WORLD_FACING = {"north": "east", "south": "west", "east": "south", "west": "north"}
 YAW = {"south": 0, "west": 90, "north": 180, "east": -90}
@@ -73,6 +75,8 @@ ENTRY_OPENINGS = ("frame", "airlock_rear")
 
 
 class Lab:
+    WORLD_FACING = WORLD_FACING
+
     def __init__(self, p):
         self.p = dict(p)
         drop = p["LAYER_DROP"]
@@ -272,6 +276,10 @@ class Lab:
         # The levers on their walls.
         for _, layer, x, z, facing in p["LEVERS"]:
             self.lab_blocks[self.at(x, self.layer_floor[layer] + 2, z)] = p["LEVER"].format(facing=WORLD_FACING[facing])
+        # Layer 1's furniture and what lies about (furnish.py).
+        levers = {(x, self.layer_floor[layer] + 2, z) for _, layer, x, z, _ in p["LEVERS"]}
+        self.furnish = Furnish(self, lab_air, levers).lay()
+        self.lab_blocks.update(self.furnish.states())
         # The flight: a stair on each cell, climbing towards the plan's north.
         stairs = f"{self.state('stairs')}[facing={WORLD_FACING['north']},half=bottom,shape=straight,waterlogged=false]"
         for x, z in self.flight.cells():
@@ -318,7 +326,8 @@ class Lab:
         return out
 
     def spawn_points(self):
-        """The level file's spawn points: the start, the Lab hall's restart point, the levers, the loot."""
+        """The level file's spawn points: the start, the Lab hall's restart point, the levers, and layer 1's
+        loot, cards, enemies and figure (furnish.py)."""
         p = self.p
         start, start_yaw = self.point(p["PLAYER_START"])
         check, check_yaw = self.point(p["CHECKPOINT_POINT"])
@@ -326,8 +335,7 @@ class Lab:
                {"id": "checkpoint", "pos": check, "yaw": check_yaw, "tags": ["restart_point"]}]
         for lid, layer, x, z, facing in p["LEVERS"]:
             out.append({"id": lid, "pos": list(self.at(x, self.layer_floor[layer] + 2, z)), "yaw": 0, "tags": ["lab_lever"]})
-        for lid, tag, layer, x, z in p["LOOT"]:
-            out.append({"id": lid, "pos": list(self.at(x, self.layer_floor[layer] + 1, z)), "yaw": 0, "tags": [tag]})
+        out += self.furnish.spawn_points(lambda facing: YAW[WORLD_FACING[facing]])
         return out
 
     def point(self, spec):

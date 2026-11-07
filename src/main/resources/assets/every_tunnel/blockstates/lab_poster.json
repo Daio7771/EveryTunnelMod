@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/lab_poster"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/lab_poster",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/lab_poster",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/lab_poster",
+      "y": 270
+    }
+  }
+}

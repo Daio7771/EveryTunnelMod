@@ -82,6 +82,14 @@ object ModEntities {
             .trackRangeBlocks(64)
             .build()
 
+    /** The figure seen far off from Level 5's Lobby ([LabFigureHooks]). Never saved; tracked from far off. */
+    val LAB_FIGURE: EntityType<LabFigureEntity> = FabricEntityTypeBuilder.create(SpawnGroup.MISC, ::LabFigureEntity)
+        .dimensions(EntityDimensions.fixed(0.6f, 1.8f))
+        .disableSaving()
+        .disableSummon()
+        .trackRangeBlocks(128)
+        .build()
+
     /** The Distortion Junior (Level 5): a small one, floating at face height. */
     val DISTORTION_JUNIOR: EntityType<DistortionJuniorEntity> =
         FabricEntityTypeBuilder.create<DistortionJuniorEntity>(SpawnGroup.MISC) { type, world -> DistortionJuniorEntity(type, world) }
@@ -105,5 +113,7 @@ object ModEntities {
         FabricDefaultAttributeRegistry.register(HUNTER, HunterEntity.createAttributes())
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "distortion_cloud"), DISTORTION_CLOUD)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "distortion_junior"), DISTORTION_JUNIOR)
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "lab_figure"), LAB_FIGURE)
+        FabricDefaultAttributeRegistry.register(LAB_FIGURE, LabFigureEntity.createAttributes())
     }
 }

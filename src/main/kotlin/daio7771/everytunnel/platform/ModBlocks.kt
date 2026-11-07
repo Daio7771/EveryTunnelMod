@@ -233,6 +233,14 @@ object ModBlocks {
 
     val LOOT_WRENCH: Block = register("loot_wrench", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.WRENCH })
     val LOOT_DETECTOR: Block = register("loot_detector", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.DETECTOR })
+    /** Level 5's fuses lying about, one per amperage (index as in [ModItems.FUSES]). */
+    val LOOT_FUSES: List<Block> = listOf(
+        register("loot_fuse_5a", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FUSES[0] }),
+        register("loot_fuse_10a", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FUSES[1] }),
+        register("loot_fuse_15a", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FUSES[2] }),
+        register("loot_fuse_20a", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FUSES[3] }),
+        register("loot_fuse_30a", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FUSES[4] }),
+    )
 
     val LOOT_KEYCARD: Block = register(
         "loot_keycard",
@@ -353,6 +361,22 @@ object ModBlocks {
     val VENDING_MACHINE: Block = register("vending_machine", StackFurnitureBlock(props(MapColor.RED, ModSoundGroups.SHEET_METAL).luminance { 5 }, listOf(box(1, 0, 1, 15, 16, 16))))
     val COFFEE_MACHINE: Block = register("coffee_machine", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision(), listOf(box(4, 0, 5, 12, 10, 13))))
     val WATER_DISPENSER: Block = register("water_dispenser", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC), listOf(box(3, 0, 3, 13, 16, 13))))
+
+    // Level 5's laboratory: stainless steel, white melamine, surgical green plastic.
+    /** A workbench, its top a full block high so things lie on it; benches side by side make one. */
+    val LAB_BENCH: Block = register("lab_bench", RowFurnitureBlock(props(MapColor.WHITE, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 0, 16, 16, 16))))
+    val LAB_CABINET: Block = register("lab_cabinet", RowFurnitureBlock(props(MapColor.WHITE, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 0, 16, 16, 16))))
+    val LAB_CHAIR: Block = register("lab_chair", PropBlock(props(MapColor.GREEN, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 13, 8, 13), box(3, 8, 12, 13, 16, 13))))
+    val LAB_SEATS: Block = register("lab_seats", RowFurnitureBlock(props(MapColor.GREEN, ModSoundGroups.PLASTIC), listOf(box(0, 0, 2, 16, 7, 13), box(0, 7, 12, 16, 15, 13))))
+    val LAB_CART: Block = register("lab_cart", PropBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(1, 0, 2, 15, 16, 14))))
+    val TOOL_BOARD: Block = register("tool_board", RowFurnitureBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(0, 1, 15, 16, 15, 16))))
+    val TOOL_CHEST: Block = register("tool_chest", PropBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(1, 0, 2, 15, 16, 15))))
+    val LAB_SHELF: Block = register("lab_shelf", StackFurnitureBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 2, 16, 16, 16))))
+    val LOW_TABLE: Block = register("low_table", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC), listOf(box(1, 0, 1, 15, 7, 15))))
+    val LAB_POSTER: Block = register("lab_poster", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(2, 1, 15, 14, 15, 16))))
+    val FIRST_AID_BOX: Block = register("first_aid_box", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(4, 5, 14, 12, 12, 16))))
+    /** One slot of Level 5's fuse box ([FuseHolderBlock]). */
+    val FUSE_HOLDER: Block = register("fuse_holder", FuseHolderBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision().luminance { if (it.get(FuseHolderBlock.LIT)) 4 else 0 }))
     /** An artificial plant in a pot, never watered, never wilting. */
     val POTTED_PLANT: Block = register("potted_plant", PropBlock(props(MapColor.DARK_GREEN, BlockSoundGroup.GRASS).noCollision(), listOf(box(3, 0, 3, 13, 16, 13))))
     /** A wall clock, stopped. */
@@ -432,7 +456,7 @@ object ModBlocks {
         }
         LOOT_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "loot"),
-            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK, LOOT_CARD_NW, LOOT_CARD_NE, LOOT_CARD_SW, LOOT_CARD_SE, LOOT_MASTER_KEY, LOOT_WRENCH, LOOT_DETECTOR).build(),
+            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK, LOOT_CARD_NW, LOOT_CARD_NE, LOOT_CARD_SW, LOOT_CARD_SE, LOOT_MASTER_KEY, LOOT_WRENCH, LOOT_DETECTOR, *LOOT_FUSES.toTypedArray()).build(),
         )
         BOX_SHELF_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),

@@ -1,0 +1,76 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "s": "every_tunnel:block/lab_steel",
+    "w": "every_tunnel:block/lab_white",
+    "g": "every_tunnel:block/lab_green",
+    "d": "every_tunnel:block/lab_steel_dark",
+    "particle": "every_tunnel:block/lab_steel"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        1
+      ],
+      "to": [
+        2,
+        14,
+        3
+      ],
+      "faces": {
+        "north": {
+          "texture": "#s"
+        },
+        "east": {
+          "texture": "#s"
+        },
+        "south": {
+          "texture": "#s"
+        },
+        "west": {
+          "texture": "#s"
+        },
+        "up": {
+          "texture": "#s"
+        },
+        "down": {
+          "texture": "#s"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        13
+      ],
+      "to": [
+        2,
+        14,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#s"
+        },
+        "east": {
+          "texture": "#s"
+        },
+        "south": {
+          "texture": "#s"
+        },
+        "west": {
+          "texture": "#s"
+        },
+        "up": {
+          "texture": "#s"
+        },
+        "down": {
+          "texture": "#s"
+        }
+      }
+    }
+  ]
+}

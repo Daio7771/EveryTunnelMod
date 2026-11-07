@@ -78,6 +78,8 @@ only: reopening the world starts a new one.
 - `A Distortion Cloud appears 11 blocks in front of <player> at (x, y, z)` (`DistortionHooks`), each time one comes;
   `Three Hunters put in at (x, y, z), <level/point>` and `A Distortion Junior put in at ...`, each time some are
   put in (the level built, a death, `/everytunnel spawn`: then `debug/<n>`).
+- `The figure stands at lab_figure (...)` and `The figure was seen` (`LabFigureHooks`); `<player> completes the fuse box at ...`
+  (`FuseHolderBlock`).
 - `[sprint] held but not sprinting at (x, y, z): …` (`client.SprintCheck`): while the sprint
   key is held walking forwards and the player does not sprint, every 2 s, what stands in the
   way (exhausted, carrying a box or book, hungry, using an item, crouching, bumping into

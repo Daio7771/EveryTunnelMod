@@ -87,6 +87,10 @@ object ModItems {
     val WRENCH: Item = WrenchItem(Item.Settings().maxCount(1))
     val DETECTOR: Item = Item(Item.Settings().maxCount(1))
 
+    /** Level 5's fuses, for the fuse box by the stairs' lever ([FuseHolderBlock]): their amperages, in order. */
+    val FUSE_AMPS: List<Int> = listOf(5, 10, 15, 20, 30)
+    val FUSES: List<Item> = FUSE_AMPS.map { Item(Item.Settings().maxCount(1)) }
+
     fun register() {
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "dart"), DART)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "battery"), BATTERY)
@@ -97,6 +101,7 @@ object ModItems {
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_snack"), FOOD_SNACK)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "wrench"), WRENCH)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "detector"), DETECTOR)
+        FUSE_AMPS.zip(FUSES).forEach { (amps, fuse) -> Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "fuse_${amps}a"), fuse) }
         val puzzleItems = RECORD_IDS.zip(RECORDS) + REEL_IDS.zip(REELS) + listOf(
             "master_card_nw" to CARD_NW, "master_card_ne" to CARD_NE, "master_card_sw" to CARD_SW, "master_card_se" to CARD_SE,
             "master_card" to MASTER_CARD, "master_key" to MASTER_KEY,
@@ -112,6 +117,7 @@ object ModItems {
             entries.add(DART)
             entries.add(WRENCH)
             entries.add(DETECTOR)
+            FUSES.forEach(entries::add)
             for ((_, item) in puzzleItems) entries.add(item)
         }
     }

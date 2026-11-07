@@ -121,6 +121,11 @@
       "every_tunnel:block/breaker/button_2"
     ]
   },
+  "block.breaker.dead": {
+    "sounds": [
+      "every_tunnel:block/breaker/dead_1"
+    ]
+  },
   "block.breaker.lever": {
     "sounds": [
       "every_tunnel:block/breaker/lever_1",
@@ -213,6 +218,26 @@
     "sounds": [
       "every_tunnel:block/fluorescent/start_1",
       "every_tunnel:block/fluorescent/start_2"
+    ]
+  },
+  "block.fuse.insert": {
+    "sounds": [
+      "every_tunnel:block/fuse/insert_1",
+      "every_tunnel:block/fuse/insert_2"
+    ]
+  },
+  "block.fuse.power": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/fuse/power_1",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "block.fuse.reject": {
+    "sounds": [
+      "every_tunnel:block/fuse/reject_1",
+      "every_tunnel:block/fuse/reject_2"
     ]
   },
   "block.hatch.open": {

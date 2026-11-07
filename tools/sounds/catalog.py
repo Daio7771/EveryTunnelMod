@@ -1438,6 +1438,39 @@ def lab_unlock(rng, variant):
     return bolt + hiss * 0.5
 
 
+def fuse_insert(rng, variant):
+    """A fuse pushed home into its holder: plastic sliding over metal, then a firm snap of the clips."""
+    n = samples(0.35)
+    slide = _noise(n, rng, 1500.0, 6000.0) * envelope(n, [(0.0, 0.0), (0.02, 0.4), (0.1, 0.3), (0.12, 0.0)])
+    snap = knock(n, rng, 0.12, rng.uniform(2400, 2900), [1.0, 1.6, 2.7], [0.8, 0.4, 0.2], [0.02, 0.015, 0.01], click=0.9, click_hi=9000.0)
+    clip = knock(n, rng, 0.125, rng.uniform(900, 1100), [1.0, 2.2], [0.5, 0.2], [0.04, 0.02], click=0.3, click_hi=4000.0)
+    return slide * 0.5 + snap + clip
+
+
+def fuse_reject(rng, variant):
+    """A fuse in the wrong holder: it will not go, a hollow plastic clack and a scrape as it pops back."""
+    n = samples(0.3)
+    clack = knock(n, rng, 0.0, rng.uniform(700, 850), [1.0, 1.9], [0.8, 0.3], [0.03, 0.02], click=0.7, click_hi=5000.0)
+    scrape = _noise(n, rng, 2000.0, 7000.0) * envelope(n, [(0.0, 0.0), (0.06, 0.0), (0.08, 0.5), (0.2, 0.0)])
+    return clack + scrape * 0.4
+
+
+def fuse_power(rng, variant):
+    """The fuse box full: a relay pulls in, then the hum of current rising and settling."""
+    n = samples(2.2)
+    t = time_axis(n)
+    relay = relay_clunk(n, rng, 0.0, heavy=True)
+    hum = mains_hum(t, 50.0, rng, harmonics=18, tilt=1.4) * envelope(n, [(0.0, 0.0), (0.1, 0.0), (0.5, 0.8), (1.4, 0.5), (2.2, 0.0)])
+    buzz = bandpass(np.tanh(3.0 * np.sin(TAU * 100.0 * t)), 300.0, 3000.0, order=2) * envelope(n, [(0.0, 0.0), (0.15, 0.0), (0.4, 0.25), (2.2, 0.0)])
+    return relay + hum * 0.6 + buzz * 0.2
+
+
+def lever_dead(rng, variant):
+    """A lever with no power behind it: pulled, a dry metal click and nothing more."""
+    n = samples(0.25)
+    return knock(n, rng, 0.0, rng.uniform(1300, 1600), [1.0, 2.4], [0.6, 0.2], [0.015, 0.01], click=0.8, click_hi=7000.0)
+
+
 def safe_tick(rng, variant):
     """A safe's dial passing a number: a tiny dry tick, high and short."""
     n = samples(0.05)
@@ -1839,6 +1872,10 @@ SOUNDS = [
     Sound("item.wrench.hit", "Level progress", "Level 5: the wrench landing a blow, metal on something", "mono", False, 3, wrench_hit, -3.0, attenuation=16),
     Sound("item.detector.beep", "Level progress", "Level 5: the radiation detector's beep, repeated faster as the Cloud nears", "mono", False, 1, detector_beep, -6.0),
     Sound("event.lab.unlock", "Level progress", "Level 5: a lock letting go far away (the south route opens)", "mono", False, 1, lab_unlock, -4.0),
+    Sound("block.fuse.insert", "Level progress", "Level 5: a fuse pushed home into its holder", "mono", False, 2, fuse_insert, -4.0),
+    Sound("block.fuse.reject", "Level progress", "Level 5: a fuse in the wrong holder, popping back", "mono", False, 2, fuse_reject, -4.0),
+    Sound("block.fuse.power", "Level progress", "Level 5: the fuse box full, a relay and the hum of current", "mono", False, 1, fuse_power, -3.0, attenuation=24),
+    Sound("block.breaker.dead", "Level progress", "Level 5: the stairs' lever without power, a dry click", "mono", False, 1, lever_dead, -6.0),
     Sound("entity.hunter.shriek", "Level 5 / Hunters", "A group of Hunters spotting someone: a rasping child-high shriek", "mono", False, 3, hunter_shriek, -2.0, attenuation=32),
     Sound("entity.hunter.attack", "Level 5 / Hunters", "A Hunter's swipe: a sleeve's swish and a scratch", "mono", False, 3, hunter_attack, -4.0),
     Sound("entity.hunter.death", "Level 5 / Hunters", "A Hunter struck down: a wet crunch, a choked squeal", "mono", False, 3, hunter_death, -3.0),

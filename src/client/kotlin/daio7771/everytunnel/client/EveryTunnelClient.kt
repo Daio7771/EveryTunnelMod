@@ -23,6 +23,7 @@ import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.DartRenderer
 import daio7771.everytunnel.client.render.DistortionRenderer
 import daio7771.everytunnel.client.render.HunterRenderer
+import daio7771.everytunnel.client.render.LabFigureRenderer
 import daio7771.everytunnel.client.render.FilmWalkerRenderer
 import daio7771.everytunnel.client.render.BoxShelfRenderer
 import daio7771.everytunnel.client.render.WallMessageRenderer
@@ -110,6 +111,7 @@ object EveryTunnelClient : ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.FILM_WALKER, ::FilmWalkerRenderer)
         EntityRendererRegistry.register(ModEntities.DART, ::DartRenderer)
         EntityRendererRegistry.register(ModEntities.HUNTER, ::HunterRenderer)
+        EntityRendererRegistry.register(ModEntities.LAB_FIGURE, ::LabFigureRenderer)
         EntityRendererRegistry.register(ModEntities.DISTORTION_CLOUD) { DistortionRenderer(it, "distortion_cloud", 0) }
         EntityRendererRegistry.register(ModEntities.DISTORTION_JUNIOR) { DistortionRenderer(it, "distortion_junior", 4) }
         AchievementToast.register()

@@ -41,7 +41,7 @@ object LootSpawner {
         "master_key" to { ModBlocks.LOOT_MASTER_KEY },
         "wrench" to { ModBlocks.LOOT_WRENCH },
         "detector" to { ModBlocks.LOOT_DETECTOR },
-    )
+    ) + ModItems.FUSE_AMPS.mapIndexed { i, amps -> "fuse_${amps}a" to { ModBlocks.LOOT_FUSES[i] } }
 
     private var server: MinecraftServer? = null
 

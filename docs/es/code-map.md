@@ -89,6 +89,7 @@ con un comentario KDoc que cuenta más.
 | `ModBlocks.kt` | Cada bloque: la luz, props, puertas, carteles, piezas del ascensor, botín, lector de tarjetas |
 | `ModItems.kt` | Batería, botella de agua, tarjeta; la pestaña creativa |
 | `LabItems.kt` | La llave inglesa del nivel 5: un arma pesada que no se desgasta |
+| `FuseHolderBlock.kt` | Un hueco de la caja de fusibles del nivel 5: solo admite el fusible de su amperaje; llena la caja, se encienden sus luces y la palanca de al lado funciona |
 | `ModEntities.kt` | El tipo de entidad del Pale man y su huevo; el asiento de la taquilla |
 | `ModSounds.kt` | Eventos de sonido que reproduce el código |
 | `ModSoundGroups.kt` | Grupos de sonido de bloques por material de prop |
@@ -135,6 +136,8 @@ con un comentario KDoc que cuenta más.
 | `DistortionEntity.kt` | Lo que comparten la Cloud y el Junior: flotar, que nada los toque, mirar al jugador, la mirada y el irse sincronizados, el humo |
 | `DistortionCloudEntity.kt` | La Distortion Cloud: quién mira hacia ella, matar, irse |
 | `DistortionJuniorEntity.kt` | El Distortion Junior: a quién molesta y marca, la mirada que acaba con él |
+| `LabFigureEntity.kt` | La figura que se ve desde el Lobby del nivel 5: cuando la miran, se va andando tras la esquina y desaparece |
+| `LabFigureHooks.kt` | Pone la figura ahí al construirse el nivel 5, una vez por partida |
 | `DistortionHooks.kt` | Los enemigos del nivel 5: sus puestos según los puntos de aparición, de vuelta al morir, avisar a los Hunters, cuándo y dónde viene una Cloud, `/everytunnel spawn` |
 
 ### `platform/`: hooks (lógica de juego movida por eventos)
@@ -257,6 +260,7 @@ con un comentario KDoc que cuenta más.
 | `DartRenderer.kt` | Un dardo lanzado: la flecha de vanilla, más pequeña, con su textura |
 | `WallMessageRenderer.kt` | Dibuja un mensaje con la fuente pintada y recuerda lo que le ha pasado |
 | `ObserverRenderer.kt` | Renderizador de GeckoLib del Observer; su cabeza gira con la de la entidad |
+| `LabFigureRenderer.kt` | La figura que se ve desde el Lobby del nivel 5, con el modelo del jugador, una silueta oscura |
 | `HunterRenderer.kt` | Renderizador de GeckoLib de los Hunters, con los ojos brillando |
 | `DistortionRenderer.kt` | Renderizador y modelo de GeckoLib de las Distortions: giradas hacia su yaw, el glitch, el ojo del Junior agrietándose |
 | `PaleManModel.kt` | Su modelo de GeckoLib, más la postura encorvada bajo techos bajos |
