@@ -99,7 +99,7 @@ las oficinas.
 |---|---|
 | `level.py` | El nivel a partir de `LEVEL_5`: espacios, aberturas, el tramo de escaleras, la cáscara alrededor del aire (azulejo blanco, una franja verde al pie, vinilo, paneles de techo; acero y chapa estriada en la esclusa y el marco), luces, puertas de acero, las puertas de la esclusa, la rejilla; dos juegos de bloques (la entrada, construida con el nivel 4; el resto, construido en juego, con su aire); las zonas del archivo del nivel |
 | `furnish.py` | Los muebles de las dos capas sala a sala, la caja de fusibles, lo que hay por ahí (la llave, el detector, los fusibles, los reactivos), las fichas, los ordenadores, la mezcladora de la sala de químicos, su tubería, las luces de alarma y la trampilla del drenaje, los puntos de aparición de los enemigos, los sujetos, la figura y los enemigos de la alarma |
-| `checks.py` | Un recorrido por las dos capas desde el pasillo de entrada que llega a todas las celdas, pared entre salas, los techos de la capa 2 bajo los suelos de la capa 1, el marco que se abre desde el tramo del nivel 4, cada celda en una zona; detienen el generador |
+| `checks.py` | Un recorrido por las dos capas desde el pasillo de entrada que llega a todas las celdas (rodeando los muebles), ningún mueble en la boca de una puerta o de un pasillo, pared entre salas, los techos de la capa 2 bajo los suelos de la capa 1, el marco que se abre desde el tramo del nivel 4, cada celda en una zona; detienen el generador |
 | `textures.py` | Las texturas propias del nivel 5 (`b5_*`), añadidas al pack del mundo |
 | `preview.py` | Las dos capas lado a lado con medidas, zonas y aberturas. `python3 -m lab.preview` desde `tools/map` lo dibuja solo, sin instalar nada |
 

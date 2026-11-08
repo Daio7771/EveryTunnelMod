@@ -95,7 +95,7 @@ the offices.
 |---|---|
 | `level.py` | The level from `LEVEL_5`: spaces, openings, the flight of stairs, the shell round the air (white tiles, a green band at their foot, vinyl, ceiling panels; steel and checker plate round the airlock and the frame), lights, steel doors, the airlock's doors, the grate; two sets of blocks (the way in, built with Level 4; the rest, built in play, its air included); the level file's zones |
 | `furnish.py` | Both layers' furniture room by room, the fuse box, what lies about (the wrench, the detector, the fuses, the reagents), the cards, the computers, the chemical room's mixer, pipe, alarm lights and the drain's hatch, the spawn points of the enemies, the subjects, the figure and the alarm's enemies |
-| `checks.py` | A walk over both layers from the entry corridor reaching every cell (round the furniture), a wall between rooms, layer 2's ceilings under layer 1's floors, the frame opening from Level 4's stretch, every cell in a zone; they stop the generator |
+| `checks.py` | A walk over both layers from the entry corridor reaching every cell (round the furniture), no furniture in a doorway's or a corridor's mouth, a wall between rooms, layer 2's ceilings under layer 1's floors, the frame opening from Level 4's stretch, every cell in a zone; they stop the generator |
 | `textures.py` | Level 5's own textures (`b5_*`), added to the world's pack |
 | `preview.py` | Both layers side by side with sizes, zones and openings. `python3 -m lab.preview` from `tools/map` draws it alone, installing nothing |
 

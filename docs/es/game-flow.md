@@ -463,7 +463,7 @@ hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla.
   Storage guarda dos snacks, dos aguas y dos pilas, vigilados por sus Hunters. Nada en el pasillo de los sujetos,
   el Lab hall ni la sala de químicos salvo los reactivos.
 - **El puzle químico** (`ChemicalHooks`, `core.puzzle.ChemicalMix`): cuatro frascos de reactivo, R-1 a R-4, en un
-  mueble junto a la mezcladora; uno en cada uno de sus dos depósitos (`MixerTankBlock`, `block.mixer.fill`) y luego
+  mueble al otro lado de la rejilla, cerca de la mezcladora; uno en cada uno de sus dos depósitos (`MixerTankBlock`, `block.mixer.fill`) y luego
   su botón rojo (`MixerBlock`). Una pareja, sorteada en cada partida, es el disolvente: la mezcladora funciona
   (`block.mixer.run`), la rejilla del drenaje se disuelve entre humo verde (`block.grate.dissolve`) y la trampilla de
   detrás se abre (sobre un foso de un bloque de momento: el drenaje es la capa 3). Cualquier otra pareja: la alarma, una sirena (`event.lab.alarm`) y luces rojas girando

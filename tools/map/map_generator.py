@@ -1415,7 +1415,7 @@ def main():
     shared5 = sorted({s.split("[")[0] for s in LEVEL_5["STAND_INS"].values()} & used)
     if shared5:
         raise SystemExit(f"LEVEL_5 STAND_INS: other levels use {', '.join(shared5)}; pick blocks they never use")
-    report5 = BC.walk(lv5) + BC.walled(lv5) + BC.stacked(lv5) + BC.joins_level_4(lv5, lv4) + BC.zoned(lv5)
+    report5 = BC.walk(lv5) + BC.clear_ways(lv5) + BC.walled(lv5) + BC.stacked(lv5) + BC.joins_level_4(lv5, lv4) + BC.zoned(lv5)
     clashes5 = [pos for pos in lv5.lab_blocks if pos in lv4.lounge_blocks]
     if clashes5:
         raise SystemExit(f"Level 5 overlaps Level 4 at {len(clashes5)} blocks, e.g. {clashes5[:3]}")

@@ -435,7 +435,7 @@ drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5).
   Storage holds two snacks, two waters and two batteries, guarded by its Hunters. Nothing in the subjects'
   corridor, the Lab hall or the chemical room but the reagents.
 - **The chemical puzzle** (`ChemicalHooks`, `core.puzzle.ChemicalMix`): four reagent flasks, R-1 to R-4, on a
-  cabinet by the mixer; one in each of its two tanks (`MixerTankBlock`, `block.mixer.fill`), then its red
+  cabinet past the grate, by the mixer; one in each of its two tanks (`MixerTankBlock`, `block.mixer.fill`), then its red
   button (`MixerBlock`). One pair, drawn each game, is the solvent: the mixer runs (`block.mixer.run`), the
   drain's grate dissolves in green fumes (`block.grate.dissolve`) and the hatch behind it, in the floor, opens (onto a
   pit a block deep for now: the drain is layer 3's). Any other

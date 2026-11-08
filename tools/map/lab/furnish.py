@@ -95,12 +95,13 @@ FURNITURE = {
         # Storage: shelves two high along the north and south walls, carts; its middle clear (its Hunters).
         + [p for x in range(100, 114) for p in tall("lab_shelf", x, 80, "south") + tall("lab_shelf", x, 89, "north")]
         + [("lab_cart", 101, 84, "east", 1), ("lab_cart", 112, 86, "west", 1)] + column("lab_cabinet", 114, 84, 88, "west")
-        # The chemical room: fume hoods along the north wall, two rows of benches, the reagents' cabinet and
-        # the mixer against the south wall beside the grate (MIXER), the pipe from it over the grate (PIPE).
+        # The chemical room: fume hoods along the north wall, two rows of benches, the mixer against the south
+        # wall beside the grate (MIXER), the pipe from it over the grate (PIPE), the reagents' cabinet on the
+        # grate's other side (the south route comes in at x 116 to 119: kept clear).
         + [p for x in range(112, 121) for p in tall("fume_hood", x, 50, "south")]
         + row("lab_bench", 114, 122, 57, "north") + row("lab_bench", 114, 122, 62, "south")
         + [("lab_chair", x, 56, "south", 1) for x in (115, 118, 121)] + [("lab_chair", x, 63, "north", 1) for x in (116, 120)]
-        + row("lab_cabinet", 117, 120, 69, "north")
+        + row("lab_cabinet", 131, 134, 69, "north")
         + [p for z in range(52, 58) for p in tall("lab_shelf", 137, z, "west")]
         + [("first_aid_box", 108, 65, "east", 2), ("lab_poster", 137, 62, "west", 2)]
     ),
@@ -150,7 +151,7 @@ LOOT = [
     ("snack_lockers", "food_snack", 1, 43, 24, 2), ("water_lockers", "water", 1, 43, 25, 2),
     ("battery_waiting", "battery", 1, 74, 7, 2),
     ("battery_office", "battery", 2, 76, 13, 2),
-] + [(f"reagent_{i + 1}", f"reagent_{i + 1}", 2, 117 + i, 69, 2) for i in range(4)] + [
+] + [(f"reagent_{i + 1}", f"reagent_{i + 1}", 2, 131 + i, 69, 2) for i in range(4)] + [
     ("snack_storage_1", "food_snack", 2, 101, 84, 2), ("water_storage_1", "water", 2, 112, 86, 2),
     ("snack_storage_2", "food_snack", 2, 114, 85, 2), ("water_storage_2", "water", 2, 114, 86, 2),
     ("battery_storage_1", "battery", 2, 114, 87, 2), ("battery_storage_2", "battery", 2, 114, 88, 2),

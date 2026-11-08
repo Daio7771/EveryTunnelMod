@@ -6,6 +6,7 @@ plan is wrong, so a bad LEVEL_5 never reaches a world.
   at most (the flight joins them), must reach every cell but those furniture stands in (furnish.py;
   what a player walks through does not count) and the sealed test chambers'. Locked doors and the grate
   count as open: each has its way of opening.
+- clear_ways(): no furniture that blocks stands in a room's cells beside a doorway or a corridor running into it.
 - walled(): two spaces of a layer are kept apart by at least one block, unless a corridor or the
   stairs join them on purpose (a slip in the numbers fails here).
 - stacked(): where layer 2 runs under layer 1, its ceiling stays below layer 1's floor, with a block
@@ -42,6 +43,24 @@ def walk(lv):
     return [f"Walk: all {len(seen)} cells reached from the entry corridor ({per_layer[1]} on layer 1 with the stairs, "
             f"{per_layer[2]} on layer 2), round {len(blocked)} of furniture, the {len(sealed)} of the sealed chambers "
             f"seen through their windows, locked doors counted as open"]
+
+
+def clear_ways(lv):
+    """Nothing that blocks stands in a doorway's or a corridor's mouth: the cells of a room beside an opening or
+    beside a corridor that runs into it (furnish.py). A walk may still get round a piece there; a player should
+    not have to."""
+    from lab.furnish import THROUGH
+    from lab.level import OPEN_KINDS
+    ground = {lv.layer_floor[layer] + 1: layer for layer in (1, 2)}
+    blocked = {(ground[y], x, z): name for (x, y, z), (name, _) in lv.furnish.items.items() if y in ground and name not in THROUGH}
+    ways = {(o.layer, x, z) for o in lv.openings for x, z in o.cells()}
+    ways |= {(s.layer, x, z) for s in lv.spaces + [lv.flight] if s.kind in OPEN_KINDS for x, z in s.cells()}
+    rooms = {(s.layer, x, z) for s in lv.spaces if s.kind not in OPEN_KINDS for x, z in s.cells()}
+    mouths = {c for c in rooms if any((c[0], c[1] + dx, c[2] + dz) in ways for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)))}
+    stuck = sorted((c, blocked[c]) for c in mouths if c in blocked)
+    if stuck:
+        raise SystemExit(f"Level 5: furniture in a way in: {stuck[:4]}")
+    return [f"Ways in: the {len(mouths)} cells of the rooms beside doorways and corridors are clear"]
 
 
 def walled(lv):
