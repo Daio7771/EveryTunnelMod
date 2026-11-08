@@ -90,6 +90,15 @@ object ModEntities {
         .trackRangeBlocks(128)
         .build()
 
+    /** A test subject in its sealed chamber (Level 5, [SubjectHooks]). Never saved. */
+    val SUBJECT: EntityType<SubjectEntity> =
+        FabricEntityTypeBuilder.create<SubjectEntity>(SpawnGroup.MISC) { type, world -> SubjectEntity(type, world) }
+            .dimensions(EntityDimensions.fixed(0.6f, 1.9f))
+            .disableSaving()
+            .disableSummon()
+            .trackRangeBlocks(64)
+            .build()
+
     /** The Distortion Junior (Level 5): a small one, floating at face height. */
     val DISTORTION_JUNIOR: EntityType<DistortionJuniorEntity> =
         FabricEntityTypeBuilder.create<DistortionJuniorEntity>(SpawnGroup.MISC) { type, world -> DistortionJuniorEntity(type, world) }
@@ -114,6 +123,7 @@ object ModEntities {
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "distortion_cloud"), DISTORTION_CLOUD)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "distortion_junior"), DISTORTION_JUNIOR)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "lab_figure"), LAB_FIGURE)
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "subject"), SUBJECT)
         FabricDefaultAttributeRegistry.register(LAB_FIGURE, LabFigureEntity.createAttributes())
     }
 }

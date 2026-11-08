@@ -160,6 +160,8 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `collapse_blocks` | `CollapseHooks` | Nivel 3: el tramo de túnel que el derrumbe llena de escombros |
 | `observer_never` | `ObserverEntity` | El pozo y el túnel del búnker del nivel 3: el Observer no ve a nadie ahí, así que nunca baja detrás de nadie |
 | `cloud` | `DistortionHooks` | Nivel 5: donde vienen las Distortion Clouds (una cada 2 a 4 minutos pasados en esas zonas) y donde pueden aparecer |
+| `first_cloud` | `LabHallHooks` | El Lab hall del nivel 5: al entrar, un golpe de cuerdas y la primera Cloud, una vez por partida |
+| `chemical_room`, `lab_grate`, `lab_drain` | `ChemicalHooks` | Nivel 5: la sala cuyas luces de alarma giran, la rejilla que disuelve el disolvente, la sala cuya trampilla se abre después |
 
 ### Etiquetas de punto de aparición
 
@@ -176,6 +178,10 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `harmless` | `DistortionHooks` | Con `hunters`: esos Hunters empujan y chillan pero nunca hacen daño (la capa 1 del nivel 5) |
 | `fuse_5a`, `fuse_10a`, `fuse_15a`, `fuse_20a`, `fuse_30a` | `LootSpawner` | Nivel 5: un fusible de ese amperaje ahí, para la caja de fusibles |
 | `lab_figure`, `lab_figure_exit` | `LabFigureHooks` | Nivel 5: donde está la figura que se ve desde el Lobby, una vez por partida, y adónde va cuando la ven |
+| `subject` | `SubjectHooks` | Nivel 5: un sujeto de pruebas inmóvil; su id `subject_<1..4>` dice qué fase |
+| `terminal` | `TerminalHooks` | Nivel 5: un ordenador en ese bloque; su id dice qué muestra su pantalla |
+| `reagent_1` a `reagent_4` | `LootSpawner`, `ChemicalHooks` | Nivel 5: un frasco de reactivo ahí; una mezcla fallida lo devuelve |
+| `alarm_hunters`, `alarm_junior` | `ChemicalHooks` | Nivel 5: donde la alarma de la sala de químicos trae tres Hunters, un Junior |
 | `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Comida, sobre muebles |
 | `water` | `LootSpawner` | Una botella de agua |
 | `keycard` | `LootSpawner` | La tarjeta |
@@ -225,19 +231,24 @@ repite su id:
   etiqueta `lab_airlock`), `lobby`,
   `workshop`, `waiting`, `lockers`, `layer1_corridor` (el anillo, seis cajas), `layer1_stairs` (las dos salas
   de escaleras y el tramo entre ellas).
-- **Capa 2:** `subjects_corridor`, `s1` a `s4`, `lab_hall`, `north_route` (dos cajas), `office`,
-  `south_route` (tres), `storage`, `chemical_room`, `shortcut`, `drain_hatch`.
+- **Capa 2:** `subjects_corridor`, `s1` a `s4` (las salas de pruebas selladas), `lab_hall` (con las etiquetas
+  `restart_point`, `cloud` y `first_cloud`), `north_route` (dos cajas) y `south_route` (tres), ambas con la etiqueta
+  `cloud`, `office`, `storage`, `chemical_room` (con la etiqueta `chemical_room`), `shortcut`, `drain_hatch` (con la
+  etiqueta `lab_drain`).
 - **Aberturas,** cada una con su zona: `entry_frame` (el marco: cruzarlo es entrar en el nivel 5),
   `airlock_rear` (con la etiqueta `lab_airlock_rear`), `welcome_door` (con la etiqueta `lab_welcome`), los huecos de puerta
-  (`workshop_door`, `waiting_door`, `s1_door` a `s4_door`, `office_door_west`, `office_door_east`), las puertas
+  (`workshop_door`, `waiting_door`, `office_door_west`, `office_door_east`), las puertas
   correderas bloqueadas (`stairs_door`, `south_door`, `shortcut_door`, con la etiqueta `lab_door`) y `hatch_grate`
-  (barrotes de hierro).
+  (barrotes de hierro, con la etiqueta `lab_grate`). Las salas de pruebas no tienen: un ventanal cada una (`WINDOWS`).
 - El Lab hall tiene la etiqueta `restart_point`.
 - **Puntos de aparición:** `player_start` (el Lobby, junto a la entrada), `checkpoint` (el Lab hall, con la
   etiqueta `restart_point`), `lever_stairs_door` y `lever_shortcut_door` (con la etiqueta `lab_lever`), y los de la
   capa 1 (`tools/map/lab/furnish.py`): `wrench` y `detector` (el banco central del Workshop), los fusibles `fuse_5a`,
   `fuse_10a`, `fuse_20a`, `fuse_30a` (con la misma etiqueta), las fichas del tablón `ch1_l5_card_*` (etiqueta `note`),
-  `hunters_fuse_box` (etiquetas `hunters` y `harmless`), `lab_figure` y `lab_figure_exit`.
+  `hunters_fuse_box` (etiquetas `hunters` y `harmless`), `lab_figure` y `lab_figure_exit`; y los de la capa 2:
+  `subject_1` a `subject_4` (etiqueta `subject`), las fichas `ch1_l5_card_s1` a `_s4`, los ordenadores `terminal_*`
+  (etiqueta `terminal`), `reagent_1` a `reagent_4` (con la misma etiqueta), `junior_north` (etiqueta
+  `distortion_junior`), `hunters_storage` (etiqueta `hunters`), `alarm_hunters` y `alarm_junior` (con la misma etiqueta).
 
 ## Cómo sigue el mod a los jugadores
 

@@ -412,7 +412,7 @@ la construcción del nivel 5, en juego (`platform.LabHooks`), en un espacio prop
   momento). Cada puerta son dos hojas de `AirlockDoorBlock` que se mueven un cuarto de bloque por paso
   (`core.door.SlidingDoor`, `platform.SlidingDoors`).
 
-De momento el nivel 5 son sus dos capas de arriba (la capa 1 amueblada, la 2 solo estructura): un laboratorio limpio de azulejo
+De momento el nivel 5 son sus dos capas de arriba, amuebladas: un laboratorio limpio de azulejo
 blanco con una franja de azulejo verde pálido, vinilo gris, paneles blancos en el techo y todos los
 fluorescentes encendidos. Capa 1: el Lobby, un anillo de pasillos con el Workshop, la sala de espera y las
 taquillas, y una puerta de acero (cerrada) a las escaleras. Capa 2, 10 bloques más abajo: el pasillo de los
@@ -444,8 +444,25 @@ hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla.
 - **El checkpoint del Lab hall:** entrar en él lo hace checkpoint, en silencio (`ContinueGame`, una zona y un punto
   de aparición con la etiqueta `restart_point`). Morir ahí o después reinicia en el Lab hall con lo que lleva el
   jugador; CONTINUE le deja ahí con lo que llevaba al llegar.
-- **Sus enemigos** existen, aunque aún no hay ninguno en el nivel (los colocará su contenido; para probarlos,
-  `/everytunnel spawn hunters|junior|cloud`). `platform.DistortionHooks` los pone al construirse el nivel y
+- **La capa 2.** El pasillo de los sujetos: las salas de pruebas S-1 a S-4 están selladas y se ven por un ventanal
+  ancho con marco de acero (`WINDOWS`), blancas y vacías salvo por su sujeto, inmóvil, una persona que sala a sala
+  se va convirtiendo en un Pale man (`SubjectEntity`, `SubjectHooks`; `tools/entity/subject.py`), con una ficha de
+  experimento en la pared del pasillo junto a cada ventanal (textos provisionales). Al entrar en el Lab hall: un
+  golpe de cuerdas graves desafinadas (`event.lab.sting`) y enseguida la primera Distortion Cloud, unos pasos por
+  delante, una vez por partida (`LabHallHooks`). Las Clouds vienen al azar en el Lab hall y en las dos rutas (zonas
+  con la etiqueta `cloud`), nunca en la Office, Storage, la sala de químicos ni el pasillo de los sujetos. El primer
+  Junior flota a la vista en el pasillo norte; tres Hunters guardan Storage.
+- **El ordenador de la Office** (`LabTerminalBlock`, `TerminalHooks`, `TerminalScreen` del cliente): con clic
+  derecho teclea su pantalla, verde sobre negro: la respuesta del puzle químico (lore provisional alrededor).
+- **El puzle químico** (`ChemicalHooks`, `core.puzzle.ChemicalMix`): cuatro frascos de reactivo, R-1 a R-4, en un
+  mueble junto a la mezcladora; uno en cada uno de sus dos depósitos (`MixerTankBlock`, `block.mixer.fill`) y luego
+  su botón rojo (`MixerBlock`). Una pareja, sorteada en cada partida, es el disolvente: la mezcladora funciona
+  (`block.mixer.run`), la rejilla del drenaje se disuelve entre humo verde (`block.grate.dissolve`) y la trampilla de
+  detrás se abre. Cualquier otra pareja: la alarma, una sirena (`event.lab.alarm`) y luces rojas girando
+  (`AlarmLightBlock`) durante 10 s, y aparecen en la sala tres Hunters y un Junior; después los dos frascos vuelven a
+  su mueble.
+- **Sus enemigos** los coloca `tools/map/lab/furnish.py`; para probarlos en cualquier sitio,
+  `/everytunnel spawn hunters|junior|cloud`. `platform.DistortionHooks` los pone al construirse el nivel y
   los devuelve a su sitio cuando el jugador muere en él; ninguno se guarda. Los que pone el comando son de un solo uso: una muerte los quita.
   - **Los Hunters** (`HunterEntity`, decisiones en `entities.HunterBrain`), en grupos de tres en un punto de
     aparición con la etiqueta `hunters`: humanoides pequeños y negros con bata, ojos blancos sin pupila.

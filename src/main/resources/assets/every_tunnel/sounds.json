@@ -240,6 +240,14 @@
       "every_tunnel:block/fuse/reject_2"
     ]
   },
+  "block.grate.dissolve": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/grate/dissolve_1",
+        "attenuation_distance": 24
+      }
+    ]
+  },
   "block.hatch.open": {
     "sounds": [
       {
@@ -301,6 +309,20 @@
       "every_tunnel:block/metal_pipe/step_2",
       "every_tunnel:block/metal_pipe/step_3",
       "every_tunnel:block/metal_pipe/step_4"
+    ]
+  },
+  "block.mixer.fill": {
+    "sounds": [
+      "every_tunnel:block/mixer/fill_1",
+      "every_tunnel:block/mixer/fill_2"
+    ]
+  },
+  "block.mixer.run": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/mixer/run_1",
+        "attenuation_distance": 24
+      }
     ]
   },
   "block.plastic.impact": {
@@ -439,6 +461,13 @@
         "name": "every_tunnel:block/shutter/close_1",
         "attenuation_distance": 32
       }
+    ]
+  },
+  "block.terminal.key": {
+    "sounds": [
+      "every_tunnel:block/terminal/key_1",
+      "every_tunnel:block/terminal/key_2",
+      "every_tunnel:block/terminal/key_3"
     ]
   },
   "block.valve.release": {
@@ -715,6 +744,19 @@
   "event.death.reveal": {
     "sounds": [
       "every_tunnel:event/death/reveal_1"
+    ]
+  },
+  "event.lab.alarm": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/lab/alarm_1",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "event.lab.sting": {
+    "sounds": [
+      "every_tunnel:event/lab/sting_1"
     ]
   },
   "event.lab.unlock": {

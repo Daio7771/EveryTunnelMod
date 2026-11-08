@@ -37,6 +37,7 @@ KDoc comment that says more.
 | `save/LoungeSave.kt` | Level 4 as it was left, as text |
 | `wall/WallMessageState.kt` | A wall message's triggers: fixed, on approach, changing when looked away from |
 | `puzzle/BreakerCode.kt` | Level 4's five levers: the code, how many are right |
+| `puzzle/ChemicalMix.kt` | Level 5's chemical puzzle: the pair of reagents drawn each game, either way round |
 | `puzzle/SafeDial.kt` | A safe's dial: ticks, clicks, fixing a number by changing direction |
 | `puzzle/darts/DartboardGeometry.kt` | Where a dart landed on the board: number and ring, in the 4 orientations |
 | `film/FilmInfo.kt` | The Cinema's film: frames, speed, which frame at what time |
@@ -89,6 +90,8 @@ KDoc comment that says more.
 | `ModBlocks.kt` | Every block: the light, props, doors, signs, elevator parts, loot, card reader |
 | `ModItems.kt` | Battery, water bottle, keycard; the creative tab |
 | `LabItems.kt` | Level 5's wrench: a heavy weapon that never wears out |
+| `ChemicalBlocks.kt` | Level 5's mixer: its tanks (a reagent flask each), its body (the button), the alarm's red lights |
+| `TerminalHooks.kt` | Level 5's computers (`LabTerminalBlock`): what each screen shows, sent to the client |
 | `FuseHolderBlock.kt` | A slot of Level 5's fuse box: takes only the fuse of its amperage; the box full, its lamps light and the lever beside it works |
 | `ModEntities.kt` | The Pale man entity type and spawn egg; the locker seat |
 | `ModSounds.kt` | Sound events played from code |
@@ -138,6 +141,9 @@ KDoc comment that says more.
 | `DistortionJuniorEntity.kt` | The Distortion Junior: whom it troubles and marks, the stare that ends it |
 | `LabFigureEntity.kt` | The figure seen from Level 5's Lobby: once looked at, it walks off round the corner and is gone |
 | `LabFigureHooks.kt` | Puts the figure there when Level 5 is built, once a game |
+| `SubjectEntity.kt` | The test subjects, still in their sealed chambers, by stage; `SubjectHooks` puts them in with the level |
+| `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
+| `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
 | `DistortionHooks.kt` | Level 5's enemies: posts from spawn points, back on a death, telling the Hunters, when and where a Cloud comes, `/everytunnel spawn` |
 
 ### `platform/`: hooks (game logic driven by events)
@@ -260,6 +266,7 @@ KDoc comment that says more.
 | `DartRenderer.kt` | A thrown dart: vanilla's arrow, smaller, with its own texture |
 | `WallMessageRenderer.kt` | Draws a wall message in the painted font; remembers what happened to it |
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
+| `SubjectRenderer.kt` | GeckoLib renderer for the subjects, each stage its body and skin |
 | `LabFigureRenderer.kt` | The figure seen from Level 5's Lobby, on the player's model, a dark shape |
 | `HunterRenderer.kt` | GeckoLib renderer for the Hunters, their eyes glowing |
 | `DistortionRenderer.kt` | GeckoLib renderer and model for the Distortions: turned to their yaw, the glitch, the Junior's cracking eye |
@@ -291,6 +298,7 @@ KDoc comment that says more.
 | `LoadingScreen.kt` | The loading screen and `LoadingCover`, which draws it over everything |
 | `LoadingTips.kt` | Rotating tips with the player's keys |
 | `EndOfDemoScreen.kt` | "End of demo" and the rolling credits |
+| `TerminalScreen.kt` | A Level 5 computer's screen, typed out green on black |
 | `DeathScreen.kt` | The death screen: "Killed by", the killer and a tip on the black of dying, and "Try again" |
 
 ### Client mixins: `client/java/daio7771/everytunnel/mixin/client/`

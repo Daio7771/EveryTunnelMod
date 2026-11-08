@@ -464,7 +464,7 @@ LEVEL_5 = dict(
     ROOM_HEIGHT=5,
     CORRIDOR_HEIGHT=4,
     # (id, zone, name, layer, box, height or None for the kind's, kind). Kinds: "entry", "room",
-    # "equipment", "loot", "lore", "hub", "puzzle", "hatch", "stairs" and "corridor" (corridors and stairs
+    # "equipment", "loot", "lore", "chamber" (sealed: seen through a window), "hub", "puzzle", "hatch", "stairs" and "corridor" (corridors and stairs
     # open onto what they touch; any other two spaces keep a wall between them). The zone ids are the plan's.
     SPACES=[
         # Layer 1: in from Level 4's dark stretch through a steel frame, a dark corridor of the lab's tiles
@@ -485,10 +485,10 @@ LEVEL_5 = dict(
         # Layer 2: the subjects' corridor to the Lab hall, and the two loops round it.
         ("stairs_bottom", "layer1_stairs", "Stairs", 2, (5, 54, 17, 63), None, "stairs"),
         ("subjects", "subjects_corridor", "Subjects corridor", 2, (17, 57, 73, 61), None, "corridor"),
-        ("s1", "s1", "S-1", 2, (21, 45, 35, 56), None, "lore"),
-        ("s2", "s2", "S-2", 2, (29, 62, 43, 72), None, "lore"),
-        ("s3", "s3", "S-3", 2, (43, 45, 57, 56), None, "lore"),
-        ("s4", "s4", "S-4", 2, (51, 62, 65, 72), None, "lore"),
+        ("s1", "s1", "S-1", 2, (21, 45, 35, 56), None, "chamber"),
+        ("s2", "s2", "S-2", 2, (29, 62, 43, 72), None, "chamber"),
+        ("s3", "s3", "S-3", 2, (43, 45, 57, 56), None, "chamber"),
+        ("s4", "s4", "S-4", 2, (51, 62, 65, 72), None, "chamber"),
         ("lab_hall", "lab_hall", "Lab hall", 2, (73, 50, 98, 71), 7, "hub"),
         ("north_west", "north_route", "", 2, (75, 26, 79, 50), None, "corridor"),
         ("north_east", "north_route", "", 2, (92, 26, 96, 50), None, "corridor"),
@@ -516,16 +516,17 @@ LEVEL_5 = dict(
         ("workshop_door", 1, "z", 13, 41, 2, 3, "doorway"),
         ("waiting_door", 1, "z", 13, 66, 2, 3, "doorway"),
         ("stairs_door", 1, "z", 37, 10, 2, 3, "locked"),            # the lever by the fuse box in the ring
-        ("s1_door", 2, "z", 56, 27, 2, 3, "doorway"),
-        ("s3_door", 2, "z", 56, 49, 2, 3, "doorway"),
-        ("s2_door", 2, "z", 61, 35, 2, 3, "doorway"),
-        ("s4_door", 2, "z", 61, 57, 2, 3, "doorway"),
         ("office_door_west", 2, "z", 25, 76, 2, 3, "doorway"),
         ("office_door_east", 2, "z", 25, 93, 2, 3, "doorway"),
         ("south_door", 2, "z", 71, 77, 2, 3, "locked"),             # opens on leaving the Office
         ("shortcut_door", 2, "x", 98, 59, 2, 3, "locked"),          # the chemical room's lever, from inside
         ("hatch_grate", 2, "z", 70, 127, 4, 3, "grate"),
     ],
+    # The test chambers S-1 to S-4 are sealed: a wide window of glass in a steel frame looks into each from
+    # the subjects' corridor, from waist height to the corridor's ceiling: (layer, axis of the wall's line,
+    # line, first cell, last cell).
+    WINDOWS=[(2, "z", 56, 22, 33), (2, "z", 56, 44, 55), (2, "z", 61, 30, 41), (2, "z", 61, 52, 63)],
+    GLASS="minecraft:glass",
     START=(-16, 13),                 # layer 1: the entry corridor's first cell, past the frame
     CHECKPOINT=(77, 67),             # layer 2: in the Lab hall
     # Plan to world: the plan's south is the world's west, so the entry corridor leaves Level 4's dark
@@ -541,7 +542,6 @@ LEVEL_5 = dict(
     # levels' content: for now the stairs' is on the ring's east wall, the shortcut's by the shortcut.
     LEVERS=[("lever_stairs_door", 1, 74, 25, "west"), ("lever_shortcut_door", 2, 108, 55, "east")],
     LEVER="every_tunnel:breaker_lever[facing={facing},on=false]",
-    # Loot on the floor: (id, tag, layer, x, z). The wrench and the detector lie in the Workshop for now.
     # Stand-in blocks re-skinned by Level 5's textures (lab/textures.py): white wall tiles, a pale green
     # band of them at the foot of the walls, grey vinyl, a ceiling of white panels, vinyl stairs. Never a
     # block another level uses: the world's resource pack re-skins a block everywhere.

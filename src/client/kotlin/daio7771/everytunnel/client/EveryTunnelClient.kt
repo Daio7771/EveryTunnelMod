@@ -24,6 +24,7 @@ import daio7771.everytunnel.client.render.DartRenderer
 import daio7771.everytunnel.client.render.DistortionRenderer
 import daio7771.everytunnel.client.render.HunterRenderer
 import daio7771.everytunnel.client.render.LabFigureRenderer
+import daio7771.everytunnel.client.render.SubjectRenderer
 import daio7771.everytunnel.client.render.FilmWalkerRenderer
 import daio7771.everytunnel.client.render.BoxShelfRenderer
 import daio7771.everytunnel.client.render.WallMessageRenderer
@@ -33,6 +34,7 @@ import daio7771.everytunnel.client.screen.DeathScreen
 import daio7771.everytunnel.client.screen.EndOfDemoScreen
 import daio7771.everytunnel.client.screen.NoteScreen
 import daio7771.everytunnel.client.screen.SafeScreen
+import daio7771.everytunnel.client.screen.TerminalScreen
 import daio7771.everytunnel.client.screen.LoadingCover
 import daio7771.everytunnel.client.screen.MainMenuScreen
 import daio7771.everytunnel.client.effects.MenuMusic
@@ -98,6 +100,7 @@ object EveryTunnelClient : ClientModInitializer {
         DetectorHud.register()
         ScreenFade.register() // after the HUD, so the black covers it
         DeathScreen.register()
+        TerminalScreen.register()
         EndOfDemoScreen.register()
         NoteScreen.register()
         SafeScreen.register()
@@ -112,6 +115,7 @@ object EveryTunnelClient : ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.DART, ::DartRenderer)
         EntityRendererRegistry.register(ModEntities.HUNTER, ::HunterRenderer)
         EntityRendererRegistry.register(ModEntities.LAB_FIGURE, ::LabFigureRenderer)
+        EntityRendererRegistry.register(ModEntities.SUBJECT, ::SubjectRenderer)
         EntityRendererRegistry.register(ModEntities.DISTORTION_CLOUD) { DistortionRenderer(it, "distortion_cloud", 0) }
         EntityRendererRegistry.register(ModEntities.DISTORTION_JUNIOR) { DistortionRenderer(it, "distortion_junior", 4) }
         AchievementToast.register()

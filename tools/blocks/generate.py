@@ -1650,6 +1650,118 @@ def fuse_item_tex(rng, index):
 
 
 
+# Level 5's chemical room: the four reagents, by code, and their colours.
+REAGENT_COLOURS = ((70, 130, 220), (222, 152, 40), (92, 190, 92), (164, 92, 214))
+
+
+def lab_screen_tex(rng):
+    """A lab computer's screen: green text on black, a cursor."""
+    img = new((8, 14, 10))
+    for y in range(2, 13, 2):
+        x = 2
+        while x < 13:
+            w = rng.randrange(1, 5)
+            if rng.random() < 0.8:
+                for xx in range(x, min(14, x + w)):
+                    px(img, xx, y, (90, 220, 120), 1.0)
+            x += w + 1
+    px(img, 2, 13, (150, 255, 170), 1.0)
+    return img
+
+
+def mixer_tank_tex(rng, reagent):
+    """A mixer tank's front: white steel round a window, the reagent's colour behind it (empty: dark)."""
+    img = new((214, 218, 216))
+    noise(img, rng, 2)
+    colour = REAGENT_COLOURS[reagent - 1] if reagent else (40, 44, 46)
+    for x in range(5, 11):
+        for y in range(2, 14):
+            px(img, x, y, colour if (reagent and y >= 5) else (40, 44, 46), 1.0)
+        px(img, x, 1, (150, 156, 160), 1.0)
+        px(img, x, 14, (150, 156, 160), 1.0)
+    for y in range(2, 14):
+        px(img, 4, y, (150, 156, 160), 1.0)
+        px(img, 11, y, (150, 156, 160), 1.0)
+    if reagent:
+        for y in range(5, 14, 3):
+            px(img, 6, y, tuple(min(255, c + 60) for c in colour), 0.8)
+    return img
+
+
+def mixer_front_tex(rng):
+    """The mixer's front: a round gauge, a red push button, a vent."""
+    img = powder_metal_tex(rng, (120, 126, 132))
+    for x in range(4, 12):
+        for y in range(2, 8):
+            if (x - 7.5) ** 2 + (y - 4.5) ** 2 <= 9:
+                px(img, x, y, (236, 236, 228), 1.0)
+    px(img, 8, 3, (20, 20, 20), 1.0)
+    px(img, 9, 4, (20, 20, 20), 1.0)
+    for x in range(6, 10):
+        for y in range(9, 13):
+            px(img, x, y, (200, 40, 36), 1.0)
+    px(img, 6, 9, (240, 110, 100), 1.0)
+    for x in range(2, 14, 2):
+        px(img, x, 14, (70, 74, 80), 1.0)
+    return img
+
+
+def alarm_frames(lit, frames=8):
+    """An alarm light's dome: dark red; lit, a bright band sweeping round it."""
+    out = []
+    for f in range(frames if lit else 1):
+        img = new((96, 20, 18) if not lit else (196, 30, 24))
+        if lit:
+            band = f * 16 // frames
+            for x in range(16):
+                d = min((x - band) % 16, (band - x) % 16)
+                if d < 4:
+                    for y in range(16):
+                        px(img, x, y, (255, 150, 120), 1.0 - d / 4)
+        out.append(img)
+    return out
+
+
+def hood_sash_tex(rng):
+    """A fume hood's sash: pale glass in a steel frame, a handle bar."""
+    img = new((176, 200, 206))
+    noise(img, rng, 2)
+    for i in range(16):
+        px(img, i, 0, (150, 156, 160), 1.0)
+        px(img, i, 15, (150, 156, 160), 1.0)
+        px(img, 0, i, (150, 156, 160), 1.0)
+        px(img, 15, i, (150, 156, 160), 1.0)
+        px(img, i, 12, (196, 200, 204), 1.0)
+    for k in range(4):
+        px(img, 3 + k, 3 + k, (220, 236, 240), 0.8)
+    return img
+
+
+def reagent_item_tex(rng, index):
+    """A reagent flask: a round-bottomed glass flask, its liquid the reagent's colour, a white code label."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    glass, outline = (214, 230, 236), (40, 46, 52)
+    colour = REAGENT_COLOURS[index]
+    for y in range(16):
+        for x in range(16):
+            neck = 6 <= x <= 9 and 1 <= y <= 6
+            body = (x - 7.5) ** 2 + (y - 10.5) ** 2 <= 20
+            if neck or body:
+                c = colour if (body and y >= 9) else glass
+                img.putpixel((x, y), c + (255,))
+    for y in range(16):
+        for x in range(16):
+            if img.getpixel((x, y))[3] == 0 and any(
+                    0 <= x + dx < 16 and 0 <= y + dy < 16 and img.getpixel((x + dx, y + dy))[3] == 255 and img.getpixel((x + dx, y + dy))[:3] != outline
+                    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                img.putpixel((x, y), outline + (255,))
+    for x in range(5, 11):
+        img.putpixel((x, 11), (244, 244, 240, 255))
+    dart_text(img, (16 - dart_text_width(str(index + 1))) // 2 + 1, 10, str(index + 1), (30, 30, 34, 255))
+    return img
+
+
+
 def logbook_tex(rng, part):
     """The logbook: ruled pages with handwriting (pages) or its dark red cloth cover."""
     if part == "cover":
@@ -2094,7 +2206,8 @@ def build():
                                  ("loot_master_key", "Master Key (Loot)", "master_key"),
                                  ("loot_wrench", "Wrench (Loot)", "wrench"),
                                  ("loot_detector", "Radiation Detector (Loot)", "detector"),
-                                 *((f"loot_fuse_{amps}a", f"Fuse {amps}A (Loot)", f"fuse_{amps}a") for amps in FUSE_AMPS)):
+                                 *((f"loot_fuse_{amps}a", f"Fuse {amps}A (Loot)", f"fuse_{amps}a") for amps in FUSE_AMPS),
+                                 *((f"loot_reagent_{i}", f"Reagent R-{i} (Loot)", f"reagent_{i}") for i in range(1, 5))):
         a.models[block_id] = {"textures": {"particle": f"{NS}:item/{item}"}}
         a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:item/{item}"})
 
@@ -2857,6 +2970,43 @@ def build():
                 for f, y in HORIZONTAL.items():
                     variants[f"amps={i},facing={f},filled={filled},lit={lit}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
     a.block("fuse_holder", "Fuse Holder", {"variants": variants}, {"parent": f"{NS}:block/fuse_holder_2_full_off"})
+
+    # Level 5's layer 2: computers, the chemical room's mixer and alarm, fume hoods.
+    a.texture("lab_screen", lab_screen_tex(r("lab_screen")), T.PLASTIC.but(smoothness=0.8, emission=GLOW["DIFFUSER_GLOW"]), tiles=False)
+    prop("lab_terminal", "Lab Computer", {"w": "lab_white", "s": "lab_screen", "d": "lab_steel_dark"},
+         [el((3, 3, 6), (13, 12, 11), "w", north=("s", (1, 1, 15, 15))), el((7, 0, 8), (9, 3, 10), "d"),
+          el((3, 0, 1), (13, 1, 5), "d")])
+    for reagent in range(5):
+        a.texture(f"mixer_tank_{reagent}", mixer_tank_tex(r(f"mixer_tank_{reagent}"), reagent), T.STEEL.but(smoothness=0.6, metal=200, relief=0.15), tiles=False)
+    a.texture("mixer_front", mixer_front_tex(r("mixer_front")), T.PAINTED_METAL.but(smoothness=0.5), tiles=False)
+    variants = {}
+    for reagent in range(5):
+        a.models[f"mixer_tank_{reagent}"] = model({"s": "lab_steel", "f": f"mixer_tank_{reagent}", "d": "lab_steel_dark"}, [
+            el((2, 0, 2), (14, 2, 14), "d"), el((3, 2, 3), (13, 14, 13), "s", north=("f", (0, 0, 16, 16))),
+            el((5, 14, 5), (11, 16, 11), "d")])
+        for f, y in HORIZONTAL.items():
+            variants[f"facing={f},reagent={reagent}"] = {"model": f"{NS}:block/mixer_tank_{reagent}", **({"y": y} if y else {})}
+    a.block("mixer_tank", "Mixer Tank", {"variants": variants}, {"parent": f"{NS}:block/mixer_tank_0"})
+    prop("mixer", "Mixer", {"d": "lab_steel_dark", "f": "mixer_front", "s": "lab_steel"},
+         [el((1, 0, 2), (15, 14, 15), "d", north=("f", (0, 0, 16, 16))), el((0, 14, 1), (16, 16, 16), "s")])
+    variants = {}
+    for lit in ("false", "true"):
+        name = f"alarm_light_{'on' if lit == 'true' else 'off'}"
+        frames = alarm_frames(lit == "true")
+        if lit == "true":
+            a.animated[name] = (frames, 2)
+        else:
+            a.texture(name, frames[0], T.PLASTIC.but(smoothness=0.7), tiles=False)
+        # Lit, the dome is drawn unshaded, so it reads as giving light.
+        a.models[name] = model({"d": "lab_steel_dark", "l": name},
+                               [element((5, 5, 14), (11, 11, 16), "d"), element((6, 6, 10), (10, 10, 14), "l", shade=lit != "true")], ao=False)
+        for f, y in HORIZONTAL.items():
+            variants[f"facing={f},on={lit}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("alarm_light", "Alarm Light", {"variants": variants}, {"parent": f"{NS}:block/alarm_light_off"})
+    a.texture("hood_sash", hood_sash_tex(r("hood_sash")), T.Material(0.85, relief=0.0))
+    stack("fume_hood", "Fume Hood", {**lab, "f": "lab_cabinet_front", "g": "hood_sash"},
+          [el((0, 0, 1), (16, 15, 16), "w", north="f"), el((0, 15, 0), (16, 16, 16), "s")],
+          upper=[el((0, 0, 3), (16, 13, 16), "s", north="g"), el((0, 13, 0), (16, 16, 16), "s")])
     return a
 
 
@@ -2929,6 +3079,7 @@ def main():
                           ("dart", dart_tex), ("master_card", master_card_tex), ("master_key", master_key_tex),
                           ("wrench", wrench_tex), ("detector", detector_tex),
                           *((f"fuse_{amps}a", lambda g, i=i: fuse_item_tex(g, i)) for i, amps in enumerate(FUSE_AMPS)),
+                          *((f"reagent_{i + 1}", lambda g, i=i: reagent_item_tex(g, i)) for i in range(4)),
                           ("master_card_nw", lambda g: card_tex(g, 0, 0)), ("master_card_ne", lambda g: card_tex(g, 1, 0)),
                           ("master_card_sw", lambda g: card_tex(g, 0, 1)), ("master_card_se", lambda g: card_tex(g, 1, 1))):
         (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))

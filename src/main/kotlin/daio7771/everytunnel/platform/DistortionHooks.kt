@@ -79,6 +79,7 @@ object DistortionHooks {
     private val schedules = HashMap<UUID, CloudSchedule>()
     private val clouds = mutableSetOf<DistortionCloudEntity>()
     private var debugSpawns = 0
+    private var onceSpawns = 0
 
     fun register() {
         ServerLifecycleEvents.SERVER_STARTED.register { server = it }
@@ -257,6 +258,7 @@ object DistortionHooks {
                 cloud.levelId = LevelManager.levelAt(dimension, tx, feet + 0.5, tz)?.id
                 if (!world.spawnEntity(cloud)) return false
                 clouds += cloud
+                schedules[player.uuid]?.appeared()
                 world.playSound(null, tx, feet + 1.2, tz, ModSounds.CLOUD_APPEAR, SoundCategory.HOSTILE, 1.5f, 1f)
                 EveryTunnel.LOGGER.info("A Distortion Cloud appears {} blocks in front of {} at ({}, {}, {})",
                     "%.0f".format(distance), player.name.string, floor(tx).toInt(), feet.toInt(), floor(tz).toInt())
@@ -293,6 +295,15 @@ object DistortionHooks {
         return true
     }
 
+    /**
+     * Three Hunters ([what] [HUNTERS_TAG]) or a Junior ([JUNIOR_TAG]) put in at [position], for once (no post:
+     * a death in their level clears them): the chemical room's alarm ([ChemicalHooks]).
+     */
+    fun putIn(world: ServerWorld, what: String, position: Position, yaw: Float, levelId: String?) {
+        val kind = if (what == HUNTERS_TAG) Kind.HUNTERS else Kind.JUNIOR
+        spawn(world, Post(kind, levelId, world.registryKey, position, yaw, "$ONCE_GROUP${++onceSpawns}"))
+    }
+
     // --- helpers -----------------------------------------------------------------------
 
     /** The height of a floor near ([x], [y], [z]) with two free blocks over it, or null. */
@@ -314,6 +325,7 @@ object DistortionHooks {
         server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension)))
 
     private const val DEBUG_GROUP = "debug/"
+    private const val ONCE_GROUP = "once/"
     /** A group round its spawn point: (blocks to the side, blocks behind). */
     private val GROUP_PLACES = listOf(0.0 to 0.0, -1.2 to 1.0, 1.2 to 1.0)
     /** Heights from a point where a floor is looked for, the nearest first. */

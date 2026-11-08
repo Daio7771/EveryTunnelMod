@@ -28,6 +28,7 @@ git).
 | `tools/entity/pale_man.py` | Geometría, animaciones, textura y máscara de brillo del Pale man, modelo del huevo | el Pale man |
 | `tools/entity/observer.py` | Geometría, animaciones y textura del Observer, modelo del huevo | el Observer |
 | `tools/entity/hunter.py` | Geometría, animaciones, textura y máscara de brillo de los ojos de los Hunters | los Hunters del nivel 5 |
+| `tools/entity/subject.py` | Los cuerpos y pieles de los cuatro sujetos, una fase cada uno, de persona a Pale man | los sujetos del nivel 5 |
 | `tools/entity/figure.py` | `textures/entity/lab_figure.png`: una silueta oscura con el formato del jugador | la figura que se ve desde el Lobby del nivel 5 |
 | `tools/entity/distortion.py` | Geometría, animaciones, texturas y máscaras de brillo de la Distortion Cloud y el Junior (el ojo del Junior agrietándose en cuatro fases) | las Distortions del nivel 5 |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (la skin del uniforme) | el uniforme |
@@ -97,7 +98,7 @@ las oficinas.
 | Módulo | Función |
 |---|---|
 | `level.py` | El nivel a partir de `LEVEL_5`: espacios, aberturas, el tramo de escaleras, la cáscara alrededor del aire (azulejo blanco, una franja verde al pie, vinilo, paneles de techo; acero y chapa estriada en la esclusa y el marco), luces, puertas de acero, las puertas de la esclusa, la rejilla; dos juegos de bloques (la entrada, construida con el nivel 4; el resto, construido en juego, con su aire); las zonas del archivo del nivel |
-| `furnish.py` | Los muebles de la capa 1 sala a sala, la caja de fusibles, lo que hay por ahí (la llave, el detector, los fusibles), las fichas del tablón, los puntos de aparición de los Hunters inofensivos y de la figura |
+| `furnish.py` | Los muebles de las dos capas sala a sala, la caja de fusibles, lo que hay por ahí (la llave, el detector, los fusibles, los reactivos), las fichas, los ordenadores, la mezcladora de la sala de químicos, su tubería, las luces de alarma y la trampilla del drenaje, los puntos de aparición de los enemigos, los sujetos, la figura y los enemigos de la alarma |
 | `checks.py` | Un recorrido por las dos capas desde el pasillo de entrada que llega a todas las celdas, pared entre salas, los techos de la capa 2 bajo los suelos de la capa 1, el marco que se abre desde el tramo del nivel 4, cada celda en una zona; detienen el generador |
 | `textures.py` | Las texturas propias del nivel 5 (`b5_*`), añadidas al pack del mundo |
 | `preview.py` | Las dos capas lado a lado con medidas, zonas y aberturas. `python3 -m lab.preview` desde `tools/map` lo dibuja solo, sin instalar nada |
@@ -119,7 +120,7 @@ generador basta con abrir el mundo. `/function garage:build` reconstruye a mano.
 
 ## Bloques
 
-`tools/blocks/generate.py` hace los recursos de los 137 bloques del mod. Los bloques en sí
+`tools/blocks/generate.py` hace los recursos de los 146 bloques del mod. Los bloques en sí
 (propiedades, formas, sonidos) se registran en Kotlin (`platform/ModBlocks.kt`); la
 herramienta **se detiene si las dos listas de ids no coinciden**. Las rotaciones de los
 modelos deben coincidir con las formas de `platform/BlockShapes.kt`. Las texturas reutilizan

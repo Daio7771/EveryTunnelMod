@@ -1471,6 +1471,75 @@ def lever_dead(rng, variant):
     return knock(n, rng, 0.0, rng.uniform(1300, 1600), [1.0, 2.4], [0.6, 0.2], [0.015, 0.01], click=0.8, click_hi=7000.0)
 
 
+def mixer_fill(rng, variant):
+    """A reagent flask emptied into a mixer's tank: a glass clink, then a short glugging pour."""
+    n = samples(0.9)
+    clink = knock(n, rng, 0.0, rng.uniform(2600, 3200), [1.0, 2.7], [0.5, 0.2], [0.04, 0.02], click=0.5, click_hi=9000.0)
+    pour = np.zeros(n)
+    t = 0.1
+    while t < 0.75:
+        pour += bubble(n, t, rng.uniform(3.0, 6.0), rng.uniform(0.3, 0.7), rng)
+        t += rng.uniform(0.04, 0.09)
+    return clink + pour * 0.8
+
+
+def mixer_run(rng, variant):
+    """The mixer run: a motor winding up and churning, then the solvent gurgling away down the pipe."""
+    n = samples(3.2)
+    t = time_axis(n)
+    f = np.interp(t, [0.0, 0.5, 2.2, 2.6], [30.0, 75.0, 75.0, 40.0])
+    motor = glide_tone(f, harmonics=(1.0, 0.6, 0.35, 0.2)) * envelope(n, [(0.0, 0.0), (0.4, 0.7), (2.3, 0.6), (2.7, 0.0)])
+    churn = bandpass(rng.normal(0.0, 1.0, n), 200.0, 1500.0, order=2) * (0.6 + 0.4 * smooth_random(n, 8.0, rng)) * envelope(
+        n, [(0.0, 0.0), (0.5, 0.3), (2.3, 0.3), (2.6, 0.0)])
+    gurgle = np.zeros(n)
+    tt = 2.2
+    while tt < 3.1:
+        gurgle += bubble(n, tt, rng.uniform(6.0, 12.0), rng.uniform(0.3, 0.6), rng)
+        tt += rng.uniform(0.03, 0.08)
+    return motor * 0.5 + churn * 0.5 + gurgle * 0.7
+
+
+def grate_dissolve(rng, variant):
+    """The drain's grate eaten by the solvent: a long rising hiss, fizzing and crackling, metal softly ticking as it goes."""
+    n = samples(3.0)
+    hiss = _noise(n, rng, 2500.0, 11000.0) * envelope(n, [(0.0, 0.0), (0.3, 1.0), (1.8, 0.8), (3.0, 0.0)])
+    fizz = static_crackle(n, rng, 30.0, 3000.0, 12000.0) * envelope(n, [(0.0, 0.0), (0.2, 0.5), (2.5, 0.4), (3.0, 0.0)])
+    ticks = np.zeros(n)
+    for _ in range(14):
+        ticks += knock(n, rng, rng.uniform(0.3, 2.6), rng.uniform(900, 2000), [1.0, 2.3], [0.3, 0.1], [0.02, 0.01], click=0.4, click_hi=6000.0)
+    return hiss * 0.5 + fizz * 0.3 + ticks
+
+
+def lab_alarm(rng, variant):
+    """The chemical room's alarm: a two-tone electronic siren, high and harsh, one cycle (the game repeats it)."""
+    n = samples(2.0)
+    t = time_axis(n)
+    f = np.where((t % 1.0) < 0.5, 960.0, 760.0)
+    f = lowpass(f, 30.0)
+    tone = np.tanh(2.5 * glide_tone(f, harmonics=(1.0, 0.0, 0.33, 0.0, 0.2)))
+    return bandpass(tone, 400.0, 6000.0, order=2) * envelope(n, [(0.0, 0.0), (0.02, 1.0), (1.97, 1.0), (2.0, 0.0)])
+
+
+def lab_sting(rng, variant):
+    """Walking into the Lab hall: a short stab of low strings, out of tune, falling away."""
+    n = samples(2.6)
+    t = time_axis(n)
+    y = np.zeros(n)
+    for f0, amp in ((55.0, 1.0), (58.3, 0.8), (82.4, 0.6), (116.5, 0.45), (123.5, 0.35)):
+        f = f0 * (1 + 0.004 * np.sin(TAU * rng.uniform(4.0, 6.0) * t)) * np.interp(t, [0.0, 2.6], [1.0, 0.985])
+        y += amp * glide_tone(f, harmonics=(1.0, 0.5, 0.33, 0.25, 0.2, 0.16))
+    y = lowpass(y, 2400.0)
+    bow = _noise(n, rng, 800.0, 4000.0) * 0.08
+    out = (y + bow) * envelope(n, [(0.0, 0.0), (0.03, 1.0), (0.4, 0.6), (2.6, 0.0)])
+    return stereo(out, np.roll(out, samples(0.012)))            # a hair later in one ear: the section is wide
+
+
+def terminal_key(rng, variant):
+    """A key of an old lab keyboard: a soft plastic click."""
+    n = samples(0.06)
+    return knock(n, rng, 0.0, rng.uniform(1800, 2400), [1.0, 1.9], [0.4, 0.15], [0.008, 0.005], click=0.5, click_hi=8000.0)
+
+
 def safe_tick(rng, variant):
     """A safe's dial passing a number: a tiny dry tick, high and short."""
     n = samples(0.05)
@@ -1876,6 +1945,12 @@ SOUNDS = [
     Sound("block.fuse.reject", "Level progress", "Level 5: a fuse in the wrong holder, popping back", "mono", False, 2, fuse_reject, -4.0),
     Sound("block.fuse.power", "Level progress", "Level 5: the fuse box full, a relay and the hum of current", "mono", False, 1, fuse_power, -3.0, attenuation=24),
     Sound("block.breaker.dead", "Level progress", "Level 5: the stairs' lever without power, a dry click", "mono", False, 1, lever_dead, -6.0),
+    Sound("block.mixer.fill", "Level progress", "Level 5: a reagent poured into a mixer's tank", "mono", False, 2, mixer_fill, -4.0),
+    Sound("block.mixer.run", "Level progress", "Level 5: the mixer run, and the solvent going down the pipe", "mono", False, 1, mixer_run, -3.0, attenuation=24),
+    Sound("block.grate.dissolve", "Level progress", "Level 5: the drain's grate eaten by the solvent", "mono", False, 1, grate_dissolve, -3.0, attenuation=24),
+    Sound("event.lab.alarm", "Level progress", "Level 5: the chemical room's two-tone siren, one cycle", "mono", False, 1, lab_alarm, -3.0, attenuation=48),
+    Sound("event.lab.sting", "Level progress", "Level 5: walking into the Lab hall, a stab of low strings out of tune", "stereo", False, 1, lab_sting, -2.0),
+    Sound("block.terminal.key", "Level progress", "Level 5: a key of a lab computer's keyboard", "mono", False, 3, terminal_key, -10.0),
     Sound("entity.hunter.shriek", "Level 5 / Hunters", "A group of Hunters spotting someone: a rasping child-high shriek", "mono", False, 3, hunter_shriek, -2.0, attenuation=32),
     Sound("entity.hunter.attack", "Level 5 / Hunters", "A Hunter's swipe: a sleeve's swish and a scratch", "mono", False, 3, hunter_attack, -4.0),
     Sound("entity.hunter.death", "Level 5 / Hunters", "A Hunter struck down: a wet crunch, a choked squeal", "mono", False, 3, hunter_death, -3.0),

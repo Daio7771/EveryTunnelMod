@@ -158,6 +158,8 @@ the server starts (levels built together name the same one). The function must e
 | `collapse_blocks` | `CollapseHooks` | Level 3: the stretch of tunnel the collapse fills with rubble |
 | `observer_never` | `ObserverEntity` | Level 3's bunker shaft and tunnel: the Observer sees no one there, so never follows anyone down |
 | `cloud` | `DistortionHooks` | Level 5: where Distortion Clouds come (one every 2 to 4 minutes spent in such zones), and where they may appear |
+| `first_cloud` | `LabHallHooks` | Level 5's Lab hall: walking in, a sting and the first Cloud, once a game |
+| `chemical_room`, `lab_grate`, `lab_drain` | `ChemicalHooks` | Level 5: the room whose alarm lights turn, the grate the solvent dissolves, the room whose hatch then opens |
 
 ### Spawn point tags
 
@@ -174,6 +176,10 @@ the server starts (levels built together name the same one). The function must e
 | `harmless` | `DistortionHooks` | With `hunters`: those Hunters push and shriek but never hurt (Level 5's layer 1) |
 | `fuse_5a`, `fuse_10a`, `fuse_15a`, `fuse_20a`, `fuse_30a` | `LootSpawner` | Level 5: a fuse of that amperage lying there, for the fuse box |
 | `lab_figure`, `lab_figure_exit` | `LabFigureHooks` | Level 5: where the figure seen from the Lobby stands, once a game, and where it goes once seen |
+| `subject` | `SubjectHooks` | Level 5: a test subject standing still; its id `subject_<1..4>` says which stage |
+| `terminal` | `TerminalHooks` | Level 5: a computer at that block; its id says what its screen shows |
+| `reagent_1` to `reagent_4` | `LootSpawner`, `ChemicalHooks` | Level 5: a reagent flask lying there; a failed mix puts it back |
+| `alarm_hunters`, `alarm_junior` | `ChemicalHooks` | Level 5: where the chemical room's alarm brings three Hunters, a Junior |
 | `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Food, on furniture |
 | `water` | `LootSpawner` | A water bottle |
 | `keycard` | `LootSpawner` | The keycard |
@@ -219,18 +225,23 @@ Level 5, the laboratory, is built in play (`LabHooks`), layers 1 and 2 so far (p
   `lab_airlock`), `lobby`,
   `workshop`, `waiting`, `lockers`, `layer1_corridor` (the ring, six boxes), `layer1_stairs` (both stair
   rooms and the flight between them).
-- **Layer 2:** `subjects_corridor`, `s1` to `s4`, `lab_hall`, `north_route` (two boxes), `office`,
-  `south_route` (three), `storage`, `chemical_room`, `shortcut`, `drain_hatch`.
+- **Layer 2:** `subjects_corridor`, `s1` to `s4` (the sealed test chambers), `lab_hall` (tagged `restart_point`,
+  `cloud` and `first_cloud`), `north_route` (two boxes) and `south_route` (three), both tagged `cloud`, `office`,
+  `storage`, `chemical_room` (tagged `chemical_room`), `shortcut`, `drain_hatch` (tagged `lab_drain`).
 - **Openings,** each its own zone: `entry_frame` (the frame: crossing it is walking into Level 5),
   `airlock_rear` (tagged `lab_airlock_rear`), `welcome_door` (tagged `lab_welcome`), the doorways (`workshop_door`,
-  `waiting_door`, `s1_door` to `s4_door`, `office_door_west`, `office_door_east`), the locked sliding doors
-  (`stairs_door`, `south_door`, `shortcut_door`, tagged `lab_door`) and `hatch_grate` (iron bars).
+  `waiting_door`, `office_door_west`, `office_door_east`), the locked sliding doors
+  (`stairs_door`, `south_door`, `shortcut_door`, tagged `lab_door`) and `hatch_grate` (iron bars, tagged
+  `lab_grate`). The test chambers have none: a window each (`WINDOWS`).
 - The Lab hall is tagged `restart_point`.
 - **Spawn points:** `player_start` (the Lobby, by the way in), `checkpoint` (the Lab hall, tagged
   `restart_point`), `lever_stairs_door` and `lever_shortcut_door` (tagged `lab_lever`), and layer 1's
   (`tools/map/lab/furnish.py`): `wrench` and `detector` (the Workshop's island bench), the fuses `fuse_5a`,
   `fuse_10a`, `fuse_20a`, `fuse_30a` (tagged the same), the noticeboard's cards `ch1_l5_card_*` (tagged `note`),
-  `hunters_fuse_box` (tagged `hunters` and `harmless`), `lab_figure` and `lab_figure_exit`.
+  `hunters_fuse_box` (tagged `hunters` and `harmless`), `lab_figure` and `lab_figure_exit`; and layer 2's:
+  `subject_1` to `subject_4` (tagged `subject`), the cards `ch1_l5_card_s1` to `_s4`, the computers `terminal_*`
+  (tagged `terminal`), `reagent_1` to `reagent_4` (tagged the same), `junior_north` (tagged `distortion_junior`),
+  `hunters_storage` (tagged `hunters`), `alarm_hunters` and `alarm_junior` (tagged the same).
 
 ## How the mod tracks players
 

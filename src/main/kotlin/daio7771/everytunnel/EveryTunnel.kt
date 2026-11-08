@@ -5,33 +5,32 @@ import daio7771.everytunnel.platform.AchievementHooks
 import daio7771.everytunnel.platform.AmbienceHooks
 import daio7771.everytunnel.platform.BookHooks
 import daio7771.everytunnel.platform.BookPhaseHooks
-import daio7771.everytunnel.platform.CollapseHooks
-import daio7771.everytunnel.platform.WaterDispenserHooks
 import daio7771.everytunnel.platform.CarryHooks
+import daio7771.everytunnel.platform.ChemicalHooks
+import daio7771.everytunnel.platform.CollapseHooks
+import daio7771.everytunnel.platform.ContinueGame
+import daio7771.everytunnel.platform.DartHooks
 import daio7771.everytunnel.platform.DeathHooks
-import daio7771.everytunnel.platform.DistortionHooks
 import daio7771.everytunnel.platform.DebugCommands
 import daio7771.everytunnel.platform.DevWorlds
+import daio7771.everytunnel.platform.DistortionHooks
 import daio7771.everytunnel.platform.EndingHooks
 import daio7771.everytunnel.platform.FlashlightHooks
 import daio7771.everytunnel.platform.HidingHooks
 import daio7771.everytunnel.platform.IntroHooks
 import daio7771.everytunnel.platform.KeycardHooks
+import daio7771.everytunnel.platform.LabDoorHooks
+import daio7771.everytunnel.platform.LabFigureHooks
+import daio7771.everytunnel.platform.LabHallHooks
+import daio7771.everytunnel.platform.LabHooks
 import daio7771.everytunnel.platform.LevelEntryHooks
 import daio7771.everytunnel.platform.LevelReloadListener
 import daio7771.everytunnel.platform.LevelTrackingHooks
 import daio7771.everytunnel.platform.LoadingHooks
 import daio7771.everytunnel.platform.LootSpawner
-import daio7771.everytunnel.platform.LabDoorHooks
-import daio7771.everytunnel.platform.LabFigureHooks
-import daio7771.everytunnel.platform.LabHooks
-import daio7771.everytunnel.platform.SlidingDoors
-import daio7771.everytunnel.platform.LoungeHooks
-import daio7771.everytunnel.platform.ContinueGame
-import daio7771.everytunnel.platform.DartHooks
 import daio7771.everytunnel.platform.LoungeClosingHooks
+import daio7771.everytunnel.platform.LoungeHooks
 import daio7771.everytunnel.platform.LoungeMusicHooks
-import daio7771.everytunnel.platform.SafeHooks
 import daio7771.everytunnel.platform.LoungePuzzleHooks
 import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.ModEntities
@@ -44,9 +43,12 @@ import daio7771.everytunnel.platform.PathingRules
 import daio7771.everytunnel.platform.PlaytestLog
 import daio7771.everytunnel.platform.ResourceHooks
 import daio7771.everytunnel.platform.RespawnHooks
+import daio7771.everytunnel.platform.SafeHooks
 import daio7771.everytunnel.platform.SafeLevelHooks
+import daio7771.everytunnel.platform.SlidingDoors
 import daio7771.everytunnel.platform.SuiteBedHooks
 import daio7771.everytunnel.platform.ValveHooks
+import daio7771.everytunnel.platform.WaterDispenserHooks
 import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
@@ -106,6 +108,8 @@ object EveryTunnel : ModInitializer {
         SlidingDoors.register()
         DistortionHooks.register()
         LabFigureHooks.register()
+        ChemicalHooks.register()
+        LabHallHooks.register()
         LoungePuzzleHooks.register()
         DartHooks.register()
         ContinueGame.register()

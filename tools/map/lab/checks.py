@@ -4,8 +4,8 @@ plan is wrong, so a bad LEVEL_5 never reaches a world.
 
 - walk(): from the entry corridor, a walk over the plan's cells of both layers, up or down one block
   at most (the flight joins them), must reach every cell but those furniture stands in (furnish.py;
-  what a player walks through does not count). Locked doors and the grate count as open: each has its
-  way of opening.
+  what a player walks through does not count) and the sealed test chambers'. Locked doors and the grate
+  count as open: each has its way of opening.
 - walled(): two spaces of a layer are kept apart by at least one block, unless a corridor or the
   stairs join them on purpose (a slip in the numbers fails here).
 - stacked(): where layer 2 runs under layer 1, its ceiling stays below layer 1's floor, with a block
@@ -20,7 +20,9 @@ from collections import deque
 
 def walk(lv):
     from lab.furnish import THROUGH
-    blocked = {(1, x, z) for (x, y, z), (name, _) in lv.furnish.items.items() if y == 1 and name not in THROUGH}
+    ground = {lv.layer_floor[layer] + 1: layer for layer in (1, 2)}
+    blocked = {(ground[y], x, z) for (x, y, z), (name, _) in lv.furnish.items.items() if y in ground and name not in THROUGH}
+    sealed = {(s.layer, x, z) for s in lv.spaces if s.kind == "chamber" for x, z in s.cells()}
     start = (1, *lv.p["START"])
     seen = {start}
     queue = deque([start])
@@ -33,12 +35,13 @@ def walk(lv):
                 if c in lv.floors and c not in seen and c not in blocked and abs(lv.floors[c] - here) <= 1:
                     seen.add(c)
                     queue.append(c)
-    missing = set(lv.floors) - seen - blocked
+    missing = set(lv.floors) - seen - blocked - sealed
     if missing:
         raise SystemExit(f"Level 5: {len(missing)} cells cannot be reached, e.g. {sorted(missing)[:3]}")
     per_layer = {n: sum(1 for c in seen if c[0] == n) for n in (1, 2)}
     return [f"Walk: all {len(seen)} cells reached from the entry corridor ({per_layer[1]} on layer 1 with the stairs, "
-            f"{per_layer[2]} on layer 2), round {len(blocked)} of furniture, locked doors counted as open"]
+            f"{per_layer[2]} on layer 2), round {len(blocked)} of furniture, the {len(sealed)} of the sealed chambers "
+            f"seen through their windows, locked doors counted as open"]
 
 
 def walled(lv):

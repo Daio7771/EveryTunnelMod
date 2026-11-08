@@ -32,7 +32,8 @@ import java.util.UUID
  *   Lobby's wall) slides open slowly onto the lit Lobby, and the level's title shows. Each door is two leaves of [AirlockDoorBlock]
  *   meeting in the middle, moved a quarter of a block a step ([SlidingDoor]).
  *   Then the level's loot goes out ([LootSpawner]), its Hunters and Distortions ([DistortionHooks]), and the
- *   figure at the end of the corridor ([LabFigureHooks]), once a game.
+ *   figure at the end of the corridor ([LabFigureHooks]), once a game, the test subjects ([SubjectHooks]); the
+ *   chemical puzzle starts afresh ([ChemicalHooks]).
  *
  * What stands is not undone when the world opens: nobody can reach it until its next build. A game
  * continued in Level 5 builds it behind the loading screen ([beginAgain], [ContinueGame]); the airlock is
@@ -153,6 +154,8 @@ object LabHooks {
         LootSpawner.place(server, level)
         DistortionHooks.levelBuilt(server, level)
         LabFigureHooks.levelBuilt(server, level)
+        SubjectHooks.levelBuilt(server, level)
+        ChemicalHooks.levelBuilt()
         ContinueGame.labBuilt(server)
         for (id in sendToStart) server.playerManager.getPlayer(id)?.let { toStart(it, level) }
         sendToStart.clear()
@@ -174,6 +177,8 @@ object LabHooks {
         LabDoorHooks.reset()
         DistortionHooks.clearAll()
         LabFigureHooks.newGame()
+        ChemicalHooks.newGame()
+        LabHallHooks.newGame()
     }
 
     /** [level] is the one built in play, and it does not stand yet. */

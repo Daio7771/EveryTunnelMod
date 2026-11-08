@@ -389,8 +389,8 @@ in play (`platform.LabHooks`), in a space of its own west of Level 4:
 
 Level 5 so far is its two upper layers: a clean laboratory of white tiles with a band of pale green ones,
 grey vinyl, white ceiling panels, every fluorescent light on. Layer 1 is furnished (`tools/map/lab/furnish.py`),
-cold and used until recently: stainless steel, white melamine, surgical green plastic; layer 2 is structure
-only. Layer 1: the Lobby, a
+cold and used until recently: stainless steel, white melamine, surgical green plastic, and so is layer 2.
+Layer 1: the Lobby, a
 ring of corridors with the Workshop, the Waiting room and the Lockers, and a steel door (shut) to the
 stairs down. Layer 2, 10 blocks lower: the subjects' corridor with rooms S-1 to S-4, the Lab hall, a
 loop north through the Office, a loop south past Storage to the chemical room, the shortcut and the
@@ -418,8 +418,24 @@ drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5).
 - **The Lab hall's checkpoint:** walking in makes it the checkpoint, silently (`ContinueGame`, a zone and a
   spawn point tagged `restart_point`). A death there or later restarts in the Lab hall with what the player
   carries; CONTINUE puts them there with what they had on arriving.
-- **Its enemies** exist, though none stands in the level yet (its content will place them; to try them,
-  `/everytunnel spawn hunters|junior|cloud`). `platform.DistortionHooks` puts them in when the level is built
+- **Layer 2.** The subjects' corridor: the test chambers S-1 to S-4 are sealed, each seen through a wide
+  window in a steel frame (`WINDOWS`), white and empty but for its subject standing still, a person turning
+  room by room into a Pale man (`SubjectEntity`, `SubjectHooks`; `tools/entity/subject.py`), an experiment
+  card on the corridor's wall by each window (placeholder texts). Walking into the Lab hall: a stab of low
+  strings out of tune (`event.lab.sting`), and a moment later the first Distortion Cloud, a few steps ahead,
+  once a game (`LabHallHooks`). Clouds come at random in the Lab hall and both routes (zones tagged `cloud`),
+  never in the Office, Storage, the chemical room or the subjects' corridor. The first Junior floats in plain
+  sight down the north corridor; three Hunters guard Storage.
+- **The Office's computer** (`LabTerminalBlock`, `TerminalHooks`, the client's `TerminalScreen`): a right click
+  types out its screen, green on black: the chemical puzzle's answer (placeholder lore round it).
+- **The chemical puzzle** (`ChemicalHooks`, `core.puzzle.ChemicalMix`): four reagent flasks, R-1 to R-4, on a
+  cabinet by the mixer; one in each of its two tanks (`MixerTankBlock`, `block.mixer.fill`), then its red
+  button (`MixerBlock`). One pair, drawn each game, is the solvent: the mixer runs (`block.mixer.run`), the
+  drain's grate dissolves in green fumes (`block.grate.dissolve`) and the hatch behind it opens. Any other
+  pair: the alarm, a siren (`event.lab.alarm`) and red lights turning (`AlarmLightBlock`) for 10 s, three
+  Hunters and a Junior appear in the room; then the two flasks are back on their cabinet.
+- **Its enemies** are placed by `tools/map/lab/furnish.py`; to try them anywhere,
+  `/everytunnel spawn hunters|junior|cloud`. `platform.DistortionHooks` puts them in when the level is built
   and back when the player dies there; none is saved. Those put in by the command come once: a death clears them.
   - **The Hunters** (`HunterEntity`, decisions in `entities.HunterBrain`), in groups of three at a spawn
     point tagged `hunters`: black little humanoids in lab coats, blank white eyes. They wander near it; one

@@ -1,0 +1,79 @@
+{
+  "variants": {
+    "facing=north,reagent=0": {
+      "model": "every_tunnel:block/mixer_tank_0"
+    },
+    "facing=east,reagent=0": {
+      "model": "every_tunnel:block/mixer_tank_0",
+      "y": 90
+    },
+    "facing=south,reagent=0": {
+      "model": "every_tunnel:block/mixer_tank_0",
+      "y": 180
+    },
+    "facing=west,reagent=0": {
+      "model": "every_tunnel:block/mixer_tank_0",
+      "y": 270
+    },
+    "facing=north,reagent=1": {
+      "model": "every_tunnel:block/mixer_tank_1"
+    },
+    "facing=east,reagent=1": {
+      "model": "every_tunnel:block/mixer_tank_1",
+      "y": 90
+    },
+    "facing=south,reagent=1": {
+      "model": "every_tunnel:block/mixer_tank_1",
+      "y": 180
+    },
+    "facing=west,reagent=1": {
+      "model": "every_tunnel:block/mixer_tank_1",
+      "y": 270
+    },
+    "facing=north,reagent=2": {
+      "model": "every_tunnel:block/mixer_tank_2"
+    },
+    "facing=east,reagent=2": {
+      "model": "every_tunnel:block/mixer_tank_2",
+      "y": 90
+    },
+    "facing=south,reagent=2": {
+      "model": "every_tunnel:block/mixer_tank_2",
+      "y": 180
+    },
+    "facing=west,reagent=2": {
+      "model": "every_tunnel:block/mixer_tank_2",
+      "y": 270
+    },
+    "facing=north,reagent=3": {
+      "model": "every_tunnel:block/mixer_tank_3"
+    },
+    "facing=east,reagent=3": {
+      "model": "every_tunnel:block/mixer_tank_3",
+      "y": 90
+    },
+    "facing=south,reagent=3": {
+      "model": "every_tunnel:block/mixer_tank_3",
+      "y": 180
+    },
+    "facing=west,reagent=3": {
+      "model": "every_tunnel:block/mixer_tank_3",
+      "y": 270
+    },
+    "facing=north,reagent=4": {
+      "model": "every_tunnel:block/mixer_tank_4"
+    },
+    "facing=east,reagent=4": {
+      "model": "every_tunnel:block/mixer_tank_4",
+      "y": 90
+    },
+    "facing=south,reagent=4": {
+      "model": "every_tunnel:block/mixer_tank_4",
+      "y": 180
+    },
+    "facing=west,reagent=4": {
+      "model": "every_tunnel:block/mixer_tank_4",
+      "y": 270
+    }
+  }
+}

@@ -80,6 +80,8 @@ only: reopening the world starts a new one.
   put in (the level built, a death, `/everytunnel spawn`: then `debug/<n>`).
 - `The figure stands at lab_figure (...)` and `The figure was seen` (`LabFigureHooks`); `<player> completes the fuse box at ...`
   (`FuseHolderBlock`).
+- `Chemical puzzle: R-a with R-b` when a game's pair is drawn, `<player> mixes R-a with R-b: the solvent | the alarm`
+  (`ChemicalHooks`), `Level 5's first Cloud, for <player>` (`LabHallHooks`).
 - `[sprint] held but not sprinting at (x, y, z): …` (`client.SprintCheck`): while the sprint
   key is held walking forwards and the player does not sprint, every 2 s, what stands in the
   way (exhausted, carrying a box or book, hungry, using an item, crouching, bumping into

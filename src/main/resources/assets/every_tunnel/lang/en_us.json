@@ -339,5 +339,19 @@
   "block.every_tunnel.low_table": "Low Table",
   "block.every_tunnel.lab_poster": "Safety Poster",
   "block.every_tunnel.first_aid_box": "First Aid Box",
-  "block.every_tunnel.fuse_holder": "Fuse Holder"
+  "block.every_tunnel.fuse_holder": "Fuse Holder",
+  "entity.every_tunnel.subject": "Test Subject",
+  "item.every_tunnel.reagent_1": "Reagent R-1",
+  "item.every_tunnel.reagent_2": "Reagent R-2",
+  "item.every_tunnel.reagent_3": "Reagent R-3",
+  "item.every_tunnel.reagent_4": "Reagent R-4",
+  "block.every_tunnel.loot_reagent_1": "Reagent R-1 (Loot)",
+  "block.every_tunnel.loot_reagent_2": "Reagent R-2 (Loot)",
+  "block.every_tunnel.loot_reagent_3": "Reagent R-3 (Loot)",
+  "block.every_tunnel.loot_reagent_4": "Reagent R-4 (Loot)",
+  "block.every_tunnel.lab_terminal": "Lab Computer",
+  "block.every_tunnel.mixer_tank": "Mixer Tank",
+  "block.every_tunnel.mixer": "Mixer",
+  "block.every_tunnel.alarm_light": "Alarm Light",
+  "block.every_tunnel.fume_hood": "Fume Hood"
 }

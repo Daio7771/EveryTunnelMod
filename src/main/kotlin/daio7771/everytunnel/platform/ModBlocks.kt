@@ -241,6 +241,13 @@ object ModBlocks {
         register("loot_fuse_20a", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FUSES[3] }),
         register("loot_fuse_30a", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.FUSES[4] }),
     )
+    /** Level 5's reagent flasks lying about, R-1 to R-4 (index as in [ModItems.REAGENTS]). */
+    val LOOT_REAGENTS: List<Block> = listOf(
+        register("loot_reagent_1", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.REAGENTS[0] }),
+        register("loot_reagent_2", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.REAGENTS[1] }),
+        register("loot_reagent_3", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.REAGENTS[2] }),
+        register("loot_reagent_4", LootBlock(props(MapColor.CLEAR, BlockSoundGroup.STONE).noCollision()) { ModItems.REAGENTS[3] }),
+    )
 
     val LOOT_KEYCARD: Block = register(
         "loot_keycard",
@@ -375,6 +382,15 @@ object ModBlocks {
     val LOW_TABLE: Block = register("low_table", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC), listOf(box(1, 0, 1, 15, 7, 15))))
     val LAB_POSTER: Block = register("lab_poster", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(2, 1, 15, 14, 15, 16))))
     val FIRST_AID_BOX: Block = register("first_aid_box", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(4, 5, 14, 12, 12, 16))))
+    /** A lab computer on a desk ([LabTerminalBlock]): its screen glows a little. */
+    val LAB_TERMINAL: Block = register("lab_terminal", LabTerminalBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision().luminance { 3 }, listOf(box(3, 0, 1, 13, 12, 11))))
+    /** The chemical room's mixer: a tank either side ([MixerTankBlock]) of its body ([MixerBlock]). */
+    val MIXER_TANK: Block = register("mixer_tank", MixerTankBlock(props(MapColor.WHITE, ModSoundGroups.SHEET_METAL), listOf(box(2, 0, 2, 14, 16, 14))))
+    val MIXER: Block = register("mixer", MixerBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 1, 16, 16, 16))))
+    /** A red alarm light on a wall ([AlarmLightBlock]), lit while the chemical room's alarm sounds. */
+    val ALARM_LIGHT: Block = register("alarm_light", AlarmLightBlock(props(MapColor.RED, ModSoundGroups.PLASTIC).noCollision().luminance { if (it.get(AlarmLightBlock.ON)) 10 else 0 }, listOf(box(5, 5, 10, 11, 11, 16))))
+    /** A fume hood, two high: a cabinet under a glass sash. */
+    val FUME_HOOD: Block = register("fume_hood", StackFurnitureBlock(props(MapColor.WHITE, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 0, 16, 16, 16))))
     /** One slot of Level 5's fuse box ([FuseHolderBlock]). */
     val FUSE_HOLDER: Block = register("fuse_holder", FuseHolderBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision().luminance { if (it.get(FuseHolderBlock.LIT)) 4 else 0 }))
     /** An artificial plant in a pot, never watered, never wilting. */
@@ -456,7 +472,7 @@ object ModBlocks {
         }
         LOOT_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "loot"),
-            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK, LOOT_CARD_NW, LOOT_CARD_NE, LOOT_CARD_SW, LOOT_CARD_SE, LOOT_MASTER_KEY, LOOT_WRENCH, LOOT_DETECTOR, *LOOT_FUSES.toTypedArray()).build(),
+            FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK, LOOT_CARD_NW, LOOT_CARD_NE, LOOT_CARD_SW, LOOT_CARD_SE, LOOT_MASTER_KEY, LOOT_WRENCH, LOOT_DETECTOR, *LOOT_FUSES.toTypedArray(), *LOOT_REAGENTS.toTypedArray()).build(),
         )
         BOX_SHELF_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),

@@ -26,6 +26,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/entity/pale_man.py` | Pale man geometry, animations, texture, glow mask, spawn egg model | the Pale man |
 | `tools/entity/observer.py` | The Observer's geometry, animations, texture, spawn egg model | the Observer |
 | `tools/entity/hunter.py` | The Hunters' geometry, animations, texture and eye glow mask | Level 5's Hunters |
+| `tools/entity/subject.py` | The four test subjects' bodies and skins, one stage each, from a person to a Pale man | Level 5's subjects |
 | `tools/entity/figure.py` | `textures/entity/lab_figure.png`: a dark shape in the player's layout | the figure seen from Level 5's Lobby |
 | `tools/entity/distortion.py` | The Distortion Cloud's and Junior's geometry, animations, textures and glow masks (the Junior's eye cracking in four stages) | Level 5's Distortions |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (the uniform skin) | the uniform |
@@ -93,7 +94,7 @@ the offices.
 | Module | Job |
 |---|---|
 | `level.py` | The level from `LEVEL_5`: spaces, openings, the flight of stairs, the shell round the air (white tiles, a green band at their foot, vinyl, ceiling panels; steel and checker plate round the airlock and the frame), lights, steel doors, the airlock's doors, the grate; two sets of blocks (the way in, built with Level 4; the rest, built in play, its air included); the level file's zones |
-| `furnish.py` | Layer 1's furniture room by room, the fuse box, what lies about (the wrench, the detector, the fuses), the noticeboard's cards, the harmless Hunters' and the figure's spawn points |
+| `furnish.py` | Both layers' furniture room by room, the fuse box, what lies about (the wrench, the detector, the fuses, the reagents), the cards, the computers, the chemical room's mixer, pipe, alarm lights and the drain's hatch, the spawn points of the enemies, the subjects, the figure and the alarm's enemies |
 | `checks.py` | A walk over both layers from the entry corridor reaching every cell (round the furniture), a wall between rooms, layer 2's ceilings under layer 1's floors, the frame opening from Level 4's stretch, every cell in a zone; they stop the generator |
 | `textures.py` | Level 5's own textures (`b5_*`), added to the world's pack |
 | `preview.py` | Both layers side by side with sizes, zones and openings. `python3 -m lab.preview` from `tools/map` draws it alone, installing nothing |
@@ -114,7 +115,7 @@ just open the world. `/function garage:build` rebuilds by hand. See [Levels](lev
 
 ## Blocks
 
-`tools/blocks/generate.py` makes the assets of the mod's 137 blocks. The blocks themselves
+`tools/blocks/generate.py` makes the assets of the mod's 146 blocks. The blocks themselves
 (properties, shapes, sounds) are registered in Kotlin (`platform/ModBlocks.kt`); the tool
 **stops if the two id lists disagree**. Model rotations must match the shapes in
 `platform/BlockShapes.kt`. Textures reuse the map's painters (`garage/textures.py`), so

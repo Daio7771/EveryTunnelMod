@@ -273,6 +273,16 @@ class Lab:
                     c = (x, s.floor + s.height, z)
                     self.lights.append(c)
                     self.lab_blocks[self.at(*c)] = p["LIGHT"].format(axis=axis)
+        # The test chambers' windows: glass from the second block up to the corridor's ceiling, in steel (a sill,
+        # a lintel, a post at each end).
+        for layer, axis, line, first, last in p["WINDOWS"]:
+            floor = self.layer_floor[layer]
+            top = floor + p["CORRIDOR_HEIGHT"] + 1
+            for k in range(first - 1, last + 2):
+                x, z = (line, k) if axis == "x" else (k, line)
+                for y in range(floor + 1, top + 1):
+                    edge = k in (first - 1, last + 1) or y in (floor + 1, top)
+                    self.lab_blocks[self.at(x, y, z)] = self.state("steel") if edge else p["GLASS"]
         # The levers on their walls.
         for _, layer, x, z, facing in p["LEVERS"]:
             self.lab_blocks[self.at(x, self.layer_floor[layer] + 2, z)] = p["LEVER"].format(facing=WORLD_FACING[facing])
@@ -312,14 +322,18 @@ class Lab:
 
     # Zone tags by kind of space or opening: the airlock's (LabHooks), the locked doors (LabDoorHooks), the
     # Lab hall's restart point (ContinueGame).
+    # The Distortion Clouds' zones (DistortionHooks), the Lab hall's first Cloud (LabHallHooks), the chemical
+    # puzzle's room, grate and hatch (ChemicalHooks).
     TAGS = {"airlock": ["lab_airlock"], "airlock_rear": ["lab_airlock_rear"], "airlock_front": ["lab_welcome"],
-            "locked": ["lab_door"], "hub": ["restart_point"]}
+            "locked": ["lab_door"], "hub": ["restart_point", "cloud", "first_cloud"], "north_route": ["cloud"],
+            "south_route": ["cloud"], "puzzle": ["chemical_room"], "grate": ["lab_grate"], "hatch": ["lab_drain"]}
 
     def zones(self):
         """(id, world box inclusive, tags) of Level 5's file: every space and every opening, so that
         going through a door never leaves the level. A zone of several boxes gives its id to each (the
         corridors round the rooms, the stairs, the routes)."""
-        out = [(s.zone, self.space_zone(s), self.TAGS.get(s.kind, [])) for s in self.spaces + [self.flight]]
+        out = [(s.zone, self.space_zone(s), self.TAGS.get(s.zone if s.zone in self.TAGS else s.kind, []))
+               for s in self.spaces + [self.flight]]
         for o in self.openings:
             floor = self.layer_floor[o.layer]
             out.append((o.id, self.cells_zone(o.cells(), floor + 1, floor + o.height), self.TAGS.get(o.kind, [])))

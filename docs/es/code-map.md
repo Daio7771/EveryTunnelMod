@@ -37,6 +37,7 @@ con un comentario KDoc que cuenta más.
 | `save/LoungeSave.kt` | El nivel 4 como se dejó, en texto |
 | `wall/WallMessageState.kt` | Los disparadores de un mensaje: fijo, al acercarse, cambia al dejar de mirarlo |
 | `puzzle/BreakerCode.kt` | Las cinco palancas del nivel 4: el código, cuántas están bien |
+| `puzzle/ChemicalMix.kt` | El puzle químico del nivel 5: la pareja de reactivos sorteada en cada partida, en cualquier orden |
 | `puzzle/SafeDial.kt` | El dial de una caja: tics, clics, fijar un número cambiando de sentido |
 | `puzzle/darts/DartboardGeometry.kt` | Dónde cayó un dardo en el tablero: número y anillo, en las 4 orientaciones |
 | `film/FilmInfo.kt` | La película del Cinema: fotogramas, velocidad, qué fotograma en cada momento |
@@ -89,6 +90,8 @@ con un comentario KDoc que cuenta más.
 | `ModBlocks.kt` | Cada bloque: la luz, props, puertas, carteles, piezas del ascensor, botín, lector de tarjetas |
 | `ModItems.kt` | Batería, botella de agua, tarjeta; la pestaña creativa |
 | `LabItems.kt` | La llave inglesa del nivel 5: un arma pesada que no se desgasta |
+| `ChemicalBlocks.kt` | La mezcladora del nivel 5: sus depósitos (un frasco cada uno), su cuerpo (el botón), las luces rojas de la alarma |
+| `TerminalHooks.kt` | Los ordenadores del nivel 5 (`LabTerminalBlock`): qué muestra cada pantalla, enviado al cliente |
 | `FuseHolderBlock.kt` | Un hueco de la caja de fusibles del nivel 5: solo admite el fusible de su amperaje; llena la caja, se encienden sus luces y la palanca de al lado funciona |
 | `ModEntities.kt` | El tipo de entidad del Pale man y su huevo; el asiento de la taquilla |
 | `ModSounds.kt` | Eventos de sonido que reproduce el código |
@@ -138,6 +141,9 @@ con un comentario KDoc que cuenta más.
 | `DistortionJuniorEntity.kt` | El Distortion Junior: a quién molesta y marca, la mirada que acaba con él |
 | `LabFigureEntity.kt` | La figura que se ve desde el Lobby del nivel 5: cuando la miran, se va andando tras la esquina y desaparece |
 | `LabFigureHooks.kt` | Pone la figura ahí al construirse el nivel 5, una vez por partida |
+| `SubjectEntity.kt` | Los sujetos de pruebas, inmóviles en sus salas selladas, por fase; `SubjectHooks` los pone con el nivel |
+| `LabHallHooks.kt` | El golpe de cuerdas y la primera Cloud del Lab hall, una vez por partida |
+| `ChemicalHooks.kt` | El puzle químico: la pareja de la partida, la mezcladora, la alarma y sus enemigos, la rejilla disolviéndose, la trampilla |
 | `DistortionHooks.kt` | Los enemigos del nivel 5: sus puestos según los puntos de aparición, de vuelta al morir, avisar a los Hunters, cuándo y dónde viene una Cloud, `/everytunnel spawn` |
 
 ### `platform/`: hooks (lógica de juego movida por eventos)
@@ -260,6 +266,7 @@ con un comentario KDoc que cuenta más.
 | `DartRenderer.kt` | Un dardo lanzado: la flecha de vanilla, más pequeña, con su textura |
 | `WallMessageRenderer.kt` | Dibuja un mensaje con la fuente pintada y recuerda lo que le ha pasado |
 | `ObserverRenderer.kt` | Renderizador de GeckoLib del Observer; su cabeza gira con la de la entidad |
+| `SubjectRenderer.kt` | Renderizador de GeckoLib de los sujetos, cada fase con su cuerpo y su piel |
 | `LabFigureRenderer.kt` | La figura que se ve desde el Lobby del nivel 5, con el modelo del jugador, una silueta oscura |
 | `HunterRenderer.kt` | Renderizador de GeckoLib de los Hunters, con los ojos brillando |
 | `DistortionRenderer.kt` | Renderizador y modelo de GeckoLib de las Distortions: giradas hacia su yaw, el glitch, el ojo del Junior agrietándose |
@@ -291,6 +298,7 @@ con un comentario KDoc que cuenta más.
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |
 | `LoadingTips.kt` | Consejos que van cambiando, con las teclas del jugador |
 | `EndOfDemoScreen.kt` | "End of demo" y los créditos que suben |
+| `TerminalScreen.kt` | La pantalla de un ordenador del nivel 5, tecleada en verde sobre negro |
 | `DeathScreen.kt` | La pantalla de muerte: "Killed by", quién te mató y un consejo sobre el negro al morir, y "Try again" |
 
 ### Mixins del cliente: `client/java/daio7771/everytunnel/mixin/client/`
