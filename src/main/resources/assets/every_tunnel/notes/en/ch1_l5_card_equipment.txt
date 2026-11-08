@@ -1,3 +1,7 @@
-EQUIPMENT: WRENCH AND DETECTOR
+EQUIPMENT SHEET - WRENCH AND DETECTOR
 
-[Placeholder: this card's text comes later.]
+Wrench: heavy steel, very resistant. It will outlast anything you hit with it. Slow to swing: make each blow count.
+
+Radiation detector: works from your pocket. It beeps when a Distortion Cloud is within sixteen metres with nothing in between, faster as it comes nearer. A red triangle means it is close.
+
+It registers nothing else.

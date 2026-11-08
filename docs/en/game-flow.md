@@ -401,8 +401,8 @@ drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5).
   a game (`LabFigureHooks`, `LabFigureEntity`). The Workshop: benches with pegboards, shelves of jars, tool
   chests; **the wrench and the detector** lie on its island bench (see
   [Player systems](player.md#level-5s-tools)). The Waiting room: rows of seats, and on its north wall the
-  noticeboard, a card for each of the Hunters, the Cloud, the Junior and the equipment (placeholder texts
-  for now). The Lockers: lockers to hide in, as in Level 3.
+  noticeboard, a technical sheet for each of the Hunters, the Cloud, the Junior and the equipment (what
+  each does and how to deal with it: the level's tutorial). The Lockers: lockers to hide in, as in Level 3.
 - **The fuse box.** The stairs' lever, on the ring's east side, is dead ("No power.", `block.breaker.dead`)
   until the fuse box beside it is full: five holders (`FuseHolderBlock`) marked 5A, 10A, 15A, 20A and 30A,
   the 15A in already. The other four fuses lie one in each room, in plain sight: 10A on the Lobby's desk,
@@ -421,17 +421,24 @@ drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5).
 - **Layer 2.** The subjects' corridor: the test chambers S-1 to S-4 are sealed, each seen through a wide
   window in a steel frame (`WINDOWS`), white and empty but for its subject standing still, a person turning
   room by room into a Pale man (`SubjectEntity`, `SubjectHooks`; `tools/entity/subject.py`), an experiment
-  card on the corridor's wall by each window (placeholder texts). Walking into the Lab hall: a stab of low
+  file on the corridor's wall by each window (subjects by number only: six-month contracts, meals provided,
+  each worse than the last). Walking into the Lab hall: a stab of low
   strings out of tune (`event.lab.sting`), and a moment later the first Distortion Cloud, a few steps ahead,
   once a game (`LabHallHooks`). Clouds come at random in the Lab hall and both routes (zones tagged `cloud`),
   never in the Office, Storage, the chemical room or the subjects' corridor. The first Junior floats in plain
   sight down the north corridor; three Hunters guard Storage.
-- **The Office's computer** (`LabTerminalBlock`, `TerminalHooks`, the client's `TerminalScreen`): a right click
-  types out its screen, green on black: the chemical puzzle's answer (placeholder lore round it).
+- **The computers** (`LabTerminalBlock`, `TerminalHooks`, the client's `TerminalScreen`): a right click types out
+  the screen, green on black. The Office's middle one: the lab head's work log (the budget gone, staying on
+  alone, the drain sealed), with the chemical puzzle's answer. Storage's: its inventory, two patient gowns more
+  than rooms. The rest: "SESSION LOCKED" in red, asking for a password, the account RTA on screen.
+- **Loot:** a snack and water on the Lockers' cabinet, a battery in the Waiting room and one in the Office;
+  Storage holds two snacks, two waters and two batteries, guarded by its Hunters. Nothing in the subjects'
+  corridor, the Lab hall or the chemical room but the reagents.
 - **The chemical puzzle** (`ChemicalHooks`, `core.puzzle.ChemicalMix`): four reagent flasks, R-1 to R-4, on a
   cabinet by the mixer; one in each of its two tanks (`MixerTankBlock`, `block.mixer.fill`), then its red
   button (`MixerBlock`). One pair, drawn each game, is the solvent: the mixer runs (`block.mixer.run`), the
-  drain's grate dissolves in green fumes (`block.grate.dissolve`) and the hatch behind it opens. Any other
+  drain's grate dissolves in green fumes (`block.grate.dissolve`) and the hatch behind it, in the floor, opens (onto a
+  pit a block deep for now: the drain is layer 3's). Any other
   pair: the alarm, a siren (`event.lab.alarm`) and red lights turning (`AlarmLightBlock`) for 10 s, three
   Hunters and a Junior appear in the room; then the two flasks are back on their cabinet.
 - **Its enemies** are placed by `tools/map/lab/furnish.py`; to try them anywhere,
@@ -458,7 +465,8 @@ drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5).
 
 The map's rebuild when the world opens does not touch Level 5: the way in goes with Level 4, and
 nobody can reach what stands until the next build. A game continued in Level 5 builds it behind the
-loading screen, the player waiting in the diploma corridor (`ContinueGame`).
+loading screen, the player waiting in the diploma corridor (`ContinueGame`); the Lobby's wall round the airlock's
+door is built with both levels, so it stands whole even when Level 4 does not.
 
 ## 12. The end
 

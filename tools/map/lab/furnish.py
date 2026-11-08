@@ -72,7 +72,7 @@ FURNITURE = {
         # The Lockers: lockers to hide in along both long walls, benches in between, a cabinet.
         + [p for x in list(range(24, 31)) + list(range(37, 44)) for p in tall("locker", x, 21, "south") + tall("locker", x, 28, "north")]
         + row("bench", 25, 29, 24, "north") + row("bench", 38, 42, 24, "north")
-        + column("lab_cabinet", 24, 24, 25, "east")
+        + column("lab_cabinet", 24, 24, 25, "east") + column("lab_cabinet", 43, 24, 25, "west")
         # The ring: posters and first aid on the walls, carts against them; the fuse box (FUSE_BOX) by the
         # stairs' lever in the east side.
         + [("lab_poster", 26, 14, "south", 2), ("lab_poster", 57, 14, "south", 2), ("first_aid_box", 48, 14, "south", 2)]
@@ -94,7 +94,7 @@ FURNITURE = {
         + [("potted_plant", 74, 24, "north", 1), ("potted_plant", 96, 24, "north", 1), ("wall_clock", 85, 13, "south", 3)]
         # Storage: shelves two high along the north and south walls, carts; its middle clear (its Hunters).
         + [p for x in range(100, 114) for p in tall("lab_shelf", x, 80, "south") + tall("lab_shelf", x, 89, "north")]
-        + [("lab_cart", 101, 84, "east", 1), ("lab_cart", 112, 86, "west", 1)]
+        + [("lab_cart", 101, 84, "east", 1), ("lab_cart", 112, 86, "west", 1)] + column("lab_cabinet", 114, 84, 88, "west")
         # The chemical room: fume hoods along the north wall, two rows of benches, the reagents' cabinet and
         # the mixer against the south wall beside the grate (MIXER), the pipe from it over the grate (PIPE).
         + [p for x in range(112, 121) for p in tall("fume_hood", x, 50, "south")]
@@ -123,7 +123,7 @@ FUSE_IN = 2
 # answer (ChemicalHooks); the others show what they have to show (TerminalHooks).
 TERMINALS = [("terminal_office", 2, 85, 18, "south"), ("terminal_office_west", 2, 78, 13, "south"),
              ("terminal_office_east", 2, 90, 13, "south"), ("terminal_lab_hall_north", 2, 83, 50, "south"),
-             ("terminal_lab_hall_south", 2, 87, 70, "north")]
+             ("terminal_lab_hall_south", 2, 87, 70, "north"), ("terminal_storage", 2, 114, 84, "west")]
 
 # The chemical room's mixer against the south wall, looking into the room: a tank either side of its body.
 MIXER = [("mixer_tank", 123, 69), ("mixer", 124, 69), ("mixer_tank", 125, 69)]
@@ -131,18 +131,30 @@ MIXER = [("mixer_tank", 123, 69), ("mixer", 124, 69), ("mixer_tank", 125, 69)]
 PIPE = [(x, 4, 69) for x in range(124, 131)]
 # The alarm's red lights, high on the chemical room's walls: (x, z, facing).
 ALARMS = [(110, 50, "south"), (135, 50, "south"), (110, 69, "north"), (135, 69, "north")]
-# The hatch down to the drain, closed, in the middle of the room behind the grate.
+# The hatch down to the drain, closed, flush with the floor in the middle of the room behind the grate; under
+# it, for now (the drain is layer 3's), a pit a block deep in steel, dark at its bottom.
 HATCH = (128, 75)
+PIT_BOTTOM = "minecraft:black_concrete"
 
-# (tag, layer, x, z, y): what lies about. The missing fuses, one in each room of layer 1, in plain sight on
-# furniture; the four reagents on their cabinet by the mixer.
+# (id, tag, layer, x, z, y): what lies about, in plain sight on furniture. Layer 1: the wrench and the
+# detector; the missing fuses, one in each room; a snack and water in the Lockers, a battery in the Waiting
+# room. Layer 2: a battery in the Office, the four reagents on their cabinet by the mixer, and Storage's
+# supplies, which its Hunters guard. Nothing in the subjects' corridor, the Lab hall or the chemical room
+# but the reagents.
 LOOT = [
-    ("wrench", 1, 40, 7, 2), ("detector", 1, 43, 7, 2),         # the Workshop's island
-    ("fuse_10a", 1, 14, 9, 2),                                  # the Lobby's desk
-    ("fuse_30a", 1, 53, 4, 2),                                  # a tool chest in the Workshop
-    ("fuse_5a", 1, 74, 6, 2),                                   # the Waiting room's cabinet
-    ("fuse_20a", 1, 24, 24, 2),                                 # the Lockers' cabinet
-] + [(f"reagent_{i + 1}", 2, 117 + i, 69, 2) for i in range(4)]
+    ("wrench", "wrench", 1, 40, 7, 2), ("detector", "detector", 1, 43, 7, 2),     # the Workshop's island
+    ("fuse_10a", "fuse_10a", 1, 14, 9, 2),                                        # the Lobby's desk
+    ("fuse_30a", "fuse_30a", 1, 53, 4, 2),                                        # a tool chest in the Workshop
+    ("fuse_5a", "fuse_5a", 1, 74, 6, 2),                                          # the Waiting room's cabinet
+    ("fuse_20a", "fuse_20a", 1, 24, 24, 2),                                       # the Lockers' cabinet
+    ("snack_lockers", "food_snack", 1, 43, 24, 2), ("water_lockers", "water", 1, 43, 25, 2),
+    ("battery_waiting", "battery", 1, 74, 7, 2),
+    ("battery_office", "battery", 2, 76, 13, 2),
+] + [(f"reagent_{i + 1}", f"reagent_{i + 1}", 2, 117 + i, 69, 2) for i in range(4)] + [
+    ("snack_storage_1", "food_snack", 2, 101, 84, 2), ("water_storage_1", "water", 2, 112, 86, 2),
+    ("snack_storage_2", "food_snack", 2, 114, 85, 2), ("water_storage_2", "water", 2, 114, 86, 2),
+    ("battery_storage_1", "battery", 2, 114, 87, 2), ("battery_storage_2", "battery", 2, 114, 88, 2),
+]
 
 # Spawn points of the level's enemies, its subjects, the figure, and the alarm's enemies: (id, layer, x, z,
 # plan facing, tags).
@@ -204,9 +216,7 @@ class Furnish:
             self.extra[(x, f2 + y, z)] = "down=false,east=false,north=true,south=true,up=false,west=false"
         for x, z, facing in ALARMS:
             self.put("alarm_light", x, z, facing, f2 + 4)
-        self.put("bunker_trapdoor", HATCH[0], HATCH[1], "north", f2 + 1)
-        self.extra[(HATCH[0], f2 + 1, HATCH[1])] = "facing={facing},half=bottom,open=false,powered=false,waterlogged=false"
-        for tag, layer, x, z, y in LOOT:
+        for _, tag, layer, x, z, y in LOOT:
             yy = self.floor(layer) + y
             if y == 2 and (x, yy - 1, z) not in self.items:
                 raise SystemExit(f"Level 5: {tag} at {(x, z)} has nothing under it")
@@ -242,12 +252,23 @@ class Furnish:
             out[(wx, wy, wz)] = state
         return out
 
+    def pit(self):
+        """{world position: state} of the drain's hatch, set into the floor, and the pit under it."""
+        x, z = HATCH
+        f2 = self.floor(2)
+        facing = self.lab.WORLD_FACING["north"]
+        out = {self.lab.at(x, f2, z): f"every_tunnel:bunker_trapdoor[facing={facing},half=top,open=false,powered=false,waterlogged=false]",
+               self.lab.at(x, f2 - 1, z): "minecraft:air", self.lab.at(x, f2 - 2, z): PIT_BOTTOM}
+        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+            out[self.lab.at(x + dx, f2 - 1, z + dz)] = self.lab.state("steel")
+        return out
+
     def spawn_points(self, yaw):
         """The level file's spawn points of what lies about, the cards, the computers, the enemies, the
         subjects and the figure; `yaw` turns a plan facing into a spawn point's yaw."""
         out = []
-        for tag, layer, x, z, y in LOOT:
-            out.append({"id": tag, "pos": self.centre(x, self.floor(layer) + y, z), "yaw": 0, "tags": [tag]})
+        for lid, tag, layer, x, z, y in LOOT:
+            out.append({"id": lid, "pos": self.centre(x, self.floor(layer) + y, z), "yaw": 0, "tags": [tag]})
         for nid, layer, x, z, _ in NOTE_BOARDS:
             out.append({"id": nid, "pos": self.centre(x, self.floor(layer) + 2, z), "yaw": 0, "tags": ["note"]})
         for tid, layer, x, z, _ in TERMINALS:

@@ -19,8 +19,8 @@ import net.minecraft.world.World
 /**
  * Level 5's computers ([LabTerminalBlock]): a right click shows what is on the screen, typed out line by line
  * on the client's `TerminalScreen`. Each is a spawn point tagged [TAG] at its block; its id says what it shows
- * ([text]). The Office's, `terminal_office`, tells the chemical puzzle's answer ([ChemicalHooks.mix]); the
- * lore round it comes later, so do the other screens' texts.
+ * ([text]). The Office's, `terminal_office`, tells the chemical puzzle's answer ([ChemicalHooks.mix]) in the lab
+ * head's work log; Storage's, `terminal_storage`, lists what is kept there; the others are locked.
  */
 object TerminalHooks {
 
@@ -40,20 +40,44 @@ object TerminalHooks {
         ServerPlayNetworking.send(player, PACKET_ID, buf)
     }
 
-    /** What the computer [id] shows. */
+    /**
+     * What the computer [id] shows, line by line; a line starting with [RED] is drawn red. The Office's is
+     * the lab head's work log, with the chemical puzzle's answer; Storage's, its inventory (two gowns more
+     * than rooms); the rest are locked, asking for a password, the last account in use left on screen.
+     */
     fun text(player: ServerPlayerEntity, id: String?): List<String> = when (id) {
         "terminal_office" -> {
             val mix = ChemicalHooks.mix(player.server)
             listOf(
-                "LOWER LABS - CHEMICAL STORE",
+                "LOWER LABS - WORK LOG",
                 "",
-                "Drain grate, solvent: R-${mix.first} with R-${mix.second}.",
+                "Day 1. Head office came down with a tablet. The budget for the lower labs is gone. End of the month. Staff to leave.",
                 "",
-                "[Placeholder: the rest of this log comes later.]",
+                "Day 30. They have left. I have kept the schedule. It seemed rude to stop in the middle.",
+                "",
+                "Day 41. The chemical room's drain backed up. I sealed it with a grate.",
+                "To open it: R-${mix.first} with R-${mix.second} in the mixer. Nothing else.",
+                "The wrong pair sets off the alarm. The alarm brings them.",
+                "",
+                "Day 77. Something in the Lab hall again. Do not look at it. Turn round, walk back the way you came. It goes.",
             )
         }
-        else -> listOf("SESSION LOCKED", "", "[Placeholder: this screen's text comes later.]")
+        "terminal_storage" -> listOf(
+            "STORAGE - INVENTORY",
+            "",
+            "Patient gowns, issued: 6",
+            "Subjects in rooms: 4",
+            "Meal trays, daily: 4",
+            "Snacks: 2",
+            "Water: 2",
+            "Batteries: 2",
+            "Restraints: 4",
+        )
+        else -> listOf("${RED}SESSION LOCKED", "", "Log in to continue.", "", "User: RTA", "Password: ________")
     }
+
+    /** A line starting with this is drawn red (`TerminalScreen`). */
+    const val RED = "!"
 
     fun readText(buf: PacketByteBuf): List<String> = buf.readString().split('\n')
 }

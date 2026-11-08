@@ -181,8 +181,9 @@ object ChemicalHooks {
     }
 
     private fun openHatch(world: ServerWorld, level: LevelDefinition) {
+        // The hatch is set into the floor, a block under the room's zone.
         val box = zone(level, DRAIN_TAG) ?: return
-        for (pos in positions(box)) {
+        for (pos in positions(box.grow(1))) {
             val state = world.getBlockState(pos)
             if (!state.isOf(ModBlocks.BUNKER_TRAPDOOR) || state.get(TrapdoorBlock.OPEN)) continue
             world.setBlockState(pos, state.with(TrapdoorBlock.OPEN, true))

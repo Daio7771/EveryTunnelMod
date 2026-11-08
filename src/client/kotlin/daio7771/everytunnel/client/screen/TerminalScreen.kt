@@ -11,7 +11,7 @@ import net.minecraft.text.Text
 import net.minecraft.util.Util
 
 /**
- * A Level 5 computer's screen ([TerminalHooks]): green letters on black in a monitor's frame, typed out a
+ * A Level 5 computer's screen ([TerminalHooks]): green letters on black (red where a line says so) in a monitor's frame, typed out a
  * character at a time with soft key clicks (`block.terminal.key`), a cursor blinking at the end. A click or
  * a key shows the rest at once; Esc, or a click once it is all there, closes it. The game does not pause.
  */
@@ -20,7 +20,7 @@ class TerminalScreen(private val lines: List<String>) : Screen(Text.literal("Ter
     private val openedMs = Util.getMeasuringTimeMs()
     private var shownAll = false
     private var clicked = 0
-    private val total = lines.sumOf { it.length + 1 }
+    private val total = lines.sumOf { it.removePrefix(TerminalHooks.RED).length + 1 }
 
     override fun shouldPause(): Boolean = false
 
@@ -43,11 +43,13 @@ class TerminalScreen(private val lines: List<String>) : Screen(Text.literal("Ter
         }
         var y = y0 + 10
         var lastX = x0 + 10
-        for (line in lines) {
+        for (raw in lines) {
             if (left <= 0) break
+            val red = raw.startsWith(TerminalHooks.RED)
+            val line = raw.removePrefix(TerminalHooks.RED)
             val shown = line.take(left)
             for (part in textRenderer.wrapLines(Text.literal(shown), w - 20)) {
-                context.drawText(textRenderer, part, x0 + 10, y, GREEN, false)
+                context.drawText(textRenderer, part, x0 + 10, y, if (red) RED else GREEN, false)
                 lastX = x0 + 10 + textRenderer.getWidth(part)
                 y += 11
             }
@@ -71,12 +73,13 @@ class TerminalScreen(private val lines: List<String>) : Screen(Text.literal("Ter
     companion object {
         private const val CHARS_PER_SECOND = 45L
         private const val CHARS_PER_CLICK = 3
-        private const val WIDTH = 300
-        private const val HEIGHT = 170
+        private const val WIDTH = 360
+        private const val HEIGHT = 240
         private const val DIM = 0xA0000000.toInt()
         private const val FRAME = 0xFFD8DAD6.toInt()
         private const val SCREEN = 0xFF060E08.toInt()
         private const val GREEN = 0xFF5CE07A.toInt()
+        private const val RED = 0xFFE04848.toInt()
 
         fun register() {
             ClientPlayNetworking.registerGlobalReceiver(TerminalHooks.PACKET_ID) { client, _, buf, _ ->

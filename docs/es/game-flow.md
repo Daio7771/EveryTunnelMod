@@ -427,7 +427,8 @@ hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla.
   bancos con paneles de herramientas, estanterías de frascos, cajas de herramientas; **la llave inglesa y el
   detector** están en su banco central (ver [Sistemas del jugador](player.md#herramientas-del-nivel-5)). La sala
   de espera: filas de asientos y, en su pared norte, el tablón, una ficha para los Hunters, la Cloud, el Junior
-  y el equipo (textos provisionales de momento). Las taquillas: taquillas para esconderse, como en el nivel 3.
+  y el equipo (fichas técnicas: qué hace cada cosa y cómo tratarla, el tutorial del nivel). Las taquillas:
+  taquillas para esconderse, como en el nivel 3.
 - **La caja de fusibles.** La palanca de las escaleras, en el lado este del anillo, no funciona ("No power.",
   `block.breaker.dead`) hasta que la caja de fusibles de al lado está llena: cinco portafusibles
   (`FuseHolderBlock`) marcados 5A, 10A, 15A, 20A y 30A, el de 15A ya puesto. Los otros cuatro fusibles están uno
@@ -447,18 +448,25 @@ hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla.
 - **La capa 2.** El pasillo de los sujetos: las salas de pruebas S-1 a S-4 están selladas y se ven por un ventanal
   ancho con marco de acero (`WINDOWS`), blancas y vacías salvo por su sujeto, inmóvil, una persona que sala a sala
   se va convirtiendo en un Pale man (`SubjectEntity`, `SubjectHooks`; `tools/entity/subject.py`), con una ficha de
-  experimento en la pared del pasillo junto a cada ventanal (textos provisionales). Al entrar en el Lab hall: un
+  experimento en la pared del pasillo junto a cada ventanal (sujetos solo por número: contratos de seis meses,
+  comidas incluidas, cada uno peor que el anterior). Al entrar en el Lab hall: un
   golpe de cuerdas graves desafinadas (`event.lab.sting`) y enseguida la primera Distortion Cloud, unos pasos por
   delante, una vez por partida (`LabHallHooks`). Las Clouds vienen al azar en el Lab hall y en las dos rutas (zonas
   con la etiqueta `cloud`), nunca en la Office, Storage, la sala de químicos ni el pasillo de los sujetos. El primer
   Junior flota a la vista en el pasillo norte; tres Hunters guardan Storage.
-- **El ordenador de la Office** (`LabTerminalBlock`, `TerminalHooks`, `TerminalScreen` del cliente): con clic
-  derecho teclea su pantalla, verde sobre negro: la respuesta del puzle químico (lore provisional alrededor).
+- **Los ordenadores** (`LabTerminalBlock`, `TerminalHooks`, `TerminalScreen` del cliente): con clic derecho teclean
+  su pantalla, verde sobre negro. El del centro de la Office: el diario de trabajo del jefe del laboratorio (el
+  presupuesto que se acaba, seguir solo, el drenaje sellado), con la respuesta del puzle químico. El de Storage: su
+  inventario, dos batas de paciente más que salas. Los demás: "SESSION LOCKED" en rojo, pidiendo contraseña, con
+  la cuenta RTA en pantalla.
+- **Loot:** un snack y agua en el mueble de las taquillas, una pila en la sala de espera y otra en la Office;
+  Storage guarda dos snacks, dos aguas y dos pilas, vigilados por sus Hunters. Nada en el pasillo de los sujetos,
+  el Lab hall ni la sala de químicos salvo los reactivos.
 - **El puzle químico** (`ChemicalHooks`, `core.puzzle.ChemicalMix`): cuatro frascos de reactivo, R-1 a R-4, en un
   mueble junto a la mezcladora; uno en cada uno de sus dos depósitos (`MixerTankBlock`, `block.mixer.fill`) y luego
   su botón rojo (`MixerBlock`). Una pareja, sorteada en cada partida, es el disolvente: la mezcladora funciona
   (`block.mixer.run`), la rejilla del drenaje se disuelve entre humo verde (`block.grate.dissolve`) y la trampilla de
-  detrás se abre. Cualquier otra pareja: la alarma, una sirena (`event.lab.alarm`) y luces rojas girando
+  detrás se abre (sobre un foso de un bloque de momento: el drenaje es la capa 3). Cualquier otra pareja: la alarma, una sirena (`event.lab.alarm`) y luces rojas girando
   (`AlarmLightBlock`) durante 10 s, y aparecen en la sala tres Hunters y un Junior; después los dos frascos vuelven a
   su mueble.
 - **Sus enemigos** los coloca `tools/map/lab/furnish.py`; para probarlos en cualquier sitio,
@@ -486,7 +494,9 @@ hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla.
 
 La reconstrucción del mapa al abrir el mundo no toca el nivel 5: la entrada se va con el nivel 4, y nadie
 puede llegar a lo que queda en pie hasta la siguiente construcción. Una partida continuada en el nivel 5
-lo construye tras la pantalla de carga, con el jugador esperando en el pasillo de diplomas (`ContinueGame`).
+lo construye tras la pantalla de carga, con el jugador esperando en el pasillo de diplomas (`ContinueGame`); la pared
+del Lobby alrededor de la puerta de la esclusa se construye con los dos niveles, así que queda entera aunque el nivel 4
+no esté.
 
 ## 12. El final
 

@@ -1,3 +1,11 @@
-DISTORTION CLOUD
+TECHNICAL SHEET - DISTORTION CLOUD
 
-[Placeholder: this card's text comes later.]
+Classification: lethal. Appears without warning, already whole.
+
+Description: a mass of black vapour, never still, with a single violet eye.
+
+Behaviour: it does not move and does not follow. Facing it is enough: with it anywhere in front of you, one second is too long. Looking at the floor does not help.
+
+Containment: none. Turn your back on it and go back the way you came. Left alone, it goes.
+
+The radiation detector registers it before you see it.

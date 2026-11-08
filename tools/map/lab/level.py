@@ -243,11 +243,12 @@ class Lab:
                 roles[(x, floor + o.height + 1, z)] = "steel"
                 roles[(x, floor, z)] = "checker"
 
-        # Next to the way in's air: built with Level 4. The rest with the level, in play.
+        # Next to the way in's air: built with Level 4. The rest with the level, in play, and the walls between
+        # the two in both: a level built without Level 4 (a game continued in it) still has its Lobby whole.
         self.entry_blocks = {self.at(*c): self.state(r) for c, r in roles.items() if near(c, entry_air)}
         # The level's own air goes in too: a build over an older one puts everything back as new.
         self.lab_blocks = {self.at(*c): "minecraft:air" for c in lab_air}
-        self.lab_blocks.update({self.at(*c): self.state(r) for c, r in roles.items() if not near(c, entry_air)})
+        self.lab_blocks.update({self.at(*c): self.state(r) for c, r in roles.items() if not near(c, entry_air) or near(c, lab_air)})
         # The airlock's door ahead stands shut in both sets: before the level, it is the Lobby's wall.
         for o in front:
             self.entry_blocks.update(self.airlock_door(o))
@@ -290,6 +291,7 @@ class Lab:
         levers = {(x, self.layer_floor[layer] + 2, z) for _, layer, x, z, _ in p["LEVERS"]}
         self.furnish = Furnish(self, lab_air, levers).lay()
         self.lab_blocks.update(self.furnish.states())
+        self.lab_blocks.update(self.furnish.pit())
         # The flight: a stair on each cell, climbing towards the plan's north.
         stairs = f"{self.state('stairs')}[facing={WORLD_FACING['north']},half=bottom,shape=straight,waterlogged=false]"
         for x, z in self.flight.cells():

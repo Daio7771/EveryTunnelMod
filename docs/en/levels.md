@@ -240,7 +240,9 @@ Level 5, the laboratory, is built in play (`LabHooks`), layers 1 and 2 so far (p
   `fuse_10a`, `fuse_20a`, `fuse_30a` (tagged the same), the noticeboard's cards `ch1_l5_card_*` (tagged `note`),
   `hunters_fuse_box` (tagged `hunters` and `harmless`), `lab_figure` and `lab_figure_exit`; and layer 2's:
   `subject_1` to `subject_4` (tagged `subject`), the cards `ch1_l5_card_s1` to `_s4`, the computers `terminal_*`
-  (tagged `terminal`), `reagent_1` to `reagent_4` (tagged the same), `junior_north` (tagged `distortion_junior`),
+  (tagged `terminal`, `terminal_storage` among them), `reagent_1` to `reagent_4` (tagged the same), the loot
+  `snack_lockers`, `water_lockers`, `battery_waiting`, `battery_office`, `snack_storage_*`, `water_storage_*`,
+  `battery_storage_*` (tagged `food_snack`, `water`, `battery`), `junior_north` (tagged `distortion_junior`),
   `hunters_storage` (tagged `hunters`), `alarm_hunters` and `alarm_junior` (tagged the same).
 
 ## How the mod tracks players

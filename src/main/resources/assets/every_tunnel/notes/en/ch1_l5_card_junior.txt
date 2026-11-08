@@ -1,3 +1,11 @@
-DISTORTION JUNIOR
+TECHNICAL SHEET - DISTORTION JUNIOR
 
-[Placeholder: this card's text comes later.]
+Classification: not lethal. Stationary.
+
+Description: a small Distortion Cloud, the size of a head, floating at eye level. The same violet eye.
+
+Behaviour: near it, your sight shakes and drifts away from it. While it watches you, the Hunters know where you are.
+
+Containment: hold its eye. Four seconds without looking away and it breaks.
+
+The radiation detector does not register it.

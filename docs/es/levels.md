@@ -247,7 +247,9 @@ repite su id:
   `fuse_10a`, `fuse_20a`, `fuse_30a` (con la misma etiqueta), las fichas del tablón `ch1_l5_card_*` (etiqueta `note`),
   `hunters_fuse_box` (etiquetas `hunters` y `harmless`), `lab_figure` y `lab_figure_exit`; y los de la capa 2:
   `subject_1` a `subject_4` (etiqueta `subject`), las fichas `ch1_l5_card_s1` a `_s4`, los ordenadores `terminal_*`
-  (etiqueta `terminal`), `reagent_1` a `reagent_4` (con la misma etiqueta), `junior_north` (etiqueta
+  (etiqueta `terminal`, entre ellos `terminal_storage`), `reagent_1` a `reagent_4` (con la misma etiqueta), el loot
+  `snack_lockers`, `water_lockers`, `battery_waiting`, `battery_office`, `snack_storage_*`, `water_storage_*`,
+  `battery_storage_*` (etiquetas `food_snack`, `water`, `battery`), `junior_north` (etiqueta
   `distortion_junior`), `hunters_storage` (etiqueta `hunters`), `alarm_hunters` y `alarm_junior` (con la misma etiqueta).
 
 ## Cómo sigue el mod a los jugadores
