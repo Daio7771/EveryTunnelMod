@@ -145,6 +145,19 @@ def scrape(n, rng, start, length, lo, hi, amp=1.0, grain=60.0):
     return y
 
 
+def hinge(n, rng, start, length, amp=1.0):
+    """A stiff iron hinge turning: stick and slip, the slips quickening as it swings, each ringing the hinge's few
+    out-of-tune modes (no gliding tone: that sounds like a voice)."""
+    slips = np.zeros(n)
+    t = start
+    while t < start + length:
+        x = (t - start) / length
+        slips += burst(n, rng, t, 0.0015, lo=300.0, hi=6000.0, tau=0.0006, amp=rng.uniform(0.6, 1.0) * (0.4 + 0.6 * x))
+        t += rng.uniform(0.7, 1.3) / (25.0 + 60.0 * x)
+    modes = sorted(rng.uniform(500.0, 2600.0, 4))
+    return amp * sum(a * resonator(slips, f, rng.uniform(20.0, 45.0)) for f, a in zip(modes, (1.0, 0.7, 0.5, 0.35)))
+
+
 def motor(n, rng, f_rot, teeth=14, brushes=0.3, harmonics=10):
     """An electric motor through its gearbox, turning at `f_rot` (Hz, per sample): the shaft's harmonics, uneven and each
     wavering on its own, the gears' whine `teeth` times the turn with sidebands from it, the brushes' noise pulsing with
@@ -1111,28 +1124,31 @@ def library_clock(rng, variant):
 
 
 def office_phone(rng, variant):
-    """A desk phone ringing somewhere far off in the offices, in an empty room down a corridor:
-    the electronic trill (two tones warbling), muffled by the distance and the walls, the room
-    answering with its long echo. It rings 2, 3 or 4 times (the variant) and stops mid-ring,
-    as if picked up. Played now and then at a spot around the player."""
+    """A desk phone ringing somewhere far off (Level 3's offices, Level 5's lab), in an empty room down a corridor: its
+    electronic ringer, a small transducer driven hard by two tones warbling, buzzy and a little unsteady, its plastic
+    case buzzing along; muffled by the distance and the walls, the room answering with its long echo. It rings 2, 3
+    or 4 times (the variant) and stops mid-ring, as if picked up. Played now and then at a spot around the player."""
     rings = variant + 1
     period, on = 4.0, 1.2
     length = (rings - 1) * period + on * rng.uniform(0.45, 0.8)
     n_dry = samples(length + 0.05)
     t = time_axis(n_dry)
-    warble = (np.floor(t * 16.0) % 2).astype(float)
-    tone = glide_tone(1000.0 + 250.0 * warble, harmonics=(1.0, 0.45, 0.25, 0.12))
+    warble = lowpass((np.floor(t * 16.0) % 2).astype(float), 400.0, order=2)
+    f = (1000.0 + 250.0 * warble) * (1.0 + 0.003 * smooth_random(n_dry, 3.0, rng))
+    square = np.tanh(4.0 * np.sin(TAU * np.cumsum(f) / SR))
     gate = np.zeros(n_dry)
     for r in range(rings):
         start, stop = r * period, min(r * period + on, length)
-        gate += envelope(n_dry, [(0.0, 0.0), (start, 0.0), (start + 0.01, 1.0), (stop - 0.01, 1.0), (stop, 0.0), (length + 0.05, 0.0)])
-    dry = bandpass(tone * np.clip(gate, 0.0, 1.0), 300.0, 2600.0)
-    dry = lowpass(dry, 1800.0) * 0.35                                                        # far off, through walls
+        gate += envelope(n_dry, [(0.0, 0.0), (start, 0.0), (start + 0.015, 0.8), (start + 0.1, 1.0), (stop - 0.01, 1.0), (stop, 0.0),
+                                 (length + 0.05, 0.0)])
+    raw = square * np.clip(gate, 0.0, 1.0)
+    ringer = 0.5 * raw + resonator(raw, rng.uniform(2100.0, 2400.0), 6.0) + 0.4 * resonator(raw, rng.uniform(600.0, 800.0), 4.0)
+    dry = lowpass(bandpass(ringer, 300.0, 4000.0, order=2), 2500.0) * 0.35                 # far off, through walls
     wet = hall_reverb(dry, rng, 2.4, 1200.0, early=((0.043, 0.6), (0.071, 0.45), (0.12, 0.3), (0.19, 0.2)))
     y = np.zeros(wet.shape[0])
     y[:n_dry] += dry * 0.45
     y += wet * 1.2
-    return fade(lowpass(y, 2200.0), 0.003, 0.4)
+    return fade(lowpass(y, 2800.0), 0.003, 0.4)
 
 
 # ===========================================================================
@@ -1225,32 +1241,30 @@ def observer_chase(rng, variant):
 
 
 def hatch_open(rng, variant):
-    """The bunker hatch opening by itself (the fifth book back): under the floor a heavy bolt
-    grinds back and drops free with a deep clank, then the two iron trapdoors swing up and bang
-    against their stops one after the other, the shaft below booming with them, and the
-    library's silence takes the ringing."""
+    """The bunker hatch opening by itself (Level 3, the fifth book back; Level 5's drain hatch too): under the floor
+    a heavy bolt grinds back and drops free with a deep clank, then the two iron trapdoors swing up on stiff hinges and
+    bang against their stops one after the other, rattling as they settle, the shaft below booming with them."""
     n = samples(3.6)
     t = time_axis(n)
-    y = np.zeros(n)
-    # The bolt: steel sliding on steel, rough and slowing, then its clank home.
+    # The bolt: steel dragged on steel, rough and slowing, then its clank home.
     slide0, slide1 = 0.05, 0.55
-    grind = shaped_noise(n, rng, 0.5, 300.0, 3500.0) * envelope(n, [(0.0, 0.0), (slide0, 0.0), (slide0 + 0.05, 0.35), (slide1 - 0.1, 0.25), (slide1, 0.0)])
-    grind *= 0.6 + 0.4 * np.abs(smooth_random(n, 35.0, rng))
-    y += resonator(grind, rng.uniform(900, 1100), 8.0) * 0.6 + grind * 0.3
-    y += knock(n, rng, slide1, rng.uniform(140, 160), [1.0, 2.756, 5.404], [1.0, 0.5, 0.25], [0.35, 0.18, 0.08], click=1.0)
-    y += burst(n, rng, slide1, 0.05, hi=500.0, tau=0.02, amp=1.0)
-    # The trapdoors: a creak each as they swing, then the bang on their stops.
+    grind = scrape(n, rng, slide0, slide1 - slide0, 300.0, 3500.0, amp=0.5, grain=35.0)
+    y = grind + 0.6 * resonator(grind, rng.uniform(900.0, 1100.0), 8.0)
+    y += modal_hit(n, rng, slide1, bar(rng.uniform(140.0, 160.0), 6), 0.35, amp=1.0, contact=0.0008, beat=0.004)
+    y += thud(n, rng, slide1, rng.uniform(55.0, 70.0), 0.06, amp=0.9, dull=500.0)
+    # The trapdoors: a hinge's creak as each swings, the bang on its stop, a rattle as it settles.
     for k, at in enumerate((1.05, 1.32)):
-        swing = glide_tone(120.0 + 60.0 * np.clip((t - at + 0.3) / 0.3, 0, 1) + 8 * smooth_random(n, 20.0, rng), harmonics=(1.0, 0.5, 0.3))
-        y += 0.08 * bandpass(swing * envelope(n, [(0.0, 0.0), (at - 0.3, 0.0), (at - 0.2, 1.0), (at, 0.6), (at + 0.01, 0.0)]), 100.0, 1500.0)
-        ratios = sorted(rng.uniform(1.0, 7.0, 10))
-        y += (0.9 - 0.15 * k) * knock(n, rng, at, rng.uniform(70, 85), ratios, [1.0 / (1 + i * 0.35) for i in range(10)],
-                                      [0.9 / (1 + i * 0.3) for i in range(10)], click=1.1)
-        y += burst(n, rng, at, 0.07, hi=250.0, tau=0.04, amp=1.6 - 0.3 * k)
-    # The shaft below and the library: a low, long boom under it all.
+        y += hinge(n, rng, at - 0.3, 0.29, amp=0.25)
+        y += (0.9 - 0.15 * k) * modal_hit(n, rng, at, plate_modes(rng, rng.uniform(70.0, 85.0), 16), 0.9, contact=0.001, beat=0.005,
+                                          fall=0.5, tilt=0.35)
+        y += thud(n, rng, at, rng.uniform(45.0, 55.0), 0.08, amp=1.4 - 0.3 * k, dull=300.0)
+        for j in range(2):
+            y += modal_hit(n, rng, at + 0.04 + 0.03 * j + rng.uniform(0.0, 0.01), plate_modes(rng, rng.uniform(70.0, 85.0), 8), 0.2,
+                           amp=0.2 / (j + 1), contact=0.001)
+    # The shaft below: a low, long boom under it all.
     boom = lowpass(shaped_noise(n, rng, 2.0, 25.0, 140.0), 140.0) * np.exp(-np.maximum(t - 1.05, 0.0) / 1.1) * (t > 1.05)
     y += 0.5 * boom
-    return fade(drive(y, 1.2), 0.0, 0.5)
+    return fade(drive(y / np.max(np.abs(y)), 1.2), 0.0, 0.5)
 
 
 def bunker_collapse(rng, variant):
@@ -1409,8 +1423,8 @@ def dart_wrong(rng, variant):
     return y + damped_partials(n, [164.8, 329.6], [1.0, 0.25], [0.3, 0.1], rng, 0.2)
 
 
-def hatch_open(rng, variant):
-    """The brass hatch: a catch let go, a small hinge."""
+def dart_hatch_open(rng, variant):
+    """The brass hatch under Level 4's dartboard: a catch let go, a small hinge."""
     n = samples(0.7)
     y = knock(n, rng, 0.01, rng.uniform(1500, 1800), [1.0, 1.8, 2.9], [0.6, 0.3, 0.15], [0.05, 0.03, 0.02], click=0.5, click_hi=8000.0)
     f0 = rng.uniform(1000, 1200)
@@ -1609,15 +1623,23 @@ def lever_dead(rng, variant):
 
 
 def mixer_fill(rng, variant):
-    """A reagent flask emptied into a mixer's tank: a glass clink, then a short glugging pour."""
-    n = samples(0.9)
-    clink = knock(n, rng, 0.0, rng.uniform(2600, 3200), [1.0, 2.7], [0.5, 0.2], [0.04, 0.02], click=0.5, click_hi=9000.0)
-    pour = np.zeros(n)
-    t = 0.1
-    while t < 0.75:
-        pour += bubble(n, t, rng.uniform(3.0, 6.0), rng.uniform(0.3, 0.7), rng)
-        t += rng.uniform(0.04, 0.09)
-    return clink + pour * 0.8
+    """A reagent flask emptied into a mixer's steel tank: the flask's lip clinking on the tank's funnel, then the pour:
+    the stream splashing into the tank, which answers hollow, the flask glugging as air bubbles back into it; a last
+    drip."""
+    n = samples(1.1)
+    y = modal_hit(n, rng, 0.0, glass_modes(rng), 0.05, amp=0.5, contact=0.00015, beat=0.001)
+    y += modal_hit(n, rng, 0.0, plate_modes(rng, rng.uniform(600.0, 800.0), 8), 0.05, amp=0.3, contact=0.0003, beat=0.003)
+    pour = envelope(n, [(0.0, 0.0), (0.08, 0.0), (0.15, 1.0), (0.7, 0.8), (0.85, 0.0)])
+    stream = bandpass(rng.standard_normal(n), 800.0, 4500.0, order=2) * (0.6 + 0.4 * np.abs(smooth_random(n, 30.0, rng))) * pour
+    y += 0.2 * stream + 0.4 * resonator(stream, rng.uniform(500.0, 700.0), 15.0)
+    t = 0.12
+    while t < 0.8:                                              # air glugging back into the flask
+        y += bubble(n, t, rng.uniform(8.0, 14.0), rng.uniform(0.3, 0.6), rng, rise=0.3)
+        t += rng.uniform(0.09, 0.14)
+    for _ in range(25):                                         # the splash's small bubbles in the tank
+        y += bubble(n, rng.uniform(0.15, 0.85), rng.uniform(1.0, 3.0), rng.uniform(0.05, 0.15), rng)
+    y += drop(n, rng, rng.uniform(0.92, 0.98), rng.uniform(2.6, 3.2), amp=0.4)
+    return fade(y, 0.0, 0.05)
 
 
 def mixer_run(rng, variant):
@@ -1637,14 +1659,24 @@ def mixer_run(rng, variant):
 
 
 def grate_dissolve(rng, variant):
-    """The drain's grate eaten by the solvent: a long rising hiss, fizzing and crackling, metal softly ticking as it goes."""
+    """The drain's grate eaten by the solvent: the acid hitting the steel with a hiss, then a fierce fizzing, thousands
+    of tiny bubbles bursting on the bars, swelling and dying away, the gas hissing off; the bars ticking as they thin,
+    and near the end a few pieces giving way and dropping onto the hatch."""
     n = samples(3.0)
-    hiss = _noise(n, rng, 2500.0, 11000.0) * envelope(n, [(0.0, 0.0), (0.3, 1.0), (1.8, 0.8), (3.0, 0.0)])
-    fizz = static_crackle(n, rng, 30.0, 3000.0, 12000.0) * envelope(n, [(0.0, 0.0), (0.2, 0.5), (2.5, 0.4), (3.0, 0.0)])
-    ticks = np.zeros(n)
+    t = time_axis(n)
+    level = envelope(n, [(0.0, 0.0), (0.05, 0.6), (0.4, 1.0), (1.8, 0.85), (2.8, 0.15), (3.0, 0.0)])
+    y = 0.25 * air(n, rng, 0.6 * level)
+    fizz = np.zeros(n)
+    starts = rng.uniform(0.02, 2.95, 2700)
+    for start in starts[rng.random(starts.size) < np.interp(starts, t, level)]:
+        place(fizz, bubble(samples(0.006), 0.0, rng.uniform(0.25, 0.9), rng.uniform(0.2, 1.0), rng), start)
+    y += 0.6 * fizz
     for _ in range(14):
-        ticks += knock(n, rng, rng.uniform(0.3, 2.6), rng.uniform(900, 2000), [1.0, 2.3], [0.3, 0.1], [0.02, 0.01], click=0.4, click_hi=6000.0)
-    return hiss * 0.5 + fizz * 0.3 + ticks
+        y += modal_hit(n, rng, rng.uniform(0.3, 2.6), bar(rng.uniform(900.0, 2200.0), 4), 0.02, amp=0.25, contact=0.0003)
+    for start in sorted(rng.uniform(2.2, 2.8, 3)):
+        y += modal_hit(n, rng, start, bar(rng.uniform(1200.0, 1800.0)), 0.05, amp=0.4, contact=0.0004, beat=0.003)
+        y += modal_hit(n, rng, start + rng.uniform(0.05, 0.09), bar(rng.uniform(1200.0, 1800.0), 4), 0.02, amp=0.12, contact=0.0004)
+    return fade(y, 0.0, 0.1)
 
 
 def lab_alarm(rng, variant):
@@ -2180,7 +2212,7 @@ SOUNDS = [
           "stereo", True, 1, offices_room_tone, -9.0, stream=True, game_volume=0.5),
     Sound("ambient.library.clock", "Level 3 ambience", "The library: a slow clock ticking, from nowhere in particular, over the room tone",
           "stereo", True, 1, library_clock, -6.0, stream=True, game_volume=0.45),
-    Sound("ambient.offices.phone", "Level 3 ambience", "A phone ringing far off (2, 3 or 4 rings, cut mid-ring), now and then",
+    Sound("ambient.offices.phone", "Level 3 ambience", "A phone ringing far off (2, 3 or 4 rings, cut mid-ring), now and then; Level 5's layer 2 too",
           "mono", False, 3, office_phone, -3.0, attenuation=32),
     Sound("music.observer.approach", "Level 3 / the Observer", "He has seen you and walks your way (clock, drone, high tremolo)", "stereo", True, 1,
           observer_approach, -4.0, stream=True),
@@ -2188,7 +2220,7 @@ SOUNDS = [
           observer_chase, -1.0, stream=True),
     Sound("event.collapse", "Level progress", "Level 3: the bunker tunnel's ceiling coming down behind the player (groan, cracks, slabs, rubble)",
           "stereo", False, 1, bunker_collapse, -1.0),
-    Sound("block.hatch.open", "Level progress", "Level 3's bunker hatch opening by itself (bolt, trapdoors banging up, the shaft booming)",
+    Sound("block.hatch.open", "Level progress", "Level 3's bunker hatch opening by itself (bolt, trapdoors banging up, the shaft booming); Level 5's drain hatch",
           "mono", False, 1, hatch_open, -1.0, attenuation=48),
     Sound("event.observer.alert", "Level progress", "Level 3: something far off noticed (a box went on the shelf); a placeholder for the observant guard",
           "stereo", False, 2, observer_alert, -6.0),
@@ -2210,7 +2242,7 @@ SOUNDS = [
     Sound("block.dart.hit", "Level progress", "A dart sticking in something", "mono", False, 3, dart_hit, -6.0),
     Sound("event.dart.right", "Level progress", "The right number", "mono", False, 1, dart_right, -8.0),
     Sound("event.dart.wrong", "Level progress", "The wrong number", "mono", False, 1, dart_wrong, -7.0),
-    Sound("block.dart_hatch.open", "Level progress", "The brass hatch under the board", "mono", False, 1, hatch_open, -6.0),
+    Sound("block.dart_hatch.open", "Level progress", "The brass hatch under the board", "mono", False, 1, dart_hatch_open, -6.0),
     Sound("block.breaker.lever", "Level progress", "A heavy knife switch: Level 4's Maintenance levers, Level 5's stairs lever", "mono", False, 3, breaker_lever, -5.0),
     Sound("block.breaker.button", "Level progress", "The breakers' button", "mono", False, 2, breaker_button, -8.0),
     Sound("event.breaker.count", "Level progress", "The counter shows a number: not five", "mono", False, 1, breaker_count, -7.0),
@@ -2232,9 +2264,9 @@ SOUNDS = [
     Sound("block.fuse.reject", "Level progress", "Level 5: a glass fuse in the wrong holder, knocking on the clip and skidding off", "mono", False, 2, fuse_reject, -4.0),
     Sound("block.fuse.power", "Level progress", "Level 5: the fuse box full, a contactor slamming in and the hum of current", "mono", False, 1, fuse_power, -3.0, attenuation=24),
     Sound("block.breaker.dead", "Level progress", "Level 5: the stairs' lever without power, a dry clack on its stop", "mono", False, 1, lever_dead, -6.0),
-    Sound("block.mixer.fill", "Level progress", "Level 5: a reagent poured into a mixer's tank", "mono", False, 2, mixer_fill, -4.0),
+    Sound("block.mixer.fill", "Level progress", "Level 5: a reagent flask emptied into a mixer's steel tank, clink, pour and glugs", "mono", False, 2, mixer_fill, -4.0),
     Sound("block.mixer.run", "Level progress", "Level 5: the mixer run, and the solvent going down the pipe", "mono", False, 1, mixer_run, -3.0, attenuation=24),
-    Sound("block.grate.dissolve", "Level progress", "Level 5: the drain's grate eaten by the solvent", "mono", False, 1, grate_dissolve, -3.0, attenuation=24),
+    Sound("block.grate.dissolve", "Level progress", "Level 5: the drain's grate eaten by the solvent, fizzing, the bars ticking and dropping", "mono", False, 1, grate_dissolve, -3.0, attenuation=24),
     Sound("event.lab.alarm", "Level progress", "Level 5: the chemical room's two-tone siren, one cycle", "mono", False, 1, lab_alarm, -3.0, attenuation=48),
     Sound("event.lab.sting", "Level progress", "Level 5: walking into the Lab hall, a stab of low strings out of tune", "stereo", False, 1, lab_sting, -2.0),
     Sound("ambient.lab.air", "Level 5 ambience", "The lab (layer 1): the air handling, ducts rushing softly, a fan, a low rumble",

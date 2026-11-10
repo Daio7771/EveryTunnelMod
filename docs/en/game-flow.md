@@ -432,7 +432,8 @@ industrial, and up its stairs the director's office (the boss's scene is still t
   strings out of tune (`event.lab.sting`), and a moment later the first Distortion Cloud, a few steps ahead,
   once a game (`LabHallHooks`). Clouds come at random in the Lab hall and both routes (zones tagged `cloud`),
   never in the Office, Storage, the chemical room or the subjects' corridor. The first Junior floats in plain
-  sight down the north corridor; three Hunters guard Storage.
+  sight down the north corridor; three Hunters guard Storage. Layer 2 sounds like layer 1 (the air handling, a
+  compressor, a duct), with a phone ringing far off now and then (Level 3's `ambient.offices.phone`).
 - **The computers** (`LabTerminalBlock`, `TerminalHooks`, the client's `TerminalScreen`): a right click types out
   the screen, green on black. The Office's middle one: the lab head's work log (the budget gone, staying on
   alone, the drain sealed), with the chemical puzzle's answer. Storage's: its inventory, two patient gowns more

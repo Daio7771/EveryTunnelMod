@@ -168,7 +168,7 @@ dsp.py: utilidades DSP · audio_io.py: leer/escribir audio
   posición en el mundo, estéreo para la música y los sonidos en la cabeza. Sus funciones
   más nuevas (la segunda pasada del nivel 5 y los sonidos que comparte) suenan menos
   sintéticas que los parciales sueltos: `modal_hit` (los muchos modos desiguales de un cuerpo
-  golpeado: `bar`, `plate_modes`, `glass_modes`), `thud`, `scrape`, `motor` (un eje y unos
+  golpeado: `bar`, `plate_modes`, `glass_modes`), `thud`, `scrape`, `hinge`, `motor` (un eje y unos
   engranajes girando, no un tono), `air` (gas con una presión que cae), `rail`. Úsalas para
   sonidos mecánicos nuevos. (`ring` es otra función, más antigua.)
 - `menu_piano.py`: el tema del menú, una pieza de piano del usuario, llamada desde

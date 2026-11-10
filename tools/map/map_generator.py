@@ -462,6 +462,9 @@ LEVEL_4 = dict(
 LAB_AIR = {"loop": "every_tunnel:ambient.lab.air", "loop_volume": 0.6, "random": [
     {"sound": "every_tunnel:ambient.lab.compressor", "interval": [45, 120], "distance": [10, 20], "volume": 0.6},
     {"sound": "every_tunnel:ambient.lab.duct", "interval": [20, 60], "distance": [6, 14], "volume": 0.7}]}
+# Layer 2's: the same, and a phone ringing somewhere now and then (Level 3's).
+LAB_AIR_PHONE = {**LAB_AIR, "random": LAB_AIR["random"] + [
+    {"sound": "every_tunnel:ambient.offices.phone", "interval": [90, 240], "distance": [10, 16], "volume": 0.8}]}
 
 LEVEL_5 = dict(
     TITLE="Level 5",
@@ -582,10 +585,12 @@ LEVEL_5 = dict(
     CATWALK="every_tunnel:metal_grating[type=top,waterlogged=false]",
     # The sounds (AmbienceHooks), zone by zone. Layer 1, from the Lobby on (the way in stays silent): the air
     # handling, a fridge's compressor off somewhere starting or stopping, a duct popping and ticking; its lights hum
-    # by themselves. The drain: water running down the channels, drips, pipes creaking far off; the Pump room's pumps,
+    # by themselves. Layer 2: the same, and a phone ringing far off now and then. The drain: water running down the channels, drips, pipes creaking far off; the Pump room's pumps,
     # loud; the Hideout only drips. Up the stairs, silence.
     ZONE_AMBIENCE={
         **{zone: LAB_AIR for zone in ("lobby", "workshop", "waiting", "lockers", "layer1_corridor", "layer1_stairs")},
+        **{zone: LAB_AIR_PHONE for zone in ("subjects_corridor", "lab_hall", "north_route", "office", "south_route", "storage",
+                                            "chemical_room", "shortcut", "drain_hatch")},
         "drain_ladder": {"loop": "every_tunnel:ambient.drain.water", "loop_volume": 0.5, "random": [
             {"sound": "every_tunnel:ambient.drip", "interval": [3, 9], "distance": [2, 6], "volume": 0.7}]},
         "drain_shaft": {"loop": "every_tunnel:ambient.drain.water", "loop_volume": 0.4},

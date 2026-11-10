@@ -459,7 +459,9 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
   golpe de cuerdas graves desafinadas (`event.lab.sting`) y enseguida la primera Distortion Cloud, unos pasos por
   delante, una vez por partida (`LabHallHooks`). Las Clouds vienen al azar en el Lab hall y en las dos rutas (zonas
   con la etiqueta `cloud`), nunca en la Office, Storage, la sala de químicos ni el pasillo de los sujetos. El primer
-  Junior flota a la vista en el pasillo norte; tres Hunters guardan Storage.
+  Junior flota a la vista en el pasillo norte; tres Hunters guardan Storage. La capa 2 suena como la capa 1 (la
+  ventilación, un compresor, un conducto), con un teléfono que suena lejos de vez en cuando (el
+  `ambient.offices.phone` del nivel 3).
 - **Los ordenadores** (`LabTerminalBlock`, `TerminalHooks`, `TerminalScreen` del cliente): con clic derecho teclean
   su pantalla, verde sobre negro. El del centro de la Office: el diario de trabajo del jefe del laboratorio (el
   presupuesto que se acaba, seguir solo, el drenaje sellado), con la respuesta del puzle químico. El de Storage: su

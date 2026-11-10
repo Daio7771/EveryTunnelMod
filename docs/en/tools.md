@@ -160,7 +160,7 @@ dsp.py: the DSP toolkit · audio_io.py: reading/writing audio
   Ids follow the sound events (`every_tunnel:<id>`). Mono for sounds positioned in the
   world, stereo for music and head sounds. Its newer helpers (Level 5's second pass and the
   sounds it shares) sound less synthetic than plain partials: `modal_hit` (a struck body's
-  many uneven modes: `bar`, `plate_modes`, `glass_modes`), `thud`, `scrape`, `motor` (a shaft
+  many uneven modes: `bar`, `plate_modes`, `glass_modes`), `thud`, `scrape`, `hinge`, `motor` (a shaft
   and gears turning, not a tone), `air` (gas under a falling pressure), `rail`. Use them for
   new mechanical sounds. (`ring` is an older, different helper.)
 - `menu_piano.py`: the menu theme, a piano piece by the user, called by `catalog.py`. It
