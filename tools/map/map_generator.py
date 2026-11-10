@@ -460,7 +460,7 @@ LEVEL_4 = dict(
 # layer 3 lies DRAIN_DROP under layer 2, beyond its east end but for the foot of the ladder.
 # Level 5's layer 1 ambience, the same in each of its zones (so the loop runs on from one to the next).
 LAB_AIR = {"loop": "every_tunnel:ambient.lab.air", "loop_volume": 0.6, "random": [
-    {"sound": "every_tunnel:ambient.lab.compressor", "interval": [45, 120], "distance": [10, 20], "volume": 0.6},
+    {"sound": "every_tunnel:ambient.lab.compressor", "interval": [45, 120], "distance": [10, 16], "volume": 0.6},
     {"sound": "every_tunnel:ambient.lab.duct", "interval": [20, 60], "distance": [6, 14], "volume": 0.7}]}
 # Layer 2's: the same, and a phone ringing somewhere now and then (Level 3's).
 LAB_AIR_PHONE = {**LAB_AIR, "random": LAB_AIR["random"] + [
