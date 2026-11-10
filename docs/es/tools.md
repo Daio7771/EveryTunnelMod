@@ -165,10 +165,17 @@ dsp.py: utilidades DSP · audio_io.py: leer/escribir audio
 
 - `catalog.py`: cada generador recibe `(rng, variant)` y devuelve un array mono o estéreo.
   Los ids siguen los eventos de sonido (`every_tunnel:<id>`). Mono para los sonidos con
-  posición en el mundo, estéreo para la música y los sonidos en la cabeza.
+  posición en el mundo, estéreo para la música y los sonidos en la cabeza. Sus funciones
+  más nuevas (la segunda pasada del nivel 5 y los sonidos que comparte) suenan menos
+  sintéticas que los parciales sueltos: `modal_hit` (los muchos modos desiguales de un cuerpo
+  golpeado: `bar`, `plate_modes`, `glass_modes`), `thud`, `scrape`, `motor` (un eje y unos
+  engranajes girando, no un tono), `air` (gas con una presión que cae), `rail`. Úsalas para
+  sonidos mecánicos nuevos. (`ring` es otra función, más antigua.)
 - `menu_piano.py`: el tema del menú, una pieza de piano del usuario, llamada desde
   `catalog.py`. Tiene sus propias funciones y semilla para coincidir con el original.
-- `dsp.py`: 44,1 kHz, ruido con semilla, envolventes, filtros. Los bucles se construyen "en
+- `dsp.py`: 44,1 kHz, ruido con semilla (con `peaks` resonantes si se quiere), envolventes,
+  filtros, `struck()` (modos que suenan desde el reposo, movidos por un impulso de fuerza cuya
+  duración apaga los agudos, en parejas que baten). Los bucles se construyen "en
   círculo" (ciclos completos, ruido moldeado por FFT) para que se repitan sin costura;
   `loop_seam()` lo comprueba.
 - `cc0_cuts.py`: un `Cut` convierte una grabación en un evento de sonido: fragmentos,

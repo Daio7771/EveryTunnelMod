@@ -77,7 +77,10 @@ object ModSounds {
     val AIRLOCK_CLOSE = event("block.airlock.close")
     val AIRLOCK_OPEN = event("block.airlock.open")
     val WRENCH_HIT = event("item.wrench.hit")
-    val DETECTOR_BEEP = event("item.detector.beep")
+    /** Level 5's detector, a Geiger counter: one count, two to four, or a crackle of six to twelve in a tick ([client.effects.DetectorEffect]). */
+    val DETECTOR_CLICK = event("item.detector.click")
+    val DETECTOR_CLICKS = event("item.detector.clicks")
+    val DETECTOR_CRACKLE = event("item.detector.crackle")
     val LAB_UNLOCK = event("event.lab.unlock")
     val FUSE_INSERT = event("block.fuse.insert")
     val FUSE_REJECT = event("block.fuse.reject")

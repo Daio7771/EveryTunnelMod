@@ -43,7 +43,7 @@ KDoc comment that says more.
 | `film/FilmInfo.kt` | The Cinema's film: frames, speed, which frame at what time |
 | `progress/PlayerProgress.kt` | What a player has done: pieces, notes read, scenes seen, Level 3's books, checkpoint |
 | `progress/Checkpoint.kt` | A checkpoint as text: a level's start, or `level/point` for a restart point inside it |
-| `detector/Detector.kt` | Level 5's detector: how full its icon is, when the triangle shows, how fast it beeps |
+| `detector/Detector.kt` | Level 5's detector: how full its icon is, when the triangle shows, how many Geiger counts fall a tick |
 | `death/DeathCause.kt` | What the death screen names (the killer, thirst, the fall) and where it shows |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 | `hiding/LookLimit.kt` | How far the head turns inside a locker |
@@ -238,7 +238,7 @@ KDoc comment that says more.
 | `AmbiencePlayer.kt` | Level loop and random positioned sounds |
 | `FluorescentHum.kt` | Hum of the 4 nearest lights |
 | `HeartbeatEffect.kt` | Heartbeat by distance to the Pale man |
-| `DetectorEffect.kt` | Level 5's detector: the nearest Cloud in sight, the beeps |
+| `DetectorEffect.kt` | Level 5's detector: the nearest Cloud in sight, the Geiger clicks |
 | `DistortionEffect.kt` | The Distortions on the senses: whispers, the screen distorting at a Cloud, the Junior's tremor and drift |
 | `CameraShake.kt` | The camera shaking in Level 3's tunnel collapse |
 | `FilmPlayer.kt` | The Cinema's film on its screen, and the projector's sound |

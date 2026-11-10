@@ -430,7 +430,9 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
   detector** están en su banco central (ver [Sistemas del jugador](player.md#herramientas-del-nivel-5)). La sala
   de espera: filas de asientos y, en su pared norte, el tablón, una ficha para los Hunters, la Cloud, el Junior
   y el equipo (fichas técnicas: qué hace cada cosa y cómo tratarla, el tutorial del nivel). Las taquillas:
-  taquillas para esconderse, como en el nivel 3.
+  taquillas para esconderse, como en el nivel 3. Desde el Lobby suena la ventilación del laboratorio
+  (`ambient.lab.air`), el compresor de una nevera arranca o para en algún sitio y de vez en cuando un conducto
+  cede o cruje (`ZONE_AMBIENCE`); la entrada sigue en silencio.
 - **La caja de fusibles.** La palanca de las escaleras, en el lado este del anillo, no funciona ("No power.",
   `block.breaker.dead`) hasta que la caja de fusibles de al lado está llena: cinco portafusibles
   (`FuseHolderBlock`) marcados 5A, 10A, 15A, 20A y 30A, el de 15A ya puesto. Los otros cuatro fusibles están uno

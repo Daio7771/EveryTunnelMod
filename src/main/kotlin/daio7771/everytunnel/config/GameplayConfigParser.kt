@@ -93,8 +93,8 @@ object GameplayConfigParser {
     private fun detector(f: JsonFields, d: DetectorConfig) = DetectorConfig(
         range = f.double("range", d.range, min = 1.0, max = 64.0),
         dangerRange = f.double("danger_range", d.dangerRange, min = 0.0, max = 64.0),
-        slowestBeepSeconds = f.double("slowest_beep_seconds", d.slowestBeepSeconds, min = 0.05, max = 10.0),
-        fastestBeepSeconds = f.double("fastest_beep_seconds", d.fastestBeepSeconds, min = 0.05, max = 10.0),
+        slowestCountsPerSecond = f.double("slowest_counts_per_second", d.slowestCountsPerSecond, min = 0.1, max = 400.0),
+        fastestCountsPerSecond = f.double("fastest_counts_per_second", d.fastestCountsPerSecond, min = 0.1, max = 400.0),
     ).also { f.reportUnknownKeys() }
 
     private fun hunter(f: JsonFields, d: HunterConfig) = HunterConfig(

@@ -22,13 +22,16 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import net.minecraft.util.hit.HitResult
 import net.minecraft.world.RaycastContext
+import java.util.Random
 import kotlin.math.sqrt
 
 /**
  * Level 5's radiation detector, working from anywhere in the inventory: it notices the nearest
  * Distortion Cloud (an entity of the type tag `every_tunnel:radiation_sources`) within
  * `detector.range` blocks, never through a wall (nothing solid between the player's eyes and it), and
- * beeps in the player's head (`item.detector.beep`), faster as it comes nearer ([Detector]).
+ * clicks in the player's head like a Geiger counter, more counts as it comes nearer ([Detector]).
+ * Minecraft starts sounds once a tick, so each tick draws how many counts fall in it and plays one
+ * sound holding that many: `item.detector.click` (one), `.clicks` (two to four) or `.crackle` (more).
  * [client.hud.DetectorHud] draws what it reads. Only while the world rules apply.
  */
 object DetectorEffect {
@@ -44,7 +47,7 @@ object DetectorEffect {
     var distance: Double? = null
         private set
 
-    private var untilBeep = 0
+    private val random = Random()
 
     fun register() {
         ClientTickEvents.END_CLIENT_TICK.register(::tick)
@@ -54,7 +57,6 @@ object DetectorEffect {
     private fun stop() {
         carrying = false
         distance = null
-        untilBeep = 0
     }
 
     private fun tick(client: MinecraftClient) {
@@ -69,16 +71,15 @@ object DetectorEffect {
         }
         val detector = Detector(ConfigManager.gameplay.detector)
         distance = nearest(world, player, ConfigManager.gameplay.detector.range)
-        val ticks = detector.beepTicks(detector.level(distance))
-        if (ticks == null) {
-            untilBeep = 0
-            return
+        val sound = when (detector.countsThisTick(detector.level(distance), random::nextDouble)) {
+            0 -> return
+            1 -> ModSounds.DETECTOR_CLICK
+            in 2..4 -> ModSounds.DETECTOR_CLICKS
+            else -> ModSounds.DETECTOR_CRACKLE
         }
-        if (--untilBeep > 0) return
-        untilBeep = ticks
         client.soundManager.play(
             PositionedSoundInstance(
-                ModSounds.DETECTOR_BEEP.id, SoundCategory.PLAYERS, VOLUME, 1.0f, SoundInstance.createRandom(),
+                sound.id, SoundCategory.PLAYERS, VOLUME, 1.0f, SoundInstance.createRandom(),
                 false, 0, SoundInstance.AttenuationType.NONE, 0.0, 0.0, 0.0, true,
             ),
         )

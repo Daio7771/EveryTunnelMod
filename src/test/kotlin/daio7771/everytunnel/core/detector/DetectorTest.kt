@@ -1,10 +1,12 @@
 package daio7771.everytunnel.core.detector
 
 import daio7771.everytunnel.config.DetectorConfig
+import kotlin.math.abs
+import kotlin.math.sqrt
+import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class DetectorTest {
@@ -29,10 +31,22 @@ class DetectorTest {
     }
 
     @Test
-    fun `beeps speed up from slow at the edge to fast next to it, and stop when nothing is near`() {
-        assertNull(detector.beepTicks(0.0))
-        assertEquals(24, detector.beepTicks(0.01))
-        assertEquals(13, detector.beepTicks(0.5))
-        assertEquals(2, detector.beepTicks(1.0))
+    fun `counts rise from slow at the edge to a crackle next to it, and stop when nothing is near`() {
+        assertEquals(0.0, detector.countsPerSecond(0.0))
+        assertEquals(1.5, detector.countsPerSecond(1e-9), 1e-6)
+        assertEquals(sqrt(1.5 * 120.0), detector.countsPerSecond(0.5), 1e-9)
+        assertEquals(120.0, detector.countsPerSecond(1.0), 1e-9)
+    }
+
+    @Test
+    fun `counts fall at random a tick, as many on average as the rate says`() {
+        val random = Random(14)
+        assertEquals(0, detector.countsThisTick(0.0, random::nextDouble))
+        for (level in listOf(0.2, 0.5, 1.0)) {
+            val ticks = 20_000
+            val mean = (1..ticks).sumOf { detector.countsThisTick(level, random::nextDouble) }.toDouble() / ticks
+            val expected = detector.countsPerSecond(level) / 20.0
+            assertTrue(abs(mean - expected) < 0.05 * expected + 0.01, "level $level: $mean counts a tick, expected $expected")
+        }
     }
 }

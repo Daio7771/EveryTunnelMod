@@ -158,10 +158,16 @@ dsp.py: the DSP toolkit · audio_io.py: reading/writing audio
 
 - `catalog.py`: each generator takes `(rng, variant)` and returns a mono or stereo array.
   Ids follow the sound events (`every_tunnel:<id>`). Mono for sounds positioned in the
-  world, stereo for music and head sounds.
+  world, stereo for music and head sounds. Its newer helpers (Level 5's second pass and the
+  sounds it shares) sound less synthetic than plain partials: `modal_hit` (a struck body's
+  many uneven modes: `bar`, `plate_modes`, `glass_modes`), `thud`, `scrape`, `motor` (a shaft
+  and gears turning, not a tone), `air` (gas under a falling pressure), `rail`. Use them for
+  new mechanical sounds. (`ring` is an older, different helper.)
 - `menu_piano.py`: the menu theme, a piano piece by the user, called by `catalog.py`. It
   has its own helpers and seed so it matches the original.
-- `dsp.py`: 44.1 kHz, seeded noise, envelopes, filters. Loops are built "circularly"
+- `dsp.py`: 44.1 kHz, seeded noise (with resonant `peaks` if wanted), envelopes, filters,
+  `struck()` (modes ringing from rest, driven by a force pulse whose length dulls the high
+  ones, split in pairs that beat). Loops are built "circularly"
   (whole cycles, FFT-shaped noise) so they repeat with no seam; `loop_seam()` checks it.
 - `cc0_cuts.py`: a `Cut` turns one recording into one sound event: segments, resampling,
   mono, fades, normalisation.

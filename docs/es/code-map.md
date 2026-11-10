@@ -43,7 +43,7 @@ con un comentario KDoc que cuenta más.
 | `film/FilmInfo.kt` | La película del Cinema: fotogramas, velocidad, qué fotograma en cada momento |
 | `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint |
 | `progress/Checkpoint.kt` | Un checkpoint como texto: el inicio de un nivel, o `nivel/punto` para un punto de reinicio dentro de él |
-| `detector/Detector.kt` | El detector del nivel 5: cuánto se llena su icono, cuándo sale el triángulo, a qué ritmo pita |
+| `detector/Detector.kt` | El detector del nivel 5: cuánto se llena su icono, cuándo sale el triángulo, cuántas cuentas Geiger caen por tick |
 | `death/DeathCause.kt` | Lo que nombra la pantalla de muerte (quién te mató, la sed, la caída) y dónde sale |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
@@ -238,7 +238,7 @@ con un comentario KDoc que cuenta más.
 | `AmbiencePlayer.kt` | Bucle del nivel y sonidos aleatorios con posición |
 | `FluorescentHum.kt` | Zumbido de las 4 luces más cercanas |
 | `HeartbeatEffect.kt` | Latido según la distancia al Pale man |
-| `DetectorEffect.kt` | El detector del nivel 5: la Cloud más cercana a la vista, los pitidos |
+| `DetectorEffect.kt` | El detector del nivel 5: la Cloud más cercana a la vista, los chasquidos Geiger |
 | `DistortionEffect.kt` | Las Distortions en los sentidos: susurros, la pantalla distorsionándose ante una Cloud, el temblor y la deriva del Junior |
 | `CameraShake.kt` | La cámara temblando en el derrumbe del túnel del nivel 3 |
 | `FilmPlayer.kt` | La película del Cinema en su pantalla, y el sonido del proyector |

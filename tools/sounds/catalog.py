@@ -19,7 +19,7 @@ from scipy import signal as sp_signal
 from dsp import (
     SR, TAU, bandpass, burst, crossfade_loop, damped_partials, drive, envelope, fade, fft_filter,
     glide_tone, highpass, loop_frequency, lowpass, mains_hum, pan, place, resonator, samples, saw,
-    shaped_noise, smooth_random, stereo, time_axis,
+    shaped_noise, smooth_random, stereo, struck, time_axis,
 )
 
 
@@ -88,6 +88,100 @@ def relay_clunk(n, rng, start=0.0, heavy=False):
     if heavy:
         y += burst(n, rng, start + 0.06, 0.004, lo=800.0, hi=5000.0, tau=0.0015, amp=0.5)
     return y
+
+
+# Level 5's second pass (and the sounds it shares): struck things with many uneven modes, motors that turn, air with a
+# pressure behind it. Fewer pure tones, more of what real objects do.
+
+def bar(f0, count=5):
+    """A free bar's modes (a wrench, a lever's handle, a spring clip), the first at f0."""
+    return [f0 * r for r in (1.0, 2.756, 5.404, 8.933, 13.345, 18.64)[:count]]
+
+
+def plate_modes(rng, f0, count, aspect=None):
+    """The lowest `count` modes of a rectangular plate (sheet steel: a door's leaf, a box, a duct's side), the first at f0."""
+    aspect = aspect if aspect is not None else rng.uniform(1.2, 2.2)
+    shape = sorted(m * m + (k * aspect) ** 2 for m in range(1, 9) for k in range(1, 9))
+    return [f0 * s / shape[0] * rng.uniform(0.985, 1.015) for s in shape[:count]]
+
+
+def glass_modes(rng, count=4):
+    """A small glass tube's modes (a fuse, a flask's neck): high, few, out of tune."""
+    f0 = rng.uniform(4200.0, 5200.0)
+    return [f0 * r for r in (1.0, 2.32, 4.1, 6.2)[:count]]
+
+
+def modal_hit(n, rng, start, freqs, tau, amp=1.0, contact=0.0005, beat=0.0, fall=0.6, tilt=0.5):
+    """A blow on a body whose modes are `freqs`: the first rings about `tau` seconds and each higher one shorter, by
+    (f0/f)^fall, and quieter, by (f0/f)^tilt, all scattered a little: no two modes of a real thing are alike."""
+    f0 = freqs[0]
+    amps = [amp * (f0 / f) ** tilt * rng.uniform(0.5, 1.0) for f in freqs]
+    taus = [tau * (f0 / f) ** fall * rng.uniform(0.75, 1.25) for f in freqs]
+    return struck(n, rng, start, freqs, amps, taus, contact, beat)
+
+
+def thud(n, rng, start, f, tau, amp=1.0, dull=400.0):
+    """Something heavy meeting something soft (rubber, a body, a mount): a dark noise blow and one low mode, bending down
+    as it starts and dying fast."""
+    y = burst(n, rng, start, tau * 2.0, hi=dull, tau=tau * 0.4, amp=amp)
+    s0 = samples(start)
+    if s0 < n:
+        t = time_axis(n - s0)
+        bend = f * (1.0 + 0.35 * np.exp(-t / 0.015))
+        y[s0:] += 0.8 * amp * np.sin(TAU * np.cumsum(bend) / SR) * np.exp(-t / tau) * (1.0 - np.exp(-t / 0.0015))
+    return y
+
+
+def scrape(n, rng, start, length, lo, hi, amp=1.0, grain=60.0):
+    """Metal or glass dragged over metal: noise in a band, catching and slipping about `grain` times a second."""
+    y = np.zeros(n)
+    s0 = samples(start)
+    if s0 >= n:
+        return y
+    m = min(samples(length), n - s0)
+    noise = bandpass(rng.standard_normal(m), lo, hi, order=2)
+    catches = np.abs(smooth_random(m, grain, rng)) ** 2
+    y[s0:s0 + m] = amp * fade(noise * (0.3 + catches) * np.sin(np.linspace(0.0, np.pi, m)) ** 0.5, 0.002, 0.004)
+    return y
+
+
+def motor(n, rng, f_rot, teeth=14, brushes=0.3, harmonics=10):
+    """An electric motor through its gearbox, turning at `f_rot` (Hz, per sample): the shaft's harmonics, uneven and each
+    wavering on its own, the gears' whine `teeth` times the turn with sidebands from it, the brushes' noise pulsing with
+    it. Not a tone: a thing turning."""
+    phase = TAU * np.cumsum(f_rot) / SR
+    shaft = np.zeros(n)
+    for k in range(1, harmonics + 1):
+        wobble = 1.0 + 0.35 * smooth_random(n, rng.uniform(2.0, 6.0), rng)
+        shaft += rng.uniform(0.3, 1.0) / k ** 0.8 * wobble * np.sin(k * phase + rng.uniform(0, TAU) + 0.15 * smooth_random(n, 8.0, rng))
+    gear = np.sin(teeth * phase + 0.3 * np.sin(phase)) * (1.0 + 0.5 * np.sin(phase + rng.uniform(0, TAU)))
+    brush = bandpass(rng.standard_normal(n), 1500.0, 7000.0, order=2) * (0.5 + 0.5 * np.cos(2.0 * phase)) ** 4
+    return 0.5 * shaft / harmonics ** 0.3 + 0.35 * gear + brushes * brush
+
+
+def air(n, rng, pressure, pipe=None):
+    """Air let out under pressure (a valve, a seal, an exhaust): noise as loud and as bright as `pressure` (0..1, per
+    sample) is high, darkening as it falls, fluttering with turbulence, coloured by the pipe or the gap it rushes through
+    (`pipe`: its first resonance, Hz)."""
+    p = np.clip(pressure, 0.0, None)
+    bright = bandpass(rng.standard_normal(n), 2500.0, 9000.0, order=2) * p ** 1.6
+    dark = bandpass(rng.standard_normal(n), 250.0, 2500.0, order=2) * p ** 0.8
+    y = (0.45 * bright + 0.5 * dark) * (1.0 + 0.3 * smooth_random(n, 45.0, rng))
+    if pipe:
+        y += 0.6 * (resonator(y, pipe, 5.0) + 0.6 * resonator(y, pipe * 2.03, 7.0) + 0.3 * resonator(y, pipe * 3.1, 9.0))
+    return y
+
+
+def rail(n, rng, speed, joint_gap, lo=150.0, hi=1400.0):
+    """Leaves or a carriage rolling along a rail at `speed` (0..1, per sample): the rollers' rough rumble, and a small
+    knock each time one crosses a joint (`joint_gap` seconds apart at full speed)."""
+    rumble = bandpass(rng.standard_normal(n), lo, hi, order=2) * (0.5 + 0.5 * np.abs(smooth_random(n, 18.0, rng))) * speed
+    joints = np.cumsum(speed) / SR / joint_gap
+    for k in range(1, int(joints[-1]) + 1):
+        i = int(np.searchsorted(joints, k))
+        if i < n:
+            rumble += modal_hit(n, rng, i / SR, plate_modes(rng, rng.uniform(320.0, 480.0), 5), 0.03, amp=0.6 * speed[i], contact=0.001)
+    return rumble
 
 
 def heartbeat_beat(rng, length=0.65):
@@ -1326,10 +1420,19 @@ def hatch_open(rng, variant):
 
 
 def breaker_lever(rng, variant):
-    """A heavy knife switch thrown: a spring's stretch and a big steel clack."""
-    n = samples(0.35)
-    y = _noise(n, rng, 2000.0, 7000.0) * envelope(n, [(0.0, 0.0), (0.02, 0.12), (0.07, 0.05), (0.08, 0.0)])
-    return y + knock(n, rng, 0.08, rng.uniform(340, 420), [1.0, 2.4, 3.8], [1.0, 0.5, 0.25], [0.05, 0.03, 0.02], click=0.9, click_hi=6000.0)
+    """A heavy knife switch thrown (Level 4's Maintenance levers, Level 5's stairs lever): the spring stretching under the
+    hand, the blades scraping into their jaws, then a big steel clack, the switch's box ringing with it, and a bounce."""
+    n = samples(0.5)
+    spring = scrape(n, rng, 0.0, 0.08, 1500.0, 7000.0, amp=0.15, grain=30.0)
+    y = spring + 0.5 * resonator(spring, rng.uniform(1600.0, 2100.0), 25.0)
+    hit = rng.uniform(0.085, 0.1)
+    y += scrape(n, rng, hit - 0.012, 0.014, 3000.0, 10000.0, amp=0.35, grain=200.0)
+    y += thud(n, rng, hit, rng.uniform(80.0, 100.0), 0.04, amp=0.7, dull=600.0)
+    y += modal_hit(n, rng, hit, plate_modes(rng, rng.uniform(330.0, 420.0), 14), 0.18, amp=0.9, contact=0.0004, beat=0.003)
+    y += modal_hit(n, rng, hit, bar(rng.uniform(900.0, 1200.0)), 0.06, amp=0.4, contact=0.0003, beat=0.002)
+    y += burst(n, rng, hit, 0.002, lo=1500.0, hi=9000.0, tau=0.0007, amp=0.6)
+    y += modal_hit(n, rng, hit + rng.uniform(0.015, 0.025), bar(rng.uniform(900.0, 1200.0), 4), 0.02, amp=0.15, contact=0.0003)
+    return fade(y, 0.0, 0.05)
 
 
 def breaker_button(rng, variant):
@@ -1414,20 +1517,30 @@ def airlock_open(rng, variant):
 
 
 def wrench_hit(rng, variant):
-    """Level 5's wrench landing: a heavy steel tool striking, a dull thud under a short metal ring."""
+    """Level 5's wrench landing on a Hunter: the dull blow into a body under a coat (a heavy thump, the cloth slapping),
+    and the steel of the wrench itself ringing for a moment before the hand damps it."""
     n = samples(0.6)
-    ratios = sorted(rng.uniform(1.0, 5.5, 6))
-    ring = knock(n, rng, 0.003, rng.uniform(380, 520), ratios, [1.0 / (1 + i * 0.5) for i in range(6)],
-                 [0.12 / (1 + i * 0.3) for i in range(6)], click=0.9, click_hi=6000.0)
-    thud = knock(n, rng, 0.0, rng.uniform(70, 95), [1.0, 1.9], [1.0, 0.4], [0.06, 0.03], click=0.4, click_hi=1200.0)
-    return ring * 0.6 + thud
+    y = thud(n, rng, 0.002, rng.uniform(95.0, 140.0), 0.05, amp=1.0, dull=rng.uniform(600.0, 900.0))
+    y += burst(n, rng, 0.001, 0.012, lo=900.0, hi=5000.0, tau=0.003, amp=0.35)
+    y += modal_hit(n, rng, 0.002, bar(rng.uniform(650.0, 900.0), 6), rng.uniform(0.07, 0.12), amp=0.3, contact=0.0008, beat=0.002, tilt=0.3)
+    return fade(y, 0.0, 0.05)
 
 
-def detector_beep(rng, variant):
-    """Level 5's radiation detector: one short, slightly harsh electronic beep; the game repeats it faster
-    as a Distortion Cloud comes near."""
-    n = samples(0.09)
-    return beep(n, 0.0, 1760.0, 0.06, 0.55) + beep(n, 0.0, 3520.0, 0.06, 0.12)
+def geiger_tick(n, rng, start, amp=1.0):
+    """One count of a Geiger counter through its little speaker: a pulse a fraction of a millisecond long knocking the
+    speaker's cone and the plastic case."""
+    pulse = burst(n, rng, start, 0.0004, lo=200.0, hi=6000.0, amp=amp)
+    cone = resonator(pulse, rng.uniform(2600.0, 3100.0), 10.0) + 0.4 * resonator(pulse, rng.uniform(5200.0, 6000.0), 12.0)
+    return 0.1 * pulse + cone + 0.6 * resonator(pulse, rng.uniform(850.0, 1050.0), 6.0)
+
+
+def geiger(rng, counts):
+    """Level 5's radiation detector: `counts` Geiger counts at random within one game tick (50 ms), so that a run of
+    them, one a tick, plays as an even crackle. The game draws how many fall in each tick, more as a Cloud nears."""
+    n = samples(0.07)
+    starts = rng.uniform(0.001, 0.05, counts) if counts > 1 else [rng.uniform(0.001, 0.004)]
+    y = sum(geiger_tick(n, rng, s, rng.uniform(0.8, 1.0)) for s in starts)
+    return fade(drive(1.5 * y / np.max(np.abs(y)), 1.2), 0.0, 0.01)
 
 
 def lab_unlock(rng, variant):
@@ -1439,36 +1552,60 @@ def lab_unlock(rng, variant):
 
 
 def fuse_insert(rng, variant):
-    """A fuse pushed home into its holder: plastic sliding over metal, then a firm snap of the clips."""
-    n = samples(0.35)
-    slide = _noise(n, rng, 1500.0, 6000.0) * envelope(n, [(0.0, 0.0), (0.02, 0.4), (0.1, 0.3), (0.12, 0.0)])
-    snap = knock(n, rng, 0.12, rng.uniform(2400, 2900), [1.0, 1.6, 2.7], [0.8, 0.4, 0.2], [0.02, 0.015, 0.01], click=0.9, click_hi=9000.0)
-    clip = knock(n, rng, 0.125, rng.uniform(900, 1100), [1.0, 2.2], [0.5, 0.2], [0.04, 0.02], click=0.3, click_hi=4000.0)
-    return slide * 0.5 + snap + clip
+    """A glass fuse pushed home into its holder: the tube's glass touching the holder, its metal caps dragging into the
+    spring clips, then the clips snapping over the caps, one end and then the other, the glass ringing faintly with them
+    and the holder's plastic body knocking."""
+    n = samples(0.45)
+    y = modal_hit(n, rng, 0.0, glass_modes(rng), 0.035, amp=0.25, contact=0.00015, beat=0.001)
+    y += scrape(n, rng, 0.02, 0.1, 2500.0, 9000.0, amp=0.25, grain=80.0)
+    first = rng.uniform(0.12, 0.14)
+    for start, amp in ((first, 1.0), (first + rng.uniform(0.025, 0.06), 0.75)):
+        y += modal_hit(n, rng, start, bar(rng.uniform(1900.0, 2500.0)), 0.03, amp=amp, contact=0.0002, beat=0.003)
+        y += burst(n, rng, start, 0.0015, lo=2000.0, hi=10000.0, tau=0.0005, amp=0.5 * amp)
+        y += modal_hit(n, rng, start + 0.001, glass_modes(rng), 0.035, amp=0.12 * amp, contact=0.00015, beat=0.001)
+    y += modal_hit(n, rng, first, plate_modes(rng, rng.uniform(700.0, 900.0), 6), 0.02, amp=0.25, contact=0.0005)
+    return fade(y, 0.0, 0.05)
 
 
 def fuse_reject(rng, variant):
-    """A fuse in the wrong holder: it will not go, a hollow plastic clack and a scrape as it pops back."""
-    n = samples(0.3)
-    clack = knock(n, rng, 0.0, rng.uniform(700, 850), [1.0, 1.9], [0.8, 0.3], [0.03, 0.02], click=0.7, click_hi=5000.0)
-    scrape = _noise(n, rng, 2000.0, 7000.0) * envelope(n, [(0.0, 0.0), (0.06, 0.0), (0.08, 0.5), (0.2, 0.0)])
-    return clack + scrape * 0.4
+    """A glass fuse in the wrong holder: its cap knocks on the edge of a clip that will not take it, the glass ticks, the
+    cap skids off, and the holder's plastic guard snaps back."""
+    n = samples(0.35)
+    y = modal_hit(n, rng, 0.0, bar(rng.uniform(1300.0, 1600.0)), 0.02, amp=0.8, contact=0.0004)
+    y += modal_hit(n, rng, 0.001, glass_modes(rng, 3), 0.03, amp=0.2, contact=0.00015)
+    y += scrape(n, rng, 0.03, 0.08, 2000.0, 8000.0, amp=0.3, grain=50.0)
+    guard = rng.uniform(0.11, 0.14)
+    y += plastic_click(n, rng, guard, brightness=5000.0, amp=0.7)
+    y += modal_hit(n, rng, guard, plate_modes(rng, rng.uniform(650.0, 850.0), 6), 0.025, amp=0.3, contact=0.0006)
+    return fade(y, 0.0, 0.05)
 
 
 def fuse_power(rng, variant):
-    """The fuse box full: a relay pulls in, then the hum of current rising and settling."""
+    """The fuse box full: a contactor in it pulls in, its steel armature slamming shut and chattering, a spark as the
+    current meets, the box's sheet steel ringing; then the current's hum swelling in the box's iron core, uneven and
+    buzzing a little, and settling."""
     n = samples(2.2)
-    t = time_axis(n)
-    relay = relay_clunk(n, rng, 0.0, heavy=True)
-    hum = mains_hum(t, 50.0, rng, harmonics=18, tilt=1.4) * envelope(n, [(0.0, 0.0), (0.1, 0.0), (0.5, 0.8), (1.4, 0.5), (2.2, 0.0)])
-    buzz = bandpass(np.tanh(3.0 * np.sin(TAU * 100.0 * t)), 300.0, 3000.0, order=2) * envelope(n, [(0.0, 0.0), (0.15, 0.0), (0.4, 0.25), (2.2, 0.0)])
-    return relay + hum * 0.6 + buzz * 0.2
+    y = thud(n, rng, 0.0, rng.uniform(70.0, 85.0), 0.05, amp=0.8, dull=500.0)
+    y += modal_hit(n, rng, 0.0, plate_modes(rng, rng.uniform(240.0, 300.0), 14), 0.12, amp=0.6, contact=0.0004, beat=0.004)
+    for k in range(3):
+        y += burst(n, rng, 0.004 + 0.004 * k + rng.uniform(0.0, 0.002), 0.001, lo=2500.0, hi=9000.0, tau=0.0004, amp=0.3 / (k + 1))
+    y += burst(n, rng, 0.003, 0.004, lo=3000.0, hi=12000.0, tau=0.0015, amp=0.15)
+    mains = 100.0 * (1.0 + 0.002 * smooth_random(n, 0.8, rng))
+    core = glide_tone(mains, harmonics=(1.0, 0.45, 0.3, 0.2, 0.12, 0.08)) * (1.0 + 0.15 * smooth_random(n, 3.0, rng))
+    buzz = bandpass(np.tanh(4.0 * np.sin(TAU * np.cumsum(mains) / SR)), 400.0, 4000.0, order=2) * (0.5 + 0.5 * np.abs(smooth_random(n, 2.0, rng)))
+    hum = envelope(n, [(0.0, 0.0), (0.03, 0.0), (0.35, 0.8), (1.3, 0.45), (2.2, 0.0)])
+    return fade(y + hum * (0.4 * core + 0.12 * buzz), 0.0, 0.05)
 
 
 def lever_dead(rng, variant):
-    """A lever with no power behind it: pulled, a dry metal click and nothing more."""
-    n = samples(0.25)
-    return knock(n, rng, 0.0, rng.uniform(1300, 1600), [1.0, 2.4], [0.6, 0.2], [0.015, 0.01], click=0.8, click_hi=7000.0)
+    """The stairs' lever with no power behind it: the handle dragged down against its spring, a dry clack on its stop,
+    the empty box knocking hollow, and nothing after it: no contact, no relay."""
+    n = samples(0.3)
+    y = scrape(n, rng, 0.0, 0.05, 1500.0, 6000.0, amp=0.12, grain=40.0)
+    y += modal_hit(n, rng, 0.05, bar(rng.uniform(1100.0, 1300.0)), 0.025, amp=0.8, contact=0.0003)
+    y += modal_hit(n, rng, 0.05, plate_modes(rng, rng.uniform(330.0, 420.0), 10), 0.04, amp=0.35, contact=0.001)
+    y += modal_hit(n, rng, 0.07, bar(rng.uniform(1100.0, 1300.0), 3), 0.01, amp=0.15, contact=0.0003)
+    return fade(y, 0.0, 0.04)
 
 
 def mixer_fill(rng, variant):
@@ -1518,6 +1655,87 @@ def lab_alarm(rng, variant):
     f = lowpass(f, 30.0)
     tone = np.tanh(2.5 * glide_tone(f, harmonics=(1.0, 0.0, 0.33, 0.0, 0.2)))
     return bandpass(tone, 400.0, 6000.0, order=2) * envelope(n, [(0.0, 0.0), (0.02, 1.0), (1.97, 1.0), (2.0, 0.0)])
+
+
+# ===========================================================================
+# Level 5's lab (layer 1; its lights hum on their own, block.fluorescent.hum)
+
+def lab_air(rng, variant):
+    """The lab's air handling, the one thing left running: air pushed down the ducts (a soft, steady rush with the
+    ducts' hollow tones in it, breathing slowly), a fan's blades turning faintly somewhere, and the air handler's low
+    rumble under it. Loops: built circularly."""
+    seconds = 30.0
+    n = samples(seconds)
+    t = time_axis(n)
+    duct = rng.uniform(75.0, 95.0)
+    peaks = [(duct * k * rng.uniform(0.98, 1.02), duct * 0.08, 2.5 / k) for k in range(1, 6)]
+    blade = loop_frequency(rng.uniform(170.0, 200.0), seconds)
+    sides = []
+    for _ in range(2):
+        rush = shaped_noise(n, rng, exponent=1.5, lo=60.0, hi=1600.0, order=2, peaks=peaks)
+        breath = 1.0 + 0.12 * smooth_random(n, 0.15, rng, periodic=True)
+        rumble = shaped_noise(n, rng, exponent=2.0, lo=18.0, hi=110.0)
+        fan = np.sin(TAU * blade * t + rng.uniform(0, TAU)) + 0.4 * np.sin(TAU * 2.0 * blade * t + rng.uniform(0, TAU))
+        fan *= 0.6 + 0.4 * smooth_random(n, 0.4, rng, periodic=True)
+        sides.append(0.5 * rush * breath + 0.5 * rumble + 0.04 * fan)
+    return stereo(sides[0], sides[1])
+
+
+def lab_compressor(rng, variant):
+    """A refrigerator's compressor somewhere off in the lab (the drinks machine, a sample fridge). 0, starting: the start
+    relay's click, the motor groaning up to speed, the compressor rocking on its rubber feet and its pipes rattling, then
+    its hum running on and fading into the room. 1, stopping: the hum running, cut; it winds down and shudders, the pipes
+    rattle, and the gas hisses and gurgles as the pressures even out."""
+    seconds = 5.0
+    n = samples(seconds)
+    if variant == 0:
+        y = modal_hit(n, rng, 0.05, bar(rng.uniform(1800.0, 2200.0), 4), 0.01, amp=0.3, contact=0.0002)
+        f_rot = envelope(n, [(0.0, 0.0), (0.1, 0.0), (0.45, 48.5), (seconds, 48.5)])
+        level = envelope(n, [(0.0, 0.0), (0.1, 0.0), (0.4, 1.0), (1.0, 0.6), (4.0, 0.5), (seconds, 0.0)])
+        shudder = 0.42
+    else:
+        f_rot = envelope(n, [(0.0, 48.5), (1.2, 48.5), (1.45, 0.0), (seconds, 0.0)])
+        level = envelope(n, [(0.0, 0.0), (0.3, 0.5), (1.2, 0.5), (1.45, 0.0), (seconds, 0.0)])
+        shudder = 1.4
+        y = 0.2 * air(n, rng, envelope(n, [(0.0, 0.0), (1.3, 0.0), (1.5, 0.25), (4.5, 0.0)]))
+        for _ in range(15):
+            y += bubble(n, rng.uniform(1.5, 4.0), rng.uniform(1.0, 3.0), rng.uniform(0.05, 0.15), rng)
+    phase = TAU * np.cumsum(f_rot) / SR
+    hum = glide_tone(f_rot, harmonics=(0.3, 1.0, 0.25, 0.4, 0.15, 0.2, 0.08))
+    piston = bandpass(rng.standard_normal(n), 300.0, 3000.0, order=2) * (0.5 + 0.5 * np.cos(phase)) ** 3
+    y += level * (hum + 0.15 * piston)
+    y += thud(n, rng, shudder, rng.uniform(40.0, 50.0), 0.12, amp=0.6, dull=250.0)
+    for _ in range(3):
+        y += modal_hit(n, rng, shudder + rng.uniform(0.0, 0.13), bar(rng.uniform(2500.0, 3500.0), 4), 0.015, amp=0.1, contact=0.0003)
+    return fade(lowpass(y, 3000.0, order=2), 0.01, 0.3)
+
+
+def lab_duct(rng, variant):
+    """A sheet-steel duct over the ceiling moving with the warmth (oil-canning). 0: one hollow bonk as a panel pops;
+    1: a bonk and a few ticks after it; 2: only ticks, creeping; 3: a panel popping out and, a moment later, back."""
+    n = samples(2.5)
+    y = np.zeros(n)
+
+    def bonk(start, amp):
+        return modal_hit(n, rng, start, plate_modes(rng, rng.uniform(110.0, 170.0), 18), rng.uniform(0.25, 0.45), amp=amp,
+                    contact=rng.uniform(0.0015, 0.003), beat=0.006, fall=0.5, tilt=0.4)
+
+    def ticks(start, count):
+        out, t = np.zeros(n), start
+        for _ in range(count):
+            out += modal_hit(n, rng, t, bar(rng.uniform(1200.0, 2600.0), 4), 0.015, amp=rng.uniform(0.1, 0.3), contact=0.0003)
+            t += rng.uniform(0.15, 0.7)
+        return out
+
+    if variant in (0, 1, 3):
+        y += bonk(0.02, 1.0)
+    if variant == 1:
+        y += ticks(rng.uniform(0.3, 0.5), int(rng.integers(2, 5)))
+    elif variant == 2:
+        y += ticks(0.02, int(rng.integers(3, 6)))
+    elif variant == 3:
+        y += bonk(rng.uniform(0.6, 1.0), 0.7)
+    return fade(lowpass(y, 5000.0, order=2), 0.0, 0.2)
 
 
 # ===========================================================================
@@ -1993,7 +2211,7 @@ SOUNDS = [
     Sound("event.dart.right", "Level progress", "The right number", "mono", False, 1, dart_right, -8.0),
     Sound("event.dart.wrong", "Level progress", "The wrong number", "mono", False, 1, dart_wrong, -7.0),
     Sound("block.dart_hatch.open", "Level progress", "The brass hatch under the board", "mono", False, 1, hatch_open, -6.0),
-    Sound("block.breaker.lever", "Level progress", "A Maintenance room lever", "mono", False, 3, breaker_lever, -5.0),
+    Sound("block.breaker.lever", "Level progress", "A heavy knife switch: Level 4's Maintenance levers, Level 5's stairs lever", "mono", False, 3, breaker_lever, -5.0),
     Sound("block.breaker.button", "Level progress", "The breakers' button", "mono", False, 2, breaker_button, -8.0),
     Sound("event.breaker.count", "Level progress", "The counter shows a number: not five", "mono", False, 1, breaker_count, -7.0),
     Sound("event.breaker.power", "Level progress", "Five: the power comes on", "mono", False, 1, breaker_power, -3.0, attenuation=32),
@@ -2002,18 +2220,29 @@ SOUNDS = [
     Sound("block.big_door.slam", "Level progress", "The big door slamming behind the player", "mono", False, 1, big_door_slam, -1.0, attenuation=48),
     Sound("block.airlock.close", "Level progress", "Level 5's airlock: the door behind shuts with a hiss of air", "mono", False, 1, airlock_close, -3.0, attenuation=24),
     Sound("block.airlock.open", "Level progress", "Level 5's airlock: the way in opens slowly, air sighing out", "mono", False, 1, airlock_open, -3.0, attenuation=24),
-    Sound("item.wrench.hit", "Level progress", "Level 5: the wrench landing a blow, metal on something", "mono", False, 3, wrench_hit, -3.0, attenuation=16),
-    Sound("item.detector.beep", "Level progress", "Level 5: the radiation detector's beep, repeated faster as the Cloud nears", "mono", False, 1, detector_beep, -6.0),
+    Sound("item.wrench.hit", "Level progress", "Level 5: the wrench landing on a Hunter, a dull blow and the steel ringing briefly", "mono", False, 3, wrench_hit, -3.0, attenuation=16),
+    Sound("item.detector.click", "Level progress", "Level 5's radiation detector, a Geiger counter: one count in a tick", "mono", False, 6,
+          lambda rng, variant: geiger(rng, 1), -6.0),
+    Sound("item.detector.clicks", "Level progress", "Level 5's radiation detector: two to four counts in a tick", "mono", False, 6,
+          lambda rng, variant: geiger(rng, int(rng.integers(2, 5))), -6.0),
+    Sound("item.detector.crackle", "Level progress", "Level 5's radiation detector next to a Cloud: six to twelve counts in a tick", "mono", False, 6,
+          lambda rng, variant: geiger(rng, int(rng.integers(6, 13))), -6.0),
     Sound("event.lab.unlock", "Level progress", "Level 5: a lock letting go far away (the south route opens)", "mono", False, 1, lab_unlock, -4.0),
-    Sound("block.fuse.insert", "Level progress", "Level 5: a fuse pushed home into its holder", "mono", False, 2, fuse_insert, -4.0),
-    Sound("block.fuse.reject", "Level progress", "Level 5: a fuse in the wrong holder, popping back", "mono", False, 2, fuse_reject, -4.0),
-    Sound("block.fuse.power", "Level progress", "Level 5: the fuse box full, a relay and the hum of current", "mono", False, 1, fuse_power, -3.0, attenuation=24),
-    Sound("block.breaker.dead", "Level progress", "Level 5: the stairs' lever without power, a dry click", "mono", False, 1, lever_dead, -6.0),
+    Sound("block.fuse.insert", "Level progress", "Level 5: a glass fuse pushed home, its caps snapping into the clips", "mono", False, 2, fuse_insert, -4.0),
+    Sound("block.fuse.reject", "Level progress", "Level 5: a glass fuse in the wrong holder, knocking on the clip and skidding off", "mono", False, 2, fuse_reject, -4.0),
+    Sound("block.fuse.power", "Level progress", "Level 5: the fuse box full, a contactor slamming in and the hum of current", "mono", False, 1, fuse_power, -3.0, attenuation=24),
+    Sound("block.breaker.dead", "Level progress", "Level 5: the stairs' lever without power, a dry clack on its stop", "mono", False, 1, lever_dead, -6.0),
     Sound("block.mixer.fill", "Level progress", "Level 5: a reagent poured into a mixer's tank", "mono", False, 2, mixer_fill, -4.0),
     Sound("block.mixer.run", "Level progress", "Level 5: the mixer run, and the solvent going down the pipe", "mono", False, 1, mixer_run, -3.0, attenuation=24),
     Sound("block.grate.dissolve", "Level progress", "Level 5: the drain's grate eaten by the solvent", "mono", False, 1, grate_dissolve, -3.0, attenuation=24),
     Sound("event.lab.alarm", "Level progress", "Level 5: the chemical room's two-tone siren, one cycle", "mono", False, 1, lab_alarm, -3.0, attenuation=48),
     Sound("event.lab.sting", "Level progress", "Level 5: walking into the Lab hall, a stab of low strings out of tune", "stereo", False, 1, lab_sting, -2.0),
+    Sound("ambient.lab.air", "Level 5 ambience", "The lab (layer 1): the air handling, ducts rushing softly, a fan, a low rumble",
+          "stereo", True, 1, lab_air, -6.0, stream=True, game_volume=0.6),
+    Sound("ambient.lab.compressor", "Level 5 ambience", "A fridge compressor off in the lab, starting (1) or stopping (2)", "mono", False, 2, lab_compressor, -3.0,
+          attenuation=24),
+    Sound("ambient.lab.duct", "Level 5 ambience", "A sheet-steel duct over the ceiling popping and ticking with the warmth", "mono", False, 4, lab_duct, -3.0,
+          attenuation=24),
     Sound("ambient.drain.water", "Level 5 ambience", "The drain: water running down the channels, gurgling, a low rush under it",
           "stereo", True, 1, drain_water, -6.0, stream=True, game_volume=0.6),
     Sound("ambient.drain.creak", "Level 5 ambience", "A pipe creaking somewhere in the drain, now and then (metal on metal, no tone)", "mono", False, 4, drain_creak, -3.0,

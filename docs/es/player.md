@@ -114,8 +114,10 @@ La luz en sí se dibuja en el cliente, ver [Gráficos](graphics.md#la-linterna).
   quita `wrench.damage` (7, tres corazones y medio), llega más o menos una vez por segundo
   (`wrench.attacks_per_second`), empuja un poco y suena a metal (`item.wrench.hit`). No se desgasta nunca.
 - **El detector de radiación:** funciona desde cualquier sitio del inventario y no gasta nada. Nota la
-  Distortion Cloud más cercana a menos de `detector.range` (16) bloques, nunca a través de una pared, y pita en
-  la cabeza del jugador (`item.detector.beep`), de cada 1,2 s en el borde a cada 0,1 s pegado a ella
+  Distortion Cloud más cercana a menos de `detector.range` (16) bloques, nunca a través de una pared, y chasquea en
+  la cabeza del jugador como un contador Geiger: sus cuentas caen al azar, unas 1,5 por segundo en el borde y más
+  a cada paso que se acerca, hasta crepitar a unas 120 por segundo pegado a ella. Cada tick sortea cuántas caen
+  en él y suena `item.detector.click` (una), `.clicks` (de dos a cuatro) o `.crackle` (más)
   (`client.effects.DetectorEffect`, números en `core.detector.Detector`). Lo que nota es cualquier entidad de la
   etiqueta de tipos `every_tunnel:radiation_sources` (la Cloud), hasta que empieza a irse.
 
@@ -198,8 +200,8 @@ Cada clave y su valor por defecto:
 | **`detector`** | | El detector de radiación del nivel 5 |
 | `range` | 16 | Bloques a los que nota la Cloud (nunca a través de una pared) |
 | `danger_range` | 8 | Más cerca de esto parpadea el triángulo de peligro |
-| `slowest_beep_seconds` | 1.2 | Entre pitidos en el borde de su alcance... |
-| `fastest_beep_seconds` | 0.1 | ...y pegado a la Cloud |
+| `slowest_counts_per_second` | 1.5 | Cuentas Geiger por segundo en el borde de su alcance... |
+| `fastest_counts_per_second` | 120 | ...y pegado a la Cloud (una crepitación) |
 | **`hunter`** | | Los Hunters del nivel 5 |
 | `health` | 6 | Su vida contra todo menos la llave inglesa (cualquier golpe de llave mata a uno) |
 | `damage` | 1 | Vida que quita un golpe (medio corazón)... |

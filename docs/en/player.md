@@ -110,8 +110,10 @@ The light itself is drawn on the client, see [Graphics](graphics.md#the-flashlig
   `wrench.damage` (7, three and a half hearts) and comes about once a second (`wrench.attacks_per_second`),
   pushes a little, and rings out in metal (`item.wrench.hit`). It never wears out.
 - **The radiation detector:** it works from anywhere in the inventory and uses nothing. It notices the
-  nearest Distortion Cloud within `detector.range` (16) blocks, never through a wall, and beeps in the
-  player's head (`item.detector.beep`), from every 1.2 s at the edge to every 0.1 s right next to it
+  nearest Distortion Cloud within `detector.range` (16) blocks, never through a wall, and clicks in the
+  player's head like a Geiger counter: its counts fall at random, about 1.5 a second at the edge and more with
+  each step nearer, up to a crackle of about 120 a second right next to it. Each tick draws how many fall in it
+  and plays `item.detector.click` (one), `.clicks` (two to four) or `.crackle` (more)
   (`client.effects.DetectorEffect`, numbers in `core.detector.Detector`). What it notices is any entity of
   the type tag `every_tunnel:radiation_sources` (the Cloud), until it starts to go.
 
@@ -193,8 +195,8 @@ Every key and its default:
 | **`detector`** | | Level 5's radiation detector |
 | `range` | 16 | Blocks within which it notices the Cloud (never through a wall) |
 | `danger_range` | 8 | Closer than this the warning triangle blinks |
-| `slowest_beep_seconds` | 1.2 | Between beeps at the edge of its range... |
-| `fastest_beep_seconds` | 0.1 | ...and right next to the Cloud |
+| `slowest_counts_per_second` | 1.5 | Geiger counts a second at the edge of its range... |
+| `fastest_counts_per_second` | 120 | ...and right next to the Cloud (a crackle) |
 | **`hunter`** | | Level 5's Hunters |
 | `health` | 6 | Their health against anything but the wrench (any blow of the wrench kills one) |
 | `damage` | 1 | Health a hit takes (half a heart)... |

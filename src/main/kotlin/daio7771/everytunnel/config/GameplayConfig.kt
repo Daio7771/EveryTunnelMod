@@ -70,10 +70,10 @@ data class DetectorConfig(
     val range: Double = 16.0,
     /** Closer than this the warning triangle blinks. */
     val dangerRange: Double = 8.0,
-    /** Seconds between beeps at the edge of its range... */
-    val slowestBeepSeconds: Double = 1.2,
-    /** ...and right next to one. */
-    val fastestBeepSeconds: Double = 0.1,
+    /** Geiger counts a second at the edge of its range... */
+    val slowestCountsPerSecond: Double = 1.5,
+    /** ...and right next to one (a crackle). */
+    val fastestCountsPerSecond: Double = 120.0,
 )
 
 /** Level 5's Hunters, little ones in groups of three (`entities.HunterBrain`, `platform.HunterEntity`). */

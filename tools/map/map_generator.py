@@ -458,6 +458,11 @@ LEVEL_4 = dict(
 # past Storage to the chemical room); layer 3, the drain, tunnels 5 wide round two loops. The layers share the
 # plan: layer 1 is the upper floor, layer 2 lies LAYER_DROP under it, so a cell may hold a space of each;
 # layer 3 lies DRAIN_DROP under layer 2, beyond its east end but for the foot of the ladder.
+# Level 5's layer 1 ambience, the same in each of its zones (so the loop runs on from one to the next).
+LAB_AIR = {"loop": "every_tunnel:ambient.lab.air", "loop_volume": 0.6, "random": [
+    {"sound": "every_tunnel:ambient.lab.compressor", "interval": [45, 120], "distance": [10, 20], "volume": 0.6},
+    {"sound": "every_tunnel:ambient.lab.duct", "interval": [20, 60], "distance": [6, 14], "volume": 0.7}]}
+
 LEVEL_5 = dict(
     TITLE="Level 5",
     FLOOR_Y=9,                       # the world y of layer 1's floor blocks (Level 4's floor)
@@ -575,9 +580,12 @@ LEVEL_5 = dict(
     POOLS=[("junction_pool", (180, 53, 193, 65), 4, [(180, 58, 193, 61), (185, 53, 188, 58), (185, 61, 188, 65)], True),
            ("cistern_pool", (197, 69, 211, 78), 5, [(202, 69, 204, 78), (204, 73, 211, 75)], False)],
     CATWALK="every_tunnel:metal_grating[type=top,waterlogged=false]",
-    # The drain's sounds (AmbienceHooks), zone by zone: water running down the channels, drips, pipes creaking far
-    # off; the Pump room's pumps, loud; the Hideout only drips. Up the stairs, silence.
+    # The sounds (AmbienceHooks), zone by zone. Layer 1, from the Lobby on (the way in stays silent): the air
+    # handling, a fridge's compressor off somewhere starting or stopping, a duct popping and ticking; its lights hum
+    # by themselves. The drain: water running down the channels, drips, pipes creaking far off; the Pump room's pumps,
+    # loud; the Hideout only drips. Up the stairs, silence.
     ZONE_AMBIENCE={
+        **{zone: LAB_AIR for zone in ("lobby", "workshop", "waiting", "lockers", "layer1_corridor", "layer1_stairs")},
         "drain_ladder": {"loop": "every_tunnel:ambient.drain.water", "loop_volume": 0.5, "random": [
             {"sound": "every_tunnel:ambient.drip", "interval": [3, 9], "distance": [2, 6], "volume": 0.7}]},
         "drain_shaft": {"loop": "every_tunnel:ambient.drain.water", "loop_volume": 0.4},

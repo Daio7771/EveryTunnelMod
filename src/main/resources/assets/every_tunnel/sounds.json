@@ -55,6 +55,47 @@
       }
     ]
   },
+  "ambient.lab.air": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/lab/air_1",
+        "stream": true,
+        "volume": 0.6
+      }
+    ]
+  },
+  "ambient.lab.compressor": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/lab/compressor_1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:ambient/lab/compressor_2",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "ambient.lab.duct": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/lab/duct_1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:ambient/lab/duct_2",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:ambient/lab/duct_3",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:ambient/lab/duct_4",
+        "attenuation_distance": 24
+      }
+    ]
+  },
   "ambient.library.clock": {
     "sounds": [
       {
@@ -859,9 +900,34 @@
       "every_tunnel:item/dart/throw_3"
     ]
   },
-  "item.detector.beep": {
+  "item.detector.click": {
     "sounds": [
-      "every_tunnel:item/detector/beep_1"
+      "every_tunnel:item/detector/click_1",
+      "every_tunnel:item/detector/click_2",
+      "every_tunnel:item/detector/click_3",
+      "every_tunnel:item/detector/click_4",
+      "every_tunnel:item/detector/click_5",
+      "every_tunnel:item/detector/click_6"
+    ]
+  },
+  "item.detector.clicks": {
+    "sounds": [
+      "every_tunnel:item/detector/clicks_1",
+      "every_tunnel:item/detector/clicks_2",
+      "every_tunnel:item/detector/clicks_3",
+      "every_tunnel:item/detector/clicks_4",
+      "every_tunnel:item/detector/clicks_5",
+      "every_tunnel:item/detector/clicks_6"
+    ]
+  },
+  "item.detector.crackle": {
+    "sounds": [
+      "every_tunnel:item/detector/crackle_1",
+      "every_tunnel:item/detector/crackle_2",
+      "every_tunnel:item/detector/crackle_3",
+      "every_tunnel:item/detector/crackle_4",
+      "every_tunnel:item/detector/crackle_5",
+      "every_tunnel:item/detector/crackle_6"
     ]
   },
   "item.flashlight.dead": {

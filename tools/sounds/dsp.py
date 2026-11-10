@@ -48,16 +48,20 @@ def _band_gain(f, lo, hi, order):
     return gain
 
 
-def shaped_noise(n, rng, exponent=0.0, lo=None, hi=None, order=4):
+def shaped_noise(n, rng, exponent=0.0, lo=None, hi=None, order=4, peaks=()):
     """
     Noise with power falling as 1/f^exponent (0 white, 1 pink, 2 brown), optionally
-    band-limited with Butterworth-like edges. Unit standard deviation.
+    band-limited with Butterworth-like edges, with resonances raised in it: `peaks` are
+    (freq, width, gain) bumps (a duct's or a room's hollow tones). Unit standard deviation.
     """
     spectrum = np.fft.rfft(rng.standard_normal(n))
     f = np.fft.rfftfreq(n, 1.0 / SR)
     f_safe = f.copy()
     f_safe[0] = f[1] if len(f) > 1 else 1.0
-    spectrum *= f_safe ** (-exponent / 2.0) * _band_gain(f, lo, hi, order)
+    bumps = np.ones_like(f)
+    for centre, width, gain in peaks:
+        bumps += gain * np.exp(-0.5 * ((f - centre) / width) ** 2)
+    spectrum *= f_safe ** (-exponent / 2.0) * _band_gain(f, lo, hi, order) * bumps
     spectrum[0] = 0.0
     x = np.fft.irfft(spectrum, n)
     return x / (np.std(x) + 1e-12)
@@ -148,6 +152,36 @@ def damped_partials(n, freqs, amps, taus, rng, start=0.0):
         if f >= SR * 0.45:
             continue
         y[s0:] += a * np.exp(-t / tau) * np.sin(TAU * f * t + rng.uniform(0, TAU))
+    return y
+
+
+def struck(n, rng, start, freqs, amps, taus, contact=0.0005, beat=0.0):
+    """
+    A struck object, modal synthesis done the physical way: its modes ring from rest
+    (decaying sines from zero, which add no click of their own), driven by a force pulse
+    `contact` seconds long, so a soft or slow blow dulls the modes above about 1/contact
+    and a hard one does not. `beat` > 0 splits each mode in two up to that fraction
+    apart: no real object is quite symmetric, so its ring beats.
+    """
+    y = np.zeros(n)
+    s0 = samples(start)
+    if s0 >= n:
+        return y
+    m = min(n - s0, samples(8.0 * max(taus)) + 1)
+    t = time_axis(m)
+    ir = np.zeros(m)
+    for f, a, tau in zip(freqs, amps, taus):
+        if f >= SR * 0.45:
+            continue
+        decay = a * np.exp(-t / tau)
+        if beat > 0.0:
+            twin = f * (1.0 + beat * rng.uniform(0.3, 1.0))
+            ir += decay * (0.6 * np.sin(TAU * f * t) + 0.4 * np.sin(TAU * twin * t))
+        else:
+            ir += decay * np.sin(TAU * f * t)
+    width = max(2, samples(contact))
+    pulse = np.hanning(width + 2)[1:-1]
+    y[s0:s0 + m] = np.convolve(ir, pulse / pulse.sum())[:m]
     return y
 
 

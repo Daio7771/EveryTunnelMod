@@ -404,7 +404,9 @@ industrial, and up its stairs the director's office (the boss's scene is still t
   chests; **the wrench and the detector** lie on its island bench (see
   [Player systems](player.md#level-5s-tools)). The Waiting room: rows of seats, and on its north wall the
   noticeboard, a technical sheet for each of the Hunters, the Cloud, the Junior and the equipment (what
-  each does and how to deal with it: the level's tutorial). The Lockers: lockers to hide in, as in Level 3.
+  each does and how to deal with it: the level's tutorial). The Lockers: lockers to hide in, as in Level 3. From the Lobby on, the lab's air handling runs
+  (`ambient.lab.air`), a fridge's compressor starts or stops somewhere and a duct pops or ticks now and then
+  (`ZONE_AMBIENCE`); the way in stays silent.
 - **The fuse box.** The stairs' lever, on the ring's east side, is dead ("No power.", `block.breaker.dead`)
   until the fuse box beside it is full: five holders (`FuseHolderBlock`) marked 5A, 10A, 15A, 20A and 30A,
   the 15A in already. The other four fuses lie one in each room, in plain sight: 10A on the Lobby's desk,
