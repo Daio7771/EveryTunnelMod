@@ -243,6 +243,18 @@ class Lab:
         base = f"{block}[facing={WORLD_FACING[outside]},hinge=left,open=false,powered=false"
         return {self.at(x, o.floor + 1, z): base + ",half=lower]", self.at(x, o.floor + 2, z): base + ",half=upper]"}
 
+    def double_door(self, o, block, outside):
+        """{world position: state} of a pair of doors in a two-cell opening, shut, facing `outside` (plan), each
+        hinged at its end of the opening (the one on the left, as seen looking `outside`, on its left)."""
+        lx, lz = {"north": (-1, 0), "south": (1, 0), "east": (0, -1), "west": (0, 1)}[outside]
+        cells = sorted(o.cells(), key=lambda c: c[0] * lx + c[1] * lz)
+        out = {}
+        for (x, z), hinge in zip(cells, ("right", "left")):
+            base = f"{block}[facing={WORLD_FACING[outside]},hinge={hinge},open=false,powered=false"
+            out[self.at(x, o.floor + 1, z)] = base + ",half=lower]"
+            out[self.at(x, o.floor + 2, z)] = base + ",half=upper]"
+        return out
+
     def compose(self, foreign_air=()):
         """The blocks of both sets, in world positions. `foreign_air`: plan cells (x, y, z) of the
         air of Level 4's dark stretch that the way in opens onto, so that no wall goes up across it."""
@@ -324,6 +336,9 @@ class Lab:
             elif o.kind == "door":
                 # The office's doors, opened by hand; each looks the way one comes to it from.
                 self.lab_blocks.update(self.door(o, p["OFFICE_DOOR"], p["DOOR_OUTSIDE"][o.id]))
+            elif o.kind == "lab_door":
+                # Layer 1's rooms: a pair of white doors with a window, opened by hand.
+                self.lab_blocks.update(self.double_door(o, p["LAB_DOOR"], p["DOOR_OUTSIDE"][o.id]))
             elif o.kind == "exit":
                 # At the end of the corridor out of the office, Level 1's locked EXIT door, its sign over it.
                 outside = p["DOOR_OUTSIDE"][o.id]
@@ -504,8 +519,9 @@ class Lab:
         return set(joins)
 
     def light_rooms(self, rooms):
-        """Every room and corridor's lights. The lab's: fluorescent lights hang in a grid, all on (none on the way
-        in: it stays dark until the airlock opens onto the Lobby). The drain's: caged lamps, dim and far apart,
+        """Every room and corridor's lights. The lab's: in a grid, all on (none on the way in: it stays dark until
+        the airlock opens onto the Lobby); on layer 1 set into its ceiling of panels, silent, an air vent beside every
+        other one (none in the niches), on layer 2 fluorescent lights hanging under it. The drain's: caged lamps, dim and far apart,
         some flickering and some dead, down the middle of the tunnels and on the walls of its rooms (none in the
         Hideout). Steel stairs, the office and the garage's corridor: lit, all on."""
         p = self.p
@@ -532,6 +548,19 @@ class Lab:
                     cells = [(x, z) for x in grid(x0, x1 - 1, p["GARAGE_LIGHT_SPACING"]) for z in grid(z0, z1 - 1, p["GARAGE_LIGHT_SPACING"])]
                 else:
                     cells = []
+                if look == "lab" and s.layer == 1:
+                    if s.id.startswith("niche"):
+                        continue
+                    lights = set(cells)
+                    along_x = (x1 - x0) >= (z1 - z0)
+                    for k, (x, z) in enumerate(sorted(cells)):
+                        c = (x, self.floors[(s.layer, x, z)] + s.height + 1, z)
+                        self.lights.append(c)
+                        self.lab_blocks[self.at(*c)] = p["CEILING_LIGHT"]
+                        vx, vz = (x + p["LIGHT_SPACING"] // 2, z) if along_x else (x, z + p["LIGHT_SPACING"] // 2)
+                        if k % 2 == 0 and x0 <= vx < x1 and z0 <= vz < z1 and (vx, vz) not in lights:
+                            self.lab_blocks[self.at(vx, self.floors[(s.layer, vx, vz)] + s.height + 1, vz)] = p["CEILING_VENT"]
+                    continue
                 for x, z in cells:
                     c = (x, self.floors[(s.layer, x, z)] + s.height, z)
                     self.lights.append(c)

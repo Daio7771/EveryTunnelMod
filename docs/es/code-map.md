@@ -121,7 +121,7 @@ con un comentario KDoc que cuenta más.
 | `CardReaderBlock.kt` | El lector de tarjetas que abre puertas de hierro |
 | `NoteBoardBlock.kt` | Un tablón de corcho con una nota: clic derecho para leerla |
 | `NotePaperBlock.kt` | Un folio mecanografiado suelto sobre una mesa (los documentos del Nivel 3): clic derecho para leerlo |
-| `WallTextBlock.kt` | Texto en una pared con la fuente del juego (placas del nivel 3, letras de la entrada) y su block entity |
+| `WallTextBlock.kt` | Texto en una pared con la fuente del juego (placas de los niveles 3 y 5, letras de la entrada) y su block entity |
 | `BoxBlocks.kt` | La caja morada del nivel 3 (se recoge), su estantería (partes, huecos, la entidad de bloque de las cajas) y el libro de oficina |
 | `LockerBlock.kt` | Una taquilla (dos bloques apilados): clic derecho para esconderse |
 | `LockerSeatEntity.kt` | El asiento invisible en el que va el jugador escondido: límite de giro, salir por delante, el sonido de la puerta |
@@ -277,7 +277,7 @@ con un comentario KDoc que cuenta más.
 | `DistortionRenderer.kt` | Renderizador y modelo de GeckoLib de las Distortions: giradas hacia su yaw, el glitch, el ojo del Junior agrietándose |
 | `PaleManModel.kt` | Su modelo de GeckoLib, más la postura encorvada bajo techos bajos |
 | `BoxShelfRenderer.kt` | Las cajas moradas en la estantería, a brillo completo |
-| `WallTextRenderer.kt` | Un texto de pared: blanco sobre una placa oscura, o letras grandes oscuras en la pared |
+| `WallTextRenderer.kt` | Un texto de pared: blanco sobre una placa oscura, oscuro sobre latón o sobre el plástico blanco del laboratorio, o letras grandes oscuras en la pared |
 | `LootRenderer.kt` | Dibuja el botín tumbado |
 | `GuardUniform.kt` | La skin del uniforme para todos los jugadores |
 

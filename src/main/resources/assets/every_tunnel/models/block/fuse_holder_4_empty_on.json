@@ -3,7 +3,7 @@
   "textures": {
     "p": "every_tunnel:block/fuse_label_4",
     "m": "every_tunnel:block/lab_steel",
-    "b": "every_tunnel:block/fuse_body_4",
+    "g": "every_tunnel:block/fuse_glass",
     "l": "every_tunnel:block/fuse_lamp_on",
     "particle": "every_tunnel:block/fuse_label_4"
   },

@@ -1,0 +1,81 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "c": "every_tunnel:block/lab_coat",
+    "s": "every_tunnel:block/lab_steel",
+    "particle": "every_tunnel:block/lab_coat"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        1,
+        14
+      ],
+      "to": [
+        12,
+        14,
+        15.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#c",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#c"
+        },
+        "south": {
+          "texture": "#c"
+        },
+        "west": {
+          "texture": "#c"
+        },
+        "up": {
+          "texture": "#c"
+        },
+        "down": {
+          "texture": "#c"
+        }
+      }
+    },
+    {
+      "from": [
+        7.5,
+        14,
+        15
+      ],
+      "to": [
+        8.5,
+        15.5,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#s"
+        },
+        "east": {
+          "texture": "#s"
+        },
+        "south": {
+          "texture": "#s"
+        },
+        "west": {
+          "texture": "#s"
+        },
+        "up": {
+          "texture": "#s"
+        },
+        "down": {
+          "texture": "#s"
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

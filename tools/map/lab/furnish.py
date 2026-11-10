@@ -29,7 +29,8 @@ ROW = {"lab_bench", "lab_cabinet", "lab_seats", "tool_board", "whiteboard", "ben
 STACK = OFFICE_STACK | {"lab_shelf", "fume_hood", "pump"}
 # What a player walks through (ModBlocks: noCollision).
 THROUGH = {"lab_chair", "tool_board", "lab_poster", "first_aid_box", "potted_plant", "wall_clock", "whiteboard", "note_board",
-           "briefing_board", "briefing_sign",
+           "briefing_board", "briefing_sign", "wall_text", "lab_reader", "sign_extinguisher", "sign_exit", "sign_biohazard",
+           "sign_radiation", "floor_line", "microscope", "glove_box", "lab_beakers", "lab_monitor", "lab_coat", "chair_jacket",
            "fuse_holder", "office_chair", "lab_terminal", "alarm_light", "pipe", "note_paper", "valve_wheel", "pressure_gauge",
            "tin_cans", "dead_flashlight", "mattress", "electrical_panel", "leather_chair", "exec_chair", "mini_diorite",
            "paper_stack", "coffee_cup", "desk_lamp_modern", "coffee_machine"}
@@ -58,6 +59,7 @@ FURNITURE = {
         # side of the way to the ring's west side, a plant in each corner, posters.
         row("lab_cabinet", 13, 17, 9, "south") + [("lab_chair", 15, 8, "south", 1)]
         + [("filing_cabinet", 12, 7, "south", 1), ("filing_cabinet", 18, 7, "south", 1), ("wall_clock", 15, 7, "south", 3)]
+        + [("lab_monitor", 16, 9, "north", 2), ("coffee_cup", 13, 9, "north", 2)]           # on the desk, for whoever sat there
         + row("lab_seats", 3, 7, 21, "north") + row("lab_seats", 14, 18, 21, "north")
         + [("low_table", 5, 19, "north", 1), ("low_table", 16, 19, "north", 1)]
         + [("potted_plant", x, z, "south", 1) for x, z in ((2, 7), (20, 7), (2, 21), (20, 21))]
@@ -67,7 +69,10 @@ FURNITURE = {
         + row("lab_bench", 30, 37, 2, "south") + row("tool_board", 30, 37, 2, "south", 2)
         + row("lab_bench", 46, 52, 2, "south") + row("tool_board", 46, 52, 2, "south", 2)
         + row("lab_bench", 38, 45, 7, "north")
-        + [("lab_chair", x, 8, "north", 1) for x in (39, 42, 44)] + [("lab_chair", x, 6, "south", 1) for x in (40, 43)]
+        + [("lab_chair", x, 8, "north", 1) for x in (39, 44)] + [("lab_chair", x, 6, "south", 1) for x in (40, 43)]
+        + [("chair_jacket", 42, 8, "north", 1), ("lab_coat", 53, 8, "west", 2)]                # someone's jacket, a coat on a hook
+        + [("microscope", 38, 7, "south", 2), ("lab_beakers", 41, 7, "south", 2), ("glove_box", 44, 7, "south", 2),
+           ("coffee_cup", 45, 7, "south", 2)]
         + [p for z in range(4, 9) for p in tall("lab_shelf", 29, z, "east")]
         + [("tool_chest", 53, z, "west", 1) for z in (4, 5, 6)] + [("lab_cart", 52, 10, "west", 1)]
         + row("whiteboard", 31, 36, 12, "north", 2) + row("lab_cabinet", 46, 51, 12, "north")
@@ -82,12 +87,19 @@ FURNITURE = {
         # The Lockers: lockers to hide in along both long walls, benches in between, a cabinet.
         + [p for x in list(range(24, 31)) + list(range(37, 44)) for p in tall("locker", x, 21, "south") + tall("locker", x, 28, "north")]
         + row("bench", 25, 29, 24, "north") + row("bench", 38, 42, 24, "north")
-        + column("lab_cabinet", 24, 24, 25, "east") + column("lab_cabinet", 43, 24, 25, "west")
+        + column("lab_cabinet", 24, 24, 25, "east") + column("lab_cabinet", 43, 24, 25, "west") + [("lab_coat", 24, 26, "east", 2)]
         # The ring: posters and first aid on the walls, carts against them; the fuse box (FUSE_BOX) by the
         # stairs' lever in the east side.
         + [("lab_poster", 26, 14, "south", 2), ("lab_poster", 57, 14, "south", 2), ("first_aid_box", 48, 14, "south", 2)]
         + [("lab_cart", 30, 36, "north", 1), ("lab_cart", 55, 36, "north", 1), ("lab_poster", 42, 36, "north", 2)]
         + [("first_aid_box", 9, 27, "east", 2), ("lab_poster", 71, 21, "east", 2)]
+        # The niches in the ring's walls: benches, a water dispenser, the fire extinguishers under their signs.
+        + row("bench", 28, 29, 37, "north") + column("bench", 8, 28, 29, "east")
+        + [("water_dispenser", 48, 37, "north", 1), ("fire_extinguisher", 49, 37, "north", 1), ("sign_extinguisher", 49, 37, "north", 3)]
+        + [("fire_extinguisher", 50, 18, "north", 1), ("sign_extinguisher", 50, 18, "north", 3), ("potted_plant", 51, 18, "north", 1)]
+        # By the doors, their card readers (green); safety signs: the stairs down to the lab, radiation on the ring.
+        + [("lab_reader", 40, 14, "south", 2), ("lab_reader", 65, 14, "south", 2), ("lab_reader", 9, 36, "north", 2)]
+        + [("sign_exit", 11, 36, "north", 4), ("sign_biohazard", 9, 36, "north", 3), ("sign_radiation", 60, 17, "north", 3)]
     ),
     2: (
         # The Lab hall: benches along the north and south walls between the ways out, a computer on each
@@ -169,6 +181,18 @@ NOTE_BOARDS = [("ch1_l5_card_s1", 2, 21, 57, "south"), ("ch1_l5_card_s3", 2, 43,
 BRIEFING = dict(layer=1, x=63, z=2, facing="south", cols=6, rows=2, sign_x=64, sign_cols=4,
                 cards=("ch1_l5_card_hunters", "ch1_l5_card_cloud", "ch1_l5_card_junior", "ch1_l5_card_equipment"),
                 note_cols=(0, 2, 3, 5))
+
+# Layer 1's columns, (layer, x, z): the Lobby's and the Workshop's, floor to ceiling, finished like the walls (white
+# tiles, the green band at their foot).
+COLUMNS = [(1, 6, 11), (1, 6, 18), (1, 16, 11), (1, 16, 18), (1, 35, 7), (1, 48, 7)]
+# Room nameplates on the walls (WallTextBlock in its lab style): (lang key, layer, x, z, facing, y, the side of its block
+# the text keeps to, as read: the door's).
+PLATES = [("sign.every_tunnel.room.workshop", 1, 43, 14, "south", 2, "left"),
+          ("sign.every_tunnel.room.waiting_room", 1, 68, 14, "south", 2, "left"),
+          ("sign.every_tunnel.room.lockers", 1, 36, 17, "north", 2, "right"),
+          ("sign.every_tunnel.room.stairs", 1, 12, 36, "north", 2, "right")]
+# The green line on the floor, from the Lobby down the ring's west side to the stairs' door: (layer, x, z0, z1).
+FLOOR_LINE = (1, 10, 12, 36)
 
 # The fuse box: a holder a slot on the east wall of the ring's east side, beside the stairs' lever (74, 25),
 # at eye height, in amperage order (index into FUSE_AMPS); the 15A is in already.
@@ -253,6 +277,7 @@ class Furnish:
         self.items = {}            # plan (x, y, z) -> (name, plan facing)
         self.taken = set(taken)    # plan cells already holding something (the levers, the windows)
         self.extra = {}            # plan (x, y, z) -> a state of its own
+        self.texts = {}            # plan (x, y, z) -> (lang key, align): the room plates
 
     def floor(self, layer):
         return self.lab.layer_floor[layer]
@@ -269,6 +294,16 @@ class Furnish:
                 self.put(name, x, z, facing, self.floor(layer) + y)
         for _, layer, x, z, facing in NOTE_BOARDS:
             self.put("note_board", x, z, facing, self.floor(layer) + 2)
+        for layer, x, z in COLUMNS:
+            f = self.floor(layer)
+            for y in range(1, self.lab.height_at(layer, x, z) + 1):
+                self.put("lab_column", x, z, "north", f + y)
+        for key, layer, x, z, facing, y, align in PLATES:
+            self.put("wall_text", x, z, facing, self.floor(layer) + y)
+            self.texts[(x, self.floor(layer) + y, z)] = (key, align)
+        layer, x, z0, z1 = FLOOR_LINE
+        for z in range(z0, z1 + 1):
+            self.put("floor_line", x, z, "north", self.floor(layer) + 1)
         bf, bz = self.floor(BRIEFING["layer"]), BRIEFING["z"]
         for col in range(BRIEFING["cols"]):
             for row_ in range(BRIEFING["rows"]):
@@ -330,7 +365,12 @@ class Furnish:
         out = {}
         for (wx, wy, wz), (name, facing, plan) in items.items():
             bid = f"every_tunnel:{name}"
-            if plan in self.extra:
+            if name == "lab_column":
+                state = self.lab.state("band" if (plan[0], plan[1] - 1, plan[2]) not in self.items else "tile")
+            elif plan in self.texts:
+                key, align = self.texts[plan]
+                state = f'{bid}[facing={facing}]{{Text:"{key}",Style:"lab",Offset:0.0f,Align:"{align}"}}'
+            elif plan in self.extra:
                 state = f"{bid}[{self.extra[plan].format(facing=facing)}]"
             elif name in ROW:
                 lx, lz = DIRS[{"north": "east", "east": "south", "south": "west", "west": "north"}[facing]]

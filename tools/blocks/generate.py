@@ -28,7 +28,7 @@ import re
 import sys
 from pathlib import Path
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "tools" / "map"))
@@ -1167,6 +1167,19 @@ def steel_door_tex(rng, half, colour, kind):
             px(img, x, y, light, 0.25)
     if half == "bottom":
         T.gradient(img, (40, 42, 46), 0.0, 0.35)                  # kicked and dirty at the bottom
+    if kind == "lab":                                             # white, a tall clean window, a lever handle
+        if half == "top":
+            rect(img, 4, 2, 11, 14, (146, 170, 182))
+            for k in range(5):
+                px(img, 5 + k, 3 + 2 * k, (200, 218, 226), 0.7)
+            rect(img, 3, 1, 12, 1, dark)
+            rect(img, 3, 15, 12, 15, dark)
+        else:
+            rect(img, 4, 0, 11, 3, (146, 170, 182))
+            rect(img, 3, 4, 12, 4, dark)
+            rect(img, 12, 7, 14, 7, (178, 184, 192))
+            px(img, 13, 8, (100, 104, 112), 1.0)
+        return img
     if kind == "office":                                          # black, a long steel pull, nothing else
         for y in range(16):
             px(img, 12, y, (150, 154, 160), 0.9)
@@ -1482,8 +1495,8 @@ def plastic_tex(rng, colour, kind=None):
 LAB_STEEL = (182, 188, 192)
 LAB_WHITE = (232, 234, 230)
 LAB_GREEN = (98, 160, 132)
-# Level 5's fuses (FuseHolderBlock), blade fuses in their usual colours: 5A tan, 10A red, 15A blue,
-# 20A yellow, 30A green.
+# Level 5's fuses (FuseHolderBlock), glass tubes with a band in the usual fuse colours: 5A tan, 10A red,
+# 15A blue, 20A yellow, 30A green.
 FUSE_AMPS = (5, 10, 15, 20, 30)
 FUSE_COLOURS = ((198, 170, 122), (200, 54, 46), (62, 106, 200), (230, 198, 52), (72, 164, 82))
 
@@ -1636,23 +1649,154 @@ def fuse_label_tex(rng, index):
 
 
 def fuse_item_tex(rng, index):
-    """A blade fuse: a coloured plastic body with its number, two metal prongs under it."""
+    """A glass fuse: a clear tube with its filament, a metal cap at each end, a band of its colour round its middle,
+    and its amperage under it."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
     colour = FUSE_COLOURS[index]
-    dark = tuple(max(0, c - 70) for c in colour)
-    light = tuple(min(255, c + 50) for c in colour)
-    for x in range(3, 13):
-        for y in range(1, 10):
-            edge = x in (3, 12) or y in (1, 9)
-            img.putpixel((x, y), (dark if edge else colour) + (255,))
-    for x in range(4, 12):
-        img.putpixel((x, 2), light + (255,))
+    for x in range(2, 14):
+        for y in range(3, 8):
+            if x <= 3 or x >= 12:                                         # the caps
+                c = (214, 218, 222) if y in (3, 4) else (150, 156, 162)
+            else:                                                         # the glass, lit along its top
+                c = (214, 232, 238) if y == 4 else (166, 194, 206) if y < 7 else (132, 158, 170)
+            img.putpixel((x, y), c + (255,))
+    for x in range(4, 12):                                                # the filament
+        img.putpixel((x, 5), (72, 72, 76, 255))
+    for x in (7, 8):                                                      # the band
+        for y in range(3, 8):
+            img.putpixel((x, y), colour + (255,))
     text = str(FUSE_AMPS[index])
-    dart_text(img, (16 - dart_text_width(text)) // 2, 3, text, (250, 250, 246, 255))
-    for x in (5, 6, 9, 10):
-        for y in range(10, 15):
-            img.putpixel((x, y), ((214, 218, 222) if x in (5, 9) else (150, 156, 162)) + (255,))
+    dart_text(img, (16 - dart_text_width(text)) // 2, 10, text, (240, 240, 236, 255))
     return img
+
+
+def fuse_glass_tex(rng):
+    """A glass fuse's tube in its holder: clear, a highlight down one side, the filament down the middle."""
+    img = new((168, 196, 208))
+    noise(img, rng, 2)
+    for y in range(16):
+        px(img, 7, y, (220, 236, 242), 0.8)
+        px(img, 8, y, (70, 70, 74), 0.9)
+    return img
+
+
+# --- Level 5's layer 1, its look: the ceiling's lights and vents, the doors' readers, safety signs, props ------
+
+def ceiling_light_tex(rng):
+    """A light set into the ceiling: a steel rim round a white prismatic diffuser, lit evenly (no tubes humming)."""
+    img = new((250, 250, 246))
+    for x in range(16):
+        for y in range(16):
+            if (x + y) % 4 == 0:
+                px(img, x, y, (236, 238, 236), 0.6)
+    for k in range(16):
+        for c in ((k, 0), (k, 15), (0, k), (15, k)):
+            px(img, *c, (196, 200, 204), 1.0)
+    return img
+
+
+def ceiling_light_material(x, y, c):
+    if x in (0, 15) or y in (0, 15):
+        return T.PAINTED_METAL.but(smoothness=0.5)
+    return T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"])
+
+
+def ceiling_vent_tex(rng):
+    """A square air vent in the ceiling: a white frame, slats with the dark of the duct between them."""
+    img = melamine_tex(rng)
+    rect(img, 2, 2, 13, 13, (70, 74, 80))
+    for y in range(3, 13, 2):
+        rect(img, 3, y, 12, y, (210, 212, 210))
+    return img
+
+
+def lab_reader_tex(rng):
+    """A card reader by a door: a dark plastic body, the card's slot, a small keypad and a green light: unlocked."""
+    img = new((52, 56, 60))
+    noise(img, rng, 2)
+    rect(img, 6, 5, 9, 5, (14, 14, 16))                                  # the slot
+    for x in (6, 8):
+        for y in (7, 9):
+            px(img, x, y, (150, 154, 160), 0.9)
+    rect(img, 9, 10, 10, 11, (90, 230, 130))                             # the light
+    return img
+
+
+def safety_sign_tex(kind):
+    """Level 5's safety signs, 32 px: the extinguisher's (red), the emergency exit's (green), and the yellow
+    triangles of biohazard and radiation."""
+    white, black, yellow = (250, 250, 248), (20, 20, 22), (244, 196, 36)
+    img = Image.new("RGB", (32, 32), (246, 246, 242))
+    d = ImageDraw.Draw(img)
+    if kind == "extinguisher":
+        d.rectangle((1, 1, 30, 30), fill=(196, 34, 30))
+        d.rounded_rectangle((12, 12, 19, 28), 2, fill=white)
+        d.rectangle((14, 8, 17, 12), fill=white)
+        d.line((17, 9, 24, 7), fill=white, width=2)
+        d.line((12, 14, 8, 22), fill=white, width=2)
+    elif kind == "exit":
+        d.rectangle((1, 1, 30, 30), fill=(30, 140, 76))
+        d.rectangle((4, 5, 12, 27), outline=white, width=2)
+        d.ellipse((18, 5, 22, 9), fill=white)
+        for a, b in (((20, 10), (18, 18)), ((19, 12), (24, 15)), ((19, 12), (15, 15)), ((18, 18), (23, 22)),
+                     ((23, 22), (22, 27)), ((18, 18), (15, 23)), ((15, 23), (12, 24))):
+            d.line((*a, *b), fill=white, width=2)
+    else:
+        d.polygon([(16, 2), (30, 28), (2, 28)], fill=yellow)
+        d.line([(16, 2), (30, 28), (2, 28), (16, 2)], fill=black, width=2)
+        if kind == "radiation":
+            for centre in (90, 210, 330):                             # one blade down, two up
+                d.pieslice((9, 12, 23, 26), centre - 30, centre + 30, fill=black)
+            d.ellipse((13, 16, 19, 22), fill=yellow)
+            d.ellipse((14, 17, 18, 21), fill=black)
+        else:
+            for angle in (-90, 30, 150):
+                cx, cy = 16 + 4 * math.cos(math.radians(angle)), 19 + 4 * math.sin(math.radians(angle))
+                d.ellipse((cx - 5, cy - 5, cx + 5, cy + 5), outline=black, width=2)
+            d.ellipse((13, 16, 19, 22), outline=black, width=1)
+    return img
+
+
+def glove_box_tex(rng):
+    """A box of nitrile gloves: white card with a blue band, the hole in its top."""
+    img = new((236, 236, 232))
+    noise(img, rng, 1)
+    rect(img, 0, 9, 15, 12, (60, 104, 186))
+    return img
+
+
+def lab_glass_tex(rng):
+    """Laboratory glass: clear, a highlight, a tinted liquid in its lower part."""
+    img = new((196, 214, 220))
+    rect(img, 0, 9, 15, 15, (120, 182, 150))
+    for y in range(16):
+        px(img, 3, y, (236, 244, 246), 0.7)
+    return img
+
+
+def monitor_screen_tex(rng):
+    """A switched-off monitor: a black screen in a dark bezel, a grey sheen across it."""
+    img = new((28, 30, 34))
+    rect(img, 1, 1, 14, 14, (12, 13, 16))
+    for k in range(6):
+        px(img, 3 + k, 3 + k // 2, (60, 64, 72), 0.6)
+    return img
+
+
+def lab_coat_tex(rng):
+    """A white lab coat hung up: its collar, the line of its buttons, a pocket with a pen."""
+    img = melamine_tex(rng, (238, 240, 236))
+    for k in range(4):
+        px(img, 6 - k, k, (200, 204, 204), 0.9)
+        px(img, 9 + k, k, (200, 204, 204), 0.9)
+    for y in range(4, 16):
+        px(img, 8, y, (206, 208, 206), 0.8)
+    for y in (6, 9, 12):
+        px(img, 9, y, (180, 182, 184), 1.0)
+    rect(img, 2, 8, 5, 8, (200, 204, 204))
+    px(img, 3, 7, (40, 60, 150), 1.0)
+    return img
+
 
 
 
@@ -3006,7 +3150,8 @@ def build():
                                         ("electrical_door", "Electrical Room Door", (92, 100, 108), "electrical"),
                                         ("emergency_door", "Emergency Exit Door", (70, 82, 90), "emergency"),
                                         ("calm_door", "Calm Room Door", (86, 58, 38), "emergency"),
-                                        ("office_door", "Office Door", (34, 34, 38), "office")):
+                                        ("office_door", "Office Door", (34, 34, 38), "office"),
+                                        ("lab_door", "Lab Door", (226, 228, 224), "lab")):
         halves = {}
         for half in ("bottom", "top"):
             halves[half] = steel_door_tex(r(f"{door_id}_{half}"), half, colour, kind)
@@ -3147,24 +3292,68 @@ def build():
         for facing, y in HORIZONTAL.items():
             variants[f"col={col},facing={facing}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
     a.block("briefing_sign", "Briefing Sign", {"variants": variants}, {"parent": f"{NS}:block/briefing_sign_1"})
+    # Layer 1's ceiling: lights and vents set into it, whole blocks of the ceiling whose underside is all one sees.
+    a.texture("lab_ceiling_light", ceiling_light_tex(r("lab_ceiling_light")), ceiling_light_material, tiles=False)
+    a.texture("lab_ceiling_vent", ceiling_vent_tex(r("lab_ceiling_vent")), T.PAINTED_METAL.but(smoothness=0.4), tiles=False)
+    for block_id, name in (("lab_ceiling_light", "Ceiling Light"), ("lab_ceiling_vent", "Ceiling Vent")):
+        a.models[block_id] = model({"w": "lab_white", "f": block_id}, [el((0, 0, 0), (16, 16, 16), "w", down="f")])
+        a.block(block_id, name, {"variants": {"": {"model": f"{NS}:block/{block_id}"}}}, {"parent": f"{NS}:block/{block_id}"})
+    # By each door, a card reader, its light green.
+    a.texture("lab_reader", lab_reader_tex(r("lab_reader")), T.PLASTIC.but(smoothness=0.5), tiles=False)
+    prop("lab_reader", "Card Reader", {"d": "lab_steel_dark", "f": "lab_reader"},
+         [el((5, 4, 15), (11, 12, 16), "d", north=("f", (5, 4, 11, 12)))], ao=False)
+    # Safety signs on the walls.
+    for kind, name in (("extinguisher", "Fire Extinguisher Sign"), ("exit", "Emergency Exit Sign"),
+                       ("biohazard", "Biohazard Sign"), ("radiation", "Radiation Sign")):
+        a.texture(f"sign_{kind}", safety_sign_tex(kind), T.PLASTIC.but(smoothness=0.5, relief=0.0), tiles=False)
+        prop(f"sign_{kind}", name, {"w": "lab_white", "s": f"sign_{kind}"},
+             [el((3, 3, 15.5), (13, 13, 16), "w", north=("s", (0, 0, 16, 16)))], ao=False)
+    # The green line on the floor from the Lobby to the stairs' door.
+    a.texture("floor_line", plastic_tex(r("floor_line"), (64, 150, 98)), T.PLASTIC.but(smoothness=0.4, relief=0.0))
+    prop("floor_line", "Floor Line", {"g": "floor_line"}, [el((6, 0, 0), (10, 0.15, 16), "g")], ao=False)
+    # Small things of the lab and of the people who worked there.
+    a.texture("lab_black", plastic_tex(r("lab_black"), (40, 42, 46)), T.PLASTIC.but(smoothness=0.5))
+    a.texture("glove_box", glove_box_tex(r("glove_box")), T.PAPER)
+    a.texture("glove_purple", plastic_tex(r("glove_purple"), (124, 96, 200)), T.Material(0.3, relief=0.1))
+    a.texture("lab_glass", lab_glass_tex(r("lab_glass")), T.Material(0.9, relief=0.0))
+    a.texture("monitor_screen", monitor_screen_tex(r("monitor_screen")), T.PLASTIC.but(smoothness=0.9), tiles=False)
+    a.texture("lab_coat", lab_coat_tex(r("lab_coat")), T.Material(0.2, porosity=0.5, relief=0.3), tiles=False)
+    a.texture("jacket", plastic_tex(r("jacket"), (44, 54, 82), "fabric"), T.Material(0.2, porosity=0.5, relief=0.3))
+    prop("microscope", "Microscope", {**lab, "k": "lab_black"},
+         [el((5, 0, 4), (11, 1, 12), "k"), el((9, 1, 8.5), (10.5, 9, 10), "w"), el((5.5, 4, 5), (10.5, 4.6, 9.5), "k"),
+          el((6.8, 6, 6.2), (8.4, 11, 7.8), "w"), el((7, 11, 6.4), (8.2, 13, 7.6), "k"), el((7.2, 4.6, 6.6), (8, 6, 7.4), "s"),
+          el((8.4, 8, 6.5), (9.2, 9, 9), "w")])
+    prop("glove_box", "Box of Gloves", {"b": "glove_box", "p": "glove_purple"},
+         [el((4, 0, 5), (12, 4, 11), "b"), el((7, 4, 7), (9, 5, 9), "p")])
+    prop("lab_beakers", "Beakers", {"g": "lab_glass"},
+         [el((3, 0, 4), (6, 5, 7), "g"), el((7, 0, 6), (10, 4, 9), "g"), el((10.5, 0, 3), (13.5, 3, 6), "g"), el((11.5, 3, 4), (12.5, 6, 5), "g")])
+    prop("lab_monitor", "Monitor", {"k": "lab_black", "s": "monitor_screen"},
+         [el((2, 3, 7), (14, 12, 8.5), "k", north=("s", (0, 0, 16, 16))), el((7, 0.5, 8.5), (9, 3, 9.5), "k"), el((5, 0, 7), (11, 0.5, 11), "k")])
+    prop("lab_coat", "Lab Coat", {"c": "lab_coat", "s": "lab_steel"},
+         [el((4, 1, 14), (12, 14, 15.5), "c", north=("c", (0, 0, 16, 16))), el((7.5, 14, 15), (8.5, 15.5, 16), "s")], ao=False)
+    prop("chair_jacket", "Lab Chair with a Jacket", {**lab, "j": "jacket"},
+         [el((3, 7, 3), (13, 8, 13), "g"), el((3, 8, 12), (13, 16, 13), "g")]
+         + [el((x, 0, z), (x + 1, 7, z + 1), "s") for x in (3, 12) for z in (3, 12)]
+         + [el((3.5, 7, 11.4), (12.5, 16.4, 13.6), "j"), el((2.4, 5, 10.5), (3.6, 12, 12.5), "j"), el((12.4, 5, 10.5), (13.6, 12, 12.5), "j")])
 
     # Level 5's fuse box: one holder a slot (FuseHolderBlock), side by side on a wall; each takes the fuse
     # of the amperage on its label, and a lamp over it lights once the whole box is full.
     a.texture("fuse_lamp_on", plastic_tex(r("fuse_lamp_on"), (120, 240, 140)), T.PLASTIC.but(smoothness=0.7, emission=GLOW["DIFFUSER_GLOW"]))
     a.texture("fuse_lamp_off", plastic_tex(r("fuse_lamp_off"), (40, 56, 44)), T.PLASTIC.but(smoothness=0.7))
+    a.texture("fuse_glass", fuse_glass_tex(r("fuse_glass")), T.Material(0.9, relief=0.0))
     variants = {}
     for i in range(len(FUSE_AMPS)):
         a.texture(f"fuse_label_{i}", fuse_label_tex(r(f"fuse_label_{i}"), i), T.PLASTIC.but(smoothness=0.5), tiles=False)
-        a.texture(f"fuse_body_{i}", plastic_tex(r(f"fuse_body_{i}"), FUSE_COLOURS[i]), T.PLASTIC.but(smoothness=0.6))
         for filled in ("false", "true"):
             for lit in ("false", "true"):
                 name = f"fuse_holder_{i}_{'full' if filled == 'true' else 'empty'}_{'on' if lit == 'true' else 'off'}"
-                textures = {"p": f"fuse_label_{i}", "m": "lab_steel", "b": f"fuse_body_{i}", "l": f"fuse_lamp_{'on' if lit == 'true' else 'off'}"}
+                textures = {"p": f"fuse_label_{i}", "m": "lab_steel", "g": "fuse_glass", "l": f"fuse_lamp_{'on' if lit == 'true' else 'off'}"}
                 els = [el((1, 1, 15), (15, 15, 16), "m", north=("p", (1, 1, 15, 15))),
                        el((6, 8, 14), (10, 9, 15), "m"), el((6, 3, 14), (10, 4, 15), "m"),
                        el((7, 12, 14.5), (9, 14, 15), "l")]
                 if filled == "true":
-                    els.append(el((6, 4, 13), (10, 8, 14.5), "b"))
+                    els += [el((7, 4.6, 13), (9, 7.4, 14.6), "g"),
+                            el((6.5, 3.8, 12.8), (9.5, 4.6, 14.8), "m"), el((6.5, 7.4, 12.8), (9.5, 8.2, 14.8), "m")]
                 a.models[name] = model(textures, els)
                 for f, y in HORIZONTAL.items():
                     variants[f"amps={i},facing={f},filled={filled},lit={lit}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}

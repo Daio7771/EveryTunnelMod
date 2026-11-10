@@ -1,0 +1,49 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "d": "every_tunnel:block/lab_steel_dark",
+    "f": "every_tunnel:block/lab_reader",
+    "particle": "every_tunnel:block/lab_steel_dark"
+  },
+  "elements": [
+    {
+      "from": [
+        5,
+        4,
+        15
+      ],
+      "to": [
+        11,
+        12,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#f",
+          "uv": [
+            5,
+            4,
+            11,
+            12
+          ]
+        },
+        "east": {
+          "texture": "#d"
+        },
+        "south": {
+          "texture": "#d"
+        },
+        "west": {
+          "texture": "#d"
+        },
+        "up": {
+          "texture": "#d"
+        },
+        "down": {
+          "texture": "#d"
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

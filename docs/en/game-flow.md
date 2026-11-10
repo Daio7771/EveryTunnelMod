@@ -408,10 +408,20 @@ industrial, and up its stairs the director's office (the boss's scene is still t
   drawing of it pinned over its technical sheet (what each does and how to deal with it: the level's
   tutorial); a right click on a drawing or a sheet reads that sheet. The Lockers: lockers to hide in, as in Level 3. From the Lobby on, the lab's air handling runs
   (`ambient.lab.air`), a fridge's compressor starts or stops somewhere and a duct pops or ticks now and then
-  (`ZONE_AMBIENCE`); the way in stays silent.
+  (`ZONE_AMBIENCE`); the way in stays silent. The look (`tools/map/lab/level.py`, `furnish.py`): a ceiling of white
+  panels with lights set into it, lit all over and silent (`lab_ceiling_light`: no fluorescent hum on layer 1),
+  an air vent beside every other one (`lab_ceiling_vent`); columns in the Lobby and the Workshop, finished like the
+  walls (`COLUMNS`); four niches in the ring's walls, lower than it, with benches, a water dispenser and fire
+  extinguishers under their signs; the Workshop and the Waiting room behind pairs of white doors with a window
+  (`lab_door`, opened by hand), a card reader with a green light by each door and by the stairs' (only to look
+  at), a white plastic plate with each room's name (`wall_text` in its `lab` style, `PLATES`); a green line on
+  the floor from the Lobby to the stairs' door (`FLOOR_LINE`); safety signs (extinguisher, emergency exit,
+  biohazard, radiation); and the people who worked there: a monitor and a coffee on the Lobby's desk, a
+  microscope, beakers and a box of gloves on the Workshop's island bench, a lab coat on a hook, a jacket left over
+  a chair.
 - **The fuse box.** The stairs' lever, on the ring's east side, is dead ("No power.", `block.breaker.dead`)
   until the fuse box beside it is full: five holders (`FuseHolderBlock`) marked 5A, 10A, 15A, 20A and 30A,
-  the 15A in already. The other four fuses lie one in each room, in plain sight: 10A on the Lobby's desk,
+  the 15A in already; the fuses are glass tubes with a band of their colour. The other four fuses lie one in each room, in plain sight: 10A on the Lobby's desk,
   30A on a tool chest in the Workshop, 5A on the Waiting room's cabinet, 20A on the Lockers' cabinet. Aimed
   at a holder with the fuse of its amperage, a right click puts it in (`block.fuse.insert`); any other snaps
   back (`block.fuse.reject`). The fifth one in, a relay and a hum (`block.fuse.power`), the lamps light, and

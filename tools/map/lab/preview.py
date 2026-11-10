@@ -33,7 +33,7 @@ KIND = {
 }
 STRETCH = (44, 44, 54)
 WALL = (150, 150, 146)
-OPENING = {"doorway": (110, 200, 120), "locked": (226, 70, 70), "frame": (190, 196, 204), "airlock_rear": (150, 130, 240),
+OPENING = {"doorway": (110, 200, 120), "lab_door": (110, 200, 160), "locked": (226, 70, 70), "frame": (190, 196, 204), "airlock_rear": (150, 130, 240),
            "airlock_front": (150, 130, 240), "grate": (240, 160, 60), "door": (230, 200, 120), "exit": (90, 220, 120)}
 WATER = (40, 90, 150)
 DECK = (150, 156, 164)

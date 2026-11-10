@@ -490,6 +490,11 @@ LEVEL_5 = dict(
         ("ring_west", "layer1_corridor", "", 1, (9, 22, 13, 33), None, "corridor"),
         ("lockers_north", "layer1_corridor", "", 1, (32, 18, 36, 21), None, "corridor"),
         ("lockers_south", "layer1_corridor", "", 1, (32, 29, 36, 33), None, "corridor"),
+        # Niches in the ring's walls, lower than it: benches, a water dispenser, fire extinguishers (furnish.py).
+        ("niche_south_west", "layer1_corridor", "", 1, (28, 37, 30, 38), 3, "corridor"),
+        ("niche_south_east", "layer1_corridor", "", 1, (48, 37, 50, 38), 3, "corridor"),
+        ("niche_north", "layer1_corridor", "", 1, (50, 18, 52, 19), 3, "corridor"),
+        ("niche_west", "layer1_corridor", "", 1, (8, 28, 9, 30), 3, "corridor"),
         ("stairs_top", "layer1_stairs", "Stairs", 1, (6, 38, 16, 44), None, "stairs"),
         # Layer 2: the subjects' corridor to the Lab hall, and the two loops round it.
         ("stairs_bottom", "layer1_stairs", "Stairs", 2, (5, 54, 17, 63), None, "stairs"),
@@ -547,8 +552,8 @@ LEVEL_5 = dict(
         ("entry_frame", 1, "x", -17, 12, 4, 3, "frame"),
         ("airlock_rear", 1, "x", -4, 12, 4, 3, "airlock_rear"),
         ("welcome_door", 1, "x", 1, 12, 4, 3, "airlock_front"),
-        ("workshop_door", 1, "z", 13, 41, 2, 3, "doorway"),
-        ("waiting_door", 1, "z", 13, 66, 2, 3, "doorway"),
+        ("workshop_door", 1, "z", 13, 41, 2, 2, "lab_door"),          # a pair of the lab's doors, opened by hand
+        ("waiting_door", 1, "z", 13, 66, 2, 2, "lab_door"),
         ("stairs_door", 1, "z", 37, 10, 2, 3, "locked"),            # the lever by the fuse box in the ring
         ("office_door_west", 2, "z", 25, 76, 2, 3, "doorway"),
         ("office_door_east", 2, "z", 25, 93, 2, 3, "doorway"),
@@ -565,7 +570,11 @@ LEVEL_5 = dict(
         ("exit_door", 3, "z", 96, 252, 1, 2, "exit", 10),
     ],
     # The side of each door one comes to it from (it faces that way).
-    DOOR_OUTSIDE={"office_door": "west", "office_exit": "north", "exit_door": "north"},
+    DOOR_OUTSIDE={"office_door": "west", "office_exit": "north", "exit_door": "north", "workshop_door": "south", "waiting_door": "south"},
+    LAB_DOOR="every_tunnel:lab_door",
+    # Layer 1's ceiling: lights set into it where the hanging ones are elsewhere, silent, and air vents between them.
+    CEILING_LIGHT="every_tunnel:lab_ceiling_light",
+    CEILING_VENT="every_tunnel:lab_ceiling_vent",
     OFFICE_DOOR="every_tunnel:office_door",
     EXIT_DOOR="every_tunnel:emergency_door",
     EXIT_SIGN="every_tunnel:exit_sign",
@@ -584,8 +593,9 @@ LEVEL_5 = dict(
            ("cistern_pool", (197, 69, 211, 78), 5, [(202, 69, 204, 78), (204, 73, 211, 75)], False)],
     CATWALK="every_tunnel:metal_grating[type=top,waterlogged=false]",
     # The sounds (AmbienceHooks), zone by zone. Layer 1, from the Lobby on (the way in stays silent): the air
-    # handling, a fridge's compressor off somewhere starting or stopping, a duct popping and ticking; its lights hum
-    # by themselves. Layer 2: the same, and a phone ringing far off now and then. The drain: water running down the channels, drips, pipes creaking far off; the Pump room's pumps,
+    # handling, a fridge's compressor off somewhere starting or stopping, a duct popping and ticking; its lights, set
+    # into the ceiling, are silent. Layer 2: the same, and a phone ringing far off now and then (its hanging lights
+    # hum by themselves). The drain: water running down the channels, drips, pipes creaking far off; the Pump room's pumps,
     # loud; the Hideout only drips. Up the stairs, silence.
     ZONE_AMBIENCE={
         **{zone: LAB_AIR for zone in ("lobby", "workshop", "waiting", "lockers", "layer1_corridor", "layer1_stairs")},

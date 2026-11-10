@@ -385,6 +385,25 @@ object ModBlocks {
     val LAB_SHELF: Block = register("lab_shelf", StackFurnitureBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 2, 16, 16, 16))))
     val LOW_TABLE: Block = register("low_table", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC), listOf(box(1, 0, 1, 15, 7, 15))))
     val LAB_POSTER: Block = register("lab_poster", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(2, 1, 15, 14, 15, 16))))
+    /** Level 5's layer 1 ceiling: a light set into it, lit all over and silent (no FluorescentHum), and an air vent. */
+    val LAB_CEILING_LIGHT: Block = register("lab_ceiling_light", Block(props(MapColor.WHITE, ModSoundGroups.PLASTIC).luminance { 15 }))
+    val LAB_CEILING_VENT: Block = register("lab_ceiling_vent", Block(props(MapColor.WHITE, ModSoundGroups.SHEET_METAL)))
+    /** A card reader by a door, its light green; only to look at. */
+    val LAB_READER: Block = register("lab_reader", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision().luminance { 2 }, listOf(box(5, 4, 15, 11, 12, 16))))
+    /** Safety signs on the walls: the extinguisher's, the emergency exit's, biohazard, radiation. */
+    val SIGN_EXTINGUISHER: Block = register("sign_extinguisher", PropBlock(props(MapColor.RED, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 3, 15, 13, 13, 16))))
+    val SIGN_EXIT: Block = register("sign_exit", PropBlock(props(MapColor.GREEN, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 3, 15, 13, 13, 16))))
+    val SIGN_BIOHAZARD: Block = register("sign_biohazard", PropBlock(props(MapColor.YELLOW, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 3, 15, 13, 13, 16))))
+    val SIGN_RADIATION: Block = register("sign_radiation", PropBlock(props(MapColor.YELLOW, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 3, 15, 13, 13, 16))))
+    /** A green line on the floor, from the Lobby to the stairs' door. */
+    val FLOOR_LINE: Block = register("floor_line", PropBlock(props(MapColor.GREEN, ModSoundGroups.PLASTIC).noCollision(), listOf(box(6, 0, 0, 10, 0.25, 16))))
+    val MICROSCOPE: Block = register("microscope", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(5, 0, 4, 11, 13, 12))))
+    val GLOVE_BOX: Block = register("glove_box", PropBlock(props(MapColor.WHITE, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(4, 0, 5, 12, 5, 11))))
+    val LAB_BEAKERS: Block = register("lab_beakers", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 14, 6, 9))))
+    val LAB_MONITOR: Block = register("lab_monitor", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision(), listOf(box(2, 0, 7, 14, 12, 11))))
+    /** Someone's white coat on a hook, and a jacket left over a chair: they left in a hurry, or did not leave. */
+    val LAB_COAT: Block = register("lab_coat", PropBlock(props(MapColor.WHITE, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(4, 1, 14, 12, 16, 16))))
+    val CHAIR_JACKET: Block = register("chair_jacket", PropBlock(props(MapColor.GREEN, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 13, 8, 13), box(3, 8, 12, 13, 16, 13))))
     val FIRST_AID_BOX: Block = register("first_aid_box", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(4, 5, 14, 12, 12, 16))))
     /** A lab computer on a desk ([LabTerminalBlock]): its screen glows a little. */
     val LAB_TERMINAL: Block = register("lab_terminal", LabTerminalBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision().luminance { 3 }, listOf(box(3, 0, 1, 13, 12, 11))))
@@ -486,6 +505,8 @@ object ModBlocks {
     val CALM_DOOR: Block = register("calm_door", DoorBlock(door(), BlockSetType.IRON))
     /** Black, a long steel pull: the director's office's doors, opened by hand. */
     val OFFICE_DOOR: Block = register("office_door", DoorBlock(door(), SERVICE_DOOR))
+    /** White, a tall window: Level 5's layer 1 rooms' doors, in pairs, opened by hand. */
+    val LAB_DOOR: Block = register("lab_door", DoorBlock(door(), SERVICE_DOOR))
     /** A lit green EXIT sign on the wall above an exit; it stays lit when the power goes (its own battery). */
     val EXIT_SIGN: Block = register(
         "exit_sign",

@@ -434,10 +434,21 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
   tratarla, el tutorial del nivel); con clic derecho en un dibujo o una ficha se lee esa ficha. Las taquillas:
   taquillas para esconderse, como en el nivel 3. Desde el Lobby suena la ventilación del laboratorio
   (`ambient.lab.air`), el compresor de una nevera arranca o para en algún sitio y de vez en cuando un conducto
-  cede o cruje (`ZONE_AMBIENCE`); la entrada sigue en silencio.
+  cede o cruje (`ZONE_AMBIENCE`); la entrada sigue en silencio. El aspecto (`tools/map/lab/level.py`,
+  `furnish.py`): un techo de placas blancas con luces empotradas, que alumbran por igual y no hacen ruido
+  (`lab_ceiling_light`: sin zumbido de fluorescentes en la capa 1), una rejilla de ventilación junto a una de cada
+  dos (`lab_ceiling_vent`); columnas en el Lobby y el Workshop, con el acabado de las paredes (`COLUMNS`); cuatro
+  nichos en las paredes del anillo, más bajos que él, con bancos, un dispensador de agua y extintores bajo su
+  cartel; el Workshop y la sala de espera tras puertas dobles blancas con ventanilla (`lab_door`, se abren a mano),
+  un lector de tarjeta con la luz verde junto a cada puerta y a la de las escaleras (solo decorativo), una placa de
+  plástico blanco con el nombre de cada sala (`wall_text` en su estilo `lab`, `PLATES`); una línea verde en el suelo
+  del Lobby a la puerta de las escaleras (`FLOOR_LINE`); carteles de seguridad (extintor, salida de emergencia,
+  riesgo biológico, radiación); y la gente que trabajaba allí: un monitor y un café en el mostrador del Lobby, un
+  microscopio, vasos de precipitados y una caja de guantes en el banco central del Workshop, una bata colgada, una
+  chaqueta olvidada en una silla.
 - **La caja de fusibles.** La palanca de las escaleras, en el lado este del anillo, no funciona ("No power.",
   `block.breaker.dead`) hasta que la caja de fusibles de al lado está llena: cinco portafusibles
-  (`FuseHolderBlock`) marcados 5A, 10A, 15A, 20A y 30A, el de 15A ya puesto. Los otros cuatro fusibles están uno
+  (`FuseHolderBlock`) marcados 5A, 10A, 15A, 20A y 30A, el de 15A ya puesto; los fusibles son tubos de cristal con una franja de su color. Los otros cuatro fusibles están uno
   en cada sala, a la vista: 10A en el mostrador del Lobby, 30A en una caja de herramientas del Workshop, 5A en el
   mueble de la sala de espera, 20A en el mueble de las taquillas. Apuntando a un portafusibles con el fusible de su
   amperaje, clic derecho lo mete (`block.fuse.insert`); cualquier otro rebota (`block.fuse.reject`). Con el quinto,

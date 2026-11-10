@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/lab_coat"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/lab_coat",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/lab_coat",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/lab_coat",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/sign_exit"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/sign_exit",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/sign_exit",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/sign_exit",
+      "y": 270
+    }
+  }
+}

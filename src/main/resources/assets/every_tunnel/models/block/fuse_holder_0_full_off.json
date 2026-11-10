@@ -3,7 +3,7 @@
   "textures": {
     "p": "every_tunnel:block/fuse_label_0",
     "m": "every_tunnel:block/lab_steel",
-    "b": "every_tunnel:block/fuse_body_0",
+    "g": "every_tunnel:block/fuse_glass",
     "l": "every_tunnel:block/fuse_lamp_off",
     "particle": "every_tunnel:block/fuse_label_0"
   },
@@ -144,33 +144,97 @@
     },
     {
       "from": [
-        6,
-        4,
+        7,
+        4.6,
         13
       ],
       "to": [
-        10,
-        8,
-        14.5
+        9,
+        7.4,
+        14.6
       ],
       "faces": {
         "north": {
-          "texture": "#b"
+          "texture": "#g"
         },
         "east": {
-          "texture": "#b"
+          "texture": "#g"
         },
         "south": {
-          "texture": "#b"
+          "texture": "#g"
         },
         "west": {
-          "texture": "#b"
+          "texture": "#g"
         },
         "up": {
-          "texture": "#b"
+          "texture": "#g"
         },
         "down": {
-          "texture": "#b"
+          "texture": "#g"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        3.8,
+        12.8
+      ],
+      "to": [
+        9.5,
+        4.6,
+        14.8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m"
+        },
+        "east": {
+          "texture": "#m"
+        },
+        "south": {
+          "texture": "#m"
+        },
+        "west": {
+          "texture": "#m"
+        },
+        "up": {
+          "texture": "#m"
+        },
+        "down": {
+          "texture": "#m"
+        }
+      }
+    },
+    {
+      "from": [
+        6.5,
+        7.4,
+        12.8
+      ],
+      "to": [
+        9.5,
+        8.2,
+        14.8
+      ],
+      "faces": {
+        "north": {
+          "texture": "#m"
+        },
+        "east": {
+          "texture": "#m"
+        },
+        "south": {
+          "texture": "#m"
+        },
+        "west": {
+          "texture": "#m"
+        },
+        "up": {
+          "texture": "#m"
+        },
+        "down": {
+          "texture": "#m"
         }
       }
     }

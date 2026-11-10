@@ -1,0 +1,112 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "k": "every_tunnel:block/lab_black",
+    "s": "every_tunnel:block/monitor_screen",
+    "particle": "every_tunnel:block/lab_black"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        3,
+        7
+      ],
+      "to": [
+        14,
+        12,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#s",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#k"
+        },
+        "south": {
+          "texture": "#k"
+        },
+        "west": {
+          "texture": "#k"
+        },
+        "up": {
+          "texture": "#k"
+        },
+        "down": {
+          "texture": "#k"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        0.5,
+        8.5
+      ],
+      "to": [
+        9,
+        3,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#k"
+        },
+        "east": {
+          "texture": "#k"
+        },
+        "south": {
+          "texture": "#k"
+        },
+        "west": {
+          "texture": "#k"
+        },
+        "up": {
+          "texture": "#k"
+        },
+        "down": {
+          "texture": "#k"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        0,
+        7
+      ],
+      "to": [
+        11,
+        0.5,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#k"
+        },
+        "east": {
+          "texture": "#k"
+        },
+        "south": {
+          "texture": "#k"
+        },
+        "west": {
+          "texture": "#k"
+        },
+        "up": {
+          "texture": "#k"
+        },
+        "down": {
+          "texture": "#k"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/lab_beakers"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/lab_beakers",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/lab_beakers",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/lab_beakers",
+      "y": 270
+    }
+  }
+}
