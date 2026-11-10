@@ -17,6 +17,7 @@ import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvents
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.PersistentState
@@ -38,7 +39,8 @@ import org.joml.Vector3f
  *   are back on their cabinet. Try again.
  * - With a tank empty, the button only clicks.
  *
- * The level built anew puts the grate, the hatch and the flasks back; the pair stays the game's.
+ * The level built anew puts the grate, the hatch and the flasks back; the pair stays the game's. Down the ladder
+ * under the hatch, the drain ([DrainHooks]) shuts it again behind the player ([setHatch]).
  */
 object ChemicalHooks {
 
@@ -55,6 +57,8 @@ object ChemicalHooks {
     /** From the mixer running to the grate dissolving, and on to the hatch opening. */
     private const val POUR_TICKS = 50L
     private const val HATCH_TICKS = 30L
+    /** Vanilla's iron trapdoor shutting, this deep: a heavy lid. */
+    private const val SLAM_PITCH = 0.6f
 
     // Server thread only.
     private var server: MinecraftServer? = null
@@ -98,6 +102,26 @@ object ChemicalHooks {
 
     /** The level stands anew: no alarm, nothing poured. */
     fun levelBuilt() = forget()
+
+    /** The solvent has opened the way down this time the level stands (the grate gone, the hatch opened once). */
+    val drainOpened: Boolean
+        get() = dissolveAt == Long.MAX_VALUE && hatchAt == Long.MIN_VALUE
+
+    /** The drain's hatch shut, with a slam heard under it ([open] false: an iron trapdoor's, deep), or open again, quietly; true if it moved. */
+    fun setHatch(server: MinecraftServer, open: Boolean): Boolean {
+        val level = LevelManager.get(LEVEL_ID) ?: return false
+        val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: return false
+        val box = zone(level, DRAIN_TAG) ?: return false
+        var moved = false
+        for (pos in positions(box.grow(1))) {
+            val state = world.getBlockState(pos)
+            if (!state.isOf(ModBlocks.BUNKER_TRAPDOOR) || state.get(TrapdoorBlock.OPEN) == open) continue
+            world.setBlockState(pos, state.with(TrapdoorBlock.OPEN, open))
+            if (!open) world.playSound(null, pos, SoundEvents.BLOCK_IRON_TRAPDOOR_CLOSE, SoundCategory.BLOCKS, 2f, SLAM_PITCH)
+            moved = true
+        }
+        return moved
+    }
 
     private fun forget() {
         alarmUntil = Long.MIN_VALUE

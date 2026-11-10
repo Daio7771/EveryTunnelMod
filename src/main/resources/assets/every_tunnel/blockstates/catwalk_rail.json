@@ -1,0 +1,43 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "every_tunnel:block/catwalk_rail_north",
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "every_tunnel:block/catwalk_rail_north",
+        "y": 90,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "every_tunnel:block/catwalk_rail_north",
+        "y": 180,
+        "uvlock": false
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "every_tunnel:block/catwalk_rail_north",
+        "y": 270,
+        "uvlock": false
+      }
+    }
+  ]
+}

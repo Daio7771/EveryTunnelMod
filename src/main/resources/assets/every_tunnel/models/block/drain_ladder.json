@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/ladder",
+  "textures": {
+    "texture": "every_tunnel:block/drain_ladder",
+    "particle": "every_tunnel:block/drain_ladder"
+  }
+}

@@ -391,6 +391,52 @@ object ModBlocks {
     val ALARM_LIGHT: Block = register("alarm_light", AlarmLightBlock(props(MapColor.RED, ModSoundGroups.PLASTIC).noCollision().luminance { if (it.get(AlarmLightBlock.ON)) 10 else 0 }, listOf(box(5, 5, 10, 11, 11, 16))))
     /** A fume hood, two high: a cabinet under a glass sash. */
     val FUME_HOOD: Block = register("fume_hood", StackFurnitureBlock(props(MapColor.WHITE, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 0, 16, 16, 16))))
+    // Level 5's drain (layer 3): rusty steel, caged lamps; the director's office: black leather, steel, smoked glass.
+    /** The ladder from the chemical room's hatch down to the drain ([DrainLadderBlock]). */
+    val DRAIN_LADDER: Block = register("drain_ladder", DrainLadderBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
+    /** The drain's dim caged lamps, on walls and hanging from ceilings ([CageLampBlock]). */
+    val CAGE_LAMP: Block = register(
+        "cage_lamp",
+        CageLampBlock(
+            props(MapColor.YELLOW, BlockSoundGroup.GLASS).noCollision().luminance { CageLampBlock.luminance(it) }
+                .emissiveLighting { state, _, _ -> FluorescentLightBlock.glows(state) },
+        ),
+    )
+    /** Steel railing on a catwalk's edges ([CatwalkRailBlock]). */
+    val CATWALK_RAIL: Block = register("catwalk_rail", CatwalkRailBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
+    /** A pump, two high: its casing, its motor on top (the Pump room's, running). */
+    val PUMP: Block = register("pump", StackFurnitureBlock(props(MapColor.GREEN, ModSoundGroups.HOLLOW_METAL), listOf(box(0, 0, 0, 16, 16, 16))))
+    /** A sluice gate's heavy plate in a wall, side by side and one over another. */
+    val SLUICE_GATE: Block = register("sluice_gate", RowFurnitureBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 13, 16, 16, 16))))
+    val VALVE_WHEEL: Block = register("valve_wheel", PropBlock(props(MapColor.RED, ModSoundGroups.METAL_PIPE).noCollision(), listOf(box(3, 3, 11.5, 13, 13, 16))))
+    val PRESSURE_GAUGE: Block = register("pressure_gauge", PropBlock(props(MapColor.WHITE, ModSoundGroups.METAL_PIPE).noCollision(), listOf(box(5, 2, 13, 11, 12, 16))))
+    /** The Hideout: the guard's mattress of rags, his empty tins, his dead flashlight. */
+    val MATTRESS: Block = register("mattress", RowFurnitureBlock(props(MapColor.LIGHT_GRAY, BlockSoundGroup.WOOL).noCollision(), listOf(box(0, 0, 1, 16, 4, 15))))
+    val TIN_CANS: Block = register("tin_cans", PropBlock(props(MapColor.IRON_GRAY, ModSoundGroups.HOLLOW_METAL).noCollision(), listOf(box(3, 0, 3, 13, 5, 13))))
+    val DEAD_FLASHLIGHT: Block = register("dead_flashlight", PropBlock(props(MapColor.YELLOW, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 6.5, 14, 3, 9.5))))
+    /** The director's desk: smoked glass on steel; desks side by side make one. */
+    val EXEC_DESK: Block = register("exec_desk", RowFurnitureBlock(props(MapColor.BLACK, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 0, 16, 16, 16))))
+    val CREDENZA: Block = register("credenza", RowFurnitureBlock(props(MapColor.BLACK, ModSoundGroups.WOOD), listOf(box(0, 0, 0, 16, 16, 16))))
+    val LEATHER_SOFA: Block = register("leather_sofa", RowFurnitureBlock(props(MapColor.BLACK, BlockSoundGroup.WOOL), listOf(box(0, 0, 1, 16, 7, 16), box(0, 7, 12, 16, 15, 16))))
+    val LEATHER_CHAIR: Block = register("leather_chair", PropBlock(props(MapColor.BLACK, BlockSoundGroup.WOOL).noCollision(), listOf(box(3, 0, 3, 13, 9, 13), box(3, 9, 12, 13, 16, 14))))
+    /** The director's own chair, high-backed, where he sits. */
+    val EXEC_CHAIR: Block = register("exec_chair", PropBlock(props(MapColor.BLACK, BlockSoundGroup.WOOL).noCollision(), listOf(box(2, 0, 2, 14, 9, 14), box(3, 9, 12, 13, 16, 15))))
+    val GLASS_TABLE: Block = register("glass_table", PropBlock(props(MapColor.BLACK, BlockSoundGroup.GLASS), listOf(box(1, 0, 1, 15, 7, 15))))
+    /** A little block of diorite on the director's desk. */
+    val MINI_DIORITE: Block = register("mini_diorite", PropBlock(props(MapColor.WHITE, BlockSoundGroup.STONE).noCollision(), listOf(box(5, 0, 5, 11, 6, 11))))
+    val PAPER_STACK: Block = register("paper_stack", PropBlock(props(MapColor.WHITE, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(2, 0, 3, 14, 3, 14))))
+    val COFFEE_CUP: Block = register("coffee_cup", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(6, 0, 6, 11, 4, 10))))
+    val DESK_LAMP_MODERN: Block = register(
+        "desk_lamp_modern", PropBlock(props(MapColor.BLACK, ModSoundGroups.METAL_PIPE).noCollision().luminance { 9 }, listOf(box(4, 0, 4, 12, 12, 11))),
+    )
+    /** The office's square ceiling lights ([PanelLightBlock]). */
+    val PANEL_LIGHT: Block = register(
+        "panel_light",
+        PanelLightBlock(
+            props(MapColor.WHITE, BlockSoundGroup.GLASS).noCollision().luminance { FluorescentLightBlock.luminance(it) }
+                .emissiveLighting { state, _, _ -> FluorescentLightBlock.glows(state) },
+        ),
+    )
     /** One slot of Level 5's fuse box ([FuseHolderBlock]). */
     val FUSE_HOLDER: Block = register("fuse_holder", FuseHolderBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision().luminance { if (it.get(FuseHolderBlock.LIT)) 4 else 0 }))
     /** An artificial plant in a pot, never watered, never wilting. */
@@ -434,6 +480,8 @@ object ModBlocks {
     val EMERGENCY_DOOR: Block = register("emergency_door", DoorBlock(door(), BlockSetType.IRON))
     /** The Calm room's: walnut to look at, but iron to hands, so only its reader opens it. */
     val CALM_DOOR: Block = register("calm_door", DoorBlock(door(), BlockSetType.IRON))
+    /** Black, a long steel pull: the director's office's doors, opened by hand. */
+    val OFFICE_DOOR: Block = register("office_door", DoorBlock(door(), SERVICE_DOOR))
     /** A lit green EXIT sign on the wall above an exit; it stays lit when the power goes (its own battery). */
     val EXIT_SIGN: Block = register(
         "exit_sign",

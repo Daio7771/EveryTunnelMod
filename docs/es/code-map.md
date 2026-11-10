@@ -107,6 +107,7 @@ con un comentario KDoc que cuenta más.
 | `PropBlock.kt` | Un prop de suelo orientado a uno de cuatro lados |
 | `ConnectingPropBlock.kt` | Tuberías, conductos y bandejas de cables que se conectan con sus vecinos |
 | `FluorescentLightBlock.kt` | La luz: encendida, parpadeante, apagada; nivel de luz 13, dibujada a brillo máximo |
+| `DrainBlocks.kt` | El drenaje del nivel 5: su escalera de mano, sus lámparas enjauladas (tenues, parpadean como los fluorescentes), las luces cuadradas del despacho, la barandilla de las pasarelas |
 | `WarmLampBlock.kt` | La luz de techo del nivel 4: cálida y silenciosa, nivel de luz 14 |
 | `SuiteBedBlock.kt` | Una cama de las Suites del nivel 4, en dos bloques |
 | `PuzzleRackBlock.kt` | Un estante con un disco o un carrete, y su brillo |
@@ -142,8 +143,10 @@ con un comentario KDoc que cuenta más.
 | `LabFigureEntity.kt` | La figura que se ve desde el Lobby del nivel 5: cuando la miran, se va andando tras la esquina y desaparece |
 | `LabFigureHooks.kt` | Pone la figura ahí al construirse el nivel 5, una vez por partida |
 | `SubjectEntity.kt` | Los sujetos de pruebas, inmóviles en sus salas selladas, por fase; `SubjectHooks` los pone con el nivel |
+| `DeadGuardEntity.kt` | El guardia anterior, muerto en el Hideout del drenaje; `DeadGuardHooks` lo pone ahí con el nivel |
 | `LabHallHooks.kt` | El golpe de cuerdas y la primera Cloud del Lab hall, una vez por partida |
 | `ChemicalHooks.kt` | El puzle químico: la pareja de la partida, la mezcladora, la alarma y sus enemigos, la rejilla disolviéndose, la trampilla |
+| `DrainHooks.kt` | El drenaje del nivel 5: la trampilla cerrándose de golpe cuando el jugador ha bajado su escalera, abierta otra vez si muere antes de la Junction |
 | `DistortionHooks.kt` | Los enemigos del nivel 5: sus puestos según los puntos de aparición, de vuelta al morir, avisar a los Hunters, cuándo y dónde viene una Cloud, `/everytunnel spawn` |
 
 ### `platform/`: hooks (lógica de juego movida por eventos)
@@ -192,7 +195,7 @@ con un comentario KDoc que cuenta más.
 | `LabDoorHooks.kt` | Las puertas bloqueadas del nivel 5: las palancas, la ruta sur que se abre al salir de la Office |
 | `BreakerHooks.kt` | La sala de mantenimiento del nivel 4: palancas, botón, contador, corriente del lector |
 | `SafeHooks.kt` | Las cajas fuertes de las Suites: combinaciones, bloque, resultado del cliente |
-| `ContinueGame.kt` | La partida guardada: puntos de control, CONTINUE, recuperar el nivel 4 |
+| `ContinueGame.kt` | La partida guardada: puntos de control (los puntos de reinicio de un nivel: el que hay dentro de la zona en la que se entra), CONTINUE, recuperar el nivel 4 |
 | `WallMessageBlock.kt` | Un mensaje pintado en la pared: el bloque y sus datos |
 | `SafeLevelHooks.kt` | Niveles sin riesgo: sin daño (el nivel 4) |
 | `SuiteBedHooks.kt` | Descansar en una cama: fundido a negro, vida y estamina llenas |
@@ -267,6 +270,7 @@ con un comentario KDoc que cuenta más.
 | `WallMessageRenderer.kt` | Dibuja un mensaje con la fuente pintada y recuerda lo que le ha pasado |
 | `ObserverRenderer.kt` | Renderizador de GeckoLib del Observer; su cabeza gira con la de la entidad |
 | `SubjectRenderer.kt` | Renderizador de GeckoLib de los sujetos, cada fase con su cuerpo y su piel |
+| `DeadGuardRenderer.kt` | Renderizador de GeckoLib del guardia anterior, sentado, con el uniforme del jugador gastado |
 | `LabFigureRenderer.kt` | La figura que se ve desde el Lobby del nivel 5, con el modelo del jugador, una silueta oscura |
 | `HunterRenderer.kt` | Renderizador de GeckoLib de los Hunters, con los ojos brillando |
 | `DistortionRenderer.kt` | Renderizador y modelo de GeckoLib de las Distortions: giradas hacia su yaw, el glitch, el ojo del Junior agrietándose |

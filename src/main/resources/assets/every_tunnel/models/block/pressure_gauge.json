@@ -1,0 +1,82 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "r": "every_tunnel:block/rusty_steel",
+    "d": "every_tunnel:block/rusty_steel_dark",
+    "g": "every_tunnel:block/gauge_face",
+    "particle": "every_tunnel:block/rusty_steel"
+  },
+  "elements": [
+    {
+      "from": [
+        7,
+        2,
+        14
+      ],
+      "to": [
+        9,
+        6,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#r"
+        },
+        "east": {
+          "texture": "#r"
+        },
+        "south": {
+          "texture": "#r"
+        },
+        "west": {
+          "texture": "#r"
+        },
+        "up": {
+          "texture": "#r"
+        },
+        "down": {
+          "texture": "#r"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        6,
+        13
+      ],
+      "to": [
+        11,
+        12,
+        15
+      ],
+      "faces": {
+        "north": {
+          "texture": "#g",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#d"
+        },
+        "south": {
+          "texture": "#d"
+        },
+        "west": {
+          "texture": "#d"
+        },
+        "up": {
+          "texture": "#d"
+        },
+        "down": {
+          "texture": "#d"
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

@@ -24,6 +24,7 @@ flowchart TD
     Q --> R[Nivel 4, B4: VIP lounge]
     R -->|puerta grande| S[Tramo oscuro, pasillo de entrada, esclusa: se construye el nivel 5]
     S --> T[Nivel 5, B5: laboratorio, capas 1 y 2]
+    T -->|disolvente, trampilla, escalera de mano| U[Capa 3: el drenaje, hasta el despacho del director]
     I -.->|muerte| O[Fundido a negro, reinicia el nivel]
     K -.->|muerte| O
     P -.->|muerte| O
@@ -412,13 +413,14 @@ la construcción del nivel 5, en juego (`platform.LabHooks`), en un espacio prop
   momento). Cada puerta son dos hojas de `AirlockDoorBlock` que se mueven un cuarto de bloque por paso
   (`core.door.SlidingDoor`, `platform.SlidingDoors`).
 
-De momento el nivel 5 son sus dos capas de arriba, amuebladas: un laboratorio limpio de azulejo
+El nivel 5 son tres capas. Las dos de arriba, amuebladas, son un laboratorio limpio de azulejo
 blanco con una franja de azulejo verde pálido, vinilo gris, paneles blancos en el techo y todos los
 fluorescentes encendidos. Capa 1: el Lobby, un anillo de pasillos con el Workshop, la sala de espera y las
 taquillas, y una puerta de acero (cerrada) a las escaleras. Capa 2, 10 bloques más abajo: el pasillo de los
 sujetos con las salas S-1 a S-4, el Lab hall, un bucle al norte por la Office, un bucle al sur por Storage
-hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla. Sus zonas están en
-[Niveles](levels.md#nivel-5). Lo que ya funciona:
+hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla. La capa 3, otros 7 bloques más
+abajo y al este de todo, es el drenaje, sucio e industrial, y subiendo su escalera el despacho del director (la
+escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel-5). Lo que ya funciona:
 
 - **La capa 1, el tutorial.** Amueblada (`tools/map/lab/furnish.py`), fría y usada hasta hace poco: acero
   inoxidable, melamina blanca, plástico verde quirófano. El Lobby: mostrador de recepción, asientos, plantas;
@@ -444,7 +446,9 @@ hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla.
   "The south route is open."
 - **El checkpoint del Lab hall:** entrar en él lo hace checkpoint, en silencio (`ContinueGame`, una zona y un punto
   de aparición con la etiqueta `restart_point`). Morir ahí o después reinicia en el Lab hall con lo que lleva el
-  jugador; CONTINUE le deja ahí con lo que llevaba al llegar.
+  jugador; CONTINUE le deja ahí con lo que llevaba al llegar. La Junction del drenaje es otro, igual (cada punto de
+  reinicio es el punto de aparición con la etiqueta `restart_point` que hay dentro de su zona; uno anterior nunca
+  ocupa el sitio de uno posterior).
 - **La capa 2.** El pasillo de los sujetos: las salas de pruebas S-1 a S-4 están selladas y se ven por un ventanal
   ancho con marco de acero (`WINDOWS`), blancas y vacías salvo por su sujeto, inmóvil, una persona que sala a sala
   se va convirtiendo en un Pale man (`SubjectEntity`, `SubjectHooks`; `tools/entity/subject.py`), con una ficha de
@@ -466,14 +470,15 @@ hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla.
   mueble al otro lado de la rejilla, cerca de la mezcladora; uno en cada uno de sus dos depósitos (`MixerTankBlock`, `block.mixer.fill`) y luego
   su botón rojo (`MixerBlock`). Una pareja, sorteada en cada partida, es el disolvente: la mezcladora funciona
   (`block.mixer.run`), la rejilla del drenaje se disuelve entre humo verde (`block.grate.dissolve`) y la trampilla de
-  detrás se abre (sobre un foso de un bloque de momento: el drenaje es la capa 3). Cualquier otra pareja: la alarma, una sirena (`event.lab.alarm`) y luces rojas girando
+  detrás se abre sobre la escalera de mano que baja al drenaje. Cualquier otra pareja: la alarma, una sirena (`event.lab.alarm`) y luces rojas girando
   (`AlarmLightBlock`) durante 10 s, y aparecen en la sala tres Hunters y un Junior; después los dos frascos vuelven a
   su mueble.
 - **Sus enemigos** los coloca `tools/map/lab/furnish.py`; para probarlos en cualquier sitio,
   `/everytunnel spawn hunters|junior|cloud`. `platform.DistortionHooks` los pone al construirse el nivel y
   los devuelve a su sitio cuando el jugador muere en él; ninguno se guarda. Los que pone el comando son de un solo uso: una muerte los quita.
   - **Los Hunters** (`HunterEntity`, decisiones en `entities.HunterBrain`), en grupos de tres en un punto de
-    aparición con la etiqueta `hunters`: humanoides pequeños y negros con bata, ojos blancos sin pupila.
+    aparición con la etiqueta `hunters` (uno al lado de otro, o en el suelo más cercano donde no lo hay: una pasarela sobre
+    el agua): humanoides pequeños y negros con bata, ojos blancos sin pupila.
     Merodean cerca de él; el que ve al jugador (16 bloques, un cono de 140 grados, o a 3 bloques mire adonde
     mire, nunca a través de una pared) chilla (`entity.hunter.shriek`) y carga el grupo entero. Medio corazón
     por golpe, uno por segundo cada uno; un golpe de llave inglesa mata a uno, aunque sea con prisa. Sin verle 4 s, buscan y luego
@@ -481,7 +486,8 @@ hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla.
   - **La Distortion Cloud** (`DistortionCloudEntity`): humo negro con glitches y un ojo morado enfadado, que
     susurra (`entity.distortion_cloud.whisper`). Aparece ya formada (`entity.distortion_cloud.appear`) de 8 a 14
     bloques delante del jugador, donde pueda verla, cada 2 a 4 minutos pasados en zonas con la etiqueta `cloud`
-    (si no hay otra cerca). Tenerla en cualquier parte por delante (a menos de 90 grados a cada lado, mire uno
+    (si no hay otra cerca); en las del drenaje (con la etiqueta `cloud_often` también), cada 1 a 2 minutos, contados
+    aparte. Tenerla en cualquier parte por delante (a menos de 90 grados a cada lado, mire uno
     arriba o abajo; las paredes la tapan) 1 s seguido mata (`entity.distortion_cloud.kill`), igual que meterse
     en ella; la pantalla se distorsiona mientras dura la mirada (`client.effects.DistortionEffect`). Si nadie
     mira hacia ella durante 6 s, se va (`entity.distortion_cloud.leave`) y el detector se calla. Hay que darse la
@@ -491,6 +497,32 @@ hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla.
     menos de 8 bloques de su ojo, sin nada en medio, la cámara tiembla y se desvía apartándose de él, y todos los
     Hunters cercanos saben dónde está el jugador. Mirarle al ojo 4 s sin apartar la vista (el ojo se agrieta,
     sube un zumbido de cristal) acaba con él (`entity.distortion_junior.die`).
+
+- **La capa 3, el drenaje** (los mismos módulos de `tools/map/lab/`; su aspecto en `STYLES`, sus sonidos en
+  `ZONE_AMBIENCE`). Una escalera de mano de acero oxidado baja unos seis bloques desde la trampilla; en cuanto el
+  jugador pisa el suelo a su pie (la zona con la etiqueta `drain_bottom`), la trampilla se cierra de golpe sobre él
+  (la trampilla de hierro vanilla, grave: `DrainHooks`): ya no hay vuelta atrás. Morir antes de la Junction devuelve arriba, al Lab
+  hall, así que entonces la trampilla se vuelve a abrir, si el disolvente la había abierto. Túneles de cinco de
+  ancho de hormigón manchado, un canal de agua por el centro, tuberías oxidadas por las paredes y bajo el techo,
+  charcos; lámparas enjauladas amarillas (`CageLampBlock`) cuelgan muy separadas, algunas parpadean y otras están
+  fundidas, con oscuridad entre ellas. Corre el agua, caen gotas, las tuberías crujen a lo lejos. Dos bucles:
+  - **La Junction,** donde se cruzan los túneles: una sala alta, una piscina de agua honda bajo pasarelas de rejilla
+    con barandilla (`CatwalkRailBlock`), una compuerta en su pared norte. Es el checkpoint del drenaje, y un Junior
+    flota sobre el agua a la vista. Las Clouds vienen en ella y en los túneles.
+  - Junto al primer bucle, **el Hideout:** a oscuras, un colchón de trapos, latas vacías, una caja con un último
+    snack encima, y el guardia anterior, el vigilante nocturno nº 13, muerto, sentado contra la pared con el
+    uniforme del jugador gastado (`DeadGuardEntity`, `DeadGuardHooks`; `tools/entity/dead_guard.py`), su linterna
+    apagada y su nota al lado (un aviso para el siguiente). Y **la Pump room:** las bombas en marcha, fuertes
+    (`ambient.drain.pumps`), dos pilas en cajas de herramientas, un snack y agua en un banco de trabajo.
+  - El túnel norte que sigue desde la Junction está cortado por **un derrumbe** de escombros: el camino sigue por
+    **la Cistern,** un depósito de agua honda cruzado por pasarelas estrechas sin barandilla, con tres Hunters donde
+    se cruzan, y sale por su lado este, rodeando hasta el túnel pasado el derrumbe.
+  - Al final, **una escalera de acero** sube diez bloques hasta **el despacho del director:** moderno, cuero negro,
+    acero y cristal ahumado, luces cuadradas en el techo (`PanelLightBlock`); su escritorio al fondo mirando a la
+    puerta, su sillón detrás, una lámpara, un bloquecito de diorita, unos papeles, café. Dos puertas (se abren a
+    mano): la de entrada desde la escalera y, en su lado sur, la de salida a un pasillo del garaje del nivel 1,
+    recto e iluminado, que acaba en la puerta EXIT cerrada del nivel 1 bajo su cartel. Bajo el final del pasillo hay
+    un pozo de 40 bloques, cerrado por su suelo hasta que la escena del jefe lo rompa.
 
 La reconstrucción del mapa al abrir el mundo no toca el nivel 5: la entrada se va con el nivel 4, y nadie
 puede llegar a lo que queda en pie hasta la siguiente construcción. Una partida continuada en el nivel 5

@@ -107,6 +107,7 @@ KDoc comment that says more.
 | `PropBlock.kt` | A floor prop facing one of four sides |
 | `ConnectingPropBlock.kt` | Pipes, ducts and cable trays that connect to neighbours |
 | `FluorescentLightBlock.kt` | The light: on, flicker, off; light level 13, drawn full bright |
+| `DrainBlocks.kt` | Level 5's drain: its ladder, its caged lamps (dim, flickering like the fluorescents), the office's panel lights, the catwalks' railing |
 | `WarmLampBlock.kt` | Level 4's ceiling light: warm and silent, light level 14 |
 | `SuiteBedBlock.kt` | A bed in Level 4's Suites, in two blocks |
 | `PuzzleRackBlock.kt` | A rack holding a record or a reel, with its glow |
@@ -142,8 +143,10 @@ KDoc comment that says more.
 | `LabFigureEntity.kt` | The figure seen from Level 5's Lobby: once looked at, it walks off round the corner and is gone |
 | `LabFigureHooks.kt` | Puts the figure there when Level 5 is built, once a game |
 | `SubjectEntity.kt` | The test subjects, still in their sealed chambers, by stage; `SubjectHooks` puts them in with the level |
+| `DeadGuardEntity.kt` | The guard before you, dead in the drain's Hideout; `DeadGuardHooks` puts him there with the level |
 | `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
+| `DrainHooks.kt` | Level 5's drain: the hatch slamming shut once the player is down its ladder, open again on a death before the Junction |
 | `DistortionHooks.kt` | Level 5's enemies: posts from spawn points, back on a death, telling the Hunters, when and where a Cloud comes, `/everytunnel spawn` |
 
 ### `platform/`: hooks (game logic driven by events)
@@ -192,7 +195,7 @@ KDoc comment that says more.
 | `LabDoorHooks.kt` | Level 5's locked doors: the levers, the south route opening on walking out of the Office |
 | `BreakerHooks.kt` | Level 4's Maintenance room: levers, button, counter, power for the reader |
 | `SafeHooks.kt` | The safes in the Suites: the combinations, the block, the result from the client |
-| `ContinueGame.kt` | The saved game: checkpoints, CONTINUE, putting Level 4 back |
+| `ContinueGame.kt` | The saved game: checkpoints (a level's restart points: the one inside the zone walked into), CONTINUE, putting Level 4 back |
 | `WallMessageBlock.kt` | A message painted on a wall: the block and its data |
 | `SafeLevelHooks.kt` | Levels without risk: no damage (Level 4) |
 | `SuiteBedHooks.kt` | Resting in a bed: fade to black, health and stamina full |
@@ -267,6 +270,7 @@ KDoc comment that says more.
 | `WallMessageRenderer.kt` | Draws a wall message in the painted font; remembers what happened to it |
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
 | `SubjectRenderer.kt` | GeckoLib renderer for the subjects, each stage its body and skin |
+| `DeadGuardRenderer.kt` | GeckoLib renderer for the guard before you, sitting, in the player's uniform worn out |
 | `LabFigureRenderer.kt` | The figure seen from Level 5's Lobby, on the player's model, a dark shape |
 | `HunterRenderer.kt` | GeckoLib renderer for the Hunters, their eyes glowing |
 | `DistortionRenderer.kt` | GeckoLib renderer and model for the Distortions: turned to their yaw, the glitch, the Junior's cracking eye |

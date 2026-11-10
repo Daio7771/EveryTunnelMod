@@ -1166,6 +1166,11 @@ def steel_door_tex(rng, half, colour, kind):
             px(img, x, y, light, 0.25)
     if half == "bottom":
         T.gradient(img, (40, 42, 46), 0.0, 0.35)                  # kicked and dirty at the bottom
+    if kind == "office":                                          # black, a long steel pull, nothing else
+        for y in range(16):
+            px(img, 12, y, (150, 154, 160), 0.9)
+            px(img, 13, y, (90, 94, 100), 0.6)
+        return img
     if kind == "emergency":
         if half == "bottom":
             rect(img, 2, 1, 13, 2, (170, 176, 184))               # push bar
@@ -1833,6 +1838,175 @@ def shutter_tex(rng):
             if rng.random() < 0.6:
                 px(img, x, (y0 + 4) % 16, (126, 86, 58))
     T.blob(img, rng, (96, 92, 84), 4, 0.3)                           # grime
+    return img
+
+
+# --- Level 5's drain (layer 3) and the director's office ------------------------------------
+
+DRAIN_RUST = (122, 76, 44)
+
+
+def rusty_steel_tex(rng, base=(92, 94, 92)):
+    """Old steel, painted once: rust in blooms and runs, grime."""
+    img = new(base)
+    noise(img, rng, 5)
+    for _ in range(3):
+        T.blob(img, rng, DRAIN_RUST, rng.randrange(2, 4), 0.55)
+    for _ in range(3):
+        x = rng.randrange(16)
+        for y in range(rng.randrange(3, 12)):
+            px(img, x, y, (104, 66, 40), 0.4)
+    speckle(img, rng, 10, (60, 58, 54), 0.6)
+    return img
+
+
+def ladder_tex(rng):
+    """The drain's ladder: two rusty steel rails and five rungs, on nothing."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in (1, 2, 13, 14):
+            px(img, x, y, (96, 92, 86, 255))
+    for y0 in (1, 4, 7, 10, 13):
+        for x in range(3, 13):
+            px(img, x, y0, (112, 106, 98, 255))
+            px(img, x, y0 + 1, (70, 66, 60, 255))
+    for _ in range(14):                                              # rust where the hands go
+        x, y = rng.randrange(16), rng.randrange(16)
+        if img.getpixel((x, y))[3]:
+            px(img, x, y, DRAIN_RUST + (255,), 0.7)
+    return img
+
+
+def bulb_tex(rng, lit):
+    """A caged lamp's bulb behind its glass: warm and yellowed when lit."""
+    img = new((255, 214, 140) if lit else (108, 96, 78))
+    noise(img, rng, 3)
+    for x in range(16):
+        px(img, x, 0, (200, 150, 80) if lit else (70, 62, 50), 0.6)
+    return img
+
+
+def pump_paint_tex(rng):
+    """Industrial green paint on cast iron, chipped to the metal and rusting there."""
+    img = new((58, 92, 74))
+    noise(img, rng, 4)
+    for _ in range(5):
+        x, y = rng.randrange(16), rng.randrange(16)
+        px(img, x, y, (120, 122, 118), 0.9)
+        px(img, x + 1, y, DRAIN_RUST, 0.8)
+    T.blob(img, rng, (40, 60, 48), 4, 0.35)                          # oil and grime
+    return img
+
+
+def pump_fins_tex(rng):
+    """The motor's cooling fins: ribs along it, green paint gone dull."""
+    img = pump_paint_tex(rng)
+    for x in range(0, 16, 2):
+        for y in range(16):
+            px(img, x, y, (34, 52, 42), 0.6)
+    return img
+
+
+def sluice_tex(rng):
+    """A sluice gate's heavy plate: rusted steel, rows of rivets top and bottom, a seam down the middle."""
+    img = rusty_steel_tex(rng, (84, 86, 84))
+    for x in range(1, 16, 3):
+        for y in (1, 14):
+            px(img, x, y, (140, 136, 128), 0.9)
+            px(img, x, y + 1, (40, 38, 36), 0.6)
+    for y in range(16):
+        px(img, 8, y, (48, 46, 42), 0.7)
+    return img
+
+
+def gauge_tex(rng):
+    """A pressure gauge's face: white dial, black ticks, the red needle near the top of its range."""
+    img = new((30, 30, 32))
+    for x in range(16):
+        for y in range(16):
+            d = math.hypot(x - 7.5, y - 7.5)
+            if d < 6.5:
+                px(img, x, y, (226, 224, 214))
+            elif d < 7.5:
+                px(img, x, y, (150, 152, 156))
+    for a in range(0, 270, 30):                                      # ticks
+        t = math.radians(135 + a)
+        px(img, round(7.5 + 5 * math.cos(t)), round(7.5 + 5 * math.sin(t)), (20, 20, 20))
+    for k in range(5):                                               # the needle
+        t = math.radians(330)
+        px(img, round(7.5 + k * math.cos(t)), round(7.5 + k * math.sin(t)), (200, 40, 30))
+    return img
+
+
+def mattress_tex(rng):
+    """An old striped mattress, faded and stained, rags over it."""
+    img = new((198, 194, 178))
+    for x in range(0, 16, 3):
+        for y in range(16):
+            px(img, x, y, (96, 112, 140), 0.6)
+    noise(img, rng, 5)
+    for _ in range(3):
+        T.blob(img, rng, (122, 98, 66), rng.randrange(2, 5), 0.5)
+    return img
+
+
+def rags_tex(rng):
+    img = new((96, 88, 78))
+    noise(img, rng, 7)
+    T.blob(img, rng, (70, 64, 58), 4, 0.4)
+    return img
+
+
+def tin_tex(rng):
+    """A tin can's side: tinplate with a faded red label round its middle."""
+    img = new((168, 170, 172))
+    noise(img, rng, 4)
+    rect(img, 0, 4, 15, 11, (150, 60, 50))
+    noise(img, rng, 3)
+    for _ in range(4):
+        px(img, rng.randrange(16), rng.randrange(16), DRAIN_RUST, 0.7)
+    return img
+
+
+def leather_tex(rng):
+    """Black leather, a soft sheen on its creases."""
+    img = new((28, 28, 30))
+    noise(img, rng, 3)
+    for _ in range(5):
+        x, y = rng.randrange(16), rng.randrange(16)
+        for k in range(rng.randrange(2, 5)):
+            px(img, x + k, y, (62, 62, 66), 0.5)
+    return img
+
+
+def black_glass_tex(rng):
+    """Smoked black glass: dark, a pale streak of reflection across it."""
+    img = new((22, 24, 28))
+    noise(img, rng, 1)
+    for k in range(16):
+        px(img, k, (k + 5) % 16, (90, 96, 104), 0.35)
+        px(img, k, (k + 6) % 16, (70, 74, 80), 0.25)
+    return img
+
+
+def lacquer_tex(rng):
+    """Black lacquered doors, a thin steel pull along each."""
+    img = new((24, 24, 26))
+    noise(img, rng, 1)
+    for x in range(16):
+        px(img, x, 2, (150, 154, 160), 0.8)
+    for y in range(16):
+        px(img, 0, y, (12, 12, 14), 0.8)
+    return img
+
+
+def paper_edges_tex(rng):
+    """The side of a stack of paper: thin lines of sheets."""
+    img = new((226, 224, 214))
+    for y in range(0, 16, 2):
+        for x in range(16):
+            px(img, x, y, (180, 176, 164), 0.5)
+    noise(img, rng, 2)
     return img
 
 
@@ -2830,7 +3004,8 @@ def build():
     for door_id, name, colour, kind in (("storage_door", "Storage Door", (92, 100, 108), "storage"),
                                         ("electrical_door", "Electrical Room Door", (92, 100, 108), "electrical"),
                                         ("emergency_door", "Emergency Exit Door", (70, 82, 90), "emergency"),
-                                        ("calm_door", "Calm Room Door", (86, 58, 38), "emergency")):
+                                        ("calm_door", "Calm Room Door", (86, 58, 38), "emergency"),
+                                        ("office_door", "Office Door", (34, 34, 38), "office")):
         halves = {}
         for half in ("bottom", "top"):
             halves[half] = steel_door_tex(r(f"{door_id}_{half}"), half, colour, kind)
@@ -3007,6 +3182,124 @@ def build():
     stack("fume_hood", "Fume Hood", {**lab, "f": "lab_cabinet_front", "g": "hood_sash"},
           [el((0, 0, 1), (16, 15, 16), "w", north="f"), el((0, 15, 0), (16, 16, 16), "s")],
           upper=[el((0, 0, 3), (16, 13, 16), "s", north="g"), el((0, 13, 0), (16, 16, 16), "s")])
+
+    # --- Level 5's drain (layer 3): rusty steel, caged lamps, wet concrete ------------------------
+    a.texture("drain_ladder", ladder_tex(r("drain_ladder")), T.STEEL.but(smoothness=0.3, metal=230, relief=0.3), tiles=False)
+    a.models["drain_ladder"] = {"parent": "minecraft:block/ladder", "textures": {"texture": tex_ref("drain_ladder"), "particle": tex_ref("drain_ladder")}}
+    a.block("drain_ladder", "Drain Ladder", horizontal_blockstate("drain_ladder"),
+            {"parent": "minecraft:item/generated", "textures": {"layer0": tex_ref("drain_ladder")}})
+    a.texture("rusty_steel", rusty_steel_tex(r("rusty_steel")), T.STEEL.but(smoothness=0.25, metal=230, relief=0.45))
+    a.texture("rusty_steel_dark", rusty_steel_tex(r("rusty_steel_dark"), (58, 60, 60)), T.STEEL.but(smoothness=0.25, metal=230, relief=0.45))
+    for lit in (True, False):
+        a.texture(f"cage_bulb_{'on' if lit else 'off'}", bulb_tex(r("cage_bulb"), lit),
+                  T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]) if lit else T.PLASTIC.but(smoothness=0.6))
+    # The caged lamp hangs from a ceiling (facing down) in its base model: a plate, a short neck, the bulb in
+    # four bars and two rings. It is turned onto walls like the fluorescent lights.
+    for state in ("on", "off"):
+        bars = [element((x, 4, z), (x + 1, 12, z + 1), "cage") for x, z in ((5, 5), (10, 5), (5, 10), (10, 10))]
+        rings = [element((5, 4, 5), (11, 5, 11), "cage"), element((5, 11, 5), (11, 12, 11), "cage")]
+        a.models[f"cage_lamp_{state}"] = model({"cage": "rusty_steel_dark", "bulb": f"cage_bulb_{state}"},
+                                               [element((5, 15, 5), (11, 16, 11), "cage"), element((7, 12, 7), (9, 15, 9), "cage"),
+                                                element((6, 5, 6), (10, 11, 10), "bulb", shade=state == "off")] + bars + rings, ao=False)
+    variants = {}
+    for facing, (x_rot, y_by_axis) in {
+            "down": (0, {"x": 0, "z": 90}), "up": (180, {"x": 0, "z": 90}),
+            "north": (270, {"x": 0, "z": 0}), "east": (270, {"x": 90, "z": 90}),
+            "south": (270, {"x": 180, "z": 180}), "west": (270, {"x": 270, "z": 270})}.items():
+        for axis, y_rot in y_by_axis.items():
+            for lit in ("true", "false"):
+                for block_id in ("cage_lamp", "panel_light"):
+                    v = {"model": f"{NS}:block/{block_id}_{'on' if lit == 'true' else 'off'}"}
+                    if x_rot:
+                        v["x"] = x_rot
+                    if y_rot:
+                        v["y"] = y_rot
+                    variants.setdefault(block_id, {})[f"facing={facing},axis={axis},lit={lit}"] = v
+    a.block("cage_lamp", "Caged Lamp", {"variants": variants["cage_lamp"]},
+            {"parent": f"{NS}:block/cage_lamp_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+    # Steel railing along a catwalk's edges: a post at each end, a top rail, a middle one, a kick plate; one model
+    # for the north edge, turned for the others.
+    a.texture("rail_steel", rusty_steel_tex(r("rail_steel"), (124, 126, 122)), T.STEEL.but(smoothness=0.35, metal=230, relief=0.3))
+    a.models["catwalk_rail_north"] = model({"s": "rail_steel"}, [
+        element((0, 0, 0), (1.5, 16, 1.5), "s"), element((14.5, 0, 0), (16, 16, 1.5), "s"),
+        element((0, 14.5, 0), (16, 16, 1.5), "s"), element((0, 7.5, 0.25), (16, 8.5, 1.25), "s"),
+        element((0, 0, 0), (16, 2, 0.5), "s")], ao=False)
+    a.block("catwalk_rail", "Catwalk Railing", {"multipart": [
+        {"when": {side: "true"}, "apply": {"model": f"{NS}:block/catwalk_rail_north", **({"y": y} if y else {}), "uvlock": False}}
+        for side, y in HORIZONTAL.items()]}, {"parent": f"{NS}:block/catwalk_rail_north"})
+    drain = {"r": "rusty_steel", "d": "rusty_steel_dark"}
+    # A pump, two high: the casing with its flanges below, the motor with its fins on top.
+    a.texture("pump_paint", pump_paint_tex(r("pump_paint")), T.PAINTED_METAL.but(smoothness=0.35, relief=0.4))
+    a.texture("pump_fins", pump_fins_tex(r("pump_fins")), T.PAINTED_METAL.but(smoothness=0.35, relief=0.6))
+    stack("pump", "Pump", {**drain, "p": "pump_paint", "f": "pump_fins"},
+          [el((0, 0, 1), (16, 2, 15), "d"), el((2, 2, 2), (14, 13, 14), "p"), el((6, 4, 0), (10, 10, 2), "r"),
+           el((5, 13, 5), (11, 16, 11), "r")],
+          upper=[el((3, 0, 3), (13, 2, 13), "r"), el((2, 2, 2), (14, 12, 14), "p", north="f", south="f", east="f", west="f"),
+                 el((4, 12, 4), (12, 14, 12), "d"), el((6, 14, 6), (10, 16, 10), "r")])
+    a.texture("sluice_steel", sluice_tex(r("sluice_steel")), T.STEEL.but(smoothness=0.25, metal=230, relief=0.6))
+    row("sluice_gate", "Sluice Gate", {**drain, "s": "sluice_steel"}, [el((0, 0, 13), (16, 16, 16), "s")],
+        left=[el((15, 0, 11), (16, 16, 16), "d")], right=[el((0, 0, 11), (1, 16, 16), "d")])
+    prop("valve_wheel", "Valve Wheel", {**drain, "w": "valve_wheel", "s": "valve_stem"},
+         [el((7, 7, 13), (9, 9, 16), "s"), el((3, 3, 11.5), (13, 13, 12.5), "w", south="w", north="w")], ao=False)
+    a.texture("gauge_face", gauge_tex(r("gauge_face")), T.Material(0.8, relief=0.0), tiles=False)
+    prop("pressure_gauge", "Pressure Gauge", {**drain, "g": "gauge_face"},
+         [el((7, 2, 14), (9, 6, 16), "r"), el((5, 6, 13), (11, 12, 15), "d", north=("g", (0, 0, 16, 16)))], ao=False)
+    # The Hideout: his mattress of rags, empty tins, his dead flashlight.
+    a.texture("mattress", mattress_tex(r("mattress")), T.Material(0.05, porosity=0.9, relief=0.5))
+    a.texture("rags", rags_tex(r("rags")), T.Material(0.05, porosity=0.9, relief=0.6))
+    row("mattress", "Old Mattress", {"m": "mattress", "g": "rags"},
+        [el((0, 0, 1), (16, 3, 15), "m"), el((2, 3, 5), (14, 4, 13), "g")])
+    a.texture("tin", tin_tex(r("tin")), T.STEEL.but(smoothness=0.5, metal=230, relief=0.2))
+    prop("tin_cans", "Empty Tins", {"t": "tin"},
+         [el((3, 0, 3), (6, 5, 6), "t"), el((9, 0, 5), (12, 4, 8), "t"), el((5, 0, 10), (13, 3, 13), "t")], ao=False)
+    prop("dead_flashlight", "Dead Flashlight", {"f": "old_flashlight", "k": "black_plastic"},
+         [el((3, 0, 7), (11, 2, 9), "f"), el((11, 0, 6.5), (14, 3, 9.5), "k")], ao=False)
+
+    # --- The director's office: modern, black leather, steel and smoked glass -----------------------
+    a.texture("black_leather", leather_tex(r("black_leather")), T.Material(0.45, porosity=0.2, relief=0.3))
+    a.texture("black_glass", black_glass_tex(r("black_glass")), T.Material(0.95, relief=0.0))
+    a.texture("lacquer_black", lacquer_tex(r("lacquer_black")), T.Material(0.8, relief=0.1))
+    a.texture("paper_edges", paper_edges_tex(r("paper_edges")), T.PAPER)
+    office = {"s": "lab_steel", "d": "lab_steel_dark", "l": "black_leather", "g": "black_glass", "k": "lacquer_black"}
+    # His desk: a top of smoked glass on a steel frame, a modesty panel at the front (facing the door).
+    row("exec_desk", "Executive Desk", office,
+        [el((0, 14, 0), (16, 16, 16), "g"), el((0, 13, 0), (16, 14, 16), "d"), el((0, 2, 1), (16, 13, 2), "k")],
+        left=[el((14, 0, 0), (16, 13, 16), "s")], right=[el((0, 0, 0), (2, 13, 16), "s")])
+    row("credenza", "Credenza", office, [el((0, 0, 1), (16, 15, 16), "k", north="k"), el((0, 15, 0), (16, 16, 16), "s")])
+    row("leather_sofa", "Leather Sofa", office,
+        [el((0, 2, 1), (16, 7, 13), "l"), el((0, 7, 12), (16, 15, 16), "l"), el((0, 0, 2), (16, 2, 14), "d")],
+        left=[el((14, 2, 1), (16, 11, 16), "l")], right=[el((0, 2, 1), (2, 11, 16), "l")])
+    prop("leather_chair", "Leather Chair", office,
+         [el((3, 6, 3), (13, 9, 13), "l"), el((3, 9, 12), (13, 17, 14), "l")]
+         + [el((x, 0, z), (x + 1, 6, z + 1), "s") for x in (3, 12) for z in (3, 12)])
+    prop("exec_chair", "Executive Chair", office,
+         [el((1, 0, 7), (15, 1, 9), "d"), el((7, 0, 1), (9, 1, 15), "d"), el((7, 1, 7), (9, 6, 9), "s"),
+          el((2, 6, 2), (14, 9, 14), "l"), el((3, 9, 12), (13, 24, 15), "l"),
+          el((2, 10, 4), (3, 12, 11), "d"), el((13, 10, 4), (14, 12, 11), "d")])
+    prop("glass_table", "Glass Table", office,
+         [el((1, 6, 1), (15, 7, 15), "g")] + [el((x, 0, z), (x + 1, 6, z + 1), "s") for x in (2, 13) for z in (2, 13)])
+    # On his desk: the mini block of diorite (vanilla's own texture), papers, coffee, a slim lamp.
+    a.models["mini_diorite"] = model({"x": "lab_steel"}, [element((5, 0, 5), (11, 6, 11), "x")], ao=False)
+    a.models["mini_diorite"]["textures"].update({"x": "minecraft:block/diorite", "particle": "minecraft:block/diorite"})
+    a.block("mini_diorite", "Mini Diorite", horizontal_blockstate("mini_diorite"), {"parent": f"{NS}:block/mini_diorite"})
+    prop("paper_stack", "Papers", {"p": "note_paper", "e": "paper_edges"},
+         [el((2, 0, 3), (13, 2, 13), "e", up="p"), el((4, 2, 4), (14, 3, 14), "e", up="p")], ao=False)
+    prop("coffee_cup", "Coffee Cup", {"m": "mug", "k": "coffee"},
+         [el((6, 0, 6), (10, 4, 10), "m", up="k"), el((10, 1, 7.5), (11, 3, 8.5), "m")], ao=False)
+    a.texture("modern_lamp_glow", plastic_tex(r("modern_lamp_glow"), (255, 236, 200)),
+              T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    prop("desk_lamp_modern", "Desk Lamp", {**office, "y": "modern_lamp_glow"},
+         [el((5, 0, 5), (11, 1, 11), "k"), el((7.5, 1, 7.5), (8.5, 11, 8.5), "s"),
+          el((4, 11, 4), (12, 12, 10), "k", down="y")], ao=False)
+    # The ceiling's square panel lights.
+    a.texture("panel_light_on", plastic_tex(r("panel_light_on"), (250, 250, 246)), lit_tubes)
+    a.texture("panel_light_off", plastic_tex(r("panel_light_off"), (150, 150, 148)), T.PLASTIC.but(smoothness=0.6))
+    for state in ("on", "off"):
+        a.models[f"panel_light_{state}"] = model({"f": "white_plastic", "l": f"panel_light_{state}"},
+                                                 [element((2, 15, 2), (14, 16, 14), "f"),
+                                                  element((3, 14.5, 3), (13, 15, 13), "l", shade=state == "off")], ao=False)
+    a.block("panel_light", "Panel Light", {"variants": variants["panel_light"]},
+            {"parent": f"{NS}:block/panel_light_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
     return a
 
 

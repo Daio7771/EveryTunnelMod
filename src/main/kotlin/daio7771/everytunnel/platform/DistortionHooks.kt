@@ -23,6 +23,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.RaycastContext
 import java.util.UUID
+import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.sin
@@ -42,9 +43,10 @@ import kotlin.math.sqrt
  *   troubles ([mark]). Hunters ask both ([toldOf]): for a while after, they know where that player is,
  *   however far.
  * - **The Cloud:** a player in a zone tagged [CLOUD_TAG], with no Cloud about, gets one after a random
- *   wait ([CloudSchedule], `cloud.min_seconds` to `cloud.max_seconds` of time spent in such zones): it
- *   appears in front of them, between `cloud.nearest` and `cloud.farthest` blocks ahead, on the floor,
- *   in a Cloud zone, where they can see it ([appear], which the level's scripted ones call too).
+ *   wait ([CloudSchedule], `cloud.min_seconds` to `cloud.max_seconds` of time spent in such zones; in zones
+ *   also tagged [OFTEN_TAG], the drain's, `cloud.often_min_seconds` to `cloud.often_max_seconds`, counted
+ *   apart): it appears in front of them, between `cloud.nearest` and `cloud.farthest` blocks ahead, on the
+ *   floor, in a Cloud zone, where they can see it ([appear], which the level's scripted ones call too).
  */
 object DistortionHooks {
 
@@ -56,6 +58,8 @@ object DistortionHooks {
     const val JUNIOR_TAG = "distortion_junior"
     /** Zones where Clouds come. */
     const val CLOUD_TAG = "cloud"
+    /** With [CLOUD_TAG]: zones where they come more often. */
+    const val OFTEN_TAG = "cloud_often"
 
     private enum class Kind { HUNTERS, JUNIOR }
 
@@ -77,6 +81,7 @@ object DistortionHooks {
     private val sightings = HashMap<String, Sighting>()
     private val marks = HashMap<UUID, Long>()
     private val schedules = HashMap<UUID, CloudSchedule>()
+    private val oftenSchedules = HashMap<UUID, CloudSchedule>()
     private val clouds = mutableSetOf<DistortionCloudEntity>()
     private var debugSpawns = 0
     private var onceSpawns = 0
@@ -115,7 +120,7 @@ object DistortionHooks {
         for (cloud in clouds.toList()) if (cloud.world == world) cloud.discard()
         sightings.clear()
         marks.clear()
-        for (schedule in schedules.values) schedule.appeared()
+        for (schedule in schedules.values + oftenSchedules.values) schedule.appeared()
         spawnPosts(world, levelId)
     }
 
@@ -135,6 +140,7 @@ object DistortionHooks {
         sightings.clear()
         marks.clear()
         schedules.clear()
+        oftenSchedules.clear()
         clouds.clear()
     }
 
@@ -151,15 +157,19 @@ object DistortionHooks {
         when (post.kind) {
             Kind.HUNTERS -> {
                 val yaw = Math.toRadians(post.yaw.toDouble())
+                val placed = mutableListOf<Position>()
                 for ((side, back) in GROUP_PLACES) {
-                    // Side by side across the way it faces, two a step behind the first.
+                    // Side by side across the way it faces, two a step behind the first; where there is no floor there
+                    // (a narrow catwalk over water), the nearest place with one.
                     val px = post.position.x + cos(yaw) * side + sin(yaw) * back
                     val pz = post.position.z + sin(yaw) * side - cos(yaw) * back
-                    val feet = floorNear(world, px, post.position.y, pz) ?: post.position.y
+                    val place = floorNear(world, px, post.position.y, pz)?.let { Position(px, it, pz) }
+                        ?: standingNear(world, post.position, placed) ?: post.position
+                    placed += place
                     val hunter = ModEntities.HUNTER.create(world) ?: continue
-                    hunter.refreshPositionAndAngles(px, feet, pz, post.yaw, 0f)
+                    hunter.refreshPositionAndAngles(place.x, place.y, place.z, post.yaw, 0f)
                     hunter.headYaw = post.yaw
-                    hunter.home = Position(px, feet, pz)
+                    hunter.home = place
                     hunter.group = post.group
                     hunter.levelId = post.levelId
                     hunter.harmless = post.harmless
@@ -222,10 +232,14 @@ object DistortionHooks {
         for (player in server.playerManager.playerList) {
             if (!ResourceHooks.appliesTo(player) || DeathHooks.isDying(player)) continue
             val world = player.serverWorld
-            val inZone = LevelManager.zonesAt(world.registryKey.value.toString(), player.x, player.y + 0.5, player.z)
-                .any { CLOUD_TAG in it.zone.tags }
+            val zones = LevelManager.zonesAt(world.registryKey.value.toString(), player.x, player.y + 0.5, player.z)
+            val inZone = zones.any { CLOUD_TAG in it.zone.tags }
             val about = clouds.any { !it.isRemoved && it.world == world && it.squaredDistanceTo(player) < ABOUT_RANGE * ABOUT_RANGE }
-            val schedule = schedules.getOrPut(player.uuid) { CloudSchedule.of(config.minSeconds, config.maxSeconds) { Math.random() } }
+            val schedule = if (zones.any { OFTEN_TAG in it.zone.tags }) {
+                oftenSchedules.getOrPut(player.uuid) { CloudSchedule.of(config.oftenMinSeconds, config.oftenMaxSeconds) { Math.random() } }
+            } else {
+                schedules.getOrPut(player.uuid) { CloudSchedule.of(config.minSeconds, config.maxSeconds) { Math.random() } }
+            }
             if (schedule.tick(inZone, about, SCHEDULE_TICKS) && appear(player)) schedule.appeared()
         }
     }
@@ -259,6 +273,7 @@ object DistortionHooks {
                 if (!world.spawnEntity(cloud)) return false
                 clouds += cloud
                 schedules[player.uuid]?.appeared()
+                oftenSchedules[player.uuid]?.appeared()
                 world.playSound(null, tx, feet + 1.2, tz, ModSounds.CLOUD_APPEAR, SoundCategory.HOSTILE, 1.5f, 1f)
                 EveryTunnel.LOGGER.info("A Distortion Cloud appears {} blocks in front of {} at ({}, {}, {})",
                     "%.0f".format(distance), player.name.string, floor(tx).toInt(), feet.toInt(), floor(tz).toInt())
@@ -311,7 +326,21 @@ object DistortionHooks {
         val base = BlockPos.ofFloored(x, y, z)
         for (dy in FLOOR_SEARCH) {
             val feet = base.up(dy)
-            if (free(world, feet) && free(world, feet.up()) && !free(world, feet.down())) return feet.y.toDouble()
+            // Never in water (the drain's channels and pools): nothing stands there.
+            if (free(world, feet) && free(world, feet.up()) && !free(world, feet.down()) && world.getFluidState(feet).isEmpty) return feet.y.toDouble()
+        }
+        return null
+    }
+
+    /** The nearest middle of a block within two of [around] with a floor to stand on, none of [taken]'s; null if none. */
+    private fun standingNear(world: ServerWorld, around: Position, taken: List<Position>): Position? {
+        val tries = (-2..2).flatMap { dx -> (-2..2).map { dz -> dx to dz } }.sortedBy { (dx, dz) -> dx * dx + dz * dz }
+        for ((dx, dz) in tries) {
+            val x = floor(around.x) + 0.5 + dx
+            val z = floor(around.z) + 0.5 + dz
+            if (taken.any { abs(it.x - x) < 0.6 && abs(it.z - z) < 0.6 }) continue
+            val feet = floorNear(world, x, around.y, z) ?: continue
+            return Position(x, feet, z)
         }
         return null
     }

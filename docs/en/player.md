@@ -212,6 +212,7 @@ Every key and its default:
 | `grace_seconds` | 1 | Seconds of looking its way before it kills |
 | `leave_seconds` | 6 | Seconds with nobody looking its way before it goes |
 | `min_seconds`, `max_seconds` | 120, 240 | One comes after a random time between these, spent in zones tagged `cloud` |
+| `often_min_seconds`, `often_max_seconds` | 60, 120 | The same, in zones tagged `cloud_often` as well (Level 5's drain), counted apart |
 | `nearest`, `farthest` | 8, 14 | Blocks ahead of the player where it appears |
 | `touch_range` | 1.2 | Closer than this it kills whatever way one faces |
 | **`junior`** | | Level 5's Distortion Junior |

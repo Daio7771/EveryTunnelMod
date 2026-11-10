@@ -32,7 +32,8 @@ import java.util.UUID
  *   Lobby's wall) slides open slowly onto the lit Lobby, and the level's title shows. Each door is two leaves of [AirlockDoorBlock]
  *   meeting in the middle, moved a quarter of a block a step ([SlidingDoor]).
  *   Then the level's loot goes out ([LootSpawner]), its Hunters and Distortions ([DistortionHooks]), and the
- *   figure at the end of the corridor ([LabFigureHooks]), once a game, the test subjects ([SubjectHooks]); the
+ *   figure at the end of the corridor ([LabFigureHooks]), once a game, the test subjects ([SubjectHooks]), the
+ *   guard's body in the drain ([DeadGuardHooks]); the
  *   chemical puzzle starts afresh ([ChemicalHooks]).
  *
  * What stands is not undone when the world opens: nobody can reach it until its next build. A game
@@ -155,7 +156,9 @@ object LabHooks {
         DistortionHooks.levelBuilt(server, level)
         LabFigureHooks.levelBuilt(server, level)
         SubjectHooks.levelBuilt(server, level)
+        DeadGuardHooks.levelBuilt(server, level)
         ChemicalHooks.levelBuilt()
+        DrainHooks.levelBuilt()
         ContinueGame.labBuilt(server)
         for (id in sendToStart) server.playerManager.getPlayer(id)?.let { toStart(it, level) }
         sendToStart.clear()

@@ -1520,6 +1520,70 @@ def lab_alarm(rng, variant):
     return bandpass(tone, 400.0, 6000.0, order=2) * envelope(n, [(0.0, 0.0), (0.02, 1.0), (1.97, 1.0), (2.0, 0.0)])
 
 
+# ===========================================================================
+# Level 5's drain (layer 3)
+
+def drain_water(rng, variant):
+    """Level 5's drain: water running down the channels in the tunnels' floors, a steady trickle that gurgles, the odd
+    bubble, a low rush under it from somewhere bigger. Loops: built circularly."""
+    seconds = 30.0
+    n = samples(seconds)
+    rush = shaped_noise(n, rng, exponent=1.8, lo=30.0, hi=260.0)
+    channels = []
+    for _ in range(2):
+        trickle = shaped_noise(n, rng, exponent=0.8, lo=400.0, hi=3200.0)
+        gurgle = np.clip(1.0 + 0.6 * smooth_random(n, 7.0, rng, True), 0.2, None)      # water over a rough bed
+        bubbles = np.zeros(n)
+        for _ in range(int(seconds * 6)):
+            pop = bubble(samples(0.15), 0.0, rng.uniform(1.2, 4.0), rng.uniform(0.05, 0.25), rng, rise=0.2)
+            place(bubbles, pop, rng.uniform(0.0, seconds), circular=True)
+        channels.append(trickle * gurgle * 0.35 + rush * 0.6 + bubbles)
+    return stereo(channels[0], channels[1])
+
+
+def drain_creak(rng, variant):
+    """A pipe somewhere in the drain shifting under its own weight. No tone in it that could pass for a voice: metal
+    rubbing on metal, slip by slip (stick and slip, the slips uneven, quickening and slowing), each slip ringing the
+    pipe's few out-of-tune modes; a dull knock in the structure as it settles."""
+    seconds = rng.uniform(1.2, 2.4)
+    n = samples(seconds)
+    slips = np.zeros(n)
+    slow, fast = rng.uniform(8.0, 14.0), rng.uniform(22.0, 40.0)
+    t = 0.05
+    while t < seconds - 0.25:
+        x = t / seconds
+        swell = np.sin(np.pi * x)
+        slips += burst(n, rng, t, 0.002, lo=300.0, hi=6000.0, tau=0.0008, amp=swell ** 0.7 * rng.uniform(0.6, 1.0))
+        t += rng.uniform(0.7, 1.3) / (slow + (fast - slow) * swell)
+    modes = sorted(rng.uniform(300.0, 3200.0, 4))
+    ring = sum(a * resonator(slips, f, rng.uniform(25.0, 60.0)) for f, a in zip(modes, (1.0, 0.7, 0.5, 0.35)))
+    grind = _noise(n, rng, 150.0, 900.0) * envelope(n, [(0.0, 0.0), (seconds * 0.3, 0.15), (seconds * 0.8, 0.1), (seconds, 0.0)])
+    y = ring + 0.3 * slips + grind
+    y += knock(n, rng, seconds - 0.2, rng.uniform(90.0, 140.0), [1.0, 2.3, 4.1], [0.5, 0.2, 0.08], [0.12, 0.05, 0.02], click=0.3, click_hi=1500.0)
+    return fade(y, 0.01, 0.1)
+
+
+def drain_pumps(rng, variant):
+    """Level 5's Pump room: the pumps running, loud. A motor's hum, the pistons thumping a steady beat, valves
+    clacking between, water forced through the pipes surging with them. Loops: the beats divide the loop."""
+    seconds, beats = 24.0, 30
+    beat = seconds / beats
+    n = samples(seconds)
+    t = time_axis(n)
+    hum = sum(a * np.sin(TAU * loop_frequency(f, seconds) * t) for f, a in ((50.0, 1.0), (100.0, 0.5), (150.0, 0.25)))
+    surge = 1.0 + 0.3 * np.sin(TAU * t / beat)
+    left, right = np.zeros(n), np.zeros(n)
+    for k in range(beats):
+        thump = knock(samples(0.6), rng, 0.0, rng.uniform(55.0, 62.0), [1.0, 1.9, 3.1], [1.0, 0.4, 0.2], [0.18, 0.08, 0.04],
+                      click=0.5, click_hi=1500.0)
+        clack = knock(samples(0.3), rng, 0.0, rng.uniform(900.0, 1100.0), [1.0, 2.3], [0.4, 0.2], [0.03, 0.015], click=0.6, click_hi=6000.0)
+        place(left, thump, k * beat, circular=True)
+        place(right, thump * 0.9, k * beat + 0.012, circular=True)
+        place(left if k % 2 else right, clack * 0.5, k * beat + beat * 0.45, circular=True)
+    beds = [hum * 0.35 + shaped_noise(n, rng, exponent=1.2, lo=80.0, hi=1500.0) * 0.3 * surge for _ in range(2)]
+    return stereo(beds[0] + left, beds[1] + right)
+
+
 def lab_sting(rng, variant):
     """Walking into the Lab hall: a short stab of low strings, out of tune, falling away."""
     n = samples(2.6)
@@ -1950,6 +2014,12 @@ SOUNDS = [
     Sound("block.grate.dissolve", "Level progress", "Level 5: the drain's grate eaten by the solvent", "mono", False, 1, grate_dissolve, -3.0, attenuation=24),
     Sound("event.lab.alarm", "Level progress", "Level 5: the chemical room's two-tone siren, one cycle", "mono", False, 1, lab_alarm, -3.0, attenuation=48),
     Sound("event.lab.sting", "Level progress", "Level 5: walking into the Lab hall, a stab of low strings out of tune", "stereo", False, 1, lab_sting, -2.0),
+    Sound("ambient.drain.water", "Level 5 ambience", "The drain: water running down the channels, gurgling, a low rush under it",
+          "stereo", True, 1, drain_water, -6.0, stream=True, game_volume=0.6),
+    Sound("ambient.drain.creak", "Level 5 ambience", "A pipe creaking somewhere in the drain, now and then (metal on metal, no tone)", "mono", False, 4, drain_creak, -3.0,
+          attenuation=24),
+    Sound("ambient.drain.pumps", "Level 5 ambience", "The Pump room: the pumps running, loud and steady (thumps, valves, water forced through)",
+          "stereo", True, 1, drain_pumps, -2.0, stream=True),
     Sound("block.terminal.key", "Level progress", "Level 5: a key of a lab computer's keyboard", "mono", False, 3, terminal_key, -10.0),
     Sound("entity.hunter.shriek", "Level 5 / Hunters", "A group of Hunters spotting someone: a rasping child-high shriek", "mono", False, 3, hunter_shriek, -2.0, attenuation=32),
     Sound("entity.hunter.attack", "Level 5 / Hunters", "A Hunter's swipe: a sleeve's swish and a scratch", "mono", False, 3, hunter_attack, -4.0),

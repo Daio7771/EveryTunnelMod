@@ -1,4 +1,41 @@
 {
+  "ambient.drain.creak": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/drain/creak_1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:ambient/drain/creak_2",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:ambient/drain/creak_3",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:ambient/drain/creak_4",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "ambient.drain.pumps": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/drain/pumps_1",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.drain.water": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/drain/water_1",
+        "stream": true,
+        "volume": 0.6
+      }
+    ]
+  },
   "ambient.drip": {
     "sounds": [
       "every_tunnel:ambient/drip_1",

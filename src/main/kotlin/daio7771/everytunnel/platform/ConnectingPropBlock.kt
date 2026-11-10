@@ -24,7 +24,8 @@ import net.minecraft.world.WorldAccess
  * A side connects when it has an arm ([arms]) and the neighbour is the same block, or,
  * for horizontal sides, a full solid face (a run ends inside the wall instead of in the
  * air), or, up and down when [throughValves], a [ValveBlock] (it carries the pipe through
- * itself, so a pipe runs on through the valve). A run going up or down (joined above or
+ * itself, so a pipe runs on through the valve), and down, then, a pump (Level 5's Pump room: the
+ * pipe rises out of its top). A run going up or down (joined above or
  * below) grows no arms into walls: one on every block of a riser reads as a comb. Since
  * that hangs on the sides above and below, every update works out all sides again. Never
  * up or down into a solid block: the ceiling and beams above a run must not
@@ -82,10 +83,11 @@ class ConnectingPropBlock(
         }
     }
 
-    /** The same block, or a valve above or below, on a side with an arm. */
+    /** The same block, or a valve above or below, or a pump below, on a side with an arm. */
     private fun joins(side: Direction, neighbor: BlockState): Boolean {
         if (side !in arms) return false
         if (neighbor.isOf(this)) return true
+        if (throughValves && side == Direction.DOWN && neighbor.isOf(ModBlocks.PUMP)) return true
         return throughValves && side.axis.isVertical && neighbor.block is ValveBlock
     }
 

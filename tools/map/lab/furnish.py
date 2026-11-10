@@ -8,6 +8,10 @@ green plastic), room by room, in plan coordinates (see level.py), and what lies 
   hall, the Office (its computer tells the chemical puzzle's answer), Storage and its Hunters, the
   chemical room (the reagents, the mixer, its pipe to the grate, the alarm's lights; where the alarm's
   enemies appear), the drain's hatch, and the first Distortion Junior, in the north corridor.
+- Layer 3, the drain (dirty, industrial): the Junction's sluice gates and its Junior (and its restart
+  point), the Cistern's Hunters on its catwalks, the Pump room's pumps and supplies, the Hideout where the
+  guard before you stayed (his body, his dead flashlight, his note), and up the stairs the director's
+  office (modern, black leather and steel): his desk with the mini block of diorite, a few papers, coffee.
 
 A piece's facing is the way its front looks (or someone sitting on it looks), in the plan. Wall pieces
 stand in the cell against their wall, facing away from it. y is over the layer's floor: 1 on the floor,
@@ -20,11 +24,16 @@ the corridor to the ring (the figure), the middle of the Lab hall (the first Clo
 
 from offices.furnish import STACK as OFFICE_STACK
 
-ROW = {"lab_bench", "lab_cabinet", "lab_seats", "tool_board", "whiteboard", "bench", "office_desk"}
-STACK = OFFICE_STACK | {"lab_shelf", "fume_hood"}
+ROW = {"lab_bench", "lab_cabinet", "lab_seats", "tool_board", "whiteboard", "bench", "office_desk",
+       "sluice_gate", "mattress", "exec_desk", "credenza", "leather_sofa"}
+STACK = OFFICE_STACK | {"lab_shelf", "fume_hood", "pump"}
 # What a player walks through (ModBlocks: noCollision).
 THROUGH = {"lab_chair", "tool_board", "lab_poster", "first_aid_box", "potted_plant", "wall_clock", "whiteboard", "note_board",
-           "fuse_holder", "office_chair", "lab_terminal", "alarm_light", "pipe"}
+           "fuse_holder", "office_chair", "lab_terminal", "alarm_light", "pipe", "note_paper", "valve_wheel", "pressure_gauge",
+           "tin_cans", "dead_flashlight", "mattress", "electrical_panel", "leather_chair", "exec_chair", "mini_diorite",
+           "paper_stack", "coffee_cup", "desk_lamp_modern", "coffee_machine"}
+# The director's office and the corridor out of it stand this much over layer 3's floor (LEVEL_5's `rise`).
+RISE = 10
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
 
 
@@ -105,7 +114,47 @@ FURNITURE = {
         + [p for z in range(52, 58) for p in tall("lab_shelf", 137, z, "west")]
         + [("first_aid_box", 108, 65, "east", 2), ("lab_poster", 137, 62, "west", 2)]
     ),
+    3: (
+        # The foot of the ladder: oil drums in its corners, away from the ladder and the tunnel's mouth.
+        [("oil_drum", 137, 70, "west", 1), ("oil_drum", 136, 70, "south", 1), ("oil_drum", 137, 78, "west", 1)]
+        # The Junction: a sluice gate in its north wall over the pool, a valve wheel and a gauge beside it, drums.
+        + row("sluice_gate", 184, 188, 51, "south") + row("sluice_gate", 184, 188, 51, "south", 2)
+        + row("sluice_gate", 184, 188, 51, "south", 3)
+        + [("valve_wheel", 182, 51, "south", 2), ("pressure_gauge", 190, 51, "south", 2)]
+        + [("oil_drum", 178, 66, "north", 1), ("oil_drum", 179, 66, "north", 1), ("oil_drum", 194, 51, "west", 1)]
+        # The Cistern: a valve wheel and a gauge on its walls; nothing on its catwalks but its Hunters.
+        + [("valve_wheel", 196, 70, "east", 2), ("pressure_gauge", 211, 70, "west", 2)]
+        # The Pump room: the pumps against the south wall (PUMP_PIPES over them), a workbench by the door with
+        # food and water, tool chests with batteries, the control panel, drums, gauges.
+        + [p for x in (164, 168, 174, 178) for p in tall("pump", x, 97, "north")]
+        + row("lab_bench", 162, 165, 89, "south") + [("tool_chest", 180, z, "west", 1) for z in (91, 92)]
+        + [("electrical_panel", 161, 93, "east", 2), ("pressure_gauge", 175, 89, "south", 3), ("pressure_gauge", 177, 89, "south", 3)]
+        + [("oil_drum", 161, 97, "east", 1), ("oil_drum", 180, 97, "west", 1), ("oil_drum", 180, 96, "west", 1)]
+        # The Hideout: the guard's body against the north wall (POINTS), his dead flashlight and his note
+        # (NOTE_PAPERS) by him, a mattress of rags, a crate for a table, empty tins.
+        + [("dead_flashlight", 159, 50, "east", 1)] + row("mattress", 168, 169, 49, "south")
+        + [("cardboard_box", 171, 52, "west", 1), ("tin_cans", 166, 51, "south", 1), ("tin_cans", 170, 54, "west", 1)]
+        # The director's office: his desk at the far end, facing the door, his chair behind it, two chairs for
+        # visitors; on the desk a lamp, the mini block of diorite, papers (and a free place by the diorite, in
+        # front of him); a credenza behind him with coffee; a black leather sofa and a glass table; plants.
+        + [(n, x, z, f, y + RISE) for n, x, z, f, y in
+           column("exec_desk", 256, 57, 61, "west")
+           + [("desk_lamp_modern", 256, 57, "west", 2), ("mini_diorite", 256, 58, "west", 2), ("paper_stack", 256, 60, "west", 2),
+              ("coffee_cup", 256, 61, "west", 2)]
+           + [("exec_chair", 257, 59, "west", 1), ("leather_chair", 254, 58, "east", 1), ("leather_chair", 254, 60, "east", 1)]
+           + column("credenza", 260, 56, 62, "west") + [("coffee_machine", 260, 61, "west", 2), ("coffee_cup", 260, 60, "west", 2),
+                                                        ("paper_stack", 260, 57, "west", 2)]
+           + row("leather_sofa", 246, 249, 52, "south") + [("glass_table", 247, 54, "north", 1), ("glass_table", 248, 54, "north", 1)]
+           + [("potted_plant", x, z, "south", 1) for x, z in ((243, 52), (243, 66), (260, 52), (260, 66))]]
+    ),
 }
+
+# The Pump room's pipes: up from each pump into a run along the south wall under the ceiling, both ends into
+# the walls: (x, y, z) over layer 3's floor.
+PUMP_PIPES = [(x, y, 97) for x in (164, 168, 174, 178) for y in (3, 4)] + [(x, 5, 97) for x in range(161, 181)]
+
+# Loose notes lying about: (note id, layer, x, z, facing), on the floor. The guard's, by his body.
+NOTE_PAPERS = [("ch1_l5_note_guard", 3, 161, 50, "south")]
 
 # Cork boards with a card each: (card note id, layer, x, z, facing), at eye height. The Waiting room's
 # noticeboard; the experiment card by each test chamber's window, on the corridor's side.
@@ -132,10 +181,9 @@ MIXER = [("mixer_tank", 123, 69), ("mixer", 124, 69), ("mixer_tank", 125, 69)]
 PIPE = [(x, 4, 69) for x in range(124, 131)]
 # The alarm's red lights, high on the chemical room's walls: (x, z, facing).
 ALARMS = [(110, 50, "south"), (135, 50, "south"), (110, 69, "north"), (135, 69, "north")]
-# The hatch down to the drain, closed, flush with the floor in the middle of the room behind the grate; under
-# it, for now (the drain is layer 3's), a pit a block deep in steel, dark at its bottom.
+# The hatch down to the drain, closed, flush with the floor in the middle of the room behind the grate; the
+# ladder under it goes down to layer 3.
 HATCH = (128, 75)
-PIT_BOTTOM = "minecraft:black_concrete"
 
 # (id, tag, layer, x, z, y): what lies about, in plain sight on furniture. Layer 1: the wrench and the
 # detector; the missing fuses, one in each room; a snack and water in the Lockers, a battery in the Waiting
@@ -155,6 +203,10 @@ LOOT = [
     ("snack_storage_1", "food_snack", 2, 101, 84, 2), ("water_storage_1", "water", 2, 112, 86, 2),
     ("snack_storage_2", "food_snack", 2, 114, 85, 2), ("water_storage_2", "water", 2, 114, 86, 2),
     ("battery_storage_1", "battery", 2, 114, 87, 2), ("battery_storage_2", "battery", 2, 114, 88, 2),
+    # Layer 3: the Pump room's two batteries, food and water; the Hideout's last food, on his crate.
+    ("battery_pump_1", "battery", 3, 180, 91, 2), ("battery_pump_2", "battery", 3, 180, 92, 2),
+    ("snack_pump", "food_snack", 3, 163, 89, 2), ("water_pump", "water", 3, 164, 89, 2),
+    ("snack_hideout", "food_snack", 3, 171, 52, 2),
 ]
 
 # Spawn points of the level's enemies, its subjects, the figure, and the alarm's enemies: (id, layer, x, z,
@@ -176,6 +228,13 @@ POINTS = [
     # Where the chemical room's alarm brings its three Hunters and its Junior (ChemicalHooks).
     ("alarm_hunters", 2, 124, 60, "north", ["alarm_hunters"]),
     ("alarm_junior", 2, 120, 65, "north", ["alarm_junior"]),
+    # Layer 3: the Junction's restart point, on its west ledge (ContinueGame), and its Junior, over the pool in
+    # plain sight; the Cistern's Hunters, where its catwalks cross; the guard's body in the Hideout, sitting
+    # against the wall (GuardHooks).
+    ("checkpoint_junction", 3, 178, 54, "east", ["restart_point"]),
+    ("junior_junction", 3, 190, 55, "west", ["distortion_junior"]),
+    ("hunters_cistern", 3, 202, 73, "north", ["hunters"]),
+    ("dead_guard", 3, 160, 49, "south", ["dead_guard"]),
 ]
 
 
@@ -217,6 +276,23 @@ class Furnish:
             self.extra[(x, f2 + y, z)] = "down=false,east=false,north=true,south=true,up=false,west=false"
         for x, z, facing in ALARMS:
             self.put("alarm_light", x, z, facing, f2 + 4)
+        for _, layer, x, z, facing in NOTE_PAPERS:
+            self.put("note_paper", x, z, facing, self.floor(layer) + 1)
+        # The Pump room's pipes, each joined to its neighbours, the risers down into their pumps, the run along
+        # the wall into the walls at its ends. Directions are the world's: the plan's x is the world's z.
+        f3 = self.floor(3)
+        pipes = {(x, f3 + y, z) for x, y, z in PUMP_PIPES}
+        world_dirs = {"south": (1, 0, 0), "north": (-1, 0, 0), "west": (0, 0, 1), "east": (0, 0, -1), "up": (0, 1, 0), "down": (0, -1, 0)}
+        for x, y, z in sorted(pipes):
+            self.put("pipe", x, z, "north", y)
+        for x, y, z in pipes:
+            flags = {}
+            for name, (dx, dy, dz) in world_dirs.items():
+                c = (x + dx, y + dy, z + dz)
+                into_pump = name == "down" and self.items.get(c, ("",))[0] == "pump"
+                into_wall = name in ("north", "south") and c not in self.air
+                flags[name] = c in pipes or into_pump or into_wall
+            self.extra[(x, y, z)] = ",".join(f"{k}={str(v).lower()}" for k, v in sorted(flags.items()))
         for _, tag, layer, x, z, y in LOOT:
             yy = self.floor(layer) + y
             if y == 2 and (x, yy - 1, z) not in self.items:
@@ -254,12 +330,12 @@ class Furnish:
         return out
 
     def pit(self):
-        """{world position: state} of the drain's hatch, set into the floor, and the pit under it."""
+        """{world position: state} of the drain's hatch, set into the floor, and the steel round the top of the
+        shaft under it (the ladder goes down it to layer 3: level.py)."""
         x, z = HATCH
         f2 = self.floor(2)
         facing = self.lab.WORLD_FACING["north"]
-        out = {self.lab.at(x, f2, z): f"every_tunnel:bunker_trapdoor[facing={facing},half=top,open=false,powered=false,waterlogged=false]",
-               self.lab.at(x, f2 - 1, z): "minecraft:air", self.lab.at(x, f2 - 2, z): PIT_BOTTOM}
+        out = {self.lab.at(x, f2, z): f"every_tunnel:bunker_trapdoor[facing={facing},half=top,open=false,powered=false,waterlogged=false]"}
         for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
             out[self.lab.at(x + dx, f2 - 1, z + dz)] = self.lab.state("steel")
         return out
@@ -272,6 +348,8 @@ class Furnish:
             out.append({"id": lid, "pos": self.centre(x, self.floor(layer) + y, z), "yaw": 0, "tags": [tag]})
         for nid, layer, x, z, _ in NOTE_BOARDS:
             out.append({"id": nid, "pos": self.centre(x, self.floor(layer) + 2, z), "yaw": 0, "tags": ["note"]})
+        for nid, layer, x, z, _ in NOTE_PAPERS:
+            out.append({"id": nid, "pos": self.centre(x, self.floor(layer) + 1, z), "yaw": 0, "tags": ["note"]})
         for tid, layer, x, z, _ in TERMINALS:
             out.append({"id": tid, "pos": self.centre(x, self.floor(layer) + 2, z), "yaw": 0, "tags": ["terminal"]})
         for pid, layer, x, z, facing, tags in POINTS:

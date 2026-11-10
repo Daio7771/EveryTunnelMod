@@ -217,6 +217,7 @@ Cada clave y su valor por defecto:
 | `grace_seconds` | 1 | Segundos mirando hacia ella antes de que mate |
 | `leave_seconds` | 6 | Segundos sin que nadie mire hacia ella antes de que se vaya |
 | `min_seconds`, `max_seconds` | 120, 240 | Viene una tras un tiempo al azar entre estos, pasado en zonas con la etiqueta `cloud` |
+| `often_min_seconds`, `often_max_seconds` | 60, 120 | Lo mismo en zonas que además tienen la etiqueta `cloud_often` (el drenaje del nivel 5), contado aparte |
 | `nearest`, `farthest` | 8, 14 | Bloques por delante del jugador donde aparece |
 | `touch_range` | 1.2 | Más cerca de esto mata mire uno adonde mire |
 | **`junior`** | | El Distortion Junior del nivel 5 |

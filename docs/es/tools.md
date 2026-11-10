@@ -32,6 +32,7 @@ git).
 | `tools/entity/figure.py` | `textures/entity/lab_figure.png`: una silueta oscura con el formato del jugador | la figura que se ve desde el Lobby del nivel 5 |
 | `tools/entity/distortion.py` | Geometría, animaciones, texturas y máscaras de brillo de la Distortion Cloud y el Junior (el ojo del Junior agrietándose en cuatro fases) | las Distortions del nivel 5 |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (la skin del uniforme) | el uniforme |
+| `tools/entity/dead_guard.py` | El guardia anterior: un cuerpo de jugador sentado contra una pared, la cabeza caída, con la skin del uniforme gastada (después de `guard.py`) | el Hideout del nivel 5 |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png` | los iconos del HUD, el detector del nivel 5 |
 | `tools/gui/logo.py` | `logo.png` | el logo |
 | `tools/gui/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | el foco sin shaders |
@@ -90,18 +91,22 @@ las oficinas.
 | `preview.py` | Plano visto desde arriba del nivel 4 con medidas y aberturas. `python3 -m lounge.preview` desde `tools/map` lo dibuja solo, sin instalar nada |
 
 - **El nivel 5** tiene sus propios módulos en `tools/map/lab/` (solo en el pack del mod), a partir de `LEVEL_5`:
-  el plano del usuario a 2/3, pasillos de 4 de ancho. Las dos capas comparten las coordenadas del plano; la capa 2
-  está `LAYER_DROP` (10) bajo la capa 1. El plano se gira en el mundo para que su entrada salga del tramo oscuro
-  del nivel 4 (ahora más largo, 44 bloques) por un marco de acero junto a su fondo, al oeste de todos los demás
-  niveles.
+  los planos del usuario a 2/3, pasillos de 4 de ancho (los túneles del drenaje, de 5). Las tres capas comparten
+  las coordenadas del plano; la capa 2 está `LAYER_DROP` (10) bajo la capa 1, la capa 3 `DRAIN_DROP` (7) bajo la
+  capa 2, al este de ella salvo el pie de la escalera de mano; un espacio puede estar `rise` por encima de su capa
+  (el despacho del director y el pasillo que sale de él, 10 bloques más arriba por su escalera de acero). Las
+  superficies toman el aspecto del espacio al que dan (`STYLE_OF`, `STYLES`: el azulejo del laboratorio, el hormigón
+  manchado del drenaje, acero, el del despacho, los bloques propios del garaje para el pasillo, negro en el pozo).
+  El plano se gira en el mundo para que su entrada salga del tramo oscuro del nivel 4 (ahora más largo, 44 bloques)
+  por un marco de acero junto a su fondo, al oeste de todos los demás niveles.
 
 | Módulo | Función |
 |---|---|
-| `level.py` | El nivel a partir de `LEVEL_5`: espacios, aberturas, el tramo de escaleras, la cáscara alrededor del aire (azulejo blanco, una franja verde al pie, vinilo, paneles de techo; acero y chapa estriada en la esclusa y el marco), luces, puertas de acero, las puertas de la esclusa, la rejilla; dos juegos de bloques (la entrada, construida con el nivel 4; el resto, construido en juego, con su aire); las zonas del archivo del nivel |
-| `furnish.py` | Los muebles de las dos capas sala a sala, la caja de fusibles, lo que hay por ahí (la llave, el detector, los fusibles, los reactivos), las fichas, los ordenadores, la mezcladora de la sala de químicos, su tubería, las luces de alarma y la trampilla del drenaje, los puntos de aparición de los enemigos, los sujetos, la figura y los enemigos de la alarma |
-| `checks.py` | Un recorrido por las dos capas desde el pasillo de entrada que llega a todas las celdas (rodeando los muebles), ningún mueble en la boca de una puerta o de un pasillo, pared entre salas, los techos de la capa 2 bajo los suelos de la capa 1, el marco que se abre desde el tramo del nivel 4, cada celda en una zona; detienen el generador |
-| `textures.py` | Las texturas propias del nivel 5 (`b5_*`), añadidas al pack del mundo |
-| `preview.py` | Las dos capas lado a lado con medidas, zonas y aberturas. `python3 -m lab.preview` desde `tools/map` lo dibuja solo, sin instalar nada |
+| `level.py` | El nivel a partir de `LEVEL_5`: espacios, aberturas, el tramo de escaleras y la subida de acero, la cáscara alrededor del aire con el aspecto de cada espacio (azulejo blanco, una franja verde al pie, vinilo, paneles de techo; acero y chapa estriada en la esclusa y el marco; el hormigón del drenaje; el del despacho; el del garaje), luces (fluorescentes; las lámparas enjauladas del drenaje, algunas parpadeando y otras fundidas; los paneles del despacho), puertas de acero, las puertas de la esclusa, la rejilla, las puertas del despacho y la puerta EXIT del nivel 1 con su cartel; la escalera de mano del drenaje y su pozo hasta la trampilla, sus canales y piscinas de agua (colocados al final), pasarelas y barandillas, el derrumbe, las tuberías de sus túneles, su suciedad, el pozo bajo el final del pasillo; dos juegos de bloques (la entrada, construida con el nivel 4; el resto, construido en juego, con su aire); las zonas del archivo del nivel |
+| `furnish.py` | Los muebles de las tres capas sala a sala, la caja de fusibles, lo que hay por ahí (la llave, el detector, los fusibles, los reactivos, el loot), las fichas, los ordenadores, la mezcladora de la sala de químicos, su tubería, las luces de alarma y la trampilla del drenaje; la compuerta del drenaje, las bombas y sus tuberías, las cosas del Hideout y la nota del guardia, el despacho del director; los puntos de aparición de los enemigos, los sujetos, la figura, los enemigos de la alarma, el guardia muerto y los puntos de reinicio |
+| `checks.py` | Un recorrido por las tres capas desde el pasillo de entrada que llega a todas las celdas (rodeando los muebles y el derrumbe, fuera del agua de las piscinas; bajando la escalera de mano desde la trampilla), ningún mueble en la boca de una puerta o de un pasillo, pared entre salas, los techos de cada capa bajo los suelos de la de encima, el marco que se abre desde el tramo del nivel 4, cada celda en una zona; detienen el generador |
+| `textures.py` | Las texturas propias del nivel 5 (`b5_*`: las del laboratorio, las del drenaje, las del despacho, la escalera de acero y las losas del escombro), añadidas al pack del mundo |
+| `preview.py` | Las tres capas una encima de otra con medidas, zonas, aberturas, el agua, las pasarelas, el derrumbe y el pozo de la capa 3. `python3 -m lab.preview` desde `tools/map` lo dibuja solo, sin instalar nada |
 
 - **Salida** (`tools/map/output/`): el datapack del mod `every_tunnel_level1_mod` (archivos
   JSON de los niveles y `garage:build`), el datapack vanilla `every_tunnel_level1_vanilla`,
@@ -139,6 +144,10 @@ conservan). Vista previa: `tools/blocks/output/blocks_sheet.png`.
   `client.render.PaleManModel`, que tiene los mismos números.
 - `tools/entity/guard.py`: una skin estándar de 64×64 con brazos anchos. Chaqueta negra con
   SECURITY en amarillo, placa, radio, botas.
+- `tools/entity/dead_guard.py`: el vigilante nocturno nº 13 en el Hideout del nivel 5. Un cuerpo de
+  jugador (las cajas de la skin) sentado en el suelo contra una pared, las piernas estiradas, las manos en
+  el suelo, la cabeza sobre el pecho; el uniforme de `guard.png`, gastado: piel gris, ojos cerrados, barba de
+  unos días, mugre y marcas de agua, una rodilla rota.
 
 ## GUI
 

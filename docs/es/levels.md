@@ -223,7 +223,7 @@ sistemas que vienen:
 
 ### Nivel 5
 
-El nivel 5, el laboratorio, se construye en juego (`LabHooks`), de momento las capas 1 y 2 (plano, herramientas
+El nivel 5, el laboratorio, se construye en juego (`LabHooks`), sus tres capas (plano, herramientas
 y aspecto: [Herramientas en Python](tools.md)). Su archivo nombra las zonas como el plano; una zona de varias cajas
 repite su id:
 
@@ -235,12 +235,20 @@ repite su id:
   `restart_point`, `cloud` y `first_cloud`), `north_route` (dos cajas) y `south_route` (tres), ambas con la etiqueta
   `cloud`, `office`, `storage`, `chemical_room` (con la etiqueta `chemical_room`), `shortcut`, `drain_hatch` (con la
   etiqueta `lab_drain`).
+- **Capa 3, el drenaje:** `drain_ladder` (el pie de la escalera de mano, con la etiqueta `drain_bottom`),
+  `drain_tunnels` (once cajas, con las etiquetas `cloud` y `cloud_often`), `junction` (con las etiquetas
+  `restart_point`, `cloud` y `cloud_often`), `hideout`, `pump_room`, `cistern`, `office_stairs` (la escalera de acero y
+  su rellano), `director_office` (con la etiqueta `director_office`), `false_exit` (el pasillo que sale del despacho,
+  con la etiqueta `false_exit`) y `false_exit_pit` (el pozo bajo su final, con la misma etiqueta), `drain_shaft` (el hueco de la escalera de mano hasta la
+  trampilla). La zona de un espacio baja hasta su agua (los canales, las piscinas), así que un jugador dentro sigue en el nivel.
 - **Aberturas,** cada una con su zona: `entry_frame` (el marco: cruzarlo es entrar en el nivel 5),
   `airlock_rear` (con la etiqueta `lab_airlock_rear`), `welcome_door` (con la etiqueta `lab_welcome`), los huecos de puerta
   (`workshop_door`, `waiting_door`, `office_door_west`, `office_door_east`), las puertas
   correderas bloqueadas (`stairs_door`, `south_door`, `shortcut_door`, con la etiqueta `lab_door`) y `hatch_grate`
-  (barrotes de hierro, con la etiqueta `lab_grate`). Las salas de pruebas no tienen: un ventanal cada una (`WINDOWS`).
-- El Lab hall tiene la etiqueta `restart_point`.
+  (barrotes de hierro, con la etiqueta `lab_grate`); en la capa 3 los huecos de puerta `hideout_door`, `pump_door`,
+  `cistern_door`, las puertas del despacho `office_door` y `office_exit`, y `exit_door` (la puerta EXIT cerrada del
+  nivel 1 al final del pasillo). Las salas de pruebas no tienen: un ventanal cada una (`WINDOWS`).
+- El Lab hall y la Junction tienen la etiqueta `restart_point`.
 - **Puntos de aparición:** `player_start` (el Lobby, junto a la entrada), `checkpoint` (el Lab hall, con la
   etiqueta `restart_point`), `lever_stairs_door` y `lever_shortcut_door` (con la etiqueta `lab_lever`), y los de la
   capa 1 (`tools/map/lab/furnish.py`): `wrench` y `detector` (el banco central del Workshop), los fusibles `fuse_5a`,
@@ -250,7 +258,11 @@ repite su id:
   (etiqueta `terminal`, entre ellos `terminal_storage`), `reagent_1` a `reagent_4` (con la misma etiqueta), el loot
   `snack_lockers`, `water_lockers`, `battery_waiting`, `battery_office`, `snack_storage_*`, `water_storage_*`,
   `battery_storage_*` (etiquetas `food_snack`, `water`, `battery`), `junior_north` (etiqueta
-  `distortion_junior`), `hunters_storage` (etiqueta `hunters`), `alarm_hunters` y `alarm_junior` (con la misma etiqueta).
+  `distortion_junior`), `hunters_storage` (etiqueta `hunters`), `alarm_hunters` y `alarm_junior` (con la misma etiqueta);
+  y los de la capa 3: `checkpoint_junction` (etiqueta `restart_point`), `junior_junction` (etiqueta
+  `distortion_junior`), `hunters_cistern` (etiqueta `hunters`), `dead_guard` (con la misma etiqueta), la nota del
+  guardia `ch1_l5_note_guard` (etiqueta `note`) y el loot `battery_pump_1`, `battery_pump_2`, `snack_pump`,
+  `water_pump`, `snack_hideout`.
 
 ## Cómo sigue el mod a los jugadores
 

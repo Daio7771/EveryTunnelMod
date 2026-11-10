@@ -30,6 +30,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/entity/figure.py` | `textures/entity/lab_figure.png`: a dark shape in the player's layout | the figure seen from Level 5's Lobby |
 | `tools/entity/distortion.py` | The Distortion Cloud's and Junior's geometry, animations, textures and glow masks (the Junior's eye cracking in four stages) | Level 5's Distortions |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (the uniform skin) | the uniform |
+| `tools/entity/dead_guard.py` | The guard before you: a player's body sitting against a wall, head dropped, in the uniform skin worn out (run after `guard.py`) | Level 5's Hideout |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png` | HUD icons, Level 5's detector |
 | `tools/gui/logo.py` | `logo.png` | the logo |
 | `tools/gui/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | the no-shader spot |
@@ -86,18 +87,22 @@ the offices.
 | `textures.py` | Level 4's own textures (burgundy carpet, walnut with a brass strip, cream walls and ceiling), added to the world's pack |
 | `preview.py` | Top-down plan of Level 4 with sizes and openings. `python3 -m lounge.preview` from `tools/map` draws it alone, installing nothing |
 
-- **Level 5** has its own modules in `tools/map/lab/` (mod pack only), from `LEVEL_5`: the user's plan at
-  2/3, corridors 4 wide. Both layers share the plan coordinates; layer 2 lies `LAYER_DROP` (10) under layer 1.
+- **Level 5** has its own modules in `tools/map/lab/` (mod pack only), from `LEVEL_5`: the user's plans at
+  2/3, corridors 4 wide (the drain's tunnels 5). The three layers share the plan coordinates; layer 2 lies
+  `LAYER_DROP` (10) under layer 1, layer 3 `DRAIN_DROP` (7) under layer 2, east of it but for the foot of the
+  ladder; a space may stand `rise` over its layer (the director's office and the corridor out of it, 10 up its
+  steel stairs). Surfaces take the look of the space they face (`STYLE_OF`, `STYLES`: the lab's tiles, the
+  drain's stained concrete, steel, the office's, the garage's own blocks for the corridor, black for the pit).
   The plan turns into the world so that its way in leaves Level 4's dark stretch (made longer, 44 blocks)
   through a steel frame by its far end, west of every other level.
 
 | Module | Job |
 |---|---|
-| `level.py` | The level from `LEVEL_5`: spaces, openings, the flight of stairs, the shell round the air (white tiles, a green band at their foot, vinyl, ceiling panels; steel and checker plate round the airlock and the frame), lights, steel doors, the airlock's doors, the grate; two sets of blocks (the way in, built with Level 4; the rest, built in play, its air included); the level file's zones |
-| `furnish.py` | Both layers' furniture room by room, the fuse box, what lies about (the wrench, the detector, the fuses, the reagents), the cards, the computers, the chemical room's mixer, pipe, alarm lights and the drain's hatch, the spawn points of the enemies, the subjects, the figure and the alarm's enemies |
-| `checks.py` | A walk over both layers from the entry corridor reaching every cell (round the furniture), no furniture in a doorway's or a corridor's mouth, a wall between rooms, layer 2's ceilings under layer 1's floors, the frame opening from Level 4's stretch, every cell in a zone; they stop the generator |
-| `textures.py` | Level 5's own textures (`b5_*`), added to the world's pack |
-| `preview.py` | Both layers side by side with sizes, zones and openings. `python3 -m lab.preview` from `tools/map` draws it alone, installing nothing |
+| `level.py` | The level from `LEVEL_5`: spaces, openings, the flight of stairs and the steel climb, the shell round the air in each space's look (white tiles, a green band at their foot, vinyl, ceiling panels; steel and checker plate round the airlock and the frame; the drain's concrete; the office's; the garage's), lights (fluorescents; the drain's caged lamps, some flickering, some dead; the office's panels), steel doors, the airlock's doors, the grate, the office's doors and Level 1's EXIT door with its sign; the drain's ladder and its shaft up to the hatch, its channels and pools of water (placed last), catwalks and railings, the collapse, the pipes down its tunnels, its grime, the pit under the corridor's end; two sets of blocks (the way in, built with Level 4; the rest, built in play, its air included); the level file's zones |
+| `furnish.py` | The three layers' furniture room by room, the fuse box, what lies about (the wrench, the detector, the fuses, the reagents, the loot), the cards, the computers, the chemical room's mixer, pipe, alarm lights and the drain's hatch; the drain's sluice gate, pumps and their pipes, the Hideout's things and the guard's note, the director's office; the spawn points of the enemies, the subjects, the figure, the alarm's enemies, the dead guard and the restart points |
+| `checks.py` | A walk over the three layers from the entry corridor reaching every cell (round the furniture and the collapse, off the pools' water; down the ladder from the hatch), no furniture in a doorway's or a corridor's mouth, a wall between rooms, each layer's ceilings under the floors of the one over it, the frame opening from Level 4's stretch, every cell in a zone; they stop the generator |
+| `textures.py` | Level 5's own textures (`b5_*`: the lab's, the drain's, the office's, the steel stairs and the rubble's slabs), added to the world's pack |
+| `preview.py` | The three layers one over the other with sizes, zones, openings, layer 3's water, catwalks, collapse and pit. `python3 -m lab.preview` from `tools/map` draws it alone, installing nothing |
 
 - **Output** (`tools/map/output/`): the mod datapack `every_tunnel_level1_mod` (level JSON
   files and `garage:build`), the vanilla datapack `every_tunnel_level1_vanilla`,
@@ -132,6 +137,10 @@ props look like the level around them. It also writes the block names into
   applies them in `client.render.PaleManModel`, which holds the same numbers.
 - `tools/entity/guard.py`: a standard 64×64 wide-arm skin. Black jacket with SECURITY in
   yellow, badge, radio, boots.
+- `tools/entity/dead_guard.py`: Night Guard No. 13 in Level 5's Hideout. A player's body (the skin's
+  boxes) sitting on the floor against a wall, legs out, hands on the floor, head on his chest; the
+  uniform from `guard.png`, worn out: grey skin, eyes shut, a few days' beard, grime and water marks,
+  a knee through.
 
 ## GUI
 

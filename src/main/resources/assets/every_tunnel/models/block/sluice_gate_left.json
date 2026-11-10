@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "r": "every_tunnel:block/rusty_steel",
+    "d": "every_tunnel:block/rusty_steel_dark",
+    "s": "every_tunnel:block/sluice_steel",
+    "particle": "every_tunnel:block/rusty_steel"
+  },
+  "elements": [
+    {
+      "from": [
+        15,
+        0,
+        11
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#d"
+        },
+        "east": {
+          "texture": "#d"
+        },
+        "south": {
+          "texture": "#d"
+        },
+        "west": {
+          "texture": "#d"
+        },
+        "up": {
+          "texture": "#d"
+        },
+        "down": {
+          "texture": "#d"
+        }
+      }
+    }
+  ]
+}

@@ -82,6 +82,8 @@ only: reopening the world starts a new one.
   (`FuseHolderBlock`).
 - `Chemical puzzle: R-a with R-b` when a game's pair is drawn, `<player> mixes R-a with R-b: the solvent | the alarm`
   (`ChemicalHooks`), `Level 5's first Cloud, for <player>` (`LabHallHooks`).
+- `Level 5: the drain's hatch slams shut over <player>` (`DrainHooks`), `Level 5: the guard before you, in the Hideout`
+  (`DeadGuardHooks`, each time the level is built), `<player>: checkpoint at level_5, checkpoint_junction` (`ContinueGame`).
 - `[sprint] held but not sprinting at (x, y, z): …` (`client.SprintCheck`): while the sprint
   key is held walking forwards and the player does not sprint, every 2 s, what stands in the
   way (exhausted, carrying a box or book, hungry, using an item, crouching, bumping into

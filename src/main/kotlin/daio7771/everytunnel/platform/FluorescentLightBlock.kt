@@ -54,8 +54,10 @@ enum class LightMode(private val id: String) : StringIdentifiable {
  * - The hum is played by the client for the nearest lights (`client.effects.FluorescentHum`).
  *
  * [LIT] is what the light shows right now; [BURST] is true during a flicker burst.
+ *
+ * Other lights behave the same with a fixture of their own: [CageLampBlock], [PanelLightBlock].
  */
-class FluorescentLightBlock(settings: Settings) : Block(settings) {
+open class FluorescentLightBlock(settings: Settings) : Block(settings) {
 
     /** Mobs path round it, not into it (see [BlockShapes.pathfindThrough]). */
     @Deprecated("Deprecated in Java")

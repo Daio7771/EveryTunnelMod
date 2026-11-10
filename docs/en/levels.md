@@ -218,7 +218,7 @@ will read:
 
 ### Level 5
 
-Level 5, the laboratory, is built in play (`LabHooks`), layers 1 and 2 so far (plan, tools and look:
+Level 5, the laboratory, is built in play (`LabHooks`), its three layers (plan, tools and look:
 [Python tools](tools.md)). Its file names its zones as the plan does; a zone of several boxes repeats its id:
 
 - **Layer 1:** `entry_corridor` (from the steel frame in Level 4's dark stretch), `airlock` (tagged
@@ -228,12 +228,20 @@ Level 5, the laboratory, is built in play (`LabHooks`), layers 1 and 2 so far (p
 - **Layer 2:** `subjects_corridor`, `s1` to `s4` (the sealed test chambers), `lab_hall` (tagged `restart_point`,
   `cloud` and `first_cloud`), `north_route` (two boxes) and `south_route` (three), both tagged `cloud`, `office`,
   `storage`, `chemical_room` (tagged `chemical_room`), `shortcut`, `drain_hatch` (tagged `lab_drain`).
+- **Layer 3, the drain:** `drain_ladder` (the foot of the ladder, tagged `drain_bottom`), `drain_tunnels` (eleven
+  boxes, tagged `cloud` and `cloud_often`), `junction` (tagged `restart_point`, `cloud` and `cloud_often`),
+  `hideout`, `pump_room`, `cistern`, `office_stairs` (the steel stairs and their landing), `director_office`
+  (tagged `director_office`), `false_exit` (the corridor out of the office, tagged `false_exit`) and
+  `false_exit_pit` (the pit under its end, tagged the same), `drain_shaft` (the ladder's shaft up to the hatch). A space's zone
+  goes down into its water (the channels, the pools), so a player in it is still in the level.
 - **Openings,** each its own zone: `entry_frame` (the frame: crossing it is walking into Level 5),
   `airlock_rear` (tagged `lab_airlock_rear`), `welcome_door` (tagged `lab_welcome`), the doorways (`workshop_door`,
   `waiting_door`, `office_door_west`, `office_door_east`), the locked sliding doors
   (`stairs_door`, `south_door`, `shortcut_door`, tagged `lab_door`) and `hatch_grate` (iron bars, tagged
-  `lab_grate`). The test chambers have none: a window each (`WINDOWS`).
-- The Lab hall is tagged `restart_point`.
+  `lab_grate`); on layer 3 the doorways `hideout_door`, `pump_door`, `cistern_door`, the office's doors
+  `office_door` and `office_exit`, and `exit_door` (Level 1's locked EXIT door at the corridor's end). The test
+  chambers have none: a window each (`WINDOWS`).
+- The Lab hall and the Junction are tagged `restart_point`.
 - **Spawn points:** `player_start` (the Lobby, by the way in), `checkpoint` (the Lab hall, tagged
   `restart_point`), `lever_stairs_door` and `lever_shortcut_door` (tagged `lab_lever`), and layer 1's
   (`tools/map/lab/furnish.py`): `wrench` and `detector` (the Workshop's island bench), the fuses `fuse_5a`,
@@ -243,7 +251,10 @@ Level 5, the laboratory, is built in play (`LabHooks`), layers 1 and 2 so far (p
   (tagged `terminal`, `terminal_storage` among them), `reagent_1` to `reagent_4` (tagged the same), the loot
   `snack_lockers`, `water_lockers`, `battery_waiting`, `battery_office`, `snack_storage_*`, `water_storage_*`,
   `battery_storage_*` (tagged `food_snack`, `water`, `battery`), `junior_north` (tagged `distortion_junior`),
-  `hunters_storage` (tagged `hunters`), `alarm_hunters` and `alarm_junior` (tagged the same).
+  `hunters_storage` (tagged `hunters`), `alarm_hunters` and `alarm_junior` (tagged the same); and layer 3's:
+  `checkpoint_junction` (tagged `restart_point`), `junior_junction` (tagged `distortion_junior`), `hunters_cistern`
+  (tagged `hunters`), `dead_guard` (tagged the same), the guard's note `ch1_l5_note_guard` (tagged `note`) and the
+  loot `battery_pump_1`, `battery_pump_2`, `snack_pump`, `water_pump`, `snack_hideout`.
 
 ## How the mod tracks players
 

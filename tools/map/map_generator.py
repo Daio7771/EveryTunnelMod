@@ -452,11 +452,12 @@ LEVEL_4 = dict(
     STEP_VOLUME=33000,
 )
 
-# Level 5 (B5), the laboratory: layers 1 and 2 (layer 3, the drain, comes later). Plan coordinates as in
-# Level 4: x east, z south, boxes (x0, z0, x1, z1) with x1 and z1 exclusive, the sizes are of the air
-# inside. The user's prototype at 2/3, corridors 4 wide, straight; layer 2 as two loops from the Lab hall
-# (north past the Office and back, south past Storage to the chemical room). Both layers share the plan:
-# layer 1 is the upper floor, layer 2 lies LAYER_DROP under it, so a cell may hold a space of each.
+# Level 5 (B5), the laboratory, in three layers. Plan coordinates as in Level 4: x east, z south, boxes (x0,
+# z0, x1, z1) with x1 and z1 exclusive, the sizes are of the air inside. The user's prototypes at 2/3,
+# corridors 4 wide, straight; layer 2 as two loops from the Lab hall (north past the Office and back, south
+# past Storage to the chemical room); layer 3, the drain, tunnels 5 wide round two loops. The layers share the
+# plan: layer 1 is the upper floor, layer 2 lies LAYER_DROP under it, so a cell may hold a space of each;
+# layer 3 lies DRAIN_DROP under layer 2, beyond its east end but for the foot of the ladder.
 LEVEL_5 = dict(
     TITLE="Level 5",
     FLOOR_Y=9,                       # the world y of layer 1's floor blocks (Level 4's floor)
@@ -500,6 +501,31 @@ LEVEL_5 = dict(
         ("chemical_room", "chemical_room", "Chemical room", 2, (108, 50, 138, 70), None, "puzzle"),
         ("shortcut", "shortcut", "Shortcut", 2, (99, 58, 108, 62), None, "corridor"),
         ("drain_hatch", "drain_hatch", "Drain hatch", 2, (124, 71, 134, 79), None, "hatch"),
+        # Layer 3: the drain, down the ladder from the hatch, east of the lab. Tunnels round two loops: the
+        # Junction's (the Hideout and the Pump room off it) and the Cistern's. The north tunnel on from the
+        # Junction is cut by a collapse, so the way on goes through the Cistern, out of its east side and back
+        # to the tunnel past the collapse, to the steel stairs up to the director's office and the corridor out
+        # of it (these stand `rise`, the last value, over the layer's floor).
+        ("drain_ladder", "drain_ladder", "Ladder", 3, (128, 70, 138, 79), 4, "room"),
+        ("tunnel_ladder", "drain_tunnels", "", 3, (138, 73, 150, 78), None, "corridor"),
+        ("tunnel_west", "drain_tunnels", "", 3, (150, 57, 155, 88), None, "corridor"),
+        ("tunnel_north_west", "drain_tunnels", "", 3, (155, 57, 178, 62), None, "corridor"),
+        ("tunnel_south_west", "drain_tunnels", "", 3, (155, 83, 184, 88), None, "corridor"),
+        ("tunnel_middle", "drain_tunnels", "", 3, (184, 67, 189, 88), None, "corridor"),
+        ("hideout", "hideout", "Hideout", 3, (157, 49, 173, 56), 4, "lore"),
+        ("pump_room", "pump_room", "Pump room", 3, (161, 89, 181, 98), 6, "loot"),
+        ("junction", "junction", "Junction", 3, (178, 51, 195, 67), 9, "hub"),
+        ("tunnel_north_east", "drain_tunnels", "", 3, (195, 57, 230, 62), None, "corridor"),
+        ("tunnel_spur", "drain_tunnels", "", 3, (201, 62, 206, 68), None, "corridor"),
+        ("cistern", "cistern", "Cistern", 3, (196, 68, 212, 79), 7, "room"),
+        ("tunnel_cistern_south", "drain_tunnels", "", 3, (201, 79, 206, 83), None, "corridor"),
+        ("tunnel_south_east", "drain_tunnels", "", 3, (189, 83, 206, 88), None, "corridor"),
+        ("tunnel_east", "drain_tunnels", "", 3, (213, 71, 223, 76), None, "corridor"),
+        ("tunnel_stairs", "drain_tunnels", "", 3, (218, 62, 223, 71), None, "corridor"),
+        ("office_stairs", "office_stairs", "Stairs", 3, (230, 57, 240, 62), 5, "climb"),
+        ("office_landing", "office_stairs", "", 3, (240, 57, 242, 62), 5, "corridor", 10),
+        ("office", "director_office", "Director's office", 3, (243, 52, 261, 67), 5, "office", 10),
+        ("false_exit", "false_exit", "Corridor", 3, (250, 68, 255, 96), None, "corridor", 10),
     ],
     # From layer 1's stairs down to layer 2's: one block down per cell along z, from the first cell on.
     FLIGHT=("stairs_flight", "layer1_stairs", (9, 44, 13, 54)),
@@ -521,7 +547,88 @@ LEVEL_5 = dict(
         ("south_door", 2, "z", 71, 77, 2, 3, "locked"),             # opens on leaving the Office
         ("shortcut_door", 2, "x", 98, 59, 2, 3, "locked"),          # the chemical room's lever, from inside
         ("hatch_grate", 2, "z", 70, 127, 4, 3, "grate"),
+        ("hideout_door", 3, "z", 56, 164, 2, 3, "doorway"),
+        ("pump_door", 3, "z", 88, 170, 2, 3, "doorway"),
+        ("cistern_door", 3, "x", 212, 72, 3, 3, "doorway"),
+        # The office's doors (kind "door": opened by hand) and, at the end of the corridor out of it, Level 1's
+        # locked EXIT door ("exit"): one cell each, two high, standing `rise` over the layer's floor.
+        ("office_door", 3, "x", 242, 59, 1, 2, "door", 10),
+        ("office_exit", 3, "z", 67, 252, 1, 2, "door", 10),
+        ("exit_door", 3, "z", 96, 252, 1, 2, "exit", 10),
     ],
+    # The side of each door one comes to it from (it faces that way).
+    DOOR_OUTSIDE={"office_door": "west", "office_exit": "north", "exit_door": "north"},
+    OFFICE_DOOR="every_tunnel:office_door",
+    EXIT_DOOR="every_tunnel:emergency_door",
+    EXIT_SIGN="every_tunnel:exit_sign",
+    # Layer 3. The ladder from the hatch down to the drain: (layer, x, z, plan facing away from its wall), from
+    # the floor up to the hatch. The channels of water down the tunnels' middles, a cell wide, a block deep:
+    # (x0, z0, x1, z1), inclusive. The pools of deep water under catwalks of grating, level with the floor:
+    # (id, box, depth, catwalk boxes, railed). The collapse across the north tunnel (box). The pit under the
+    # end of the false exit's corridor, closed by its floor until the boss's scene breaks it: (box, depth).
+    DRAIN_DROP=7,                    # layer 3's floor blocks lie this much under layer 2's
+    LADDER=(3, 128, 75, "east"),
+    LADDER_BLOCK="every_tunnel:drain_ladder[facing={facing},waterlogged=false]",
+    CHANNELS=[(139, 75, 152, 75), (152, 59, 152, 85), (152, 59, 176, 59), (152, 85, 186, 85), (186, 68, 186, 85),
+              (186, 85, 203, 85), (203, 80, 203, 85), (196, 59, 206, 59), (203, 60, 203, 66), (213, 59, 228, 59),
+              (220, 60, 220, 73), (214, 73, 220, 73)],
+    POOLS=[("junction_pool", (180, 53, 193, 65), 4, [(180, 58, 193, 61), (185, 53, 188, 58), (185, 61, 188, 65)], True),
+           ("cistern_pool", (197, 69, 211, 78), 5, [(202, 69, 204, 78), (204, 73, 211, 75)], False)],
+    CATWALK="every_tunnel:metal_grating[type=top,waterlogged=false]",
+    # The drain's sounds (AmbienceHooks), zone by zone: water running down the channels, drips, pipes creaking far
+    # off; the Pump room's pumps, loud; the Hideout only drips. Up the stairs, silence.
+    ZONE_AMBIENCE={
+        "drain_ladder": {"loop": "every_tunnel:ambient.drain.water", "loop_volume": 0.5, "random": [
+            {"sound": "every_tunnel:ambient.drip", "interval": [3, 9], "distance": [2, 6], "volume": 0.7}]},
+        "drain_shaft": {"loop": "every_tunnel:ambient.drain.water", "loop_volume": 0.4},
+        "drain_tunnels": {"loop": "every_tunnel:ambient.drain.water", "loop_volume": 0.8, "random": [
+            {"sound": "every_tunnel:ambient.drip", "interval": [4, 12], "distance": [3, 10], "volume": 0.7},
+            {"sound": "every_tunnel:ambient.drain.creak", "interval": [25, 60], "distance": [8, 16], "volume": 0.8}]},
+        "junction": {"loop": "every_tunnel:ambient.drain.water", "loop_volume": 1.0, "random": [
+            {"sound": "every_tunnel:ambient.drip", "interval": [3, 9], "distance": [3, 10], "volume": 0.8},
+            {"sound": "every_tunnel:ambient.drain.creak", "interval": [20, 50], "distance": [8, 16], "volume": 0.8}]},
+        "cistern": {"loop": "every_tunnel:ambient.drain.water", "loop_volume": 0.6, "random": [
+            {"sound": "every_tunnel:ambient.drip", "interval": [3, 8], "distance": [3, 10], "volume": 0.8},
+            {"sound": "every_tunnel:ambient.drain.creak", "interval": [30, 70], "distance": [8, 16], "volume": 0.7}]},
+        "pump_room": {"loop": "every_tunnel:ambient.drain.pumps", "loop_volume": 1.0, "random": [
+            {"sound": "every_tunnel:ambient.drip", "interval": [6, 14], "distance": [2, 8], "volume": 0.6}]},
+        "hideout": {"random": [
+            {"sound": "every_tunnel:ambient.drip", "interval": [5, 14], "distance": [2, 6], "volume": 0.6}]},
+        "office_stairs": {}, "director_office": {}, "false_exit": {},
+    },
+    RAIL="every_tunnel:catwalk_rail[east={east},north={north},south={south},west={west}]",
+    COLLAPSE=(207, 57, 212, 62),
+    PIT=((250, 88, 255, 95), 40),
+    PIPE="every_tunnel:pipe",
+    PUDDLE="every_tunnel:puddle",
+    STAIN="every_tunnel:stain",
+    PUDDLE_SHARE=0.05,               # of the tunnels' walkway cells
+    STAIN_SHARE=0.06,                # of their cells against a wall
+    # The drain's caged lamps: down the tunnels every LAMP_SPACING, this share dead and this flickering; in its
+    # rooms (id: (on the "walls" or the "ceiling", spacing, mode or None for drawn like the tunnels', at most)).
+    LAMP="every_tunnel:cage_lamp[facing={facing},axis=x,mode={mode},lit={lit},burst=false]",
+    LAMP_SPACING=8,
+    LAMP_DEAD=0.2,
+    LAMP_FLICKER=0.25,
+    LAMP_ROOMS={"drain_ladder": ("walls", 5, "flicker", 1), "junction": ("walls", 6, None, 99),
+                "cistern": ("walls", 6, None, 99), "pump_room": ("ceiling", 5, "on", 99)},
+    PANEL_LIGHT="every_tunnel:panel_light[facing=down,axis=x,mode=on,lit=true,burst=false]",
+    OFFICE_LIGHT_SPACING=4,
+    GARAGE_LIGHT_SPACING=6,
+    # The look of a space's or an opening's surfaces, by id: the rest are the lab's on layers 1 and 2 and the
+    # drain's on layer 3. STYLES: role -> a stand-in of STAND_INS, or a block of its own (the garage's corridor
+    # is built of Level 1's own blocks, which the same pack re-skins: it looks like the garage).
+    STYLE_OF={"office_stairs": "steel", "office_landing": "steel", "office": "office", "office_door": "office",
+              "office_exit": "office", "false_exit": "garage", "exit_door": "garage"},
+    STYLES=dict(
+        drain=dict(vinyl="drain_floor", tile="drain_wall", band="drain_band", ceiling="drain_ceiling",
+                   rubble="rubble", rubble_slab="rubble_slab"),
+        steel=dict(vinyl="every_tunnel:checker_plate", tile="steel", band="steel", ceiling="steel"),
+        office=dict(vinyl="office_floor", tile="office_wall", band="office_band", ceiling="office_ceiling"),
+        garage=dict(vinyl="minecraft:gray_concrete", tile="minecraft:light_gray_concrete", band="minecraft:polished_andesite",
+                    stripe="minecraft:yellow_terracotta", ceiling="minecraft:smooth_stone"),
+        pit=dict(vinyl="minecraft:black_concrete", tile="minecraft:black_concrete", ceiling="minecraft:black_concrete"),
+    ),
     # The test chambers S-1 to S-4 are sealed: a wide window of glass in a steel frame looks into each from
     # the subjects' corridor, from waist height to the corridor's ceiling: (layer, axis of the wall's line,
     # line, first cell, last cell).
@@ -552,6 +659,20 @@ LEVEL_5 = dict(
         ceiling="minecraft:smooth_quartz",
         stairs="minecraft:polished_andesite_stairs",
         steel="minecraft:waxed_cut_copper",
+        steel_stairs="minecraft:waxed_cut_copper_stairs",
+        # Layer 3: the drain's stained concrete (floor, walls with a dark tide line at their foot, ceiling) and
+        # the rubble of its collapse; the director's office (polished dark stone, pale panels over a dark skirting,
+        # a white ceiling).
+        drain_floor="minecraft:packed_mud",
+        drain_wall="minecraft:mud_bricks",
+        drain_band="minecraft:dripstone_block",
+        drain_ceiling="minecraft:dead_horn_coral_block",
+        rubble="minecraft:cobbled_deepslate",
+        rubble_slab="minecraft:cobbled_deepslate_slab",
+        office_floor="minecraft:polished_blackstone",
+        office_wall="minecraft:smooth_red_sandstone",
+        office_band="minecraft:cut_red_sandstone",
+        office_ceiling="minecraft:smooth_sandstone",
     ),
     CHECKER="every_tunnel:checker_plate",     # the airlock's floor and the thresholds of steel
     AIRLOCK_DOOR="every_tunnel:airlock_door[facing={facing},width={width}]",
@@ -729,8 +850,10 @@ def bounds(world, offset):
 
 # Blocks that break (and drop as items) without the block they hang on, stand on or
 # stick to. The build places them after everything else, so their support is already there.
+# Placed after everything else: what hangs on a neighbour, and water (Level 5's drain), which would run out
+# of a channel or a pool whose walls were not up yet.
 SUPPORTED = {"minecraft:sculk_vein", "minecraft:glow_lichen", "minecraft:pointed_dripstone",
-             "minecraft:ladder"}
+             "minecraft:ladder", "every_tunnel:drain_ladder", "minecraft:water"}
 SUPPORTED_SUFFIXES = ("_carpet", "_candle", "_door", "_button")
 
 
@@ -1203,7 +1326,11 @@ def level5_json(lv5):
     """Level 5: from the steel frame in Level 4's dark stretch on, so that the checkpoint and its rules
     start there; its title waits for the airlock to open. It has no `build`: LabHooks builds it in play."""
     p = lv5.p
-    zones = [{"id": zid, "from": list(b[:3]), "to": list(b[3:]), **({"tags": tags} if tags else {})} for zid, b, tags in lv5.zones()]
+    zones = [{"id": zid, "from": list(b[:3]), "to": list(b[3:]), **({"tags": tags} if tags else {}),
+              **({"ambience": p["ZONE_AMBIENCE"][zid]} if zid in p["ZONE_AMBIENCE"] else {})} for zid, b, tags in lv5.zones()]
+    unknown = set(p["ZONE_AMBIENCE"]) - {zid for zid, _, _ in lv5.zones()}
+    if unknown:
+        raise SystemExit(f"LEVEL_5 ZONE_AMBIENCE: no zone {', '.join(sorted(unknown))}")
     return json.dumps({
         "name": "Level 5 - Laboratory B5 (generated)",
         "order": 5,
@@ -1514,7 +1641,7 @@ def main():
         "White boxes: gaps for puzzles. Dots: white notes, yellow batteries, cyan water, red food."])
     V.write_texture_sheet(OUT / "level4_texture_sheet.png", textures4)
     stats5 = report5 + [
-        f"B5 (layers 1 and 2): {len(lv5.lab_blocks)} blocks, entry corridor {len(lv5.entry_blocks)}, {len(lv5.lights)} lights; "
+        f"B5 (three layers): {len(lv5.lab_blocks)} blocks, entry corridor {len(lv5.entry_blocks)}, {len(lv5.lights)} lights; "
         f"world box {lv5.box}; {len(steps5)} steps over {chunk_count(area5)} chunks",
         "Green: open doorway. Red: locked door. Grey: the steel frame from Level 4's dark stretch. Violet: the airlock's sliding doors. Orange: the grate.",
         "Blue dot: the start, through the frame from Level 4's dark stretch (top left). White ring: the Lab hall checkpoint. Faint: the other layer.",

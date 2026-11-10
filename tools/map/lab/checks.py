@@ -2,15 +2,17 @@
 Checks on Level 5's plan (see level.py). Each returns its report lines and raises SystemExit when the
 plan is wrong, so a bad LEVEL_5 never reaches a world.
 
-- walk(): from the entry corridor, a walk over the plan's cells of both layers, up or down one block
-  at most (the flight joins them), must reach every cell but those furniture stands in (furnish.py;
-  what a player walks through does not count) and the sealed test chambers'. Locked doors and the grate
-  count as open: each has its way of opening.
+- walk(): from the entry corridor, a walk over the plan's cells of the three layers, up or down one
+  block at most (the flight joins layers 1 and 2, the climb goes up to the director's office) or down
+  the ladder from the hatch to layer 3, must reach every cell but those furniture stands in (furnish.py;
+  what a player walks through does not count), the collapse's, the pools' water off their catwalks and
+  the sealed test chambers'. Locked doors, the grate and the hatch count as open: each has its way of
+  opening.
 - clear_ways(): no furniture that blocks stands in a room's cells beside a doorway or a corridor running into it.
 - walled(): two spaces of a layer are kept apart by at least one block, unless a corridor or the
   stairs join them on purpose (a slip in the numbers fails here).
-- stacked(): where layer 2 runs under layer 1, its ceiling stays below layer 1's floor, with a block
-  of its own.
+- stacked(): where a layer runs under the one over it (2 under 1, 3 under 2), its ceiling stays below
+  that layer's floor, with a block of its own.
 - joins_level_4(): the steel frame opens from Level 4's dark stretch, at its floor.
 - zoned(): everywhere a player can be lies in a zone of Level 5's file, or they would be out of the
   levels.
@@ -19,40 +21,58 @@ plan is wrong, so a bad LEVEL_5 never reaches a world.
 from collections import deque
 
 
-def walk(lv):
+LAYERS = (1, 2, 3)
+
+
+def standing(lv):
+    """(layer, x, z) -> the name of the furniture that blocks it: what stands on its floor, not walked through."""
     from lab.furnish import THROUGH
-    ground = {lv.layer_floor[layer] + 1: layer for layer in (1, 2)}
-    blocked = {(ground[y], x, z) for (x, y, z), (name, _) in lv.furnish.items.items() if y in ground and name not in THROUGH}
+    floors = {}
+    for (layer, x, z), floor in lv.floors.items():
+        floors.setdefault((x, z), []).append((layer, floor))
+    out = {}
+    for (x, y, z), (name, _) in lv.furnish.items.items():
+        for layer, floor in floors.get((x, z), ()):
+            if y == floor + 1 and name not in THROUGH:
+                out[(layer, x, z)] = name
+    return out
+
+
+def walk(lv):
+    from lab.furnish import HATCH
+    blocked = set(standing(lv)) | {(3, x, z) for x, z in lv.collapse_cells}
+    water = {(3, x, z) for _, cells, decks, _, _ in lv.pools for x, z in cells - decks}
     sealed = {(s.layer, x, z) for s in lv.spaces if s.kind == "chamber" for x, z in s.cells()}
+    ladder = (3, lv.p["LADDER"][1], lv.p["LADDER"][2])
+    links = {(2, *HATCH): ladder}
     start = (1, *lv.p["START"])
     seen = {start}
     queue = deque([start])
     while queue:
         layer, x, z = queue.popleft()
         here = lv.floors[(layer, x, z)]
-        for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-            for other in (1, 2):
-                c = (other, x + dx, z + dz)
-                if c in lv.floors and c not in seen and c not in blocked and abs(lv.floors[c] - here) <= 1:
-                    seen.add(c)
-                    queue.append(c)
-    missing = set(lv.floors) - seen - blocked - sealed
+        steps = [(other, x + dx, z + dz) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)) for other in LAYERS]
+        for c in steps + ([links[(layer, x, z)]] if (layer, x, z) in links else []):
+            if c in lv.floors and c not in seen and c not in blocked and c not in water and (
+                    abs(lv.floors[c] - here) <= 1 or c == links.get((layer, x, z))):
+                seen.add(c)
+                queue.append(c)
+    missing = set(lv.floors) - seen - blocked - sealed - water
     if missing:
         raise SystemExit(f"Level 5: {len(missing)} cells cannot be reached, e.g. {sorted(missing)[:3]}")
-    per_layer = {n: sum(1 for c in seen if c[0] == n) for n in (1, 2)}
+    per_layer = {n: sum(1 for c in seen if c[0] == n) for n in LAYERS}
     return [f"Walk: all {len(seen)} cells reached from the entry corridor ({per_layer[1]} on layer 1 with the stairs, "
-            f"{per_layer[2]} on layer 2), round {len(blocked)} of furniture, the {len(sealed)} of the sealed chambers "
-            f"seen through their windows, locked doors counted as open"]
+            f"{per_layer[2]} on layer 2, {per_layer[3]} on layer 3 down the ladder, up to the office), round {len(blocked)} "
+            f"of furniture and the collapse, {len(water)} of the pools' water off the catwalks, the {len(sealed)} of the sealed "
+            f"chambers seen through their windows, locked doors, the grate and the hatch counted as open"]
 
 
 def clear_ways(lv):
     """Nothing that blocks stands in a doorway's or a corridor's mouth: the cells of a room beside an opening or
     beside a corridor that runs into it (furnish.py). A walk may still get round a piece there; a player should
     not have to."""
-    from lab.furnish import THROUGH
     from lab.level import OPEN_KINDS
-    ground = {lv.layer_floor[layer] + 1: layer for layer in (1, 2)}
-    blocked = {(ground[y], x, z): name for (x, y, z), (name, _) in lv.furnish.items.items() if y in ground and name not in THROUGH}
+    blocked = standing(lv)
     ways = {(o.layer, x, z) for o in lv.openings for x, z in o.cells()}
     ways |= {(s.layer, x, z) for s in lv.spaces + [lv.flight] if s.kind in OPEN_KINDS for x, z in s.cells()}
     rooms = {(s.layer, x, z) for s in lv.spaces if s.kind not in OPEN_KINDS for x, z in s.cells()}
@@ -79,24 +99,29 @@ def walled(lv):
 
 
 def stacked(lv):
-    upper = {(x, z): f for (layer, x, z), f in lv.floors.items() if layer == 1}
-    tightest = None
-    for (layer, x, z), floor in lv.floors.items():
-        if layer != 2:
-            continue
-        ceiling = floor + lv.height_at(2, x, z) + 1
-        for dx in (-1, 0, 1):
-            for dz in (-1, 0, 1):
-                above = upper.get((x + dx, z + dz))
-                if above is None or abs(above - floor) <= 1:
-                    continue                 # nothing over it, or the stairs meeting it on purpose
-                if ceiling >= above:
-                    raise SystemExit(f"Level 5: layer 2's ceiling at {(x, z)} (y {ceiling}) meets layer 1's floor (y {above})")
-                gap = above - ceiling - 1
-                tightest = gap if tightest is None else min(tightest, gap)
-    if tightest is None:
-        return ["Layers: layer 2 runs under no part of layer 1"]
-    return [f"Layers: layer 2 runs under layer 1 with at least {tightest} block(s) between its ceiling and layer 1's floor"]
+    out = []
+    shaft = {(x, z) for x, _, z in lv.shaft_air}
+    for top, low in ((1, 2), (2, 3)):
+        upper = {(x, z): f for (layer, x, z), f in lv.floors.items() if layer == top}
+        tightest = None
+        for (layer, x, z), floor in lv.floors.items():
+            if layer != low:
+                continue
+            ceiling = floor + lv.height_at(low, x, z) + 1
+            for dx in (-1, 0, 1):
+                for dz in (-1, 0, 1):
+                    above = upper.get((x + dx, z + dz))
+                    if above is None or abs(above - floor) <= 1 or (x + dx, z + dz) in shaft:
+                        continue             # nothing over it, the stairs meeting it, or the ladder's shaft, on purpose
+                    if ceiling >= above:
+                        raise SystemExit(f"Level 5: layer {low}'s ceiling at {(x, z)} (y {ceiling}) meets layer {top}'s floor (y {above})")
+                    gap = above - ceiling - 1
+                    tightest = gap if tightest is None else min(tightest, gap)
+        if tightest is None:
+            out.append(f"Layers: layer {low} runs under no part of layer {top}")
+        else:
+            out.append(f"Layers: layer {low} runs under layer {top} with at least {tightest} block(s) between its ceiling and that floor")
+    return out
 
 
 def joins_level_4(lv, lounge):

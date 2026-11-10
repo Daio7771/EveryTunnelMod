@@ -21,6 +21,7 @@ import daio7771.everytunnel.client.hud.AchievementToast
 import daio7771.everytunnel.client.hud.DetectorHud
 import daio7771.everytunnel.client.hud.StatusHud
 import daio7771.everytunnel.client.render.DartRenderer
+import daio7771.everytunnel.client.render.DeadGuardRenderer
 import daio7771.everytunnel.client.render.DistortionRenderer
 import daio7771.everytunnel.client.render.HunterRenderer
 import daio7771.everytunnel.client.render.LabFigureRenderer
@@ -116,6 +117,7 @@ object EveryTunnelClient : ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.HUNTER, ::HunterRenderer)
         EntityRendererRegistry.register(ModEntities.LAB_FIGURE, ::LabFigureRenderer)
         EntityRendererRegistry.register(ModEntities.SUBJECT, ::SubjectRenderer)
+        EntityRendererRegistry.register(ModEntities.DEAD_GUARD, ::DeadGuardRenderer)
         EntityRendererRegistry.register(ModEntities.DISTORTION_CLOUD) { DistortionRenderer(it, "distortion_cloud", 0) }
         EntityRendererRegistry.register(ModEntities.DISTORTION_JUNIOR) { DistortionRenderer(it, "distortion_junior", 4) }
         AchievementToast.register()
@@ -128,7 +130,7 @@ object EveryTunnelClient : ClientModInitializer {
         BlockRenderLayerMap.INSTANCE.putBlocks(
             RenderLayer.getCutout(),
             ModBlocks.SHOPPING_CART, ModBlocks.CABLE_TRAY, ModBlocks.HANGING_CABLE, ModBlocks.STAIN, ModBlocks.PUDDLE,
-            ModBlocks.METAL_GRATING, ModBlocks.VALVE, ModBlocks.POTTED_PLANT, ModBlocks.WALL_CLOCK,
+            ModBlocks.METAL_GRATING, ModBlocks.VALVE, ModBlocks.POTTED_PLANT, ModBlocks.WALL_CLOCK, ModBlocks.DRAIN_LADDER,
         )
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val player = client.player ?: return@register

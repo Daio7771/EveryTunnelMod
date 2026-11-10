@@ -118,6 +118,8 @@ object GameplayConfigParser {
         leaveSeconds = f.double("leave_seconds", d.leaveSeconds, min = 0.5, max = 120.0),
         minSeconds = f.double("min_seconds", d.minSeconds, min = 5.0, max = 3600.0),
         maxSeconds = f.double("max_seconds", d.maxSeconds, min = 5.0, max = 3600.0),
+        oftenMinSeconds = f.double("often_min_seconds", d.oftenMinSeconds, min = 5.0, max = 3600.0),
+        oftenMaxSeconds = f.double("often_max_seconds", d.oftenMaxSeconds, min = 5.0, max = 3600.0),
         nearest = f.double("nearest", d.nearest, min = 2.0, max = 32.0),
         farthest = f.double("farthest", d.farthest, min = 2.0, max = 32.0),
         touchRange = f.double("touch_range", d.touchRange, min = 0.0, max = 4.0),

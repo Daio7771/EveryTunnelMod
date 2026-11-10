@@ -111,6 +111,9 @@ data class CloudConfig(
     /** One appears after a random time between these, spent in zones tagged `cloud`. */
     val minSeconds: Double = 120.0,
     val maxSeconds: Double = 240.0,
+    /** The same in zones tagged `cloud_often` as well (Level 5's drain): sooner. */
+    val oftenMinSeconds: Double = 60.0,
+    val oftenMaxSeconds: Double = 120.0,
     /** Blocks ahead of the player where it appears, at the nearest and the farthest. */
     val nearest: Double = 8.0,
     val farthest: Double = 14.0,

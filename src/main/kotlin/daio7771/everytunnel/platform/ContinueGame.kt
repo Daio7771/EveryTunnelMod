@@ -40,10 +40,11 @@ import java.nio.file.Path
  * behind the loading screen ([LabHooks.beginAgain]) while the player waits in Level 4's diploma corridor, which
  * always stands.
  *
- * A level may also have a restart point inside it (a zone tagged [RESTART_TAG], the spawn point tagged the same:
- * Level 5's Lab hall). Walking in makes it the checkpoint, the same way ([Checkpoint]: `level/point`): what the
- * player carries is noted, and a death ([DeathHooks]) or CONTINUE comes back there, not to the level's start.
- * It is never taken back by an earlier one.
+ * A level may also have restart points inside it (zones tagged [RESTART_TAG], each with a spawn point tagged the
+ * same inside it: Level 5's Lab hall and, in the drain, its Junction). Walking in makes it the checkpoint, the same
+ * way ([Checkpoint]: `level/point`): what the player carries is noted, and a death ([DeathHooks]) or CONTINUE
+ * comes back there, not to the level's start. It is never taken back by an earlier one (of an earlier level, or
+ * listed earlier in the level's file).
  *
  * Seeing the credits ([finished]) erases the saved game. Achievements are kept apart and stay.
  */
@@ -92,7 +93,9 @@ object ContinueGame {
             val level = LevelManager.get(key.levelId) ?: return@register
             val player = server?.playerManager?.getPlayer(change.playerId) ?: return@register
             if (LoadingHooks.isLoading(player) || !WorldRules.appliesTo(player.isCreative, player.isSpectator)) return@register
-            val point = level.spawnPoints.firstOrNull { RESTART_TAG in it.tags } ?: return@register
+            val box = level.zone(key.zoneId)?.box ?: return@register
+            val points = level.spawnPoints.filter { RESTART_TAG in it.tags }
+            val point = points.firstOrNull { box.contains(it.position.x, it.position.y, it.position.z) } ?: points.firstOrNull() ?: return@register
             restartPointReached(player, level, point.id)
         }
         // Before the player's data is written, so this goes with it.
@@ -130,6 +133,8 @@ object ContinueGame {
         val currentLevel = current?.let { LevelManager.get(it.levelId) }
         if (current != null && currentLevel != null) {
             if (currentLevel.order > level.order || current == Checkpoint(level.id, pointId)) return
+            val order = level.spawnPoints.filter { RESTART_TAG in it.tags }.map { it.id }
+            if (current.levelId == level.id && order.indexOf(current.pointId) > order.indexOf(pointId)) return
         }
         progress.setCheckpoint(player, Checkpoint(level.id, pointId).toString())
         progress.saveInventory(player)

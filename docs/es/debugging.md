@@ -83,6 +83,8 @@ cuenta. Las partidas viven solo en memoria: reabrir el mundo empieza una nueva.
   (`FuseHolderBlock`).
 - `Chemical puzzle: R-a with R-b` al sortearse la pareja de la partida, `<jugador> mixes R-a with R-b: the solvent | the alarm`
   (`ChemicalHooks`), `Level 5's first Cloud, for <jugador>` (`LabHallHooks`).
+- `Level 5: the drain's hatch slams shut over <jugador>` (`DrainHooks`), `Level 5: the guard before you, in the Hideout`
+  (`DeadGuardHooks`, cada vez que se construye el nivel), `<jugador>: checkpoint at level_5, checkpoint_junction` (`ContinueGame`).
 - `[sprint] held but not sprinting at (x, y, z): …` (`client.SprintCheck`): mientras se
   mantiene la tecla de correr andando hacia delante y el jugador no corre, cada 2 s, qué lo
   impide (agotado, llevando una caja o un libro, hambre, usando un objeto, agachado, chocando

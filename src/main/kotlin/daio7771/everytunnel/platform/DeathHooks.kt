@@ -183,6 +183,7 @@ object DeathHooks {
         ObserverHooks.sendHome(world, levelId)
         DistortionHooks.restart(world, levelId)
         CollapseHooks.reset(player.server, levelId)
+        DrainHooks.restart(player, levelId)
     }
 
     /** What the death screen names for a death in [levelId] by [source], or null for none. */

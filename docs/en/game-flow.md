@@ -24,6 +24,7 @@ flowchart TD
     Q --> R[Level 4, B4: VIP lounge]
     R -->|big door| S[Dark stretch, entry corridor, airlock: Level 5 built]
     S --> T[Level 5, B5: laboratory, layers 1 and 2]
+    T -->|solvent, hatch, ladder| U[Layer 3: the drain, up to the director's office]
     I -.->|death| O[Fade to black, restart level]
     K -.->|death| O
     P -.->|death| O
@@ -387,14 +388,15 @@ in play (`platform.LabHooks`), in a space of its own west of Level 4:
   shows (the level's `entry` is `manual`: `LabHooks` shows it then). Each door is two leaves of
   `AirlockDoorBlock` moving a quarter of a block a step (`core.door.SlidingDoor`, `platform.SlidingDoors`).
 
-Level 5 so far is its two upper layers: a clean laboratory of white tiles with a band of pale green ones,
-grey vinyl, white ceiling panels, every fluorescent light on. Layer 1 is furnished (`tools/map/lab/furnish.py`),
-cold and used until recently: stainless steel, white melamine, surgical green plastic, and so is layer 2.
-Layer 1: the Lobby, a
+Level 5 is three layers. The two upper ones are a clean laboratory of white tiles with a band of pale green ones,
+grey vinyl, white ceiling panels, every fluorescent light on, furnished (`tools/map/lab/furnish.py`) cold and
+used until recently: stainless steel, white melamine, surgical green plastic. Layer 1: the Lobby, a
 ring of corridors with the Workshop, the Waiting room and the Lockers, and a steel door (shut) to the
 stairs down. Layer 2, 10 blocks lower: the subjects' corridor with rooms S-1 to S-4, the Lab hall, a
 loop north through the Office, a loop south past Storage to the chemical room, the shortcut and the
-drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5). What works so far:
+drain hatch behind a grate. Layer 3, 7 blocks lower again and east of it all, is the drain, dirty and
+industrial, and up its stairs the director's office (the boss's scene is still to come). Its zones are listed in
+[Levels](levels.md#level-5). What works so far:
 
 - **Layer 1, the tutorial.** The Lobby: a reception desk, seats, plants; seen from it, far down the corridor
   to the ring, a dark figure stands looking back, and once looked at it turns and goes round the corner, once
@@ -417,7 +419,9 @@ drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5).
   then: a lock is heard letting go far off (`event.lab.unlock`) and "The south route is open." shows.
 - **The Lab hall's checkpoint:** walking in makes it the checkpoint, silently (`ContinueGame`, a zone and a
   spawn point tagged `restart_point`). A death there or later restarts in the Lab hall with what the player
-  carries; CONTINUE puts them there with what they had on arriving.
+  carries; CONTINUE puts them there with what they had on arriving. The drain's Junction is one too, the same
+  way (each restart point is the spawn point tagged `restart_point` inside its zone; an earlier one never takes
+  a later one's place).
 - **Layer 2.** The subjects' corridor: the test chambers S-1 to S-4 are sealed, each seen through a wide
   window in a steel frame (`WINDOWS`), white and empty but for its subject standing still, a person turning
   room by room into a Pale man (`SubjectEntity`, `SubjectHooks`; `tools/entity/subject.py`), an experiment
@@ -437,15 +441,15 @@ drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5).
 - **The chemical puzzle** (`ChemicalHooks`, `core.puzzle.ChemicalMix`): four reagent flasks, R-1 to R-4, on a
   cabinet past the grate, by the mixer; one in each of its two tanks (`MixerTankBlock`, `block.mixer.fill`), then its red
   button (`MixerBlock`). One pair, drawn each game, is the solvent: the mixer runs (`block.mixer.run`), the
-  drain's grate dissolves in green fumes (`block.grate.dissolve`) and the hatch behind it, in the floor, opens (onto a
-  pit a block deep for now: the drain is layer 3's). Any other
+  drain's grate dissolves in green fumes (`block.grate.dissolve`) and the hatch behind it, in the floor, opens onto
+  the ladder down to the drain. Any other
   pair: the alarm, a siren (`event.lab.alarm`) and red lights turning (`AlarmLightBlock`) for 10 s, three
   Hunters and a Junior appear in the room; then the two flasks are back on their cabinet.
 - **Its enemies** are placed by `tools/map/lab/furnish.py`; to try them anywhere,
   `/everytunnel spawn hunters|junior|cloud`. `platform.DistortionHooks` puts them in when the level is built
   and back when the player dies there; none is saved. Those put in by the command come once: a death clears them.
   - **The Hunters** (`HunterEntity`, decisions in `entities.HunterBrain`), in groups of three at a spawn
-    point tagged `hunters`: black little humanoids in lab coats, blank white eyes. They wander near it; one
+    point tagged `hunters` (side by side, or on the nearest floor where there is none: a catwalk over water): black little humanoids in lab coats, blank white eyes. They wander near it; one
     that sees the player (16 blocks, a 140-degree cone, or 3 blocks whatever way it faces, never through a
     wall) shrieks (`entity.hunter.shriek`) and the whole group charges. Half a heart a hit, once a second each;
     one blow of the wrench kills one, even a hurried one. Out of sight for 4 s they search, then walk back. They do not hear, not
@@ -453,7 +457,7 @@ drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5).
   - **The Distortion Cloud** (`DistortionCloudEntity`): black smoke with glitches and one angry purple eye,
     whispering (`entity.distortion_cloud.whisper`). It appears already whole (`entity.distortion_cloud.appear`)
     8 to 14 blocks in front of the player, where they can see it, every 2 to 4 minutes spent in zones tagged
-    `cloud` (with none about). Having it anywhere in front (within 90 degrees either side, however far up or
+    `cloud` (with none about); in the drain's (tagged `cloud_often` too), every 1 to 2 minutes, counted apart. Having it anywhere in front (within 90 degrees either side, however far up or
     down one looks; walls hide it) for 1 s in a row kills (`entity.distortion_cloud.kill`), as does walking
     into it; the screen distorts as the look goes on (`client.effects.DistortionEffect`). Nobody looking its
     way for 6 s, it goes (`entity.distortion_cloud.leave`) and the detector falls quiet. Turn round and go back.
@@ -462,6 +466,32 @@ drain hatch behind a grate. Its zones are listed in [Levels](levels.md#level-5).
     in between, the camera trembles and drifts away from it, and every Hunter about knows where the player is.
     Staring at its eye 4 s without looking away (its eye cracks, a glassy hum rises) ends it
     (`entity.distortion_junior.die`).
+
+- **Layer 3, the drain** (the same `tools/map/lab/` modules; its look in `STYLES`, its sounds in
+  `ZONE_AMBIENCE`). A ladder of rusty steel goes down about six blocks from the hatch; once the player stands on
+  the floor at its foot (the zone tagged `drain_bottom`), the hatch slams shut over them (vanilla's iron trapdoor,
+  deep: `DrainHooks`): there is no way back up. A death before the Junction comes back up in the Lab hall, so the hatch
+  opens again then, if the solvent had opened it. Tunnels five wide of stained concrete, a channel of water down
+  their middle, rusty pipes along the walls and under the ceiling, puddles; caged yellow lamps
+  (`CageLampBlock`) hang far apart, some flickering, some dead, with dark between them. Water runs, drips fall,
+  pipes creak far off. Two loops:
+  - **The Junction,** where the tunnels cross: a tall room, a pool of deep water under railed catwalks of
+    grating (`CatwalkRailBlock`), a sluice gate in its north wall. It is the drain's checkpoint, and a Junior
+    floats over the water in plain sight. Clouds come in it and in the tunnels.
+  - Off the first loop, **the Hideout:** dark, a mattress of rags, empty tins, a crate with a last snack on it,
+    and the guard before you, Night Guard No. 13, dead, sitting against the wall in the player's uniform worn out
+    (`DeadGuardEntity`, `DeadGuardHooks`; `tools/entity/dead_guard.py`), his dead flashlight and his note by him
+    (a warning to the next one). And **the Pump room:** the pumps running, loud (`ambient.drain.pumps`), two
+    batteries on tool chests, a snack and water on a workbench.
+  - The north tunnel on from the Junction is cut by **a collapse** of rubble: the way on goes through **the
+    Cistern,** a tank of deep water crossed by narrow catwalks without rails, three Hunters where they cross, and
+    out of its east side, round to the tunnel past the collapse.
+  - At its end, **steel stairs** climb ten blocks to **the director's office:** modern, black leather, steel
+    and smoked glass, square ceiling lights (`PanelLightBlock`); his desk at the far end facing the door, his
+    chair behind it, a lamp, a little block of diorite, a few papers, coffee. Two doors (opened by hand): the
+    one in from the stairs, and on its south side the one out to a corridor of Level 1's garage, straight, lit,
+    ending at Level 1's locked EXIT door under its sign. Under the corridor's end lies a pit 40 blocks deep,
+    closed by its floor until the boss's scene breaks it.
 
 The map's rebuild when the world opens does not touch Level 5: the way in goes with Level 4, and
 nobody can reach what stands until the next build. A game continued in Level 5 builds it behind the

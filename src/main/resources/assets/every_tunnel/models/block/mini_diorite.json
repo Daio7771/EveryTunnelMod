@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "x": "minecraft:block/diorite",
+    "particle": "minecraft:block/diorite"
+  },
+  "elements": [
+    {
+      "from": [
+        5,
+        0,
+        5
+      ],
+      "to": [
+        11,
+        6,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#x"
+        },
+        "east": {
+          "texture": "#x"
+        },
+        "south": {
+          "texture": "#x"
+        },
+        "west": {
+          "texture": "#x"
+        },
+        "up": {
+          "texture": "#x"
+        },
+        "down": {
+          "texture": "#x"
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

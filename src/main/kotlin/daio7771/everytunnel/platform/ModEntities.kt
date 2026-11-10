@@ -90,6 +90,15 @@ object ModEntities {
         .trackRangeBlocks(128)
         .build()
 
+    /** The guard before you, dead in Level 5's drain ([DeadGuardHooks]). Never saved. */
+    val DEAD_GUARD: EntityType<DeadGuardEntity> =
+        FabricEntityTypeBuilder.create<DeadGuardEntity>(SpawnGroup.MISC) { type, world -> DeadGuardEntity(type, world) }
+            .dimensions(EntityDimensions.fixed(0.8f, 1.2f))
+            .disableSaving()
+            .disableSummon()
+            .trackRangeBlocks(64)
+            .build()
+
     /** A test subject in its sealed chamber (Level 5, [SubjectHooks]). Never saved. */
     val SUBJECT: EntityType<SubjectEntity> =
         FabricEntityTypeBuilder.create<SubjectEntity>(SpawnGroup.MISC) { type, world -> SubjectEntity(type, world) }
@@ -124,6 +133,7 @@ object ModEntities {
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "distortion_junior"), DISTORTION_JUNIOR)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "lab_figure"), LAB_FIGURE)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "subject"), SUBJECT)
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "dead_guard"), DEAD_GUARD)
         FabricDefaultAttributeRegistry.register(LAB_FIGURE, LabFigureEntity.createAttributes())
     }
 }
