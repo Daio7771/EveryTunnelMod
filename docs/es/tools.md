@@ -29,7 +29,7 @@ git).
 | `tools/entity/pale_man.py` | Geometría, animaciones, textura y máscara de brillo del Pale man, modelo del huevo | el Pale man |
 | `tools/entity/observer.py` | Geometría, animaciones y textura del Observer, modelo del huevo | el Observer |
 | `tools/entity/hunter.py` | Geometría, animaciones, textura y máscara de brillo de los ojos de los Hunters | los Hunters del nivel 5 |
-| `tools/entity/subject.py` | Los cuerpos y pieles de los cuatro sujetos, una fase cada uno, de persona a Pale man | los sujetos del nivel 5 |
+| `tools/entity/subject.py` | Los cuerpos y pieles de los cuatro sujetos, una fase cada uno, de persona a Pale man, sedados y atados a una camilla vertical | los sujetos del nivel 5 |
 | `tools/entity/figure.py` | `textures/entity/lab_figure.png`: una silueta oscura con el formato del jugador | la figura que se ve desde el Lobby del nivel 5 |
 | `tools/entity/distortion.py` | Geometría, animaciones, texturas y máscaras de brillo de la Distortion Cloud y el Junior (el ojo del Junior agrietándose en cuatro fases) | las Distortions del nivel 5 |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (la skin del uniforme) | el uniforme |

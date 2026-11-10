@@ -398,6 +398,8 @@
   "block.every_tunnel.lab_monitor": "Monitor",
   "block.every_tunnel.lab_coat": "Lab Coat",
   "block.every_tunnel.chair_jacket": "Lab Chair with a Jacket",
+  "block.every_tunnel.iv_drip": "Drip Stand",
+  "block.every_tunnel.instrument_tray": "Instrument Tray",
   "block.every_tunnel.wall_sconce": "Wall Sconce",
   "block.every_tunnel.lounge_painting": "Painting",
   "block.every_tunnel.lounge_rug": "Runner",

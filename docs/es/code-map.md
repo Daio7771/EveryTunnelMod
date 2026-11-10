@@ -144,7 +144,7 @@ con un comentario KDoc que cuenta más.
 | `DistortionJuniorEntity.kt` | El Distortion Junior: a quién molesta y marca, la mirada que acaba con él |
 | `LabFigureEntity.kt` | La figura que se ve desde el Lobby del nivel 5: cuando la miran, se va andando tras la esquina y desaparece |
 | `LabFigureHooks.kt` | Pone la figura ahí al construirse el nivel 5, una vez por partida |
-| `SubjectEntity.kt` | Los sujetos de pruebas, inmóviles en sus salas selladas, por fase; `SubjectHooks` los pone con el nivel |
+| `SubjectEntity.kt` | Los sujetos de pruebas, sedados y atados a sus camillas en sus salas selladas, por fase; `SubjectHooks` los pone con el nivel |
 | `DeadGuardEntity.kt` | El guardia anterior, muerto en el Hideout del drenaje; `DeadGuardHooks` lo pone ahí con el nivel |
 | `LabHallHooks.kt` | El golpe de cuerdas y la primera Cloud del Lab hall, una vez por partida |
 | `ChemicalHooks.kt` | El puzle químico: la pareja de la partida, la mezcladora, la alarma y sus enemigos, la rejilla disolviéndose, la trampilla |

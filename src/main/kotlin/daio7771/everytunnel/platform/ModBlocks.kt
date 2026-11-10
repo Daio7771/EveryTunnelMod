@@ -410,6 +410,9 @@ object ModBlocks {
     /** Someone's white coat on a hook, and a jacket left over a chair: they left in a hurry, or did not leave. */
     val LAB_COAT: Block = register("lab_coat", PropBlock(props(MapColor.WHITE, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(4, 1, 14, 12, 16, 16))))
     val CHAIR_JACKET: Block = register("chair_jacket", PropBlock(props(MapColor.GREEN, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 13, 8, 13), box(3, 8, 12, 13, 16, 13))))
+    /** By each test subject: a drip stand, its pole near two blocks high, and a tray of instruments on its stand. */
+    val IV_DRIP: Block = register("iv_drip", PropBlock(props(MapColor.IRON_GRAY, ModSoundGroups.METAL_PIPE).noCollision(), listOf(box(7, 0, 7, 9, 16, 9))))
+    val INSTRUMENT_TRAY: Block = register("instrument_tray", PropBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(2, 0, 2, 14, 14, 14))))
     val FIRST_AID_BOX: Block = register("first_aid_box", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(4, 5, 14, 12, 12, 16))))
     /** A lab computer on a desk ([LabTerminalBlock]): its screen glows a little. */
     val LAB_TERMINAL: Block = register("lab_terminal", LabTerminalBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision().luminance { 3 }, listOf(box(3, 0, 1, 13, 12, 11))))

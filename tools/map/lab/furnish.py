@@ -4,8 +4,9 @@ green plastic), room by room, in plan coordinates (see level.py), and what lies 
 
 - Layer 1, the tutorial: the wrench and the detector, the fuses, the safety briefing's cards, the fuse box by
   the stairs' lever, the harmless Hunters that guard it, the figure seen from the Lobby.
-- Layer 2: the subjects (one in each sealed test chamber, an experiment card by each window), the Lab
-  hall, the Office (its computer tells the chemical puzzle's answer), Storage and its Hunters, the
+- Layer 2: the subjects (one in each sealed test chamber, with a drip stand and a tray of instruments; an
+  experiment card by each window), the Lab hall, the Office (its computer tells the chemical puzzle's
+  answer), Storage and its Hunters, the
   chemical room (the reagents, the mixer, its pipe to the grate, the alarm's lights; where the alarm's
   enemies appear), the drain's hatch, and the first Distortion Junior, in the north corridor.
 - Layer 3, the drain (dirty, industrial): the Junction's sluice gates and its Junior (and its restart
@@ -33,7 +34,7 @@ THROUGH = {"lab_chair", "tool_board", "lab_poster", "first_aid_box", "potted_pla
            "sign_radiation", "floor_line", "microscope", "glove_box", "lab_beakers", "lab_monitor", "lab_coat", "chair_jacket",
            "fuse_holder", "office_chair", "lab_terminal", "alarm_light", "pipe", "note_paper", "valve_wheel", "pressure_gauge",
            "tin_cans", "dead_flashlight", "mattress", "electrical_panel", "leather_chair", "exec_chair", "mini_diorite",
-           "paper_stack", "coffee_cup", "desk_lamp_modern", "coffee_machine"}
+           "paper_stack", "coffee_cup", "desk_lamp_modern", "coffee_machine", "iv_drip"}
 # The director's office and the corridor out of it stand this much over layer 3's floor (LEVEL_5's `rise`).
 RISE = 10
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
@@ -102,9 +103,15 @@ FURNITURE = {
         + [("sign_exit", 11, 36, "north", 4), ("sign_biohazard", 9, 36, "north", 3), ("sign_radiation", 60, 17, "north", 3)]
     ),
     2: (
+        # The test chambers: beside each subject on its stretcher (POINTS), a drip stand on one side, its tube towards
+        # it, and a tray of instruments on the other, facing the window.
+        [("iv_drip", 28, 50, "west", 1), ("instrument_tray", 26, 50, "south", 1),
+         ("iv_drip", 34, 67, "east", 1), ("instrument_tray", 36, 67, "north", 1),
+         ("iv_drip", 50, 50, "west", 1), ("instrument_tray", 48, 50, "south", 1),
+         ("iv_drip", 56, 67, "east", 1), ("instrument_tray", 58, 67, "north", 1)]
         # The Lab hall: benches along the north and south walls between the ways out, a computer on each
         # row, carts, posters, first aid; its middle kept clear.
-        row("lab_bench", 80, 90, 50, "south") + row("lab_bench", 81, 90, 70, "north")
+        + row("lab_bench", 80, 90, 50, "south") + row("lab_bench", 81, 90, 70, "north")
         + [("lab_cart", 96, 52, "west", 1), ("lab_cart", 96, 68, "west", 1)]
         + [("lab_poster", 73, 53, "east", 2), ("lab_poster", 73, 67, "east", 2), ("first_aid_box", 97, 54, "west", 2)]
         # The Office: desks along the north wall with their chairs and computers, the desk in the middle

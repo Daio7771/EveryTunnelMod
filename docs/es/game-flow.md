@@ -495,7 +495,8 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
   reinicio es el punto de aparición con la etiqueta `restart_point` que hay dentro de su zona; uno anterior nunca
   ocupa el sitio de uno posterior).
 - **La capa 2.** El pasillo de los sujetos: las salas de pruebas S-1 a S-4 están selladas y se ven por un ventanal
-  ancho con marco de acero (`WINDOWS`), blancas y vacías salvo por su sujeto, inmóvil, una persona que sala a sala
+  ancho con marco de acero (`WINDOWS`), blancas y vacías salvo por su sujeto, sedado y atado a una camilla vertical
+  (muñecas, tobillos, pecho, frente), con un gotero y una bandeja de instrumental al lado, una persona que sala a sala
   se va convirtiendo en un Pale man (`SubjectEntity`, `SubjectHooks`; `tools/entity/subject.py`), con una ficha de
   experimento en la pared del pasillo junto a cada ventanal (sujetos solo por número: contratos de seis meses,
   comidas incluidas, cada uno peor que el anterior). Al entrar en el Lab hall: un

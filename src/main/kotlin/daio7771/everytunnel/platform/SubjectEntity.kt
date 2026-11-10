@@ -24,8 +24,10 @@ import software.bernie.geckolib.util.GeckoLibUtil
 
 /**
  * A test subject in its sealed chamber, S-1 to S-4 (Level 5's subjects' corridor): a person turning, room by
- * room, into a Pale man ([stage] 1 to 4). Completely still; nothing touches it; never saved ([SubjectHooks]
- * puts it back with the level). Models and textures: `tools/entity/subject.py` (GeckoLib).
+ * room, into a Pale man ([stage] 1 to 4), sedated and strapped to a vertical stretcher (part of its model), a
+ * drip stand and a tray of instruments beside it (blocks, `tools/map/lab/furnish.py`). Completely still; nothing
+ * touches it; never saved ([SubjectHooks] puts it back with the level). Models and textures:
+ * `tools/entity/subject.py` (GeckoLib).
  */
 class SubjectEntity(type: EntityType<*>, world: World) : Entity(type, world), GeoEntity {
 

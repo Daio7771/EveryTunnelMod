@@ -1812,6 +1812,20 @@ def lab_glass_tex(rng):
     return img
 
 
+def saline_bag_tex(rng):
+    """A drip's bag: clear plastic, the fluid in it, a printed label with blue lines."""
+    img = new((214, 226, 230))
+    noise(img, rng, 2)
+    rect(img, 0, 5, 15, 15, (196, 214, 222))
+    rect(img, 3, 7, 12, 12, (238, 240, 236))
+    for y in (8, 10):
+        for x in range(4, 12):
+            px(img, x, y, (70, 110, 170), 0.8)
+    for y in range(16):
+        px(img, 1, y, (244, 248, 250), 0.6)
+    return img
+
+
 def monitor_screen_tex(rng):
     """A switched-off monitor: a black screen in a dark bezel, a grey sheen across it."""
     img = new((28, 30, 34))
@@ -3060,20 +3074,6 @@ def build():
     prop("wall_sheet", "Score Sheet", {"p": "note_paper", "t": "screen_white"},
          [el((3, 1, 15.75), (13, 15, 16), "p", north=("p", (0, 0, 16, 16))), el((6, 14, 15.5), (10, 15.5, 15.75), "t")])
     prop("served_glass", "Served Glass", {"g": "served_glass"}, [el((6, 0, 6), (10, 6, 10), "g")])
-    prop("diploma", "Diploma", {"d": "diploma", "w": "suite_bed_frame"},
-         [el((2, 2, 15.5), (14, 14, 16), "w", north="d")])
-    # The shelf: 2 blocks wide, 3 high (BoxShelfBlock: col 0 on the left as seen from the front,
-    # the east of a model facing north; row 0 at the bottom). Five boards 8 pixels apart from the
-    # floor, a top, a back and the two outer sides; the boxes stand on the boards (drawn by
-    # BoxShelfRenderer), board k's top at 1 + 8k pixels over the shelf's foot.
-    variants = {}
-    for col in (0, 1):
-        outer = (15.5, 16) if col == 0 else (0, 0.5)
-        post = (15, 16) if col == 0 else (0, 1)
-        for row_ in (0, 1, 2):
-            boards = [(0, 1), (8, 9)] if row_ < 2 else [(0, 1), (15, 16)]
-            els = [el((0, y0, 2), (16, y1, 16), "m") for y0, y1 in boards]
-            els += [el((0, 0, 15.5), (16, 16, 16), "m"),                                    # the back
     # The dark stretch past the big door, left as it was: dead sconces and paintings on its walls, a runner down it, a
     # chair knocked over on its back, books dropped on the floor where it turns into a library.
     a.texture("sconce_shade", plastic_tex(r("sconce_shade"), (196, 182, 154), "fabric"), T.Material(0.2, porosity=0.5, relief=0.2))
@@ -3100,6 +3100,20 @@ def build():
          [lying, el((8.5, 0, 5), (14, 1.2, 12.5), "g", north=("p", (0, 0, 16, 4)), south=("p", (0, 0, 16, 4)), west=("p", (0, 0, 16, 4))),
           el((9.5, 1.2, 6), (13.5, 2.4, 11.5), "n", north=("p", (0, 0, 16, 4)), south=("p", (0, 0, 16, 4)), west=("p", (0, 0, 16, 4))),
           open_book])
+    prop("diploma", "Diploma", {"d": "diploma", "w": "suite_bed_frame"},
+         [el((2, 2, 15.5), (14, 14, 16), "w", north="d")])
+    # The shelf: 2 blocks wide, 3 high (BoxShelfBlock: col 0 on the left as seen from the front,
+    # the east of a model facing north; row 0 at the bottom). Five boards 8 pixels apart from the
+    # floor, a top, a back and the two outer sides; the boxes stand on the boards (drawn by
+    # BoxShelfRenderer), board k's top at 1 + 8k pixels over the shelf's foot.
+    variants = {}
+    for col in (0, 1):
+        outer = (15.5, 16) if col == 0 else (0, 0.5)
+        post = (15, 16) if col == 0 else (0, 1)
+        for row_ in (0, 1, 2):
+            boards = [(0, 1), (8, 9)] if row_ < 2 else [(0, 1), (15, 16)]
+            els = [el((0, y0, 2), (16, y1, 16), "m") for y0, y1 in boards]
+            els += [el((0, 0, 15.5), (16, 16, 16), "m"),                                    # the back
                     el((outer[0], 0, 2), (outer[1], 16, 16), "m"),                           # the outer side
                     el((post[0], 0, 2), (post[1], 16, 3), "m")]                              # the front post
             name = f"box_shelf_{col}_{row_}"
@@ -3395,6 +3409,29 @@ def build():
          [el((2, 3, 7), (14, 12, 8.5), "k", north=("s", (0, 0, 16, 16))), el((7, 0.5, 8.5), (9, 3, 9.5), "k"), el((5, 0, 7), (11, 0.5, 11), "k")])
     prop("lab_coat", "Lab Coat", {"c": "lab_coat", "s": "lab_steel"},
          [el((4, 1, 14), (12, 14, 15.5), "c", north=("c", (0, 0, 16, 16))), el((7.5, 14, 15), (8.5, 15.5, 16), "s")], ao=False)
+    # By each test subject: a drip stand, its tube hanging down and out to the front (towards the subject), and a
+    # steel tray of instruments on a stand, syringes, vials, a gauze pad.
+    a.texture("saline_bag", saline_bag_tex(r("saline_bag")), T.Material(0.85, relief=0.0))
+    a.texture("vial_amber", plastic_tex(r("vial_amber"), (150, 96, 44)), T.Material(0.9, relief=0.0))
+    a.texture("gauze", plastic_tex(r("gauze"), (236, 236, 230), "fabric"), T.Material(0.2, porosity=0.6, relief=0.2))
+    def high(frm, to, key, uv):
+        """A box reaching over the block, every face showing `uv` of `key` (the automatic uv would leave the texture)."""
+        return el(frm, to, key, **{f: (key, uv) for f in ("north", "south", "east", "west", "up", "down")})
+
+    prop("iv_drip", "Drip Stand", {"s": "lab_steel", "b": "saline_bag", "g": "lab_glass"},
+         [el((2, 0, 7.5), (14, 0.8, 8.5), "s"), el((7.5, 0, 2), (8.5, 0.8, 14), "s"), el((7, 0, 7), (9, 1.5, 9), "s"),
+          high((7.6, 1.5, 7.6), (8.4, 30, 8.4), "s", (7, 0, 8, 16)), high((3, 29, 7.6), (13, 29.6, 8.4), "s", (0, 7, 16, 8)),
+          high((3.5, 21.5, 7.3), (6.5, 28.6, 8.7), "b", (2, 1, 14, 15)), high((4.6, 19.5, 7.6), (5.4, 21.5, 8.4), "g", (4, 4, 8, 12)),
+          high((4.85, 11, 7.85), (5.15, 19.5, 8.15), "b", (1, 0, 2, 16)), el((4.85, 11, 0), (5.15, 11.3, 8), "b")], ao=False)
+    prop("instrument_tray", "Instrument Tray", {"s": "lab_steel", "w": "lab_white", "v": "vial_amber", "k": "lab_black", "z": "gauze"},
+         [el((2, 0, 7.5), (14, 0.8, 8.5), "s"), el((7.5, 0, 2), (8.5, 0.8, 14), "s"), el((7.5, 0.8, 7.5), (8.5, 12, 8.5), "s"),
+          el((2, 12, 3), (14, 12.6, 13), "s"), el((2, 12.6, 3), (14, 13.4, 3.5), "s"), el((2, 12.6, 12.5), (14, 13.4, 13), "s"),
+          el((2, 12.6, 3.5), (2.5, 13.4, 12.5), "s"), el((13.5, 12.6, 3.5), (14, 13.4, 12.5), "s"),
+          el((4, 12.6, 5), (9, 13.4, 5.8), "w"), el((9, 12.8, 5.2), (11, 13.2, 5.6), "w"), el((3, 12.9, 5.3), (4, 13.1, 5.5), "s"),
+          el((4.5, 12.6, 7), (9.5, 13.4, 7.8), "w"), el((9.5, 12.8, 7.2), (11.5, 13.2, 7.6), "w"),
+          el((10, 12.6, 9), (11.4, 15, 10.4), "v"), el((10, 15, 9), (11.4, 15.6, 10.4), "k"),
+          el((11.9, 12.6, 10.4), (13.2, 14.6, 11.7), "v"), el((11.9, 14.6, 10.4), (13.2, 15.2, 11.7), "k"),
+          el((4, 12.6, 9.5), (8.5, 12.9, 12), "z")])
     prop("chair_jacket", "Lab Chair with a Jacket", {**lab, "j": "jacket"},
          [el((3, 7, 3), (13, 8, 13), "g"), el((3, 8, 12), (13, 16, 13), "g")]
          + [el((x, 0, z), (x + 1, 7, z + 1), "s") for x in (3, 12) for z in (3, 12)]

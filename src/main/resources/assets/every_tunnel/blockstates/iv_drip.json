@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/iv_drip"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/iv_drip",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/iv_drip",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/iv_drip",
+      "y": 270
+    }
+  }
+}

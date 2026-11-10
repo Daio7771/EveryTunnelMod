@@ -1,19 +1,21 @@
 """
 The four test subjects of Level 5's rooms S-1 to S-4, for GeckoLib: people hired on six-month contracts,
-turning, room by room, into what the Pale man is (the Pale men were people). Still, all of them.
+turning, room by room, into what the Pale man is (the Pale men were people). Sedated, all of them, strapped
+to a vertical stretcher: a padded board leaning back on two steel legs, straps at the wrists, the ankles, the
+chest and the forehead; eyes shut, the head fallen to one side, the arms limp.
 
 Run after changing anything here (from the repository root):   python3 tools/entity/subject.py
 
 Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   geo/entity/subject_<1..4>.geo.json             one body per stage
   animations/entity/subject.animation.json       one animation that holds the pose (they never move)
-  textures/entity/subject_<1..4>.png (+ subject_4_glowmask.png: S-4's eyes, faintly; the others glow nowhere)
+  textures/entity/subject_<1..4>.png (nothing of them glows: their eyes are shut)
 and, in tools/entity/output/ (git-ignored): subject_preview.png (the four side by side, front and side).
 
 One body, bent by a stage t from 0 (S-1) to 1 (S-4), between a person's proportions and the Pale man's
 (tools/entity/pale_man.py): legs, arms, fingers and neck grow long and thin, the back stoops and the
 neck falls forwards, the head shrinks and the ears grow; the skin goes from a living colour to his
-bluish beige, the hair falls out, the eyes cloud over. All wear a patient's gown, light green with a
+bluish beige, the hair falls out. All wear a patient's gown, light green with a
 number tag on the chest: clean on S-1, stained on S-2, torn on S-3, rags on S-4.
 
 Conventions as in pale_man.py: the model faces north (-z); rotations are degrees [x, y, z]; box UV,
@@ -35,7 +37,7 @@ from pale_man import Bone, faces, write_json  # noqa: E402
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel"
 OUT = Path(__file__).resolve().parent / "output"
-LAYOUT = 64
+LAYOUT = 128
 SCALE = 2
 PX = LAYOUT * SCALE
 STAGES = 4
@@ -44,14 +46,16 @@ SKIN_ALIVE = (226, 184, 156)
 SKIN_PALE = (206, 190, 180)                 # the Pale man's
 VEIN = (148, 162, 198)
 HAIR = (62, 44, 34)
-EYE_WHITE = (236, 236, 232)
-IRIS = (70, 92, 110)
-MILKY = (236, 242, 246)
 GOWN = (160, 204, 196)
 GOWN_SHADE = (126, 170, 164)
 GOWN_DOT = (120, 160, 176)
 STAIN = (150, 136, 96)
 TAG = (240, 240, 236)
+BOARD = (176, 188, 184)                     # the stretcher's padded vinyl
+STEEL = (168, 172, 176)
+STRAP = (58, 54, 50)
+BUCKLE = (196, 198, 200)
+TILT = 12                                   # degrees the stretcher leans back
 
 
 def lerp(a, b, t):
@@ -84,12 +88,27 @@ def skeleton(t):
     head_h = round(lerp(7, 6, t))
     head_w = round(lerp(7, 5, t))
     width = round(lerp(8, 6, t))
-    lean, droop, lift = lerp(0, 8, t), lerp(0, 45, t), lerp(0, -15, t)
+    # On the stretcher the back lies flat but for the stage's stoop, the head falls forwards and to one side.
+    lean, droop, lift = lerp(0, 4, t), lerp(0, 45, t), lerp(10, -5, t)
     upper, fore = round(lerp(6, 10, t)), round(lerp(5, 9, t))
     fingers = round(lerp(2, 4, t))
     half = thin / 2
 
-    bone("root", None, (0, 0, 0))
+    top = shoulder + neck
+    # The stretcher, leaning back from its foot, the body on it: a padded board between two steel rails, and two
+    # steel legs from its back to the floor behind.
+    board_w = width + 2 * thin + 2
+    board_h = top + head_h + 2
+    bone("frame", None, (0, 0, 1.5), (-TILT, 0, 0))
+    cube("frame", (-board_w / 2, 0, 1.5), (board_w, board_h, 1), "board")
+    for x in (-board_w / 2 - 1, board_w / 2):
+        cube("frame", (x, 0, 1), (1, board_h, 2), "rail")
+    leg_top = round(board_h * 0.55)
+    leg = leg_top * math.cos(math.radians(TILT)) / math.cos(math.radians(TILT + 11)) + 1
+    bone("stand", "frame", (0, leg_top, 2.5), (2 * TILT + 11, 0, 0))     # 11 degrees past upright, backwards
+    for x in (-board_w / 2 + 0.5, board_w / 2 - 1.5):
+        cube("stand", (x, leg_top - leg, 2), (1, leg, 1), "rail")
+    bone("root", "frame", (0, 0, 0))
     cube("root", (-width / 2, hip, -1.5), (width, 3, 3), "hips")
     for side, x in (("left", width / 4), ("right", -width / 4)):
         bone(f"{side}_thigh", "root", (x, hip, 0))
@@ -97,15 +116,17 @@ def skeleton(t):
         bone(f"{side}_shin", f"{side}_thigh", (x, shin, 0))
         cube(f"{side}_shin", (x - half, 1, -half), (thin, shin - 1, thin), "leg")
         cube(f"{side}_shin", (x - 1.5, 0, -3 - t * 1.5), (3, 1, 4 + round(t * 2)), "foot")
+        cube(f"{side}_shin", (x - half, 2, -half), (thin, 2, thin), "strap", 0.45)
     bone("torso", "root", (0, hip + 3, 0), (lean, 0, 0))
     cube("torso", (-width / 2, hip + 3, -1.5), (width, belly - 3 + chest, 3), "body")
     skirt = round(thigh * 0.7)                          # the gown hangs to above the knees
     cube("torso", (-width / 2, hip - skirt, -1.5), (width, belly + chest + skirt, 3), "gown", 0.4)
+    cube("torso", (-width / 2 - thin, shoulder - 4, -1.5), (width + 2 * thin, 2, 3), "strap", 0.7)
     bone("neck", "torso", (0, shoulder, -0.5), (droop, 0, 0))
     cube("neck", (-1, shoulder, -1.5), (2, neck, 2), "neck")
-    bone("head", "neck", (0, shoulder + neck, -0.5), (lift, 0, 0))
-    top = shoulder + neck
+    bone("head", "neck", (0, shoulder + neck, -0.5), (lift, 0, 14))
     cube("head", (-head_w / 2, top, -head_w / 2 - 0.5), (head_w, head_h, head_w), "head")
+    cube("head", (-head_w / 2, top + head_h - 2, -head_w / 2 - 0.5), (head_w, 2, head_w), "strap", 0.35)
     ear = round(lerp(1, 3, t))
     cube("head", (head_w / 2, top + head_h / 2 - ear / 2, -1), (1, ear, 2), "ear")
     cube("head", (-head_w / 2 - 1, top + head_h / 2 - ear / 2, -1), (1, ear, 2), "ear")
@@ -115,6 +136,7 @@ def skeleton(t):
         cube(f"{side}_arm", (x - half, shoulder - 0.5 - 3, -half), (thin, 3, thin), "sleeve", 0.35)
         bone(f"{side}_forearm", f"{side}_arm", (x, shoulder - 0.5 - upper, 0))
         cube(f"{side}_forearm", (x - half, shoulder - 0.5 - upper - fore, -half), (thin, fore, thin), "arm")
+        cube(f"{side}_forearm", (x - half, shoulder - 0.5 - upper - fore, -half), (thin, 2, thin), "strap", 0.45)
         bone(f"{side}_hand", f"{side}_forearm", (x, shoulder - 0.5 - upper - fore, 0))
         hand = 3 if t < 0.5 else 2
         cube(f"{side}_hand", (x - hand / 2, shoulder - 0.5 - upper - fore - 2 - fingers, -0.5), (hand, 2 + fingers, 1), "hand")
@@ -156,6 +178,12 @@ class Painter:
         d = self.rng.uniform(-amount, amount) if amount else 0
         self.img.putpixel((x, y), tuple(max(0, min(255, int(round(ch + d)))) for ch in c[:3]) + (255,))
 
+    def fill(self, rect, c, amount=0):
+        x0, y0, x1, y1 = rect
+        for y in range(y0, y1):
+            for x in range(x0, x1):
+                self.put(x, y, c, amount)
+
     def clear(self, x, y):
         self.img.putpixel((x, y), (0, 0, 0, 0))
 
@@ -192,6 +220,24 @@ def paint(p, kind, rects, number):
     elif kind == "ear":
         for r in rects.values():
             p.skin(r)
+    elif kind == "board":
+        for r in rects.values():
+            p.fill(r, BOARD, 5)
+            x0, y0, x1, y1 = r
+            for y in range(y0 + 3, y1, 12):            # the padding's seams
+                for x in range(x0, x1):
+                    p.put(x, y, mix(BOARD, (90, 100, 98), 0.5), 3)
+    elif kind == "rail":
+        for r in rects.values():
+            p.fill(r, STEEL, 8)
+    elif kind == "strap":
+        for name, r in rects.items():
+            p.fill(r, STRAP, 5)
+        x0, y0, x1, y1 = rects["north"]                # a buckle in front
+        cx, cy = (x0 + x1) // 2, (y0 + y1) // 2
+        for x in range(cx - 1, cx + 1):
+            for y in range(max(y0, cy - 1), min(y1, cy + 1)):
+                p.put(x, y, BUCKLE, 6)
     elif kind == "hips":
         for r in rects.values():
             p.gown(r, holes * 0.5)
@@ -231,14 +277,9 @@ def paint(p, kind, rects, number):
                 if p.rng.random() < hair_left:
                     p.put(x, y0, HAIR, 8)
         ey = y0 + h // 2 - 1
-        for ex in (x0 + w // 4 - 1, x1 - w // 4 - 1):
+        for ex in (x0 + w // 4 - 1, x1 - w // 4 - 1):     # shut: a dark lash line under a heavy lid
             for dx in (0, 1):
-                if t < 0.5:
-                    p.put(ex + dx, ey, EYE_WHITE if dx == 0 else mix(IRIS, MILKY, t * 2))
-                else:
-                    p.put(ex + dx, ey, MILKY)
-                    if t > 0.9:
-                        p.glow.putpixel((ex + dx, ey), MILKY + (255,))
+                p.put(ex + dx, ey, mix(p.skin_colour, (60, 44, 42), 0.6), 3)
                 p.put(ex + dx, ey - 1, mix(p.skin_colour, (120, 100, 96), 0.4 + t * 0.3), 3)
         cx = x0 + w // 2
         for x in range(cx - 2, cx + 2):                  # the mouth, a thin line

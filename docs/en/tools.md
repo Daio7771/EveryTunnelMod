@@ -27,7 +27,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/entity/pale_man.py` | Pale man geometry, animations, texture, glow mask, spawn egg model | the Pale man |
 | `tools/entity/observer.py` | The Observer's geometry, animations, texture, spawn egg model | the Observer |
 | `tools/entity/hunter.py` | The Hunters' geometry, animations, texture and eye glow mask | Level 5's Hunters |
-| `tools/entity/subject.py` | The four test subjects' bodies and skins, one stage each, from a person to a Pale man | Level 5's subjects |
+| `tools/entity/subject.py` | The four test subjects' bodies and skins, one stage each, from a person to a Pale man, sedated and strapped to a vertical stretcher | Level 5's subjects |
 | `tools/entity/figure.py` | `textures/entity/lab_figure.png`: a dark shape in the player's layout | the figure seen from Level 5's Lobby |
 | `tools/entity/distortion.py` | The Distortion Cloud's and Junior's geometry, animations, textures and glow masks (the Junior's eye cracking in four stages) | Level 5's Distortions |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (the uniform skin) | the uniform |

@@ -466,7 +466,8 @@ industrial, and up its stairs the director's office (the boss's scene is still t
   way (each restart point is the spawn point tagged `restart_point` inside its zone; an earlier one never takes
   a later one's place).
 - **Layer 2.** The subjects' corridor: the test chambers S-1 to S-4 are sealed, each seen through a wide
-  window in a steel frame (`WINDOWS`), white and empty but for its subject standing still, a person turning
+  window in a steel frame (`WINDOWS`), white and empty but for its subject, sedated and strapped to a vertical
+  stretcher (wrists, ankles, chest, forehead), a drip stand and a tray of instruments beside it, a person turning
   room by room into a Pale man (`SubjectEntity`, `SubjectHooks`; `tools/entity/subject.py`), an experiment
   file on the corridor's wall by each window (subjects by number only: six-month contracts, meals provided,
   each worse than the last). Walking into the Lab hall: a stab of low

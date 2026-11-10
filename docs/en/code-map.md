@@ -144,7 +144,7 @@ KDoc comment that says more.
 | `DistortionJuniorEntity.kt` | The Distortion Junior: whom it troubles and marks, the stare that ends it |
 | `LabFigureEntity.kt` | The figure seen from Level 5's Lobby: once looked at, it walks off round the corner and is gone |
 | `LabFigureHooks.kt` | Puts the figure there when Level 5 is built, once a game |
-| `SubjectEntity.kt` | The test subjects, still in their sealed chambers, by stage; `SubjectHooks` puts them in with the level |
+| `SubjectEntity.kt` | The test subjects, sedated and strapped to their stretchers in their sealed chambers, by stage; `SubjectHooks` puts them in with the level |
 | `DeadGuardEntity.kt` | The guard before you, dead in the drain's Hideout; `DeadGuardHooks` puts him there with the level |
 | `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
