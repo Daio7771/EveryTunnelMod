@@ -12,11 +12,12 @@ blocks over its layer's floor (the director's office, up its steel stairs, and t
 The way in leaves Level 4's dark stretch through a steel frame in its side, by its far end; LEVEL_5's
 PLACE_X and PLACE_Z turn the plan so that it does.
 
-The blocks come in two sets. The way in (entry_blocks: the frame, a dark corridor of the lab's tiles,
-the airlock of steel and its two sliding doors) is built with Level 4, as the player walks it while the
-rest goes up. Crossing the frame is walking into Level 5, so its title shows there. The airlock's door
-ahead, in the Lobby's wall, stays shut until the level is built (lab_blocks, in play: LabHooks); the
-one behind stands open until the player is in.
+The blocks come in two sets. The way in (entry_blocks: the frame, a long dark corridor between the
+shelves of Level 3's library, where the Cloud's game is played (CLOUD_GAME), the airlock of steel and its two
+sliding doors) is built with Level 4, as the player walks it while the rest goes up. Crossing the frame is
+walking into Level 5, though its checkpoint waits for the airlock, and its title shows as the airlock opens.
+The airlock's door ahead, in the Lobby's wall, stays shut until the level is built (lab_blocks, in play:
+LabHooks); the one behind stands open until the player is in.
 
 Walls, floors and ceilings take the look of the space they face (STYLE_OF, STYLES): the lab's tiles on
 layers 1 and 2, the drain's stained concrete on layer 3, steel up its stairs, the office's, the garage's
@@ -87,7 +88,7 @@ OPEN_KINDS = ("corridor", "stairs", "entry", "climb")
 ENTRY_KINDS = ("entry", "airlock")
 ENTRY_OPENINGS = ("frame", "airlock_rear")
 # Which look wins where a block faces spaces of two.
-STYLE_ORDER = ("lab", "office", "garage", "steel", "pit", "drain")
+STYLE_ORDER = ("library", "lab", "office", "garage", "steel", "pit", "drain")
 
 
 class Lab:
@@ -265,7 +266,7 @@ class Lab:
         front = [o for o in self.openings if o.kind == "airlock_front"]
         front_air = self.opening_air(front)
         styles = {}
-        for s in rooms + [self.flight]:
+        for s in rooms + [self.flight] + [s for s in self.entry if s.kind == "entry"]:
             look = self.style(s)
             styles.update({c: look for c in self.carve_air([s])})
         for o in self.openings:
@@ -314,12 +315,15 @@ class Lab:
         def shell(c, role):
             return self.state(role, "lab" if role in ("steel", "checker") else self.shell_style(c, styles))
 
-        # Next to the way in's air: built with Level 4. The rest with the level, in play, and the walls between
-        # the two in both: a level built without Level 4 (a game continued in it) still has its Lobby whole.
-        self.entry_blocks = {self.at(*c): shell(c, r) for c, r in roles.items() if near(c, entry_air)}
+        # Next to the way in's air: built with Level 4, its air too (a build over an older one leaves nothing of it).
+        # The rest with the level, in play, and the walls between the two in both: a level built without Level 4 (a
+        # game continued in it) still has its Lobby whole.
+        self.entry_blocks = {self.at(*c): "minecraft:air" for c in entry_air if c not in outside}
+        self.entry_blocks.update({self.at(*c): shell(c, r) for c, r in roles.items() if near(c, entry_air)})
         # The level's own air goes in too: a build over an older one puts everything back as new.
         self.lab_blocks = {self.at(*c): "minecraft:air" for c in lab_air}
         self.lab_blocks.update({self.at(*c): shell(c, r) for c, r in roles.items() if not near(c, entry_air) or near(c, lab_air)})
+        self.entry_blocks.update(self.shelves())
         # The airlock's door ahead stands shut in both sets: before the level, it is the Lobby's wall.
         for o in front:
             self.entry_blocks.update(self.airlock_door(o))
@@ -381,6 +385,24 @@ class Lab:
         self.box = self.bounds({**self.lab_blocks, **self.entry_blocks})
         self.lab_box = self.bounds(self.lab_blocks)
         return self
+
+    def shelves(self):
+        """{world position: state} of the bookshelves along both long walls of the entry corridor, facing in,
+        SHELF_HEIGHT high: its outermost rows of cells, all the way."""
+        p = self.p
+        out = {}
+        for s in self.entry:
+            if s.kind != "entry":
+                continue
+            x0, z0, x1, z1 = s.box
+            h = p["SHELF_HEIGHT"]
+            for z, facing in ((z0, "south"), (z1 - 1, "north")):
+                for x in range(x0, x1):
+                    for y in range(s.floor + 1, s.floor + h + 1):
+                        state = p["BOOKSHELF"].format(facing=WORLD_FACING[facing], up=str(y < s.floor + h).lower(),
+                                                      down=str(y > s.floor + 1).lower())
+                        out[self.at(x, y, z)] = state
+        return out
 
     # --- the drain (layer 3) ---------------------------------------------------------
 
@@ -651,7 +673,11 @@ class Lab:
     # The Distortion Clouds' zones (DistortionHooks; `cloud_often`: more often), the Lab hall's first Cloud
     # (LabHallHooks), the chemical puzzle's room, grate and hatch (ChemicalHooks), the foot of the ladder down
     # from the hatch (DrainHooks), the director's office and the false exit with its pit (the boss's scene).
-    TAGS = {"airlock": ["lab_airlock"], "airlock_rear": ["lab_airlock_rear"], "airlock_front": ["lab_welcome"],
+    # The entry corridor (the Cloud's game, CloudGameHooks, in its zone `cloud_game`): the battery dead, no sprinting, no
+    # checkpoint yet, and a death there goes back to Level 4's key (ResourceHooks, ContinueGame, DeathHooks); its frame
+    # holds no checkpoint either.
+    TAGS = {"entry": ["dead_battery", "no_sprint", "no_checkpoint", "back_to_key"], "frame": ["no_checkpoint", "back_to_key"],
+            "airlock": ["lab_airlock"], "airlock_rear": ["lab_airlock_rear"], "airlock_front": ["lab_welcome"],
             "locked": ["lab_door"], "hub": ["restart_point", "cloud", "first_cloud"], "north_route": ["cloud"],
             "south_route": ["cloud"], "puzzle": ["chemical_room"], "grate": ["lab_grate"], "hatch": ["lab_drain"],
             "drain_ladder": ["drain_bottom"], "drain_tunnels": ["cloud", "cloud_often"],
@@ -667,6 +693,11 @@ class Lab:
         for o in self.openings:
             out.append((o.id, self.cells_zone(o.cells(), o.floor + 1, o.floor + o.height), self.TAGS.get(o.kind, [])))
         out.append(("false_exit_pit", self.cells_zone(self.pit_cells, self.pit_floor - self.pit_depth, self.pit_floor), ["false_exit_pit"]))
+        # The entry corridor's game, from its start line to the airlock (CloudGameHooks).
+        entry = next(s for s in self.spaces if s.kind == "entry")
+        x0, z0, x1, z1 = entry.box
+        cells = [(x, z) for x in range(x0 + self.p["CLOUD_GAME"]["start"], x1) for z in range(z0, z1)]
+        out.append(("cloud_game", self.cells_zone(cells, entry.floor + 1, entry.floor + entry.height), ["cloud_game"]))
         # The ladder's shaft, from the foot of the ladder's room up to the hatch in layer 2's floor.
         shaft = sorted(self.shaft_air)
         out.append(("drain_shaft", self.cells_zone([(x, z) for x, _, z in shaft], shaft[0][1], self.layer_floor[2]), []))
@@ -682,6 +713,12 @@ class Lab:
                {"id": "checkpoint", "pos": check, "yaw": check_yaw, "tags": ["restart_point"]}]
         for lid, layer, x, z, facing in p["LEVERS"]:
             out.append({"id": lid, "pos": list(self.at(x, self.layer_floor[layer] + 2, z)), "yaw": 0, "tags": ["lab_lever"]})
+        # The entry corridor's game runs down its middle line, from its start line to its last cell before the airlock.
+        entry = next(s for s in self.spaces if s.kind == "entry")
+        for pid, x in (("cloud_game_start", entry.box[0] + p["CLOUD_GAME"]["start"]), ("cloud_game_end", entry.box[2] - 1)):
+            (ax, ay, az), yaw = self.point((entry.layer, x, entry.box[1], "east"))
+            (bx, _, bz), _ = self.point((entry.layer, x, entry.box[3] - 1, "east"))
+            out.append({"id": pid, "pos": [(ax + bx) / 2, ay, (az + bz) / 2], "yaw": yaw, "tags": ["cloud_game"]})
         out += self.furnish.spawn_points(lambda facing: YAW[WORLD_FACING[facing]])
         return out
 

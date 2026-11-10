@@ -99,6 +99,21 @@ object LootSpawner {
         taken += "${level.id}/${point.id}"
     }
 
+    /** [level]'s loot of the kind [tag] where it lay again, as not taken (Level 4's Master Key, [LoungeClosingHooks.takeBack]). */
+    fun putBack(server: MinecraftServer, level: LevelDefinition, tag: String) {
+        val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: return
+        val block = LOOT[tag]?.invoke() ?: return
+        for (point in level.spawnPoints) {
+            if (tag !in point.tags) continue
+            taken -= "${level.id}/${point.id}"
+            val pos = BlockPos.ofFloored(point.position.x, point.position.y, point.position.z)
+            val there = world.getBlockState(pos)
+            if (!there.isAir && !there.isReplaceable && there.block !is LootBlock) continue
+            val state = block.defaultState.with(LootBlock.FACING, Direction.fromRotation(point.yaw.toDouble()))
+            world.setBlockState(pos, state.with(LootBlock.WATERLOGGED, there.fluidState.isStill))
+        }
+    }
+
     /** A game continued: what had been taken in [level] goes again, but for the Master Key ([LoungeClosingHooks.undoKey]). */
     fun restoreTaken(keys: List<String>, world: net.minecraft.server.world.ServerWorld, level: LevelDefinition) {
         for (key in keys) {

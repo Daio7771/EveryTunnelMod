@@ -161,6 +161,11 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `observer_never` | `ObserverEntity` | El pozo y el túnel del búnker del nivel 3: el Observer no ve a nadie ahí, así que nunca baja detrás de nadie |
 | `cloud` | `DistortionHooks` | Nivel 5: donde vienen las Distortion Clouds (una cada 2 a 4 minutos pasados en esas zonas) y donde pueden aparecer |
 | `first_cloud` | `LabHallHooks` | El Lab hall del nivel 5: al entrar, un golpe de cuerdas y la primera Cloud, una vez por partida |
+| `cloud_game` | `CloudGameHooks` | El pasillo de entrada del nivel 5, desde su línea de salida: al entrar empieza el juego de la Cloud (como el de Halt), al salir se acaba |
+| `dead_battery` | `ResourceHooks` | Ahí la batería está vacía y ninguna pila sirve; al salir vuelve a estar llena |
+| `no_sprint` | `ResourceHooks` | Ahí nadie esprinta |
+| `no_checkpoint` | `ContinueGame` | Ahí no se guarda punto de control: el del nivel espera a su primera zona sin la etiqueta |
+| `back_to_key` | `DeathHooks` | Morir ahí devuelve al nivel 4 junto a la mesa de la Master Key, como antes de cogerla |
 | `chemical_room`, `lab_grate`, `lab_drain` | `ChemicalHooks` | Nivel 5: la sala cuyas luces de alarma giran, la rejilla que disuelve el disolvente, la sala cuya trampilla se abre después |
 
 ### Etiquetas de punto de aparición
@@ -180,6 +185,8 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `lab_figure`, `lab_figure_exit` | `LabFigureHooks` | Nivel 5: donde está la figura que se ve desde el Lobby, una vez por partida, y adónde va cuando la ven |
 | `subject` | `SubjectHooks` | Nivel 5: un sujeto de pruebas inmóvil; su id `subject_<1..4>` dice qué fase |
 | `terminal` | `TerminalHooks` | Nivel 5: un ordenador en ese bloque; su id dice qué muestra su pantalla |
+| `cloud_game` | `CloudGameHooks` | Nivel 5: `cloud_game_start` y `cloud_game_end`, los extremos de la línea por la que va el juego del pasillo de entrada |
+| `key_table` | `DeathHooks` | Nivel 4: junto a la mesa de la Master Key, adonde vuelve quien muere en el pasillo de entrada del nivel 5 |
 | `reagent_1` a `reagent_4` | `LootSpawner`, `ChemicalHooks` | Nivel 5: un frasco de reactivo ahí; una mezcla fallida lo devuelve |
 | `alarm_hunters`, `alarm_junior` | `ChemicalHooks` | Nivel 5: donde la alarma de la sala de químicos trae tres Hunters, un Junior |
 | `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Comida, sobre muebles |
@@ -227,8 +234,9 @@ El nivel 5, el laboratorio, se construye en juego (`LabHooks`), sus tres capas (
 y aspecto: [Herramientas en Python](tools.md)). Su archivo nombra las zonas como el plano; una zona de varias cajas
 repite su id:
 
-- **Capa 1:** `entry_corridor` (desde el marco de acero del tramo oscuro del nivel 4), `airlock` (con la
-  etiqueta `lab_airlock`), `lobby`,
+- **Capa 1:** `entry_corridor` (desde el marco de acero del tramo oscuro del nivel 4, el juego de la Cloud: con
+  las etiquetas `dead_battery`, `no_sprint`, `no_checkpoint` y `back_to_key`), `cloud_game` (lo mismo desde su línea
+  de salida, con la etiqueta `cloud_game`), `airlock` (con la etiqueta `lab_airlock`), `lobby`,
   `workshop`, `waiting`, `lockers`, `layer1_corridor` (el anillo, seis cajas), `layer1_stairs` (las dos salas
   de escaleras y el tramo entre ellas).
 - **Capa 2:** `subjects_corridor`, `s1` a `s4` (las salas de pruebas selladas), `lab_hall` (con las etiquetas
@@ -241,7 +249,8 @@ repite su id:
   su rellano), `director_office` (con la etiqueta `director_office`), `false_exit` (el pasillo que sale del despacho,
   con la etiqueta `false_exit`) y `false_exit_pit` (el pozo bajo su final, con la misma etiqueta), `drain_shaft` (el hueco de la escalera de mano hasta la
   trampilla). La zona de un espacio baja hasta su agua (los canales, las piscinas), así que un jugador dentro sigue en el nivel.
-- **Aberturas,** cada una con su zona: `entry_frame` (el marco: cruzarlo es entrar en el nivel 5),
+- **Aberturas,** cada una con su zona: `entry_frame` (el marco: cruzarlo es entrar en el nivel 5, con las
+  etiquetas `no_checkpoint` y `back_to_key`),
   `airlock_rear` (con la etiqueta `lab_airlock_rear`), `welcome_door` (con la etiqueta `lab_welcome`), los huecos de puerta
   (`workshop_door`, `waiting_door`, `office_door_west`, `office_door_east`), las puertas
   correderas bloqueadas (`stairs_door`, `south_door`, `shortcut_door`, con la etiqueta `lab_door`) y `hatch_grate`
@@ -250,7 +259,8 @@ repite su id:
   nivel 1 al final del pasillo). Las salas de pruebas no tienen: un ventanal cada una (`WINDOWS`).
 - El Lab hall y la Junction tienen la etiqueta `restart_point`.
 - **Puntos de aparición:** `player_start` (el Lobby, junto a la entrada), `checkpoint` (el Lab hall, con la
-  etiqueta `restart_point`), `lever_stairs_door` y `lever_shortcut_door` (con la etiqueta `lab_lever`), y los de la
+  etiqueta `restart_point`), `cloud_game_start` y `cloud_game_end` (con la etiqueta `cloud_game`, la línea por la que
+  va el juego del pasillo de entrada), `lever_stairs_door` y `lever_shortcut_door` (con la etiqueta `lab_lever`), y los de la
   capa 1 (`tools/map/lab/furnish.py`): `wrench` y `detector` (el banco central del Workshop), los fusibles `fuse_5a`,
   `fuse_10a`, `fuse_20a`, `fuse_30a` (con la misma etiqueta), las fichas de la pizarra de seguridad `ch1_l5_card_*` (etiqueta `note`, cada una en la celda de su columna en la fila de abajo),
   `hunters_fuse_box` (etiquetas `hunters` y `harmless`), `lab_figure` y `lab_figure_exit`; y los de la capa 2:

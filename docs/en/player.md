@@ -47,6 +47,8 @@ save, and it changes nothing else.
 - At 0 the player is **exhausted**: no sprinting until stamina is back to 30%. The client
   enforces it (`ClientPlayerEntityMixin` makes `canSprint` false), because sprinting is
   decided on the client.
+- Nobody sprints in a zone tagged `no_sprint` (Level 5's entry corridor): the server stops it and the
+  client holds back the same way.
 - While exhausted: heavy breathing in the player's head (`client.effects.BreathingEffect`),
   the screen edges darken and swell with each breath (`client.hud.ExhaustionVignette`),
   and panting is a noise for the Pale man once per second.
@@ -88,6 +90,9 @@ shown in the hand.
   (`item.battery.open/close`). Refills 100%. "The flashlight battery is already full" if it
   is.
 - The flashlight works in Creative too, but only drains where the rules apply.
+- **A dead battery** in a zone tagged `dead_battery` (Level 5's entry corridor, where the only light is the
+  Cloud's): walking in, the battery drops to nothing and a flashlight on flickers out as if run down; no battery
+  item helps there; walking out, the battery is full again.
 
 The light itself is drawn on the client, see [Graphics](graphics.md#the-flashlight).
 
@@ -217,6 +222,12 @@ Every key and its default:
 | `often_min_seconds`, `often_max_seconds` | 60, 120 | The same, in zones tagged `cloud_often` as well (Level 5's drain), counted apart |
 | `nearest`, `farthest` | 8, 14 | Blocks ahead of the player where it appears |
 | `touch_range` | 1.2 | Closer than this it kills whatever way one faces |
+| `game_grace_seconds` | 1.5 | The entry corridor's game: seconds of looking its way there before it kills |
+| `game_behind_blocks`, `game_ahead_blocks` | 8, 8 | Blocks behind and ahead of the player where it lands when it jumps |
+| `game_forward_min_seconds`, `game_forward_max_seconds` | 7, 10 | A leg forward, with it behind: a random length between these... |
+| `game_back_min_seconds`, `game_back_max_seconds` | 2.5, 3.5 | ...and a leg back, with it in front |
+| `game_creep_start`, `game_creep_end` | 2.4, 3.6 | Blocks a second it creeps after the player, at the start and at the end (a walk is about 4.3) |
+| `game_hurry` | 0.35 | Share by which the legs are shorter at the end |
 | **`junior`** | | Level 5's Distortion Junior |
 | `range` | 8 | Blocks from its eye within which it troubles the player (never through a wall) |
 | `stare_seconds` | 4 | Seconds of staring at its eye, without looking away, that end it |

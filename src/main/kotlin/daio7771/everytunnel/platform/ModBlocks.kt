@@ -108,6 +108,12 @@ object ModBlocks {
     val WALL_SHEET: Block = register("wall_sheet", NoteBoardBlock(props(MapColor.WHITE, BlockSoundGroup.WOOL).noCollision()))
 
     val SERVED_GLASS: Block = register("served_glass", PropBlock(props(MapColor.CLEAR, BlockSoundGroup.GLASS).noCollision(), listOf(box(6, 0, 6, 10, 6, 10))))
+    /** Level 4's dark stretch, left as it was: dead sconces, paintings, a runner, a chair knocked over, books dropped. */
+    val WALL_SCONCE: Block = register("wall_sconce", PropBlock(props(MapColor.YELLOW, ModSoundGroups.METAL_PIPE).noCollision(), listOf(box(5.5, 4, 8.5, 10.5, 14, 16))))
+    val LOUNGE_PAINTING: Block = register("lounge_painting", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(1, 3, 15, 15, 13, 16))))
+    val LOUNGE_RUG: Block = register("lounge_rug", PropBlock(props(MapColor.GREEN, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(0, 0, 0, 16, 0.5, 16))))
+    val FALLEN_CHAIR: Block = register("fallen_chair", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD), listOf(box(3, 0, 0, 13, 10, 16))))
+    val FALLEN_BOOKS: Block = register("fallen_books", PropBlock(props(MapColor.RED, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(2, 0, 2, 14, 2.5, 15))))
     val DIPLOMA: Block = register("diploma", PropBlock(props(MapColor.WHITE, ModSoundGroups.WOOD).noCollision(), listOf(box(2, 2, 15, 14, 14, 16))))
 
     val WARM_LAMP: Block = register(

@@ -1,4 +1,13 @@
 {
+  "ambient.cloud_game.static": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/cloud_game/static_1",
+        "stream": true,
+        "volume": 0.6
+      }
+    ]
+  },
   "ambient.drain.creak": {
     "sounds": [
       {

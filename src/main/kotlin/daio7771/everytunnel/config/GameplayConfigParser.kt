@@ -123,6 +123,16 @@ object GameplayConfigParser {
         nearest = f.double("nearest", d.nearest, min = 2.0, max = 32.0),
         farthest = f.double("farthest", d.farthest, min = 2.0, max = 32.0),
         touchRange = f.double("touch_range", d.touchRange, min = 0.0, max = 4.0),
+        gameGraceSeconds = f.double("game_grace_seconds", d.gameGraceSeconds, min = 0.05, max = 10.0),
+        gameBehindBlocks = f.double("game_behind_blocks", d.gameBehindBlocks, min = 2.0, max = 32.0),
+        gameAheadBlocks = f.double("game_ahead_blocks", d.gameAheadBlocks, min = 2.0, max = 32.0),
+        gameForwardMinSeconds = f.double("game_forward_min_seconds", d.gameForwardMinSeconds, min = 0.5, max = 120.0),
+        gameForwardMaxSeconds = f.double("game_forward_max_seconds", d.gameForwardMaxSeconds, min = 0.5, max = 120.0),
+        gameBackMinSeconds = f.double("game_back_min_seconds", d.gameBackMinSeconds, min = 0.5, max = 120.0),
+        gameBackMaxSeconds = f.double("game_back_max_seconds", d.gameBackMaxSeconds, min = 0.5, max = 120.0),
+        gameCreepStart = f.double("game_creep_start", d.gameCreepStart, min = 0.0, max = 10.0),
+        gameCreepEnd = f.double("game_creep_end", d.gameCreepEnd, min = 0.0, max = 10.0),
+        gameHurry = f.double("game_hurry", d.gameHurry, min = 0.0, max = 0.9),
     ).also { f.reportUnknownKeys() }
 
     private fun junior(f: JsonFields, d: JuniorConfig) = JuniorConfig(

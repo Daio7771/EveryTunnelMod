@@ -3,6 +3,7 @@ package daio7771.everytunnel.platform
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.level.LevelDefinition
+import daio7771.everytunnel.core.level.SpawnPoint
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
@@ -37,12 +38,16 @@ import net.minecraft.util.math.Direction
  *   is tried. Then the key is used and it opens from the centre out, over 3 s ([OPENING]).
  * - **The way out:** walking on into a zone tagged [SHUT_TAG], halfway along the dark stretch, slams it
  *   behind the player. The stretch goes on into Level 5's entry corridor ([LabHooks]).
+ * - **Back to the key:** a death in that corridor ([DeathHooks]) undoes all this ([takeBack]): the lamps
+ *   as they were, the big door shut, the key on its table again, and the player beside it ([keyTable]).
  *
- * What it changes in the world is not undone here: a new game rebuilds the level ([LoungeHooks.newGame]).
+ * Otherwise what it changes in the world is not undone here: a new game rebuilds the level ([LoungeHooks.newGame]).
  */
 object LoungeClosingHooks {
 
     const val SHUT_TAG = "big_door_shut"
+    /** Level 4's spawn point by the Master Key's table. */
+    private const val KEY_TABLE = "key_table"
     const val CINEMA_TAG = "cinema_wakes"
     private const val LEVEL_ID = "level_4"
     private const val STEP_TICKS = 30
@@ -63,6 +68,9 @@ object LoungeClosingHooks {
     private var shut = false
 
     private var cinemaAwake = false
+
+    /** What the blackout changed (the lamps, the wet floor sign's place), as it was before: [takeBack] puts it back. */
+    private val beforeBlackout = HashMap<BlockPos, BlockState>()
 
     /** The lights went out. */
     var blackout = false
@@ -92,6 +100,7 @@ object LoungeClosingHooks {
         doorFacing = null
         openingTicks = -1
         shut = false
+        beforeBlackout.clear()
     }
 
     fun keyTaken(player: ServerPlayerEntity) {
@@ -103,18 +112,21 @@ object LoungeClosingHooks {
             val box = zone.box
             for (pos in BlockPos.iterate(box.minX, box.minY, box.minZ, box.maxX, box.maxY, box.maxZ)) {
                 val state = world.getBlockState(pos)
-                if (state.isOf(ModBlocks.WARM_LAMP) && state.get(WarmLampBlock.LIT)) {
-                    world.setBlockState(pos, state.with(WarmLampBlock.LIT, false))
-                    lamps++
-                } else if (state.isOf(ModBlocks.FLUORESCENT_LIGHT)) {
-                    world.setBlockState(pos, FluorescentLightBlock.withMode(state, LightMode.OFF))
-                } else if (state.isOf(ModBlocks.EMERGENCY_LAMP) && !state.get(EmergencyLampBlock.LIT)) {
-                    world.setBlockState(pos, state.with(EmergencyLampBlock.LIT, true))
+                val next = when {
+                    state.isOf(ModBlocks.WARM_LAMP) && state.get(WarmLampBlock.LIT) -> state.with(WarmLampBlock.LIT, false).also { lamps++ }
+                    state.isOf(ModBlocks.FLUORESCENT_LIGHT) -> FluorescentLightBlock.withMode(state, LightMode.OFF)
+                    state.isOf(ModBlocks.EMERGENCY_LAMP) && !state.get(EmergencyLampBlock.LIT) -> state.with(EmergencyLampBlock.LIT, true)
+                    else -> continue
                 }
+                beforeBlackout.putIfAbsent(pos.toImmutable(), state)
+                world.setBlockState(pos, next)
             }
         }
         // Looking the way someone coming up the Hall would come from.
-        pointOf(level, "wet_sign")?.let { world.setBlockState(it, ModBlocks.WET_FLOOR_SIGN.defaultState.with(PropBlock.FACING, Direction.EAST)) }
+        pointOf(level, "wet_sign")?.let {
+            beforeBlackout.putIfAbsent(it, world.getBlockState(it))
+            world.setBlockState(it, ModBlocks.WET_FLOOR_SIGN.defaultState.with(PropBlock.FACING, Direction.EAST))
+        }
         world.playSound(null, player.blockPos, ModSounds.LOUNGE_BLACKOUT, SoundCategory.BLOCKS, 2f, 1f)
         EveryTunnel.LOGGER.info("The Master Key is taken: {} lamps go out", lamps)
     }
@@ -125,6 +137,33 @@ object LoungeClosingHooks {
         for (slot in 0 until inventory.size()) {
             if (inventory.getStack(slot).isOf(ModItems.MASTER_KEY)) inventory.setStack(slot, ItemStack.EMPTY)
         }
+    }
+
+    /** Level 4's level and the spot by the Master Key's table, facing it, where a death in Level 5's entry corridor comes back to. */
+    fun keyTable(): Pair<LevelDefinition, SpawnPoint>? {
+        val level = LevelManager.get(LEVEL_ID) ?: return null
+        return level.spawnPoint(KEY_TABLE)?.let { level to it }
+    }
+
+    /**
+     * A death in Level 5's entry corridor: Level 4 as it was before the Master Key was taken, so that the moment can be
+     * lived again. The lamps as they were, no wet floor sign, the Cinema asleep, the big door shut, the music as before
+     * the blackout, the key off [player] and on its table again.
+     */
+    fun takeBack(player: ServerPlayerEntity) {
+        val server = player.server
+        val (level, world) = place(server) ?: return
+        for ((pos, state) in beforeBlackout) world.setBlockState(pos, state)
+        for (i in 0 until GLOWS) {
+            val at = pointOf(level, "cinema_glow_$i") ?: continue
+            if (world.getBlockState(at).isOf(Blocks.LIGHT)) world.setBlockState(at, Blocks.AIR.defaultState)
+        }
+        val facing = doorFacing
+        if (facing != null && !shut) pointOf(level, "big_door")?.let { shutDoor(world, it, facing) }
+        reset()
+        undoKey(player)
+        LootSpawner.putBack(server, level, "master_key")
+        EveryTunnel.LOGGER.info("Level 4 is back to before the Master Key was taken")
     }
 
     fun useBigDoor(player: ServerPlayerEntity, state: BlockState) {
@@ -184,13 +223,18 @@ object LoungeClosingHooks {
         val origin = pointOf(level, "big_door") ?: return
         shut = true
         openingTicks = -1
+        shutDoor(world, origin, facing)
+        world.playSound(null, partAt(origin, facing, 2, 1), ModSounds.BIG_DOOR_SLAM, SoundCategory.BLOCKS, 3f, 1f)
+    }
+
+    /** The big door whole, shut, its bottom left part at [origin]. */
+    private fun shutDoor(world: ServerWorld, origin: BlockPos, facing: Direction) {
         for (col in 0..5) {
             for (row in 0..3) {
                 val state = ModBlocks.BIG_DOOR.defaultState.with(BigDoorBlock.FACING, facing).with(BigDoorBlock.COL, col).with(BigDoorBlock.ROW, row)
                 world.setBlockState(partAt(origin, facing, col, row), state)
             }
         }
-        world.playSound(null, partAt(origin, facing, 2, 1), ModSounds.BIG_DOOR_SLAM, SoundCategory.BLOCKS, 3f, 1f)
     }
 
     /** To the right of someone looking at the door's front is [facing] turned counterclockwise. */

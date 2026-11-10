@@ -25,13 +25,16 @@ object ClientResources {
         }
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> current = ResourceSyncPacket.NONE }
         // Lets the battery item predict on the client whether it can be used.
-        FlashlightHooks.clientBatteryNotFull = { current.battery < current.batteryMax }
+        FlashlightHooks.clientBatteryNotFull = { current.battery < current.batteryMax && !current.deadBattery }
         DrinkHooks.clientThirstNotFull = { current.thirst < current.thirstMax }
     }
 
-    /** True while the player is exhausted, or carries a box or a book, and must not sprint. Called from `ClientPlayerEntityMixin`. */
+    /**
+     * True while the player is exhausted, or carries a box or a book, or stands where sprinting is not allowed
+     * (Level 5's entry corridor), and must not sprint. Called from `ClientPlayerEntityMixin`.
+     */
     @JvmStatic
-    fun isSprintBlocked(): Boolean = current.active && (current.exhausted || carryingBox())
+    fun isSprintBlocked(): Boolean = current.active && (current.exhausted || current.noSprint || carryingBox())
 
     /** A Level 3 box or book in the inventory: no sprinting while carrying it (`platform.CarryHooks`). */
     private fun carryingBox(): Boolean {

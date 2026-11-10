@@ -415,7 +415,10 @@ LEVEL_4 = dict(
     # frame in its side by the far end opens onto Level 5's entry corridor (LEVEL_5; built with this level).
     EXIT_STRETCH=("ch1_l4_exit", "Dark stretch", (47, -45, 53, -1), 4),
     EXIT_SHUT_AT=35,                 # cells from its far end, inclusive: the door slams from here on
+    EXIT_LIBRARY=11,                 # cells from its far end over which it turns into a library (LIBRARY_CARPET, furnish.py)
+    LIBRARY_CARPET="minecraft:green_wool",   # Level 3's library carpet (its stand-in, so it looks the same)
     START=(50, 55),                  # the checkpoint, in Reception, facing north
+    KEY_TABLE=(95, 37),              # by the Master Key's table, facing it: a death in Level 5's entry corridor comes back here
     # Plan to world: the plan's north is the world's west, so the level meets the corridor from B4:
     # world x = z + PLACE_X, world z = PLACE_Z - x.
     PLACE_X=-47,
@@ -476,9 +479,10 @@ LEVEL_5 = dict(
     # "equipment", "loot", "lore", "chamber" (sealed: seen through a window), "hub", "puzzle", "hatch", "stairs" and "corridor" (corridors and stairs
     # open onto what they touch; any other two spaces keep a wall between them). The zone ids are the plan's.
     SPACES=[
-        # Layer 1: in from Level 4's dark stretch through a steel frame, a dark corridor of the lab's tiles
-        # and the airlock, then the Lobby and a ring of corridors.
-        ("entry", "entry_corridor", "Entry corridor", 1, (-16, 12, -4, 16), None, "entry"),
+        # Layer 1: in from Level 4's dark stretch through a steel frame, a long dark corridor between the shelves
+        # of a library (Level 3's, its own blocks: the Cloud's game, CHASE) and the airlock, then the Lobby and a
+        # ring of corridors.
+        ("entry", "entry_corridor", "Entry corridor", 1, (-104, 11, -4, 17), 5, "entry"),
         ("airlock", "airlock", "Airlock", 1, (-3, 12, 1, 16), 4, "airlock"),
         ("lobby", "lobby", "Lobby", 1, (2, 7, 21, 22), None, "room"),
         ("workshop", "workshop", "Workshop", 1, (29, 2, 54, 13), None, "equipment"),
@@ -549,7 +553,7 @@ LEVEL_5 = dict(
     # player is in, the one ahead shut until the level stands; LabHooks), "grate" (iron bars the chemical
     # puzzle will dissolve).
     OPENINGS=[
-        ("entry_frame", 1, "x", -17, 12, 4, 3, "frame"),
+        ("entry_frame", 1, "x", -105, 12, 4, 3, "frame"),
         ("airlock_rear", 1, "x", -4, 12, 4, 3, "airlock_rear"),
         ("welcome_door", 1, "x", 1, 12, 4, 3, "airlock_front"),
         ("workshop_door", 1, "z", 13, 41, 2, 2, "lab_door"),          # a pair of the lab's doors, opened by hand
@@ -641,9 +645,11 @@ LEVEL_5 = dict(
     # The look of a space's or an opening's surfaces, by id: the rest are the lab's on layers 1 and 2 and the
     # drain's on layer 3. STYLES: role -> a stand-in of STAND_INS, or a block of its own (the garage's corridor
     # is built of Level 1's own blocks, which the same pack re-skins: it looks like the garage).
-    STYLE_OF={"office_stairs": "steel", "office_landing": "steel", "office": "office", "office_door": "office",
+    STYLE_OF={"entry": "library", "entry_frame": "library", "office_stairs": "steel", "office_landing": "steel", "office": "office", "office_door": "office",
               "office_exit": "office", "false_exit": "garage", "exit_door": "garage"},
     STYLES=dict(
+        library=dict(vinyl="minecraft:green_wool", tile="minecraft:dark_oak_planks", band="minecraft:dark_oak_planks",
+                     ceiling="minecraft:calcite"),
         drain=dict(vinyl="drain_floor", tile="drain_wall", band="drain_band", ceiling="drain_ceiling",
                    rubble="rubble", rubble_slab="rubble_slab"),
         steel=dict(vinyl="every_tunnel:checker_plate", tile="steel", band="steel", ceiling="steel"),
@@ -657,12 +663,18 @@ LEVEL_5 = dict(
     # line, first cell, last cell).
     WINDOWS=[(2, "z", 56, 22, 33), (2, "z", 56, 44, 55), (2, "z", 61, 30, 41), (2, "z", 61, 52, 63)],
     GLASS="minecraft:glass",
-    START=(-16, 13),                 # layer 1: the entry corridor's first cell, past the frame
+    START=(-104, 13),                # layer 1: the entry corridor's first cell, past the frame
+    # The entry corridor's game (CloudGameHooks): no light but the Cloud's, which keeps behind the player and now and
+    # then jumps in front of them, all the way. It starts `start` cells in, past the frame. Its shelves of Level 3's
+    # library stand along both walls, SHELF_HEIGHT high.
+    CLOUD_GAME=dict(start=10),
+    SHELF_HEIGHT=4,
+    BOOKSHELF="every_tunnel:bookshelf[facing={facing},up={up},down={down}]",
     CHECKPOINT=(77, 67),             # layer 2: in the Lab hall
     # Plan to world: the plan's south is the world's west, so the entry corridor leaves Level 4's dark
     # stretch at its far end, to its left: world x = PLACE_X - z, world z = PLACE_Z + x.
     PLACE_X=-77,
-    PLACE_Z=140,
+    PLACE_Z=228,
     # The player's start (a death comes back here) and the Lab hall's restart point, the checkpoint walking
     # into the Lab hall makes: (layer, x, z, plan facing).
     PLAYER_START=(1, 4, 14, "east"),
@@ -1316,6 +1328,7 @@ def level4_json(lv4, extra_zones=()):
     p = lv4.p
     sx, sz = p["START"]
     wx, wz = lv4.world(sx, sz)
+    kx, kz = lv4.world(*p["KEY_TABLE"])
     zones = [{"id": zid, "from": list(b[:3]), "to": list(b[3:]), **({"tags": tags} if tags else {})}
              for zid, b, tags in list(lv4.zones()) + list(extra_zones)]
     return json.dumps({
@@ -1323,7 +1336,9 @@ def level4_json(lv4, extra_zones=()):
         "order": 4,
         "dimension": "minecraft:overworld",
         "zones": zones,
-        "spawn_points": [{"id": "player_start", "pos": [wx + 0.5, p["FLOOR_Y"] + 1, wz + 0.5], "yaw": 90, "tags": ["player"]}]
+        "spawn_points": [{"id": "player_start", "pos": [wx + 0.5, p["FLOOR_Y"] + 1, wz + 0.5], "yaw": 90, "tags": ["player"]},
+                         {"id": "key_table", "pos": [kx + 0.5, p["FLOOR_Y"] + lv4.floors[p["KEY_TABLE"]] + 1, kz + 0.5], "yaw": 180,
+                          "tags": ["key_table"]}]
         + [{"id": sid, "pos": list(pos), "yaw": 0, "tags": [tag]} for sid, pos, tag in lv4.furnish.spawn_points()],
         "entry": {"title": p["TITLE"], "subtitle": "", "sound": "every_tunnel:event.level_transition"},
         "safe": True,

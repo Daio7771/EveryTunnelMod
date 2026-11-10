@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/lounge_rug"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/lounge_rug",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/lounge_rug",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/lounge_rug",
+      "y": 270
+    }
+  }
+}

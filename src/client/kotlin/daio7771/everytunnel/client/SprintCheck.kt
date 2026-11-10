@@ -9,7 +9,7 @@ import net.minecraft.entity.effect.StatusEffects
  * A diagnosis for "the player cannot sprint": while the sprint key is held, walking forwards,
  * and the player is not sprinting, the log says why, at most every [EVERY_TICKS] (only in
  * worlds with levels). Each line lists what stands in the way: the mod's own reasons (out of
- * stamina, carrying a box or book) and vanilla's (hunger, using an item, a crouching pose under
+ * stamina, carrying a box or book, a place without sprinting) and vanilla's (hunger, using an item, a crouching pose under
  * a low ceiling, bumping into something, in the air, blindness).
  */
 object SprintCheck {
@@ -29,7 +29,8 @@ object SprintCheck {
         wait = EVERY_TICKS
         val reasons = buildList {
             if (ClientResources.current.exhausted) add("exhausted")
-            if (ClientResources.isSprintBlocked() && !ClientResources.current.exhausted) add("carrying a box or book")
+            if (ClientResources.current.noSprint) add("no sprinting here")
+            if (ClientResources.isSprintBlocked() && !ClientResources.current.exhausted && !ClientResources.current.noSprint) add("carrying a box or book")
             if (player.hungerManager.foodLevel <= 6 && !player.abilities.allowFlying) add("hungry (food ${player.hungerManager.foodLevel})")
             if (player.isUsingItem) add("using an item")
             if (player.isInSneakingPose || player.input.sneaking) add("crouching (pose ${player.pose})")

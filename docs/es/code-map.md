@@ -67,6 +67,7 @@ con un comentario KDoc que cuenta más.
 | `HunterBrain.kt` | La máquina de estados de los Hunters (merodear, perseguir, buscar, volver) y sus golpes |
 | `Gaze.kt` | Adónde mira un jugador: por delante (la Cloud), en el blanco (el ojo del Junior) |
 | `DistortionClocks.kt` | El reloj de la Cloud (la gracia, irse), el del Junior (la mirada), cuándo viene la siguiente Cloud |
+| `CloudGame.kt` | El juego del pasillo de entrada del nivel 5, como el de Halt: la Cloud detrás, sus saltos delante y detrás, cada vez más deprisa |
 | `Package.kt` | Documentación del paquete |
 
 ### `util/` y `world/`
@@ -139,7 +140,7 @@ con un comentario KDoc que cuenta más.
 | `ObserverHooks.kt` | Genera al Observer, le pasa los avisos de las cajas, lo devuelve a casa al morir el jugador |
 | `HunterEntity.kt` | Un Hunter: vista (cono, alcance, paredes), avisar a su grupo, moverse, golpes, sonidos, animaciones |
 | `DistortionEntity.kt` | Lo que comparten la Cloud y el Junior: flotar, que nada los toque, mirar al jugador, la mirada y el irse sincronizados, el humo |
-| `DistortionCloudEntity.kt` | La Distortion Cloud: quién mira hacia ella, matar, irse |
+| `DistortionCloudEntity.kt` | La Distortion Cloud: quién mira hacia ella, matar, irse; la del juego del pasillo de entrada |
 | `DistortionJuniorEntity.kt` | El Distortion Junior: a quién molesta y marca, la mirada que acaba con él |
 | `LabFigureEntity.kt` | La figura que se ve desde el Lobby del nivel 5: cuando la miran, se va andando tras la esquina y desaparece |
 | `LabFigureHooks.kt` | Pone la figura ahí al construirse el nivel 5, una vez por partida |
@@ -149,6 +150,7 @@ con un comentario KDoc que cuenta más.
 | `ChemicalHooks.kt` | El puzle químico: la pareja de la partida, la mezcladora, la alarma y sus enemigos, la rejilla disolviéndose, la trampilla |
 | `DrainHooks.kt` | El drenaje del nivel 5: la trampilla cerrándose de golpe cuando el jugador ha bajado su escalera, abierta otra vez si muere antes de la Junction |
 | `DistortionHooks.kt` | Los enemigos del nivel 5: sus puestos según los puntos de aparición, de vuelta al morir, avisar a los Hunters, cuándo y dónde viene una Cloud, `/everytunnel spawn` |
+| `CloudGameHooks.kt` | El juego del pasillo de entrada: lo empieza y lo acaba su zona, mueve su Cloud por la línea del pasillo |
 
 ### `platform/`: hooks (lógica de juego movida por eventos)
 
@@ -230,7 +232,7 @@ con un comentario KDoc que cuenta más.
 | `SprintCheck.kt` | Apunta en el log por qué el jugador no corre con la tecla de correr pulsada |
 | `AchievementStore.kt` | Los logros conseguidos, guardados para siempre en `config/every_tunnel/achievements.json` |
 | `AchievementIcons.kt` | El icono de cada logro (un objeto o uno dibujado para el mod, o el "?" de bloqueado) |
-| `compat/LambDynamicLightsCompat.kt` | El haz como fuente de luz de LambDynamicLights |
+| `compat/LambDynamicLightsCompat.kt` | El haz como fuente de luz de LambDynamicLights; la luz de las Clouds del pasillo de entrada |
 
 ### `effects/`
 
@@ -240,7 +242,7 @@ con un comentario KDoc que cuenta más.
 | `FluorescentHum.kt` | Zumbido de las 4 luces más cercanas |
 | `HeartbeatEffect.kt` | Latido según la distancia al Pale man |
 | `DetectorEffect.kt` | El detector del nivel 5: la Cloud más cercana a la vista, los chasquidos Geiger |
-| `DistortionEffect.kt` | Las Distortions en los sentidos: susurros, la pantalla distorsionándose ante una Cloud, el temblor y la deriva del Junior |
+| `DistortionEffect.kt` | Las Distortions en los sentidos: susurros, la pantalla distorsionándose ante una Cloud, el violeta de las del pasillo de entrada, el temblor y la deriva del Junior |
 | `CameraShake.kt` | La cámara temblando en el derrumbe del túnel del nivel 3 |
 | `FilmPlayer.kt` | La película del Cinema en su pantalla, y el sonido del proyector |
 | `BreathingEffect.kt` | Respiración fuerte agotado |

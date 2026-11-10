@@ -6,6 +6,7 @@ import daio7771.everytunnel.platform.AmbienceHooks
 import daio7771.everytunnel.platform.BookHooks
 import daio7771.everytunnel.platform.BookPhaseHooks
 import daio7771.everytunnel.platform.CarryHooks
+import daio7771.everytunnel.platform.CloudGameHooks
 import daio7771.everytunnel.platform.ChemicalHooks
 import daio7771.everytunnel.platform.CollapseHooks
 import daio7771.everytunnel.platform.ContinueGame
@@ -108,6 +109,7 @@ object EveryTunnel : ModInitializer {
         LabDoorHooks.register()
         SlidingDoors.register()
         DistortionHooks.register()
+        CloudGameHooks.register()
         LabFigureHooks.register()
         ChemicalHooks.register()
         DrainHooks.register()

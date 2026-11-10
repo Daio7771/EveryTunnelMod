@@ -76,6 +76,7 @@ object FlashlightHooks {
     fun canInsertBattery(player: PlayerEntity): Boolean {
         if (!available(player)) return false
         if (player.world.isClient) return clientBatteryNotFull()
+        if (player is ServerPlayerEntity && ResourceHooks.inDark(player)) return false
         val config = ConfigManager.gameplay
         return ResourceSystem.canInsertBattery(ResourceSystem.stateOf(player.uuid, config), config)
     }
@@ -83,7 +84,7 @@ object FlashlightHooks {
     /** Refills the battery from [stack] (one battery item, kept in Creative). */
     fun insertBattery(player: ServerPlayerEntity, stack: ItemStack) {
         val config = ConfigManager.gameplay
-        if (!available(player)) return
+        if (!available(player) || ResourceHooks.inDark(player)) return
         val before = ResourceSystem.stateOf(player.uuid, config)
         val (state, result) = ResourceSystem.insertBattery(before, config)
         if (result != BatteryInsert.REFILLED) {

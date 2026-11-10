@@ -80,6 +80,7 @@ object ModEntities {
             .dimensions(EntityDimensions.fixed(1.2f, 2.4f))
             .disableSaving()
             .trackRangeBlocks(64)
+            .trackedUpdateRate(1)      // the entry corridor's follow the player: smooth
             .build()
 
     /** The figure seen far off from Level 5's Lobby ([LabFigureHooks]). Never saved; tracked from far off. */

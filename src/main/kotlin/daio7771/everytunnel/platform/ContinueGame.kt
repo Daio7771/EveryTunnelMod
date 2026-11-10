@@ -46,12 +46,17 @@ import java.nio.file.Path
  * comes back there, not to the level's start. It is never taken back by an earlier one (of an earlier level, or
  * listed earlier in the level's file).
  *
+ * A level's checkpoint is not made in a zone tagged [NO_CHECKPOINT_TAG] (Level 5's entry corridor, the Cloud's game,
+ * and its frame): it waits for the first zone of the level without it (the airlock). Quitting in the corridor,
+ * CONTINUE goes back to Level 4.
+ *
  * Seeing the credits ([finished]) erases the saved game. Achievements are kept apart and stay.
  */
 object ContinueGame {
 
     const val MARKER = "every_tunnel_continue"
     const val RESTART_TAG = "restart_point"
+    const val NO_CHECKPOINT_TAG = "no_checkpoint"
     private const val LEVEL_4 = "level_4"
     private const val LEVEL_5 = "level_5"
 
@@ -80,8 +85,9 @@ object ContinueGame {
             requested = false
         }
         LevelTriggers.register { change ->
-            if (!change.levelChanged) return@register
+            if (!change.levelChanged && change.enteredZones.isEmpty()) return@register
             val level = change.current.levelId?.let(LevelManager::get) ?: return@register
+            if (NO_CHECKPOINT_TAG in LevelManager.tagsOf(change.current.zones)) return@register
             val player = server?.playerManager?.getPlayer(change.playerId) ?: return@register
             if (LoadingHooks.isLoading(player) || !WorldRules.appliesTo(player.isCreative, player.isSpectator)) return@register
             reached(player, level)

@@ -308,6 +308,44 @@ def food_snack_tex(rng):
     return img
 
 
+def lounge_painting_tex(rng):
+    """An oil painting in a gilt frame, gone dark: a dusk over low hills, a pale moon, a field almost black."""
+    img = new((22, 26, 24))
+    noise(img, rng, 3)
+    for y in range(1, 15):
+        for x in range(1, 15):
+            if y < 7:
+                c = (44 + y * 3, 54 + y * 2, 58)                  # the sky, lighter towards the hills
+            elif y < 10 - (1 if 4 <= x <= 9 else 0):
+                c = (30, 40, 30)                                   # the hills
+            else:
+                c = (20, 24, 18)                                   # the field
+            px(img, x, y, c, 0.85)
+    for x, y in ((10, 3), (11, 3), (10, 4), (11, 4)):
+        px(img, x, y, (196, 192, 160), 0.9)
+    for i in range(16):
+        for a, b in ((i, 0), (i, 15), (0, i), (15, i)):
+            px(img, a, b, (176, 138, 62))
+    for i in range(1, 15):
+        for a, b in ((i, 1), (i, 14), (1, i), (14, i)):
+            px(img, a, b, (110, 82, 36), 0.6)
+    return img
+
+
+def lounge_rug_tex(rng):
+    """A runner's tile: a deep green field with a small gold diamond, a burgundy and gold border down its west edge."""
+    img = new((38, 66, 54))
+    noise(img, rng, 3)
+    for y in range(16):
+        px(img, 0, y, (96, 30, 40))
+        px(img, 1, y, (186, 150, 74))
+        px(img, 2, y, (96, 30, 40))
+    for d in range(4):
+        for x, y in ((9 + d, 4 + d), (9 - d, 4 + d), (9 + d, 12 - d), (9 - d, 12 - d)):
+            px(img, x, y, (170, 138, 70), 0.8)
+    return img
+
+
 def diploma_tex(rng):
     """A framed diploma: cream paper, a heading, lines too small to read, a brass seal."""
     img = new((226, 216, 190))
@@ -3036,6 +3074,32 @@ def build():
             boards = [(0, 1), (8, 9)] if row_ < 2 else [(0, 1), (15, 16)]
             els = [el((0, y0, 2), (16, y1, 16), "m") for y0, y1 in boards]
             els += [el((0, 0, 15.5), (16, 16, 16), "m"),                                    # the back
+    # The dark stretch past the big door, left as it was: dead sconces and paintings on its walls, a runner down it, a
+    # chair knocked over on its back, books dropped on the floor where it turns into a library.
+    a.texture("sconce_shade", plastic_tex(r("sconce_shade"), (196, 182, 154), "fabric"), T.Material(0.2, porosity=0.5, relief=0.2))
+    a.texture("lounge_painting", lounge_painting_tex(r("lounge_painting")), T.Material(0.3, relief=0.25), tiles=False)
+    a.texture("lounge_rug", lounge_rug_tex(r("lounge_rug")), T.Material(0.1, porosity=0.6, relief=0.3), tiles=False)
+    for colour, rgb in (("red", (120, 36, 34)), ("green", (40, 76, 52)), ("navy", (36, 44, 80))):
+        a.texture(f"book_{colour}", plastic_tex(r(f"book_{colour}"), rgb), T.PAPER)
+    a.texture("book_pages", plastic_tex(r("book_pages"), (226, 218, 196)), T.PAPER)
+    prop("wall_sconce", "Wall Sconce", {"b": "lounge_brass", "s": "sconce_shade"},
+         [el((6.5, 4, 15), (9.5, 9, 16), "b"), el((7.5, 7, 11.5), (8.5, 8, 15), "b"), el((7, 7, 10), (9, 9, 12), "b"),
+          el((5.5, 9, 8.5), (10.5, 14, 13.5), "s")], ao=False)
+    prop("lounge_painting", "Painting", {"p": "lounge_painting", "w": "suite_bed_frame"},
+         [el((1, 3, 15.4), (15, 13, 16), "w", north=("p", (0, 0, 16, 16)))], ao=False)
+    prop("lounge_rug", "Runner", {"r": "lounge_rug"},
+         [el((0, 0, 0), (16, 0.5, 16), "r", up=("r", (0, 0, 16, 16)), down=("r", (0, 0, 16, 16)))], ao=False)
+    prop("fallen_chair", "Chair, Knocked Over", {"w": "library_wood"},
+         [el((3, 0, 7), (13, 1, 16), "w"), el((3, 0, 6), (13, 10, 7), "w")]
+         + [el((x, 0, 0), (x + 1, 1, 6), "w") for x in (3, 12)] + [el((x, 9, 0), (x + 1, 10, 6), "w") for x in (3, 12)])
+    open_book = el((3, 0, 11), (8, 0.6, 15), "p", up=("p", (0, 0, 16, 16)))
+    open_book["rotation"] = {"origin": [5.5, 0, 13], "axis": "y", "angle": -22.5}
+    lying = el((2, 0, 2.5), (7, 1.5, 10), "r", north=("p", (0, 0, 16, 4)), south=("p", (0, 0, 16, 4)), east=("p", (0, 0, 16, 4)))
+    lying["rotation"] = {"origin": [4.5, 0, 6], "axis": "y", "angle": 22.5}
+    prop("fallen_books", "Dropped Books", {"r": "book_red", "g": "book_green", "n": "book_navy", "p": "book_pages"},
+         [lying, el((8.5, 0, 5), (14, 1.2, 12.5), "g", north=("p", (0, 0, 16, 4)), south=("p", (0, 0, 16, 4)), west=("p", (0, 0, 16, 4))),
+          el((9.5, 1.2, 6), (13.5, 2.4, 11.5), "n", north=("p", (0, 0, 16, 4)), south=("p", (0, 0, 16, 4)), west=("p", (0, 0, 16, 4))),
+          open_book])
                     el((outer[0], 0, 2), (outer[1], 16, 16), "m"),                           # the outer side
                     el((post[0], 0, 2), (post[1], 16, 3), "m")]                              # the front post
             name = f"box_shelf_{col}_{row_}"

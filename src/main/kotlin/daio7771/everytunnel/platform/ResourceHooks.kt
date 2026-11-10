@@ -2,6 +2,8 @@ package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.config.GameplayConfig
+import daio7771.everytunnel.core.LevelManager
+import daio7771.everytunnel.core.PlayerLocationTracker
 import daio7771.everytunnel.systems.ResourceInput
 import daio7771.everytunnel.systems.ResourceState
 import daio7771.everytunnel.systems.ResourceSystem
@@ -32,18 +34,26 @@ import java.util.UUID
  *   nothing ([ResourceSystem]); the client is told, to dim those bars.
  * - Vanilla hunger is held full: thirst replaces it, and a low food level would
  *   otherwise block sprinting without the player seeing why.
+ * - In a zone tagged [NO_SPRINT_TAG] nobody sprints (the client is told, and holds back too). In
+ *   one tagged [DEAD_BATTERY_TAG] the battery is empty: walking in, it drops to nothing (a flashlight
+ *   on goes out as if run down), no battery item helps, and walking out it is full again (Level 5's
+ *   entry corridor, where the only light is the Cloud's).
  * - Death resets resources to full (full battery, flashlight off).
  * - States are saved with the world (`data/every_tunnel_resources.dat` in the
  *   save folder) and synced to the client with [ResourceSyncPacket].
  */
 object ResourceHooks {
 
+    const val NO_SPRINT_TAG = "no_sprint"
+    const val DEAD_BATTERY_TAG = "dead_battery"
     private const val TICK_SECONDS = 1.0 / 20.0
     private const val SAVE_ID = "every_tunnel_resources"
 
     // Server thread only.
     private val jumps = JumpCounter()
     private val lastSent = HashMap<UUID, ResourceSyncPacket>()
+    /** Players in a zone tagged [DEAD_BATTERY_TAG]. */
+    private val inDark = HashSet<UUID>()
 
     fun register() {
         ServerTickEvents.END_SERVER_TICK.register(::tick)
@@ -53,13 +63,18 @@ object ResourceHooks {
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->
             jumps.forget(handler.player.uuid)
             lastSent.remove(handler.player.uuid)
+            inDark.remove(handler.player.uuid)
         }
         ServerLifecycleEvents.SERVER_STOPPED.register {
             jumps.clear()
             lastSent.clear()
+            inDark.clear()
             ResourceSystem.clear()
         }
     }
+
+    /** [player] stands where the battery is dead ([DEAD_BATTERY_TAG]). */
+    fun inDark(player: ServerPlayerEntity): Boolean = player.uuid in inDark
 
     /** Survival or Adventure in a world with levels, alive, and not behind the loading screen ([LoadingHooks]). */
     fun appliesTo(player: ServerPlayerEntity): Boolean =
@@ -81,6 +96,10 @@ object ResourceHooks {
                 continue
             }
             val safe = SafeLevelHooks.isSafe(player)
+            val tags = LevelManager.tagsOf(PlayerLocationTracker.locationOf(player.uuid).zones)
+            val noSprint = NO_SPRINT_TAG in tags
+            if (noSprint) player.isSprinting = false
+            darkness(player, DEAD_BATTERY_TAG in tags, config)
             val input = ResourceInput(player.isSprinting, jumpCount, safe)
             val step = ResourceSystem.tick(player.uuid, input, TICK_SECONDS, config)
             save.markDirty()
@@ -89,15 +108,29 @@ object ResourceHooks {
             if (step.damage > 0.0) player.damage(player.damageSources.dryOut(), step.damage.toFloat())
             if (step.batteryDied) FlashlightHooks.batteryDied(player)
 
-            sync(player, packetOf(true, step.state, config, safe))
+            sync(player, packetOf(true, step.state, config, safe, noSprint, player.uuid in inDark))
         }
     }
 
-    private fun packetOf(active: Boolean, s: ResourceState, config: GameplayConfig, safe: Boolean = false) =
-        ResourceSyncPacket.of(
-            active, s.stamina, config.stamina.max, s.thirst, config.thirst.max, s.exhausted,
-            s.flashlightOn, s.battery, config.flashlight.batteryMaxSeconds, safe,
-        )
+    /** In a zone tagged [DEAD_BATTERY_TAG] ([dark]) the battery is empty; out of it again, full. */
+    private fun darkness(player: ServerPlayerEntity, dark: Boolean, config: GameplayConfig) {
+        val state = ResourceSystem.stateOf(player.uuid, config)
+        if (dark) {
+            inDark += player.uuid
+            if (state.battery <= 0.0 && !state.flashlightOn) return
+            ResourceSystem.set(player.uuid, state.copy(battery = 0.0, flashlightOn = false))
+            if (state.flashlightOn) FlashlightHooks.batteryDied(player)
+        } else if (inDark.remove(player.uuid)) {
+            ResourceSystem.set(player.uuid, state.copy(battery = config.flashlight.batteryMaxSeconds))
+        }
+    }
+
+    private fun packetOf(
+        active: Boolean, s: ResourceState, config: GameplayConfig, safe: Boolean = false, noSprint: Boolean = false, dark: Boolean = false,
+    ) = ResourceSyncPacket.of(
+        active, s.stamina, config.stamina.max, s.thirst, config.thirst.max, s.exhausted,
+        s.flashlightOn, s.battery, config.flashlight.batteryMaxSeconds, safe, noSprint, dark,
+    )
 
     private fun sync(player: ServerPlayerEntity, packet: ResourceSyncPacket) {
         if (lastSent[player.uuid] == packet) return

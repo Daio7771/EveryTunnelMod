@@ -37,6 +37,14 @@ class PlayerLocationTrackerTest {
     }
 
     @Test
+    fun `the tags of where a player stands come from every zone there`() {
+        PlayerLocationTracker.update(player, overworld, 29.5, 1.0, 29.5)
+        assertEquals(setOf("exit"), LevelManager.tagsOf(PlayerLocationTracker.locationOf(player).zones))
+        PlayerLocationTracker.update(player, overworld, 5.5, 1.0, 5.5)
+        assertTrue(LevelManager.tagsOf(PlayerLocationTracker.locationOf(player).zones).isEmpty())
+    }
+
+    @Test
     fun `going from one box of a zone to another is no change`() {
         val level = LevelParser.parse(
             "level_1",

@@ -67,6 +67,7 @@ KDoc comment that says more.
 | `HunterBrain.kt` | The Hunters' state machine (wander, chase, search, return) and their hits |
 | `Gaze.kt` | Where a player looks: in front (the Cloud), on target (the Junior's eye) |
 | `DistortionClocks.kt` | The Cloud's clock (grace, going), the Junior's (the stare), when the next Cloud comes |
+| `CloudGame.kt` | Level 5's entry corridor game, as Halt plays it: the Cloud behind, its jumps in front and back, quickening |
 | `Package.kt` | Package doc |
 
 ### `util/` and `world/`
@@ -139,7 +140,7 @@ KDoc comment that says more.
 | `ObserverHooks.kt` | Spawns the Observer, passes him the box alerts, sends him home on a death |
 | `HunterEntity.kt` | A Hunter: sight (cone, range, walls), telling its group, moving, hits, sounds, animations |
 | `DistortionEntity.kt` | What the Cloud and the Junior share: floating, untouchable, facing the player, stare and going synced, smoke |
-| `DistortionCloudEntity.kt` | The Distortion Cloud: who looks its way, killing, going |
+| `DistortionCloudEntity.kt` | The Distortion Cloud: who looks its way, killing, going; the entry corridor's game's one |
 | `DistortionJuniorEntity.kt` | The Distortion Junior: whom it troubles and marks, the stare that ends it |
 | `LabFigureEntity.kt` | The figure seen from Level 5's Lobby: once looked at, it walks off round the corner and is gone |
 | `LabFigureHooks.kt` | Puts the figure there when Level 5 is built, once a game |
@@ -149,6 +150,7 @@ KDoc comment that says more.
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
 | `DrainHooks.kt` | Level 5's drain: the hatch slamming shut once the player is down its ladder, open again on a death before the Junction |
 | `DistortionHooks.kt` | Level 5's enemies: posts from spawn points, back on a death, telling the Hunters, when and where a Cloud comes, `/everytunnel spawn` |
+| `CloudGameHooks.kt` | The entry corridor's game: started and ended by its zone, its Cloud moved along the corridor's line |
 
 ### `platform/`: hooks (game logic driven by events)
 
@@ -230,7 +232,7 @@ KDoc comment that says more.
 | `SprintCheck.kt` | Logs why the player does not sprint while the sprint key is held |
 | `AchievementStore.kt` | The achievements earned, kept for good in `config/every_tunnel/achievements.json` |
 | `AchievementIcons.kt` | Each achievement's icon (an item or one drawn for the mod, or the locked "?") |
-| `compat/LambDynamicLightsCompat.kt` | The beam as a LambDynamicLights light source |
+| `compat/LambDynamicLightsCompat.kt` | The beam as a LambDynamicLights light source; the entry corridor's Clouds' light |
 
 ### `effects/`
 
@@ -240,7 +242,7 @@ KDoc comment that says more.
 | `FluorescentHum.kt` | Hum of the 4 nearest lights |
 | `HeartbeatEffect.kt` | Heartbeat by distance to the Pale man |
 | `DetectorEffect.kt` | Level 5's detector: the nearest Cloud in sight, the Geiger clicks |
-| `DistortionEffect.kt` | The Distortions on the senses: whispers, the screen distorting at a Cloud, the Junior's tremor and drift |
+| `DistortionEffect.kt` | The Distortions on the senses: whispers, the screen distorting at a Cloud, the violet of the entry corridor's, the Junior's tremor and drift |
 | `CameraShake.kt` | The camera shaking in Level 3's tunnel collapse |
 | `FilmPlayer.kt` | The Cinema's film on its screen, and the projector's sound |
 | `BreathingEffect.kt` | Heavy breathing when exhausted |

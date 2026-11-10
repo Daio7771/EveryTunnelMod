@@ -62,6 +62,10 @@ object LevelManager {
         return hits
     }
 
+    /** The tags of all of [zones] (a player's, as [PlayerLocationTracker] has them), together. */
+    fun tagsOf(zones: Collection<ZoneKey>): Set<String> =
+        zones.flatMapTo(HashSet()) { get(it.levelId)?.zone(it.zoneId)?.tags ?: emptyList() }
+
     /** The first zone (levels by order, then zones in file order) containing the position, or null. */
     fun zoneAt(dimension: String, x: Double, y: Double, z: Double): ZoneHit? {
         for (level in snapshot.ordered) {

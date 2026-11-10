@@ -260,6 +260,7 @@
   "wall.every_tunnel.water_warm": "WHO KEEPS THE\nWATER WARM",
   "wall.every_tunnel.dont_stay": "DON'T STAY",
   "wall.every_tunnel.stay": "STAY",
+  "wall.every_tunnel.dont_look": "DON'T LOOK.\nWALK AWAY.",
   "item.every_tunnel.master_card": "Master Card",
   "item.every_tunnel.master_key": "Master Key",
   "item.every_tunnel.wrench": "Wrench",
@@ -396,5 +397,10 @@
   "block.every_tunnel.lab_beakers": "Beakers",
   "block.every_tunnel.lab_monitor": "Monitor",
   "block.every_tunnel.lab_coat": "Lab Coat",
-  "block.every_tunnel.chair_jacket": "Lab Chair with a Jacket"
+  "block.every_tunnel.chair_jacket": "Lab Chair with a Jacket",
+  "block.every_tunnel.wall_sconce": "Wall Sconce",
+  "block.every_tunnel.lounge_painting": "Painting",
+  "block.every_tunnel.lounge_rug": "Runner",
+  "block.every_tunnel.fallen_chair": "Chair, Knocked Over",
+  "block.every_tunnel.fallen_books": "Dropped Books"
 }

@@ -47,6 +47,8 @@ cambia nada más.
 - A 0 el jugador está **agotado**: no puede esprintar hasta que la stamina vuelve al 30%. Lo
   impone el cliente (`ClientPlayerEntityMixin` hace que `canSprint` sea false), porque el
   sprint lo decide el cliente.
+- Nadie esprinta en una zona con la etiqueta `no_sprint` (el pasillo de entrada del nivel 5): el servidor lo
+  corta y el cliente se frena igual.
 - Agotado: respiración fuerte en la cabeza del jugador (`client.effects.BreathingEffect`),
   los bordes de la pantalla se oscurecen y laten con cada respiración
   (`client.hud.ExhaustionVignette`), y el jadeo es un ruido para el Pale man una vez por
@@ -92,6 +94,9 @@ en la mano.
   ya está llena.
 - La linterna funciona también en Creativo, pero solo gasta batería donde se aplican las
   reglas.
+- **Batería muerta** en una zona con la etiqueta `dead_battery` (el pasillo de entrada del nivel 5, donde la única
+  luz es la de la Cloud): al entrar, la batería cae a cero y la linterna encendida parpadea y se apaga como si se
+  agotara; ahí no sirve ninguna pila; al salir, la batería vuelve a estar llena.
 
 La luz en sí se dibuja en el cliente, ver [Gráficos](graphics.md#la-linterna).
 
@@ -222,6 +227,12 @@ Cada clave y su valor por defecto:
 | `often_min_seconds`, `often_max_seconds` | 60, 120 | Lo mismo en zonas que además tienen la etiqueta `cloud_often` (el drenaje del nivel 5), contado aparte |
 | `nearest`, `farthest` | 8, 14 | Bloques por delante del jugador donde aparece |
 | `touch_range` | 1.2 | Más cerca de esto mata mire uno adonde mire |
+| `game_grace_seconds` | 1.5 | El juego del pasillo de entrada: segundos mirando hacia ella ahí antes de que mate |
+| `game_behind_blocks`, `game_ahead_blocks` | 8, 8 | Bloques por detrás y por delante del jugador donde cae cuando salta |
+| `game_forward_min_seconds`, `game_forward_max_seconds` | 7, 10 | Un tramo hacia delante, con ella detrás: un largo al azar entre estos... |
+| `game_back_min_seconds`, `game_back_max_seconds` | 2.5, 3.5 | ...y un tramo hacia atrás, con ella delante |
+| `game_creep_start`, `game_creep_end` | 2.4, 3.6 | Bloques por segundo a los que se acerca al jugador, al principio y al final (andando se va a unos 4.3) |
+| `game_hurry` | 0.35 | Parte en que los tramos son más cortos al final |
 | **`junior`** | | El Distortion Junior del nivel 5 |
 | `range` | 8 | Bloques desde su ojo a los que molesta al jugador (nunca a través de una pared) |
 | `stare_seconds` | 4 | Segundos mirándole al ojo, sin apartar la vista, que acaban con él |

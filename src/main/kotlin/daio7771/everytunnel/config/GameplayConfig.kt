@@ -119,6 +119,21 @@ data class CloudConfig(
     val farthest: Double = 14.0,
     /** Closer than this (walking into it backwards), it kills whatever way one faces. */
     val touchRange: Double = 1.2,
+    /** The entry corridor's game (`entities.CloudGame`): seconds of looking its way there before it kills. */
+    val gameGraceSeconds: Double = 1.5,
+    /** Blocks behind and ahead of the player where it lands when it jumps. */
+    val gameBehindBlocks: Double = 8.0,
+    val gameAheadBlocks: Double = 8.0,
+    /** Seconds of a leg forward (it behind) and of a leg back (it in front), each a random length between these. */
+    val gameForwardMinSeconds: Double = 7.0,
+    val gameForwardMaxSeconds: Double = 10.0,
+    val gameBackMinSeconds: Double = 2.5,
+    val gameBackMaxSeconds: Double = 3.5,
+    /** Blocks a second it creeps after the player, at the start and at the end (a walk is about 4.3). */
+    val gameCreepStart: Double = 2.4,
+    val gameCreepEnd: Double = 3.6,
+    /** Share by which the legs are shorter at the end. */
+    val gameHurry: Double = 0.35,
 )
 
 /** Level 5's Distortion Junior: it never kills (`entities.JuniorClock`, `platform.DistortionJuniorEntity`). */

@@ -401,9 +401,39 @@ la construcción del nivel 5, en juego (`platform.LabHooks`), en un espacio prop
 - `garage:level5_begin` fuerza la carga de la zona; `/everytunnel labready` avisa de que los chunks
   están. Luego se ejecuta un `garage:level5_step_<n>` cada 2 ticks (46 pasos, unos 5 s). Los pasos ponen
   también el aire del nivel, así que construirlo encima de uno anterior no deja nada de aquel.
-- Mientras, el jugador sigue andando a oscuras. El tramo, ahora más largo y del lounge hasta el final, tiene
-  un marco de acero en un lado junto a su fondo: al cruzarlo se entra en el nivel 5 (ahí sale su título), un
-  pasillo oscuro con el azulejo del laboratorio, construido con el nivel 4.
+- Mientras, el jugador sigue andando a oscuras. El tramo, ahora más largo y del lounge hasta el final, sigue como
+  lo dejaron (`STRETCH` en `tools/map/lounge/furnish.py`): apliques apagados y cuadros en las paredes, mesitas (con
+  un vaso olvidado en una), una alfombra de pasillo por el centro, una silla volcada. Sus últimas 11 celdas se
+  vuelven biblioteca (la moqueta verde del nivel 3 a parches, `EXIT_LIBRARY`; estanterías, el fichero, un carrito,
+  libros caídos por el suelo). Tiene un marco de acero en un lado junto a su fondo y, pintado en la pared del
+  fondo, DON'T LOOK. WALK AWAY. (`dont_look`). Al cruzar el marco se entra en el nivel 5: un pasillo recto de unos 100 bloques entre las
+  estanterías de la biblioteca del nivel 3 (sus propios bloques), construido con el nivel 4. **El juego de la Cloud:**
+  - Ahí no hay más luz que la de la Cloud: al entrar, la batería cae a cero y la linterna parpadea y se apaga (una
+    zona con la etiqueta `dead_battery`, `platform.ResourceHooks`); ninguna pila sirve ahí, y al salir vuelve a
+    estar llena. Ahí nadie esprinta (`no_sprint`: lo frenan el servidor y la comprobación de sprint del cliente).
+  - A diez celdas de la entrada empieza el juego, como lo juega Halt (zona `cloud_game`, `platform.CloudGameHooks`,
+    `entities.CloudGame`): una sola Cloud para todo el pasillo (`DistortionCloudEntity.inGame`), por su línea central
+    (puntos de aparición `cloud_game_start` y `cloud_game_end`). Aparece detrás del jugador y se le acerca despacio
+    (`cloud.game_creep_start` a `game_creep_end` bloques por segundo, menos que andando): si se para, le alcanza.
+    Tras un tramo hacia delante (`game_forward_min_seconds` a `game_forward_max_seconds`, al azar) salta delante de
+    él (`game_ahead_blocks`), y hay que darse la vuelta y volver andando; tras un tramo hacia atrás
+    (`game_back_min_seconds` a `game_back_max_seconds`) salta otra vez detrás (`game_behind_blocks`), en su cara
+    mientras vuelve, y hay que darse la vuelta otra vez. Los tramos se acortan hacia el final (`game_hurry`) y se
+    acerca más deprisa; cerca del final ya no salta delante. Tocarla mata, y mirar hacia ella también (durante
+    `game_grace_seconds`, 1.5, ahí): hay que darle la espalda. Salir de la zona, por cualquiera de los dos lados,
+    acaba el juego: se va.
+  - En el cliente (`DistortionEffect`): da luz (`LambDynamicLightsCompat`, nivel 11) y, a 20 bloques o menos, la
+    imagen se multiplica por violeta: su luz es violeta y lo oscuro sigue oscuro. Cada salto llena la pantalla de
+    destellos violeta tres veces con el símbolo de girar en el centro (`textures/gui/turn_icon.png`), y se oye donde
+    cae (`entity.distortion_cloud.appear`). Mientras está cerca suena una estática monótona, sin venir de ningún
+    sitio (`ambient.cloud_game.static`), que sube de tono de 0.8 a 1.4 según avanza el jugador.
+  - Morir ahí (`back_to_key`) no reinicia el nivel 5: `DeathHooks` lleva al jugador al nivel 4 junto a la mesa de
+    la Master Key (punto de aparición `key_table`), y `LoungeClosingHooks.takeBack` deshace el cierre: las lámparas
+    como estaban antes del apagón, sin cartel de suelo mojado, el Cinema dormido, la puerta grande cerrada, la
+    música como antes, la llave fuera del inventario y otra vez en su mesa (`LootSpawner.putBack`); el juego se
+    acaba y su Cloud desaparece (`CloudGameHooks.died`).
+  - El pasillo y su marco tienen la etiqueta `no_checkpoint`: el punto de control del nivel 5 se guarda en la
+    esclusa (`ContinueGame`), así que si se sale del juego en el pasillo, CONTINUE vuelve al nivel 4.
 - **La esclusa**, al final, de acero con suelo de chapa estriada (`LabHooks`, zonas con las etiquetas
   `lab_airlock`, `lab_airlock_rear`, `lab_welcome`): al entrar, la puerta de atrás se cierra deslizándose con
   un siseo (`block.airlock.close`), nunca encima de alguien que esté en el hueco, y se vuelve a abrir si el

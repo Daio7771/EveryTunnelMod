@@ -14,7 +14,8 @@ from offices.furnish import ROW, STACK, TILE, WALK_THROUGH
 TILES = TILE | {"pool_table", "lounge_desk"}
 RACKS = {"record_rack", "reel_rack"}
 THROUGH = WALK_THROUGH | {"cinema_seat", "bar_stool", "served_glass", "diploma", "office_chair", "cinema_screen",
-                         "throw_line", "wall_sheet", "calm_reader", "breaker_lever", "breaker_button", "breaker_counter", "pipe", "ceiling_speaker", "wall_message", "calm_plate_left", "calm_plate_right", "emergency_lamp"}
+                         "throw_line", "wall_sheet", "calm_reader", "breaker_lever", "breaker_button", "breaker_counter", "pipe", "ceiling_speaker", "wall_message", "calm_plate_left", "calm_plate_right", "emergency_lamp",
+                         "wall_sconce", "lounge_painting", "lounge_rug", "fallen_books"}
 WORLD_FACING = {"north": "west", "west": "south", "south": "east", "east": "north"}
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
 LOOT_COLOUR = {"battery": (235, 205, 70), "water": (90, 215, 235), "food_plate": (225, 80, 70),
@@ -80,6 +81,23 @@ FURNITURE = (
     + table(100, 33, ("east", "west")) + table(100, 40, ("east", "west"))
     + [("armchair", 93, 34, "east"), ("armchair", 93, 40, "east")]
     + [("potted_plant", x, z, "north") for x, z in PLANTS]
+)
+
+# The dark stretch past the big door (EXIT_STRETCH: x 47 to 52, z -45, its far end, to -2), left as it was: dead sconces
+# and paintings on its walls, side tables (a glass left on one), a runner down its middle, a chair knocked over. Its
+# last cells turn into a library, as Level 5's entry corridor is one (and its carpet turns, level.py): shelves three
+# high along the walls but by the frame into that corridor (in the west wall, z -45 to -42), the card catalogue, a
+# cart, books dropped on the floor. (name, x, z, facing, y).
+STRETCH = (
+    [("wall_sconce", 47, z, "east", 3) for z in (-8, -20, -32)] + [("wall_sconce", 52, z, "west", 3) for z in (-14, -26)]
+    + [("lounge_painting", 52, z, "west", 3) for z in (-8, -20, -32)] + [("lounge_painting", 47, z, "east", 3) for z in (-14, -26)]
+    + [("nightstand", 47, -17, "east", 1), ("served_glass", 47, -17, "east", 2), ("nightstand", 52, -29, "west", 1)]
+    + [("lounge_rug", 49, z, "north", 1) for z in range(-35, -2)] + [("lounge_rug", 50, z, "south", 1) for z in range(-35, -2)]
+    + [("fallen_chair", 51, -23, "west", 1)]
+    + [("bookshelf", 52, z, "west", y) for z in range(-45, -36) for y in (1, 2, 3)]
+    + [("bookshelf", 47, z, "east", y) for z in range(-40, -36) for y in (1, 2, 3)]
+    + [("card_catalog", 47, -36, "east", 1), ("book_cart", 51, -39, "north", 1)]
+    + [("fallen_books", x, z, f, 1) for x, z, f in ((49, -41, "north"), (50, -37, "east"), (48, -44, "west"), (51, -34, "south"))]
 )
 
 # Stacked on the ground floor's pieces: (name, x, z, facing, y).
@@ -152,8 +170,9 @@ PIPES = [(x, z) for x in range(60, 70) for z in (48, 55)]
 PIPE_STATE = "every_tunnel:pipe[down=false,east=true,north=false,south=false,up=false,west=true]"
 # The safes in the Suites, in Rowan's room and Daniel's: (the note inside, x, z, facing).
 SAFES = [("ch1_l4_note_diary_rowan", 16, 13, "east"), ("ch1_l4_note_diary_daniel", 23, 26, "west")]
-# Painted on the walls (wall_messages.py): (id, x, z, y over its floor, the way it looks).
-WALL_MESSAGES = [("water_warm", 78, 43, 3, "north"), ("dont_stay", 103, 37, 3, "west")]
+# Painted on the walls (wall_messages.py): (id, x, z, y over its floor, the way it looks). dont_look: on the dark
+# stretch's far wall, by the frame into Level 5's entry corridor, the last thing the flashlight shows.
+WALL_MESSAGES = [("water_warm", 78, 43, 3, "north"), ("dont_stay", 103, 37, 3, "west"), ("dont_look", 50, -45, 3, "south")]
 # The ceiling speakers Level 4's jazz comes out of (LoungeMusicHooks): none in the Suites or Maintenance.
 SPEAKERS = [(50, 54), (44, 37), (57, 38), (50, 20), (78, 31), (76, 21), (50, 6), (97, 38), (23, 37)]
 # big_door: its bottom left part. wet_sign: nothing stands there until the blackout.
@@ -198,7 +217,7 @@ class Furnish:
     def lay(self):
         for name, x, z, facing in FURNITURE:
             self.put(name, x, z, facing)
-        for name, x, z, facing, y in STACKED:
+        for name, x, z, facing, y in STACKED + STRETCH:
             self.put(name, x, z, facing, y)
         for name, x, z, facing, y, index in PUZZLE_RACKS:
             self.put(name, x, z, facing, y, in_gap=True)

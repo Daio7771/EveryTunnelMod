@@ -1713,6 +1713,29 @@ def lab_air(rng, variant):
     return stereo(sides[0], sides[1])
 
 
+def cloud_game_static(rng, variant):
+    """Level 5's entry corridor, while its Cloud is about (the game played as Halt plays it): a monotone static, a
+    broad dry hiss with a steady buzzing tone in it, a crackle here and there, the whole of it fluttering slowly. The
+    game raises its pitch as the player gets further along. Loops: built circularly."""
+    seconds = 8.0
+    n = samples(seconds)
+    t = time_axis(n)
+    tone = loop_frequency(rng.uniform(105.0, 115.0), seconds)
+    sides = []
+    for _ in range(2):
+        hiss = shaped_noise(n, rng, exponent=0.6, lo=250.0, hi=7000.0, order=2, peaks=[(1800.0, 400.0, 2.0)])
+        buzz = sum(np.sin(TAU * tone * k * t + rng.uniform(0, TAU)) / k ** 1.2 for k in range(1, 12))
+        flutter = 1.0 + 0.15 * smooth_random(n, 3.0, rng, periodic=True)
+        crackle = np.zeros(n)
+        for _ in range(int(seconds * 14)):
+            at = int(rng.integers(0, n))
+            width = int(rng.integers(20, 120))
+            idx = (at + np.arange(width)) % n
+            crackle[idx] += rng.standard_normal(width) * np.exp(-np.arange(width) / (width / 4)) * rng.uniform(0.3, 1.0)
+        sides.append(flutter * (0.6 * hiss + 0.12 * buzz / 3.0) + 0.5 * crackle)
+    return stereo(sides[0], sides[1])
+
+
 def lab_compressor(rng, variant):
     """A refrigerator's compressor somewhere off in the lab (the drinks machine, a sample fridge). 0, starting: the start
     relay's click, the motor groaning up to speed, the compressor rocking on its rubber feet and its pipes rattling, then
@@ -2271,6 +2294,8 @@ SOUNDS = [
     Sound("event.lab.sting", "Level progress", "Level 5: walking into the Lab hall, a stab of low strings out of tune", "stereo", False, 1, lab_sting, -2.0),
     Sound("ambient.lab.air", "Level 5 ambience", "The lab (layer 1): the air handling, ducts rushing softly, a fan, a low rumble",
           "stereo", True, 1, lab_air, -6.0, stream=True, game_volume=0.6),
+    Sound("ambient.cloud_game.static", "Level 5 ambience", "Level 5's entry corridor, while its Cloud is about: a monotone static, its pitch raised in game",
+          "stereo", True, 1, cloud_game_static, -8.0, stream=True, game_volume=0.6),
     Sound("ambient.lab.compressor", "Level 5 ambience", "A fridge compressor off in the lab, starting (1) or stopping (2)", "mono", False, 2, lab_compressor, -3.0,
           attenuation=24),
     Sound("ambient.lab.duct", "Level 5 ambience", "A sheet-steel duct over the ceiling popping and ticking with the warmth", "mono", False, 4, lab_duct, -3.0,

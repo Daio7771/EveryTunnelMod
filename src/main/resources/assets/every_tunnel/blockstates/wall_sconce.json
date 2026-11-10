@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/wall_sconce"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/wall_sconce",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/wall_sconce",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/wall_sconce",
+      "y": 270
+    }
+  }
+}

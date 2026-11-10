@@ -11,6 +11,8 @@ The diploma corridor is built with Level 3 and the rest in play, when Level 3 is
 blocks come in two sets: corridor_blocks (with the wall and the door to Reception) and lounge_blocks.
 """
 
+import random
+
 from lounge.furnish import Furnish
 
 AROUND = [(dx, dy, dz) for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1) if (dx, dy, dz) != (0, 0, 0)]
@@ -198,6 +200,16 @@ class Lounge:
                 roles[c] = "service_floor" if r == "carpet" else "service_wall"
         self.lounge_blocks = {self.at(*c): self.state(r) for c, r in roles.items()}
         self.corridor_blocks = {self.at(*c): self.state(r) for c, r in corridor_roles.items()}
+        # The dark stretch's far end turns into a library: Level 3's green carpet in patches, more and more of it, over
+        # its last EXIT_LIBRARY cells (its furniture: furnish.py, STRETCH).
+        x0, z0, x1, z1 = self.exit.box
+        depth = p["EXIT_LIBRARY"]
+        patches = random.Random("exit_library")
+        for x in range(x0, x1):
+            for z in range(z0, z0 + depth):
+                pos = self.at(x, self.floors[(x, z)], z)
+                if self.lounge_blocks.get(pos) == self.state("carpet") and patches.random() < (1 - (z - z0) / depth) ** 0.7:
+                    self.lounge_blocks[pos] = p["LIBRARY_CARPET"]
         for x, y, z, st in self.door_cells("door"):
             self.lounge_blocks[self.at(x, y, z)] = st
         for x, y, z, st in self.door_cells("steel_door"):

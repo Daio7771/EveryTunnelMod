@@ -2,6 +2,8 @@ package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
+import daio7771.everytunnel.core.PlayerLocationTracker
+import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.core.death.DeathCause
 import daio7771.everytunnel.core.progress.Checkpoint
 import daio7771.everytunnel.systems.ResourceSystem
@@ -42,6 +44,10 @@ import java.util.UUID
  * [DistortionHooks.restart]). Then the screen fades back in ([FADE_IN_TICKS]).
  * The inventory is kept: what was picked up stays picked up.
  *
+ * A death in a zone tagged [BACK_TO_KEY_TAG] (Level 5's entry corridor, the Cloud's game) goes further back:
+ * to Level 4 by the Master Key's table, as it was before the key was taken ([LoungeClosingHooks.takeBack]),
+ * and its game is over, its Cloud gone ([CloudGameHooks.died]).
+ *
  * A player who never entered a level dies the vanilla way.
  */
 object DeathHooks {
@@ -61,12 +67,15 @@ object DeathHooks {
     private const val FADE_IN_START_TICK = 60
     private const val FADE_IN_TICKS = 30
 
+    const val BACK_TO_KEY_TAG = "back_to_key"
+
     private val FREEZE_ID: UUID = UUID.fromString("5c0b8e8e-2f4c-4d0a-9a51-6f2b8f3d7a10")
 
-    /** [waits]: a death screen shows, and the black stays until the player has [retried]. */
+    /** [waits]: a death screen shows, and the black stays until the player has [retried]. [backToKey]: see [BACK_TO_KEY_TAG]. */
     private class Dying(
         val levelId: String,
         val waits: Boolean,
+        val backToKey: Boolean,
         var ticks: Int = 0,
         var restarted: Boolean = false,
         var retried: Boolean = false,
@@ -99,7 +108,7 @@ object DeathHooks {
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->
             // Leaving while dying: finish now, so they come back alive at the level start.
             val player = handler.player
-            dying.remove(player.uuid)?.let { state -> if (!state.restarted) restart(player, state.levelId) }
+            dying.remove(player.uuid)?.let { state -> if (!state.restarted) restart(player, state) }
             unfreeze(player)
             lastLevel.remove(player.uuid)
         }
@@ -118,7 +127,8 @@ object DeathHooks {
         player.isSprinting = false
         val cause = causeOf(levelId, source)
         val shown = cause != null && ServerPlayNetworking.canSend(player, CAUSE_PACKET_ID)
-        dying[player.uuid] = Dying(levelId, waits = shown)
+        val backToKey = BACK_TO_KEY_TAG in LevelManager.tagsOf(PlayerLocationTracker.locationOf(player.uuid).zones)
+        dying[player.uuid] = Dying(levelId, waits = shown, backToKey = backToKey)
         player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)?.let { speed ->
             if (speed.getModifier(FREEZE_ID) == null) {
                 speed.addTemporaryModifier(
@@ -146,7 +156,7 @@ object DeathHooks {
             state.ticks++
             if (state.ticks >= RESTART_TICK && !state.restarted) {
                 state.restarted = true
-                restart(player, state.levelId)
+                restart(player, state)
             }
             val done = if (state.waits) state.restarted && state.retried else state.ticks >= FADE_IN_START_TICK
             if (done) {
@@ -157,18 +167,26 @@ object DeathHooks {
         }
     }
 
-    private fun restart(player: ServerPlayerEntity, levelId: String) {
+    private fun restart(player: ServerPlayerEntity, state: Dying) {
+        val levelId = state.levelId
         val level = LevelManager.get(levelId)
+        // Level 5's entry corridor goes back to before Level 4's Master Key was taken.
+        val back = if (state.backToKey) LoungeClosingHooks.keyTable() else null
         // A restart point reached in this level (Level 5's Lab hall) comes before its start.
         val checkpoint = Checkpoint.parse(ProgressService.get().checkpoint(player))
-        val start = checkpoint?.takeIf { it.levelId == levelId }?.pointId?.let { level?.spawnPoint(it) } ?: startOf(levelId)
-        val world = level?.let { player.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(it.dimension))) }
-        if (start == null || world == null) {
+        val start = back?.second ?: checkpoint?.takeIf { it.levelId == levelId }?.pointId?.let { level?.spawnPoint(it) } ?: startOf(levelId)
+        val world = level?.let { worldOf(player, it) }
+        val startWorld = back?.first?.let { worldOf(player, it) } ?: world
+        if (start == null || world == null || startWorld == null) {
             EveryTunnel.LOGGER.warn("Cannot restart {} for {}: the level or its start is gone", levelId, player.name.string)
             return
         }
+        if (back != null) {
+            LoungeClosingHooks.takeBack(player)
+            CloudGameHooks.died(player)
+        }
         player.stopRiding()
-        player.teleport(world, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
+        player.teleport(startWorld, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
         player.velocity = Vec3d.ZERO
         player.fallDistance = 0f
         player.extinguish()
@@ -185,6 +203,9 @@ object DeathHooks {
         CollapseHooks.reset(player.server, levelId)
         DrainHooks.restart(player, levelId)
     }
+
+    private fun worldOf(player: ServerPlayerEntity, level: LevelDefinition) =
+        player.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension)))
 
     /** What the death screen names for a death in [levelId] by [source], or null for none. */
     private fun causeOf(levelId: String, source: DamageSource): DeathCause? {

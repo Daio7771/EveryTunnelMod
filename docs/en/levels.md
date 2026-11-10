@@ -159,6 +159,11 @@ the server starts (levels built together name the same one). The function must e
 | `observer_never` | `ObserverEntity` | Level 3's bunker shaft and tunnel: the Observer sees no one there, so never follows anyone down |
 | `cloud` | `DistortionHooks` | Level 5: where Distortion Clouds come (one every 2 to 4 minutes spent in such zones), and where they may appear |
 | `first_cloud` | `LabHallHooks` | Level 5's Lab hall: walking in, a sting and the first Cloud, once a game |
+| `cloud_game` | `CloudGameHooks` | Level 5's entry corridor, from its start line: walking in starts the Cloud's game (as Halt plays it), walking out ends it |
+| `dead_battery` | `ResourceHooks` | The battery is empty there and no battery item helps; walking out, it is full again |
+| `no_sprint` | `ResourceHooks` | Nobody sprints there |
+| `no_checkpoint` | `ContinueGame` | No checkpoint is made there: the level's waits for its first zone without the tag |
+| `back_to_key` | `DeathHooks` | A death there goes back to Level 4 by the Master Key's table, as before it was taken |
 | `chemical_room`, `lab_grate`, `lab_drain` | `ChemicalHooks` | Level 5: the room whose alarm lights turn, the grate the solvent dissolves, the room whose hatch then opens |
 
 ### Spawn point tags
@@ -178,6 +183,8 @@ the server starts (levels built together name the same one). The function must e
 | `lab_figure`, `lab_figure_exit` | `LabFigureHooks` | Level 5: where the figure seen from the Lobby stands, once a game, and where it goes once seen |
 | `subject` | `SubjectHooks` | Level 5: a test subject standing still; its id `subject_<1..4>` says which stage |
 | `terminal` | `TerminalHooks` | Level 5: a computer at that block; its id says what its screen shows |
+| `cloud_game` | `CloudGameHooks` | Level 5: `cloud_game_start` and `cloud_game_end`, the ends of the line the entry corridor's game runs down |
+| `key_table` | `DeathHooks` | Level 4: by the Master Key's table, where a death in Level 5's entry corridor comes back to |
 | `reagent_1` to `reagent_4` | `LootSpawner`, `ChemicalHooks` | Level 5: a reagent flask lying there; a failed mix puts it back |
 | `alarm_hunters`, `alarm_junior` | `ChemicalHooks` | Level 5: where the chemical room's alarm brings three Hunters, a Junior |
 | `food_plate`, `food_popcorn`, `food_snack` | `LootSpawner` | Food, on furniture |
@@ -221,8 +228,9 @@ will read:
 Level 5, the laboratory, is built in play (`LabHooks`), its three layers (plan, tools and look:
 [Python tools](tools.md)). Its file names its zones as the plan does; a zone of several boxes repeats its id:
 
-- **Layer 1:** `entry_corridor` (from the steel frame in Level 4's dark stretch), `airlock` (tagged
-  `lab_airlock`), `lobby`,
+- **Layer 1:** `entry_corridor` (from the steel frame in Level 4's dark stretch, the Cloud's game: tagged
+  `dead_battery`, `no_sprint`, `no_checkpoint` and `back_to_key`), `cloud_game` (the same from its start line on,
+  tagged `cloud_game`), `airlock` (tagged `lab_airlock`), `lobby`,
   `workshop`, `waiting`, `lockers`, `layer1_corridor` (the ring, six boxes), `layer1_stairs` (both stair
   rooms and the flight between them).
 - **Layer 2:** `subjects_corridor`, `s1` to `s4` (the sealed test chambers), `lab_hall` (tagged `restart_point`,
@@ -234,7 +242,8 @@ Level 5, the laboratory, is built in play (`LabHooks`), its three layers (plan, 
   (tagged `director_office`), `false_exit` (the corridor out of the office, tagged `false_exit`) and
   `false_exit_pit` (the pit under its end, tagged the same), `drain_shaft` (the ladder's shaft up to the hatch). A space's zone
   goes down into its water (the channels, the pools), so a player in it is still in the level.
-- **Openings,** each its own zone: `entry_frame` (the frame: crossing it is walking into Level 5),
+- **Openings,** each its own zone: `entry_frame` (the frame: crossing it is walking into Level 5, tagged
+  `no_checkpoint` and `back_to_key`),
   `airlock_rear` (tagged `lab_airlock_rear`), `welcome_door` (tagged `lab_welcome`), the doorways (`workshop_door`,
   `waiting_door`, `office_door_west`, `office_door_east`), the locked sliding doors
   (`stairs_door`, `south_door`, `shortcut_door`, tagged `lab_door`) and `hatch_grate` (iron bars, tagged
@@ -243,7 +252,7 @@ Level 5, the laboratory, is built in play (`LabHooks`), its three layers (plan, 
   chambers have none: a window each (`WINDOWS`).
 - The Lab hall and the Junction are tagged `restart_point`.
 - **Spawn points:** `player_start` (the Lobby, by the way in), `checkpoint` (the Lab hall, tagged
-  `restart_point`), `lever_stairs_door` and `lever_shortcut_door` (tagged `lab_lever`), and layer 1's
+  `restart_point`), `cloud_game_start` and `cloud_game_end` (tagged `cloud_game`, the line the entry corridor's game runs down), `lever_stairs_door` and `lever_shortcut_door` (tagged `lab_lever`), and layer 1's
   (`tools/map/lab/furnish.py`): `wrench` and `detector` (the Workshop's island bench), the fuses `fuse_5a`,
   `fuse_10a`, `fuse_20a`, `fuse_30a` (tagged the same), the safety briefing's cards `ch1_l5_card_*` (tagged `note`, each at its column's cell in the board's bottom row),
   `hunters_fuse_box` (tagged `hunters` and `harmless`), `lab_figure` and `lab_figure_exit`; and layer 2's:

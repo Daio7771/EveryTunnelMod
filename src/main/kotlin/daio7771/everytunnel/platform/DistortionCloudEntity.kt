@@ -6,6 +6,9 @@ import daio7771.everytunnel.entities.CloudClock
 import daio7771.everytunnel.entities.Gaze
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.Entity
+import net.minecraft.entity.data.DataTracker
+import net.minecraft.entity.data.TrackedData
+import net.minecraft.entity.data.TrackedDataHandlerRegistry
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.sound.SoundCategory
@@ -28,14 +31,42 @@ import kotlin.math.hypot
  * [daio7771.everytunnel.config.CloudConfig.leaveSeconds], it goes (`entity.distortion_cloud.leave`).
  * The detector notices it (it is in the type tag `every_tunnel:radiation_sources`).
  *
+ * The one of Level 5's entry corridor is [inGame] ([CloudGameHooks], which moves it): it never goes of itself,
+ * and looking its way there kills after [daio7771.everytunnel.config.CloudConfig.gameGraceSeconds]. Synced with it:
+ * how many times it has jumped ([jumps]: clients flash the screen each time) and how far along the corridor its
+ * player is ([progress]: the static rises). Clients give it a violet light, the only one in that dark.
+ *
  * Model, animations and texture: `tools/entity/distortion.py` (GeckoLib).
  */
 class DistortionCloudEntity(type: EntityType<*>, world: World) : DistortionEntity(type, world) {
 
     private val config = ConfigManager.gameplay.cloud
-    private val clock = CloudClock.of(config.graceSeconds, config.leaveSeconds)
+    private var clock = CloudClock.of(config.graceSeconds, config.leaveSeconds)
 
     override val endTicks: Int = 24
+
+    /** The entry corridor's: moved by [CloudGameHooks], it stays until the game is over. Set once, as it is put in. */
+    var inGame: Boolean
+        get() = dataTracker.get(IN_GAME)
+        set(value) {
+            dataTracker.set(IN_GAME, value)
+            clock = CloudClock.of(if (value) config.gameGraceSeconds else config.graceSeconds, config.leaveSeconds)
+        }
+
+    var jumps: Int
+        get() = dataTracker.get(JUMPS)
+        set(value) = dataTracker.set(JUMPS, value)
+
+    var progress: Float
+        get() = dataTracker.get(PROGRESS)
+        set(value) = dataTracker.set(PROGRESS, value)
+
+    override fun initDataTracker() {
+        super.initDataTracker()
+        dataTracker.startTracking(IN_GAME, false)
+        dataTracker.startTracking(JUMPS, 0)
+        dataTracker.startTracking(PROGRESS, 0f)
+    }
 
     override fun serverTick(world: ServerWorld) {
         val players = watchers(world, WATCH_RANGE)
@@ -46,7 +77,7 @@ class DistortionCloudEntity(type: EntityType<*>, world: World) : DistortionEntit
         for (player in players) {
             if (player.uuid in tick.kill || touches(player)) kill(player)
         }
-        if (tick.leave) leave()
+        if (tick.leave && !inGame) leave()
     }
 
     /** It is in front of [player], with nothing solid between their eyes and some part of it. */
@@ -86,6 +117,9 @@ class DistortionCloudEntity(type: EntityType<*>, world: World) : DistortionEntit
         private val SIGHT_HEIGHTS = listOf(0.5, 1.2, 1.6, 2.1)
         /** Enough to kill anyone (dying is handled by DeathHooks). */
         private const val KILL_DAMAGE = 1000f
+        private val IN_GAME: TrackedData<Boolean> = DataTracker.registerData(DistortionCloudEntity::class.java, TrackedDataHandlerRegistry.BOOLEAN)
+        private val JUMPS: TrackedData<Int> = DataTracker.registerData(DistortionCloudEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
+        private val PROGRESS: TrackedData<Float> = DataTracker.registerData(DistortionCloudEntity::class.java, TrackedDataHandlerRegistry.FLOAT)
 
         val IDLE: RawAnimation = RawAnimation.begin().thenLoop("animation.distortion_cloud.idle")
         val LEAVE: RawAnimation = RawAnimation.begin().thenPlayAndHold("animation.distortion_cloud.leave")

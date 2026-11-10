@@ -100,6 +100,8 @@ object ModSounds {
     val CLOUD_APPEAR = event("entity.distortion_cloud.appear")
     val CLOUD_KILL = event("entity.distortion_cloud.kill")
     val CLOUD_LEAVE = event("entity.distortion_cloud.leave")
+    /** The entry corridor's game: its static, heard from nowhere, its pitch rising (`DistortionEffect`). */
+    val CLOUD_GAME_STATIC = event("ambient.cloud_game.static")
     val JUNIOR_WHISPER = event("entity.distortion_junior.whisper")
     val JUNIOR_STARE = event("entity.distortion_junior.stare")
     val JUNIOR_DIE = event("entity.distortion_junior.die")

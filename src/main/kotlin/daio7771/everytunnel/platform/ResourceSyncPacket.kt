@@ -28,6 +28,10 @@ data class ResourceSyncPacket(
     val batteryMax: Float,
     /** In a safe level: thirst and the battery are paused, and the HUD dims them. */
     val safe: Boolean = false,
+    /** Where sprinting is not allowed (a zone tagged `no_sprint`, Level 5's entry corridor). */
+    val noSprint: Boolean = false,
+    /** Where the battery is dead (a zone tagged `dead_battery`): no battery item helps there. */
+    val deadBattery: Boolean = false,
 ) {
     fun write(buf: PacketByteBuf) {
         buf.writeBoolean(active)
@@ -40,6 +44,8 @@ data class ResourceSyncPacket(
         buf.writeFloat(battery)
         buf.writeFloat(batteryMax)
         buf.writeBoolean(safe)
+        buf.writeBoolean(noSprint)
+        buf.writeBoolean(deadBattery)
     }
 
     /** True while the battery is below the low battery warning percentage. */
@@ -61,6 +67,8 @@ data class ResourceSyncPacket(
             battery: Double,
             batteryMax: Double,
             safe: Boolean = false,
+            noSprint: Boolean = false,
+            deadBattery: Boolean = false,
         ) = ResourceSyncPacket(
             active,
             if (active) round(stamina) else 0f,
@@ -72,6 +80,8 @@ data class ResourceSyncPacket(
             round(battery),
             round(batteryMax),
             active && safe,
+            active && noSprint,
+            active && deadBattery,
         )
 
         fun read(buf: PacketByteBuf) = ResourceSyncPacket(
@@ -85,6 +95,8 @@ data class ResourceSyncPacket(
             battery = buf.readFloat(),
             batteryMax = buf.readFloat(),
             safe = buf.readBoolean(),
+            noSprint = buf.readBoolean(),
+            deadBattery = buf.readBoolean(),
         )
 
         private fun round(value: Double): Float = Math.round(value * 10.0) / 10f

@@ -377,9 +377,38 @@ in play (`platform.LabHooks`), in a space of its own west of Level 4:
 - `garage:level5_begin` force-loads the area; `/everytunnel labready` says the chunks are there. Then
   one `garage:level5_step_<n>` runs every 2 ticks (46 steps, about 5 s). The steps put back the level's
   air as well, so a build over an older one leaves nothing of it.
-- Meanwhile the player walks on, in the dark. The stretch, longer now and the lounge's to its end, has a
-  steel frame in its side by its far end: through it is Level 5 (its title shows there), a dark corridor
-  of the lab's tiles, built with Level 4.
+- Meanwhile the player walks on, in the dark. The stretch, longer now and the lounge's to its end, is left as it
+  was (`STRETCH` in `tools/map/lounge/furnish.py`): dead sconces and paintings on its walls, side tables (a glass
+  left on one), a runner down its middle, a chair knocked over. Its last 11 cells turn into a library (Level 3's
+  green carpet in patches, `EXIT_LIBRARY`; shelves, the card catalogue, a cart, books dropped on the floor). It has a
+  steel frame in its side by its far end, and on its far wall, painted, DON'T LOOK. WALK AWAY. (`dont_look`).
+  Through the frame is Level 5: a straight corridor of about 100 blocks between the shelves of Level 3's library
+  (its own blocks), built with Level 4. **The Cloud's game:**
+  - No light there but the Cloud's: walking in, the battery drops to nothing and the flashlight flickers out (a
+    zone tagged `dead_battery`, `platform.ResourceHooks`); no battery helps there, and walking out it is full again.
+    Nobody sprints there (`no_sprint`: the server and the client's sprint check both hold back).
+  - Ten cells in begins the game, played as Halt plays it (zone `cloud_game`, `platform.CloudGameHooks`,
+    `entities.CloudGame`): one Cloud for the whole corridor (`DistortionCloudEntity.inGame`), down its middle line
+    (spawn points `cloud_game_start` and `cloud_game_end`). It appears behind the player and creeps after them
+    (`cloud.game_creep_start` to `game_creep_end` blocks a second, slower than a walk): stopping, it reaches them.
+    After a leg forward (`game_forward_min_seconds` to `game_forward_max_seconds`, at random) it jumps in front of
+    them (`game_ahead_blocks`), and they must turn round and walk back; after a leg back (`game_back_min_seconds` to
+    `game_back_max_seconds`) it jumps behind them again (`game_behind_blocks`), in their face as they walk back, and
+    they turn round once more. The legs get shorter towards the end (`game_hurry`), the creeping faster; close to
+    the end it no longer jumps in front. Touching it kills, and so does looking its way (for `game_grace_seconds`,
+    1.5, there): one must turn one's back on it. Walking out of the zone, at either end, ends the game: it goes.
+  - On the client (`DistortionEffect`): it gives off light (`LambDynamicLightsCompat`, level 11) and, within 20
+    blocks, the picture is multiplied by violet: its light is violet and the dark stays dark. Each jump flashes
+    violet over the whole screen three times with the turn round sign in the middle (`textures/gui/turn_icon.png`),
+    and is heard where it lands (`entity.distortion_cloud.appear`). While it is about, a monotone static is heard
+    from nowhere (`ambient.cloud_game.static`), its pitch rising from 0.8 to 1.4 as the player gets further along.
+  - A death there (`back_to_key`) does not restart Level 5: `DeathHooks` takes the player back to Level 4 by the
+    Master Key's table (spawn point `key_table`), and `LoungeClosingHooks.takeBack` undoes the closing: the
+    lamps as they were before the blackout, no wet floor sign, the Cinema asleep, the big door shut, the music
+    as before, the key off the player and on its table again (`LootSpawner.putBack`); the game is over, its Cloud
+    gone (`CloudGameHooks.died`).
+  - The corridor and its frame are tagged `no_checkpoint`: Level 5's checkpoint is made at the airlock
+    (`ContinueGame`), so quitting in the corridor, CONTINUE goes back to Level 4.
 - **The airlock** at its end, steel on a checker plate floor (`LabHooks`, zones tagged `lab_airlock`,
   `lab_airlock_rear`, `lab_welcome`): walking in, the door behind slides shut with a hiss
   (`block.airlock.close`), never on someone in the doorway, and opens again for someone who steps back out

@@ -14,6 +14,7 @@ MESSAGES = {
     "silence": dict(size=0.5, rotation=-1.0, trigger="fixed"),
     "water_warm": dict(size=0.42, rotation=2.0, trigger="on_approach"),
     "dont_stay": dict(size=0.8, rotation=-1.5, trigger="on_look_away_change", changed="stay"),
+    "dont_look": dict(size=0.5, rotation=-1.0, trigger="fixed"),
 }
 
 

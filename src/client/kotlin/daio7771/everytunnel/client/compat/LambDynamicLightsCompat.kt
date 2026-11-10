@@ -3,18 +3,27 @@ package daio7771.everytunnel.client.compat
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.ShaderMode
 import daio7771.everytunnel.client.effects.FlashlightEffect
+import daio7771.everytunnel.platform.DistortionCloudEntity
+import daio7771.everytunnel.platform.ModEntities
 import daio7771.everytunnel.systems.FlashlightBeam
 import dev.lambdaurora.lambdynlights.api.DynamicLightsContext
 import dev.lambdaurora.lambdynlights.api.DynamicLightsInitializer
 import dev.lambdaurora.lambdynlights.api.behavior.DynamicLightBehavior
 import dev.lambdaurora.lambdynlights.api.behavior.DynamicLightBehaviorManager
+import dev.lambdaurora.lambdynlights.api.entity.EntityLightSource
+import dev.lambdaurora.lambdynlights.api.entity.luminance.EntityLuminance
+import dev.lambdaurora.lambdynlights.api.item.ItemLightSourceManager
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.world.ClientWorld
+import net.minecraft.entity.Entity
+import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 
 /**
- * LambDynamicLights integration: turns [FlashlightEffect.beam] into dynamic light.
+ * LambDynamicLights integration: turns [FlashlightEffect.beam] into dynamic light, and gives the Distortion
+ * Cloud of Level 5's entry corridor (the [DistortionCloudEntity.inGame] one) a light of its own, the only one in
+ * that dark ([GameCloudLuminance]; `DistortionEffect` tints it violet).
  *
  * Only LambDynamicLights (4.x API) calls this entrypoint (`lambdynlights:initializer`
  * in fabric.mod.json), so without that mod nothing here is loaded and the flashlight
@@ -33,6 +42,11 @@ object LambDynamicLightsCompat : DynamicLightsInitializer {
 
     override fun onInitializeDynamicLights(context: DynamicLightsContext) {
         manager = context.dynamicLightBehaviorManager()
+        context.entityLightSourceManager().onRegisterEvent().register { registry ->
+            registry.register(
+                EntityLightSource(EntityLightSource.EntityPredicate.builder().of(ModEntities.DISTORTION_CLOUD).build(), listOf(GameCloudLuminance)),
+            )
+        }
         ClientTickEvents.END_CLIENT_TICK.register(::tick)
         EveryTunnel.LOGGER.info("LambDynamicLights found: the flashlight casts dynamic light")
     }
@@ -57,6 +71,20 @@ object LambDynamicLightsCompat : DynamicLightsInitializer {
             addedIn = world
         }
     }
+}
+
+/** The light of the entry corridor's Cloud ([LIGHT]); the others give none. */
+private object GameCloudLuminance : EntityLuminance {
+
+    private const val LIGHT = 11
+
+    private val TYPE: EntityLuminance.Type =
+        EntityLuminance.Type.registerSimple(Identifier(EveryTunnel.MOD_ID, "game_cloud"), this)
+
+    override fun type(): EntityLuminance.Type = TYPE
+
+    override fun getLuminance(itemLightSourceManager: ItemLightSourceManager, entity: Entity): Int =
+        if (entity is DistortionCloudEntity && entity.inGame && !entity.ending) LIGHT else 0
 }
 
 /**
