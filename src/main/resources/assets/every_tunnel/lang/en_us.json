@@ -376,5 +376,7 @@
   "block.every_tunnel.coffee_cup": "Coffee Cup",
   "block.every_tunnel.desk_lamp_modern": "Desk Lamp",
   "block.every_tunnel.panel_light": "Panel Light",
-  "entity.every_tunnel.dead_guard": "Night Guard No. 13"
+  "entity.every_tunnel.dead_guard": "Night Guard No. 13",
+  "block.every_tunnel.briefing_board": "Briefing Board",
+  "block.every_tunnel.briefing_sign": "Briefing Sign"
 }

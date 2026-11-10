@@ -21,6 +21,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 |---|---|---|
 | `tools/map/map_generator.py` | Level datapacks, world resource pack, installs into `run/saves/noname_complex`; the menu scene into the mod | the map or the menu scene |
 | `tools/blocks/generate.py` | Block/item models, blockstates, textures + LabPBR maps, names, loot tables | a mod block |
+| `tools/blocks/briefing.py` | Level 5's safety briefing (called by `generate.py`, which cuts it into the blocks' textures): the cork board with pencil drawings rendered from the entities' models and the typed cards, the SAFETY BRIEFING plate; alone, a preview | the briefing board |
 | `tools/film/film.py` | The Cinema's film: a recording into old-film frames | the film |
 | `tools/film/eye.py` | `film_eye/` | what the Cinema shows during the blackout: an eye and INTRUDER DETECTED |
 | `tools/entity/pale_man.py` | Pale man geometry, animations, texture, glow mask, spawn egg model | the Pale man |

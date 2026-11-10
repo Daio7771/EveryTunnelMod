@@ -172,6 +172,10 @@ object ModBlocks {
     val VALVE: Block = register("valve", ValveBlock(props(MapColor.RED, ModSoundGroups.METAL_PIPE)))
     /** A cork board with a note pinned to it; right-click reads the note (NoteHooks). */
     val NOTE_BOARD: Block = register("note_board", NoteBoardBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision()))
+    /** Level 5's safety briefing: a big cork board in twelve parts, its four sheets read with a right-click (NoteHooks). */
+    val BRIEFING_BOARD: Block = register("briefing_board", BriefingBoardBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision()))
+    /** The SAFETY BRIEFING plate over it, in four parts. */
+    val BRIEFING_SIGN: Block = register("briefing_sign", BriefingSignBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision()))
     /** A loose typed sheet on a desk: Level 3's company documents; right-click reads it (NoteHooks). */
     val NOTE_PAPER: Block = register(
         "note_paper",

@@ -245,7 +245,7 @@ Level 5, the laboratory, is built in play (`LabHooks`), its three layers (plan, 
 - **Spawn points:** `player_start` (the Lobby, by the way in), `checkpoint` (the Lab hall, tagged
   `restart_point`), `lever_stairs_door` and `lever_shortcut_door` (tagged `lab_lever`), and layer 1's
   (`tools/map/lab/furnish.py`): `wrench` and `detector` (the Workshop's island bench), the fuses `fuse_5a`,
-  `fuse_10a`, `fuse_20a`, `fuse_30a` (tagged the same), the noticeboard's cards `ch1_l5_card_*` (tagged `note`),
+  `fuse_10a`, `fuse_20a`, `fuse_30a` (tagged the same), the safety briefing's cards `ch1_l5_card_*` (tagged `note`, each at its column's cell in the board's bottom row),
   `hunters_fuse_box` (tagged `hunters` and `harmless`), `lab_figure` and `lab_figure_exit`; and layer 2's:
   `subject_1` to `subject_4` (tagged `subject`), the cards `ch1_l5_card_s1` to `_s4`, the computers `terminal_*`
   (tagged `terminal`, `terminal_storage` among them), `reagent_1` to `reagent_4` (tagged the same), the loot

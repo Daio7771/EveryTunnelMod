@@ -252,7 +252,7 @@ repite su id:
 - **Puntos de aparición:** `player_start` (el Lobby, junto a la entrada), `checkpoint` (el Lab hall, con la
   etiqueta `restart_point`), `lever_stairs_door` y `lever_shortcut_door` (con la etiqueta `lab_lever`), y los de la
   capa 1 (`tools/map/lab/furnish.py`): `wrench` y `detector` (el banco central del Workshop), los fusibles `fuse_5a`,
-  `fuse_10a`, `fuse_20a`, `fuse_30a` (con la misma etiqueta), las fichas del tablón `ch1_l5_card_*` (etiqueta `note`),
+  `fuse_10a`, `fuse_20a`, `fuse_30a` (con la misma etiqueta), las fichas de la pizarra de seguridad `ch1_l5_card_*` (etiqueta `note`, cada una en la celda de su columna en la fila de abajo),
   `hunters_fuse_box` (etiquetas `hunters` y `harmless`), `lab_figure` y `lab_figure_exit`; y los de la capa 2:
   `subject_1` a `subject_4` (etiqueta `subject`), las fichas `ch1_l5_card_s1` a `_s4`, los ordenadores `terminal_*`
   (etiqueta `terminal`, entre ellos `terminal_storage`), `reagent_1` a `reagent_4` (con la misma etiqueta), el loot

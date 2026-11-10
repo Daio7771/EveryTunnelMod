@@ -403,8 +403,10 @@ industrial, and up its stairs the director's office (the boss's scene is still t
   a game (`LabFigureHooks`, `LabFigureEntity`). The Workshop: benches with pegboards, shelves of jars, tool
   chests; **the wrench and the detector** lie on its island bench (see
   [Player systems](player.md#level-5s-tools)). The Waiting room: rows of seats, and on its north wall the
-  noticeboard, a technical sheet for each of the Hunters, the Cloud, the Junior and the equipment (what
-  each does and how to deal with it: the level's tutorial). The Lockers: lockers to hide in, as in Level 3. From the Lobby on, the lab's air handling runs
+  safety briefing, a big cork board under a printed plate, SAFETY BRIEFING (`BriefingBoardBlock`,
+  `BriefingSignBlock`): a column for each of the Hunters, the Cloud, the Junior and the equipment, a pencil
+  drawing of it pinned over its technical sheet (what each does and how to deal with it: the level's
+  tutorial); a right click on a drawing or a sheet reads that sheet. The Lockers: lockers to hide in, as in Level 3. From the Lobby on, the lab's air handling runs
   (`ambient.lab.air`), a fridge's compressor starts or stops somewhere and a duct pops or ticks now and then
   (`ZONE_AMBIENCE`); the way in stays silent.
 - **The fuse box.** The stairs' lever, on the ring's east side, is dead ("No power.", `block.breaker.dead`)

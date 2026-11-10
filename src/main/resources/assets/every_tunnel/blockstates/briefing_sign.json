@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "col=0,facing=north": {
+      "model": "every_tunnel:block/briefing_sign_0"
+    },
+    "col=0,facing=east": {
+      "model": "every_tunnel:block/briefing_sign_0",
+      "y": 90
+    },
+    "col=0,facing=south": {
+      "model": "every_tunnel:block/briefing_sign_0",
+      "y": 180
+    },
+    "col=0,facing=west": {
+      "model": "every_tunnel:block/briefing_sign_0",
+      "y": 270
+    },
+    "col=1,facing=north": {
+      "model": "every_tunnel:block/briefing_sign_1"
+    },
+    "col=1,facing=east": {
+      "model": "every_tunnel:block/briefing_sign_1",
+      "y": 90
+    },
+    "col=1,facing=south": {
+      "model": "every_tunnel:block/briefing_sign_1",
+      "y": 180
+    },
+    "col=1,facing=west": {
+      "model": "every_tunnel:block/briefing_sign_1",
+      "y": 270
+    },
+    "col=2,facing=north": {
+      "model": "every_tunnel:block/briefing_sign_2"
+    },
+    "col=2,facing=east": {
+      "model": "every_tunnel:block/briefing_sign_2",
+      "y": 90
+    },
+    "col=2,facing=south": {
+      "model": "every_tunnel:block/briefing_sign_2",
+      "y": 180
+    },
+    "col=2,facing=west": {
+      "model": "every_tunnel:block/briefing_sign_2",
+      "y": 270
+    },
+    "col=3,facing=north": {
+      "model": "every_tunnel:block/briefing_sign_3"
+    },
+    "col=3,facing=east": {
+      "model": "every_tunnel:block/briefing_sign_3",
+      "y": 90
+    },
+    "col=3,facing=south": {
+      "model": "every_tunnel:block/briefing_sign_3",
+      "y": 180
+    },
+    "col=3,facing=west": {
+      "model": "every_tunnel:block/briefing_sign_3",
+      "y": 270
+    }
+  }
+}

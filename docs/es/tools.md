@@ -23,6 +23,7 @@ git).
 |---|---|---|
 | `tools/map/map_generator.py` | Datapacks de los niveles, resource pack del mundo, lo instala en `run/saves/noname_complex`; la escena del menú en el mod | el mapa o la escena del menú |
 | `tools/blocks/generate.py` | Modelos de bloque y objeto, blockstates, texturas + mapas LabPBR, nombres, loot tables | un bloque del mod |
+| `tools/blocks/briefing.py` | La pizarra de seguridad del nivel 5 (la llama `generate.py`, que la corta en las texturas de los bloques): el corcho con dibujos a lápiz renderizados desde los modelos de las entidades y las fichas mecanografiadas, la placa SAFETY BRIEFING; sola, una vista previa | la pizarra |
 | `tools/film/film.py` | La película del Cinema: una grabación convertida en fotogramas de cine viejo | la película |
 | `tools/film/eye.py` | `film_eye/` | lo que muestra el Cinema durante el apagón: un ojo e INTRUDER DETECTED |
 | `tools/entity/pale_man.py` | Geometría, animaciones, textura y máscara de brillo del Pale man, modelo del huevo | el Pale man |

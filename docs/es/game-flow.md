@@ -428,8 +428,10 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
   gira y desaparece tras la esquina, una vez por partida (`LabFigureHooks`, `LabFigureEntity`). El Workshop:
   bancos con paneles de herramientas, estanterías de frascos, cajas de herramientas; **la llave inglesa y el
   detector** están en su banco central (ver [Sistemas del jugador](player.md#herramientas-del-nivel-5)). La sala
-  de espera: filas de asientos y, en su pared norte, el tablón, una ficha para los Hunters, la Cloud, el Junior
-  y el equipo (fichas técnicas: qué hace cada cosa y cómo tratarla, el tutorial del nivel). Las taquillas:
+  de espera: filas de asientos y, en su pared norte, la pizarra de seguridad, un gran corcho bajo una placa
+  impresa, SAFETY BRIEFING (`BriefingBoardBlock`, `BriefingSignBlock`): una columna para los Hunters, la Cloud,
+  el Junior y el equipo, con un dibujo a lápiz clavado sobre su ficha técnica (qué hace cada cosa y cómo
+  tratarla, el tutorial del nivel); con clic derecho en un dibujo o una ficha se lee esa ficha. Las taquillas:
   taquillas para esconderse, como en el nivel 3. Desde el Lobby suena la ventilación del laboratorio
   (`ambient.lab.air`), el compresor de una nevera arranca o para en algún sitio y de vez en cuando un conducto
   cede o cruje (`ZONE_AMBIENCE`); la entrada sigue en silencio.

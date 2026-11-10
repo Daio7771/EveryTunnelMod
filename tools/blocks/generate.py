@@ -39,6 +39,7 @@ from garage import textures as T                                        # noqa: 
 from garage.pbr import Material                                         # noqa: E402
 from garage.textures import mix, new, noise, px, rect, speckle         # noqa: E402
 from offices import textures as OT                                     # noqa: E402
+import briefing                                                         # noqa: E402
 
 NS = "every_tunnel"
 RESOURCES = ROOT / "src" / "main" / "resources"
@@ -3123,6 +3124,29 @@ def build():
          [el((2, 1, 15.5), (14, 15, 16), "w", north=("p", (0, 0, 16, 16)))], ao=False)
     prop("first_aid_box", "First Aid Box", {"f": "first_aid_front", "w": "lab_white"},
          [el((4, 5, 14), (12, 12, 16), "w", north=("f", (0, 0, 16, 16)))])
+    # The Waiting room's safety briefing (briefing.py): the cork board's picture cut in parts, each a panel flat on
+    # the wall with wood round its edges; the printed plate over it the same way, only its band of the picture used.
+    board_img, plate_img, bpx = briefing.board_image(), briefing.sign_image(), briefing.PX
+    variants = {}
+    for col in range(briefing.COLS):
+        for row_ in range(briefing.ROWS):
+            name = f"briefing_board_{col}_{row_}"
+            top = (briefing.ROWS - 1 - row_) * bpx
+            a.texture(name, board_img.crop((col * bpx, top, (col + 1) * bpx, top + bpx)), T.PAPER, tiles=False)
+            a.models[name] = model({"f": name, "w": "suite_bed_frame"}, [el((0, 0, 14), (16, 16, 16), "w", north="f")])
+            for facing, y in HORIZONTAL.items():
+                variants[f"col={col},facing={facing},row={row_}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("briefing_board", "Briefing Board", {"variants": variants}, {"parent": f"{NS}:block/briefing_board_0_1"})
+    band_top, band_bottom = (v * 16 / bpx for v in briefing.plate_band())
+    variants = {}
+    for col in range(briefing.SIGN_COLS):
+        name = f"briefing_sign_{col}"
+        a.texture(name, plate_img.crop((col * bpx, 0, (col + 1) * bpx, bpx)), T.PLASTIC.but(smoothness=0.5, relief=0.0), tiles=False)
+        a.models[name] = model({"f": name, "w": "lab_white"},
+                               [el((0, 16 - band_bottom, 15), (16, 16 - band_top, 16), "w", north=("f", (0, band_top, 16, band_bottom)))], ao=False)
+        for facing, y in HORIZONTAL.items():
+            variants[f"col={col},facing={facing}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("briefing_sign", "Briefing Sign", {"variants": variants}, {"parent": f"{NS}:block/briefing_sign_1"})
 
     # Level 5's fuse box: one holder a slot (FuseHolderBlock), side by side on a wall; each takes the fuse
     # of the amperage on its label, and a lamp over it lights once the whole box is full.

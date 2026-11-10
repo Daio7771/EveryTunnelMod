@@ -2,7 +2,7 @@
 Level 5, furnished: a cold, clean laboratory used until recently (stainless steel, white melamine, surgical
 green plastic), room by room, in plan coordinates (see level.py), and what lies in it or happens there.
 
-- Layer 1, the tutorial: the wrench and the detector, the fuses, the noticeboard's cards, the fuse box by
+- Layer 1, the tutorial: the wrench and the detector, the fuses, the safety briefing's cards, the fuse box by
   the stairs' lever, the harmless Hunters that guard it, the figure seen from the Lobby.
 - Layer 2: the subjects (one in each sealed test chamber, an experiment card by each window), the Lab
   hall, the Office (its computer tells the chemical puzzle's answer), Storage and its Hunters, the
@@ -29,6 +29,7 @@ ROW = {"lab_bench", "lab_cabinet", "lab_seats", "tool_board", "whiteboard", "ben
 STACK = OFFICE_STACK | {"lab_shelf", "fume_hood", "pump"}
 # What a player walks through (ModBlocks: noCollision).
 THROUGH = {"lab_chair", "tool_board", "lab_poster", "first_aid_box", "potted_plant", "wall_clock", "whiteboard", "note_board",
+           "briefing_board", "briefing_sign",
            "fuse_holder", "office_chair", "lab_terminal", "alarm_light", "pipe", "note_paper", "valve_wheel", "pressure_gauge",
            "tin_cans", "dead_flashlight", "mattress", "electrical_panel", "leather_chair", "exec_chair", "mini_diorite",
            "paper_stack", "coffee_cup", "desk_lamp_modern", "coffee_machine"}
@@ -71,7 +72,7 @@ FURNITURE = {
         + [("tool_chest", 53, z, "west", 1) for z in (4, 5, 6)] + [("lab_cart", 52, 10, "west", 1)]
         + row("whiteboard", 31, 36, 12, "north", 2) + row("lab_cabinet", 46, 51, 12, "north")
         + [("first_aid_box", 38, 12, "north", 2)]
-        # The Waiting room: the noticeboard on the north wall (NOTE_BOARDS), two pairs of seat rows facing
+        # The Waiting room: the safety briefing on the north wall (BRIEFING), two pairs of seat rows facing
         # each other round a low table, a water dispenser, a drinks machine, a cabinet, plants, a clock.
         + row("lab_seats", 59, 63, 4, "south") + row("lab_seats", 59, 63, 8, "north") + [("low_table", 61, 6, "north", 1)]
         + row("lab_seats", 69, 73, 4, "south") + row("lab_seats", 69, 73, 8, "north") + [("low_table", 71, 6, "north", 1)]
@@ -158,10 +159,16 @@ NOTE_PAPERS = [("ch1_l5_note_guard", 3, 161, 50, "south")]
 
 # Cork boards with a card each: (card note id, layer, x, z, facing), at eye height. The Waiting room's
 # noticeboard; the experiment card by each test chamber's window, on the corridor's side.
-NOTE_BOARDS = [("ch1_l5_card_hunters", 1, 64, 2, "south"), ("ch1_l5_card_cloud", 1, 65, 2, "south"),
-               ("ch1_l5_card_junior", 1, 66, 2, "south"), ("ch1_l5_card_equipment", 1, 67, 2, "south"),
-               ("ch1_l5_card_s1", 2, 21, 57, "south"), ("ch1_l5_card_s3", 2, 43, 57, "south"),
+NOTE_BOARDS = [("ch1_l5_card_s1", 2, 21, 57, "south"), ("ch1_l5_card_s3", 2, 43, 57, "south"),
                ("ch1_l5_card_s2", 2, 29, 60, "north"), ("ch1_l5_card_s4", 2, 51, 60, "north")]
+
+# The Waiting room's safety briefing (BriefingBoardBlock, BriefingSignBlock): on its north wall a cork board `cols`
+# wide from `x` (column 0 on the left as seen from the front, the plan's x rising) and `rows` high from eye height,
+# the plate over it from `sign_x`; each card is a spawn point at its column's cell in the bottom row (the block's
+# NOTE_COLS).
+BRIEFING = dict(layer=1, x=63, z=2, facing="south", cols=6, rows=2, sign_x=64, sign_cols=4,
+                cards=("ch1_l5_card_hunters", "ch1_l5_card_cloud", "ch1_l5_card_junior", "ch1_l5_card_equipment"),
+                note_cols=(0, 2, 3, 5))
 
 # The fuse box: a holder a slot on the east wall of the ring's east side, beside the stairs' lever (74, 25),
 # at eye height, in amperage order (index into FUSE_AMPS); the 15A is in already.
@@ -262,6 +269,14 @@ class Furnish:
                 self.put(name, x, z, facing, self.floor(layer) + y)
         for _, layer, x, z, facing in NOTE_BOARDS:
             self.put("note_board", x, z, facing, self.floor(layer) + 2)
+        bf, bz = self.floor(BRIEFING["layer"]), BRIEFING["z"]
+        for col in range(BRIEFING["cols"]):
+            for row_ in range(BRIEFING["rows"]):
+                self.put("briefing_board", BRIEFING["x"] + col, bz, BRIEFING["facing"], bf + 2 + row_)
+                self.extra[(BRIEFING["x"] + col, bf + 2 + row_, bz)] = f"col={col},facing={{facing}},row={row_}"
+        for col in range(BRIEFING["sign_cols"]):
+            self.put("briefing_sign", BRIEFING["sign_x"] + col, bz, BRIEFING["facing"], bf + 2 + BRIEFING["rows"])
+            self.extra[(BRIEFING["sign_x"] + col, bf + 2 + BRIEFING["rows"], bz)] = f"col={col},facing={{facing}}"
         for x, z, i in FUSE_BOX:
             self.put("fuse_holder", x, z, "west", 2)
             self.extra[(x, 2, z)] = f"amps={i},facing={{facing}},filled={str(i == FUSE_IN).lower()},lit=false"
@@ -350,6 +365,9 @@ class Furnish:
             out.append({"id": nid, "pos": self.centre(x, self.floor(layer) + 2, z), "yaw": 0, "tags": ["note"]})
         for nid, layer, x, z, _ in NOTE_PAPERS:
             out.append({"id": nid, "pos": self.centre(x, self.floor(layer) + 1, z), "yaw": 0, "tags": ["note"]})
+        for nid, col in zip(BRIEFING["cards"], BRIEFING["note_cols"]):
+            out.append({"id": nid, "pos": self.centre(BRIEFING["x"] + col, self.floor(BRIEFING["layer"]) + 2, BRIEFING["z"]),
+                        "yaw": 0, "tags": ["note"]})
         for tid, layer, x, z, _ in TERMINALS:
             out.append({"id": tid, "pos": self.centre(x, self.floor(layer) + 2, z), "yaw": 0, "tags": ["terminal"]})
         for pid, layer, x, z, facing, tags in POINTS:
