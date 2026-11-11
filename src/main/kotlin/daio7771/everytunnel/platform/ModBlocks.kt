@@ -438,6 +438,12 @@ object ModBlocks {
                 .emissiveLighting { state, _, _ -> FluorescentLightBlock.glows(state) },
         ),
     )
+    /** The director's office: his burgundy runner, his trophies, his wall of CCTV screens ([MonitorBankBlock]). */
+    val OFFICE_RUG: Block = register("office_rug", PropBlock(props(MapColor.DARK_RED, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(0, 0, 0, 16, 0.5, 16))))
+    val TROPHY_CUP: Block = register("trophy_cup", PropBlock(props(MapColor.GOLD, ModSoundGroups.HOLLOW_METAL).noCollision(), listOf(box(4, 0, 5, 12, 11, 11))))
+    val CRYSTAL_AWARD: Block = register("crystal_award", PropBlock(props(MapColor.LIGHT_BLUE, BlockSoundGroup.GLASS).noCollision(), listOf(box(5, 0, 6, 11, 11, 10))))
+    val MONTH_PLAQUE: Block = register("month_plaque", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(4, 0, 8, 12, 11, 11))))
+    val MONITOR_BANK: Block = register("monitor_bank", MonitorBankBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 6 }))
     /** The anteroom's security camera on the ceiling, following the player ([SecurityCameraBlock]). */
     val SECURITY_CAMERA: Block = register("security_camera", SecurityCameraBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision()))
     /** A chalk arrow on a drain wall, in three parts ([ChalkArrowBlock]). */

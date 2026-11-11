@@ -346,6 +346,52 @@ def lounge_rug_tex(rng):
     return img
 
 
+def office_rug_tex(rng):
+    """The director's runner: a deep burgundy field with a small gold lozenge, a dark border and a gold line down its
+    west edge."""
+    img = new((92, 22, 30))
+    noise(img, rng, 3)
+    for y in range(16):
+        px(img, 0, y, (40, 12, 16))
+        px(img, 1, y, (40, 12, 16))
+        px(img, 2, y, (186, 150, 74))
+    for d in range(3):
+        for x, y in ((9 + d, 5 + d), (9 - d, 5 + d), (9 + d, 11 - d), (9 - d, 11 - d)):
+            px(img, x, y, (186, 150, 74), 0.8)
+    return img
+
+
+# The director's wall of CCTV screens (MonitorBankBlock's `cam`): each camera's label, two lines.
+CAMERAS = [("CAM 01", "B1 GARAGE"), ("CAM 02", "B1 RAMP"), ("CAM 03", "B2 STAIRS"), ("CAM 04", "B3 LIBRARY"),
+           ("CAM 05", "B3 OFFICES"), ("CAM 06", "B3 BUNKER"), ("CAM 07", "B4 LOUNGE"), ("CAM 08", "B4 CINEMA"),
+           ("CAM 09", "B4 BAR"), ("CAM 10", "B5 LOBBY"), ("CAM 11", "B5 LAB HALL"), ("CAM 12", "B5 DRAIN"),
+           ("CAM 13", "B5 CISTERN"), ("CAM 14", "B5 ANTEROOM"), ("CAM 15", "B5 OFFICE")]
+SCREEN_PX = 64
+
+
+def screen_frames(rng, label, frames=4):
+    """One of the director's CCTV screens: only snow, grey and grainy, a brighter band rolling down it and faint
+    scanlines, its camera's label in white at the top left, each frame different."""
+    out = []
+    band0 = rng.randrange(SCREEN_PX)
+    for f in range(frames):
+        img = Image.new("RGBA", (SCREEN_PX, SCREEN_PX), (0, 0, 0, 255))
+        band = (band0 + f * SCREEN_PX // frames) % SCREEN_PX
+        for y in range(SCREEN_PX):
+            lift = 40 if abs(y - band) < 4 else 0
+            dim = 0.8 if y % 2 else 1.0
+            for x in range(SCREEN_PX):
+                v = int((rng.randint(30, 150) + lift) * dim)
+                v = max(0, min(255, v))
+                img.putpixel((x, y), (v, v, min(255, v + 6), 255))
+        for row, text in enumerate(label):
+            y = 4 + row * 8
+            for dx, dy, colour in ((1, 1, (0, 0, 0, 255)), (0, 0, (236, 236, 228, 255))):
+                dart_text(img, 4 + dx, y + dy, text, colour)
+        out.append(img)
+    return out
+
+
 def diploma_tex(rng):
     """A framed diploma: cream paper, a heading, lines too small to read, a brass seal."""
     img = new((226, 216, 190))
@@ -374,7 +420,8 @@ DART_FONT = {
     "S": "111100111001111", "E": "111100110100111", "G": "111100101101111", "A": "111101111101101",
     "M": "1000111011101011000110001", "C": "111100100100111", "L": "100100100100111", "R": "110101110101101",
     "W": "1000110001101011010101010", "T": "111010010010010", "F": "111100110100100", "D": "110101101101110",
-    "N": "1000111001101011001110001",
+    "N": "1000111001101011001110001", "B": "110101110101110", "I": "111010010010111", "K": "101101110101101",
+    "P": "110101110100100", "Y": "101101010010010",
 }
 # As in core/puzzle/darts: DartboardGeometry.ORDER.
 DART_ORDER = (20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5)
@@ -2415,7 +2462,7 @@ class Assets:
         self.blockstates = {}    # block id -> json
         self.names = {}          # block id -> English name
         self.item_textures = {}  # item texture name -> image (textures/item/)
-        self.animated = {}       # block texture name -> ([16x16 frames], ticks per frame); no PBR maps
+        self.animated = {}       # block texture name -> ([square frames], ticks per frame); no PBR maps
         self.loot_doors = set()  # door block ids: they drop from their lower half only
 
     def texture(self, name, img, material, tiles=True):
@@ -3454,6 +3501,32 @@ def build():
         for facing, y in HORIZONTAL.items():
             variants[f"col={col},facing={facing}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
     a.block("briefing_sign", "Briefing Sign", {"variants": variants}, {"parent": f"{NS}:block/briefing_sign_1"})
+    # The director's office: his runner from the door to the desk, his trophies, his wall of CCTV screens.
+    a.texture("office_rug", office_rug_tex(r("office_rug")), T.Material(0.1, porosity=0.6, relief=0.3), tiles=False)
+    prop("office_rug", "Director's Runner", {"r": "office_rug"},
+         [el((0, 0, 0), (16, 0.5, 16), "r", up=("r", (0, 0, 16, 16)), down=("r", (0, 0, 16, 16)))], ao=False)
+    a.texture("trophy_gold", plastic_tex(r("trophy_gold"), (212, 172, 72)), T.STEEL.but(smoothness=0.8, metal=231))
+    a.texture("trophy_base", plastic_tex(r("trophy_base"), (34, 26, 22)), T.Material(0.6, relief=0.2))
+    a.texture("trophy_crystal", plastic_tex(r("trophy_crystal"), (196, 222, 230)), T.Material(0.95, relief=0.0))
+    a.texture("trophy_plaque", plastic_tex(r("trophy_plaque"), (88, 56, 36)), T.Material(0.45, porosity=0.2, relief=0.3))
+    trophy = {"g": "trophy_gold", "b": "trophy_base", "c": "trophy_crystal", "p": "trophy_plaque"}
+    prop("trophy_cup", "Trophy Cup", trophy,
+         [el((5, 0, 5), (11, 2, 11), "b"), el((6.5, 2, 6.5), (9.5, 3, 9.5), "g"), el((7.5, 3, 7.5), (8.5, 6, 8.5), "g"),
+          el((5.5, 6, 5.5), (10.5, 11, 10.5), "g"), el((4, 7, 7.5), (5.5, 10, 8.5), "g"), el((10.5, 7, 7.5), (12, 10, 8.5), "g")])
+    prop("crystal_award", "Crystal Award", trophy,
+         [el((5, 0, 6), (11, 1.5, 10), "b"), el((6, 1.5, 7), (10, 11, 9), "c")])
+    prop("month_plaque", "Employee of the Month Plaque", trophy,
+         [el((4, 0, 8), (12, 11, 9.5), "p", north=("g", (2, 2, 14, 14))), el((4, 0, 9.5), (12, 1, 11), "p")])
+    variants = {}
+    for cam, label in enumerate(CAMERAS):
+        name = f"monitor_bank_{cam}"
+        a.animated[name] = (screen_frames(r(name), label), 2)
+        a.models[name] = model({"b": "monitor_body", "s": name}, [
+            element((0, 0, 4), (16, 16, 16), "b"),
+            {"from": [1, 1, 3.9], "to": [15, 15, 4], "shade": False, "faces": {"north": {"texture": "#s", "uv": [0, 0, 16, 16]}}}])
+        for facing, y in HORIZONTAL.items():
+            variants[f"cam={cam},facing={facing}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("monitor_bank", "CCTV Screen", {"variants": variants}, {"parent": f"{NS}:block/monitor_bank_0"})
     # The anteroom's security camera, in three parts (SecurityCameraBlock's `part`): the mount on the ceiling, drawn
     # in the world; the head and its red light, drawn turned by the client (SecurityCameraRenderer) round the mount's
     # pivot (8, 11, 8), the lens to the north.
@@ -3771,9 +3844,10 @@ def main():
             (tex_dir / f"{name}{suffix}.png").write_bytes(data)
             sheet[name + suffix] = data
     for name, (frames, frametime) in a.animated.items():
-        strip = Image.new("RGBA", (16, 16 * len(frames)))
+        w, h = frames[0].size
+        strip = Image.new("RGBA", (w, h * len(frames)))
         for i, frame in enumerate(frames):
-            strip.paste(frame, (0, 16 * i))
+            strip.paste(frame, (0, h * i))
         (tex_dir / f"{name}.png").write_bytes(png(strip))
         write_json(tex_dir / f"{name}.png.mcmeta", {"animation": {"frametime": frametime}})
     for name, data in a.models.items():

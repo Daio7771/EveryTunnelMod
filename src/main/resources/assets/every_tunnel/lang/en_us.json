@@ -196,6 +196,13 @@
   "sign.every_tunnel.room.meeting_room": "Meeting room",
   "sign.every_tunnel.room.management": "Management",
   "sign.every_tunnel.room.director": "DIRECTOR",
+  "sign.every_tunnel.diploma.service": "NONAME COMPLEX\nCertificate of Service\nThirty years of dedicated leadership",
+  "sign.every_tunnel.diploma.director": "DIRECTOR OF THE YEAR\nAwarded by the Board\nFor outstanding containment",
+  "sign.every_tunnel.diploma.excellence": "AWARD OF EXCELLENCE\nZero incidents reported\nTwelve years running",
+  "sign.every_tunnel.diploma.retention": "STAFF RETENTION AWARD\nNight Security Division",
+  "sign.every_tunnel.trophy.director": "DIRECTOR\nOF THE YEAR",
+  "sign.every_tunnel.trophy.hours": "100,000 HOURS\nWITHOUT AN ACCIDENT",
+  "sign.every_tunnel.trophy.month": "EMPLOYEE\nOF THE MONTH",
   "sign.every_tunnel.room.finance": "Finance",
   "sign.every_tunnel.room.servers": "Servers",
   "sign.every_tunnel.room.office": "Office",
@@ -410,5 +417,10 @@
   "block.every_tunnel.fallen_books": "Dropped Books",
   "block.every_tunnel.chalk_arrow": "Chalk Arrow",
   "block.every_tunnel.director_door": "Director's Door",
-  "block.every_tunnel.security_camera": "Security Camera"
+  "block.every_tunnel.security_camera": "Security Camera",
+  "block.every_tunnel.office_rug": "Director's Runner",
+  "block.every_tunnel.trophy_cup": "Trophy Cup",
+  "block.every_tunnel.crystal_award": "Crystal Award",
+  "block.every_tunnel.month_plaque": "Employee of the Month Plaque",
+  "block.every_tunnel.monitor_bank": "CCTV Screen"
 }

@@ -97,7 +97,7 @@ las oficinas.
   capa 2, al este de ella salvo el pie de la escalera de mano; un espacio puede estar `rise` por encima de su capa
   (la antesala del director, su despacho y el pasillo que sale de él, 10 bloques más arriba por la escalera de caracol, `SPIRAL`). Las
   superficies toman el aspecto del espacio al que dan (`STYLE_OF`, `STYLES`: el azulejo del laboratorio, el hormigón
-  manchado del drenaje, acero, el del despacho, los bloques propios del garaje para el pasillo, negro en el pozo).
+  manchado del drenaje, acero, el del despacho, el nogal del director, los bloques propios del garaje para el pasillo, negro en el pozo).
   El plano se gira en el mundo para que su entrada salga del tramo oscuro del nivel 4 (ahora más largo, 44 bloques)
   por un marco de acero junto a su fondo, al oeste de todos los demás niveles.
 

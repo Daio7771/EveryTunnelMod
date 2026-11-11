@@ -35,7 +35,7 @@ THROUGH = {"lab_chair", "tool_board", "lab_poster", "first_aid_box", "potted_pla
            "fuse_holder", "office_chair", "lab_terminal", "alarm_light", "pipe", "note_paper", "valve_wheel", "pressure_gauge",
            "tin_cans", "dead_flashlight", "mattress", "electrical_panel", "leather_chair", "exec_chair", "mini_diorite",
            "paper_stack", "coffee_cup", "desk_lamp_modern", "coffee_machine", "iv_drip", "chalk_arrow", "desk_phone",
-           "lounge_painting", "wall_clock", "security_camera"}
+           "lounge_painting", "wall_clock", "security_camera", "office_rug", "trophy_cup", "crystal_award", "month_plaque"}
 # The director's office and the corridor out of it stand this much over layer 3's floor (LEVEL_5's `rise`).
 RISE = 10
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
@@ -167,6 +167,12 @@ FURNITURE = {
                                                         ("paper_stack", 260, 57, "west", 2)]
            + row("leather_sofa", 246, 249, 52, "south") + [("glass_table", 247, 54, "north", 1), ("glass_table", 248, 54, "north", 1)]
            + [("potted_plant", x, z, "south", 1) for x, z in ((243, 52), (243, 66), (260, 52), (260, 66))]
+           # His runner from the door to his visitors' chairs, its gold edges outside; his trophies on a low credenza
+           # by the south wall, their plaques over them (TROPHIES); his diplomas over the sofa (DIPLOMAS); his wall of
+           # CCTV screens over the credenza behind him (MONITORS).
+           + [("office_rug", x, 59, "east", 1) for x in range(243, 254)] + [("office_rug", x, 60, "west", 1) for x in range(243, 254)]
+           + row("credenza", 255, 257, 66, "north")
+           + [("trophy_cup", 255, 66, "north", 2), ("crystal_award", 256, 66, "north", 2), ("month_plaque", 257, 66, "north", 2)]
            # His secretary's anteroom, spotless and lit as if still open: her desk on the north side facing the way
            # through, its computer (TERMINALS) and phone, her chair; three leather chairs for visitors along the south
            # wall with a glass table; plants, a painting, a clock; the plate by his door (DIRECTOR_PLATE) and the
@@ -215,6 +221,15 @@ PLATES = [("sign.every_tunnel.room.workshop", 1, 43, 14, "south", 2, "left"),
           ("sign.every_tunnel.room.waiting_room", 1, 68, 14, "south", 2, "left"),
           ("sign.every_tunnel.room.lockers", 1, 36, 17, "north", 2, "right"),
           ("sign.every_tunnel.room.stairs", 1, 12, 36, "north", 2, "right")]
+# The director's diplomas (WallTextBlock, framed certificates): (lang key, x, z, facing), over his office's floor at eye
+# height; his trophies' brass plaques, over each trophy.
+DIPLOMAS = [("sign.every_tunnel.diploma.service", 245, 52, "south"), ("sign.every_tunnel.diploma.director", 247, 52, "south"),
+            ("sign.every_tunnel.diploma.excellence", 249, 52, "south"), ("sign.every_tunnel.diploma.retention", 251, 52, "south")]
+TROPHIES = [("sign.every_tunnel.trophy.director", 255, 66, "north"), ("sign.every_tunnel.trophy.hours", 256, 66, "north"),
+            ("sign.every_tunnel.trophy.month", 257, 66, "north")]
+# The wall of CCTV screens behind his chair (MonitorBankBlock): its left column as seen from the front (x, z), the way
+# it faces, columns and rows, its bottom row's height over the office's floor; cameras numbered left to right, top down.
+MONITORS = dict(x=260, z=57, facing="west", cols=5, rows=3, y=3)
 # The director's door's plate in the anteroom, brass (WallTextBlock): (lang key, layer, x, z, facing, y over the floor, side).
 DIRECTOR_PLATE = ("sign.every_tunnel.room.director", 3, 241, 58, "west", RISE + 2, "right")
 # The green line on the floor, from the Lobby down the ring's west side to the stairs' door: (layer, x, z0, z1).
@@ -330,6 +345,16 @@ class Furnish:
         key, layer, x, z, facing, y, align = DIRECTOR_PLATE
         self.put("wall_text", x, z, facing, self.floor(layer) + y)
         self.texts[(x, self.floor(layer) + y, z)] = (key, align, "brass")
+        office = self.floor(3) + RISE
+        for (key, x, z, facing), y, style in [(d, 2, "diploma") for d in DIPLOMAS] + [(t, 3, "plaque") for t in TROPHIES]:
+            self.put("wall_text", x, z, facing, office + y)
+            self.texts[(x, office + y, z)] = (key, "center", style)
+        (dx, dz), mon = RIGHT_OF[MONITORS["facing"]], MONITORS
+        for row_ in range(mon["rows"]):
+            for col in range(mon["cols"]):
+                x, z, y = mon["x"] + dx * col, mon["z"] + dz * col, office + mon["y"] + mon["rows"] - 1 - row_
+                self.put("monitor_bank", x, z, mon["facing"], y)
+                self.extra[(x, y, z)] = f"cam={row_ * mon['cols'] + col},facing={{facing}}"
         layer, x, z0, z1 = FLOOR_LINE
         for z in range(z0, z1 + 1):
             self.put("floor_line", x, z, "north", self.floor(layer) + 1)

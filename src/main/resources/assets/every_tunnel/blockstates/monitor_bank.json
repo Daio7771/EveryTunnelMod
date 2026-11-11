@@ -1,0 +1,229 @@
+{
+  "variants": {
+    "cam=0,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_0"
+    },
+    "cam=0,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_0",
+      "y": 90
+    },
+    "cam=0,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_0",
+      "y": 180
+    },
+    "cam=0,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_0",
+      "y": 270
+    },
+    "cam=1,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_1"
+    },
+    "cam=1,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_1",
+      "y": 90
+    },
+    "cam=1,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_1",
+      "y": 180
+    },
+    "cam=1,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_1",
+      "y": 270
+    },
+    "cam=2,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_2"
+    },
+    "cam=2,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_2",
+      "y": 90
+    },
+    "cam=2,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_2",
+      "y": 180
+    },
+    "cam=2,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_2",
+      "y": 270
+    },
+    "cam=3,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_3"
+    },
+    "cam=3,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_3",
+      "y": 90
+    },
+    "cam=3,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_3",
+      "y": 180
+    },
+    "cam=3,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_3",
+      "y": 270
+    },
+    "cam=4,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_4"
+    },
+    "cam=4,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_4",
+      "y": 90
+    },
+    "cam=4,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_4",
+      "y": 180
+    },
+    "cam=4,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_4",
+      "y": 270
+    },
+    "cam=5,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_5"
+    },
+    "cam=5,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_5",
+      "y": 90
+    },
+    "cam=5,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_5",
+      "y": 180
+    },
+    "cam=5,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_5",
+      "y": 270
+    },
+    "cam=6,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_6"
+    },
+    "cam=6,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_6",
+      "y": 90
+    },
+    "cam=6,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_6",
+      "y": 180
+    },
+    "cam=6,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_6",
+      "y": 270
+    },
+    "cam=7,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_7"
+    },
+    "cam=7,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_7",
+      "y": 90
+    },
+    "cam=7,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_7",
+      "y": 180
+    },
+    "cam=7,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_7",
+      "y": 270
+    },
+    "cam=8,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_8"
+    },
+    "cam=8,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_8",
+      "y": 90
+    },
+    "cam=8,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_8",
+      "y": 180
+    },
+    "cam=8,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_8",
+      "y": 270
+    },
+    "cam=9,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_9"
+    },
+    "cam=9,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_9",
+      "y": 90
+    },
+    "cam=9,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_9",
+      "y": 180
+    },
+    "cam=9,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_9",
+      "y": 270
+    },
+    "cam=10,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_10"
+    },
+    "cam=10,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_10",
+      "y": 90
+    },
+    "cam=10,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_10",
+      "y": 180
+    },
+    "cam=10,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_10",
+      "y": 270
+    },
+    "cam=11,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_11"
+    },
+    "cam=11,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_11",
+      "y": 90
+    },
+    "cam=11,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_11",
+      "y": 180
+    },
+    "cam=11,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_11",
+      "y": 270
+    },
+    "cam=12,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_12"
+    },
+    "cam=12,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_12",
+      "y": 90
+    },
+    "cam=12,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_12",
+      "y": 180
+    },
+    "cam=12,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_12",
+      "y": 270
+    },
+    "cam=13,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_13"
+    },
+    "cam=13,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_13",
+      "y": 90
+    },
+    "cam=13,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_13",
+      "y": 180
+    },
+    "cam=13,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_13",
+      "y": 270
+    },
+    "cam=14,facing=north": {
+      "model": "every_tunnel:block/monitor_bank_14"
+    },
+    "cam=14,facing=east": {
+      "model": "every_tunnel:block/monitor_bank_14",
+      "y": 90
+    },
+    "cam=14,facing=south": {
+      "model": "every_tunnel:block/monitor_bank_14",
+      "y": 180
+    },
+    "cam=14,facing=west": {
+      "model": "every_tunnel:block/monitor_bank_14",
+      "y": 270
+    }
+  }
+}

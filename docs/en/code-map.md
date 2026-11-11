@@ -149,7 +149,7 @@ KDoc comment that says more.
 | `DeadGuardEntity.kt` | The guard before you, dead in the drain's Hideout; `DeadGuardHooks` puts him there with the level |
 | `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
-| `DirectorBlocks.kt` | Level 5's anteroom: the director's double door that opens both leaves at once, the security camera block |
+| `DirectorBlocks.kt` | Level 5's anteroom and office: the director's double door that opens both leaves at once, the security camera block, the wall of CCTV screens |
 | `DeepWaterHooks.kt` | Level 5's deep water (the drain's pools): falling in pulls the player under, and they drown |
 | `DrainHooks.kt` | Level 5's drain: the hatch slamming shut once the player is down its ladder, open again on a death before the Junction |
 | `DistortionHooks.kt` | Level 5's enemies: posts from spawn points, back on a death, telling the Hunters, when and where a Cloud comes, `/everytunnel spawn` |
@@ -284,7 +284,7 @@ KDoc comment that says more.
 | `DistortionRenderer.kt` | GeckoLib renderer and model for the Distortions: turned to their yaw, the glitch, the Junior's cracking eye |
 | `PaleManModel.kt` | His GeckoLib model, plus the stoop under low ceilings |
 | `BoxShelfRenderer.kt` | The purple boxes on the box shelf, full bright |
-| `WallTextRenderer.kt` | A wall text: white on a dark plate, dark on brass or on the lab's white plastic, or big dark letters on the wall |
+| `WallTextRenderer.kt` | A wall text: white on a dark plate, dark on brass or on the lab's white plastic, big dark letters on the wall, or several lines on a framed certificate or a small brass plaque |
 | `LootRenderer.kt` | Draws loot items lying flat |
 | `GuardUniform.kt` | The uniform skin for every player |
 

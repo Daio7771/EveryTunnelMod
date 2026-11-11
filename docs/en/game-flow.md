@@ -548,9 +548,13 @@ industrial, and up its stairs the director's office (the boss's scene is still t
     follow the player while it sees them, its red light blinking, a small servo whirring as it turns
     (`SecurityCameraBlock`, the client's `SecurityCameraRenderer`, `core.camera.CameraAim`, `block.camera.servo`).
     A brass plate reads DIRECTOR by **his double door** of dark walnut, both leaves opening at once
-    (`PairedDoorBlock`), onto **the director's office:** modern, black leather, steel
-    and smoked glass, square ceiling lights (`PanelLightBlock`); his desk at the far end facing the door, his
-    chair behind it, a lamp, a little block of diorite, a few papers, coffee. On its south side a door (opened by
+    (`PairedDoorBlock`), onto **the director's office:** walnut-panelled walls with a brass rail at waist
+    height over a dark wainscot, a ceiling seven blocks up in coffers between walnut beams, a square light in
+    each (`PanelLightBlock`, `COFFERS`); black leather, steel and smoked glass; a burgundy runner from the door to
+    his desk at the far end, his chair behind it, a lamp, a little block of diorite, a few papers, coffee. Behind
+    him, over a credenza, a wall of fifteen CCTV screens showing only snow under their cameras' labels (`MonitorBankBlock`);
+    four framed diplomas over the sofa and three trophies on a credenza by the south wall, each with its brass
+    plaque (`WallTextBlockEntity`'s `diploma` and `plaque` styles). On its south side a door (opened by
     hand) out to a corridor of Level 1's garage, straight, lit,
     ending at Level 1's locked EXIT door under its sign. Under the corridor's end lies a pit 40 blocks deep,
     closed by its floor until the boss's scene breaks it.

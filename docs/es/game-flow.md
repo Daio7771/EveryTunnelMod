@@ -584,9 +584,13 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
     piloto rojo parpadeando y un servo pequeño que suena al girar (`SecurityCameraBlock`, `SecurityCameraRenderer` en
     el cliente, `core.camera.CameraAim`, `block.camera.servo`). Una placa de latón dice DIRECTOR junto a **su puerta
     doble** de nogal oscuro, cuyas dos hojas se abren a la vez (`PairedDoorBlock`), que da a **el despacho del
-    director:** moderno, cuero negro,
-    acero y cristal ahumado, luces cuadradas en el techo (`PanelLightBlock`); su escritorio al fondo mirando a la
-    puerta, su sillón detrás, una lámpara, un bloquecito de diorita, unos papeles, café. En su lado sur, una puerta
+    director:** paredes con paneles de nogal, un listón de latón a la altura de la cintura sobre un arrimadero oscuro,
+    un techo a siete bloques en casetones entre vigas de nogal, con una luz cuadrada en cada uno (`PanelLightBlock`,
+    `COFFERS`); cuero negro, acero y cristal ahumado; una alfombra burdeos de la puerta a su escritorio al fondo, su
+    sillón detrás, una lámpara, un bloquecito de diorita, unos papeles, café. Detrás de él, sobre un aparador, un muro
+    de quince monitores CCTV que solo muestran nieve bajo el rótulo de su cámara (`MonitorBankBlock`); cuatro diplomas
+    enmarcados sobre el sofá y tres trofeos en un aparador junto a la pared sur, cada uno con su placa de latón (los
+    estilos `diploma` y `plaque` de `WallTextBlockEntity`). En su lado sur, una puerta
     (se abre a mano) de salida a un pasillo del garaje del nivel 1,
     recto e iluminado, que acaba en la puerta EXIT cerrada del nivel 1 bajo su cartel. Bajo el final del pasillo hay
     un pozo de 40 bloques, cerrado por su suelo hasta que la escena del jefe lo rompa.

@@ -89,7 +89,7 @@ OPEN_KINDS = ("corridor", "stairs", "entry", "climb")
 ENTRY_KINDS = ("entry", "airlock")
 ENTRY_OPENINGS = ("frame", "airlock_rear")
 # Which look wins where a block faces spaces of two.
-STYLE_ORDER = ("library", "lab", "office", "garage", "steel", "pit", "drain")
+STYLE_ORDER = ("library", "lab", "walnut", "office", "garage", "steel", "pit", "drain")
 
 
 class Lab:
@@ -274,6 +274,9 @@ class Lab:
             look = self.style(o)
             styles.update({c: look for c in self.opening_air([o])})
         lab_air = self.carve_air(rooms + [self.flight])
+        coffer_air = self.coffers()[1]
+        lab_air.update(coffer_air)
+        styles.update({c: self.style(next(s for s in self.spaces if s.id == p["COFFERS"]["space"])) for c in coffer_air})
         lab_air.update(self.opening_air([o for o in self.openings if o.kind not in ENTRY_OPENINGS + ("airlock_front",)]))
         drain = self.drain_air()
         lab_air.update(drain)
@@ -466,6 +469,29 @@ class Lab:
                 air[(x, y, z)] = f3 if y <= top else top
                 self.spiral_styles[(x, y, z)] = "drain" if y <= f3 + sp["drain_up_to"] else "steel" if y <= top else "office"
         return air
+
+    def coffers(self):
+        """The director's office's coffered ceiling (COFFERS): (the coffers' middle cells, {plan cell (x, y, z): floor y} of
+        the air they add a block over the room's ceiling). Coffers `size` cells square, a beam a cell wide between them,
+        as many as fit, centred."""
+        size = self.p["COFFERS"]["size"]
+        s = next(sp for sp in self.spaces if sp.id == self.p["COFFERS"]["space"])
+        x0, z0, x1, z1 = s.box
+
+        def starts(a, b):
+            n = (b - a + 1) // (size + 1)
+            first = a + (b - a + 1 - (n * (size + 1) - 1)) // 2
+            return [first + k * (size + 1) for k in range(n)]
+
+        middles, air = [], {}
+        y = s.floor + s.height + 1
+        for sx in starts(x0, x1 - 1):
+            for sz in starts(z0, z1 - 1):
+                middles.append((sx + size // 2, sz + size // 2))
+                for x in range(sx, sx + size):
+                    for z in range(sz, sz + size):
+                        air[(x, y, z)] = s.floor
+        return middles, air
 
     def spiral_link(self):
         """(layer, x, z) of the cell at the spiral stairs' foot (the tunnel's last) -> the one at their top (the doorway
@@ -691,12 +717,16 @@ class Lab:
                     c = (x, self.floors[(s.layer, x, z)] + s.height, z)
                     self.lights.append(c)
                     self.lab_blocks[self.at(*c)] = p["LIGHT"].format(axis=axis)
-            elif look == "office":
-                for x in grid(x0, x1 - 1, p["OFFICE_LIGHT_SPACING"]):
-                    for z in grid(z0, z1 - 1, p["OFFICE_LIGHT_SPACING"]):
-                        c = (x, s.floor + s.height, z)
-                        self.lights.append(c)
-                        self.lab_blocks[self.at(*c)] = p["PANEL_LIGHT"]
+            elif look in ("office", "walnut"):
+                if s.id == p["COFFERS"]["space"]:
+                    # Up in the middle of each coffer.
+                    spots = [(x, s.floor + s.height + 1, z) for x, z in self.coffers()[0]]
+                else:
+                    spots = [(x, s.floor + s.height, z) for x in grid(x0, x1 - 1, p["OFFICE_LIGHT_SPACING"])
+                             for z in grid(z0, z1 - 1, p["OFFICE_LIGHT_SPACING"])]
+                for c in spots:
+                    self.lights.append(c)
+                    self.lab_blocks[self.at(*c)] = p["PANEL_LIGHT"]
             elif s.kind == "corridor":
                 # Hanging over the channel, down the tunnel's middle.
                 mid = (z0 + z1) // 2 if axis == "z" else (x0 + x1) // 2

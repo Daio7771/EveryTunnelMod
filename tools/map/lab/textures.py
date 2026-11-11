@@ -3,8 +3,9 @@ Level 5's own textures: a clean laboratory. White wall tiles with a band of pale
 their foot, grey speckled vinyl on the floor, a ceiling of white perforated panels; the airlock's
 riveted steel panels, which the stairs up from the drain are made of too. Under it the drain: stained
 concrete, wet underfoot, a dark tide line along the foot of the walls, the rubble of a collapse. Up its
-stairs the director's office: polished dark stone, pale panels over a dark steel skirting, a white
-ceiling.
+stairs the director's anteroom: polished dark stone, pale panels over a dark steel skirting, a white
+ceiling; his office the same floor and ceiling, its walls panelled in walnut over a dark wainscot, a brass
+rail at waist height.
 
 Like Level 4's (lounge/textures.py), each texture re-skins a stand-in vanilla block (STAND_INS in
 LEVEL_5), with LabPBR maps for shader packs, in the same world resource pack (add_to_pack). Texture
@@ -113,6 +114,7 @@ CONCRETE = Material(0.15, porosity=0.6, relief=0.5)
 WET = Material(0.5, porosity=0.35, relief=0.45)
 POLISHED = Material(0.85, relief=0.1)
 PLASTER = Material(0.2, porosity=0.3, relief=0.15)
+WOOD = Material(0.5, porosity=0.2, relief=0.25)
 RUST = (118, 78, 50)
 
 
@@ -211,6 +213,54 @@ def office_band_tex(rng, kind):
     return img
 
 
+WALNUT = (74, 48, 34)
+BRASS = (190, 156, 86)
+
+
+def walnut(rng):
+    """Walnut veneer: its grain running up the face, streaks lighter and darker."""
+    img = T.new(WALNUT)
+    grain = [rng.uniform(-1, 1) for _ in range(16)]
+    for x in range(16):
+        for y in range(16):
+            t = grain[x] * 0.6 + rng.uniform(-0.3, 0.3)
+            T.px(img, x, y, (96, 66, 46) if t > 0 else (52, 32, 22), abs(t) * 0.45)
+    return img
+
+
+def walnut_wall_tex(rng, kind):
+    """The director's walls: a walnut panel to each block, a shadowed seam on its left, a lit edge on its right."""
+    img = walnut(rng)
+    for y in range(16):
+        T.px(img, 0, y, (30, 18, 12), 0.85)
+        T.px(img, 15, y, (110, 78, 54), 0.5)
+    return img
+
+
+def walnut_rail_tex(rng, kind):
+    """The panel over the skirting: walnut, and along its foot, waist high, a brass rail catching the light."""
+    img = walnut_wall_tex(rng, kind)
+    for x in range(16):
+        T.px(img, x, 13, (230, 200, 130), 0.9)
+        T.px(img, x, 14, BRASS, 1.0)
+        T.px(img, x, 15, (110, 84, 40), 0.9)
+    return img
+
+
+def walnut_band_tex(rng, kind):
+    """The wainscot at the foot of his walls: a darker walnut panel with a moulding along its top, a black skirting under."""
+    img = walnut(rng)
+    T.rect(img, 0, 0, 15, 15, (0, 0, 0), 0.25)                       # darker than the panels over it
+    for x in range(16):
+        T.px(img, x, 0, (120, 88, 60), 0.7)
+        T.px(img, x, 1, (36, 22, 14), 0.6)
+        for y in (12, 13, 14, 15):
+            T.px(img, x, y, (22, 20, 20), 0.95)
+    for y in range(2, 12):
+        T.px(img, 0, y, (30, 18, 12), 0.85)
+    return img
+
+
 def office_ceiling_tex(rng, kind):
     img = T.new((234, 234, 230))
     T.noise(img, rng, 1)
@@ -244,6 +294,9 @@ ROLES = {
     "office_wall": ("b5_office_wall", ["plain"], office_wall_tex, False, PLASTER),
     "office_band": ("b5_office_band", ["plain"], office_band_tex, False, STEEL),
     "office_ceiling": ("b5_office_ceiling", ["plain"], office_ceiling_tex, False, PLASTER),
+    "walnut_wall": ("b5_walnut_wall", ["plain"], walnut_wall_tex, False, WOOD),
+    "walnut_rail": ("b5_walnut_rail", ["plain"], walnut_rail_tex, False, WOOD),
+    "walnut_band": ("b5_walnut_band", ["plain"], walnut_band_tex, False, WOOD),
 }
 
 

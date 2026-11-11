@@ -541,7 +541,7 @@ LEVEL_5 = dict(
         ("tunnel_stairs", "drain_tunnels", "", 3, (218, 62, 223, 71), None, "corridor"),
         # Up the spiral stairs (SPIRAL), the director's secretary's anteroom, then his office.
         ("anteroom", "anteroom", "Anteroom", 3, (236, 55, 242, 65), 5, "room", 10),
-        ("office", "director_office", "Director's office", 3, (243, 52, 261, 67), 5, "office", 10),
+        ("director_office", "director_office", "Director's office", 3, (243, 52, 261, 67), 7, "office", 10),
         ("false_exit", "false_exit", "Corridor", 3, (250, 68, 255, 96), None, "corridor", 10),
     ],
     # From layer 1's stairs down to layer 2's: one block down per cell along z, from the first cell on. Its
@@ -651,11 +651,15 @@ LEVEL_5 = dict(
                 "cistern": ("walls", 6, None, 99), "pump_room": ("ceiling", 5, "on", 99)},
     PANEL_LIGHT="every_tunnel:panel_light[facing=down,axis=x,mode=on,lit=true,burst=false]",
     OFFICE_LIGHT_SPACING=4,
+    # The director's office's ceiling: COFFERS square recesses a block deep, `size` cells across between beams a cell
+    # wide, centred in the room, a panel light in the middle of each (instead of OFFICE_LIGHT_SPACING's grid).
+    COFFERS=dict(space="director_office", size=3),
     GARAGE_LIGHT_SPACING=6,
     # The look of a space's or an opening's surfaces, by id: the rest are the lab's on layers 1 and 2 and the
     # drain's on layer 3. STYLES: role -> a stand-in of STAND_INS, or a block of its own (the garage's corridor
     # is built of Level 1's own blocks, which the same pack re-skins: it looks like the garage).
-    STYLE_OF={"entry": "library", "entry_frame": "library", "anteroom": "office", "spiral_exit": "office", "office": "office",
+    STYLE_OF={"entry": "library", "entry_frame": "library", "anteroom": "office", "spiral_exit": "office",
+              "director_office": "walnut",
               "office_door": "office", "office_exit": "office", "false_exit": "garage", "exit_door": "garage"},
     STYLES=dict(
         library=dict(vinyl="minecraft:green_wool", tile="minecraft:dark_oak_planks", band="minecraft:dark_oak_planks",
@@ -664,6 +668,7 @@ LEVEL_5 = dict(
                    rubble="rubble", rubble_slab="rubble_slab"),
         steel=dict(vinyl="every_tunnel:checker_plate", tile="steel", band="steel", ceiling="steel"),
         office=dict(vinyl="office_floor", tile="office_wall", band="office_band", ceiling="office_ceiling"),
+        walnut=dict(vinyl="office_floor", tile="walnut_wall", band="walnut_band", stripe="walnut_rail", ceiling="office_ceiling"),
         garage=dict(vinyl="minecraft:gray_concrete", tile="minecraft:light_gray_concrete", band="minecraft:polished_andesite",
                     stripe="minecraft:yellow_terracotta", ceiling="minecraft:smooth_stone"),
         pit=dict(vinyl="minecraft:black_concrete", tile="minecraft:black_concrete", ceiling="minecraft:black_concrete"),
@@ -718,6 +723,10 @@ LEVEL_5 = dict(
         office_wall="minecraft:smooth_red_sandstone",
         office_band="minecraft:cut_red_sandstone",
         office_ceiling="minecraft:smooth_sandstone",
+        # The director's office itself: walnut panels, the one with the brass rail over the wainscot.
+        walnut_wall="minecraft:mangrove_planks",
+        walnut_rail="minecraft:bamboo_planks",
+        walnut_band="minecraft:cherry_planks",
     ),
     CHECKER="every_tunnel:checker_plate",     # the airlock's floor and the thresholds of steel
     AIRLOCK_DOOR="every_tunnel:airlock_door[facing={facing},width={width}]",

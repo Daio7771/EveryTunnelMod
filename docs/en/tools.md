@@ -93,7 +93,7 @@ the offices.
   `LAYER_DROP` (10) under layer 1, layer 3 `DRAIN_DROP` (7) under layer 2, east of it but for the foot of the
   ladder; a space may stand `rise` over its layer (the director's anteroom, his office and the corridor out of it, 10
   up the spiral stairs, `SPIRAL`). Surfaces take the look of the space they face (`STYLE_OF`, `STYLES`: the lab's tiles, the
-  drain's stained concrete, steel, the office's, the garage's own blocks for the corridor, black for the pit).
+  drain's stained concrete, steel, the office's, the director's walnut, the garage's own blocks for the corridor, black for the pit).
   The plan turns into the world so that its way in leaves Level 4's dark stretch (made longer, 44 blocks)
   through a steel frame by its far end, west of every other level.
 

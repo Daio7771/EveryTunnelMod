@@ -149,7 +149,7 @@ con un comentario KDoc que cuenta más.
 | `DeadGuardEntity.kt` | El guardia anterior, muerto en el Hideout del drenaje; `DeadGuardHooks` lo pone ahí con el nivel |
 | `LabHallHooks.kt` | El golpe de cuerdas y la primera Cloud del Lab hall, una vez por partida |
 | `ChemicalHooks.kt` | El puzle químico: la pareja de la partida, la mezcladora, la alarma y sus enemigos, la rejilla disolviéndose, la trampilla |
-| `DirectorBlocks.kt` | La antesala del nivel 5: la puerta doble del director que abre sus dos hojas a la vez, el bloque de la cámara de seguridad |
+| `DirectorBlocks.kt` | La antesala y el despacho del nivel 5: la puerta doble del director que abre sus dos hojas a la vez, el bloque de la cámara de seguridad, el muro de monitores CCTV |
 | `DeepWaterHooks.kt` | El agua honda del nivel 5 (las piscinas del drenaje): al caer, algo arrastra al jugador al fondo y se ahoga |
 | `DrainHooks.kt` | El drenaje del nivel 5: la trampilla cerrándose de golpe cuando el jugador ha bajado su escalera, abierta otra vez si muere antes de la Junction |
 | `DistortionHooks.kt` | Los enemigos del nivel 5: sus puestos según los puntos de aparición, de vuelta al morir, avisar a los Hunters, cuándo y dónde viene una Cloud, `/everytunnel spawn` |
@@ -284,7 +284,7 @@ con un comentario KDoc que cuenta más.
 | `DistortionRenderer.kt` | Renderizador y modelo de GeckoLib de las Distortions: giradas hacia su yaw, el glitch, el ojo del Junior agrietándose |
 | `PaleManModel.kt` | Su modelo de GeckoLib, más la postura encorvada bajo techos bajos |
 | `BoxShelfRenderer.kt` | Las cajas moradas en la estantería, a brillo completo |
-| `WallTextRenderer.kt` | Un texto de pared: blanco sobre una placa oscura, oscuro sobre latón o sobre el plástico blanco del laboratorio, o letras grandes oscuras en la pared |
+| `WallTextRenderer.kt` | Un texto de pared: blanco sobre una placa oscura, oscuro sobre latón o sobre el plástico blanco del laboratorio, letras grandes oscuras en la pared, o varias líneas en un diploma enmarcado o una placa pequeña de latón |
 | `LootRenderer.kt` | Dibuja el botín tumbado |
 | `GuardUniform.kt` | La skin del uniforme para todos los jugadores |
 

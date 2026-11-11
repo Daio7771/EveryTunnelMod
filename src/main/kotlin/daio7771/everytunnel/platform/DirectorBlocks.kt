@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.DirectionProperty
 import net.minecraft.state.property.EnumProperty
+import net.minecraft.state.property.IntProperty
 import net.minecraft.state.property.Properties
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
@@ -88,3 +89,24 @@ class SecurityCameraBlock(settings: Settings) : BlockWithEntity(settings) {
 
 /** Marks a [SecurityCameraBlock] for its client renderer; holds nothing. */
 class SecurityCameraBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlocks.SECURITY_CAMERA_ENTITY, pos, state)
+
+/**
+ * One screen of the director's wall of CCTV monitors (Level 5's office): a CRT in its casing showing only snow
+ * under its camera's label ([CAM], one of fifteen; the labels and the snow are its textures, `tools/blocks/generate.py`'s
+ * CAMERAS), glowing faintly.
+ */
+class MonitorBankBlock(settings: Settings) : Block(settings) {
+
+    init {
+        defaultState = stateManager.defaultState.with(FACING, Direction.NORTH).with(CAM, 0)
+    }
+
+    override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
+        builder.add(FACING, CAM)
+    }
+
+    companion object {
+        val FACING: DirectionProperty = Properties.HORIZONTAL_FACING
+        val CAM: IntProperty = IntProperty.of("cam", 0, 14)
+    }
+}

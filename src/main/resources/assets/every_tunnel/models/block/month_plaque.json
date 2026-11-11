@@ -1,0 +1,82 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "g": "every_tunnel:block/trophy_gold",
+    "b": "every_tunnel:block/trophy_base",
+    "c": "every_tunnel:block/trophy_crystal",
+    "p": "every_tunnel:block/trophy_plaque",
+    "particle": "every_tunnel:block/trophy_gold"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        0,
+        8
+      ],
+      "to": [
+        12,
+        11,
+        9.5
+      ],
+      "faces": {
+        "north": {
+          "texture": "#g",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ]
+        },
+        "east": {
+          "texture": "#p"
+        },
+        "south": {
+          "texture": "#p"
+        },
+        "west": {
+          "texture": "#p"
+        },
+        "up": {
+          "texture": "#p"
+        },
+        "down": {
+          "texture": "#p"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        0,
+        9.5
+      ],
+      "to": [
+        12,
+        1,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#p"
+        },
+        "east": {
+          "texture": "#p"
+        },
+        "south": {
+          "texture": "#p"
+        },
+        "west": {
+          "texture": "#p"
+        },
+        "up": {
+          "texture": "#p"
+        },
+        "down": {
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

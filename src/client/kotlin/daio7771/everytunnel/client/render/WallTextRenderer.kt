@@ -26,6 +26,9 @@ import org.joml.Matrix4f
  * - [WallTextBlockEntity.Style.LETTERS]: big dark grey letters [LETTERS_HEIGHT] of a block high
  *   straight on the wall, a darker shadow under them for relief; they may run over several
  *   blocks either side ([rendersOutsideBoundingBox]).
+ * - [WallTextBlockEntity.Style.DIPLOMA] and [WallTextBlockEntity.Style.PLAQUE] ([multiline]): one line per line of the
+ *   text, centred; a certificate on cream paper in a dark wood frame, its first line larger, a gold seal at its foot,
+ *   or a small brass plaque, both as wide as their longest line needs.
  */
 class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntityRenderer<WallTextBlockEntity> {
 
@@ -39,6 +42,10 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         val state = entity.cachedState
         if (!state.isOf(ModBlocks.WALL_TEXT)) return
         val facing = state.get(WallTextBlock.FACING)
+        if (entity.style == WallTextBlockEntity.Style.DIPLOMA || entity.style == WallTextBlockEntity.Style.PLAQUE) {
+            multiline(entity, facing.asRotation(), matrices, vertexConsumers, light)
+            return
+        }
         val text = Text.translatable(entity.text)
         val width = font.getWidth(text).toFloat()
         val brass = entity.style == WallTextBlockEntity.Style.BRASS
@@ -67,6 +74,49 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         } else {
             font.draw(text, x, y, LETTERS_INK, true, matrices.peek().positionMatrix, vertexConsumers,
                 TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light)
+        }
+        matrices.pop()
+    }
+
+    /** A certificate or a plaque: its lines, in blocks, centred on the block (and [WallTextBlockEntity.offset]). */
+    private fun multiline(entity: WallTextBlockEntity, rotation: Float, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, light: Int) {
+        val diploma = entity.style == WallTextBlockEntity.Style.DIPLOMA
+        val lines = Text.translatable(entity.text).string.split("\n")
+        val heights = lines.indices.map { if (diploma && it == 0) DIPLOMA_HEADING else if (diploma) DIPLOMA_LINE else PLAQUE_LINE }
+        val widths = lines.mapIndexed { i, line -> font.getWidth(line) * heights[i] / GLYPH_HEIGHT }
+        val gap = if (diploma) DIPLOMA_GAP else PLAQUE_GAP
+        val margin = if (diploma) DIPLOMA_MARGIN else PLAQUE_MARGIN
+        val seal = if (diploma) DIPLOMA_SEAL + gap else 0f
+        val halfWidth = maxOf(widths.max() / 2f + margin, if (diploma) DIPLOMA_MIN_HALF_WIDTH else 0f)
+        val textHeight = heights.sum() + gap * (lines.size - 1)
+        val halfHeight = (textHeight + seal) / 2f + margin
+        val frame = if (diploma) DIPLOMA_FRAME else PLAQUE_RIM
+
+        matrices.push()
+        matrices.translate(0.5, 0.5, 0.5)
+        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-rotation))
+        matrices.translate(entity.offset.toDouble(), 0.0, -0.5 + WALL_GAP)
+        matrices.scale(1f, -1f, 1f)                                                     // y down, like the font's
+        val buffer = vertexConsumers.getBuffer(RenderLayer.getTextBackground())
+        val m = matrices.peek().positionMatrix
+        quad(buffer, m, -halfWidth - frame, -halfHeight - frame, halfWidth + frame, halfHeight + frame, 0f,
+            if (diploma) DIPLOMA_FRAME_COLOR else BRASS_RIM, light)
+        quad(buffer, m, -halfWidth, -halfHeight, halfWidth, halfHeight, BLOCK_LAYER, if (diploma) DIPLOMA_PAPER else BRASS_COLOR, light)
+        if (diploma) {
+            val sx = halfWidth - margin - DIPLOMA_SEAL
+            val sy = halfHeight - margin - DIPLOMA_SEAL
+            quad(buffer, m, sx, sy, sx + DIPLOMA_SEAL, sy + DIPLOMA_SEAL, 2f * BLOCK_LAYER, DIPLOMA_SEAL_COLOR, light)
+        }
+        var y = -halfHeight + margin
+        for ((i, line) in lines.withIndex()) {
+            matrices.push()
+            matrices.translate((-widths[i] / 2f).toDouble(), y.toDouble(), (3f * BLOCK_LAYER).toDouble())
+            val s = heights[i] / GLYPH_HEIGHT
+            matrices.scale(s, s, s)
+            font.draw(line, 0f, 1f, if (diploma) DIPLOMA_INK else BRASS_INK, false, matrices.peek().positionMatrix, vertexConsumers,
+                TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light)
+            matrices.pop()
+            y += heights[i] + gap
         }
         matrices.pop()
     }
@@ -113,5 +163,23 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         const val LAB_COLOR = 0xFFF2F2EE.toInt()
         const val LAB_INK = 0xFF16181A.toInt()
         const val LETTERS_INK = 0xFF3A3D42.toInt()
+        /** Certificates and plaques, in blocks: their lines' heights, the gaps between, margins, frame, seal. */
+        const val DIPLOMA_HEADING = 0.075f
+        const val DIPLOMA_LINE = 0.045f
+        const val DIPLOMA_GAP = 0.035f
+        const val DIPLOMA_MARGIN = 0.08f
+        const val DIPLOMA_FRAME = 0.035f
+        const val DIPLOMA_SEAL = 0.07f
+        const val DIPLOMA_MIN_HALF_WIDTH = 0.3f
+        const val PLAQUE_LINE = 0.05f
+        const val PLAQUE_GAP = 0.025f
+        const val PLAQUE_MARGIN = 0.04f
+        const val PLAQUE_RIM = 0.012f
+        /** The step between a certificate's layers, in blocks. */
+        const val BLOCK_LAYER = 0.002f
+        const val DIPLOMA_FRAME_COLOR = 0xFF3A2416.toInt()
+        const val DIPLOMA_PAPER = 0xFFE8DEC4.toInt()
+        const val DIPLOMA_INK = 0xFF2C2018.toInt()
+        const val DIPLOMA_SEAL_COLOR = 0xFFC2963E.toInt()
     }
 }
