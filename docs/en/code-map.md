@@ -35,6 +35,7 @@ KDoc comment that says more.
 | `puzzle/OrderPuzzle.kt` | A puzzle of things in order: attempts, failures, the hint |
 | `door/SlidingDoor.kt` | A door of two leaves sliding into the walls a quarter of a block at a time: how much of each column is left (Level 5's airlock) |
 | `save/LoungeSave.kt` | Level 4 as it was left, as text |
+| `camera/CameraAim.kt` | Where a security camera's head points, turning towards a target no faster than its servo |
 | `wall/WallMessageState.kt` | A wall message's triggers: fixed, on approach, changing when looked away from |
 | `puzzle/BreakerCode.kt` | Level 4's five levers: the code, how many are right |
 | `puzzle/ChemicalMix.kt` | Level 5's chemical puzzle: the pair of reagents drawn each game, either way round |
@@ -148,6 +149,7 @@ KDoc comment that says more.
 | `DeadGuardEntity.kt` | The guard before you, dead in the drain's Hideout; `DeadGuardHooks` puts him there with the level |
 | `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
+| `DirectorBlocks.kt` | Level 5's anteroom: the director's double door that opens both leaves at once, the security camera block |
 | `DeepWaterHooks.kt` | Level 5's deep water (the drain's pools): falling in pulls the player under, and they drown |
 | `DrainHooks.kt` | Level 5's drain: the hatch slamming shut once the player is down its ladder, open again on a death before the Junction |
 | `DistortionHooks.kt` | Level 5's enemies: posts from spawn points, back on a death, telling the Hunters, when and where a Cloud comes, `/everytunnel spawn` |
@@ -272,6 +274,7 @@ KDoc comment that says more.
 | `PaleManRenderer.kt` | GeckoLib renderer with the eye glow mask |
 | `FilmWalkerRenderer.kt` | The figure in the Cinema's film, on the player's model |
 | `DartRenderer.kt` | A thrown dart: vanilla's arrow, smaller, with its own texture |
+| `SecurityCameraRenderer.kt` | Turns the anteroom camera's head to follow the player, blinks its red light, plays its servo |
 | `WallMessageRenderer.kt` | Draws a wall message in the painted font; remembers what happened to it |
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
 | `SubjectRenderer.kt` | GeckoLib renderer for the subjects, each stage its body and skin |

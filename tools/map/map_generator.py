@@ -532,15 +532,15 @@ LEVEL_5 = dict(
         ("hideout", "hideout", "Hideout", 3, (157, 49, 173, 56), 4, "lore"),
         ("pump_room", "pump_room", "Pump room", 3, (161, 89, 181, 98), 6, "loot"),
         ("junction", "junction", "Junction", 3, (178, 51, 195, 67), 9, "hub"),
-        ("tunnel_north_east", "drain_tunnels", "", 3, (195, 57, 230, 62), None, "corridor"),
+        ("tunnel_north_east", "drain_tunnels", "", 3, (195, 57, 226, 62), None, "corridor"),
         ("tunnel_spur", "drain_tunnels", "", 3, (201, 62, 206, 68), None, "corridor"),
         ("cistern", "cistern", "Cistern", 3, (196, 68, 212, 79), 7, "room"),
         ("tunnel_cistern_south", "drain_tunnels", "", 3, (201, 79, 206, 83), None, "corridor"),
         ("tunnel_south_east", "drain_tunnels", "", 3, (189, 83, 206, 88), None, "corridor"),
         ("tunnel_east", "drain_tunnels", "", 3, (213, 71, 223, 76), None, "corridor"),
         ("tunnel_stairs", "drain_tunnels", "", 3, (218, 62, 223, 71), None, "corridor"),
-        ("office_stairs", "office_stairs", "Stairs", 3, (230, 57, 240, 62), 5, "climb"),
-        ("office_landing", "office_stairs", "", 3, (240, 57, 242, 62), 5, "corridor", 10),
+        # Up the spiral stairs (SPIRAL), the director's secretary's anteroom, then his office.
+        ("anteroom", "anteroom", "Anteroom", 3, (236, 55, 242, 65), 5, "room", 10),
         ("office", "director_office", "Director's office", 3, (243, 52, 261, 67), 5, "office", 10),
         ("false_exit", "false_exit", "Corridor", 3, (250, 68, 255, 96), None, "corridor", 10),
     ],
@@ -571,7 +571,8 @@ LEVEL_5 = dict(
         ("cistern_door", 3, "x", 212, 72, 3, 3, "doorway"),
         # The office's doors (kind "door": opened by hand) and, at the end of the corridor out of it, Level 1's
         # locked EXIT door ("exit"): one cell each, two high, standing `rise` over the layer's floor.
-        ("office_door", 3, "x", 242, 59, 1, 2, "door", 10),
+        ("spiral_exit", 3, "x", 235, 58, 3, 3, "doorway", 10),
+        ("office_door", 3, "x", 242, 59, 2, 2, "director_door", 10),
         ("office_exit", 3, "z", 67, 252, 1, 2, "door", 10),
         ("exit_door", 3, "z", 96, 252, 1, 2, "exit", 10),
     ],
@@ -582,6 +583,7 @@ LEVEL_5 = dict(
     CEILING_LIGHT="every_tunnel:lab_ceiling_light",
     CEILING_VENT="every_tunnel:lab_ceiling_vent",
     OFFICE_DOOR="every_tunnel:office_door",
+    DIRECTOR_DOOR="every_tunnel:director_door",
     EXIT_DOOR="every_tunnel:emergency_door",
     EXIT_SIGN="every_tunnel:exit_sign",
     # Layer 3. The ladder from the hatch down to the drain: (layer, x, z, plan facing away from its wall), from
@@ -593,7 +595,7 @@ LEVEL_5 = dict(
     LADDER=(3, 128, 75, "east"),
     LADDER_BLOCK="every_tunnel:drain_ladder[facing={facing},waterlogged=false]",
     CHANNELS=[(139, 75, 152, 75), (152, 59, 152, 85), (152, 59, 176, 59), (152, 85, 186, 85), (186, 68, 186, 85),
-              (186, 85, 203, 85), (203, 80, 203, 85), (196, 59, 206, 59), (203, 60, 203, 66), (213, 59, 228, 59),
+              (186, 85, 203, 85), (203, 80, 203, 85), (196, 59, 206, 59), (203, 60, 203, 66), (213, 59, 225, 59),
               (220, 60, 220, 73), (214, 73, 220, 73)],
     POOLS=[("junction_pool", (180, 53, 193, 65), 4, [(180, 58, 193, 61), (185, 53, 188, 58), (185, 61, 188, 65)], True),
            ("cistern_pool", (197, 69, 211, 78), 5, [(202, 69, 204, 78), (204, 73, 211, 75)], False)],
@@ -623,9 +625,15 @@ LEVEL_5 = dict(
             {"sound": "every_tunnel:ambient.drip", "interval": [6, 14], "distance": [2, 8], "volume": 0.6}]},
         "hideout": {"random": [
             {"sound": "every_tunnel:ambient.drip", "interval": [5, 14], "distance": [2, 6], "volume": 0.6}]},
-        "office_stairs": {}, "director_office": {}, "false_exit": {},
+        "office_stairs": {}, "anteroom": {}, "director_office": {}, "false_exit": {},
     },
     RAIL="every_tunnel:catwalk_rail[east={east},north={north},south={south},west={west}]",
+    # At the north tunnel's east end, the spiral stairs up to the anteroom (lab/level.py, lay_spiral): a round shaft
+    # round `centre`, `turns` turns of grating up `rise` (RISE), from its `entry` side (the tunnel's end) to the doorway
+    # spiral_exit on the far side; its walls the drain's up to `drain_up_to` over the floor, steel above, the office's at
+    # the top. Its zone is office_stairs.
+    SPIRAL=dict(centre=(230, 59), turns=1.5, rise=10, entry="west", drain_up_to=4),
+    SPIRAL_BARS="minecraft:iron_bars[east={east},north={north},south={south},west={west},waterlogged=false]",
     COLLAPSE=(207, 57, 212, 62),
     PIT=((250, 88, 255, 95), 40),
     PIPE="every_tunnel:pipe",
@@ -647,8 +655,8 @@ LEVEL_5 = dict(
     # The look of a space's or an opening's surfaces, by id: the rest are the lab's on layers 1 and 2 and the
     # drain's on layer 3. STYLES: role -> a stand-in of STAND_INS, or a block of its own (the garage's corridor
     # is built of Level 1's own blocks, which the same pack re-skins: it looks like the garage).
-    STYLE_OF={"entry": "library", "entry_frame": "library", "office_stairs": "steel", "office_landing": "steel", "office": "office", "office_door": "office",
-              "office_exit": "office", "false_exit": "garage", "exit_door": "garage"},
+    STYLE_OF={"entry": "library", "entry_frame": "library", "anteroom": "office", "spiral_exit": "office", "office": "office",
+              "office_door": "office", "office_exit": "office", "false_exit": "garage", "exit_door": "garage"},
     STYLES=dict(
         library=dict(vinyl="minecraft:green_wool", tile="minecraft:dark_oak_planks", band="minecraft:dark_oak_planks",
                      ceiling="minecraft:calcite"),
@@ -1356,6 +1364,10 @@ def level5_steps(lv5):
     c = [f"execute store result score #drops {SCORE} run gamerule doTileDrops", "gamerule doTileDrops false"]
     c.append(f"kill @e[type=minecraft:item,x={box[0]},y={box[1]},z={box[2]},dx={box[3] - box[0]},dy={box[4] - box[1]},dz={box[5] - box[2]}]")
     place_rects(c, {pos: st for pos, st in lv5.lab_blocks.items() if not needs_support(st)})
+    # Where a door goes, an older build's door (or anything) is emptied first, its top before its bottom: a door's
+    # half breaks when the other goes, and an old top breaking over a new bottom would take the new bottom with it.
+    for x, y, z in sorted(pos for pos, st in lv5.lab_blocks.items() if "_door[" in st and "half=upper" in st):
+        c += [f"setblock {x} {y} {z} minecraft:air", f"setblock {x} {y - 1} {z} minecraft:air"]
     place_rects(c, {pos: st for pos, st in lv5.lab_blocks.items() if needs_support(st)})
     c.append(f"execute if score #drops {SCORE} matches 1 run gamerule doTileDrops true")
     c.append(f"forceload remove {box[0]} {box[2]} {box[3]} {box[5]}")

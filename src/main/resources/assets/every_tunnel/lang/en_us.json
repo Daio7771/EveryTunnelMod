@@ -195,6 +195,7 @@
   "sign.every_tunnel.room.archive": "Archive",
   "sign.every_tunnel.room.meeting_room": "Meeting room",
   "sign.every_tunnel.room.management": "Management",
+  "sign.every_tunnel.room.director": "DIRECTOR",
   "sign.every_tunnel.room.finance": "Finance",
   "sign.every_tunnel.room.servers": "Servers",
   "sign.every_tunnel.room.office": "Office",
@@ -407,5 +408,7 @@
   "block.every_tunnel.lounge_rug": "Runner",
   "block.every_tunnel.fallen_chair": "Chair, Knocked Over",
   "block.every_tunnel.fallen_books": "Dropped Books",
-  "block.every_tunnel.chalk_arrow": "Chalk Arrow"
+  "block.every_tunnel.chalk_arrow": "Chalk Arrow",
+  "block.every_tunnel.director_door": "Director's Door",
+  "block.every_tunnel.security_camera": "Security Camera"
 }

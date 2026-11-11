@@ -239,7 +239,7 @@ Level 5, the laboratory, is built in play (`LabHooks`), its three layers (plan, 
   `storage`, `chemical_room` (tagged `chemical_room`), `shortcut`, `drain_hatch` (tagged `lab_drain`).
 - **Layer 3, the drain:** `drain_ladder` (the foot of the ladder, tagged `drain_bottom`), `drain_tunnels` (eleven
   boxes, tagged `cloud` and `cloud_often`), `junction` (tagged `restart_point`, `cloud`, `cloud_often` and
-  `deep_water`), `hideout`, `pump_room`, `cistern` (tagged `deep_water`), `office_stairs` (the steel stairs and their landing), `director_office`
+  `deep_water`), `hideout`, `pump_room`, `cistern` (tagged `deep_water`), `office_stairs` (the spiral stairs' shaft), `anteroom`, `director_office`
   (tagged `director_office`), `false_exit` (the corridor out of the office, tagged `false_exit`) and
   `false_exit_pit` (the pit under its end, tagged the same), `drain_shaft` (the ladder's shaft up to the hatch). A space's zone
   goes down into its water (the channels, the pools), so a player in it is still in the level.
@@ -248,8 +248,8 @@ Level 5, the laboratory, is built in play (`LabHooks`), its three layers (plan, 
   `airlock_rear` (tagged `lab_airlock_rear`), `welcome_door` (tagged `lab_welcome`), the doorways (`workshop_door`,
   `waiting_door`, `office_door_west`, `office_door_east`), the locked sliding doors
   (`stairs_door`, `south_door`, `shortcut_door`, tagged `lab_door`) and `hatch_grate` (iron bars, tagged
-  `lab_grate`); on layer 3 the doorways `hideout_door`, `pump_door`, `cistern_door`, the office's doors
-  `office_door` and `office_exit`, and `exit_door` (Level 1's locked EXIT door at the corridor's end). The test
+  `lab_grate`); on layer 3 the doorways `hideout_door`, `pump_door`, `cistern_door`, `spiral_exit` (the
+  spiral stairs' top into the anteroom), the office's doors `office_door` (the director's double door) and `office_exit`, and `exit_door` (Level 1's locked EXIT door at the corridor's end). The test
   chambers have none: a window each (`WINDOWS`).
 - The Lab hall and the Junction are tagged `restart_point`.
 - **Spawn points:** `player_start` (the Lobby, by the way in), `checkpoint` (the Lab hall, tagged

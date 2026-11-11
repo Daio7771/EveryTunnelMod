@@ -82,6 +82,8 @@ object ModSounds {
     val DETECTOR_CLICKS = event("item.detector.clicks")
     val DETECTOR_CRACKLE = event("item.detector.crackle")
     val LAB_UNLOCK = event("event.lab.unlock")
+    /** Level 5's anteroom camera turning (client.render.SecurityCameraRenderer). */
+    val CAMERA_SERVO = event("block.camera.servo")
     val FUSE_INSERT = event("block.fuse.insert")
     val FUSE_REJECT = event("block.fuse.reject")
     val FUSE_POWER = event("block.fuse.power")

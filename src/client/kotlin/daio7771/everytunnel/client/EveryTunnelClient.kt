@@ -28,6 +28,7 @@ import daio7771.everytunnel.client.render.LabFigureRenderer
 import daio7771.everytunnel.client.render.SubjectRenderer
 import daio7771.everytunnel.client.render.FilmWalkerRenderer
 import daio7771.everytunnel.client.render.BoxShelfRenderer
+import daio7771.everytunnel.client.render.SecurityCameraRenderer
 import daio7771.everytunnel.client.render.WallMessageRenderer
 import daio7771.everytunnel.client.render.WallTextRenderer
 import daio7771.everytunnel.client.render.LootRenderer
@@ -127,6 +128,8 @@ object EveryTunnelClient : ClientModInitializer {
         BlockEntityRendererFactories.register(ModBlocks.WALL_TEXT_ENTITY, ::WallTextRenderer)
         BlockEntityRendererFactories.register(ModBlocks.WALL_MESSAGE_ENTITY, ::WallMessageRenderer)
         WallMessageRenderer.register()
+        BlockEntityRendererFactories.register(ModBlocks.SECURITY_CAMERA_ENTITY, ::SecurityCameraRenderer)
+        SecurityCameraRenderer.register()
         BlockRenderLayerMap.INSTANCE.putBlocks(
             RenderLayer.getCutout(),
             ModBlocks.SHOPPING_CART, ModBlocks.CABLE_TRAY, ModBlocks.HANGING_CABLE, ModBlocks.STAIN, ModBlocks.PUDDLE,

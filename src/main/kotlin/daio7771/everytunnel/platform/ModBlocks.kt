@@ -296,6 +296,10 @@ object ModBlocks {
     lateinit var WALL_MESSAGE_ENTITY: BlockEntityType<WallMessageBlockEntity>
         private set
 
+    /** Marks the [SecurityCameraBlock] for its renderer; registered in [register]. */
+    lateinit var SECURITY_CAMERA_ENTITY: BlockEntityType<SecurityCameraBlockEntity>
+        private set
+
     /** The boxes on a [BoxShelfBlock], at its foot; registered in [register]. */
     lateinit var BOX_SHELF_ENTITY: BlockEntityType<BoxShelfBlockEntity>
         private set
@@ -434,6 +438,8 @@ object ModBlocks {
                 .emissiveLighting { state, _, _ -> FluorescentLightBlock.glows(state) },
         ),
     )
+    /** The anteroom's security camera on the ceiling, following the player ([SecurityCameraBlock]). */
+    val SECURITY_CAMERA: Block = register("security_camera", SecurityCameraBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision()))
     /** A chalk arrow on a drain wall, in three parts ([ChalkArrowBlock]). */
     val CHALK_ARROW: Block = register("chalk_arrow", ChalkArrowBlock(props(MapColor.WHITE, BlockSoundGroup.STONE).noCollision()))
     /** Steel railing on a catwalk's edges ([CatwalkRailBlock]). */
@@ -516,6 +522,11 @@ object ModBlocks {
     val CALM_DOOR: Block = register("calm_door", DoorBlock(door(), BlockSetType.IRON))
     /** Black, a long steel pull: the director's office's doors, opened by hand. */
     val OFFICE_DOOR: Block = register("office_door", DoorBlock(door(), SERVICE_DOOR))
+    /** Dark walnut, a slim brass pull: the director's double door, both leaves opening at once by hand ([PairedDoorBlock]). */
+    val DIRECTOR_DOOR: Block = register(
+        "director_door",
+        PairedDoorBlock(door().mapColor(MapColor.BROWN).sounds(BlockSoundGroup.WOOD), BlockSetType.OAK),
+    )
     /** White, a tall window: Level 5's layer 1 rooms' doors, in pairs, opened by hand. */
     val LAB_DOOR: Block = register("lab_door", DoorBlock(door(), SERVICE_DOOR))
     /** A lit green EXIT sign on the wall above an exit; it stays lit when the power goes (its own battery). */
@@ -557,6 +568,10 @@ object ModBlocks {
         LOOT_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "loot"),
             FabricBlockEntityTypeBuilder.create(::LootBlockEntity, LOOT_BATTERY, LOOT_WATER_BOTTLE, LOOT_KEYCARD, LOOT_FOOD_PLATE, LOOT_FOOD_POPCORN, LOOT_FOOD_SNACK, LOOT_CARD_NW, LOOT_CARD_NE, LOOT_CARD_SW, LOOT_CARD_SE, LOOT_MASTER_KEY, LOOT_WRENCH, LOOT_DETECTOR, *LOOT_FUSES.toTypedArray(), *LOOT_REAGENTS.toTypedArray()).build(),
+        )
+        SECURITY_CAMERA_ENTITY = Registry.register(
+            Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "security_camera"),
+            FabricBlockEntityTypeBuilder.create(::SecurityCameraBlockEntity, SECURITY_CAMERA).build(),
         )
         BOX_SHELF_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),

@@ -34,7 +34,8 @@ THROUGH = {"lab_chair", "tool_board", "lab_poster", "first_aid_box", "potted_pla
            "sign_radiation", "floor_line", "microscope", "glove_box", "lab_beakers", "lab_monitor", "lab_coat", "chair_jacket",
            "fuse_holder", "office_chair", "lab_terminal", "alarm_light", "pipe", "note_paper", "valve_wheel", "pressure_gauge",
            "tin_cans", "dead_flashlight", "mattress", "electrical_panel", "leather_chair", "exec_chair", "mini_diorite",
-           "paper_stack", "coffee_cup", "desk_lamp_modern", "coffee_machine", "iv_drip", "chalk_arrow"}
+           "paper_stack", "coffee_cup", "desk_lamp_modern", "coffee_machine", "iv_drip", "chalk_arrow", "desk_phone",
+           "lounge_painting", "wall_clock", "security_camera"}
 # The director's office and the corridor out of it stand this much over layer 3's floor (LEVEL_5's `rise`).
 RISE = 10
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
@@ -165,7 +166,17 @@ FURNITURE = {
            + column("credenza", 260, 56, 62, "west") + [("coffee_machine", 260, 61, "west", 2), ("coffee_cup", 260, 60, "west", 2),
                                                         ("paper_stack", 260, 57, "west", 2)]
            + row("leather_sofa", 246, 249, 52, "south") + [("glass_table", 247, 54, "north", 1), ("glass_table", 248, 54, "north", 1)]
-           + [("potted_plant", x, z, "south", 1) for x, z in ((243, 52), (243, 66), (260, 52), (260, 66))]]
+           + [("potted_plant", x, z, "south", 1) for x, z in ((243, 52), (243, 66), (260, 52), (260, 66))]
+           # His secretary's anteroom, spotless and lit as if still open: her desk on the north side facing the way
+           # through, its computer (TERMINALS) and phone, her chair; three leather chairs for visitors along the south
+           # wall with a glass table; plants, a painting, a clock; the plate by his door (DIRECTOR_PLATE) and the
+           # camera in the ceiling's corner (POINTS: the camera faces the stairs' doorway).
+           + row("exec_desk", 238, 240, 56, "south") + [("desk_phone", 240, 56, "south", 2), ("paper_stack", 238, 56, "south", 2)]
+           + [("exec_chair", 239, 55, "south", 1)]
+           + [("leather_chair", x, 64, "north", 1) for x in (237, 238, 239)] + [("glass_table", 240, 64, "north", 1)]
+           + [("potted_plant", x, z, "south", 1) for x, z in ((236, 55), (241, 55), (236, 64))]
+           + [("lounge_painting", 239, 64, "north", 3), ("wall_clock", 239, 55, "south", 3)]
+           + [("security_camera", 241, 64, "west", 5)]]
     ),
 }
 
@@ -204,6 +215,8 @@ PLATES = [("sign.every_tunnel.room.workshop", 1, 43, 14, "south", 2, "left"),
           ("sign.every_tunnel.room.waiting_room", 1, 68, 14, "south", 2, "left"),
           ("sign.every_tunnel.room.lockers", 1, 36, 17, "north", 2, "right"),
           ("sign.every_tunnel.room.stairs", 1, 12, 36, "north", 2, "right")]
+# The director's door's plate in the anteroom, brass (WallTextBlock): (lang key, layer, x, z, facing, y over the floor, side).
+DIRECTOR_PLATE = ("sign.every_tunnel.room.director", 3, 241, 58, "west", RISE + 2, "right")
 # The green line on the floor, from the Lobby down the ring's west side to the stairs' door: (layer, x, z0, z1).
 FLOOR_LINE = (1, 10, 12, 36)
 
@@ -215,7 +228,7 @@ FUSE_IN = 2
 
 # Computers on desks and benches: (id, layer, x, z, facing). `terminal_office` tells the chemical puzzle's
 # answer (ChemicalHooks); the others show what they have to show (TerminalHooks).
-TERMINALS = [("terminal_office", 2, 85, 18, "south"), ("terminal_office_west", 2, 78, 13, "south"),
+TERMINALS = [("terminal_anteroom", 3, 239, 56, "south"), ("terminal_office", 2, 85, 18, "south"), ("terminal_office_west", 2, 78, 13, "south"),
              ("terminal_office_east", 2, 90, 13, "south"), ("terminal_lab_hall_north", 2, 83, 50, "south"),
              ("terminal_lab_hall_south", 2, 87, 70, "north"), ("terminal_storage", 2, 114, 84, "west")]
 
@@ -313,7 +326,10 @@ class Furnish:
                 self.put("lab_column", x, z, "north", f + y)
         for key, layer, x, z, facing, y, align in PLATES:
             self.put("wall_text", x, z, facing, self.floor(layer) + y)
-            self.texts[(x, self.floor(layer) + y, z)] = (key, align)
+            self.texts[(x, self.floor(layer) + y, z)] = (key, align, "lab")
+        key, layer, x, z, facing, y, align = DIRECTOR_PLATE
+        self.put("wall_text", x, z, facing, self.floor(layer) + y)
+        self.texts[(x, self.floor(layer) + y, z)] = (key, align, "brass")
         layer, x, z0, z1 = FLOOR_LINE
         for z in range(z0, z1 + 1):
             self.put("floor_line", x, z, "north", self.floor(layer) + 1)
@@ -335,7 +351,7 @@ class Furnish:
             self.extra[(x, 2, z)] = f"amps={i},facing={{facing}},filled={str(i == FUSE_IN).lower()},lit=false"
         f2 = self.floor(2)
         for _, layer, x, z, facing in TERMINALS:
-            self.put("lab_terminal", x, z, facing, self.floor(layer) + 2)
+            self.put("lab_terminal", x, z, facing, self.lab.floors[(layer, x, z)] + 2)
         for name, x, z in MIXER:
             self.put(name, x, z, "north", f2 + 1)
         for x, y, z in PIPE:
@@ -386,8 +402,8 @@ class Furnish:
             if name == "lab_column":
                 state = self.lab.state("band" if (plan[0], plan[1] - 1, plan[2]) not in self.items else "tile")
             elif plan in self.texts:
-                key, align = self.texts[plan]
-                state = f'{bid}[facing={facing}]{{Text:"{key}",Style:"lab",Offset:0.0f,Align:"{align}"}}'
+                key, align, style = self.texts[plan]
+                state = f'{bid}[facing={facing}]{{Text:"{key}",Style:"{style}",Offset:0.0f,Align:"{align}"}}'
             elif plan in self.extra:
                 state = f"{bid}[{self.extra[plan].format(facing=facing)}]"
             elif name in ROW:
@@ -427,7 +443,7 @@ class Furnish:
             out.append({"id": nid, "pos": self.centre(BRIEFING["x"] + col, self.floor(BRIEFING["layer"]) + 2, BRIEFING["z"]),
                         "yaw": 0, "tags": ["note"]})
         for tid, layer, x, z, _ in TERMINALS:
-            out.append({"id": tid, "pos": self.centre(x, self.floor(layer) + 2, z), "yaw": 0, "tags": ["terminal"]})
+            out.append({"id": tid, "pos": self.centre(x, self.lab.floors[(layer, x, z)] + 2, z), "yaw": 0, "tags": ["terminal"]})
         for pid, layer, x, z, facing, tags in POINTS:
             out.append({"id": pid, "pos": self.centre(x, self.floor(layer) + 1, z), "yaw": yaw(facing), "tags": tags})
         return out

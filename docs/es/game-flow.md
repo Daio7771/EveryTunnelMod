@@ -574,10 +574,20 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
   - **El agua honda** de las dos piscinas (zonas con la etiqueta `deep_water`, `DeepWaterHooks`) mata: al caer, algo
     arrastra al jugador al fondo, no puede nadar hacia arriba, se hunde entre burbujas mientras la pantalla se oscurece
     y se ahoga dos segundos después ("Deep Water"). Los canales de los túneles, de un bloque, solo mojan.
-  - Al final, **una escalera de acero** sube diez bloques hasta **el despacho del director:** moderno, cuero negro,
+  - Al final, **una escalera de caracol** de rejilla sube diez bloques por un pozo redondo (vuelta y media alrededor
+    de un hueco abierto, con barrotes de hierro) que se va limpiando al subir: abajo el hormigón manchado del
+    drenaje, con una lámpara enjaulada que parpadea a media altura; acero más arriba; el aspecto del despacho arriba
+    del todo, iluminado por un panel sobre el hueco. Al salir arriba, **la antesala** de la secretaria del director,
+    impecable e iluminada como si siguiera abierta: su mesa mirando al paso, el ordenador (SESSION LOCKED) y el
+    teléfono, su silla; tres sillones de cuero para las visitas, una mesa de cristal, plantas, un cuadro, un reloj.
+    En la esquina del techo, **una cámara de seguridad** gira la cabeza para seguir al jugador mientras lo ve, con su
+    piloto rojo parpadeando y un servo pequeño que suena al girar (`SecurityCameraBlock`, `SecurityCameraRenderer` en
+    el cliente, `core.camera.CameraAim`, `block.camera.servo`). Una placa de latón dice DIRECTOR junto a **su puerta
+    doble** de nogal oscuro, cuyas dos hojas se abren a la vez (`PairedDoorBlock`), que da a **el despacho del
+    director:** moderno, cuero negro,
     acero y cristal ahumado, luces cuadradas en el techo (`PanelLightBlock`); su escritorio al fondo mirando a la
-    puerta, su sillón detrás, una lámpara, un bloquecito de diorita, unos papeles, café. Dos puertas (se abren a
-    mano): la de entrada desde la escalera y, en su lado sur, la de salida a un pasillo del garaje del nivel 1,
+    puerta, su sillón detrás, una lámpara, un bloquecito de diorita, unos papeles, café. En su lado sur, una puerta
+    (se abre a mano) de salida a un pasillo del garaje del nivel 1,
     recto e iluminado, que acaba en la puerta EXIT cerrada del nivel 1 bajo su cartel. Bajo el final del pasillo hay
     un pozo de 40 bloques, cerrado por su suelo hasta que la escena del jefe lo rompa.
 

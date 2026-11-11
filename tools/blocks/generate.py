@@ -1177,6 +1177,40 @@ def led_glow(x, y, c):
     return T.PLASTIC.but(smoothness=0.5, relief=0.3)
 
 
+def wood_door_tex(rng, half, colour):
+    """One half of the director's door: dark walnut veneer, its grain running up, a shallow inset panel, and on
+    the handle side (the right, like vanilla's) a slim brass pull. Spotless."""
+    img = new(colour)
+    dark = tuple(max(0, c - 18) for c in colour)
+    light = tuple(min(255, c + 14) for c in colour)
+    grain = [rng.uniform(-1, 1) for _ in range(16)]
+    for x in range(16):                                           # the grain: faint streaks, up the leaf
+        for y in range(16):
+            t = grain[x] * 0.5 + rng.uniform(-0.25, 0.25)
+            px(img, x, y, light if t > 0 else dark, abs(t) * 0.5)
+    for i in range(16):                                           # the leaf's edges
+        px(img, 0, i, dark, 0.8)
+        px(img, 15, i, dark, 0.5)
+    edge = 15 if half == "bottom" else 0
+    for x in range(16):
+        px(img, x, edge, dark, 0.8)
+    # The inset panel: a hairline of shadow above and left, of light below and right.
+    y0, y1 = (2, 15) if half == "top" else (0, 13)
+    for x in range(3, 11):
+        if half == "top":
+            px(img, x, y0, dark, 0.7)
+        if half == "bottom":
+            px(img, x, y1, light, 0.6)
+    for y in range(y0, y1 + 1):
+        px(img, 3, y, dark, 0.7)
+        px(img, 10, y, light, 0.6)
+    brass, shade = (196, 164, 92), (128, 100, 52)                 # the pull, waist to chest high (y = 0: a half's top)
+    for y in (range(0, 7) if half == "bottom" else range(10, 16)):
+        px(img, 12, y, brass, 0.95)
+        px(img, 13, y, shade, 0.7)
+    return img
+
+
 def steel_door_tex(rng, half, colour, kind):
     """One half of a painted steel door (bottom or top), handle side on the right like vanilla's
     doors (the models mirror it for the other hinge). kind: "storage" / "electrical" (service
@@ -3268,17 +3302,22 @@ def build():
         element((x, 7, 14), (x + 1, 8, 15), "h") for x in (3, 5, 7, 9, 11)], ao=False)
     a.block("key_rack", "Key Rack", horizontal_blockstate("key_rack"), {"parent": f"{NS}:block/key_rack"})
 
-    # Doors: painted steel, the models are vanilla's door shapes (door_bottom_left ...).
+    # Doors: painted steel (the director's: walnut), the models are vanilla's door shapes (door_bottom_left ...).
     for door_id, name, colour, kind in (("storage_door", "Storage Door", (92, 100, 108), "storage"),
                                         ("electrical_door", "Electrical Room Door", (92, 100, 108), "electrical"),
                                         ("emergency_door", "Emergency Exit Door", (70, 82, 90), "emergency"),
                                         ("calm_door", "Calm Room Door", (86, 58, 38), "emergency"),
                                         ("office_door", "Office Door", (34, 34, 38), "office"),
-                                        ("lab_door", "Lab Door", (226, 228, 224), "lab")):
+                                        ("lab_door", "Lab Door", (226, 228, 224), "lab"),
+                                        ("director_door", "Director's Door", (62, 40, 28), "wood")):
         halves = {}
         for half in ("bottom", "top"):
-            halves[half] = steel_door_tex(r(f"{door_id}_{half}"), half, colour, kind)
-            a.texture(f"{door_id}_{half}", halves[half], T.PAINTED_METAL.but(smoothness=0.4, relief=0.4))
+            if kind == "wood":
+                halves[half] = wood_door_tex(r(f"{door_id}_{half}"), half, colour)
+                a.texture(f"{door_id}_{half}", halves[half], T.Material(0.45, porosity=0.2, relief=0.3))
+            else:
+                halves[half] = steel_door_tex(r(f"{door_id}_{half}"), half, colour, kind)
+                a.texture(f"{door_id}_{half}", halves[half], T.PAINTED_METAL.but(smoothness=0.4, relief=0.4))
         for part in ("bottom", "top"):
             for hinge in ("left", "right"):
                 for opened in ("", "_open"):
@@ -3415,6 +3454,26 @@ def build():
         for facing, y in HORIZONTAL.items():
             variants[f"col={col},facing={facing}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
     a.block("briefing_sign", "Briefing Sign", {"variants": variants}, {"parent": f"{NS}:block/briefing_sign_1"})
+    # The anteroom's security camera, in three parts (SecurityCameraBlock's `part`): the mount on the ceiling, drawn
+    # in the world; the head and its red light, drawn turned by the client (SecurityCameraRenderer) round the mount's
+    # pivot (8, 11, 8), the lens to the north.
+    a.texture("camera_body", plastic_tex(r("camera_body"), (204, 206, 202)), T.PLASTIC.but(smoothness=0.55, relief=0.2))
+    a.texture("camera_dark", plastic_tex(r("camera_dark"), (36, 38, 42)), T.PLASTIC.but(smoothness=0.7, relief=0.1))
+    a.texture("camera_led", new((255, 36, 28)), T.PLASTIC.but(smoothness=0.8, relief=0.0, emission=1.0), tiles=False)
+    camera_parts = {
+        "mount": [el((4, 15, 4), (12, 16, 12), "b"), el((7, 11, 7), (9, 15, 9), "d")],
+        "head": [el((6, 7, 2), (10, 10.5, 13), "b", north="d"), el((5.5, 10.5, 1), (10.5, 11, 12), "b"),
+                 el((7, 8, 1.5), (9, 9.5, 2), "d")],
+        "led": [el((8.6, 9.8, 1.6), (9.4, 10.3, 2), "l")],
+    }
+    variants = {}
+    for part, els in camera_parts.items():
+        a.models[f"security_camera_{part}"] = model({"b": "camera_body", "d": "camera_dark", "l": "camera_led"}, els, ao=False)
+        for facing, y in HORIZONTAL.items():
+            variants[f"facing={facing},part={part}"] = {"model": f"{NS}:block/security_camera_{part}", **({"y": y} if y else {})}
+    a.models["security_camera_inventory"] = model({"b": "camera_body", "d": "camera_dark", "l": "camera_led"},
+                                                  camera_parts["mount"] + camera_parts["head"], ao=False)
+    a.block("security_camera", "Security Camera", {"variants": variants}, {"parent": f"{NS}:block/security_camera_inventory"})
     # Layer 3: a chalk arrow on the tunnel's wall at the foot of the ladder, pointing the way to the Hideout. The
     # picture cut in CHALK_COLS parts, each flat on the wall, only its face drawn (the chalk's gaps show the wall).
     chalk_img = chalk_arrow_image(r("chalk_arrow"))

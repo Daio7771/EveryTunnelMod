@@ -220,6 +220,22 @@
       "every_tunnel:block/breaker/lever_3"
     ]
   },
+  "block.camera.servo": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/camera/servo_1",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "every_tunnel:block/camera/servo_2",
+        "attenuation_distance": 16
+      },
+      {
+        "name": "every_tunnel:block/camera/servo_3",
+        "attenuation_distance": 16
+      }
+    ]
+  },
   "block.card_reader.accept": {
     "sounds": [
       "every_tunnel:block/card_reader/accept_1"

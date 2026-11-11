@@ -539,10 +539,19 @@ industrial, and up its stairs the director's office (the boss's scene is still t
   - **The deep water** of both pools (zones tagged `deep_water`, `DeepWaterHooks`) kills: falling in, the player is
     pulled to the bottom, cannot swim up, sinks among bubbles as the screen darkens, and drowns two seconds later
     ("Deep Water"). The tunnels' channels, a block deep, are only wet.
-  - At its end, **steel stairs** climb ten blocks to **the director's office:** modern, black leather, steel
+  - At its end, **spiral stairs** of grating climb ten blocks in a round shaft (a turn and a half round an open
+    well, iron bars along it) that cleans up as it rises: the drain's stained concrete at the foot, under a caged
+    lamp that flickers half way, steel above, the office's look at the top, lit by a panel over the well. Out at
+    the top, **the anteroom** of the director's secretary, spotless and lit as if still open: her desk facing
+    the way through, its computer (SESSION LOCKED) and phone, her chair; three leather chairs for visitors, a
+    glass table, plants, a painting, a clock. In the ceiling's corner **a security camera** turns its head to
+    follow the player while it sees them, its red light blinking, a small servo whirring as it turns
+    (`SecurityCameraBlock`, the client's `SecurityCameraRenderer`, `core.camera.CameraAim`, `block.camera.servo`).
+    A brass plate reads DIRECTOR by **his double door** of dark walnut, both leaves opening at once
+    (`PairedDoorBlock`), onto **the director's office:** modern, black leather, steel
     and smoked glass, square ceiling lights (`PanelLightBlock`); his desk at the far end facing the door, his
-    chair behind it, a lamp, a little block of diorite, a few papers, coffee. Two doors (opened by hand): the
-    one in from the stairs, and on its south side the one out to a corridor of Level 1's garage, straight, lit,
+    chair behind it, a lamp, a little block of diorite, a few papers, coffee. On its south side a door (opened by
+    hand) out to a corridor of Level 1's garage, straight, lit,
     ending at Level 1's locked EXIT door under its sign. Under the corridor's end lies a pit 40 blocks deep,
     closed by its floor until the boss's scene breaks it.
 

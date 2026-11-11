@@ -246,8 +246,8 @@ repite su id:
   etiqueta `lab_drain`).
 - **Capa 3, el drenaje:** `drain_ladder` (el pie de la escalera de mano, con la etiqueta `drain_bottom`),
   `drain_tunnels` (once cajas, con las etiquetas `cloud` y `cloud_often`), `junction` (con las etiquetas
-  `restart_point`, `cloud`, `cloud_often` y `deep_water`), `hideout`, `pump_room`, `cistern` (con la etiqueta `deep_water`), `office_stairs` (la escalera de acero y
-  su rellano), `director_office` (con la etiqueta `director_office`), `false_exit` (el pasillo que sale del despacho,
+  `restart_point`, `cloud`, `cloud_often` y `deep_water`), `hideout`, `pump_room`, `cistern` (con la etiqueta `deep_water`), `office_stairs` (el pozo de la escalera de
+  caracol), `anteroom`, `director_office` (con la etiqueta `director_office`), `false_exit` (el pasillo que sale del despacho,
   con la etiqueta `false_exit`) y `false_exit_pit` (el pozo bajo su final, con la misma etiqueta), `drain_shaft` (el hueco de la escalera de mano hasta la
   trampilla). La zona de un espacio baja hasta su agua (los canales, las piscinas), así que un jugador dentro sigue en el nivel.
 - **Aberturas,** cada una con su zona: `entry_frame` (el marco: cruzarlo es entrar en el nivel 5, con las
@@ -256,7 +256,8 @@ repite su id:
   (`workshop_door`, `waiting_door`, `office_door_west`, `office_door_east`), las puertas
   correderas bloqueadas (`stairs_door`, `south_door`, `shortcut_door`, con la etiqueta `lab_door`) y `hatch_grate`
   (barrotes de hierro, con la etiqueta `lab_grate`); en la capa 3 los huecos de puerta `hideout_door`, `pump_door`,
-  `cistern_door`, las puertas del despacho `office_door` y `office_exit`, y `exit_door` (la puerta EXIT cerrada del
+  `cistern_door`, `spiral_exit` (de lo alto de la escalera de caracol a la antesala), las puertas del despacho
+  `office_door` (la puerta doble del director) y `office_exit`, y `exit_door` (la puerta EXIT cerrada del
   nivel 1 al final del pasillo). Las salas de pruebas no tienen: un ventanal cada una (`WINDOWS`).
 - El Lab hall y la Junction tienen la etiqueta `restart_point`.
 - **Puntos de aparición:** `player_start` (el Lobby, junto a la entrada), `checkpoint` (el Lab hall, con la

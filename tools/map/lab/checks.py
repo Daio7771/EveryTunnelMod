@@ -3,8 +3,8 @@ Checks on Level 5's plan (see level.py). Each returns its report lines and raise
 plan is wrong, so a bad LEVEL_5 never reaches a world.
 
 - walk(): from the entry corridor, a walk over the plan's cells of the three layers, up or down one
-  block at most (the flight joins layers 1 and 2, the climb goes up to the director's office) or down
-  the ladder from the hatch to layer 3, must reach every cell but those furniture stands in (furnish.py;
+  block at most (the flight joins layers 1 and 2) or down the ladder from the hatch to layer 3 and up the
+  spiral stairs to the director's anteroom, must reach every cell but those furniture stands in (furnish.py;
   what a player walks through does not count), the collapse's, the pools' water off their catwalks and
   the sealed test chambers'. Locked doors, the grate and the hatch count as open: each has its way of
   opening.
@@ -44,7 +44,7 @@ def walk(lv):
     water = {(3, x, z) for _, cells, decks, _, _ in lv.pools for x, z in cells - decks}
     sealed = {(s.layer, x, z) for s in lv.spaces if s.kind == "chamber" for x, z in s.cells()}
     ladder = (3, lv.p["LADDER"][1], lv.p["LADDER"][2])
-    links = {(2, *HATCH): ladder}
+    links = {(2, *HATCH): ladder, **lv.spiral_link()}
     start = (1, *lv.p["START"])
     seen = {start}
     queue = deque([start])

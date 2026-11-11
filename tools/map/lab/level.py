@@ -24,6 +24,7 @@ layers 1 and 2, the drain's stained concrete on layer 3, steel up its stairs, th
 in the corridor out of the office (Level 1's own blocks, so it looks the same), black down the pit.
 """
 
+import math
 import random
 
 from lab.furnish import Furnish
@@ -276,6 +277,7 @@ class Lab:
         lab_air.update(self.opening_air([o for o in self.openings if o.kind not in ENTRY_OPENINGS + ("airlock_front",)]))
         drain = self.drain_air()
         lab_air.update(drain)
+        styles.update(self.spiral_styles)
         for c in drain:
             styles.setdefault(c, "pit" if c in self.pit_air else "steel" if c in self.shaft_air else "drain")
         air = {**entry_air, **front_air, **lab_air}
@@ -340,6 +342,9 @@ class Lab:
             elif o.kind == "door":
                 # The office's doors, opened by hand; each looks the way one comes to it from.
                 self.lab_blocks.update(self.door(o, p["OFFICE_DOOR"], p["DOOR_OUTSIDE"][o.id]))
+            elif o.kind == "director_door":
+                # The director's: a pair of dark wood doors, both leaves opening at once (the block opens its partner).
+                self.lab_blocks.update(self.double_door(o, p["DIRECTOR_DOOR"], p["DOOR_OUTSIDE"][o.id]))
             elif o.kind == "lab_door":
                 # Layer 1's rooms: a pair of white doors with a window, opened by hand.
                 self.lab_blocks.update(self.double_door(o, p["LAB_DOOR"], p["DOOR_OUTSIDE"][o.id]))
@@ -438,6 +443,7 @@ class Lab:
                     air[(cx, y, cz)] = f3 - depth - 1
                     self.wet_air.add((cx, y, cz))
             self.pools.append((pid, cells, decks, depth, railed))
+        air.update(self.spiral_air())
         box, depth = p["PIT"]
         self.pit_cells = box_cells(box)
         pit_floor = self.floors[(3, *self.pit_cells[0])]
@@ -445,6 +451,103 @@ class Lab:
         self.pit_air = {(cx, y, cz): pit_floor - depth - 1 for cx, cz in self.pit_cells for y in range(pit_floor - depth, pit_floor)}
         air.update(self.pit_air)
         return air
+
+    def spiral_air(self):
+        """(x, y, z) -> floor y of the spiral stairs' shaft (SPIRAL): round, from layer 3's floor up to `rise` over it and
+        a room's height more; its upper part counts the top's floor as its own (the skirting's band). Kept apart too
+        (self.spiral_cells, self.spiral_styles: the drain's look low down, steel above, the office's at the top)."""
+        sp, f3 = self.p["SPIRAL"], self.layer_floor[3]
+        cx, cz = sp["centre"]
+        top = f3 + sp["rise"]
+        self.spiral_cells = {(x, z) for x in range(cx - 5, cx + 6) for z in range(cz - 5, cz + 6) if math.hypot(x - cx, z - cz) < 4.5}
+        air, self.spiral_styles = {}, {}
+        for x, z in self.spiral_cells:
+            for y in range(f3 + 1, top + self.p["ROOM_HEIGHT"]):
+                air[(x, y, z)] = f3 if y <= top else top
+                self.spiral_styles[(x, y, z)] = "drain" if y <= f3 + sp["drain_up_to"] else "steel" if y <= top else "office"
+        return air
+
+    def spiral_link(self):
+        """(layer, x, z) of the cell at the spiral stairs' foot (the tunnel's last) -> the one at their top (the doorway
+        out): the walk's way up them (checks.py)."""
+        sp = self.p["SPIRAL"]
+        cx, cz = sp["centre"]
+        dx, dz = {"west": (-1, 0), "east": (1, 0), "north": (0, -1), "south": (0, 1)}[sp["entry"]]
+        return {(3, cx + 5 * dx, cz + 5 * dz): (3, cx - 5 * dx, cz - 5 * dz)}
+
+    def lay_spiral(self):
+        """The spiral stairs (SPIRAL): treads of grating round an open well, half a block a step, `turns` turns from the
+        tunnel's end on its `entry` side up to the doorway on its far side; iron bars two high along the well; at the top,
+        a landing of grating over the half the treads no longer reach. A caged lamp flickers on the wall half way up, a
+        panel light hangs over the well at the top. Returns the plan cells (x, y, z) it holds."""
+        p, sp, f3 = self.p, self.p["SPIRAL"], self.layer_floor[3]
+        cx, cz = sp["centre"]
+        turns, rise = sp["turns"], sp["rise"]
+        top = f3 + rise
+        well = {(x, z) for x, z in self.spiral_cells if abs(x - cx) <= 1 and abs(z - cz) <= 1}
+        railing = {(x, z) for x, z in self.spiral_cells if (x, z) not in well and max(abs(x - cx), abs(z - cz)) <= 2}
+        ring = self.spiral_cells - well
+        start = {"west": math.pi, "east": 0.0, "north": -math.pi / 2, "south": math.pi / 2}[sp["entry"]]
+
+        def share(x, z):
+            return ((math.atan2(z - cz, x - cx) - start) / (2 * math.pi)) % 1.0
+
+        def surface(u):
+            """The tread's surface `u` turns up from the bottom, in half blocks."""
+            return 2 * (f3 + 1) + round(u / turns * rise * 2)
+
+        taken, bars = set(), set()
+        grating = p["CATWALK"].replace("type=top", "type={half}")
+        for x, z in ring:
+            for t in range(int(math.ceil(turns)) + 1):
+                u = t + share(x, z)
+                if u > turns:
+                    if t < turns:
+                        # Its last tread fell short of the top: the landing over it, level with the doorway out.
+                        self.lab_blocks[self.at(x, top, z)] = grating.format(half="top")
+                        taken.add((x, top, z))
+                        if (x, z) in railing:
+                            bars |= {(x, top + 1, z), (x, top + 2, z)}
+                    break
+                h = surface(u)
+                if h <= 2 * (f3 + 1):
+                    continue                          # the first steps are the floor
+                block_y, half = divmod(h, 2)
+                at = (x, block_y, z) if half else (x, block_y - 1, z)
+                self.lab_blocks[self.at(*at)] = grating.format(half="bottom" if half else "top")
+                taken.add(at)
+                if (x, z) in railing:
+                    bars |= {(x, block_y + half, z), (x, block_y + half + 1, z)}
+        offsets = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
+        for x, y, z in bars:
+            if (x, y, z) in taken:
+                continue
+            joined = {side: (x + ox, y, z + oz) in bars for side, (ox, oz) in offsets.items()}
+            sides = {WORLD_FACING[k]: str(v).lower() for k, v in joined.items()}
+            self.lab_blocks[self.at(x, y, z)] = p["SPIRAL_BARS"].format(**sides)
+            taken.add((x, y, z))
+        # The lamp: on the outer wall where the treads are half way up, two blocks over them, facing the well.
+        u = turns / 2
+        angle = start + 2 * math.pi * (u % 1.0)
+        best = None
+        for x, z in ring - railing:
+            if all((x + ox, z + oz) in self.spiral_cells for ox, oz in offsets.values()):
+                continue                              # not against the wall
+            off = abs(math.remainder(math.atan2(z - cz, x - cx) - angle, 2 * math.pi))
+            if best is None or off < best[0]:
+                best = (off, x, z)
+        _, lx, lz = best
+        vx, vz = cx - lx, cz - lz
+        facing = ("east" if vx > 0 else "west") if abs(vx) >= abs(vz) else ("south" if vz > 0 else "north")
+        c = (lx, surface(u) // 2 + 2, lz)
+        self.lab_blocks[self.at(*c)] = p["LAMP"].format(facing=WORLD_FACING[facing], mode="flicker", lit="true")
+        self.lights.append(c)
+        taken.add(c)
+        c = (cx, top + p["ROOM_HEIGHT"] - 1, cz)
+        self.lab_blocks[self.at(*c)] = p["PANEL_LIGHT"]
+        self.lights.append(c)
+        taken.add(c)
+        return taken
 
     def lay_drain(self):
         """Layer 3's blocks in its air: the channels' water, the pools' water and catwalks (railed or not),
@@ -495,6 +598,7 @@ class Lab:
                 if face:
                     self.lab_blocks[self.at(cx, f3 + top + 1, cz)] = f"{self.state('rubble_slab', 'drain')}[type=bottom,waterlogged=false]"
                     taken.add((cx, f3 + top + 1, cz))
+        taken |= self.lay_spiral()
         taken |= self.pipes(taken)
         self.drain_taken = taken
 
@@ -638,7 +742,7 @@ class Lab:
                     self.lab_blocks[pos] = f"{p['PUDDLE']}[pattern={rng.randrange(4)}]"
                     continue
                 for dx, dz, wall in SIDES:
-                    if (3, x + dx, z + dz) in self.floors or rng.random() >= p["STAIN_SHARE"]:
+                    if (3, x + dx, z + dz) in self.floors or (x + dx, z + dz) in self.spiral_cells or rng.random() >= p["STAIN_SHARE"]:
                         continue
                     away = {"north": "south", "south": "north", "east": "west", "west": "east"}[wall]
                     self.lab_blocks[pos] = f"{p['STAIN']}[facing={WORLD_FACING[away]},pattern={rng.randrange(10)}]"
@@ -700,6 +804,9 @@ class Lab:
         x0, z0, x1, z1 = entry.box
         cells = [(x, z) for x in range(x0 + self.p["CLOUD_GAME"]["start"], x1) for z in range(z0, z1)]
         out.append(("cloud_game", self.cells_zone(cells, entry.floor + 1, entry.floor + entry.height), ["cloud_game"]))
+        # The spiral stairs' shaft, from layer 3's floor to its top.
+        f3, sp = self.layer_floor[3], self.p["SPIRAL"]
+        out.append(("office_stairs", self.cells_zone(sorted(self.spiral_cells), f3 + 1, f3 + sp["rise"] + self.p["ROOM_HEIGHT"] - 1), []))
         # The ladder's shaft, from the foot of the ladder's room up to the hatch in layer 2's floor.
         shaft = sorted(self.shaft_air)
         out.append(("drain_shaft", self.cells_zone([(x, z) for x, _, z in shaft], shaft[0][1], self.layer_floor[2]), []))

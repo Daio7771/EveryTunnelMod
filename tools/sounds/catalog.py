@@ -1565,6 +1565,21 @@ def lab_unlock(rng, variant):
     return bolt + hiss * 0.5
 
 
+def camera_servo(rng, variant):
+    """Level 5's security camera turning: a small servo winding up and easing off through its plastic gears, a thin
+    whine over a buzz, the housing rattling faintly, and a soft tick as it stops."""
+    length = rng.uniform(0.32, 0.42)
+    n = samples(length + 0.08)
+    t = time_axis(n)
+    top = rng.uniform(55.0, 70.0)
+    f = np.interp(t, [0.0, 0.06, length - 0.08, length], [10.0, top, top * rng.uniform(0.9, 1.05), 8.0])
+    run = envelope(n, [(0.0, 0.0), (0.04, 1.0), (length - 0.06, 0.9), (length, 0.0)])
+    y = bandpass(motor(n, rng, f, teeth=11, brushes=0.5, harmonics=6), 600.0, 7000.0, order=2) * run
+    y += 0.25 * bandpass(rng.standard_normal(n), 2000.0, 6000.0, order=2) * run * (0.5 + 0.5 * np.abs(smooth_random(n, 60.0, rng)))
+    y += plastic_click(n, rng, length, brightness=7000.0, amp=0.5)
+    return fade(y, 0.0, 0.03)
+
+
 def fuse_insert(rng, variant):
     """A glass fuse pushed home into its holder: the tube's glass touching the holder, its metal caps dragging into the
     spring clips, then the clips snapping over the caps, one end and then the other, the glass ringing faintly with them
@@ -2283,6 +2298,7 @@ SOUNDS = [
     Sound("item.detector.crackle", "Level progress", "Level 5's radiation detector next to a Cloud: six to twelve counts in a tick", "mono", False, 6,
           lambda rng, variant: geiger(rng, int(rng.integers(6, 13))), -6.0),
     Sound("event.lab.unlock", "Level progress", "Level 5: a lock letting go far away (the south route opens)", "mono", False, 1, lab_unlock, -4.0),
+    Sound("block.camera.servo", "Level progress", "Level 5: the anteroom's security camera turning to follow the player, a small servo", "mono", False, 3, camera_servo, -6.0, attenuation=16),
     Sound("block.fuse.insert", "Level progress", "Level 5: a glass fuse pushed home, its caps snapping into the clips", "mono", False, 2, fuse_insert, -4.0),
     Sound("block.fuse.reject", "Level progress", "Level 5: a glass fuse in the wrong holder, knocking on the clip and skidding off", "mono", False, 2, fuse_reject, -4.0),
     Sound("block.fuse.power", "Level progress", "Level 5: the fuse box full, a contactor slamming in and the hum of current", "mono", False, 1, fuse_power, -3.0, attenuation=24),
