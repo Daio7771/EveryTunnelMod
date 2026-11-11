@@ -22,6 +22,7 @@ import net.minecraft.util.hit.HitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.RaycastContext
+import java.util.Locale
 import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.cos
@@ -34,7 +35,8 @@ import kotlin.math.sqrt
  *
  * - **Posts:** each spawn point tagged [HUNTERS_TAG] holds a group of three Hunters (harmless ones if it is
  *   tagged [HARMLESS_TAG] too), each tagged
- *   [JUNIOR_TAG] a Junior. When the level is built ([levelBuilt], from [LabHooks]) they are put there;
+ *   [JUNIOR_TAG] a Junior. When the level is built ([levelBuilt], from [LabHooks]) they are put there (each Hunter
+ *   where its whole body fits, in sight of the post, its place logged);
  *   a player dying in it puts every one back, the dead too, and sends any Cloud away ([restart], from
  *   [DeathHooks]); a new game, or the levels rebuilt, clears them all ([clearAll]). None is saved. What
  *   the debug command `/everytunnel spawn` puts in ([spawnForDebug]) holds no post: a death in its level
@@ -127,6 +129,7 @@ object DistortionHooks {
     /** A new game, or the levels rebuilt: none of them anywhere until the level is built again. */
     fun clearAll() {
         val server = server ?: return
+        KeptEntities.forget { it is HunterEntity || it is DistortionEntity }
         for (world in server.worlds) {
             for (entity in world.iterateEntities().toList()) {
                 if (entity is HunterEntity || entity is DistortionEntity) entity.discard()
@@ -159,34 +162,43 @@ object DistortionHooks {
                 val yaw = Math.toRadians(post.yaw.toDouble())
                 val placed = mutableListOf<Position>()
                 for ((side, back) in GROUP_PLACES) {
-                    // Side by side across the way it faces, two a step behind the first; where there is no floor there
-                    // (a narrow catwalk over water), the nearest place with one.
+                    val probe = ModEntities.HUNTER.create(world) ?: continue
+                    // Side by side across the way it faces, two a step behind the first; where that is no place for
+                    // one (no floor, as off a narrow catwalk over water; a wall in the way), the nearest that is.
                     val px = post.position.x + cos(yaw) * side + sin(yaw) * back
                     val pz = post.position.z + sin(yaw) * side - cos(yaw) * back
                     val place = floorNear(world, px, post.position.y, pz)?.let { Position(px, it, pz) }
-                        ?: standingNear(world, post.position, placed) ?: post.position
+                        ?.takeIf { fits(world, probe, post.position, it, placed) }
+                        ?: standingNear(world, probe, post.position, placed) ?: post.position
                     placed += place
-                    val hunter = ModEntities.HUNTER.create(world) ?: continue
-                    hunter.refreshPositionAndAngles(place.x, place.y, place.z, post.yaw, 0f)
-                    hunter.headYaw = post.yaw
-                    hunter.home = place
-                    hunter.group = post.group
-                    hunter.levelId = post.levelId
-                    hunter.harmless = post.harmless
-                    world.spawnEntity(hunter)
+                    EveryTunnel.LOGGER.info("  a Hunter at ({}, {}, {})", "%.1f".format(Locale.ROOT, place.x),
+                        "%.1f".format(Locale.ROOT, place.y), "%.1f".format(Locale.ROOT, place.z))
+                    KeptEntities.spawn(world) { w ->
+                        ModEntities.HUNTER.create(w)?.apply {
+                            refreshPositionAndAngles(place.x, place.y, place.z, post.yaw, 0f)
+                            headYaw = post.yaw
+                            home = place
+                            group = post.group
+                            levelId = post.levelId
+                            harmless = post.harmless
+                        }
+                    }
                 }
             }
             Kind.JUNIOR -> {
-                val junior = ModEntities.DISTORTION_JUNIOR.create(world) ?: return
-                junior.refreshPositionAndAngles(post.position.x, post.position.y, post.position.z, post.yaw, 0f)
-                junior.levelId = post.levelId
-                world.spawnEntity(junior)
+                KeptEntities.spawn(world) { w ->
+                    ModEntities.DISTORTION_JUNIOR.create(w)?.apply {
+                        refreshPositionAndAngles(post.position.x, post.position.y, post.position.z, post.yaw, 0f)
+                        levelId = post.levelId
+                    }
+                }
             }
         }
     }
 
     /** The Hunters and Distortions of [levelId] (null: the debug ones of no level) in [world], gone. */
     private fun discard(world: ServerWorld, levelId: String?) {
+        KeptEntities.forget { (it is HunterEntity && it.levelId == levelId) || (it is DistortionEntity && it.levelId == levelId) }
         for (entity in world.iterateEntities().toList()) {
             val of = when (entity) {
                 is HunterEntity -> entity.levelId
@@ -332,17 +344,27 @@ object DistortionHooks {
         return null
     }
 
-    /** The nearest middle of a block within two of [around] with a floor to stand on, none of [taken]'s; null if none. */
-    private fun standingNear(world: ServerWorld, around: Position, taken: List<Position>): Position? {
+    /** The nearest middle of a block within two of [around] where [entity] [fits]; null if none. */
+    private fun standingNear(world: ServerWorld, entity: Entity, around: Position, taken: List<Position>): Position? {
         val tries = (-2..2).flatMap { dx -> (-2..2).map { dz -> dx to dz } }.sortedBy { (dx, dz) -> dx * dx + dz * dz }
         for ((dx, dz) in tries) {
             val x = floor(around.x) + 0.5 + dx
             val z = floor(around.z) + 0.5 + dz
-            if (taken.any { abs(it.x - x) < 0.6 && abs(it.z - z) < 0.6 }) continue
             val feet = floorNear(world, x, around.y, z) ?: continue
-            return Position(x, feet, z)
+            val place = Position(x, feet, z)
+            if (fits(world, entity, around, place, taken)) return place
         }
         return null
+    }
+
+    /**
+     * [entity] can stand at [place]: its whole body clear of blocks (not half in a wall), none of [taken]'s there,
+     * and [post] in plain sight from it (never behind a wall, in the room next door).
+     */
+    private fun fits(world: ServerWorld, entity: Entity, post: Position, place: Position, taken: List<Position>): Boolean {
+        if (taken.any { abs(it.x - place.x) < 0.6 && abs(it.z - place.z) < 0.6 }) return false
+        if (!world.isSpaceEmpty(entity, entity.type.dimensions.getBoxAt(place.x, place.y, place.z))) return false
+        return clear(world, Vec3d(post.x, post.y + 0.9, post.z), Vec3d(place.x, place.y + 0.9, place.z), entity)
     }
 
     private fun free(world: ServerWorld, pos: BlockPos): Boolean = world.getBlockState(pos).getCollisionShape(world, pos).isEmpty

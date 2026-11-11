@@ -14,12 +14,14 @@ import daio7771.everytunnel.platform.DartHooks
 import daio7771.everytunnel.platform.DeathHooks
 import daio7771.everytunnel.platform.DebugCommands
 import daio7771.everytunnel.platform.DevWorlds
+import daio7771.everytunnel.platform.DeepWaterHooks
 import daio7771.everytunnel.platform.DistortionHooks
 import daio7771.everytunnel.platform.DrainHooks
 import daio7771.everytunnel.platform.EndingHooks
 import daio7771.everytunnel.platform.FlashlightHooks
 import daio7771.everytunnel.platform.HidingHooks
 import daio7771.everytunnel.platform.IntroHooks
+import daio7771.everytunnel.platform.KeptEntities
 import daio7771.everytunnel.platform.KeycardHooks
 import daio7771.everytunnel.platform.LabDoorHooks
 import daio7771.everytunnel.platform.LabFigureHooks
@@ -113,6 +115,8 @@ object EveryTunnel : ModInitializer {
         LabFigureHooks.register()
         ChemicalHooks.register()
         DrainHooks.register()
+        DeepWaterHooks.register()
+        KeptEntities.register()
         LabHallHooks.register()
         LoungePuzzleHooks.register()
         DartHooks.register()

@@ -107,7 +107,7 @@ class Lab:
         self.spaces = [Space(sid, zone, name, layer, box, height(kind, h), kind, self.layer_floor[layer] + (rest[0] if rest else 0))
                        for sid, zone, name, layer, box, h, kind, *rest in p["SPACES"]]
         sid, zone, box = p["FLIGHT"]
-        self.flight = Space(sid, zone, "", 1, box, p["CORRIDOR_HEIGHT"], "stairs", 0)
+        self.flight = Space(sid, zone, "", 1, box, p["FLIGHT_HEIGHT"], "stairs", 0)
         self.openings = [Opening(oid, layer, axis, line, first, width, h, kind, self.layer_floor[layer] + (rest[0] if rest else 0))
                          for oid, layer, axis, line, first, width, h, kind, *rest in p["OPENINGS"]]
         self.entry = [s for s in self.spaces if s.kind in ENTRY_KINDS]
@@ -672,7 +672,8 @@ class Lab:
     # restart points (ContinueGame: the Lab hall's, the Junction's).
     # The Distortion Clouds' zones (DistortionHooks; `cloud_often`: more often), the Lab hall's first Cloud
     # (LabHallHooks), the chemical puzzle's room, grate and hatch (ChemicalHooks), the foot of the ladder down
-    # from the hatch (DrainHooks), the director's office and the false exit with its pit (the boss's scene).
+    # from the hatch (DrainHooks), the pools' rooms (DeepWaterHooks: falling in drowns), the director's office and
+    # the false exit with its pit (the boss's scene).
     # The entry corridor (the Cloud's game, CloudGameHooks, in its zone `cloud_game`): the battery dead, no sprinting, no
     # checkpoint yet, and a death there goes back to Level 4's key (ResourceHooks, ContinueGame, DeathHooks); its frame
     # holds no checkpoint either.
@@ -681,7 +682,8 @@ class Lab:
             "locked": ["lab_door"], "hub": ["restart_point", "cloud", "first_cloud"], "north_route": ["cloud"],
             "south_route": ["cloud"], "puzzle": ["chemical_room"], "grate": ["lab_grate"], "hatch": ["lab_drain"],
             "drain_ladder": ["drain_bottom"], "drain_tunnels": ["cloud", "cloud_often"],
-            "junction": ["restart_point", "cloud", "cloud_often"], "director_office": ["director_office"],
+            "junction": ["restart_point", "cloud", "cloud_often", "deep_water"], "cistern": ["deep_water"],
+            "director_office": ["director_office"],
             "false_exit": ["false_exit"]}
 
     def zones(self):

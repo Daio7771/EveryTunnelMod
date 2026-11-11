@@ -44,7 +44,7 @@ con un comentario KDoc que cuenta más.
 | `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint |
 | `progress/Checkpoint.kt` | Un checkpoint como texto: el inicio de un nivel, o `nivel/punto` para un punto de reinicio dentro de él |
 | `detector/Detector.kt` | El detector del nivel 5: cuánto se llena su icono, cuándo sale el triángulo, cuántas cuentas Geiger caen por tick |
-| `death/DeathCause.kt` | Lo que nombra la pantalla de muerte (quién te mató, la sed, la caída) y dónde sale |
+| `death/DeathCause.kt` | Lo que nombra la pantalla de muerte (quién te mató, la sed, la caída, el agua honda) y dónde sale |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
 
@@ -109,7 +109,7 @@ con un comentario KDoc que cuenta más.
 | `PropBlock.kt` | Un prop de suelo orientado a uno de cuatro lados |
 | `ConnectingPropBlock.kt` | Tuberías, conductos y bandejas de cables que se conectan con sus vecinos |
 | `FluorescentLightBlock.kt` | La luz: encendida, parpadeante, apagada; nivel de luz 13, dibujada a brillo máximo |
-| `DrainBlocks.kt` | El drenaje del nivel 5: su escalera de mano, sus lámparas enjauladas (tenues, parpadean como los fluorescentes), las luces cuadradas del despacho, la barandilla de las pasarelas |
+| `DrainBlocks.kt` | El drenaje del nivel 5: su escalera de mano, sus lámparas enjauladas (tenues, parpadean como los fluorescentes), las luces cuadradas del despacho, la barandilla de las pasarelas, la flecha de tiza hacia el Hideout |
 | `WarmLampBlock.kt` | La luz de techo del nivel 4: cálida y silenciosa, nivel de luz 14 |
 | `SuiteBedBlock.kt` | Una cama de las Suites del nivel 4, en dos bloques |
 | `PuzzleRackBlock.kt` | Un estante con un disco o un carrete, y su brillo |
@@ -148,6 +148,7 @@ con un comentario KDoc que cuenta más.
 | `DeadGuardEntity.kt` | El guardia anterior, muerto en el Hideout del drenaje; `DeadGuardHooks` lo pone ahí con el nivel |
 | `LabHallHooks.kt` | El golpe de cuerdas y la primera Cloud del Lab hall, una vez por partida |
 | `ChemicalHooks.kt` | El puzle químico: la pareja de la partida, la mezcladora, la alarma y sus enemigos, la rejilla disolviéndose, la trampilla |
+| `DeepWaterHooks.kt` | El agua honda del nivel 5 (las piscinas del drenaje): al caer, algo arrastra al jugador al fondo y se ahoga |
 | `DrainHooks.kt` | El drenaje del nivel 5: la trampilla cerrándose de golpe cuando el jugador ha bajado su escalera, abierta otra vez si muere antes de la Junction |
 | `DistortionHooks.kt` | Los enemigos del nivel 5: sus puestos según los puntos de aparición, de vuelta al morir, avisar a los Hunters, cuándo y dónde viene una Cloud, `/everytunnel spawn` |
 | `CloudGameHooks.kt` | El juego del pasillo de entrada: lo empieza y lo acaba su zona, mueve su Cloud por la línea del pasillo |
@@ -177,6 +178,7 @@ con un comentario KDoc que cuenta más.
 | `IntroHooks.kt` | La intro del ascensor: puertas, canción, indicadores de planta, título |
 | `LevelEntryHooks.kt` | Títulos de nivel y persianas que se cierran tras el jugador |
 | `LootSpawner.kt` | Coloca y repone el botín en los puntos con etiqueta |
+| `KeptEntities.kt` | Entidades que nunca se guardan pero se ponen lejos del jugador (las del nivel 5): vuelven a su sitio cuando carga otra vez el chunk que las perdió |
 | `KeycardHooks.kt` | Ola de apagado, restaurar luces, bloquear lectores |
 | `ValveHooks.kt` | El puzle de las válvulas del nivel 3: cifras por partida, comprobar giros, abrir la puerta, reiniciar |
 | `NoteHooks.kt` | Leer una nota (tablón o folio): busca su id y la envía con las cifras de las válvulas |

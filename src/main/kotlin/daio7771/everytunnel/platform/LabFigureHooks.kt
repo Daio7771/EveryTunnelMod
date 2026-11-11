@@ -36,12 +36,14 @@ object LabFigureHooks {
         val point = level.spawnPoints.firstOrNull { TAG in it.tags } ?: return
         val exit = level.spawnPoints.firstOrNull { EXIT_TAG in it.tags } ?: return
         val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: return
-        val figure = ModEntities.LAB_FIGURE.create(world) ?: return
-        figure.refreshPositionAndAngles(point.position.x, point.position.y, point.position.z, point.yaw, 0f)
-        figure.headYaw = point.yaw
-        figure.bodyYaw = point.yaw
-        figure.exit = Vec3d(exit.position.x, exit.position.y, exit.position.z)
-        world.spawnEntity(figure)
+        KeptEntities.spawn(world) { w ->
+            ModEntities.LAB_FIGURE.create(w)?.apply {
+                refreshPositionAndAngles(point.position.x, point.position.y, point.position.z, point.yaw, 0f)
+                headYaw = point.yaw
+                bodyYaw = point.yaw
+                this.exit = Vec3d(exit.position.x, exit.position.y, exit.position.z)
+            }
+        } ?: return
         EveryTunnel.LOGGER.info("The figure stands at {} ({}, {}, {})", point.id, point.position.x, point.position.y, point.position.z)
     }
 
@@ -64,6 +66,7 @@ object LabFigureHooks {
     }
 
     private fun discard(server: MinecraftServer) {
+        KeptEntities.forget { it is LabFigureEntity }
         for (world in server.worlds) {
             for (entity in world.iterateEntities().toList()) if (entity is LabFigureEntity) entity.discard()
         }

@@ -421,7 +421,7 @@ Level 5 is three layers. The two upper ones are a clean laboratory of white tile
 grey vinyl, white ceiling panels, every fluorescent light on, furnished (`tools/map/lab/furnish.py`) cold and
 used until recently: stainless steel, white melamine, surgical green plastic. Layer 1: the Lobby, a
 ring of corridors with the Workshop, the Waiting room and the Lockers, and a steel door (shut) to the
-stairs down. Layer 2, 10 blocks lower: the subjects' corridor with rooms S-1 to S-4, the Lab hall, a
+stairs down (one flight, its ceiling coming down with it, five blocks clear over each step). Layer 2, 10 blocks lower: the subjects' corridor with rooms S-1 to S-4, the Lab hall, a
 loop north through the Office, a loop south past Storage to the chemical room, the shortcut and the
 drain hatch behind a grate. Layer 3, 7 blocks lower again and east of it all, is the drain, dirty and
 industrial, and up its stairs the director's office (the boss's scene is still to come). Its zones are listed in
@@ -492,9 +492,13 @@ industrial, and up its stairs the director's office (the boss's scene is still t
   Hunters and a Junior appear in the room; then the two flasks are back on their cabinet.
 - **Its enemies** are placed by `tools/map/lab/furnish.py`; to try them anywhere,
   `/everytunnel spawn hunters|junior|cloud`. `platform.DistortionHooks` puts them in when the level is built
-  and back when the player dies there; none is saved. Those put in by the command come once: a death clears them.
+  and back when the player dies there; none is saved. As the level is built while the player is still in Level 4, they
+  (and the subjects, the figure, the dead guard) go in through `KeptEntities`: one lost with its chunk when it unloads
+  comes back as it was put in once its chunk ticks again; one killed or sent away does not. Those put in by the command
+  come once: a death clears them.
   - **The Hunters** (`HunterEntity`, decisions in `entities.HunterBrain`), in groups of three at a spawn
-    point tagged `hunters` (side by side, or on the nearest floor where there is none: a catwalk over water): black little humanoids in lab coats, blank white eyes. They wander near it; one
+    point tagged `hunters` (side by side, or the nearest place where there is no room: a catwalk over water, a wall;
+    each one where its whole body fits and the point is in sight, never behind a wall, its place in the log): black little humanoids in lab coats, blank white eyes. They wander near it; one
     that sees the player (16 blocks, a 140-degree cone, or 3 blocks whatever way it faces, never through a
     wall) shrieks (`entity.hunter.shriek`) and the whole group charges. Half a heart a hit, once a second each;
     one blow of the wrench kills one, even a hurried one. Out of sight for 4 s they search, then walk back. They do not hear, not
@@ -519,7 +523,8 @@ industrial, and up its stairs the director's office (the boss's scene is still t
   opens again then, if the solvent had opened it. Tunnels five wide of stained concrete, a channel of water down
   their middle, rusty pipes along the walls and under the ceiling, puddles; caged yellow lamps
   (`CageLampBlock`) hang far apart, some flickering, some dead, with dark between them. Water runs, drips fall,
-  pipes creak far off. Two loops:
+  pipes creak far off. At the foot of the ladder, on the far wall of the first tunnel, a chalk arrow at eye height
+  points left, the way to the Hideout (`ChalkArrowBlock`). Two loops:
   - **The Junction,** where the tunnels cross: a tall room, a pool of deep water under railed catwalks of
     grating (`CatwalkRailBlock`), a sluice gate in its north wall. It is the drain's checkpoint, and a Junior
     floats over the water in plain sight. Clouds come in it and in the tunnels.
@@ -531,6 +536,9 @@ industrial, and up its stairs the director's office (the boss's scene is still t
   - The north tunnel on from the Junction is cut by **a collapse** of rubble: the way on goes through **the
     Cistern,** a tank of deep water crossed by narrow catwalks without rails, three Hunters where they cross, and
     out of its east side, round to the tunnel past the collapse.
+  - **The deep water** of both pools (zones tagged `deep_water`, `DeepWaterHooks`) kills: falling in, the player is
+    pulled to the bottom, cannot swim up, sinks among bubbles as the screen darkens, and drowns two seconds later
+    ("Deep Water"). The tunnels' channels, a block deep, are only wet.
   - At its end, **steel stairs** climb ten blocks to **the director's office:** modern, black leather, steel
     and smoked glass, square ceiling lights (`PanelLightBlock`); his desk at the far end facing the door, his
     chair behind it, a lamp, a little block of diorite, a few papers, coffee. Two doors (opened by hand): the
@@ -567,7 +575,7 @@ instead:
    come up with a low blow (`event.death.reveal`), and under them "Try again". The black stays until the
    player presses it (or Enter, Space, Esc: `death_retry`); the game does not pause.
    What it names (`core.death.DeathCause`, sent as `death_cause`, shown by `client.screen.DeathScreen`):
-   the Pale Man, the Observer, the Hunters, the Distortion Cloud, thirst, the fall; anything else says
+   the Pale Man, the Observer, the Hunters, the Distortion Cloud, thirst, the fall, deep water (drowning); anything else says
    only "You died". The texts are `death.every_tunnel.*` in the lang file.
 3. In the dark they are moved to the start of the level they were last in (its first spawn
    point tagged `player`), or to the restart point they reached in it (Level 5's Lab hall), with full

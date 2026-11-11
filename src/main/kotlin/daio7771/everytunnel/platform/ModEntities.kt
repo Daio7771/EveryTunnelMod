@@ -67,9 +67,9 @@ object ModEntities {
 
     val OBSERVER_SPAWN_EGG: Item = SpawnEggItem(OBSERVER, 0x1E1E23, 0xACB2BA, Item.Settings())
 
-    /** A Hunter (Level 5), shorter than the player: the model stands about 1.4 blocks. */
+    /** A Hunter (Level 5), shorter than the player: the model stands about 1.4 blocks, as wide as its box (arms out of walls). */
     val HUNTER: EntityType<HunterEntity> = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, ::HunterEntity)
-        .dimensions(EntityDimensions.fixed(0.5f, 1.35f))
+        .dimensions(EntityDimensions.fixed(0.6f, 1.35f))
         .disableSaving()
         .trackRangeBlocks(64)
         .build()

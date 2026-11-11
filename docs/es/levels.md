@@ -166,6 +166,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `no_sprint` | `ResourceHooks` | Ahí nadie esprinta |
 | `no_checkpoint` | `ContinueGame` | Ahí no se guarda punto de control: el del nivel espera a su primera zona sin la etiqueta |
 | `back_to_key` | `DeathHooks` | Morir ahí devuelve al nivel 4 junto a la mesa de la Master Key, como antes de cogerla |
+| `deep_water` | `DeepWaterHooks` | Las piscinas del nivel 5: caer en su agua honda arrastra al jugador al fondo, y se ahoga |
 | `chemical_room`, `lab_grate`, `lab_drain` | `ChemicalHooks` | Nivel 5: la sala cuyas luces de alarma giran, la rejilla que disuelve el disolvente, la sala cuya trampilla se abre después |
 
 ### Etiquetas de punto de aparición
@@ -245,7 +246,7 @@ repite su id:
   etiqueta `lab_drain`).
 - **Capa 3, el drenaje:** `drain_ladder` (el pie de la escalera de mano, con la etiqueta `drain_bottom`),
   `drain_tunnels` (once cajas, con las etiquetas `cloud` y `cloud_often`), `junction` (con las etiquetas
-  `restart_point`, `cloud` y `cloud_often`), `hideout`, `pump_room`, `cistern`, `office_stairs` (la escalera de acero y
+  `restart_point`, `cloud`, `cloud_often` y `deep_water`), `hideout`, `pump_room`, `cistern` (con la etiqueta `deep_water`), `office_stairs` (la escalera de acero y
   su rellano), `director_office` (con la etiqueta `director_office`), `false_exit` (el pasillo que sale del despacho,
   con la etiqueta `false_exit`) y `false_exit_pit` (el pozo bajo su final, con la misma etiqueta), `drain_shaft` (el hueco de la escalera de mano hasta la
   trampilla). La zona de un espacio baja hasta su agua (los canales, las piscinas), así que un jugador dentro sigue en el nivel.

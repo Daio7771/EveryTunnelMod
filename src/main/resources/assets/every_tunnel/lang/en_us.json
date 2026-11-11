@@ -321,6 +321,8 @@
   "death.every_tunnel.thirst.tip": "Drink before it runs out: look for water as you go.",
   "death.every_tunnel.fall": "The Fall",
   "death.every_tunnel.fall.tip": "Watch your step.",
+  "death.every_tunnel.deep_water": "Deep Water",
+  "death.every_tunnel.deep_water.tip": "The water is deeper than it looks. Keep to the catwalks.",
   "death.every_tunnel.try_again": "Try again",
   "item.every_tunnel.fuse_5a": "Fuse (5A)",
   "item.every_tunnel.fuse_10a": "Fuse (10A)",
@@ -404,5 +406,6 @@
   "block.every_tunnel.lounge_painting": "Painting",
   "block.every_tunnel.lounge_rug": "Runner",
   "block.every_tunnel.fallen_chair": "Chair, Knocked Over",
-  "block.every_tunnel.fallen_books": "Dropped Books"
+  "block.every_tunnel.fallen_books": "Dropped Books",
+  "block.every_tunnel.chalk_arrow": "Chalk Arrow"
 }

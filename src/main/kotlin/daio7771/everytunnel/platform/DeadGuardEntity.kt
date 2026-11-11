@@ -53,18 +53,19 @@ class DeadGuardEntity(type: EntityType<*>, world: World) : Entity(type, world), 
     override fun getAnimatableInstanceCache(): AnimatableInstanceCache = animations
 }
 
-/** The guard's body in the Hideout: at the spawn point tagged [TAG], each time Level 5 is built. */
+/** The guard's body in the Hideout: at the spawn point tagged [TAG], each time Level 5 is built (kept: [KeptEntities]). */
 object DeadGuardHooks {
 
     const val TAG = "dead_guard"
 
     fun levelBuilt(server: MinecraftServer, level: LevelDefinition) {
         val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: return
+        KeptEntities.forget { it is DeadGuardEntity }
         for (entity in world.iterateEntities().toList()) if (entity is DeadGuardEntity) entity.discard()
         for (point in level.spawnPoints.filter { TAG in it.tags }) {
-            val guard = ModEntities.DEAD_GUARD.create(world) ?: continue
-            guard.refreshPositionAndAngles(point.position.x, point.position.y, point.position.z, point.yaw, 0f)
-            world.spawnEntity(guard)
+            KeptEntities.spawn(world) { w ->
+                ModEntities.DEAD_GUARD.create(w)?.apply { refreshPositionAndAngles(point.position.x, point.position.y, point.position.z, point.yaw, 0f) }
+            }
         }
         EveryTunnel.LOGGER.info("Level 5: the guard before you, in the Hideout")
     }

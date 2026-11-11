@@ -76,12 +76,15 @@ object SubjectHooks {
 
     fun levelBuilt(server: MinecraftServer, level: LevelDefinition) {
         val world = server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: return
+        KeptEntities.forget { it is SubjectEntity }
         for (entity in world.iterateEntities().toList()) if (entity is SubjectEntity) entity.discard()
         for (point in level.spawnPoints.filter { TAG in it.tags }) {
-            val subject = ModEntities.SUBJECT.create(world) ?: continue
-            subject.stage = point.id.substringAfterLast('_').toIntOrNull() ?: 1
-            subject.refreshPositionAndAngles(point.position.x, point.position.y, point.position.z, point.yaw, 0f)
-            world.spawnEntity(subject)
+            KeptEntities.spawn(world) { w ->
+                ModEntities.SUBJECT.create(w)?.apply {
+                    stage = point.id.substringAfterLast('_').toIntOrNull() ?: 1
+                    refreshPositionAndAngles(point.position.x, point.position.y, point.position.z, point.yaw, 0f)
+                }
+            }
         }
         EveryTunnel.LOGGER.info("Level 5's subjects in their chambers")
     }

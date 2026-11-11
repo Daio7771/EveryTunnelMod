@@ -434,6 +434,8 @@ object ModBlocks {
                 .emissiveLighting { state, _, _ -> FluorescentLightBlock.glows(state) },
         ),
     )
+    /** A chalk arrow on a drain wall, in three parts ([ChalkArrowBlock]). */
+    val CHALK_ARROW: Block = register("chalk_arrow", ChalkArrowBlock(props(MapColor.WHITE, BlockSoundGroup.STONE).noCollision()))
     /** Steel railing on a catwalk's edges ([CatwalkRailBlock]). */
     val CATWALK_RAIL: Block = register("catwalk_rail", CatwalkRailBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
     /** A pump, two high: its casing, its motor on top (the Pump room's, running). */

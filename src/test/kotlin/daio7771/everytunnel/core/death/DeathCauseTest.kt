@@ -18,6 +18,7 @@ class DeathCauseTest {
     fun `without a killer the damage names it, or nothing does`() {
         assertEquals(DeathCause.THIRST, DeathCause.of(2, null, "minecraft:dry_out"))
         assertEquals(DeathCause.FALL, DeathCause.of(5, null, "minecraft:fall"))
+        assertEquals(DeathCause.DEEP_WATER, DeathCause.of(5, null, "minecraft:drown"))
         assertEquals(DeathCause.OTHER, DeathCause.of(3, null, "minecraft:lava"))
         assertEquals(DeathCause.OTHER, DeathCause.of(3, "minecraft:zombie", "minecraft:mob_attack"))
     }

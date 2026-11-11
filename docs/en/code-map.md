@@ -44,7 +44,7 @@ KDoc comment that says more.
 | `progress/PlayerProgress.kt` | What a player has done: pieces, notes read, scenes seen, Level 3's books, checkpoint |
 | `progress/Checkpoint.kt` | A checkpoint as text: a level's start, or `level/point` for a restart point inside it |
 | `detector/Detector.kt` | Level 5's detector: how full its icon is, when the triangle shows, how many Geiger counts fall a tick |
-| `death/DeathCause.kt` | What the death screen names (the killer, thirst, the fall) and where it shows |
+| `death/DeathCause.kt` | What the death screen names (the killer, thirst, the fall, deep water) and where it shows |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 | `hiding/LookLimit.kt` | How far the head turns inside a locker |
 
@@ -109,7 +109,7 @@ KDoc comment that says more.
 | `PropBlock.kt` | A floor prop facing one of four sides |
 | `ConnectingPropBlock.kt` | Pipes, ducts and cable trays that connect to neighbours |
 | `FluorescentLightBlock.kt` | The light: on, flicker, off; light level 13, drawn full bright |
-| `DrainBlocks.kt` | Level 5's drain: its ladder, its caged lamps (dim, flickering like the fluorescents), the office's panel lights, the catwalks' railing |
+| `DrainBlocks.kt` | Level 5's drain: its ladder, its caged lamps (dim, flickering like the fluorescents), the office's panel lights, the catwalks' railing, the chalk arrow to the Hideout |
 | `WarmLampBlock.kt` | Level 4's ceiling light: warm and silent, light level 14 |
 | `SuiteBedBlock.kt` | A bed in Level 4's Suites, in two blocks |
 | `PuzzleRackBlock.kt` | A rack holding a record or a reel, with its glow |
@@ -148,6 +148,7 @@ KDoc comment that says more.
 | `DeadGuardEntity.kt` | The guard before you, dead in the drain's Hideout; `DeadGuardHooks` puts him there with the level |
 | `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
+| `DeepWaterHooks.kt` | Level 5's deep water (the drain's pools): falling in pulls the player under, and they drown |
 | `DrainHooks.kt` | Level 5's drain: the hatch slamming shut once the player is down its ladder, open again on a death before the Junction |
 | `DistortionHooks.kt` | Level 5's enemies: posts from spawn points, back on a death, telling the Hunters, when and where a Cloud comes, `/everytunnel spawn` |
 | `CloudGameHooks.kt` | The entry corridor's game: started and ended by its zone, its Cloud moved along the corridor's line |
@@ -177,6 +178,7 @@ KDoc comment that says more.
 | `IntroHooks.kt` | The elevator intro: doors, song, floor indicators, title |
 | `LevelEntryHooks.kt` | Level titles and closing shutters behind the player |
 | `LootSpawner.kt` | Places and restocks loot at tagged spawn points |
+| `KeptEntities.kt` | Entities never saved but put in far from the player (Level 5's): back where they were put once a chunk that dropped them loads again |
 | `KeycardHooks.kt` | Lights-out wave, restoring lights, locking readers |
 | `ValveHooks.kt` | Level 3's valve puzzle: digits per new game, checking turns, opening the door, resetting |
 | `NoteHooks.kt` | Reading a note (board or sheet): finds its id, sends it with the valve digits |

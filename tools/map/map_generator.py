@@ -544,8 +544,10 @@ LEVEL_5 = dict(
         ("office", "director_office", "Director's office", 3, (243, 52, 261, 67), 5, "office", 10),
         ("false_exit", "false_exit", "Corridor", 3, (250, 68, 255, 96), None, "corridor", 10),
     ],
-    # From layer 1's stairs down to layer 2's: one block down per cell along z, from the first cell on.
+    # From layer 1's stairs down to layer 2's: one block down per cell along z, from the first cell on. Its
+    # ceiling comes down with it, FLIGHT_HEIGHT over each cell's floor (five free blocks over each step).
     FLIGHT=("stairs_flight", "layer1_stairs", (9, 44, 13, 54)),
+    FLIGHT_HEIGHT=6,
     # Openings through the one-block walls: (id, layer, axis of the wall's line, line, first cell, width,
     # height, kind). Kinds: "doorway" (open), "locked" (a sliding steel door like the airlock's, shut until
     # a lever or an event opens it: LabDoorHooks), "frame" (open, in steel: the way in from Level 4's dark stretch, in its side wall),

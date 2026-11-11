@@ -2265,6 +2265,51 @@ def cube(up, down, side, north=None):
         "east": tex_ref(side), "west": tex_ref(side), "particle": tex_ref(side)}}
 
 
+# The chalk arrow (layer 3): CHALK_COLS blocks wide, CHALK_PX pixels a block.
+CHALK_COLS, CHALK_PX = 3, 64
+
+
+def chalk_arrow_image(rng):
+    """A chalk arrow pointing left, about one and a half blocks long, drawn in a hurry: each stroke gone over twice,
+    the chalk grainy with gaps, thinner at its ends. Transparent round it."""
+    w, h = CHALK_COLS * CHALK_PX, CHALK_PX
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    chalk = (236, 233, 224)
+    grain = [rng.random() < 0.18 for _ in range(97)]                        # pits in the wall the chalk skips
+
+    def stroke(x0, y0, x1, y1, width):
+        length = math.hypot(x1 - x0, y1 - y0)
+        steps = int(length * 2)
+        bend = rng.uniform(-1.5, 1.5)
+        for i in range(steps + 1):
+            t = i / steps
+            # A hand's line: a slight bow, a little shake, thinner where the chalk lands and lifts.
+            nx, ny = -(y1 - y0) / length, (x1 - x0) / length
+            off = bend * math.sin(math.pi * t) + rng.uniform(-0.3, 0.3)
+            cx, cy = x0 + (x1 - x0) * t + nx * off, y0 + (y1 - y0) * t + ny * off
+            r = width * (0.55 + 0.45 * math.sin(math.pi * min(1.0, 0.15 + t * 0.85)))
+            for yy in range(int(cy - r) - 1, int(cy + r) + 2):
+                for xx in range(int(cx - r) - 1, int(cx + r) + 2):
+                    if not (0 <= xx < w and 0 <= yy < h) or math.hypot(xx - cx, yy - cy) > r:
+                        continue
+                    if rng.random() < 0.42 or grain[(xx * 7 + yy * 3) % len(grain)]:
+                        continue                                            # the wall's grain shows through
+                    alpha = rng.randint(110, 225)
+                    old = img.getpixel((xx, yy))
+                    if old[3] < alpha:
+                        shade = rng.randint(-14, 6)
+                        img.putpixel((xx, yy), tuple(max(0, min(255, c + shade)) for c in chalk) + (alpha,))
+
+    tip_x, mid_y = w // 2 - 48, h // 2
+    tail_x = w // 2 + 48
+    for _ in range(2):
+        j = lambda: rng.uniform(-1.5, 1.5)                                  # noqa: E731
+        stroke(tail_x + j(), mid_y + j(), tip_x + j(), mid_y + j(), 3.2)
+        stroke(tip_x + j(), mid_y + j(), tip_x + 26 + j(), mid_y - 20 + j(), 3.0)
+        stroke(tip_x + j(), mid_y + j(), tip_x + 26 + j(), mid_y + 20 + j(), 3.0)
+    return img
+
+
 def plane(texture):
     """A flat picture lying on the floor (y = 0.1), seen from above. Turned onto walls and
     ceilings by the blockstate (same rotations as StainBlock's shapes)."""
@@ -3370,6 +3415,19 @@ def build():
         for facing, y in HORIZONTAL.items():
             variants[f"col={col},facing={facing}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
     a.block("briefing_sign", "Briefing Sign", {"variants": variants}, {"parent": f"{NS}:block/briefing_sign_1"})
+    # Layer 3: a chalk arrow on the tunnel's wall at the foot of the ladder, pointing the way to the Hideout. The
+    # picture cut in CHALK_COLS parts, each flat on the wall, only its face drawn (the chalk's gaps show the wall).
+    chalk_img = chalk_arrow_image(r("chalk_arrow"))
+    variants = {}
+    for col in range(CHALK_COLS):
+        name = f"chalk_arrow_{col}"
+        a.texture(name, chalk_img.crop((col * CHALK_PX, 0, (col + 1) * CHALK_PX, CHALK_PX)),
+                  Material(0.05, porosity=0.6, relief=0.0), tiles=False)
+        a.models[name] = model({"f": name}, [el((0, 0, 15.95), (16, 16, 16), "f", east=None, west=None, up=None, down=None,
+                                                south=None)], ao=False)
+        for facing, y in HORIZONTAL.items():
+            variants[f"col={col},facing={facing}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("chalk_arrow", "Chalk Arrow", {"variants": variants}, {"parent": f"{NS}:block/chalk_arrow_1"})
     # Layer 1's ceiling: lights and vents set into it, whole blocks of the ceiling whose underside is all one sees.
     a.texture("lab_ceiling_light", ceiling_light_tex(r("lab_ceiling_light")), ceiling_light_material, tiles=False)
     a.texture("lab_ceiling_vent", ceiling_vent_tex(r("lab_ceiling_vent")), T.PAINTED_METAL.but(smoothness=0.4), tiles=False)

@@ -6,6 +6,8 @@ import net.minecraft.block.LadderBlock
 import net.minecraft.block.ShapeContext
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.BooleanProperty
+import net.minecraft.state.property.DirectionProperty
+import net.minecraft.state.property.IntProperty
 import net.minecraft.state.property.Properties
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
@@ -97,5 +99,31 @@ class CatwalkRailBlock(settings: Settings) : Block(settings) {
             SIDES.filter { (side, _) -> state.get(side) }
                 .map { (_, b) -> Block.createCuboidShape(b[0], 0.0, b[1], b[2], height, b[3]) }
                 .fold(VoxelShapes.empty()) { all, one -> VoxelShapes.union(all, one) }
+    }
+}
+
+/**
+ * A chalk arrow on a wall of the drain (by the foot of the ladder, pointing the way to the Hideout), [COL] of its
+ * three parts, left to right as one faces it. Flat on the wall, nothing to bump into.
+ */
+class ChalkArrowBlock(settings: Settings) : Block(settings) {
+
+    init {
+        defaultState = stateManager.defaultState.with(FACING, Direction.NORTH).with(COL, 0)
+    }
+
+    override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
+        builder.add(FACING, COL)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun getOutlineShape(state: BlockState, world: BlockView, pos: BlockPos, context: ShapeContext): VoxelShape =
+        SHAPES.getValue(state.get(FACING))
+
+    companion object {
+        val FACING: DirectionProperty = Properties.HORIZONTAL_FACING
+        val COL: IntProperty = IntProperty.of("col", 0, 2)
+
+        private val SHAPES = BlockShapes.horizontal(listOf(BlockShapes.box(0, 4, 15.5, 16, 12, 16)))
     }
 }

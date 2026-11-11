@@ -34,7 +34,7 @@ THROUGH = {"lab_chair", "tool_board", "lab_poster", "first_aid_box", "potted_pla
            "sign_radiation", "floor_line", "microscope", "glove_box", "lab_beakers", "lab_monitor", "lab_coat", "chair_jacket",
            "fuse_holder", "office_chair", "lab_terminal", "alarm_light", "pipe", "note_paper", "valve_wheel", "pressure_gauge",
            "tin_cans", "dead_flashlight", "mattress", "electrical_panel", "leather_chair", "exec_chair", "mini_diorite",
-           "paper_stack", "coffee_cup", "desk_lamp_modern", "coffee_machine", "iv_drip"}
+           "paper_stack", "coffee_cup", "desk_lamp_modern", "coffee_machine", "iv_drip", "chalk_arrow"}
 # The director's office and the corridor out of it stand this much over layer 3's floor (LEVEL_5's `rise`).
 RISE = 10
 DIRS = {"north": (0, -1), "south": (0, 1), "east": (1, 0), "west": (-1, 0)}
@@ -189,6 +189,12 @@ BRIEFING = dict(layer=1, x=63, z=2, facing="south", cols=6, rows=2, sign_x=64, s
                 cards=("ch1_l5_card_hunters", "ch1_l5_card_cloud", "ch1_l5_card_junior", "ch1_l5_card_equipment"),
                 note_cols=(0, 2, 3, 5))
 
+# Layer 3: a chalk arrow (ChalkArrowBlock) at eye height on the tunnel's far wall at the foot of the ladder, pointing
+# left (the plan's north), the way to the Hideout: `cols` blocks from (x, z), column 0 on the left as seen from the front.
+CHALK_ARROW = dict(layer=3, x=154, z=74, facing="west", cols=3)
+# Along a wall facing each way, to the right as seen from the front.
+RIGHT_OF = {"south": (1, 0), "north": (-1, 0), "west": (0, 1), "east": (0, -1)}
+
 # Layer 1's columns, (layer, x, z): the Lobby's and the Workshop's, floor to ceiling, finished like the walls (white
 # tiles, the green band at their foot).
 COLUMNS = [(1, 6, 11), (1, 6, 18), (1, 16, 11), (1, 16, 18), (1, 35, 7), (1, 48, 7)]
@@ -319,6 +325,11 @@ class Furnish:
         for col in range(BRIEFING["sign_cols"]):
             self.put("briefing_sign", BRIEFING["sign_x"] + col, bz, BRIEFING["facing"], bf + 2 + BRIEFING["rows"])
             self.extra[(BRIEFING["sign_x"] + col, bf + 2 + BRIEFING["rows"], bz)] = f"col={col},facing={{facing}}"
+        cf, (dx, dz) = self.floor(CHALK_ARROW["layer"]) + 2, RIGHT_OF[CHALK_ARROW["facing"]]
+        for col in range(CHALK_ARROW["cols"]):
+            x, z = CHALK_ARROW["x"] + dx * col, CHALK_ARROW["z"] + dz * col
+            self.put("chalk_arrow", x, z, CHALK_ARROW["facing"], cf)
+            self.extra[(x, cf, z)] = f"col={col},facing={{facing}}"
         for x, z, i in FUSE_BOX:
             self.put("fuse_holder", x, z, "west", 2)
             self.extra[(x, 2, z)] = f"amps={i},facing={{facing}},filled={str(i == FUSE_IN).lower()},lit=false"

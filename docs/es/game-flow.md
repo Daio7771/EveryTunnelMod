@@ -446,7 +446,8 @@ la construcción del nivel 5, en juego (`platform.LabHooks`), en un espacio prop
 El nivel 5 son tres capas. Las dos de arriba, amuebladas, son un laboratorio limpio de azulejo
 blanco con una franja de azulejo verde pálido, vinilo gris, paneles blancos en el techo y todos los
 fluorescentes encendidos. Capa 1: el Lobby, un anillo de pasillos con el Workshop, la sala de espera y las
-taquillas, y una puerta de acero (cerrada) a las escaleras. Capa 2, 10 bloques más abajo: el pasillo de los
+taquillas, y una puerta de acero (cerrada) a las escaleras (un tramo, con el techo bajando con él, cinco bloques
+libres sobre cada peldaño). Capa 2, 10 bloques más abajo: el pasillo de los
 sujetos con las salas S-1 a S-4, el Lab hall, un bucle al norte por la Office, un bucle al sur por Storage
 hasta la sala de químicos, el atajo y la trampilla al drenaje tras una rejilla. La capa 3, otros 7 bloques más
 abajo y al este de todo, es el drenaje, sucio e industrial, y subiendo su escalera el despacho del director (la
@@ -523,10 +524,13 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
   su mueble.
 - **Sus enemigos** los coloca `tools/map/lab/furnish.py`; para probarlos en cualquier sitio,
   `/everytunnel spawn hunters|junior|cloud`. `platform.DistortionHooks` los pone al construirse el nivel y
-  los devuelve a su sitio cuando el jugador muere en él; ninguno se guarda. Los que pone el comando son de un solo uso: una muerte los quita.
+  los devuelve a su sitio cuando el jugador muere en él; ninguno se guarda. Como el nivel se construye con el jugador aún en el
+  nivel 4, entran (y los sujetos, la figura, el guardia muerto) por `KeptEntities`: uno perdido con su chunk al descargarse
+  vuelve tal como se puso en cuanto su chunk se actualiza otra vez; uno matado o despedido no. Los que pone el comando son de
+  un solo uso: una muerte los quita.
   - **Los Hunters** (`HunterEntity`, decisiones en `entities.HunterBrain`), en grupos de tres en un punto de
-    aparición con la etiqueta `hunters` (uno al lado de otro, o en el suelo más cercano donde no lo hay: una pasarela sobre
-    el agua): humanoides pequeños y negros con bata, ojos blancos sin pupila.
+    aparición con la etiqueta `hunters` (uno al lado de otro, o en el sitio más cercano donde no caben: una pasarela sobre
+    el agua, una pared; cada uno donde cabe su cuerpo entero y se ve el punto, nunca tras un muro, su sitio en el log): humanoides pequeños y negros con bata, ojos blancos sin pupila.
     Merodean cerca de él; el que ve al jugador (16 bloques, un cono de 140 grados, o a 3 bloques mire adonde
     mire, nunca a través de una pared) chilla (`entity.hunter.shriek`) y carga el grupo entero. Medio corazón
     por golpe, uno por segundo cada uno; un golpe de llave inglesa mata a uno, aunque sea con prisa. Sin verle 4 s, buscan y luego
@@ -553,7 +557,9 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
   hall, así que entonces la trampilla se vuelve a abrir, si el disolvente la había abierto. Túneles de cinco de
   ancho de hormigón manchado, un canal de agua por el centro, tuberías oxidadas por las paredes y bajo el techo,
   charcos; lámparas enjauladas amarillas (`CageLampBlock`) cuelgan muy separadas, algunas parpadean y otras están
-  fundidas, con oscuridad entre ellas. Corre el agua, caen gotas, las tuberías crujen a lo lejos. Dos bucles:
+  fundidas, con oscuridad entre ellas. Corre el agua, caen gotas, las tuberías crujen a lo lejos. Al pie de la escalera,
+  en la pared del fondo del primer túnel, una flecha de tiza a la altura de los ojos apunta a la izquierda, hacia el
+  Hideout (`ChalkArrowBlock`). Dos bucles:
   - **La Junction,** donde se cruzan los túneles: una sala alta, una piscina de agua honda bajo pasarelas de rejilla
     con barandilla (`CatwalkRailBlock`), una compuerta en su pared norte. Es el checkpoint del drenaje, y un Junior
     flota sobre el agua a la vista. Las Clouds vienen en ella y en los túneles.
@@ -565,6 +571,9 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
   - El túnel norte que sigue desde la Junction está cortado por **un derrumbe** de escombros: el camino sigue por
     **la Cistern,** un depósito de agua honda cruzado por pasarelas estrechas sin barandilla, con tres Hunters donde
     se cruzan, y sale por su lado este, rodeando hasta el túnel pasado el derrumbe.
+  - **El agua honda** de las dos piscinas (zonas con la etiqueta `deep_water`, `DeepWaterHooks`) mata: al caer, algo
+    arrastra al jugador al fondo, no puede nadar hacia arriba, se hunde entre burbujas mientras la pantalla se oscurece
+    y se ahoga dos segundos después ("Deep Water"). Los canales de los túneles, de un bloque, solo mojan.
   - Al final, **una escalera de acero** sube diez bloques hasta **el despacho del director:** moderno, cuero negro,
     acero y cristal ahumado, luces cuadradas en el techo (`PanelLightBlock`); su escritorio al fondo mirando a la
     puerta, su sillón detrás, una lámpara, un bloquecito de diorita, unos papeles, café. Dos puertas (se abren a
@@ -604,7 +613,7 @@ sigue vivo:
    consejo debajo, con un golpe grave (`event.death.reveal`), y debajo "Try again". El negro sigue hasta que el
    jugador lo pulsa (o Enter, Espacio, Esc: `death_retry`); el juego no se pausa.
    Lo que nombra (`core.death.DeathCause`, enviado como `death_cause`, mostrado por `client.screen.DeathScreen`):
-   el Pale Man, el Observer, los Hunters, la Distortion Cloud, la sed, la caída; cualquier otra cosa dice
+   el Pale Man, el Observer, los Hunters, la Distortion Cloud, la sed, la caída, el agua honda (ahogarse); cualquier otra cosa dice
    solo "You died". Los textos son `death.every_tunnel.*` en el archivo de idioma.
 3. A oscuras se le lleva al inicio del último nivel en el que estuvo (su primer punto con la
    etiqueta `player`), o al punto de reinicio que alcanzó en él (el Lab hall del nivel 5), con la vida y los

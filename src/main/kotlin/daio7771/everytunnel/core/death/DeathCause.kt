@@ -15,6 +15,7 @@ enum class DeathCause(val id: String) {
     CLOUD("distortion_cloud"),
     THIRST("thirst"),
     FALL("fall"),
+    DEEP_WATER("deep_water"),
     OTHER("other");
 
     companion object {
@@ -36,6 +37,7 @@ enum class DeathCause(val id: String) {
             val cause = killer?.let(KILLERS::get) ?: when (damage) {
                 "minecraft:dry_out" -> THIRST
                 "minecraft:fall" -> FALL
+                "minecraft:drown" -> DEEP_WATER
                 else -> OTHER
             }
             return if (levelOrder in QUIET_LEVELS && cause != THIRST) null else cause

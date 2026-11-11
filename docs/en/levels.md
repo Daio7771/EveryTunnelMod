@@ -164,6 +164,7 @@ the server starts (levels built together name the same one). The function must e
 | `no_sprint` | `ResourceHooks` | Nobody sprints there |
 | `no_checkpoint` | `ContinueGame` | No checkpoint is made there: the level's waits for its first zone without the tag |
 | `back_to_key` | `DeathHooks` | A death there goes back to Level 4 by the Master Key's table, as before it was taken |
+| `deep_water` | `DeepWaterHooks` | Level 5's pools: falling into their deep water pulls the player under, and they drown |
 | `chemical_room`, `lab_grate`, `lab_drain` | `ChemicalHooks` | Level 5: the room whose alarm lights turn, the grate the solvent dissolves, the room whose hatch then opens |
 
 ### Spawn point tags
@@ -237,8 +238,8 @@ Level 5, the laboratory, is built in play (`LabHooks`), its three layers (plan, 
   `cloud` and `first_cloud`), `north_route` (two boxes) and `south_route` (three), both tagged `cloud`, `office`,
   `storage`, `chemical_room` (tagged `chemical_room`), `shortcut`, `drain_hatch` (tagged `lab_drain`).
 - **Layer 3, the drain:** `drain_ladder` (the foot of the ladder, tagged `drain_bottom`), `drain_tunnels` (eleven
-  boxes, tagged `cloud` and `cloud_often`), `junction` (tagged `restart_point`, `cloud` and `cloud_often`),
-  `hideout`, `pump_room`, `cistern`, `office_stairs` (the steel stairs and their landing), `director_office`
+  boxes, tagged `cloud` and `cloud_often`), `junction` (tagged `restart_point`, `cloud`, `cloud_often` and
+  `deep_water`), `hideout`, `pump_room`, `cistern` (tagged `deep_water`), `office_stairs` (the steel stairs and their landing), `director_office`
   (tagged `director_office`), `false_exit` (the corridor out of the office, tagged `false_exit`) and
   `false_exit_pit` (the pit under its end, tagged the same), `drain_shaft` (the ladder's shaft up to the hatch). A space's zone
   goes down into its water (the channels, the pools), so a player in it is still in the level.
