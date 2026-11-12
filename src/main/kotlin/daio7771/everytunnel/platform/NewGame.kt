@@ -45,6 +45,7 @@ object NewGame {
         LootSpawner.restock(server)
         CollapseHooks.resetAll(server)
         PaleManSpawner.startNewGame(server)
+        ObserverHooks.levelsRebuilt(server)
         LoadingHooks.levelsRebuilt(server)
         EveryTunnel.LOGGER.info("Levels rebuilt: loot back, keycard lights forgotten")
     }

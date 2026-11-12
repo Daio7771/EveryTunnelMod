@@ -2,6 +2,7 @@ package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
+import daio7771.everytunnel.core.PlayerLocationTracker
 import daio7771.everytunnel.core.level.Position
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -86,6 +87,19 @@ object ObserverHooks {
             val point = level.spawnPoint(observer.homeKey!!.substringAfter('/')) ?: continue
             observer.returnHome(point.position.x, point.position.y, point.position.z, point.yaw)
         }
+    }
+
+    /**
+     * The levels were rebuilt, which killed every Observer in them ([ObserverEntity.remove] forgot their spawn
+     * points): one comes back for each level a player is in. Without it, a world opened inside Level 3 (the
+     * player is tracked there before the build ends) had no Observer for the whole game.
+     */
+    fun levelsRebuilt(server: MinecraftServer) {
+        if (LoungeHooks.levelThreeErased) return
+        val levels = server.playerManager.playerList
+            .mapNotNull { PlayerLocationTracker.locationOf(it.uuid).levelId }
+            .toSet()
+        for (levelId in levels) spawnFor(levelId)
     }
 
     private fun spawnFor(levelId: String) {
