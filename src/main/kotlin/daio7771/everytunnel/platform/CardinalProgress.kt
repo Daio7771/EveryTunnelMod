@@ -1,6 +1,7 @@
 package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.core.ending.RunSummary
 import daio7771.everytunnel.core.progress.PlayerProgress
 import dev.onyxstudios.cca.api.v3.component.ComponentKey
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistry
@@ -64,6 +65,15 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
 
     override fun setLounge(player: PlayerEntity, text: String?) = change(player) { it.lounge = text }
 
+    override fun addPlayTicks(player: PlayerEntity, ticks: Long) {
+        val progress = of(player)
+        progress.playTicks += ticks
+    }
+
+    override fun addDeath(player: PlayerEntity) = change(player) { it.deaths += 1 }
+
+    override fun runSummary(player: PlayerEntity): RunSummary = of(player).let { RunSummary(it.playTicks, it.deaths) }
+
     override fun saveInventory(player: PlayerEntity) {
         KEY.get(player).inventory = player.inventory.writeNbt(NbtList())
     }
@@ -110,6 +120,8 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             progress.level3Books = tag.getInt(BOOKS)
             progress.checkpoint = if (tag.contains(CHECKPOINT, NbtElement.STRING_TYPE.toInt())) tag.getString(CHECKPOINT) else null
             progress.lounge = if (tag.contains(LOUNGE, NbtElement.STRING_TYPE.toInt())) tag.getString(LOUNGE) else null
+            progress.playTicks = tag.getLong(PLAY_TICKS)
+            progress.deaths = tag.getInt(DEATHS)
             inventory = tag.getList(INVENTORY, NbtElement.COMPOUND_TYPE.toInt())
         }
 
@@ -122,6 +134,8 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             tag.putInt(BOOKS, progress.level3Books)
             progress.checkpoint?.let { tag.putString(CHECKPOINT, it) }
             progress.lounge?.let { tag.putString(LOUNGE, it) }
+            tag.putLong(PLAY_TICKS, progress.playTicks)
+            tag.putInt(DEATHS, progress.deaths)
             tag.put(INVENTORY, inventory)
         }
 
@@ -143,6 +157,8 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             const val BOOKS = "level3_books"
             const val CHECKPOINT = "checkpoint"
             const val LOUNGE = "lounge"
+            const val PLAY_TICKS = "play_ticks"
+            const val DEATHS = "deaths"
             const val INVENTORY = "checkpoint_inventory"
         }
     }

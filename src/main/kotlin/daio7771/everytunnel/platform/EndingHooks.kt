@@ -28,8 +28,11 @@ object EndingHooks {
 
     const val END_TAG = "end"
 
-    /** To the client: show the end screen (no payload). */
+    /** To the client: show the end screen. Payload: the time played in ticks (long) and the deaths (var int) of the game. */
     val ENDING_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "ending")
+
+    /** To the client, from `/everytunnel congrats`: open the congratulations window at once, with the same payload. */
+    val CONGRATS_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "congrats")
 
     private const val FADE_SECONDS = 2.5f
     private const val SCREEN_TICK = 60
@@ -70,7 +73,19 @@ object EndingHooks {
         ContinueGame.finished(player)
         EveryTunnel.LOGGER.info("{} reached the end", player.name.string)
         PlaytestLog.endOfDemo(player)
-        if (ServerPlayNetworking.canSend(player, ENDING_PACKET_ID)) ServerPlayNetworking.send(player, ENDING_PACKET_ID, PacketByteBufs.empty())
+        send(player, ENDING_PACKET_ID)
+    }
+
+    /** The congratulations window with this game's numbers so far, without the ending (development). */
+    fun previewCongrats(player: ServerPlayerEntity) = send(player, CONGRATS_PACKET_ID)
+
+    private fun send(player: ServerPlayerEntity, id: Identifier) {
+        if (!ServerPlayNetworking.canSend(player, id)) return
+        val summary = ProgressService.get().runSummary(player)
+        val buf = PacketByteBufs.create()
+        buf.writeLong(summary.playTicks)
+        buf.writeVarInt(summary.deaths)
+        ServerPlayNetworking.send(player, id, buf)
     }
 
     private fun tick(server: MinecraftServer) {
@@ -86,9 +101,7 @@ object EndingHooks {
             if (t == 0) DeathHooks.sendFade(player, 1f, FADE_SECONDS)
             if (t >= SCREEN_TICK) {
                 iterator.remove()
-                if (ServerPlayNetworking.canSend(player, ENDING_PACKET_ID)) {
-                    ServerPlayNetworking.send(player, ENDING_PACKET_ID, PacketByteBufs.empty())
-                }
+                send(player, ENDING_PACKET_ID)
             }
         }
     }

@@ -8,7 +8,7 @@ class AchievementTest {
 
     @Test
     fun `there are eight, each found by its unique id`() {
-        assertEquals(10, Achievement.entries.size)
+        assertEquals(11, Achievement.entries.size)
         for (achievement in Achievement.entries) assertEquals(achievement, Achievement.byId(achievement.id))
         assertEquals(Achievement.entries.size, Achievement.entries.map { it.id }.toSet().size)
     }

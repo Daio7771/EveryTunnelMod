@@ -498,5 +498,12 @@
   "terminal.every_tunnel.locked.title": "SESIÓN BLOQUEADA",
   "terminal.every_tunnel.locked.log_in": "Inicia sesión para continuar.",
   "terminal.every_tunnel.locked.user": "Usuario: RTA",
-  "terminal.every_tunnel.locked.password": "Contraseña: ________"
+  "terminal.every_tunnel.locked.password": "Contraseña: ________",
+  "achievement.every_tunnel.nothing_there": "Ahí no hay nada",
+  "achievement.every_tunnel.nothing_there.description": "Creíste en la palabra del Director y bajaste por el pasillo.",
+  "screen.every_tunnel.congrats.title": "Enhorabuena",
+  "screen.every_tunnel.congrats.text": "Has llegado al final de Every Tunnel.\nGracias por pasar el turno de noche aquí abajo, a oscuras, escuchando cada paso. Este juego se hizo para eso, y tú lo has completado.\nEspero que el Noname Complex te acompañe un tiempo. Gracias por jugar.\n- Daio",
+  "screen.every_tunnel.congrats.time": "Tiempo de juego",
+  "screen.every_tunnel.congrats.deaths": "Muertes",
+  "screen.every_tunnel.congrats.close": "CERRAR"
 }

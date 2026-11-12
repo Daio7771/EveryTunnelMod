@@ -47,6 +47,8 @@ import net.minecraft.util.Identifier
  * - `/everytunnel loungeready`: run by the map's `garage:level4_go` when Level 4's chunks are
  *   loaded: its build goes on ([LoungeHooks]).
  * - `/everytunnel labready`: the same for Level 5, by `garage:level5_go` ([LabHooks]).
+ * - `/everytunnel congrats`: opens the congratulations window with this game's time and deaths so far, without the
+ *   ending ([EndingHooks.previewCongrats]).
  * - `/everytunnel profile on|off|report`: the tick profiler ([TickProfiler]): a line in the log every
  *   30 s with the server tick and the cost of each of the mod's tick hooks.
  * - `/everytunnel rebuilt`: run by the map's `garage:build` after rebuilding the levels:
@@ -75,6 +77,7 @@ object DebugCommands {
             root
                 .then(CommandManager.literal("levels").executes(::levels))
                 .then(CommandManager.literal("where").executes(::where))
+                .then(CommandManager.literal("congrats").executes { EndingHooks.previewCongrats(it.source.playerOrThrow); 1 })
                 .then(
                     CommandManager.literal("profile")
                         .then(CommandManager.literal("on").executes { TickProfiler.start(); reply(it, "Profiler on: a line in the log every 30 s."); 1 })

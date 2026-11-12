@@ -30,7 +30,7 @@ KDoc comment that says more.
 | `guide/GuideMarkdown.kt` | Reads a player guide page (the Markdown subset) into blocks |
 | `menu/LampFlicker.kt` | When the menu scene's lamps flicker |
 | `menu/BlockLight.kt` | Block light for a box of blocks with no world (the menu scene) |
-| `achievement/Achievement.kt` | The ten achievements, in list order, by id |
+| `achievement/Achievement.kt` | The eleven achievements, in list order, by id |
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
 | `puzzle/OrderPuzzle.kt` | A puzzle of things in order: attempts, failures, the hint |
 | `door/SlidingDoor.kt` | A door of two leaves sliding into the walls a quarter of a block at a time: how much of each column is left (Level 5's airlock) |
@@ -43,6 +43,7 @@ KDoc comment that says more.
 | `puzzle/darts/DartboardGeometry.kt` | Where a dart landed on the board: number and ring, in the 4 orientations |
 | `film/FilmInfo.kt` | The Cinema's film: frames, speed, which frame at what time |
 | `progress/PlayerProgress.kt` | What a player has done: pieces, notes read, scenes seen, Level 3's books, checkpoint |
+| `ending/RunSummary.kt` | The congratulations window's numbers: time played and deaths of a game, the time as `H:MM:SS` |
 | `progress/Checkpoint.kt` | A checkpoint as text: a level's start, or `level/point` for a restart point inside it |
 | `detector/Detector.kt` | Level 5's detector: how full its icon is, when the triangle shows, how many Geiger counts fall a tick |
 | `death/DeathCause.kt` | What the death screen names (the killer, thirst, the fall, deep water) and where it shows |
@@ -210,11 +211,13 @@ KDoc comment that says more.
 | `BoxHooks.kt` | Level 3's box puzzle: boxes out at random, carrying, the shelf, death, debug |
 | `HidingHooks.kt` | Hiding in lockers: in, out, no noise inside, out on a new game |
 | `AchievementHooks.kt` | Earning achievements: what earns each, telling the client |
-| `EndingHooks.kt` | The end of the game: the saved game erased, the final credits |
+| `EndingHooks.kt` | The end of the game: the saved game erased, the final credits, the game's numbers sent with them |
 | `FalseExitHooks.kt` | Level 5's false exit: the floor over the pit giving way, the fall, the black |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
 | `PlaytestLog.kt` | The `[playtest]` log |
+| `RunStatsHooks.kt` | Counts the time played into the player's progress (deaths are counted in `DeathHooks`), for the congratulations window |
+| `TickProfiler.kt` | Times the server tick and each tick hook (`/everytunnel profile`); `core/profile/TickStats.kt` holds the numbers |
 
 ### Common mixins: `main/java/daio7771/everytunnel/mixin/`
 
@@ -310,6 +313,7 @@ KDoc comment that says more.
 | `EraseSaveScreen.kt` | The warning before Ctrl+Shift+D erases the saved game |
 | `LoadingScreen.kt` | The loading screen and `LoadingCover`, which draws it over everything |
 | `LoadingTips.kt` | Rotating tips with the player's keys |
+| `CongratulationsScreen.kt` | The congratulations window over the main menu after the credits: the Observer with his coffee, a thank-you, time played and deaths |
 | `FinalCreditsScreen.kt` | The final credits, timed to their song: drawings, typed titles, tools, "Level 6 coming soon"; the fall's music |
 | `TerminalScreen.kt` | A Level 5 computer's screen, typed out green on black |
 | `DeathScreen.kt` | The death screen: "Killed by", the killer and a tip on the black of dying, and "Try again" |
@@ -325,7 +329,7 @@ See [Architecture](architecture.md#mixins) for the target and reason of each.
 | `fabric.mod.json` | Mod metadata, entrypoints, dependencies |
 | `every_tunnel.mixins.json`, `client/resources/every_tunnel.client.mixins.json` | Mixin lists |
 | `assets/every_tunnel/lang/en_us.json` | Every in-game text |
-| `assets/every_tunnel/lang/es_*.json` | Only the guide screen's own words in Spanish; everything else falls back to English |
+| `assets/every_tunnel/lang/es_*.json` | The Spanish translation (`es_es.json`, copied to the other `es_*` by `tools/lang/spanish_variants.py`) |
 | `assets/every_tunnel/guide/` | Not in `src/`: copied from `docs/*/guide/` by the build (`copyGuide`) |
 | `assets/every_tunnel/sounds.json`, `sounds/` | Sound events and `.ogg` files (from `tools/sounds/export.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | From `tools/blocks`, `tools/entity`, `tools/gui` |

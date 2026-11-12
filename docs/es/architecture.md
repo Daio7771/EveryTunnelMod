@@ -39,7 +39,7 @@ platform/                                           todo lo que toca Minecraft o
 | `core.guide` | `GuideMarkdown`, el lector de las páginas de la guía del jugador |
 | `core.puzzle` | El código de las válvulas del nivel 3 y el texto de las notas |
 | `core.progress` | `PlayerProgress`, lo que ha hecho un jugador (piezas, notas, escenas) |
-| `core.achievement` | `Achievement`, los diez logros |
+| `core.achievement` | `Achievement`, los once logros |
 | `core.hiding` | `LookLimit`, cuánto gira la cabeza en una taquilla |
 | `systems` | `ResourceSystem` (stamina, sed, batería), `NoiseSystem`, `FlashlightBeam` (matemática del haz) |
 | `entities` | `PaleManBrain`, `ObserverBrain` y `HunterBrain`, las decisiones del Pale man, del Observer y de los Hunters; `Gaze` y los relojes de las Distortions |
@@ -129,7 +129,8 @@ Todos los ids son `every_tunnel:<nombre>`. API de red de Fabric (estilo 1.20.1,
 | `screen_fade` | servidor → cliente | `DeathHooks` | Oscuridad objetivo (0 a 1) y segundos para llegar |
 | `loading` | servidor → cliente | `LoadingHooks` | Estado de carga: `0` cargando, `1` listo |
 | `loading_done` | cliente → servidor | `LoadingCover` | El cliente ha dibujado el mundo y ha hecho el fundido de entrada |
-| `ending` | servidor → cliente | `EndingHooks` | Pasar los créditos finales |
+| `ending` | servidor → cliente | `EndingHooks` | Pasar los créditos finales; lleva el tiempo jugado (long, ticks) y las muertes (var int) |
+| `congrats` | servidor → cliente | `EndingHooks` | Desarrollo (`/everytunnel congrats`): abrir la ventana de felicitación, mismo contenido |
 | `false_exit_fall` | servidor → cliente | `FalseExitHooks` | Poner la música de la caída, en la cabeza del jugador |
 
 El estado del Pale man llega a los clientes como dato sincronizado de la entidad

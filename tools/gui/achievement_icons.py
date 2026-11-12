@@ -16,6 +16,7 @@ Icons at u (what AchievementIcons expects):
 - u=48: the Pale man's silhouette (Beware of Tall Men): tall, thin, arms down to his knees.
 - u=64: a puzzle piece (Big Brain), warm orange.
 - u=80: a brass padlock (Privacy Policy).
+- u=96: the Director's mask, an ivory face with slit eyes and a thin smile (Nothing in There).
 
 Each icon is a 16x16 mask: '#' outline, 'o' fill, 'h' highlight, 's' shade, 'k' dark, 'y' its
 mark (light), '.' transparent.
@@ -30,6 +31,22 @@ TEXTURE = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel" / "tex
 OUT = Path(__file__).resolve().parent / "output"
 
 OUTLINE = (14, 15, 19, 255)
+
+
+def mask_rows():
+    """The Director's mask: an ivory oval, lit from the top left, with slanted slit eyes and a thin smile."""
+    inside = lambda x, y: ((x - 7.5) / 6.3) ** 2 + ((y - 7.5) / 7.2) ** 2 <= 1.0
+    grid = [["." for _ in range(16)] for _ in range(16)]
+    for y in range(16):
+        for x in range(16):
+            if inside(x, y):
+                edge = not all(inside(nx, ny) for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
+                grid[y][x] = "#" if edge else ("h" if x + y < 12 else ("s" if x + y > 17 else "o"))
+    for x, y in [(3, 5), (4, 6), (5, 6), (6, 5), (9, 5), (10, 6), (11, 6), (12, 5),
+                 (4, 10), (5, 11), (6, 11), (7, 11), (8, 11), (9, 11), (10, 11), (11, 10)]:
+        grid[y][x] = "k"
+    return ["".join(row) for row in grid]
+
 
 ICONS = [
     ("locked", {
@@ -153,6 +170,9 @@ ICONS = [
         "..############..",
         "................",
     ]),
+    ("mask", {
+        "o": (226, 222, 208, 255), "h": (248, 246, 238, 255), "s": (160, 156, 142, 255), "k": (26, 26, 30, 255),
+    }, mask_rows()),
 ]
 
 

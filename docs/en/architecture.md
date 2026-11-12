@@ -37,7 +37,7 @@ platform/                                           everything that touches Mine
 | `core.guide` | `GuideMarkdown`, the reader of the player guide pages |
 | `core.puzzle` | Level 3's valve code and the notes' text |
 | `core.progress` | `PlayerProgress`, what a player has done (pieces, notes, scenes) |
-| `core.achievement` | `Achievement`, the ten achievements |
+| `core.achievement` | `Achievement`, the eleven achievements |
 | `core.hiding` | `LookLimit`, how far the head turns in a locker |
 | `systems` | `ResourceSystem` (stamina, thirst, battery), `NoiseSystem`, `FlashlightBeam` (beam math) |
 | `entities` | `PaleManBrain`, `ObserverBrain` and `HunterBrain`, the Pale man's, the Observer's and the Hunters' decisions; `Gaze` and the Distortions' clocks |
@@ -125,7 +125,8 @@ All ids are `every_tunnel:<name>`. Fabric networking API (1.20.1 style,
 | `screen_fade` | server → client | `DeathHooks` | Target darkness (0 to 1) and seconds to get there |
 | `loading` | server → client | `LoadingHooks` | Loading state: `0` loading, `1` ready |
 | `loading_done` | client → server | `LoadingCover` | The client has drawn the world and faded in |
-| `ending` | server → client | `EndingHooks` | Roll the final credits |
+| `ending` | server → client | `EndingHooks` | Roll the final credits; carries the time played (long, ticks) and the deaths (var int) |
+| `congrats` | server → client | `EndingHooks` | Development (`/everytunnel congrats`): open the congratulations window, same payload |
 | `false_exit_fall` | server → client | `FalseExitHooks` | Play the fall's music, in the player's head |
 
 The Pale man's state reaches clients as tracked entity data (`PaleManEntity.brainState`),

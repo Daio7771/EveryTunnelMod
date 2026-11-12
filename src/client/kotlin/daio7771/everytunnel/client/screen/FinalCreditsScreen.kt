@@ -3,6 +3,7 @@ package daio7771.everytunnel.client.screen
 import com.mojang.blaze3d.systems.RenderSystem
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.cutscene.FinalCredits
+import daio7771.everytunnel.core.ending.RunSummary
 import daio7771.everytunnel.platform.EndingHooks
 import daio7771.everytunnel.platform.FalseExitHooks
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
@@ -36,9 +37,12 @@ import kotlin.math.pow
  * translation wraps its title, shrinks its text and lifts its credits ([layoutOf]) instead of running into them or
  * off the window's edges.
  *
+ * When they end (or are skipped) the congratulations window opens over the menu ([CongratulationsScreen]), with the
+ * numbers of the game that came in the ending packet.
+ *
  * Also here: the fall's music, in the player's head ([FalseExitHooks.FALL_PACKET_ID]).
  */
-class FinalCreditsScreen : Screen(Text.translatable("every_tunnel.credits.the_end")) {
+class FinalCreditsScreen(private val summary: RunSummary = RunSummary.EMPTY) : Screen(Text.translatable("every_tunnel.credits.the_end")) {
 
     private val openedAt = Util.getMeasuringTimeMs()
     private var quitting = false
@@ -250,6 +254,8 @@ class FinalCreditsScreen : Screen(Text.translatable("every_tunnel.credits.the_en
         client.world?.disconnect()
         if (singleplayer) client.disconnect(MessageScreen(Text.translatable("menu.savingLevel"))) else client.disconnect()
         client.setScreen(TitleScreen())
+        // The title screen is the main menu now: the congratulations window goes over it.
+        client.setScreen(CongratulationsScreen(client.currentScreen, summary, award = true))
     }
 
     /**
@@ -308,9 +314,19 @@ class FinalCreditsScreen : Screen(Text.translatable("every_tunnel.credits.the_en
         private val ART = listOf(Triple("guard", 1024, 768), Triple("terminal", 1024, 1024), Triple("observer", 1024, 1024), Triple("archive", 1024, 768))
         private val TOOLS = listOf("tools_engine", "tools_libraries", "tools_dev", "tools_compat").map { "every_tunnel.credits.$it" }
 
+        /** The ending packet's numbers: the time played in ticks and the deaths (nothing in a packet from an older server). */
+        private fun readSummary(buf: net.minecraft.network.PacketByteBuf): RunSummary =
+            if (buf.readableBytes() >= 9) RunSummary(buf.readLong(), buf.readVarInt()) else RunSummary.EMPTY
+
         fun register() {
-            ClientPlayNetworking.registerGlobalReceiver(EndingHooks.ENDING_PACKET_ID) { client, _, _, _ ->
-                client.execute { client.setScreen(FinalCreditsScreen()) }
+            ClientPlayNetworking.registerGlobalReceiver(EndingHooks.ENDING_PACKET_ID) { client, _, buf, _ ->
+                val summary = readSummary(buf)
+                client.execute { client.setScreen(FinalCreditsScreen(summary)) }
+            }
+            // From `/everytunnel congrats` (development): the window over what is on screen, earning nothing.
+            ClientPlayNetworking.registerGlobalReceiver(EndingHooks.CONGRATS_PACKET_ID) { client, _, buf, _ ->
+                val summary = readSummary(buf)
+                client.execute { client.setScreen(CongratulationsScreen(client.currentScreen, summary, award = false)) }
             }
             ClientPlayNetworking.registerGlobalReceiver(FalseExitHooks.FALL_PACKET_ID) { client, _, _, _ ->
                 client.execute {

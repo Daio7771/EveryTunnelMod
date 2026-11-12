@@ -620,7 +620,12 @@ El juego termina en la falsa salida del nivel 5, pasado el director (`platform.F
    "Thank you for playing"; "Level 6 coming soon" en el morado de los dibujos; negro. Los textos son
    las claves de idioma `every_tunnel.credits.*`.
 5. Al acabar, o con Esc en cualquier momento (la canción y la pantalla se funden), se guarda el mundo
-   y vuelve el menú principal.
+   y vuelve el menú principal, y sobre él la **ventana de felicitación** (`CongratulationsScreen`):
+   un panel blanco con el Observer sentado con un café (`tools/gui/congrats_art.py`), un
+   agradecimiento (`screen.every_tunnel.congrats.*`) y el tiempo jugado y las muertes de toda la partida,
+   sumados entre sus sesiones (`PlayerProgress.playTicks` y `deaths`, que llevan `RunStatsHooks` y
+   `DeathHooks`, enviados en `ending`). Da "Ahí no hay nada" (la primera vez) y sale cada vez que se
+   termina el juego. Enter, Espacio, Esc o su botón la cierran.
 
 La partida guardada se borra: solo queda NEW GAME. Una zona con la etiqueta `end` aún terminaría el
 juego a la antigua (un fundido y los mismos créditos); ningún nivel la tiene ahora.
@@ -652,7 +657,7 @@ en el inicio del nivel actual, como respaldo.
 
 ## Logros
 
-Diez logros (`core.achievement.Achievement`, en el orden de la lista). El servidor dice cuándo
+Once logros (`core.achievement.Achievement`, en el orden de la lista). El servidor dice cuándo
 se consigue uno (`platform.AchievementHooks`, solo en mundos con niveles), como mucho una vez por partida. El cliente muestra el aviso "Achievement Unlocked!" solo la primera
 vez, porque siguen desbloqueados hasta que Ctrl+Shift+D en la pantalla ACHIEVEMENTS los reinicia, dibujado como el de desafío de vanilla con su fanfarria
 (`client.hud.AchievementToast`), y lo recuerda para siempre en
@@ -669,10 +674,13 @@ Los logros de vanilla no se tocan.
 | Under Pressure | dejar bien las válvulas del nivel 3 (todos los del mundo) | la válvula |
 | Master of the Boxes | poner las diez cajas del nivel 3 en la estantería de Storage (todos los del mundo) | la caja morada |
 | Shhh! | devolver los cinco libros del nivel 3 a la mesa del bibliotecario (todos los del mundo) | el libro de oficina |
+| Big Brain | coger la primera pieza de la tarjeta maestra del nivel 4 | una pieza de puzle |
+| Privacy Policy | abrir una caja fuerte de las Suites del nivel 4 | un candado |
+| Nothing in There | terminar el juego: lo consigue el cliente al abrirse la ventana de felicitación (`CongratulationsScreen`) | la máscara del director |
 
 La pantalla ACHIEVEMENTS del menú principal (`client.screen.AchievementsScreen`) los muestra en
 el papel de la guía (`client.screen.Paper`) con cuántos se tienen; uno que aún no se tiene
 muestra un "?" y "Not yet unlocked". Los textos están en el archivo de idioma
 (`achievement.every_tunnel.<id>`, su `.description`, `toast.every_tunnel.achievement_unlocked`);
-los iconos de la placa, la calavera, la silueta y el "?" salen de
+los iconos de la placa, la calavera, la silueta, la pieza de puzle, el candado, la máscara y el "?" salen de
 `tools/gui/achievement_icons.py`, los demás son objetos del mod (`client.AchievementIcons`). Está previsto un sonido propio en lugar de la fanfarria.

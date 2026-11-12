@@ -24,6 +24,17 @@ class PlayerProgress {
     /** Level 4 as it was left, as text (`core.save.LoungeSave`), or null. */
     var lounge: String? = null
 
+    /** Server ticks played and deaths in this game, summed over its sessions: the congratulations window's numbers. Never negative. */
+    var playTicks: Long = 0
+        set(value) {
+            field = value.coerceAtLeast(0)
+        }
+
+    var deaths: Int = 0
+        set(value) {
+            field = value.coerceAtLeast(0)
+        }
+
     /** The pieces of each level, as a copy (level id -> piece ids). */
     val pieces: Map<String, Set<String>>
         get() = piecesByLevel.mapValues { (_, pieces) -> pieces.toSet() }
@@ -59,11 +70,13 @@ class PlayerProgress {
         level3Books = 0
         checkpoint = null
         lounge = null
+        playTicks = 0
+        deaths = 0
     }
 
     /** One line for the debug command. */
     fun describe(): String {
         val pieceList = piecesByLevel.entries.joinToString("; ") { (level, pieces) -> "$level: ${pieces.joinToString(", ")}" }
-        return "pieces [$pieceList], notes $notesRead, scenes $scenesSeen, level 3 books $level3Books, checkpoint ${checkpoint ?: "none"}"
+        return "pieces [$pieceList], notes $notesRead, scenes $scenesSeen, level 3 books $level3Books, checkpoint ${checkpoint ?: "none"}, played ${playTicks / 20} s, deaths $deaths"
     }
 }

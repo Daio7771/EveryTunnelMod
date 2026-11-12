@@ -40,7 +40,10 @@ enum class Achievement(val id: String, val puzzle: Boolean = false) {
     BIG_BRAIN("big_brain"),
 
     /** Level 4: a safe in the Suites opened. */
-    PRIVACY_POLICY("privacy_policy");
+    PRIVACY_POLICY("privacy_policy"),
+
+    /** Level 5: the game finished, down the Director's corridor that had "nothing in there". Earned by the client when the congratulations window opens. */
+    NOTHING_THERE("nothing_there");
 
     companion object {
         /** The achievement named [id], or null for an id this version does not know. */

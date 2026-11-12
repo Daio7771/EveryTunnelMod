@@ -62,4 +62,20 @@ class PlayerProgressTest {
         assertEquals(0, progress.level3Books)
         assertNull(progress.checkpoint)
     }
+
+    @Test
+    fun `the time played and the deaths are never negative and a new game clears them`() {
+        val progress = PlayerProgress()
+        progress.playTicks = 1200
+        progress.deaths = 3
+        progress.playTicks -= 5000
+        progress.deaths -= 10
+        assertEquals(0, progress.playTicks)
+        assertEquals(0, progress.deaths)
+        progress.playTicks = 99
+        progress.deaths = 4
+        progress.clear()
+        assertEquals(0, progress.playTicks)
+        assertEquals(0, progress.deaths)
+    }
 }

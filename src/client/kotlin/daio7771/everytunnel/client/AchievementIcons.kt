@@ -17,7 +17,7 @@ import net.minecraft.util.Identifier
 object AchievementIcons {
 
     private val SHEET = Identifier(EveryTunnel.MOD_ID, "textures/gui/achievement_icons.png")
-    private const val SHEET_WIDTH = 96
+    private const val SHEET_WIDTH = 112
     private const val LOCKED_U = 0
 
     /** The icons drawn for the mod (`tools/gui/achievement_icons.py`): where each is on the sheet. */
@@ -27,12 +27,13 @@ object AchievementIcons {
         Achievement.TALL_MEN -> 48        // the Pale man's silhouette
         Achievement.BIG_BRAIN -> 64       // a puzzle piece
         Achievement.PRIVACY_POLICY -> 80  // a padlock
+        Achievement.NOTHING_THERE -> 96   // the Director's mask
         else -> null
     }
 
     /** The others are the thing itself, as an item. */
     private fun item(achievement: Achievement): ItemStack? = when (achievement) {
-        Achievement.FIRST_DAY, Achievement.OUCH, Achievement.TALL_MEN, Achievement.BIG_BRAIN, Achievement.PRIVACY_POLICY -> null
+        Achievement.FIRST_DAY, Achievement.OUCH, Achievement.TALL_MEN, Achievement.BIG_BRAIN, Achievement.PRIVACY_POLICY, Achievement.NOTHING_THERE -> null
         Achievement.STAY_HYDRATED -> ItemStack(ModItems.WATER_BOTTLE)
         Achievement.KEYCARD -> ItemStack(ModItems.KEYCARD)
         Achievement.VALVES -> ItemStack(ModBlocks.VALVE)

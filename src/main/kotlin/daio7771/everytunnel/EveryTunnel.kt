@@ -52,6 +52,7 @@ import daio7771.everytunnel.platform.ResourceHooks
 import daio7771.everytunnel.platform.RespawnHooks
 import daio7771.everytunnel.platform.SafeHooks
 import daio7771.everytunnel.platform.SafeLevelHooks
+import daio7771.everytunnel.platform.RunStatsHooks
 import daio7771.everytunnel.platform.SlidingDoors
 import daio7771.everytunnel.platform.SuiteBedHooks
 import daio7771.everytunnel.platform.ValveHooks
@@ -88,6 +89,7 @@ object EveryTunnel : ModInitializer {
     override fun onInitialize() {
         ConfigManager.load(FabricLoader.getInstance().configDir)
         TickProfiler.register()
+        RunStatsHooks.register()
         ModItems.register()
         ModBlocks.register()
         PathingRules.register()

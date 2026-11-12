@@ -582,7 +582,12 @@ The game ends down Level 5's false exit, past the director (`platform.FalseExitH
    "Thank you for playing"; "Level 6 coming soon" in the drawings' purple; black. The texts are the
    lang keys `every_tunnel.credits.*`.
 5. At the end, or with Esc at any moment (the song and the screen fade out), the world is saved and
-   the main menu comes back.
+   the main menu comes back, and over it the **congratulations window** (`CongratulationsScreen`):
+   a white panel with the Observer sat with a coffee (`tools/gui/congrats_art.py`), a thank-you
+   (`screen.every_tunnel.congrats.*`) and the time played and deaths of the whole game, summed over its
+   sessions (`PlayerProgress.playTicks` and `deaths`, kept by `RunStatsHooks` and `DeathHooks`, sent in
+   `ending`). It earns "Nothing in There" (the first time ever) and shows every time the game is finished.
+   Enter, Space, Esc or its button close it.
 
 The saved game is erased: only NEW GAME remains. A zone tagged `end` would still end the game
 the old way (a fade, then the same credits); no level has one now.
@@ -614,7 +619,7 @@ current level's start, as a fallback.
 
 ## Achievements
 
-Ten achievements (`core.achievement.Achievement`, in list order). The server says when one
+Eleven achievements (`core.achievement.Achievement`, in list order). The server says when one
 is earned (`platform.AchievementHooks`, only in worlds with levels), once per game at most. The client shows the "Achievement Unlocked!" toast only the first time ever,
 as they stay unlocked until Ctrl+Shift+D on the ACHIEVEMENTS screen resets them, drawn like vanilla's
 challenge toast with its fanfare
@@ -632,11 +637,14 @@ The vanilla advancements are not touched.
 | Under Pressure | Level 3's valves are right (everyone in the world) | the valve |
 | Master of the Boxes | Level 3's ten boxes are on Storage's shelf (everyone in the world) | the purple box |
 | Shhh! | Level 3's five books are back on the librarian's desk (everyone in the world) | the office book |
+| Big Brain | the first piece of Level 4's master card is picked up | a puzzle piece |
+| Privacy Policy | a safe in Level 4's Suites is opened | a padlock |
+| Nothing in There | the game is finished: earned by the client when the congratulations window opens (`CongratulationsScreen`) | the Director's mask |
 
 The ACHIEVEMENTS screen in the main menu (`client.screen.AchievementsScreen`) lists them on
 the guide's paper (`client.screen.Paper`) with how many are earned; one not earned yet shows a
 "?" and "Not yet unlocked". The texts are in the lang file (`achievement.every_tunnel.<id>`, its
 `.description`, `toast.every_tunnel.achievement_unlocked`); the badge, skull, silhouette and
-"?" icons come from `tools/gui/achievement_icons.py`, the others are the mod's items
+"?", puzzle piece, padlock and mask icons come from `tools/gui/achievement_icons.py`, the others are the mod's items
 (`client.AchievementIcons`). An own sound
 in place of the fanfare is planned.

@@ -140,6 +140,7 @@ object DeathHooks {
         if (shown) ServerPlayNetworking.send(player, CAUSE_PACKET_ID, PacketByteBufs.create().writeString(cause!!.id))
         EveryTunnel.LOGGER.info("{} died in {}: restarting the level", player.name.string, levelId)
         PlaytestLog.died(player, levelId, source)
+        ProgressService.get().addDeath(player)
         AchievementHooks.died(player, source)
     }
 

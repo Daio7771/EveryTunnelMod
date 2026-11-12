@@ -505,5 +505,12 @@
   "terminal.every_tunnel.locked.title": "SESSION LOCKED",
   "terminal.every_tunnel.locked.log_in": "Log in to continue.",
   "terminal.every_tunnel.locked.user": "User: RTA",
-  "terminal.every_tunnel.locked.password": "Password: ________"
+  "terminal.every_tunnel.locked.password": "Password: ________",
+  "achievement.every_tunnel.nothing_there": "Nothing in There",
+  "achievement.every_tunnel.nothing_there.description": "Took the Director at his word and walked down the corridor.",
+  "screen.every_tunnel.congrats.title": "Congratulations",
+  "screen.every_tunnel.congrats.text": "You made it to the end of Every Tunnel.\nThank you for spending the night shift down here, in the dark, listening to every step. This game was made for exactly that, and you saw it through.\nI hope the Noname Complex stays with you for a while. Thank you for playing.\n- Daio",
+  "screen.every_tunnel.congrats.time": "Time played",
+  "screen.every_tunnel.congrats.deaths": "Deaths",
+  "screen.every_tunnel.congrats.close": "CLOSE"
 }

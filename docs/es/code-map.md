@@ -30,7 +30,7 @@ con un comentario KDoc que cuenta más.
 | `guide/GuideMarkdown.kt` | Lee una página de la guía del jugador (el subconjunto de Markdown) en bloques |
 | `menu/LampFlicker.kt` | Cuándo parpadean las lámparas de la escena del menú |
 | `menu/BlockLight.kt` | Luz de bloque para una caja de bloques sin mundo (la escena del menú) |
-| `achievement/Achievement.kt` | Los diez logros, en el orden de la lista, por id |
+| `achievement/Achievement.kt` | Los once logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
 | `puzzle/OrderPuzzle.kt` | Un puzle de cosas en orden: intentos, fallos, la pista |
 | `door/SlidingDoor.kt` | Una puerta de dos hojas que se meten en las paredes un cuarto de bloque cada vez: cuánto queda de cada columna (la esclusa del nivel 5) |
@@ -43,6 +43,7 @@ con un comentario KDoc que cuenta más.
 | `puzzle/darts/DartboardGeometry.kt` | Dónde cayó un dardo en el tablero: número y anillo, en las 4 orientaciones |
 | `film/FilmInfo.kt` | La película del Cinema: fotogramas, velocidad, qué fotograma en cada momento |
 | `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint |
+| `ending/RunSummary.kt` | Los números de la ventana de felicitación: tiempo jugado y muertes de una partida, el tiempo como `H:MM:SS` |
 | `progress/Checkpoint.kt` | Un checkpoint como texto: el inicio de un nivel, o `nivel/punto` para un punto de reinicio dentro de él |
 | `detector/Detector.kt` | El detector del nivel 5: cuánto se llena su icono, cuándo sale el triángulo, cuántas cuentas Geiger caen por tick |
 | `death/DeathCause.kt` | Lo que nombra la pantalla de muerte (quién te mató, la sed, la caída, el agua honda) y dónde sale |
@@ -210,11 +211,13 @@ con un comentario KDoc que cuenta más.
 | `BoxHooks.kt` | El puzle de las cajas del nivel 3: cajas al azar, llevarlas, la estantería, la muerte, depuración |
 | `HidingHooks.kt` | Esconderse en taquillas: entrar, salir, sin ruido dentro, salir en partida nueva |
 | `AchievementHooks.kt` | Conseguir logros: qué da cada uno, avisar al cliente |
-| `EndingHooks.kt` | El final del juego: la partida guardada borrada, los créditos finales |
+| `EndingHooks.kt` | El final del juego: la partida guardada borrada, los créditos finales, los números de la partida enviados con ellos |
 | `FalseExitHooks.kt` | La falsa salida del nivel 5: el suelo sobre el pozo que cede, la caída, el negro |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
 | `PlaytestLog.kt` | El registro `[playtest]` |
+| `RunStatsHooks.kt` | Cuenta el tiempo jugado en el progreso del jugador (las muertes se cuentan en `DeathHooks`), para la ventana de felicitación |
+| `TickProfiler.kt` | Mide el tick del servidor y cada hook de tick (`/everytunnel profile`); `core/profile/TickStats.kt` guarda los números |
 
 ### Mixins comunes: `main/java/daio7771/everytunnel/mixin/`
 
@@ -310,6 +313,7 @@ con un comentario KDoc que cuenta más.
 | `EraseSaveScreen.kt` | El aviso antes de que Ctrl+Shift+D borre la partida guardada |
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |
 | `LoadingTips.kt` | Consejos que van cambiando, con las teclas del jugador |
+| `CongratulationsScreen.kt` | La ventana de felicitación sobre el menú principal tras los créditos: el Observer con su café, un agradecimiento, tiempo jugado y muertes |
 | `FinalCreditsScreen.kt` | Los créditos finales, al ritmo de su canción: dibujos, títulos tecleados, herramientas, "Level 6 coming soon"; la música de la caída |
 | `TerminalScreen.kt` | La pantalla de un ordenador del nivel 5, tecleada en verde sobre negro |
 | `DeathScreen.kt` | La pantalla de muerte: "Killed by", quién te mató y un consejo sobre el negro al morir, y "Try again" |
@@ -325,7 +329,7 @@ Ver [Arquitectura](architecture.md#mixins) para el objetivo y el motivo de cada 
 | `fabric.mod.json` | Metadatos del mod, entrypoints, dependencias |
 | `every_tunnel.mixins.json`, `client/resources/every_tunnel.client.mixins.json` | Listas de mixins |
 | `assets/every_tunnel/lang/en_us.json` | Todos los textos del juego |
-| `assets/every_tunnel/lang/es_*.json` | Solo las palabras propias de la pantalla de la guía en español; el resto vuelve al inglés |
+| `assets/every_tunnel/lang/es_*.json` | La traducción al español (`es_es.json`, copiada a los demás `es_*` por `tools/lang/spanish_variants.py`) |
 | `assets/every_tunnel/guide/` | No está en `src/`: lo copia de `docs/*/guide/` la compilación (`copyGuide`) |
 | `assets/every_tunnel/sounds.json`, `sounds/` | Eventos de sonido y archivos `.ogg` (de `tools/sounds/export.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | De `tools/blocks`, `tools/entity`, `tools/gui` |
