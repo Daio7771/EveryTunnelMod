@@ -36,7 +36,13 @@ LambDynamicLights and Cardinal Components API).
 - Level 5's entry corridor was almost black without a shader pack. Without shaders the dark is
   now lifted a little while its game runs (`game_dark_lift` in `gameplay.json`; shader packs are
   untouched).
+- The Cloud in the corridor to Level 5 could vanish just before its mini-game, taken by the
+  map's own clean-up. It stays now.
+- Hunters and Distortion Clouds had no glowing eyes without a shader pack (white and purple).
+  They glow with vanilla graphics too.
 - Credits and achievements no longer run into each other or off the screen with longer
-  translations.
+  translations. The same goes for Level 3's lettering and the Observer's warning, which now
+  shrinks to fit or takes two lines.
+- The notes and the credits now agree on who Rowan, Daniel and the Observer are.
 
 Earlier versions: see [Releases](https://github.com/Daio7771/EveryTunnelMod/releases).

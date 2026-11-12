@@ -91,7 +91,7 @@ Play with headphones.
 ## Good to know
 
 - **Singleplayer**, Fabric only, Minecraft 1.20.1 only.
-- **This is a demo** of the first four levels. More of the Noname Complex is planned.
+- **This is Chapter 1** (Levels 1 to 5). More of the Noname Complex is planned.
 - The mod replaces the title screen with its own menu. **Ctrl+Shift+V** switches to
   Minecraft's title screen and back (other worlds, multiplayer).
 - The mod only changes worlds that contain its levels. Your other worlds stay vanilla.
