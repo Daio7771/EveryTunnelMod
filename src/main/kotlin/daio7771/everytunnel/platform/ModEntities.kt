@@ -100,6 +100,15 @@ object ModEntities {
             .trackRangeBlocks(64)
             .build()
 
+    /** The director, in his chair at the top of Level 5 ([DirectorHooks]). Never saved. */
+    val DIRECTOR: EntityType<DirectorEntity> =
+        FabricEntityTypeBuilder.create<DirectorEntity>(SpawnGroup.MISC) { type, world -> DirectorEntity(type, world) }
+            .dimensions(EntityDimensions.fixed(0.8f, 1.2f))
+            .disableSaving()
+            .disableSummon()
+            .trackRangeBlocks(64)
+            .build()
+
     /** A test subject in its sealed chamber (Level 5, [SubjectHooks]). Never saved. */
     val SUBJECT: EntityType<SubjectEntity> =
         FabricEntityTypeBuilder.create<SubjectEntity>(SpawnGroup.MISC) { type, world -> SubjectEntity(type, world) }
@@ -135,6 +144,7 @@ object ModEntities {
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "lab_figure"), LAB_FIGURE)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "subject"), SUBJECT)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "dead_guard"), DEAD_GUARD)
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "director"), DIRECTOR)
         FabricDefaultAttributeRegistry.register(LAB_FIGURE, LabFigureEntity.createAttributes())
     }
 }

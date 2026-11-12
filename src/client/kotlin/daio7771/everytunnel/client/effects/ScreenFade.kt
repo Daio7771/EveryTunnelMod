@@ -9,7 +9,8 @@ import net.minecraft.util.Util
 
 /**
  * Black over the whole screen, faded in and out by the server (`platform.DeathHooks`:
- * dying fades to black, the restart at the level start fades back in). Drawn over the
+ * dying fades to black, the restart at the level start fades back in), and out of a skipped
+ * cinematic's black (`client.cutscene.CutsceneView`). Drawn over the
  * HUD; fades in real time, so it keeps going while the game is paused.
  */
 object ScreenFade {
@@ -28,7 +29,7 @@ object ScreenFade {
         HudRenderCallback.EVENT.register { context, _ -> render(context) }
     }
 
-    private fun fadeTo(darkness: Float, seconds: Float) {
+    fun fadeTo(darkness: Float, seconds: Float) {
         from = current()
         to = darkness.coerceIn(0f, 1f)
         startMs = Util.getMeasuringTimeMs()

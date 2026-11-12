@@ -94,6 +94,7 @@ object DebugCommands {
                         .then(CommandManager.literal("cloud").executes { spawn(it, "cloud") }),
                 )
                 .then(CommandManager.literal("intro").executes(::intro))
+                .then(CommandManager.literal("director").executes(::director))
                 .then(CommandManager.literal("newgame").executes(::newGame))
                 .then(
                     CommandManager.literal("setlevel")
@@ -160,6 +161,16 @@ object DebugCommands {
             }
         }
         return levels.size
+    }
+
+    /** Before the director's door, his scene ready to play again (Level 5 must stand: `setlevel 5` first). */
+    private fun director(context: CommandContext<ServerCommandSource>): Int {
+        if (!DirectorSceneHooks.again(context.source.playerOrThrow)) {
+            reply(context, "Level 5 has no director's door point.")
+            return 0
+        }
+        reply(context, "Before the director's door: open it to see his scene.")
+        return 1
     }
 
     private fun where(context: CommandContext<ServerCommandSource>): Int {

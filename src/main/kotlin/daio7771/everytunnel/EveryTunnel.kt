@@ -15,6 +15,7 @@ import daio7771.everytunnel.platform.DeathHooks
 import daio7771.everytunnel.platform.DebugCommands
 import daio7771.everytunnel.platform.DevWorlds
 import daio7771.everytunnel.platform.DeepWaterHooks
+import daio7771.everytunnel.platform.DirectorSceneHooks
 import daio7771.everytunnel.platform.DistortionHooks
 import daio7771.everytunnel.platform.DrainHooks
 import daio7771.everytunnel.platform.EndingHooks
@@ -116,6 +117,7 @@ object EveryTunnel : ModInitializer {
         ChemicalHooks.register()
         DrainHooks.register()
         DeepWaterHooks.register()
+        DirectorSceneHooks.register()
         KeptEntities.register()
         LabHallHooks.register()
         LoungePuzzleHooks.register()

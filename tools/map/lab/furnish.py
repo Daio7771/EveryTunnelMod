@@ -307,6 +307,11 @@ POINTS = [
     ("junior_junction", 3, 190, 55, "west", ["distortion_junior"]),
     ("hunters_cistern", 3, 202, 73, "north", ["hunters"]),
     ("dead_guard", 3, 160, 49, "south", ["dead_guard"]),
+    # The director, in his chair behind the desk, facing the door (DirectorHooks; his cinematic,
+    # DirectorScene, plays round him).
+    ("director", 3, 257, 59, "west", ["director"]),
+    # In the anteroom, before his door: where `/everytunnel director` puts you to see his scene again.
+    ("director_door_outside", 3, 240, 59, "east", ["director_debug"]),
 ]
 
 
@@ -470,7 +475,8 @@ class Furnish:
         for tid, layer, x, z, _ in TERMINALS:
             out.append({"id": tid, "pos": self.centre(x, self.lab.floors[(layer, x, z)] + 2, z), "yaw": 0, "tags": ["terminal"]})
         for pid, layer, x, z, facing, tags in POINTS:
-            out.append({"id": pid, "pos": self.centre(x, self.floor(layer) + 1, z), "yaw": yaw(facing), "tags": tags})
+            y = self.lab.floors.get((layer, x, z), self.floor(layer)) + 1      # on a raised floor (the office), on it
+            out.append({"id": pid, "pos": self.centre(x, y, z), "yaw": yaw(facing), "tags": tags})
         return out
 
     def centre(self, x, y, z):

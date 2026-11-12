@@ -192,6 +192,7 @@
   "message.every_tunnel.observer_coming": "He's coming. Hide.",
   "message.every_tunnel.observer_near": "He's near. Hide.",
   "message.every_tunnel.locker_exit": "Sneak (%s) or right-click to step out",
+  "message.every_tunnel.skip_scene": "Press %s again to skip",
   "sign.every_tunnel.room.archive": "Archive",
   "sign.every_tunnel.room.meeting_room": "Meeting room",
   "sign.every_tunnel.room.management": "Management",
@@ -422,5 +423,6 @@
   "block.every_tunnel.trophy_cup": "Trophy Cup",
   "block.every_tunnel.crystal_award": "Crystal Award",
   "block.every_tunnel.month_plaque": "Employee of the Month Plaque",
-  "block.every_tunnel.monitor_bank": "CCTV Screen"
+  "block.every_tunnel.monitor_bank": "CCTV Screen",
+  "entity.every_tunnel.director": "The Director"
 }

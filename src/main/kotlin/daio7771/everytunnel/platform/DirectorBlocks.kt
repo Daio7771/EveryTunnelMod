@@ -9,6 +9,7 @@ import net.minecraft.block.DoorBlock
 import net.minecraft.block.ShapeContext
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.DirectionProperty
 import net.minecraft.state.property.EnumProperty
@@ -26,7 +27,8 @@ import net.minecraft.world.World
 
 /**
  * One leaf of a pair of doors that open together (Level 5's director's door): opening or shutting one by hand
- * does the same to the leaf beside it, the same block facing the same way, hinged on the other side.
+ * does the same to the leaf beside it, the same block facing the same way, hinged on the other side. Opening
+ * the director's starts his scene ([DirectorSceneHooks]).
  */
 class PairedDoorBlock(settings: Settings, type: BlockSetType) : DoorBlock(settings, type) {
 
@@ -37,6 +39,7 @@ class PairedDoorBlock(settings: Settings, type: BlockSetType) : DoorBlock(settin
         if (!result.isAccepted) return result
         val now = world.getBlockState(pos)
         if (!now.isOf(this)) return result
+        if (now.get(OPEN) && player is ServerPlayerEntity) DirectorSceneHooks.doorOpened(player)
         val facing = now.get(FACING)
         for (side in listOf(facing.rotateYClockwise(), facing.rotateYCounterclockwise())) {
             val other = pos.offset(side)
