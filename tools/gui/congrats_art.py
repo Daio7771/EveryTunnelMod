@@ -1,13 +1,18 @@
 """
-The congratulations window's pixel art (client/screen/CongratulationsScreen.kt): the Observer, sat on a
-chair with a cup of coffee, at the end of his shift. 40x48 pixels, drawn on a white window, so outlined in near
-black like the achievement icons. His look is the model's (tools/entity/observer.py): a blank grey head, a black
-suit, a white shirt, a dark red tie, white gloves.
+The congratulations window's pixel art (client/screen/CongratulationsScreen.kt): the Observer, sat with a cup of
+coffee at the end of his shift, animated: the steam rises, and now and then he drinks. 48x48 pixels a frame, on a
+white window, so outlined in near black like the achievement icons. His look is the model's
+(tools/entity/observer.py): a blank grey head, a black suit, a white shirt, a dark red tie, white gloves.
+
+The sheet is 4 columns by 4 rows of frames: the column is the pose of his right arm (0 the cup at his side, 1
+rising, 2 at his head, 3 tilted to drink) and the row the phase of the steam (0 to 3; there is none at the head).
+The window picks the frames in the order of TIMELINE below, which CongratulationsScreen.kt repeats.
 
 Run after changing anything here (from the repository root):   python3 tools/gui/congrats_art.py
 
-Writes src/main/resources/assets/every_tunnel/textures/gui/congrats_observer.png (committed) and
-tools/gui/output/congrats_observer_preview.png (git-ignored; enlarged, on the window's white).
+Writes src/main/resources/assets/every_tunnel/textures/gui/congrats_observer.png (192x192, committed) and, in
+tools/gui/output/ (git-ignored), congrats_observer_preview.png (the sheet, enlarged) and
+congrats_observer_preview.gif (the animation, enlarged).
 """
 
 from pathlib import Path
@@ -19,6 +24,8 @@ TEXTURE = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel" / "tex
 OUT = Path(__file__).resolve().parent / "output"
 
 W, H = 48, 48
+POSES = 4
+PHASES = 4
 
 OUTLINE = (20, 21, 26, 255)
 HEAD = (156, 162, 170, 255)
@@ -37,53 +44,87 @@ SHOE = (26, 27, 32, 255)
 SHOE_LIGHT = (70, 72, 82, 255)
 CHAIR = (96, 101, 112, 255)
 CHAIR_LIGHT = (130, 136, 148, 255)
-CHAIR_SHADE = (66, 70, 80, 255)
 CUP = (244, 242, 236, 255)
 CUP_SHADE = (204, 200, 190, 255)
 COFFEE = (104, 64, 38, 255)
 STEAM = (176, 182, 192, 255)
+STEAM_FAINT = (204, 208, 216, 255)
+
+# The animation: (pose, steam phase, milliseconds), looped. About 6 seconds: the cup steams at his side, he lifts it,
+# sips twice, and puts it back.
+TIMELINE = (
+    [(0, k % 4, 300) for k in range(12)]
+    + [(1, 0, 350), (2, 1, 350), (3, 0, 550), (2, 2, 250), (3, 0, 550), (2, 3, 300), (1, 1, 300)]
+)
+
+# The right hand (its middle) in each pose, and the cup's top left corner.
+HAND = [(35, 23), (34, 16), (33, 11), (34, 9)]
+CUP_AT = [(36, 18), (35, 8), (28, 2), None]
 
 
-def new():
-    return Image.new("RGBA", (W, H), (0, 0, 0, 0))
+def new(size=(W, H)):
+    return Image.new("RGBA", size, (0, 0, 0, 0))
 
 
 def rect(img, x0, y0, x1, y1, colour):
     """Fills x0..x1, y0..y1 inclusive."""
     for y in range(y0, y1 + 1):
         for x in range(x0, x1 + 1):
-            img.putpixel((x, y), colour)
+            if 0 <= x < img.width and 0 <= y < img.height:
+                img.putpixel((x, y), colour)
 
 
 def px(img, points, colour):
     for x, y in points:
-        img.putpixel((x, y), colour)
+        if 0 <= x < img.width and 0 <= y < img.height:
+            img.putpixel((x, y), colour)
+
+
+def thick_line(img, a, b, half, colour):
+    """A line from a to b, 2 * half + 1 pixels across."""
+    (x0, y0), (x1, y1) = a, b
+    steps = max(abs(x1 - x0), abs(y1 - y0), 1)
+    for i in range(steps + 1):
+        x = round(x0 + (x1 - x0) * i / steps)
+        y = round(y0 + (y1 - y0) * i / steps)
+        rect(img, x - half, y - half, x + half, y + half, colour)
 
 
 def outline(img):
     """A one pixel outline round everything drawn, in near black."""
     src = img.copy()
-    for y in range(H):
-        for x in range(W):
+    for y in range(img.height):
+        for x in range(img.width):
             if src.getpixel((x, y))[3] != 0:
                 continue
             for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                 nx, ny = x + dx, y + dy
-                if 0 <= nx < W and 0 <= ny < H and src.getpixel((nx, ny))[3] != 0:
+                if 0 <= nx < img.width and 0 <= ny < img.height and src.getpixel((nx, ny))[3] != 0:
                     img.putpixel((x, y), OUTLINE)
                     break
 
 
-def draw():
+def cup_image():
+    """The cup upright, 10x9: the coffee on top, the handle on the right."""
+    cup = new((10, 9))
+    rect(cup, 0, 0, 6, 7, CUP)
+    rect(cup, 6, 0, 6, 7, CUP_SHADE)
+    rect(cup, 0, 0, 6, 1, COFFEE)
+    rect(cup, 7, 2, 8, 2, CUP)
+    rect(cup, 8, 3, 8, 5, CUP)
+    rect(cup, 7, 6, 7, 6, CUP)
+    return cup
+
+
+def body():
+    """Everything of him that does not move: the chair, legs, torso, head and his left arm."""
     img = new()
 
-    # The chair: a backrest peeking out on both sides of him, and the seat.
-    rect(img, 8, 17, 31, 26, CHAIR)
-    rect(img, 8, 17, 31, 18, CHAIR_LIGHT)
-    rect(img, 30, 19, 31, 26, CHAIR_SHADE)
-    rect(img, 7, 31, 32, 34, CHAIR)
-    rect(img, 7, 31, 32, 31, CHAIR_LIGHT)
-    rect(img, 7, 34, 32, 34, CHAIR_SHADE)
+    # The chair: a seat no wider than he is, and a stem between his knees (so nothing sticks out like a hand).
+    rect(img, 10, 31, 29, 34, CHAIR)
+    rect(img, 10, 31, 29, 31, CHAIR_LIGHT)
+    rect(img, 19, 35, 20, 43, CHAIR)
+    rect(img, 16, 44, 23, 45, CHAIR)
 
     # Legs and shoes: sat, knees forward, feet flat on the floor.
     for x0 in (12, 22):
@@ -105,7 +146,6 @@ def draw():
     rect(img, 19, 18, 20, 26, TIE)
     px(img, [(20, y) for y in range(18, 27)], TIE_SHADE)
     px(img, [(19, 27), (20, 27)], TIE_SHADE)
-    # The jacket's buttons.
     px(img, [(19, 29), (20, 29), (19, 32)], SUIT_LIGHT)
 
     # The neck and the head: a blank grey cube.
@@ -116,46 +156,82 @@ def draw():
     rect(img, 25, 3, 26, 11, HEAD_SHADE)
     rect(img, 13, 10, 26, 11, HEAD_SHADE)
 
-    # His left arm (to our left) rests on his knee, the glove on it.
-    rect(img, 7, 16, 10, 28, SUIT)
-    rect(img, 7, 16, 7, 28, SUIT_LIGHT)
-    rect(img, 8, 29, 11, 32, GLOVE)
-    rect(img, 8, 29, 8, 32, GLOVE)
-    rect(img, 11, 29, 11, 32, GLOVE_SHADE)
+    # His left arm (to our left) hangs, the glove resting at the hem of his jacket.
+    rect(img, 7, 16, 10, 29, SUIT)
+    rect(img, 7, 16, 7, 29, SUIT_LIGHT)
+    rect(img, 8, 30, 11, 33, GLOVE)
+    rect(img, 11, 30, 11, 33, GLOVE_SHADE)
+    return img
 
-    # His right arm (to our right): the sleeve comes out at the elbow and the glove holds the cup up beside him.
+
+def right_arm(img, pose):
+    """His right arm (to our right) and the cup, in [pose]."""
+    # The upper arm hangs from the shoulder; the forearm goes from the elbow to the hand.
     rect(img, 29, 16, 32, 25, SUIT)
     rect(img, 31, 16, 32, 25, SUIT_SHADE)
-    rect(img, 29, 24, 34, 27, SUIT)
-    rect(img, 29, 27, 34, 27, SUIT_SHADE)
-    rect(img, 34, 21, 37, 26, GLOVE)
-    rect(img, 34, 26, 37, 26, GLOVE_SHADE)
+    hx, hy = HAND[pose]
+    thick_line(img, (31, 25), (hx - 1, hy + 1), 1, SUIT)
+    rect(img, hx - 1, hy - 2, hx + 2, hy + 2, GLOVE)
+    rect(img, hx - 1, hy + 2, hx + 2, hy + 2, GLOVE_SHADE)
+    cup = cup_image()
+    if CUP_AT[pose] is not None:
+        img.alpha_composite(cup, CUP_AT[pose])
+    else:
+        # Tilted to drink: the rim to his head. Turned about its middle, then put where he holds it.
+        tilted = cup.rotate(48, expand=True, resample=Image.NEAREST)
+        img.alpha_composite(tilted, (27, 0))
+    # The hand over the cup's handle, so that he holds it.
+    rect(img, hx, hy - 1, hx + 2, hy + 1, GLOVE)
 
-    # The cup, steaming, against the white above his shoulder.
-    rect(img, 36, 18, 42, 25, CUP)
-    rect(img, 42, 18, 42, 25, CUP_SHADE)
-    rect(img, 36, 18, 42, 19, COFFEE)
-    rect(img, 43, 20, 44, 20, CUP)            # the handle
-    rect(img, 44, 21, 44, 23, CUP)
-    rect(img, 43, 24, 43, 24, CUP)
 
+def steam(img, pose, phase):
+    """Two wisps over the cup, swaying as they rise; none at his head."""
+    if pose > 1:
+        return
+    top = CUP_AT[pose][1] - 2
+    left = CUP_AT[pose][0]
+    sway = (0, 1, 0, -1)
+    for base, offset in ((left + 2, 0), (left + 6, 2)):
+        for i in range(5):
+            x = base + sway[(i + phase + offset) % 4]
+            y = top - i
+            if y >= 0:
+                img.putpixel((x, y), STEAM if i < 3 else STEAM_FAINT)
+
+
+def frame(pose, phase):
+    img = body()
+    right_arm(img, pose)
     outline(img)
-    # The steam, two wisps, drawn after the outline so that it stays thin and light.
-    px(img, [(38, 16), (39, 15), (38, 14), (39, 13), (38, 12)], STEAM)
-    px(img, [(42, 15), (41, 14), (42, 13), (41, 12), (42, 11)], STEAM)
+    steam(img, pose, phase)
     return img
 
 
 def main():
-    img = draw()
+    sheet = new((W * POSES, H * PHASES))
+    frames = {}
+    for pose in range(POSES):
+        for phase in range(PHASES):
+            f = frame(pose, phase)
+            frames[(pose, phase)] = f
+            sheet.paste(f, (pose * W, phase * H))
     TEXTURE.parent.mkdir(parents=True, exist_ok=True)
-    img.save(TEXTURE)
+    sheet.save(TEXTURE)
     OUT.mkdir(parents=True, exist_ok=True)
-    scale = 10
-    sheet = Image.new("RGBA", (W * scale + 40, H * scale + 40), (255, 255, 255, 255))
-    sheet.alpha_composite(img.resize((W * scale, H * scale), Image.NEAREST), (20, 20))
-    sheet.save(OUT / "congrats_observer_preview.png")
-    print(f"wrote {TEXTURE}")
+
+    scale = 6
+    big = Image.new("RGBA", (sheet.width * scale + 20, sheet.height * scale + 20), (255, 255, 255, 255))
+    big.alpha_composite(sheet.resize((sheet.width * scale, sheet.height * scale), Image.NEAREST), (10, 10))
+    big.save(OUT / "congrats_observer_preview.png")
+
+    gif = []
+    for pose, phase, _ in TIMELINE:
+        shot = Image.new("RGBA", (W * 8, H * 8), (255, 255, 255, 255))
+        shot.alpha_composite(frames[(pose, phase)].resize((W * 8, H * 8), Image.NEAREST))
+        gif.append(shot.convert("P", palette=Image.ADAPTIVE))
+    gif[0].save(OUT / "congrats_observer_preview.gif", save_all=True, append_images=gif[1:],
+                duration=[ms for _, _, ms in TIMELINE], loop=0, disposal=2)
+    print(f"wrote {TEXTURE} ({sheet.width}x{sheet.height}); loop {sum(ms for *_, ms in TIMELINE)} ms")
 
 
 if __name__ == "__main__":

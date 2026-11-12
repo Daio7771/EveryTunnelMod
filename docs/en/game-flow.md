@@ -583,7 +583,7 @@ The game ends down Level 5's false exit, past the director (`platform.FalseExitH
    lang keys `every_tunnel.credits.*`.
 5. At the end, or with Esc at any moment (the song and the screen fade out), the world is saved and
    the main menu comes back, and over it the **congratulations window** (`CongratulationsScreen`):
-   a white panel with the Observer sat with a coffee (`tools/gui/congrats_art.py`), a thank-you
+   a white panel with the Observer sat with a coffee, animated: the steam rises and he sips (`tools/gui/congrats_art.py`), a thank-you
    (`screen.every_tunnel.congrats.*`) and the time played and deaths of the whole game, summed over its
    sessions (`PlayerProgress.playTicks` and `deaths`, kept by `RunStatsHooks` and `DeathHooks`, sent in
    `ending`). It earns "Nothing in There" (the first time ever) and shows every time the game is finished.

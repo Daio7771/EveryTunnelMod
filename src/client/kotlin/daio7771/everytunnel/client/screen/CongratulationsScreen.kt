@@ -15,13 +15,14 @@ import net.minecraft.util.Util
 
 /**
  * The congratulations window, over the main menu once the final credits are done (or skipped with Esc): a clean white
- * panel with the Observer sat with his coffee (`congrats_observer.png`, `tools/gui/congrats_art.py`), a title, a few
+ * panel with the Observer sat with his coffee, steaming and sipping (`congrats_observer.png`, `tools/gui/congrats_art.py`), a title, a few
  * paragraphs of thanks, the time played and the deaths of the whole game ([RunSummary]) and a button that closes it.
  * Enter, Space, Esc or a click on the button close it, back to the menu underneath ([parent]).
  *
  * With [award], opening it earns [Achievement.NOTHING_THERE] (the first time ever: its toast shows over the window).
  * The texts are the lang keys `screen.every_tunnel.congrats.*` (paragraphs split at "\n"). Everything is laid out
- * from the window's size and the translation's length: the art comes down a size, or goes, when there is no room.
+ * from the window's size and the translation's length: the art comes down a size, then moves beside the text, when
+ * there is no room above it.
  */
 class CongratulationsScreen(
     private val parent: Screen?,
@@ -46,40 +47,58 @@ class CongratulationsScreen(
 
     private class Layout(
         val left: Int, val top: Int, val width: Int, val height: Int,
-        val artScale: Int, val artY: Int,
+        /** The art: where, and at what size (0: none). */
+        val artX: Int, val artY: Int, val artScale: Int,
         val titleY: Int,
+        /** The column of text and numbers: its centre and its width. */
+        val columnCentre: Int, val columnWidth: Int,
         val bodyY: Int, val paragraphs: List<List<OrderedText>>,
         val statsY: Int,
         val buttonX: Int, val buttonY: Int, val buttonW: Int,
     )
 
-    /** Where everything goes in a window of this size, in the player's language. */
+    /**
+     * Where everything goes in a window of this size, in the player's language. First the art above the title, as big as
+     * fits; if the window is too short for that, the art beside the text, which takes no height of its own; and if
+     * that does not fit either, it is the one used all the same.
+     */
     private fun layout(): Layout {
-        val panelW = minOf(PANEL_MAX, width - 2 * EDGE).coerceAtLeast(120)
-        val textW = panelW - 2 * PAD
         val texts = Text.translatable("screen.every_tunnel.congrats.text").string.split("\n")
-        val paragraphs = texts.map { textRenderer.wrapLines(Text.literal(it), textW) }
+        val room = height - 2 * EDGE
+        for (scale in ART_SCALES) {
+            val above = arranged(PANEL_MAX, scale, true, texts)
+            if (above.height <= room) return above
+        }
+        return arranged(PANEL_WIDE, ART_SCALES.last(), false, texts)
+    }
+
+    private fun arranged(panelMax: Int, scale: Int, above: Boolean, texts: List<String>): Layout {
+        val panelW = minOf(panelMax, width - 2 * EDGE).coerceAtLeast(120)
+        val artW = ART_W * scale
+        // Beside the text, the art needs a column of its own; with no room for one it is left out.
+        val beside = !above && panelW - 2 * PAD - artW - ART_GAP >= MIN_COLUMN
+        val artScale = if (above || beside) scale else 0
+        val columnW = if (beside) panelW - 2 * PAD - artW - ART_GAP else panelW - 2 * PAD
+        val paragraphs = texts.map { textRenderer.wrapLines(Text.literal(it), columnW) }
         val bodyH = paragraphs.sumOf { it.size * LINE + PARAGRAPH_GAP } - PARAGRAPH_GAP
         val titleH = (textRenderer.fontHeight * TITLE_SCALE).toInt()
-        val statsH = STATS_H
-        val fixed = PAD_Y + titleH + 8 + bodyH + 10 + statsH + 12 + BUTTON_H + PAD_Y
-        // The biggest art that leaves the panel inside the window (and none if even the smallest does not).
-        val scale = ART_SCALES.firstOrNull { fixed + ART_H * it + 8 <= height - 2 * EDGE } ?: 0
-        val artH = if (scale > 0) ART_H * scale + 8 else 0
-        val panelH = fixed + artH
-        val top = ((height - panelH) / 2).coerceAtLeast(EDGE / 2)
+        val textH = bodyH + 10 + STATS_H
+        val aboveH = if (above) ART_H * scale + 8 else 0
+        val middleH = if (beside) maxOf(ART_H * scale, textH) else textH
+        val panelH = PAD_Y + aboveH + titleH + 8 + middleH + 12 + BUTTON_H + PAD_Y
         val left = (width - panelW) / 2
-        var y = top + PAD_Y
-        val artY = y
-        y += artH
-        val titleY = y
-        y += titleH + 8
-        val bodyY = y
-        y += bodyH + 10
-        val statsY = y
-        y += statsH + 12
+        val top = ((height - panelH) / 2).coerceAtLeast(EDGE / 2)
+        val titleY = top + PAD_Y + aboveH
+        val middleY = titleY + titleH + 8
+        val bodyY = middleY + (middleH - textH) / 2
+        val artX = if (beside) left + PAD else left + (panelW - artW) / 2
+        val artY = if (beside) middleY + (middleH - ART_H * scale) / 2 else top + PAD_Y
+        val columnCentre = if (beside) left + PAD + artW + ART_GAP + columnW / 2 else left + panelW / 2
         val buttonW = maxOf(BUTTON_MIN_W, textRenderer.getWidth(Text.translatable("screen.every_tunnel.congrats.close")) + 28)
-        return Layout(left, top, panelW, panelH, scale, artY, titleY, bodyY, paragraphs, statsY, left + (panelW - buttonW) / 2, y, buttonW)
+        return Layout(
+            left, top, panelW, panelH, artX, artY, artScale, titleY, columnCentre, columnW, bodyY, paragraphs,
+            bodyY + bodyH + 10, left + (panelW - buttonW) / 2, top + panelH - PAD_Y - BUTTON_H, buttonW,
+        )
     }
 
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
@@ -97,34 +116,33 @@ class CongratulationsScreen(
     }
 
     private fun content(context: DrawContext, l: Layout, mouseX: Int, mouseY: Int, fade: Float) {
-        val centre = l.left + l.width / 2
         if (l.artScale > 0) {
-            val w = ART_W * l.artScale
             RenderSystem.enableBlend()
             context.setShaderColor(1f, 1f, 1f, fade)
-            context.drawTexture(ART, centre - w / 2, l.artY, w, ART_H * l.artScale, 0f, 0f, ART_W, ART_H, ART_W, ART_H)
+            val shot = shotAt(Util.getMeasuringTimeMs() - openedAt)
+            context.drawTexture(ART, l.artX, l.artY, ART_W * l.artScale, ART_H * l.artScale, (shot.pose * ART_W).toFloat(), (shot.phase * ART_H).toFloat(), ART_W, ART_H, SHEET_W, SHEET_H)
             context.setShaderColor(1f, 1f, 1f, 1f)
             RenderSystem.disableBlend()
         }
         val title = Text.translatable("screen.every_tunnel.congrats.title").styled { it.withBold(true) }
+        val panelCentre = l.left + l.width / 2
         context.matrices.push()
         context.matrices.scale(TITLE_SCALE, TITLE_SCALE, 1f)
-        context.drawText(textRenderer, title, ((centre - textRenderer.getWidth(title) * TITLE_SCALE / 2) / TITLE_SCALE).toInt(), (l.titleY / TITLE_SCALE).toInt(), faded(fade, INK), false)
+        context.drawText(textRenderer, title, ((panelCentre - textRenderer.getWidth(title) * TITLE_SCALE / 2) / TITLE_SCALE).toInt(), (l.titleY / TITLE_SCALE).toInt(), faded(fade, INK), false)
         context.matrices.pop()
 
         var y = l.bodyY
         for (paragraph in l.paragraphs) {
             for (line in paragraph) {
-                context.drawText(textRenderer, line, centre - textRenderer.getWidth(line) / 2, y, faded(fade, INK), false)
+                context.drawText(textRenderer, line, l.columnCentre - textRenderer.getWidth(line) / 2, y, faded(fade, INK), false)
                 y += LINE
             }
             y += PARAGRAPH_GAP
         }
 
-        // The two numbers of the game, side by side: a small label over each value.
-        val columnW = l.width / 2 - PAD
-        stat(context, "screen.every_tunnel.congrats.time", summary.time(), centre - columnW / 2 - STATS_GAP, l.statsY, fade)
-        stat(context, "screen.every_tunnel.congrats.deaths", summary.deaths.toString(), centre + columnW / 2 + STATS_GAP, l.statsY, fade)
+        // The two numbers of the game, side by side in the text's column: a small label over each value.
+        stat(context, "screen.every_tunnel.congrats.time", summary.time(), l.columnCentre - l.columnWidth / 4, l.statsY, fade)
+        stat(context, "screen.every_tunnel.congrats.deaths", summary.deaths.toString(), l.columnCentre + l.columnWidth / 4, l.statsY, fade)
 
         val over = overButton(l, mouseX, mouseY)
         context.fill(l.buttonX, l.buttonY, l.buttonX + l.buttonW, l.buttonY + BUTTON_H, faded(fade, if (over) BUTTON_HOVER else BUTTON))
@@ -160,6 +178,16 @@ class CongratulationsScreen(
         return super.keyPressed(keyCode, scanCode, modifiers)
     }
 
+    /** The frame of the Observer's animation [elapsedMs] after the window opened: the timeline, looped. */
+    private fun shotAt(elapsedMs: Long): Shot {
+        var left = elapsedMs.coerceAtLeast(0) % CYCLE_MS
+        for (shot in TIMELINE) {
+            if (left < shot.ms) return shot
+            left -= shot.ms
+        }
+        return TIMELINE.first()
+    }
+
     /** [colour] with its alpha scaled by [fade]. */
     private fun faded(fade: Float, colour: Int): Int {
         val a = ((colour ushr 24) * fade).toInt().coerceIn(0, 255)
@@ -168,12 +196,29 @@ class CongratulationsScreen(
 
     companion object {
         private val ART = Identifier(EveryTunnel.MOD_ID, "textures/gui/congrats_observer.png")
+        /** One frame of the sheet, and the sheet: 4 poses of his arm across, 4 phases of the steam down. */
         private const val ART_W = 48
         private const val ART_H = 48
+        private const val SHEET_W = 192
+        private const val SHEET_H = 192
+
+        /** A frame of the animation: the pose, the steam's phase and how long it shows (the same as `tools/gui/congrats_art.py`). */
+        private class Shot(val pose: Int, val phase: Int, val ms: Int)
+
+        /** The steam rises at his side for 3.6 s; he lifts the cup, sips twice and puts it back: about 6 s in a loop. */
+        private val TIMELINE = List(12) { Shot(0, it % 4, 300) } + listOf(
+            Shot(1, 0, 350), Shot(2, 1, 350), Shot(3, 0, 550), Shot(2, 2, 250), Shot(3, 0, 550), Shot(2, 3, 300), Shot(1, 1, 300),
+        )
+        private val CYCLE_MS = TIMELINE.sumOf { it.ms }.toLong()
         /** The sizes the art is drawn at, biggest first. */
         private val ART_SCALES = listOf(2, 1)
 
+        /** The panel's widest: with the art above the title, and with it beside the text. */
         private const val PANEL_MAX = 300
+        private const val PANEL_WIDE = 360
+        private const val ART_GAP = 14
+        /** The least a column of text may be before the art beside it is left out. */
+        private const val MIN_COLUMN = 150
         private const val EDGE = 8
         private const val PAD = 18
         private const val PAD_Y = 14
@@ -182,7 +227,6 @@ class CongratulationsScreen(
         private const val TITLE_SCALE = 1.6f
         private const val VALUE_SCALE = 1.5f
         private const val STATS_H = 30
-        private const val STATS_GAP = 0
         private const val BUTTON_H = 18
         private const val BUTTON_MIN_W = 80
         private const val SHADOW = 3

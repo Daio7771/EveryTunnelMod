@@ -621,7 +621,7 @@ El juego termina en la falsa salida del nivel 5, pasado el director (`platform.F
    las claves de idioma `every_tunnel.credits.*`.
 5. Al acabar, o con Esc en cualquier momento (la canción y la pantalla se funden), se guarda el mundo
    y vuelve el menú principal, y sobre él la **ventana de felicitación** (`CongratulationsScreen`):
-   un panel blanco con el Observer sentado con un café (`tools/gui/congrats_art.py`), un
+   un panel blanco con el Observer sentado con un café, animado: sube el vapor y da sorbos (`tools/gui/congrats_art.py`), un
    agradecimiento (`screen.every_tunnel.congrats.*`) y el tiempo jugado y las muertes de toda la partida,
    sumados entre sus sesiones (`PlayerProgress.playTicks` y `deaths`, que llevan `RunStatsHooks` y
    `DeathHooks`, enviados en `ending`). Da "Ahí no hay nada" (la primera vez) y sale cada vez que se
