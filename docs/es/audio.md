@@ -15,6 +15,9 @@ y la respiración del Pale man, su propio latido, cuánto ruido hacen sus propio
   créditos finales, `fabric.mod.json`).
 - **Nada de música con IA.** Los servicios gratuitos de música con IA solo permiten uso no
   comercial.
+- **Una excepción con IA: la voz del director.** Sus líneas en la cinemática del nivel 5, y
+  las frases que repite después, son voces de la biblioteca de ElevenLabs (plan de pago, no
+  clonadas), generadas por el usuario y entregadas como archivos mono. Nada más es IA.
 - **Archivos secos.** Los sonidos no llevan reverberación: Sound Physics Remastered añade la
   reverberación y el sonido amortiguado tras los muros dentro del juego. Las ejecuciones de
   desarrollo siempre lo incluyen, para juzgar los sonidos con él.

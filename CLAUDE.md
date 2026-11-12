@@ -34,7 +34,9 @@ is the core of the mod.
 - Every feature only acts in worlds with levels (`WorldRules`); vanilla worlds stay vanilla.
 - Generated content (sounds, textures, models, the map) comes from the Python tools in
   `tools/`: change the tool and rerun it, never edit its output by hand.
-- Sounds: synthesized or CC0 only, plus the one credited CC BY song. No AI music or assets.
+- Sounds: synthesized or CC0 only, plus the one credited CC BY song. The one AI exception is the
+  director's voice in Level 5 (ElevenLabs library voices, files from the user). No AI music,
+  other sounds or assets.
 - **Docs are bilingual:** `docs/en/` and `docs/es/` hold the same pages. When a change makes a
   page wrong, fix it in both languages in the same step. The player guide pages
   (`docs/*/guide/`) are shown in game and use a small Markdown subset (see contributing).
