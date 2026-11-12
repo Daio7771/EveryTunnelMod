@@ -38,7 +38,17 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
 
     private val viewTop get() = MARGIN
     private val viewBottom get() = height - MARGIN
-    private val sheetHeight get() = maxOf(PAD_TOP + HEADER_HEIGHT + Achievement.entries.size * ROW_HEIGHT + PAD_BOTTOM, viewBottom - viewTop - SHEET_GAP * 2)
+    private val sheetHeight get() = maxOf(PAD_TOP + HEADER_HEIGHT + Achievement.entries.sumOf { rowHeight(it) } + PAD_BOTTOM, viewBottom - viewTop - SHEET_GAP * 2)
+
+    /** The width the title and the line of an achievement have, beside its icon. */
+    private val lineWidth get() = sheetWidth - PAD_X * 2 - ICON_SIZE - ICON_GAP
+
+    /** An earned achievement's line, wrapped to [lineWidth]: a longer translation takes more lines, never cut short. */
+    private fun lineOf(achievement: Achievement): List<OrderedText> =
+        textRenderer.wrapLines(AchievementToast.description(achievement), lineWidth.coerceAtLeast(40))
+
+    private fun rowHeight(achievement: Achievement): Int =
+        if (achievement in unlocked) ROW_HEIGHT + (lineOf(achievement).size - 1).coerceAtLeast(0) * LINE_STEP else ROW_HEIGHT
 
     override fun init() {
         unlocked = AchievementStore.unlocked
@@ -103,12 +113,13 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
             if (earned) {
                 val name = AchievementToast.title(achievement).copy().styled { it.withBold(true) }
                 context.drawText(textRenderer, reorder(textRenderer.trimToWidth(name, available)), textX, y + TITLE_Y, Paper.INK_DARK, false)
-                val line = textRenderer.trimToWidth(AchievementToast.description(achievement), available)
-                context.drawText(textRenderer, reorder(line), textX, y + LINE_Y, Paper.INK_SOFT, false)
+                for ((k, line) in lineOf(achievement).withIndex()) {
+                    context.drawText(textRenderer, line, textX, y + LINE_Y + k * LINE_STEP, Paper.INK_SOFT, false)
+                }
             } else {
                 context.drawText(textRenderer, lockedText, textX, y + LOCKED_Y, Paper.INK_SOFT, false)
             }
-            y += ROW_HEIGHT
+            y += rowHeight(achievement)
         }
         context.disableScissor()
     }
@@ -179,6 +190,8 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
         private const val ICON_Y = 6
         private const val TITLE_Y = 5
         private const val LINE_Y = 16
+        /** Each further line of a long achievement line. */
+        private const val LINE_STEP = 10
         private const val LOCKED_Y = 10
 
         private const val WHEEL_STEP = 24.0

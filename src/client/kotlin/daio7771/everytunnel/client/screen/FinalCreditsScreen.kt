@@ -16,6 +16,8 @@ import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.sound.SoundCategory
 import net.minecraft.sound.SoundEvent
+import net.minecraft.text.OrderedText
+import net.minecraft.text.Style
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.Util
@@ -30,7 +32,9 @@ import kotlin.math.pow
  * smaller; the tools, a group at a time; "Thank you for playing"; "Level 6 coming soon" in the archive's purple;
  * black, and back to the title screen (the world saved; the saved game is already erased). Esc at any moment
  * fades the song and the screen out and goes back the same way. Its texts are the lang keys
- * `every_tunnel.credits.*` (lines split at "\n"), in Minecraft's font.
+ * `every_tunnel.credits.*` (lines split at "\n"), in Minecraft's font. Nothing is placed by fixed sizes: a longer
+ * translation wraps its title, shrinks its text and lifts its credits ([layoutOf]) instead of running into them or
+ * off the window's edges.
  *
  * Also here: the fall's music, in the player's head ([FalseExitHooks.FALL_PACKET_ID]).
  */
@@ -95,43 +99,113 @@ class FinalCreditsScreen : Screen(Text.translatable("every_tunnel.credits.the_en
         }
 
         val tx = if (left) half + margin / 2 else margin
-        val column = boxW
-        var y = (height * 0.14).toInt()
-        val heading = Text.translatable("every_tunnel.credits.$name").string
-        val typed = heading.substring(0, FinalCredits.typed(s, heading.length))
+        val layout = layouts.getOrPut(i) { layoutOf(name, boxW, margin) }
         alpha(FinalCredits.inScreen(s, FinalCredits.TITLE_AT))?.let { a ->
+            var typed = FinalCredits.typed(s, layout.headingLength)
             context.matrices.push()
-            context.matrices.scale(TITLE_SCALE, TITLE_SCALE, 1f)
-            context.drawText(textRenderer, typed, (tx / TITLE_SCALE).toInt(), (y / TITLE_SCALE).toInt(), a or WHITE, true)
+            context.matrices.scale(layout.headingScale, layout.headingScale, 1f)
+            for ((k, line) in layout.heading.withIndex()) {
+                if (typed <= 0) break
+                context.drawText(textRenderer, line.take(typed), (tx / layout.headingScale).toInt(), ((layout.headingTop + k * layout.headingStep) / layout.headingScale).toInt(), a or WHITE, true)
+                typed -= line.length + 1
+            }
             context.matrices.pop()
         }
-        y += (textRenderer.fontHeight * TITLE_SCALE).toInt() + 10
-        val paragraphs = Text.translatable("every_tunnel.credits.$name.text").string.split("\n")
-        for ((k, paragraph) in paragraphs.withIndex()) {
-            val a = alpha(FinalCredits.inScreen(s, FinalCredits.lineAt(k, paragraphs.size)))
-            for (line in textRenderer.wrapLines(Text.literal(paragraph), column)) {
-                if (a != null) context.drawText(textRenderer, line, tx, y, a or LIGHT, true)
+        val bodyScale = layout.bodyScale
+        var y = layout.bodyTop / bodyScale
+        context.matrices.push()
+        context.matrices.scale(bodyScale, bodyScale, 1f)
+        for ((k, paragraph) in layout.paragraphs.withIndex()) {
+            val a = alpha(FinalCredits.inScreen(s, FinalCredits.lineAt(k, layout.paragraphs.size)))
+            for (line in paragraph) {
+                if (a != null) context.drawText(textRenderer, line, (tx / bodyScale).toInt(), y.toInt(), a or LIGHT, true)
                 y += textRenderer.fontHeight + 2
             }
             y += 5
         }
+        context.matrices.pop()
 
-        val credits = Text.translatable("every_tunnel.credits.$name.credits").string.split("\n")
-        val cy = (height * 0.80).toInt()
         val a = FinalCredits.inScreen(s, FinalCredits.CREDITS_AT)
-        for ((k, line) in credits.withIndex()) {
-            centred(context, Text.literal(line), cy + (k * (textRenderer.fontHeight + 2) * CREDITS_SCALE).toInt(), a, GREY, CREDITS_SCALE)
+        for ((k, line) in layout.credits.withIndex()) {
+            centred(context, line, layout.creditsTop + k * layout.creditsStep, a, GREY, CREDITS_SCALE)
         }
     }
 
-    /** [texts] centred from [top]: the first in [first]'s colour, the rest in [rest]'s. */
+    /**
+     * Where everything of screen [name] goes, worked out once per size of the window (cleared in [init]) from its
+     * texts in the player's language, which may be longer than English: the title is wrapped to the [column]
+     * and typed over its lines; the credits are wrapped to the window and kept clear of its edges, rising when they
+     * take more lines; and the text between is shrunk (down to [MIN_BODY_SCALE]) until it ends above the credits.
+     */
+    private fun layoutOf(name: String, column: Int, margin: Int): Layout {
+        val heading = Text.translatable("every_tunnel.credits.$name").string
+        // The biggest of the title scales that keeps it to two lines (else the smallest, wrapped as it must).
+        var headingScale = TITLE_SCALES.first()
+        var headingLines = emptyList<String>()
+        for (candidate in TITLE_SCALES) {
+            headingScale = candidate
+            headingLines = textRenderer.textHandler.wrapLines(heading, (column / candidate).toInt(), Style.EMPTY).map { it.string }
+            if (headingLines.size <= 2) break
+        }
+        val headingStep = (textRenderer.fontHeight * headingScale).toInt() + 2
+        val headingTop = (height * 0.14).toInt()
+        val bodyTop = headingTop + headingLines.size * headingStep + 8
+
+        val creditsStep = ((textRenderer.fontHeight + 2) * CREDITS_SCALE).toInt()
+        val credits = Text.translatable("every_tunnel.credits.$name.credits").string.split("\n")
+            .flatMap { textRenderer.wrapLines(Text.literal(it), ((width - margin * 2) / CREDITS_SCALE).toInt()) }
+        val creditsTop = minOf((height * 0.80).toInt(), (height * 0.90).toInt() - credits.size * creditsStep)
+
+        val texts = Text.translatable("every_tunnel.credits.$name.text").string.split("\n")
+        var scale = 1f
+        var paragraphs = texts.map { textRenderer.wrapLines(Text.literal(it), column) }
+        while (scale > MIN_BODY_SCALE && bodyTop + bodyHeight(paragraphs) * scale > creditsTop - BODY_GAP) {
+            scale = (scale - 0.05f).coerceAtLeast(MIN_BODY_SCALE)
+            paragraphs = texts.map { textRenderer.wrapLines(Text.literal(it), (column / scale).toInt()) }
+        }
+        return Layout(headingLines, headingScale, heading.length, headingTop, headingStep, bodyTop, scale, paragraphs, credits, creditsTop, creditsStep)
+    }
+
+    /** The height of the wrapped [paragraphs] at scale 1. */
+    private fun bodyHeight(paragraphs: List<List<OrderedText>>): Int =
+        paragraphs.sumOf { it.size * (textRenderer.fontHeight + 2) + 5 }
+
+    private class Layout(
+        val heading: List<String>,
+        val headingScale: Float,
+        val headingLength: Int,
+        val headingTop: Int,
+        val headingStep: Int,
+        val bodyTop: Int,
+        val bodyScale: Float,
+        val paragraphs: List<List<OrderedText>>,
+        val credits: List<OrderedText>,
+        val creditsTop: Int,
+        val creditsStep: Int,
+    )
+
+    private val layouts = HashMap<Int, Layout>()
+
+    override fun init() {
+        layouts.clear()
+    }
+
+    /** [texts] centred from [top]: the first in [first]'s colour, the rest in [rest]'s. A line too long for the window wraps. */
     private fun lines(context: DrawContext, texts: List<String>, top: Int, opacity: Double, first: Int, rest: Int) {
-        for ((k, line) in texts.withIndex()) {
-            centred(context, Text.literal(line), top + k * (textRenderer.fontHeight + 3) + if (k > 0) 4 else 0, opacity, if (k == 0) first else rest, 1f)
+        var y = top
+        for ((k, text) in texts.withIndex()) {
+            for (line in textRenderer.wrapLines(Text.literal(text), (width * 0.88).toInt())) {
+                centred(context, line, y, opacity, if (k == 0) first else rest, 1f)
+                y += textRenderer.fontHeight + 3
+            }
+            if (k == 0) y += 4
         }
     }
 
-    private fun centred(context: DrawContext, text: Text, y: Int, opacity: Double, colour: Int, scale: Float) {
+    private fun centred(context: DrawContext, text: Text, y: Int, opacity: Double, colour: Int, scale: Float) =
+        centred(context, text.asOrderedText(), y, opacity, colour, scale)
+
+    private fun centred(context: DrawContext, text: OrderedText, y: Int, opacity: Double, colour: Int, scale: Float) {
         val a = alpha(opacity) ?: return
         context.matrices.push()
         context.matrices.scale(scale, scale, 1f)
@@ -208,8 +282,12 @@ class FinalCreditsScreen : Screen(Text.translatable("every_tunnel.credits.the_en
 
     companion object {
         private const val ESCAPE = 256
-        private const val TITLE_SCALE = 1.5f
+        /** The title's scales, biggest first: it takes the first that fits in two lines. */
+        private val TITLE_SCALES = listOf(1.5f, 1.35f, 1.2f)
         private const val CREDITS_SCALE = 0.85f
+        /** The text of a screen shrinks to this at most to end above its credits; the gap kept between them. */
+        private const val MIN_BODY_SCALE = 0.7f
+        private const val BODY_GAP = 6
         private const val SKIP_MS = 1000L
         private const val BLACK = 0xFF000000.toInt()
         private const val WHITE = 0xFFFFFF
