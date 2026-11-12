@@ -132,6 +132,10 @@ Todos los ids son `every_tunnel:<nombre>`. API de red de Fabric (estilo 1.20.1,
 | `ending` | servidor → cliente | `EndingHooks` | Pasar los créditos finales; lleva el tiempo jugado (long, ticks) y las muertes (var int) |
 | `congrats` | servidor → cliente | `EndingHooks` | Desarrollo (`/everytunnel congrats`): abrir la ventana de felicitación, mismo contenido |
 | `false_exit_fall` | servidor → cliente | `FalseExitHooks` | Poner la música de la caída, en la cabeza del jugador |
+| `director_scene_start` | servidor → cliente | `DirectorSceneHooks` | Empezar la escena del director; lleva dónde se sienta (x, y, z como double, orientación como float) |
+| `director_scene_end` | servidor → cliente | `DirectorSceneHooks` | La escena ha terminado; lleva si se saltó (booleano) |
+| `director_scene_skip` | cliente → servidor | `CutsceneView` | El jugador pulsó saltar por segunda vez: acabar la escena ya (sin contenido) |
+| `director_phrase` | servidor → cliente | `DirectorLoopHooks` | Poner una de sus frases tras la escena; lleva su id (cadena) |
 
 El estado del Pale man llega a los clientes como dato sincronizado de la entidad
 (`PaleManEntity.brainState`), no como paquete.
@@ -170,7 +174,7 @@ Las mínimas: una mixin solo donde Fabric API no tiene evento.
 | `LivingEntityMixin` | `LivingEntity.shouldSpawnConsumptionEffects` | Sin el sorbo de vanilla para la botella de agua; tiene sus propios tragos |
 | `ClientPlayerEntityMixin` | `canSprint` | No se puede esprintar agotado (el sprint lo decide el cliente) |
 | `GameRendererMixin` | `tiltViewWhenHurt` (final) | Hace temblar la cámara en el derrumbe del túnel del nivel 3 (`CameraShake`) |
-| `InGameHudMixin` | `renderStatusBars`, `renderExperienceBar` | Oculta las barras de vanilla mientras el HUD del mod las sustituye |
+| `InGameHudMixin` | `render`, `renderStatusBars`, `renderExperienceBar` | Oculta todo el HUD mientras suena una cinemática, y las barras de vanilla mientras el HUD del mod las sustituye |
 | `AbstractClientPlayerEntityMixin` | `getSkinTexture`, `getModel`, `getCapeTexture` | Todos los jugadores llevan el uniforme del vigilante en los mundos con niveles |
 | `LightmapTextureManagerMixin` | `update` (gamma) | El brillo cuenta como Moody en los niveles (algo subido sin shaders en el juego del pasillo de entrada de Level 5) |
 | `MinecraftClientMixin` | `setScreen` | Sustituye la pantalla de título de vanilla por el menú principal |

@@ -18,6 +18,7 @@ the answers. The spawn eggs are in the Every Tunnel tab only in dev runs too.
 | `/everytunnel noise` | The noises of the last 5 seconds near you |
 | `/everytunnel noise watch` | Toggles showing each noise you make in the action bar |
 | `/everytunnel congrats` | Opens the congratulations window with this game's time and deaths so far, earning nothing |
+| `/everytunnel director` | Puts you before the director's door in Level 5 (`setlevel 5` first), his scene ready to play again and his mask back on |
 | `/everytunnel profile on\|off\|report` | The tick profiler (`TickProfiler`): a `[profile]` line in the log every 30 s with the server tick and the cost of each of the mod's tick hooks (average per tick / slowest call, in ms); `report` prints the window so far. `-Devery_tunnel.profile=true` starts it on from the launch |
 | `/everytunnel paleman` | The Pale men near you: state and target |
 | `/everytunnel spawn hunters\|junior\|cloud` | Level 5's enemies in front of you: a group of three Hunters or a Distortion Junior (once: a death in their level clears them, and they do not come back), or a Distortion Cloud, wherever you are |

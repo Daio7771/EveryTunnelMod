@@ -592,13 +592,28 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
     estilos `diploma` y `plaque` de `WallTextBlockEntity`). En su lado sur, una puerta
     (se abre a mano) de salida a un pasillo del garaje del nivel 1,
     recto e iluminado, que acaba en la puerta EXIT cerrada del nivel 1 bajo su cartel. Bajo el final del pasillo hay
-    un pozo de 40 bloques, cerrado por su suelo hasta que la escena del jefe lo rompa.
+    un pozo de 40 bloques, cerrado por su suelo hasta que el jugador lo pisa ([El final](#12-el-final)).
 
 La reconstrucción del mapa al abrir el mundo no toca el nivel 5: la entrada se va con el nivel 4, y nadie
 puede llegar a lo que queda en pie hasta la siguiente construcción. Una partida continuada en el nivel 5
 lo construye tras la pantalla de carga, con el jugador esperando en el pasillo de diplomas (`ContinueGame`); la pared
 del Lobby alrededor de la puerta de la esclusa se construye con los dos niveles, así que queda entera aunque el nivel 4
 no esté.
+
+### La escena del director
+
+Abrir la puerta doble del director (`PairedDoorBlock`) empieza su escena, una vez cada vez que se construye
+el nivel 5 (`platform.DirectorSceneHooks`). Se sujeta al jugador, sin daño, mientras una cámara propia sale
+volando de sus ojos, entran las bandas negras y el director, sentado en su silla tras su mesa y con su máscara,
+dice sus veinte líneas (voces de ElevenLabs, subtituladas enteras en la banda de abajo). La puerta se cierra de
+golpe al pasar la cámara y queda bloqueada, y el jugador pasa justo dentro, de cara a él. La cámara corta entre
+cuatro encuadres: un plano general que se acerca, un primer plano, por encima de su hombro al jugador y luego de
+vuelta a él con su muro de monitores detrás, y un general desde la esquina. Él gesticula, se quita la máscara y
+la deja sobre su mesa, se levanta para señalar el pasillo y vuelve a sentarse. Pulsar saltar dos veces la salta,
+con el mismo estado final. Al acabar, el punto de dentro de la puerta pasa a ser el punto de reinicio (CONTINUE
+lo encuentra como la escena lo dejó), y mientras el jugador siga en su despacho repite seis frases, una cada 20
+a 30 segundos. La salida es el pasillo que sale de su despacho, que lleva al final de abajo. Cómo funciona:
+[Sistema de cinemáticas](cinematic-system.md).
 
 ## 12. El final
 

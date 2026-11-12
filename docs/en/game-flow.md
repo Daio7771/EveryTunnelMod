@@ -556,12 +556,27 @@ industrial, and up its stairs the director's office (the boss's scene is still t
     plaque (`WallTextBlockEntity`'s `diploma` and `plaque` styles). On its south side a door (opened by
     hand) out to a corridor of Level 1's garage, straight, lit,
     ending at Level 1's locked EXIT door under its sign. Under the corridor's end lies a pit 40 blocks deep,
-    closed by its floor until the boss's scene breaks it.
+    closed by its floor until the player steps onto it ([The end](#12-the-end)).
 
 The map's rebuild when the world opens does not touch Level 5: the way in goes with Level 4, and
 nobody can reach what stands until the next build. A game continued in Level 5 builds it behind the
 loading screen, the player waiting in the diploma corridor (`ContinueGame`); the Lobby's wall round the airlock's
 door is built with both levels, so it stands whole even when Level 4 does not.
+
+### The director's scene
+
+Opening the director's double door (`PairedDoorBlock`) starts his scene, once each time Level 5 is built
+(`platform.DirectorSceneHooks`). The player is held, unharmed, while a camera of its own flies in from
+their eyes, black bands slide in, and the director, sitting in his chair behind his desk in his mask,
+speaks his twenty lines (ElevenLabs voices, subtitled whole in the bottom band). The door slams shut
+as the camera passes it and stays locked, and the player is put just inside it, facing him. The camera
+cuts between four framings: a wide shot pushing in, a close-up, over his shoulder at the player and
+then back at him with his wall of monitors behind, and a wide one from the corner. He gestures, takes
+the mask off and lays it on his desk, stands to point down the corridor, and sits again. Pressing
+jump twice skips it, to the same end state. At the end the spot inside the door becomes the restart
+point (CONTINUE finds him as the scene left him), and while the player stays in his office he
+repeats six phrases, one every 20 to 30 seconds. The way on is the corridor out of his office, which
+leads to the end below. How it works: [Cinematic system](cinematic-system.md).
 
 ## 12. The end
 

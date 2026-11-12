@@ -32,6 +32,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/entity/distortion.py` | The Distortion Cloud's and Junior's geometry, animations, textures and glow masks (the Junior's eye cracking in four stages) | Level 5's Distortions |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (the uniform skin) | the uniform |
 | `tools/entity/dead_guard.py` | The guard before you: a player's body sitting against a wall, head dropped, in the uniform skin worn out (run after `guard.py`) | Level 5's Hideout |
+| `tools/entity/director.py` | The director's geometry (sitting, the Cinema film's mask on its own plate), animations (breathing, gestures, mask off, standing, pointing) and texture | Level 5's director |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png`, `turn_icon.png` | HUD icons, Level 5's detector, the entry corridor's turn round sign |
 | `tools/gui/logo.py` | `logo.png` | the logo |
 | `tools/gui/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | the no-shader spot |
@@ -39,10 +40,12 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/gui/safe_dial.py` | `safe_dial.png` | the dial of the safes in the Suites |
 | `tools/gui/wall_font.py` | `wall_paint.png`, `wall_paint.json` | the painted font of the wall messages |
 | `tools/gui/achievement_icons.py` | `achievement_icons.png` | the achievement icons drawn for the mod (badge, skull, Pale man, puzzle piece, padlock, the Director's mask, locked) |
+| `tools/gui/credits_art.py` | `textures/gui/credits/*.png`: the final credits' four drawings by the author (`tools/gui/credits/*.webp`), shrunk | the credits' drawings |
 | `tools/gui/congrats_art.py` | `congrats_observer.png` | the congratulations window's pixel art, a sheet of 16 frames (4 poses of his arm by 4 phases of the steam): the Observer with his coffee, steaming and sipping |
 | `tools/gui/guide_paper.py` | `guide_paper.png` (seamless tile), `guide_stains.png` | the guide's paper |
 | `tools/sounds/generate.py` | WAV previews and a listening page (`tools/sounds/out/index.html`) | a sound, to listen |
 | `tools/sounds/export.py` | `.ogg` files and `sounds.json` in the mod | a sound, to ship it |
+| `tools/sounds/voices.py` | `cutscene/director.json` and the director's subtitles in `en_us.json`, from his voice files (`tools/sounds/voice/`) | one of his voices or his words; see [Cinematic system](cinematic-system.md) |
 
 ## Map
 

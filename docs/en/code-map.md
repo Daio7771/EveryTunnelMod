@@ -36,6 +36,11 @@ KDoc comment that says more.
 | `door/SlidingDoor.kt` | A door of two leaves sliding into the walls a quarter of a block at a time: how much of each column is left (Level 5's airlock) |
 | `save/LoungeSave.kt` | Level 4 as it was left, as text |
 | `camera/CameraAim.kt` | Where a security camera's head points, turning towards a target no faster than its servo |
+| `cutscene/Cutscene.kt` | A cinematic as plain data: camera poses, a scene's frame, shots, the fly-in and fly-out, the black bands |
+| `cutscene/DirectorScene.kt` | The director's scene timed from his voice: framings, subtitles, his gestures, where he looks away, his mask; `SkipPrompt` (skipping by pressing twice) |
+| `cutscene/DirectorLines.kt` | The director's voice lines and their subtitle cues, read from `cutscene/director.json` |
+| `cutscene/DirectorLoop.kt` | The phrases he repeats after his scene: their order, the gaps, how much he looks at the player |
+| `cutscene/FinalCredits.kt` | The final credits' timeline (drawn by `FinalCreditsScreen`) |
 | `wall/WallMessageState.kt` | A wall message's triggers: fixed, on approach, changing when looked away from |
 | `puzzle/BreakerCode.kt` | Level 4's five levers: the code, how many are right |
 | `puzzle/ChemicalMix.kt` | Level 5's chemical puzzle: the pair of reagents drawn each game, either way round |
@@ -148,6 +153,7 @@ KDoc comment that says more.
 | `LabFigureHooks.kt` | Puts the figure there when Level 5 is built, once a game |
 | `SubjectEntity.kt` | The test subjects, sedated and strapped to their stretchers in their sealed chambers, by stage; `SubjectHooks` puts them in with the level |
 | `DeadGuardEntity.kt` | The guard before you, dead in the drain's Hideout; `DeadGuardHooks` puts him there with the level |
+| `DirectorEntity.kt` | The director in his chair (GeckoLib): moves with the client's scene, mask and gaze synced; `DirectorHooks` puts him there with the level |
 | `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
 | `DirectorBlocks.kt` | Level 5's anteroom and office: the director's double door that opens both leaves at once, the security camera block, the wall of CCTV screens |
@@ -213,6 +219,7 @@ KDoc comment that says more.
 | `AchievementHooks.kt` | Earning achievements: what earns each, telling the client |
 | `EndingHooks.kt` | The end of the game: the saved game erased, the final credits, the game's numbers sent with them |
 | `FalseExitHooks.kt` | Level 5's false exit: the floor over the pit giving way, the fall, the black |
+| `DirectorSceneHooks.kt` | The director's scene: starts when his door is opened, holds the player, the door's slam, skipping, the end (a restart point inside his door); `DirectorLoopHooks`, in the same file, sends his phrases after it |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
 | `PlaytestLog.kt` | The `[playtest]` log |
@@ -283,6 +290,7 @@ KDoc comment that says more.
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
 | `SubjectRenderer.kt` | GeckoLib renderer for the subjects, each stage its body and skin |
 | `DeadGuardRenderer.kt` | GeckoLib renderer for the guard before you, sitting, in the player's uniform worn out |
+| `DirectorRenderer.kt` | GeckoLib renderer for the director: his model, texture and animations, turned to his yaw |
 | `LabFigureRenderer.kt` | The figure seen from Level 5's Lobby, on the player's model, a dark shape |
 | `HunterRenderer.kt` | GeckoLib renderer for the Hunters, their eyes glowing |
 | `EyesGlowLayer.kt` | The glow of the Hunters' and Distortions' eyes: the `_glowmask` texture drawn again with vanilla's `eyes` layer (it replaces GeckoLib's `AutoGlowingGeoLayer`, which cut the eyes out of the base texture) |
@@ -292,6 +300,14 @@ KDoc comment that says more.
 | `WallTextRenderer.kt` | A wall text: white on a dark plate, dark on brass or on the lab's white plastic, big dark letters on the wall, or several lines on a framed certificate or a small brass plaque |
 | `LootRenderer.kt` | Draws loot items lying flat |
 | `GuardUniform.kt` | The uniform skin for every player |
+
+### `cutscene/`
+
+| File | What it does |
+|---|---|
+| `CutsceneView.kt` | A cinematic on the client: a camera of its own moved tick by tick, the HUD off, the player drawn from outside, the director's pose, his lines, skipping |
+| `CutsceneScreen.kt` | The screen that takes the keys and the mouse during a cinematic: the black bands, the subtitles, the notice to skip |
+| `DirectorVoice.kt` | His phrases after the scene: played flat, subtitled over the HUD |
 
 ### `menu/`
 
@@ -333,6 +349,7 @@ See [Architecture](architecture.md#mixins) for the target and reason of each.
 | `assets/every_tunnel/lang/es_*.json` | The Spanish translation (`es_es.json`, copied to the other `es_*` by `tools/lang/spanish_variants.py`) |
 | `assets/every_tunnel/guide/` | Not in `src/`: copied from `docs/*/guide/` by the build (`copyGuide`) |
 | `assets/every_tunnel/sounds.json`, `sounds/` | Sound events and `.ogg` files (from `tools/sounds/export.py`) |
+| `assets/every_tunnel/cutscene/director.json` | The director's voice lines: part, length and subtitle cues (from `tools/sounds/voices.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | From `tools/blocks`, `tools/entity`, `tools/gui` |
 | `assets/every_tunnel/geo/`, `animations/` | The Pale man's GeckoLib files |
 | `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | The menu scene (from `tools/map/map_generator.py`) |

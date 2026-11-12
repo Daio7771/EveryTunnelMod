@@ -128,6 +128,10 @@ All ids are `every_tunnel:<name>`. Fabric networking API (1.20.1 style,
 | `ending` | server → client | `EndingHooks` | Roll the final credits; carries the time played (long, ticks) and the deaths (var int) |
 | `congrats` | server → client | `EndingHooks` | Development (`/everytunnel congrats`): open the congratulations window, same payload |
 | `false_exit_fall` | server → client | `FalseExitHooks` | Play the fall's music, in the player's head |
+| `director_scene_start` | server → client | `DirectorSceneHooks` | Begin the director's scene; carries where he sits (x, y, z as doubles, yaw as a float) |
+| `director_scene_end` | server → client | `DirectorSceneHooks` | The scene is over; carries whether it was skipped (boolean) |
+| `director_scene_skip` | client → server | `CutsceneView` | The player pressed jump a second time: end the scene now (no payload) |
+| `director_phrase` | server → client | `DirectorLoopHooks` | Play one of his phrases after the scene; carries its id (string) |
 
 The Pale man's state reaches clients as tracked entity data (`PaleManEntity.brainState`),
 not as a packet.
@@ -165,7 +169,7 @@ Kept to the minimum: a mixin only where Fabric API has no event.
 | `LivingEntityMixin` | `LivingEntity.shouldSpawnConsumptionEffects` | No vanilla sipping sound for the water bottle; it plays its own gulps |
 | `ClientPlayerEntityMixin` | `canSprint` | No sprinting while exhausted (sprint is decided on the client) |
 | `GameRendererMixin` | `tiltViewWhenHurt` (tail) | Shakes the camera in Level 3's tunnel collapse (`CameraShake`) |
-| `InGameHudMixin` | `renderStatusBars`, `renderExperienceBar` | Hides vanilla bars while the mod's HUD replaces them |
+| `InGameHudMixin` | `render`, `renderStatusBars`, `renderExperienceBar` | Hides the whole HUD while a cinematic plays, and vanilla's bars while the mod's HUD replaces them |
 | `AbstractClientPlayerEntityMixin` | `getSkinTexture`, `getModel`, `getCapeTexture` | Every player wears the guard uniform in level worlds |
 | `LightmapTextureManagerMixin` | `update` (gamma) | Brightness counts as Moody in the levels (a little lifted without shaders in Level 5's entry corridor game) |
 | `MinecraftClientMixin` | `setScreen` | Replaces vanilla's title screen with the main menu |

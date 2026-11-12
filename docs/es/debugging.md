@@ -19,6 +19,7 @@ en la pestaña Every Tunnel al desarrollar.
 | `/everytunnel noise` | Los ruidos de los últimos 5 segundos cerca de ti |
 | `/everytunnel noise watch` | Activa o desactiva mostrar cada ruido tuyo en la barra de acción |
 | `/everytunnel congrats` | Abre la ventana de felicitación con el tiempo y las muertes de esta partida hasta ahora, sin conseguir nada |
+| `/everytunnel director` | Te pone ante la puerta del director en el nivel 5 (antes, `setlevel 5`), con su escena lista para repetirse y su máscara de nuevo puesta |
 | `/everytunnel profile on\|off\|report` | El perfilador de ticks (`TickProfiler`): una línea `[profile]` en el log cada 30 s con el tick del servidor y el coste de cada hook de tick del mod (media por tick / llamada más lenta, en ms); `report` imprime la ventana hasta ahora. `-Devery_tunnel.profile=true` lo enciende desde el arranque |
 | `/everytunnel paleman` | Los Pale men cercanos: estado y objetivo |
 | `/everytunnel spawn hunters\|junior\|cloud` | Los enemigos del nivel 5 delante de ti: un grupo de tres Hunters o un Distortion Junior (una sola vez: morir en su nivel los quita y no vuelven), o una Distortion Cloud, estés donde estés |

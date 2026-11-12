@@ -34,6 +34,7 @@ git).
 | `tools/entity/distortion.py` | Geometría, animaciones, texturas y máscaras de brillo de la Distortion Cloud y el Junior (el ojo del Junior agrietándose en cuatro fases) | las Distortions del nivel 5 |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (la skin del uniforme) | el uniforme |
 | `tools/entity/dead_guard.py` | El guardia anterior: un cuerpo de jugador sentado contra una pared, la cabeza caída, con la skin del uniforme gastada (después de `guard.py`) | el Hideout del nivel 5 |
+| `tools/entity/director.py` | La geometría del director (sentado, con la máscara de la película del Cinema en su propia placa), sus animaciones (respirar, gestos, quitarse la máscara, levantarse, señalar) y su textura | el director del nivel 5 |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png`, `turn_icon.png` | los iconos del HUD, el detector del nivel 5, el símbolo de girar del pasillo de entrada |
 | `tools/gui/logo.py` | `logo.png` | el logo |
 | `tools/gui/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | el foco sin shaders |
@@ -41,10 +42,12 @@ git).
 | `tools/gui/safe_dial.py` | `safe_dial.png` | el dial de las cajas fuertes de las Suites |
 | `tools/gui/wall_font.py` | `wall_paint.png`, `wall_paint.json` | la fuente pintada de los mensajes en la pared |
 | `tools/gui/achievement_icons.py` | `achievement_icons.png` | los iconos de logro dibujados para el mod (placa, calavera, Pale man, pieza de puzle, candado, la máscara del director, bloqueado) |
+| `tools/gui/credits_art.py` | `textures/gui/credits/*.png`: los cuatro dibujos del autor de los créditos finales (`tools/gui/credits/*.webp`), reducidos | los dibujos de los créditos |
 | `tools/gui/congrats_art.py` | `congrats_observer.png` | el pixel art de la ventana de felicitación, una hoja de 16 fotogramas (4 poses del brazo por 4 fases del vapor): el Observer con su café, echando vapor y dando sorbos |
 | `tools/gui/guide_paper.py` | `guide_paper.png` (mosaico sin costuras), `guide_stains.png` | el papel de la guía |
 | `tools/sounds/generate.py` | WAV de prueba y una página para escucharlos (`tools/sounds/out/index.html`) | un sonido, para oírlo |
 | `tools/sounds/export.py` | Los `.ogg` y `sounds.json` en el mod | un sonido, para meterlo en el juego |
+| `tools/sounds/voices.py` | `cutscene/director.json` y los subtítulos del director en `en_us.json`, a partir de sus archivos de voz (`tools/sounds/voice/`) | una de sus voces o sus palabras; véase [Sistema de cinemáticas](cinematic-system.md) |
 
 ## Mapa
 

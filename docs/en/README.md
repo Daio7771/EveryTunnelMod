@@ -2,10 +2,11 @@
 
 Every Tunnel is a singleplayer psychological horror mod for Minecraft 1.20.1 (Fabric,
 Kotlin). The player is the new night-shift security guard of the Noname Complex, an
-abandoned underground facility. The current release is a demo of four levels: Level 1 (B1)
+abandoned underground facility. The current release is Chapter 1, five levels: Level 1 (B1)
 has no enemies and teaches the player to listen; Level 2 (B2) adds the Pale man, who is blind and
 hunts by sound; Level 3 (B3) has the Observer, who only sees; Level 4 (B4), the VIP lounge, is all
-puzzles and no risk. Sound design is the core of the mod.
+puzzles and no risk; Level 5 (B5), the laboratory, has the Hunters and the Distortions, and ends with
+the director's scene, a fall and the credits. Sound design is the core of the mod.
 
 *[Versión en español](../es/README.md)*
 
@@ -29,6 +30,7 @@ Read them in this order the first time:
 | [Noise and the Pale man](noise-and-pale-man.md) | The noise system, his hearing AI, his entity and music |
 | [Audio](audio.md) | Every sound event, the client players, how sounds are made |
 | [Graphics](graphics.md) | With and without shaders, lights, brightness, textures, art direction |
+| [Cinematic system](cinematic-system.md) | The director's scene (guided camera, voice, subtitles, skipping), the fall and the final credits |
 | [Python tools](tools.md) | The generators for map, sounds, blocks, entity art and GUI |
 | [Building and release](building-and-release.md) | Gradle tasks, dev worlds, the release jar |
 | [Debugging](debugging.md) | Debug commands and the `[playtest]` log |

@@ -2,10 +2,11 @@
 
 Every Tunnel es un mod de terror psicológico para un jugador en Minecraft 1.20.1 (Fabric,
 Kotlin). El jugador es el nuevo vigilante del turno de noche del Noname Complex, unas
-instalaciones subterráneas abandonadas. La versión actual es una demo de cuatro niveles: el Nivel 1 (B1)
+instalaciones subterráneas abandonadas. La versión actual es el Capítulo 1, cinco niveles: el Nivel 1 (B1)
 no tiene enemigos y enseña al jugador a escuchar; el Nivel 2 (B2) añade al Pale man, que es ciego y
 caza por el sonido; el Nivel 3 (B3) tiene al Observer, que solo ve; el Nivel 4 (B4), la zona VIP, es
-todo puzles y sin riesgo. El diseño de sonido es el núcleo del mod.
+todo puzles y sin riesgo; el Nivel 5 (B5), el laboratorio, tiene a los Hunters y las Distortions, y
+acaba con la escena del director, una caída y los créditos. El diseño de sonido es el núcleo del mod.
 
 *[English version](../en/README.md)*
 
@@ -31,6 +32,7 @@ La primera vez, léelas en este orden:
 | [El ruido y el Pale man](noise-and-pale-man.md) | El sistema de ruido, su IA de oído, su entidad y su música |
 | [Audio](audio.md) | Cada evento de sonido, los reproductores del cliente, cómo se hacen los sonidos |
 | [Gráficos](graphics.md) | Con y sin shaders, luces, brillo, texturas, dirección de arte |
+| [Sistema de cinemáticas](cinematic-system.md) | La escena del director (cámara guiada, voz, subtítulos, saltar), la caída y los créditos finales |
 | [Herramientas Python](tools.md) | Los generadores del mapa, sonidos, bloques, arte de entidades y GUI |
 | [Compilación y release](building-and-release.md) | Tareas de Gradle, mundos de desarrollo, el jar de release |
 | [Depuración](debugging.md) | Comandos de depuración y el registro `[playtest]` |

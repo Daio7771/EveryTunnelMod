@@ -36,6 +36,11 @@ con un comentario KDoc que cuenta más.
 | `door/SlidingDoor.kt` | Una puerta de dos hojas que se meten en las paredes un cuarto de bloque cada vez: cuánto queda de cada columna (la esclusa del nivel 5) |
 | `save/LoungeSave.kt` | El nivel 4 como se dejó, en texto |
 | `camera/CameraAim.kt` | Hacia dónde apunta la cabeza de una cámara de seguridad, girando hacia un objetivo no más rápido que su servo |
+| `cutscene/Cutscene.kt` | Una cinemática como datos: poses de cámara, el marco de una escena, planos, el vuelo de entrada y de salida, las bandas negras |
+| `cutscene/DirectorScene.kt` | La escena del director medida con su voz: encuadres, subtítulos, sus gestos, cuándo aparta la vista, su máscara; `SkipPrompt` (saltar pulsando dos veces) |
+| `cutscene/DirectorLines.kt` | Las líneas de voz del director y sus subtítulos, leídas de `cutscene/director.json` |
+| `cutscene/DirectorLoop.kt` | Las frases que repite tras su escena: su orden, las pausas, cuánto mira al jugador |
+| `cutscene/FinalCredits.kt` | La línea de tiempo de los créditos finales (los dibuja `FinalCreditsScreen`) |
 | `wall/WallMessageState.kt` | Los disparadores de un mensaje: fijo, al acercarse, cambia al dejar de mirarlo |
 | `puzzle/BreakerCode.kt` | Las cinco palancas del nivel 4: el código, cuántas están bien |
 | `puzzle/ChemicalMix.kt` | El puzle químico del nivel 5: la pareja de reactivos sorteada en cada partida, en cualquier orden |
@@ -148,6 +153,7 @@ con un comentario KDoc que cuenta más.
 | `LabFigureHooks.kt` | Pone la figura ahí al construirse el nivel 5, una vez por partida |
 | `SubjectEntity.kt` | Los sujetos de pruebas, sedados y atados a sus camillas en sus salas selladas, por fase; `SubjectHooks` los pone con el nivel |
 | `DeadGuardEntity.kt` | El guardia anterior, muerto en el Hideout del drenaje; `DeadGuardHooks` lo pone ahí con el nivel |
+| `DirectorEntity.kt` | El director en su silla (GeckoLib): se mueve con la escena del cliente, con máscara y mirada sincronizadas; `DirectorHooks` lo pone ahí con el nivel |
 | `LabHallHooks.kt` | El golpe de cuerdas y la primera Cloud del Lab hall, una vez por partida |
 | `ChemicalHooks.kt` | El puzle químico: la pareja de la partida, la mezcladora, la alarma y sus enemigos, la rejilla disolviéndose, la trampilla |
 | `DirectorBlocks.kt` | La antesala y el despacho del nivel 5: la puerta doble del director que abre sus dos hojas a la vez, el bloque de la cámara de seguridad, el muro de monitores CCTV |
@@ -213,6 +219,7 @@ con un comentario KDoc que cuenta más.
 | `AchievementHooks.kt` | Conseguir logros: qué da cada uno, avisar al cliente |
 | `EndingHooks.kt` | El final del juego: la partida guardada borrada, los créditos finales, los números de la partida enviados con ellos |
 | `FalseExitHooks.kt` | La falsa salida del nivel 5: el suelo sobre el pozo que cede, la caída, el negro |
+| `DirectorSceneHooks.kt` | La escena del director: empieza al abrir su puerta, sujeta al jugador, el portazo, el salto y el final (un punto de reinicio tras su puerta); `DirectorLoopHooks`, en el mismo archivo, manda sus frases después |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
 | `PlaytestLog.kt` | El registro `[playtest]` |
@@ -283,6 +290,7 @@ con un comentario KDoc que cuenta más.
 | `ObserverRenderer.kt` | Renderizador de GeckoLib del Observer; su cabeza gira con la de la entidad |
 | `SubjectRenderer.kt` | Renderizador de GeckoLib de los sujetos, cada fase con su cuerpo y su piel |
 | `DeadGuardRenderer.kt` | Renderizador de GeckoLib del guardia anterior, sentado, con el uniforme del jugador gastado |
+| `DirectorRenderer.kt` | Renderizador de GeckoLib del director: su modelo, su textura y sus animaciones, girado a su orientación |
 | `LabFigureRenderer.kt` | La figura que se ve desde el Lobby del nivel 5, con el modelo del jugador, una silueta oscura |
 | `HunterRenderer.kt` | Renderizador de GeckoLib de los Hunters, con los ojos brillando |
 | `EyesGlowLayer.kt` | El brillo de los ojos de los Hunters y las Distortions: la textura `_glowmask` dibujada otra vez con la capa `eyes` de vanilla (sustituye a `AutoGlowingGeoLayer` de GeckoLib, que recortaba los ojos de la textura base) |
@@ -292,6 +300,14 @@ con un comentario KDoc que cuenta más.
 | `WallTextRenderer.kt` | Un texto de pared: blanco sobre una placa oscura, oscuro sobre latón o sobre el plástico blanco del laboratorio, letras grandes oscuras en la pared, o varias líneas en un diploma enmarcado o una placa pequeña de latón |
 | `LootRenderer.kt` | Dibuja el botín tumbado |
 | `GuardUniform.kt` | La skin del uniforme para todos los jugadores |
+
+### `cutscene/`
+
+| Archivo | Qué hace |
+|---|---|
+| `CutsceneView.kt` | Una cinemática en el cliente: una cámara propia movida tick a tick, el HUD apagado, el jugador dibujado desde fuera, la pose del director, sus líneas, saltar |
+| `CutsceneScreen.kt` | La pantalla que se queda con las teclas y el ratón durante una cinemática: las bandas negras, los subtítulos, el aviso para saltar |
+| `DirectorVoice.kt` | Sus frases tras la escena: sonando planas, subtituladas sobre el HUD |
 
 ### `menu/`
 
@@ -333,6 +349,7 @@ Ver [Arquitectura](architecture.md#mixins) para el objetivo y el motivo de cada 
 | `assets/every_tunnel/lang/es_*.json` | La traducción al español (`es_es.json`, copiada a los demás `es_*` por `tools/lang/spanish_variants.py`) |
 | `assets/every_tunnel/guide/` | No está en `src/`: lo copia de `docs/*/guide/` la compilación (`copyGuide`) |
 | `assets/every_tunnel/sounds.json`, `sounds/` | Eventos de sonido y archivos `.ogg` (de `tools/sounds/export.py`) |
+| `assets/every_tunnel/cutscene/director.json` | Las líneas de voz del director: parte, duración y subtítulos (de `tools/sounds/voices.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | De `tools/blocks`, `tools/entity`, `tools/gui` |
 | `assets/every_tunnel/geo/`, `animations/` | Los archivos de GeckoLib del Pale man |
 | `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | La escena del menú (de `tools/map/map_generator.py`) |
