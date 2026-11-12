@@ -4,7 +4,6 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -59,7 +58,7 @@ object FalseExitHooks {
     private var fallen = false
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerLivingEntityEvents.ALLOW_DAMAGE.register { entity, _, _ -> falling?.player != entity.uuid }
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> if (falling?.player == handler.player.uuid) falling = null }
         ServerLifecycleEvents.SERVER_STOPPED.register { levelBuilt() }

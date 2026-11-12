@@ -5,7 +5,6 @@ import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -83,6 +82,7 @@ object LoadingHooks {
     private val loading = HashMap<UUID, Loading>()
     private var building = false
     private var buildStartTick = 0L
+    private var buildStartNanos = 0L
 
     fun register() {
         ServerLifecycleEvents.SERVER_STARTED.register(::startBuilds)
@@ -98,7 +98,7 @@ object LoadingHooks {
             server.execute { loading[player.uuid]?.done = true }
         }
         ServerLivingEntityEvents.ALLOW_DAMAGE.register { entity, _, _ -> entity.uuid !in loading }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     /** True from joining until the loading screen is gone. */
@@ -108,7 +108,10 @@ object LoadingHooks {
     fun levelsRebuilt(server: MinecraftServer) {
         if (!building) return
         building = false
-        EveryTunnel.LOGGER.info("Map built in {} s", "%.1f".format(Locale.ROOT, (server.ticks - buildStartTick) / 20.0))
+        EveryTunnel.LOGGER.info(
+            "Map built in {} s ({} ms of the server's own time)", "%.1f".format(Locale.ROOT, (server.ticks - buildStartTick) / 20.0),
+            (System.nanoTime() - buildStartNanos) / 1_000_000,
+        )
     }
 
     private fun startBuilds(server: MinecraftServer) {
@@ -119,6 +122,7 @@ object LoadingHooks {
         // Silent: the build's own messages and the commands' feedback are not for the player.
         val source = server.commandSource.withSilent()
         buildStartTick = server.ticks.toLong()
+        buildStartNanos = System.nanoTime()
         for (id in ids) {
             val function = Identifier.tryParse(id)?.let { functions.getFunction(it).orElse(null) }
             if (function == null) {

@@ -6,7 +6,6 @@ import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.core.level.SpawnPoint
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.block.LightBlock
@@ -88,7 +87,7 @@ object LoungeClosingHooks {
             if (SHUT_TAG in tags && server != null) slam(server)
             if (CINEMA_TAG in tags && server != null && blackout && !cinemaAwake) wakeCinema(server)
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     /** A new game, or the map rebuilt. */

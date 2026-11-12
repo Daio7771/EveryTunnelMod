@@ -8,7 +8,6 @@ import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.core.puzzle.OrderPuzzle
 import daio7771.everytunnel.core.save.LoungeSave
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.block.Block
@@ -121,7 +120,7 @@ object LoungePuzzleHooks {
             server = null
             reset()
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     /** A new game, or the map rebuilt. */

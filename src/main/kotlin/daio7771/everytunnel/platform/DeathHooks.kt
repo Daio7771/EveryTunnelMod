@@ -11,7 +11,6 @@ import daio7771.everytunnel.world.LevelTriggers
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -101,7 +100,7 @@ object DeathHooks {
             false
         }
         ServerLivingEntityEvents.ALLOW_DAMAGE.register { entity, _, _ -> entity.uuid !in dying }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerPlayNetworking.registerGlobalReceiver(RETRY_PACKET_ID) { server, player, _, _, _ ->
             server.execute { dying[player.uuid]?.retried = true }
         }

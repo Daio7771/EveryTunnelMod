@@ -9,7 +9,6 @@ import daio7771.everytunnel.core.level.Position
 import daio7771.everytunnel.systems.ResourceState
 import daio7771.everytunnel.systems.ResourceSystem
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.entity.damage.DamageSource
 import net.minecraft.entity.damage.DamageTypes
@@ -91,7 +90,7 @@ object PlaytestLog {
     private val runs = HashMap<UUID, Run>()
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->
             val player = handler.player
             runs.remove(player.uuid)?.let { run -> if (!run.ended && run.ticks > 0) summary(player, run, "left the world") }

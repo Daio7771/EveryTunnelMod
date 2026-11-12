@@ -4,7 +4,6 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.PlayerLocationTracker
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.server.network.ServerPlayerEntity
 
@@ -16,7 +15,7 @@ import net.minecraft.server.network.ServerPlayerEntity
 object LevelTrackingHooks {
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register { server ->
+        TickProfiler.endServerTick.register { server ->
             for (player in server.playerManager.playerList) update(player)
         }
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->

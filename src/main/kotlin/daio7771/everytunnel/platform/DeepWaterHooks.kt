@@ -4,7 +4,6 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.PlayerLocationTracker
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.particle.ParticleTypes
 import net.minecraft.registry.tag.FluidTags
@@ -36,7 +35,7 @@ object DeepWaterHooks {
     private val pulled = HashMap<UUID, Int>()
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> pulled.remove(handler.player.uuid) }
         ServerLifecycleEvents.SERVER_STOPPED.register { pulled.clear() }
     }

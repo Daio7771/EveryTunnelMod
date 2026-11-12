@@ -5,7 +5,6 @@ import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.block.DoorBlock
 import net.minecraft.block.enums.DoubleBlockHalf
 import net.minecraft.registry.RegistryKey
@@ -72,7 +71,7 @@ object LoungeHooks {
             if (APPROACH_TAG in tags && phase == Phase.NOT_STARTED) setDoor(server, open = true)
             if (BUILD_TAG in tags && phase == Phase.NOT_STARTED) begin(server)
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     private fun begin(server: MinecraftServer) {

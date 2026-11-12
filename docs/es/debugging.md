@@ -18,6 +18,7 @@ en la pestaña Every Tunnel al desarrollar.
 | `/everytunnel resources set stamina\|thirst\|battery <valor>` | Cambia uno (la batería en segundos de luz) |
 | `/everytunnel noise` | Los ruidos de los últimos 5 segundos cerca de ti |
 | `/everytunnel noise watch` | Activa o desactiva mostrar cada ruido tuyo en la barra de acción |
+| `/everytunnel profile on\|off\|report` | El perfilador de ticks (`TickProfiler`): una línea `[profile]` en el log cada 30 s con el tick del servidor y el coste de cada hook de tick del mod (media por tick / llamada más lenta, en ms); `report` imprime la ventana hasta ahora. `-Devery_tunnel.profile=true` lo enciende desde el arranque |
 | `/everytunnel paleman` | Los Pale men cercanos: estado y objetivo |
 | `/everytunnel spawn hunters\|junior\|cloud` | Los enemigos del nivel 5 delante de ti: un grupo de tres Hunters o un Distortion Junior (una sola vez: morir en su nivel los quita y no vuelven), o una Distortion Cloud, estés donde estés |
 | `/everytunnel intro` | Repite la intro del ascensor (Supervivencia o Aventura). En una ejecución de desarrollo, una partida nueva se salta la espera del ascensor; esto la reproduce entera |

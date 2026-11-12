@@ -1,7 +1,6 @@
 package daio7771.everytunnel.platform
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.entity.Entity
 import net.minecraft.registry.RegistryKey
 import net.minecraft.server.MinecraftServer
@@ -27,7 +26,7 @@ object KeptEntities {
     private val kept = mutableListOf<Kept>()
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerLifecycleEvents.SERVER_STOPPED.register { kept.clear() }
     }
 

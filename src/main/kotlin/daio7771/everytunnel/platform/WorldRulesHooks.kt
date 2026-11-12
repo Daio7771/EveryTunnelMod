@@ -3,7 +3,6 @@ package daio7771.everytunnel.platform
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents
 import net.minecraft.entity.player.PlayerEntity
@@ -51,7 +50,7 @@ object WorldRulesHooks {
         }
         PlayerBlockBreakEvents.BEFORE.register { _, player, _, _, _ -> !isRestricted(player) }
 
-        ServerTickEvents.END_SERVER_TICK.register { server ->
+        TickProfiler.endServerTick.register { server ->
             for (player in server.playerManager.playerList) {
                 syncAbilities(player, player.interactionManager.gameMode)
             }

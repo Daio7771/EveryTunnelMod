@@ -56,6 +56,7 @@ import daio7771.everytunnel.platform.SlidingDoors
 import daio7771.everytunnel.platform.SuiteBedHooks
 import daio7771.everytunnel.platform.ValveHooks
 import daio7771.everytunnel.platform.WaterDispenserHooks
+import daio7771.everytunnel.platform.TickProfiler
 import daio7771.everytunnel.platform.WorldRulesHooks
 import net.fabricmc.api.ModInitializer
 import net.fabricmc.loader.api.FabricLoader
@@ -86,6 +87,7 @@ object EveryTunnel : ModInitializer {
 
     override fun onInitialize() {
         ConfigManager.load(FabricLoader.getInstance().configDir)
+        TickProfiler.register()
         ModItems.register()
         ModBlocks.register()
         PathingRules.register()

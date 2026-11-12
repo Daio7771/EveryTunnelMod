@@ -7,7 +7,6 @@ import daio7771.everytunnel.core.level.BlockBox
 import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.block.Blocks
 import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket
 import net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket
@@ -74,7 +73,7 @@ object LevelEntryHooks {
             val player = server?.playerManager?.getPlayer(change.playerId) ?: return@register
             enter(player, to)
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     private fun enter(player: ServerPlayerEntity, level: LevelDefinition) {

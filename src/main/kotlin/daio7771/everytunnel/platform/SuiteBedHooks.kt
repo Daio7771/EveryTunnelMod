@@ -3,7 +3,6 @@ package daio7771.everytunnel.platform
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.systems.ResourceSystem
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.entity.attribute.EntityAttributeModifier
 import net.minecraft.entity.attribute.EntityAttributes
@@ -30,7 +29,7 @@ object SuiteBedHooks {
     private val resting = HashMap<UUID, Int>()
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->
             if (resting.remove(handler.player.uuid) != null) unfreeze(handler.player)
         }

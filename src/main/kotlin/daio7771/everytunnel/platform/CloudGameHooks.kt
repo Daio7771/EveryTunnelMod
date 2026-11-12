@@ -10,7 +10,6 @@ import daio7771.everytunnel.entities.CloudGame
 import daio7771.everytunnel.entities.Gaze
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
@@ -56,7 +55,7 @@ object CloudGameHooks {
             if (tagged(change.exitedZones) != null) stop(player.uuid)
             tagged(change.enteredZones)?.let { key -> LevelManager.get(key.levelId)?.let { start(player, it) } }
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> stop(handler.player.uuid) }
     }
 

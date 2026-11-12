@@ -4,7 +4,6 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.server.MinecraftServer
 import net.minecraft.sound.SoundCategory
@@ -44,7 +43,7 @@ object LabHallHooks {
             player.playSound(ModSounds.LAB_STING, SoundCategory.HOSTILE, 1f, 1f)
             coming[player.uuid] = server.ticks.toLong()
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     private fun tick(server: MinecraftServer) {

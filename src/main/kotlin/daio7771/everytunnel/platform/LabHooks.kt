@@ -7,7 +7,6 @@ import daio7771.everytunnel.core.level.BlockBox
 import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.MinecraftServer
@@ -101,7 +100,7 @@ object LabHooks {
             if (BUILD_TAG in tags && phase == Phase.NOT_STARTED) begin(server)
             if (AIRLOCK_TAG in tags && airlock == Airlock.WAITING) enterAirlock(server)
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     private fun begin(server: MinecraftServer) {

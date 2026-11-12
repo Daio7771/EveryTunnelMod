@@ -3,7 +3,6 @@ package daio7771.everytunnel.platform
 import daio7771.everytunnel.core.door.SlidingDoor
 import daio7771.everytunnel.core.level.BlockBox
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.block.Blocks
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.MinecraftServer
@@ -30,7 +29,7 @@ object SlidingDoors {
 
     fun register() {
         ServerLifecycleEvents.SERVER_STOPPED.register { opening.clear() }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     /** Starts [box]'s door sliding open, a quarter of a block every [stepTicks], heard from its middle. */

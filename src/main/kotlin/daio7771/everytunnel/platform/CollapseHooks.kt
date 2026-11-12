@@ -6,7 +6,6 @@ import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.systems.CollapseSchedule
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.block.BlockState
@@ -80,7 +79,7 @@ object CollapseHooks {
             if (!ResourceHooks.appliesTo(player)) return@register
             LevelManager.get(key.levelId)?.let { start(player, it) }
         }
-        ServerTickEvents.END_SERVER_TICK.register { tick() }
+        TickProfiler.endServerTick.register { tick() }
     }
 
     private fun start(player: ServerPlayerEntity, level: LevelDefinition) {

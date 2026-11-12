@@ -4,7 +4,6 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.block.BlockState
 import net.minecraft.entity.ItemEntity
@@ -50,7 +49,7 @@ object CarryHooks {
 
     fun register() {
         ServerLifecycleEvents.SERVER_STOPPED.register { carried.clear() }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerPlayConnectionEvents.JOIN.register { handler, _, _ ->
             val player = handler.player
             if (WorldRules.active && player.uuid !in carried && isCarrying(player)) {

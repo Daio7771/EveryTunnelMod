@@ -6,7 +6,6 @@ import daio7771.everytunnel.systems.NoiseSource
 import daio7771.everytunnel.systems.NoiseSystem
 import daio7771.everytunnel.systems.ResourceSystem
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
@@ -64,7 +63,7 @@ object NoiseHooks {
     private val watching = HashSet<UUID>()
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->
             tracked.remove(handler.player.uuid)
             jumps.forget(handler.player.uuid)

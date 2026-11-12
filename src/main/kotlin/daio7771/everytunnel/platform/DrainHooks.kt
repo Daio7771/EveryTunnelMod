@@ -6,7 +6,6 @@ import daio7771.everytunnel.core.ZoneKey
 import daio7771.everytunnel.core.progress.Checkpoint
 import daio7771.everytunnel.world.LevelTriggers
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import java.util.UUID
@@ -41,7 +40,7 @@ object DrainHooks {
             if (tagged(change.enteredZones)) arriving += change.playerId
             if (tagged(change.exitedZones)) arriving -= change.playerId
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     private fun tick(server: MinecraftServer) {

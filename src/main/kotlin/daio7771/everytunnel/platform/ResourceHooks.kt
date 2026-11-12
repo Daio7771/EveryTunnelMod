@@ -10,7 +10,6 @@ import daio7771.everytunnel.systems.ResourceSystem
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -56,7 +55,7 @@ object ResourceHooks {
     private val inDark = HashSet<UUID>()
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerPlayerEvents.AFTER_RESPAWN.register { _, newPlayer, alive ->
             if (!alive) ResourceSystem.reset(newPlayer.uuid)
         }

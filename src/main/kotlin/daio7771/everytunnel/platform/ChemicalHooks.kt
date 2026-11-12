@@ -6,7 +6,6 @@ import daio7771.everytunnel.core.level.BlockBox
 import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.core.puzzle.ChemicalMix
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.block.Blocks
 import net.minecraft.block.TrapdoorBlock
 import net.minecraft.nbt.NbtCompound
@@ -74,7 +73,7 @@ object ChemicalHooks {
             server = null
             forget()
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     /** This game's pair, drawn the first time it is wanted. */

@@ -4,7 +4,6 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.audio.LoungeMix
 import daio7771.everytunnel.core.level.LevelDefinition
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -33,7 +32,7 @@ object LoungeMusicHooks {
     private val sent = HashMap<UUID, Sent>()
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register { server -> if (server.ticks % CHECK_TICKS == 0) check(server) }
+        TickProfiler.endServerTick.register { server -> if (server.ticks % CHECK_TICKS == 0) check(server) }
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> sent.remove(handler.player.uuid) }
     }
 

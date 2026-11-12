@@ -5,7 +5,6 @@ import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.world.LevelTriggers
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -59,7 +58,7 @@ object EndingHooks {
             EveryTunnel.LOGGER.info("{} reached the end of the demo", player.name.string)
             PlaytestLog.endOfDemo(player)
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> endings.remove(handler.player.uuid) }
     }
 

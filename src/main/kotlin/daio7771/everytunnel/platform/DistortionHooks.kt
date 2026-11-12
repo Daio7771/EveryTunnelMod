@@ -9,7 +9,6 @@ import daio7771.everytunnel.entities.CloudSchedule
 import daio7771.everytunnel.entities.Gaze
 import daio7771.everytunnel.entities.HunterBrain
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.entity.Entity
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
@@ -95,7 +94,7 @@ object DistortionHooks {
             posts.clear()
             forget()
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     // --- posts ---------------------------------------------------------------------------

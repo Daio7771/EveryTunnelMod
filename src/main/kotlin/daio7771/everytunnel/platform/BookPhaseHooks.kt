@@ -4,7 +4,6 @@ import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.entities.ObserverBrain
 import daio7771.everytunnel.systems.ObserverNearness
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.server.MinecraftServer
 import net.minecraft.sound.SoundCategory
@@ -25,7 +24,7 @@ object BookPhaseHooks {
     private val phase = HashMap<String, Pair<Int, Boolean>>()
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerLifecycleEvents.SERVER_STOPPED.register {
             nearness.clear()
             phase.clear()

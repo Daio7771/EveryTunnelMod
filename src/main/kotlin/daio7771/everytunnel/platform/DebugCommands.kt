@@ -47,6 +47,8 @@ import net.minecraft.util.Identifier
  * - `/everytunnel loungeready`: run by the map's `garage:level4_go` when Level 4's chunks are
  *   loaded: its build goes on ([LoungeHooks]).
  * - `/everytunnel labready`: the same for Level 5, by `garage:level5_go` ([LabHooks]).
+ * - `/everytunnel profile on|off|report`: the tick profiler ([TickProfiler]): a line in the log every
+ *   30 s with the server tick and the cost of each of the mod's tick hooks.
  * - `/everytunnel rebuilt`: run by the map's `garage:build` after rebuilding the levels:
  *   puts the loot back ([NewGame.levelsRebuilt]).
  * - `/everytunnel film set|walk|back`: for filming the Cinema's film ([FilmSetHooks]): builds its set and
@@ -73,6 +75,12 @@ object DebugCommands {
             root
                 .then(CommandManager.literal("levels").executes(::levels))
                 .then(CommandManager.literal("where").executes(::where))
+                .then(
+                    CommandManager.literal("profile")
+                        .then(CommandManager.literal("on").executes { TickProfiler.start(); reply(it, "Profiler on: a line in the log every 30 s."); 1 })
+                        .then(CommandManager.literal("off").executes { TickProfiler.stop(); reply(it, "Profiler off."); 1 })
+                        .then(CommandManager.literal("report").executes { reply(it, TickProfiler.report()); 1 }),
+                )
                 .then(
                     CommandManager.literal("resources").executes(::resources)
                         .then(

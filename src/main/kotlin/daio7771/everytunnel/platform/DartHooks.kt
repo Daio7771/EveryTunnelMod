@@ -7,7 +7,6 @@ import daio7771.everytunnel.core.puzzle.OrderPuzzle
 import daio7771.everytunnel.core.puzzle.darts.DartboardGeometry
 import daio7771.everytunnel.core.save.LoungeSave
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.block.BlockState
 import net.minecraft.entity.ItemEntity
 import net.minecraft.item.ItemStack
@@ -66,7 +65,7 @@ object DartHooks {
             server = null
             reset()
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     /** A new game, or the map rebuilt. */

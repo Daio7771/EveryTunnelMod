@@ -4,7 +4,6 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.level.LevelDefinition
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.nbt.NbtElement
 import net.minecraft.nbt.NbtList
@@ -47,7 +46,7 @@ object KeycardHooks {
     private val waves = mutableListOf<Wave>()
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register { tick() }
+        TickProfiler.endServerTick.register { tick() }
         ServerLifecycleEvents.SERVER_STOPPED.register { waves.clear() }
     }
 

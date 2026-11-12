@@ -11,7 +11,6 @@ import daio7771.everytunnel.core.level.SpawnPoint
 import daio7771.everytunnel.core.progress.Checkpoint
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -85,7 +84,7 @@ object DirectorSceneHooks {
         private set
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
         ServerPlayNetworking.registerGlobalReceiver(SKIP_PACKET_ID) { server, player, _, _, _ ->
             server.execute { if (running?.player == player.uuid) finish(server, skipped = true) }
         }
@@ -307,7 +306,7 @@ object DirectorLoopHooks {
     }
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        TickProfiler.endServerTick.register(::tick)
     }
 
     private fun tick(server: MinecraftServer) {
