@@ -110,7 +110,7 @@ When uploading:
 | License | All Rights Reserved. The CC BY 4.0 music credit must stay in the description |
 | Source | https://github.com/Daio7771/EveryTunnelMod |
 | Issues | https://github.com/Daio7771/EveryTunnelMod/issues |
-| File | The release jar (`everytunnerBuild`), display name `Every Tunnel <version>` (e.g. `Every Tunnel 0.2.1`), release type **Beta** while it is a demo |
+| File | The release jar (`everytunnerBuild`), display name `Every Tunnel <version>` (e.g. `Every Tunnel 1.0`), release type **Beta** or **Release**: decided when it is published (see below) |
 | File changelog | What changed in this version, for players |
 
 The same jar goes to the repository's
@@ -132,10 +132,16 @@ All in `gradle.properties`:
 | Cardinal Components | 5.2.3 |
 | Sound Physics Remastered (dev) | fabric-1.20.1-1.5.1 |
 | Sodium / Iris / Indium (dev) | 0.5.13 / 1.7.6 / 1.0.36 |
-| Mod version | `mod_version` (0.4, shown in the main menu as "v0.4 Beta (Level 4)") |
+| Mod version | `mod_version` (1.0, shown in the main menu as "v1.0": the line is `menu.every_tunnel.version`, which takes the version) |
 
 ## Open release questions
 
-Still to decide before the first public release: the world resource pack prompt, distribution channel and version name, install notes, which shader pack
-to recommend, whether the `[playtest]` log stays on, and whether the jar still needs the
+Decided: the `[playtest]` log stays on (it helps with GitHub issues), and the shader packs
+recommended are Complementary Reimagined, Bliss Shaders and Photon Shaders (tested), though any
+shader pack works.
+
+Still to decide: the release type on CurseForge. Publish **Beta** first, and move to **Release**
+once the 1.0 jar has passed a clean-instance test (a new launcher instance with only
+LambDynamicLights and Cardinal Components) and a few players' logs have come back without
+mod errors. Also open: the world resource pack prompt, and whether the jar still needs the
 pre-built regions (the map rebuilds on every open anyway).

@@ -110,7 +110,7 @@ Al subir:
 | Licencia | All Rights Reserved. El crédito CC BY 4.0 de la música debe seguir en la descripción |
 | Source | https://github.com/Daio7771/EveryTunnelMod |
 | Issues | https://github.com/Daio7771/EveryTunnelMod/issues |
-| Archivo | El jar de release (`everytunnerBuild`), nombre visible `Every Tunnel <versión>` (p. ej. `Every Tunnel 0.2.1`), tipo **Beta** mientras sea una demo |
+| Archivo | El jar de release (`everytunnerBuild`), nombre visible `Every Tunnel <versión>` (p. ej. `Every Tunnel 1.0`), tipo **Beta** o **Release**: se decide al publicar (ver abajo) |
 | Changelog del archivo | Qué cambió en esta versión, para jugadores |
 
 El mismo jar va a las [Releases](https://github.com/Daio7771/EveryTunnelMod/releases) del
@@ -131,11 +131,17 @@ Todas en `gradle.properties`:
 | Cardinal Components | 5.2.3 |
 | Sound Physics Remastered (desarrollo) | fabric-1.20.1-1.5.1 |
 | Sodium / Iris / Indium (desarrollo) | 0.5.13 / 1.7.6 / 1.0.36 |
-| Versión del mod | `mod_version` (0.4; el menú principal muestra "v0.4 Beta (Level 4)") |
+| Versión del mod | `mod_version` (1.0; el menú principal muestra "v1.0": la línea es `menu.every_tunnel.version`, que recibe la versión) |
 
 ## Preguntas abiertas del release
 
-Por decidir antes de la primera versión pública: el aviso del resource pack del mundo, el canal de distribución y el nombre de la versión,
-las notas de instalación, qué shader pack recomendar, si el registro `[playtest]` sigue
-activo, y si el jar aún necesita las regiones preconstruidas (el mapa se reconstruye al
-abrir de todos modos).
+Decidido: el registro `[playtest]` sigue activo (ayuda con los issues de GitHub), y los shader
+packs recomendados son Complementary Reimagined, Bliss Shaders y Photon Shaders (probados),
+aunque cualquier shader pack funciona.
+
+Por decidir: el tipo de release en CurseForge. Publicar primero como **Beta** y pasar a
+**Release** cuando el jar 1.0 haya pasado una prueba en instancia limpia (una instancia nueva
+del launcher con solo LambDynamicLights y Cardinal Components) y hayan vuelto los logs de unos
+cuantos jugadores sin errores del mod. También abierto: el aviso del resource pack del mundo, y
+si el jar aún necesita las regiones preconstruidas (el mapa se reconstruye al abrir de todos
+modos).

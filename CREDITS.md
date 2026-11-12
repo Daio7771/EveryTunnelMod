@@ -1,8 +1,18 @@
 # Credits
 
-Every Tunnel is made by Daio7771: design, code, the Python tools, textures, models, sounds,
-the music of the main menu and of Level 4, the map, the story and the text. All rights reserved
+Every Tunnel is made by Daio7771: the design, the story, the music of the main menu and of
+Level 4, and the direction of everything else (see "Voice and AI" below). All rights reserved
 (`LICENSE.txt`), except the work listed below, which keeps its own licence.
+
+## Voice and AI
+
+The Director's lines in Level 5 (the voice files in `tools/sounds/voice/`, their texts in
+`tools/sounds/voices.py`) are voices from ElevenLabs' library, generated with the author's own
+plan. They are the only AI-made sound or music in the game: the rest is synthesized for it, the
+author's own, or listed below. The design, the story and the music are the author's. The code, the
+Python tools that generate the map, textures, models and sound effects, and part of the in-game text
+and its Spanish translation were written with the help of AI tools (Claude Code), directed,
+approved and tested by the author.
 
 ## Music
 

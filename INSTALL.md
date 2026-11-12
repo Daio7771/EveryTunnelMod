@@ -91,7 +91,7 @@ On its first start, Every Tunnel turns **colored lighting** off in Complementary
 reflections that depend on it). **Leave it off**: with it on, the lamps and your flashlight
 light nothing.
 
-Other shader packs may work, but they are not tuned.
+**Bliss Shaders** and **Photon Shaders** have been tested too, and any other shader pack should work. Only Complementary is set up for you.
 
 ## Settings
 
@@ -133,3 +133,8 @@ Press **Ctrl+Shift+V** in the main menu. Press it again to come back.
 **Something else is wrong.**
 [Open an issue on GitHub](https://github.com/Daio7771/EveryTunnelMod/issues) with your
 `logs/latest.log` (in the `logs` folder, next to `mods`).
+
+**Is it made with AI?**
+The Director's voice is generated with AI (ElevenLabs). The design, story and music are the
+author's own; AI tools helped with the code, the tools that generate the game's assets, and
+parts of the text.

@@ -58,7 +58,7 @@
   "menu.every_tunnel.options": "OPTIONS",
   "menu.every_tunnel.guide": "GUIDE",
   "menu.every_tunnel.exit": "EXIT",
-  "menu.every_tunnel.version": "v%s Beta (Level 4)",
+  "menu.every_tunnel.version": "v%s",
   "menu.every_tunnel.world_missing": "The map is missing. Reinstall the mod.",
   "loading.every_tunnel.tip.1": "He can't see you. He doesn't need to. Sneak ({sneak}) to walk quietly.",
   "loading.every_tunnel.tip.2": "The flashlight ({flashlight}) is company property. The batteries are your problem.",

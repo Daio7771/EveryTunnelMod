@@ -58,7 +58,7 @@
   "menu.every_tunnel.options": "OPCIONES",
   "menu.every_tunnel.guide": "GUÍA",
   "menu.every_tunnel.exit": "SALIR",
-  "menu.every_tunnel.version": "v%s Beta (Nivel 4)",
+  "menu.every_tunnel.version": "v%s",
   "menu.every_tunnel.world_missing": "Falta el mapa. Reinstala el mod.",
   "loading.every_tunnel.tip.1": "No puede verte. No lo necesita. Agáchate ({sneak}) para caminar sin hacer ruido.",
   "loading.every_tunnel.tip.2": "La linterna ({flashlight}) es propiedad de la empresa. Las pilas son cosa tuya.",

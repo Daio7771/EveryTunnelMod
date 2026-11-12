@@ -6,14 +6,15 @@
 
 <p align="center">
   <b>A singleplayer psychological horror mod for Minecraft 1.20.1 (Fabric)</b><br>
-  Demo: Levels 1 to 4 · version 0.4
+  Chapter 1 · Levels 1 to 5 · version 1.0
 </p>
 
 ---
 
 You are the new night-shift security guard of the **Noname Complex**, an abandoned
 underground facility. Your shift starts in the service elevator and goes down through its
-parking garage into the offices below, and on to the lounge under them.
+parking garage into the offices below, on to the lounge under them, and down to the laboratory
+at the very bottom.
 
 **Level 1** is empty. It teaches you to listen. **Level 2** adds the **Pale man**: tall,
 blind, and hunting by sound. Everything you do makes noise, and every noise tells him where
@@ -22,6 +23,9 @@ something in the library watches. It never hears you. It only needs to see you o
 
 **Level 4** is the VIP lounge: warm, expensive and perfectly kept. Nothing hunts you here. There
 is soft jazz, a bed if you need one, and everything is very glad you came.
+
+**Level 5** is the laboratory, cold, bright and long abandoned. Whatever was kept down here did
+not stay where it was put.
 
 ## Features
 
@@ -41,11 +45,11 @@ is soft jazz, a bed if you need one, and everything is very glad you came.
   music follows what he is doing.
 - **Survival on a budget.** Stamina, thirst and a flashlight battery, with a few batteries
   and water bottles left lying around by previous guards.
-- **A complete demo.** Its own main menu, an elevator intro, four levels, 10 achievements,
+- **A complete chapter.** Its own main menu, an elevator intro, five levels, 11 achievements,
   an ending and credits. The game saves as you go, and CONTINUE takes you back.
 - **An in-game guide** (main menu, GUIDE), and the whole game in English and Spanish (Spain).
-- **Looks right with or without shaders.** Tuned for Complementary Reimagined, with material
-  maps for every texture. Plays fine on plain Minecraft too.
+- **Looks right with or without shaders.** Tuned for Complementary Reimagined, and tested with
+  Bliss Shaders and Photon Shaders. Any shader pack works, and so does plain Minecraft.
 
 ## Requirements
 
@@ -80,7 +84,7 @@ Not required, but they make a big difference:
 - **[Sodium](https://modrinth.com/mod/sodium) + [Iris](https://modrinth.com/mod/iris) +
   [Indium](https://modrinth.com/mod/indium)** with the
   **[Complementary Reimagined](https://modrinth.com/shader/complementary-reimagined)**
-  shader pack.
+  shader pack (Bliss Shaders and Photon Shaders work too).
 
 Play with headphones.
 
@@ -94,11 +98,15 @@ Play with headphones.
 
 ## Credits and license
 
-Made by **Daio7771**: design, code, sound and art. **All rights reserved**
+Made by **Daio7771**. **All rights reserved**
 ([LICENSE.txt](LICENSE.txt)): you may make and monetize videos and streams of the game and
 include it in modpacks that download it from CurseForge or GitHub, but not re-upload it or
 reuse its code, art or story. Versions 0.1.0 and 0.2.0 were released under MIT. The sounds
-are synthesized for the game or come from CC0 recordings.
+are synthesized for the game or come from CC0 recordings, except the Director's voice.
+
+**About AI.** The Director's voice is generated with AI (ElevenLabs). The design, story and
+music are the author's own; AI tools helped with the code, the tools that generate the
+game's assets, and parts of the text.
 
 Music: "Local Forecast - Elevator" Kevin MacLeod (incompetech.com)
 Licensed under Creative Commons: By Attribution 4.0 License
