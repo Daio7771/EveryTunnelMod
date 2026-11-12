@@ -8,13 +8,12 @@ import net.minecraft.util.Identifier
 import software.bernie.geckolib.core.animation.AnimationState
 import software.bernie.geckolib.model.GeoModel
 import software.bernie.geckolib.renderer.GeoEntityRenderer
-import software.bernie.geckolib.renderer.layer.AutoGlowingGeoLayer
 import kotlin.random.Random
 
 /**
  * Draws a Distortion (the Cloud, the Junior) with GeckoLib from `geo/entity/<name>.geo.json`, its
  * animations and its texture (all made by `tools/entity/distortion.py`), its eye and brightest glitches
- * glowing in the dark (the `_glowmask` textures). They are not living things, so GeckoLib would leave
+ * glowing in the dark (the `_glowmask` textures) ([EyesGlowLayer]). They are not living things, so GeckoLib would leave
  * them facing north: they are turned to the entity's eased yaw ([DistortionEntity.renderYaw]).
  */
 class DistortionRenderer<T : DistortionEntity>(context: EntityRendererFactory.Context, name: String, stages: Int) :
@@ -22,7 +21,7 @@ class DistortionRenderer<T : DistortionEntity>(context: EntityRendererFactory.Co
 
     init {
         shadowRadius = 0f
-        addRenderLayer(AutoGlowingGeoLayer(this))
+        addRenderLayer(EyesGlowLayer(this))
     }
 
     override fun applyRotations(animatable: T, poseStack: MatrixStack, ageInTicks: Float, rotationYaw: Float, partialTick: Float) {
