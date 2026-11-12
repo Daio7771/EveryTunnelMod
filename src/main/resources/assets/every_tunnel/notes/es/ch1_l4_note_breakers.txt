@@ -1,0 +1,9 @@
+DISYUNTORES - MANTENIMIENTO
+
+Cinco palancas alimentan los lectores de tarjetas de la planta.
+
+La combinación cambia en cada turno. Nadie la apunta.
+
+Coloca las palancas. Pulsa el botón. El contador dice cuántas están bien. No dice cuáles.
+
+Cinco significa corriente.

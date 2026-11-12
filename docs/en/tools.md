@@ -119,6 +119,13 @@ the offices.
 The mod runs `garage:build` every time the world opens, so after running the generator,
 just open the world. `/function garage:build` rebuilds by hand. See [Levels](levels.md).
 
+## Languages
+
+`tools/lang/spanish_variants.py` copies `lang/es_es.json` (the Spanish translation, written by
+hand) to `es_ar`, `es_cl`, `es_ec`, `es_mx`, `es_uy` and `es_ve`, because Minecraft does not
+fall back from one Spanish locale to another. Run it after every change to `es_es.json`; the
+six files it writes are never edited by hand.
+
 ## Blocks
 
 `tools/blocks/generate.py` makes the assets of the mod's 146 blocks. The blocks themselves

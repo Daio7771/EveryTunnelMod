@@ -124,6 +124,13 @@ El mod ejecuta `garage:build` cada vez que se abre el mundo, así que tras ejecu
 generador basta con abrir el mundo. `/function garage:build` reconstruye a mano. Ver
 [Niveles](levels.md).
 
+## Idiomas
+
+`tools/lang/spanish_variants.py` copia `lang/es_es.json` (la traducción al español, escrita a
+mano) a `es_ar`, `es_cl`, `es_ec`, `es_mx`, `es_uy` y `es_ve`, porque Minecraft no pasa de un
+idioma en español a otro. Ejecútalo tras cada cambio en `es_es.json`; los seis archivos que
+escribe no se editan a mano.
+
 ## Bloques
 
 `tools/blocks/generate.py` hace los recursos de los 146 bloques del mod. Los bloques en sí

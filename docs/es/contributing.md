@@ -11,8 +11,10 @@ asistente necesita saber.
 - **Código, comentarios, mensajes de commit, textos del juego: inglés.**
 - **Documentación:** inglés y español, las mismas páginas en `docs/en/` y `docs/es/`.
   Cambia las dos en el mismo commit.
-- El juego en sí está solo en inglés por ahora (`en_us.json`); hay prevista una traducción
-  al español para más adelante. La guía del juego ya está en los dos.
+- El juego está en inglés (`en_us.json`, la referencia) y en español de España (`es_es.json`,
+  que `tools/lang/spanish_variants.py` copia también a los demás `es_*`). Los mensajes
+  pintados en las paredes (`wall.every_tunnel.*`) se quedan en inglés a propósito. La guía
+  del juego y las notas están en los dos.
 
 ## Páginas públicas
 

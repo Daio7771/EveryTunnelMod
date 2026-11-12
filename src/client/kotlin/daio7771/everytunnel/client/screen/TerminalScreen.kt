@@ -15,7 +15,7 @@ import net.minecraft.util.Util
  * character at a time with soft key clicks (`block.terminal.key`), a cursor blinking at the end. A click or
  * a key shows the rest at once; Esc, or a click once it is all there, closes it. The game does not pause.
  */
-class TerminalScreen(private val lines: List<String>) : Screen(Text.literal("Terminal")) {
+class TerminalScreen(private val lines: List<String>) : Screen(Text.translatable("screen.every_tunnel.terminal")) {
 
     private val openedMs = Util.getMeasuringTimeMs()
     private var shownAll = false

@@ -108,7 +108,7 @@ zone containing them; the player is "in" every zone containing them, from any le
 
 | Key | Meaning |
 |---|---|
-| `title` | Big text on screen ("Level 2"); empty shows nothing |
+| `title` | Big text on screen: a translation key (`title.every_tunnel.level_2`, "Level 2" in `en_us.json`; text that is no key shows as written); empty shows nothing |
 | `subtitle` | Smaller text under it |
 | `sound` | Sound event played in the player's head |
 | `manual` | `true`: the title and sound wait for the level's own code instead of showing on walking in (Level 5's, as its airlock opens) |

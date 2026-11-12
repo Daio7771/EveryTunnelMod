@@ -1,0 +1,7 @@
+FICHAS DE CLIENTES
+
+Filas de fichas. Todos los nombres están tachados con el mismo bolígrafo azul.
+
+Línea restante en cada una: «Tratamiento: descanso. Duración: abierta».
+
+La última ficha no tiene nombre, solo un número: 14.

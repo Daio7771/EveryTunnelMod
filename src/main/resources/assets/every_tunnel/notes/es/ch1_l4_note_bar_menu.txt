@@ -1,0 +1,8 @@
+SELECCIÓN DE HOY
+
+{R0:menu}
+{R1:menu}
+{R2:menu}
+{R3:menu}
+
+Plato para el guardia de turno: al final de la barra, como siempre.

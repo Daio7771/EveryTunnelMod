@@ -99,8 +99,8 @@ Other shader packs may work, but they are not tuned.
 - **Music volume on.** The music tells you what the Pale man is doing.
 - **Brightness** always counts as "Moody" in the levels. That is intended: the dark is part of
   the game.
-- **Language:** the in-game guide follows Minecraft's language (English or Spanish); change it
-  in Options → Language.
+- **Language:** the game follows Minecraft's language (English or Spanish); change it in
+  Options → Language. The messages painted on the walls stay in English in both.
 
 ## Updating and uninstalling
 

@@ -8,6 +8,7 @@ import net.minecraft.block.BlockState
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.network.PacketByteBuf
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.text.Text
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.ActionResult
 import net.minecraft.util.Hand
@@ -36,50 +37,76 @@ object TerminalHooks {
         player.serverWorld.playSound(null, pos, ModSounds.TERMINAL_KEY, SoundCategory.BLOCKS, 0.6f, 1f)
         if (!ServerPlayNetworking.canSend(player, PACKET_ID)) return
         val buf = PacketByteBufs.create()
-        buf.writeString(lines.joinToString("\n"))
+        buf.writeVarInt(lines.size)
+        for (line in lines) {
+            buf.writeString(line.key)
+            buf.writeBoolean(line.red)
+            buf.writeVarInt(line.args.size)
+            line.args.forEach { buf.writeString(it) }
+        }
         ServerPlayNetworking.send(player, PACKET_ID, buf)
     }
 
     /**
-     * What the computer [id] shows, line by line; a line starting with [RED] is drawn red. The Office's is
-     * the lab head's work log, with the chemical puzzle's answer; Storage's, its inventory (two gowns more
-     * than rooms); the rest are locked, asking for a password, the last account in use left on screen.
+     * One line of a screen: [key] is a translation key (`terminal.every_tunnel.*`, empty for a blank line), filled
+     * with [args]; the client translates it, so the screen follows the player's language. [red] draws it red.
      */
-    fun text(player: ServerPlayerEntity, id: String?): List<String> = when (id) {
+    data class Line(val key: String = "", val red: Boolean = false, val args: List<String> = emptyList())
+
+    /**
+     * What the computer [id] shows, line by line. The Office's is the lab head's work log, with the chemical
+     * puzzle's answer; Storage's, its inventory (two gowns more than rooms); the rest are locked, asking for a
+     * password, the last account in use left on screen.
+     */
+    fun text(player: ServerPlayerEntity, id: String?): List<Line> = when (id) {
         "terminal_office" -> {
             val mix = ChemicalHooks.mix(player.server)
             listOf(
-                "LOWER LABS - WORK LOG",
-                "",
-                "Day 1. Head office came down with a tablet. The budget for the lower labs is gone. End of the month. Staff to leave.",
-                "",
-                "Day 30. They have left. I have kept the schedule. It seemed rude to stop in the middle.",
-                "",
-                "Day 41. The chemical room's drain backed up. I sealed it with a grate.",
-                "To open it: R-${mix.first} with R-${mix.second} in the mixer. Nothing else.",
-                "The wrong pair sets off the alarm. The alarm brings them.",
-                "",
-                "Day 77. Something in the Lab hall again. Do not look at it. Turn round, walk back the way you came. It goes.",
+                Line("terminal.every_tunnel.office.title"),
+                Line(),
+                Line("terminal.every_tunnel.office.day_1"),
+                Line(),
+                Line("terminal.every_tunnel.office.day_30"),
+                Line(),
+                Line("terminal.every_tunnel.office.day_41_drain"),
+                Line("terminal.every_tunnel.office.day_41_mix", args = listOf(mix.first.toString(), mix.second.toString())),
+                Line("terminal.every_tunnel.office.day_41_alarm"),
+                Line(),
+                Line("terminal.every_tunnel.office.day_77"),
             )
         }
         "terminal_storage" -> listOf(
-            "STORAGE - INVENTORY",
-            "",
-            "Patient gowns, issued: 6",
-            "Subjects in rooms: 4",
-            "Meal trays, daily: 4",
-            "Snacks: 2",
-            "Water: 2",
-            "Batteries: 2",
-            "Restraints: 4",
+            Line("terminal.every_tunnel.storage.title"),
+            Line(),
+            Line("terminal.every_tunnel.storage.gowns"),
+            Line("terminal.every_tunnel.storage.subjects"),
+            Line("terminal.every_tunnel.storage.trays"),
+            Line("terminal.every_tunnel.storage.snacks"),
+            Line("terminal.every_tunnel.storage.water"),
+            Line("terminal.every_tunnel.storage.batteries"),
+            Line("terminal.every_tunnel.storage.restraints"),
         )
-        else -> listOf("${RED}SESSION LOCKED", "", "Log in to continue.", "", "User: RTA", "Password: ________")
+        else -> listOf(
+            Line("terminal.every_tunnel.locked.title", red = true),
+            Line(),
+            Line("terminal.every_tunnel.locked.log_in"),
+            Line(),
+            Line("terminal.every_tunnel.locked.user"),
+            Line("terminal.every_tunnel.locked.password"),
+        )
     }
 
     /** A line starting with this is drawn red (`TerminalScreen`). */
     const val RED = "!"
 
-    fun readText(buf: PacketByteBuf): List<String> = buf.readString().split('\n')
+    /** The screen's lines as the client's language reads them, a red one marked with [RED]. */
+    fun readText(buf: PacketByteBuf): List<String> = List(buf.readVarInt()) {
+        val key = buf.readString()
+        val red = buf.readBoolean()
+        val args = Array<Any>(buf.readVarInt()) { buf.readString() }
+        val text = if (key.isEmpty()) "" else Text.translatable(key, *args).string
+        if (red) RED + text else text
+    }
 }
 
 /** A lab computer on a desk or a bench (Level 5): a right click reads its screen ([TerminalHooks]). */

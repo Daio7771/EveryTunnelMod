@@ -92,8 +92,8 @@ object LevelEntryHooks {
         val entry = level.entry ?: return
         if (entry.title.isNotEmpty() || entry.subtitle.isNotEmpty()) {
             player.networkHandler.sendPacket(TitleFadeS2CPacket(TITLE_FADE_IN, TITLE_STAY, TITLE_FADE_OUT))
-            player.networkHandler.sendPacket(SubtitleS2CPacket(Text.literal(entry.subtitle).formatted(Formatting.GRAY)))
-            player.networkHandler.sendPacket(TitleS2CPacket(Text.literal(entry.title).formatted(Formatting.GRAY)))
+            player.networkHandler.sendPacket(SubtitleS2CPacket(shown(entry.subtitle)))
+            player.networkHandler.sendPacket(TitleS2CPacket(shown(entry.title)))
         }
         entry.sound?.let { id ->
             val sound = Registries.SOUND_EVENT.get(Identifier(id))
@@ -104,6 +104,9 @@ object LevelEntryHooks {
             }
         }
     }
+
+    /** An entry title or subtitle in grey: a translation key (`title.every_tunnel.level_3`), which the client translates; text that is no key shows as it is. */
+    private fun shown(text: String): Text = Text.translatable(text).formatted(Formatting.GRAY)
 
     /** Opens every shutter of every level and forgets the ones waiting or closing (a new game). */
     fun openAll(server: MinecraftServer) {

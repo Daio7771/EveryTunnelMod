@@ -100,9 +100,12 @@ teclas que tiene asignadas el jugador.
 
 Copia `assets/every_tunnel/lang/en_us.json` al archivo del idioma (`es_es.json`...) y
 traduce los valores. `tools/blocks/generate.py` reescribe los nombres de bloques en
-`en_us.json`; los demás idiomas no los toca. Las claves que faltan vuelven al inglés. *(Por
-ahora los archivos `es_*.json` solo tienen las palabras de la pantalla de la guía; hay
-prevista una traducción completa del juego al español para más adelante.)*
+`en_us.json`; los demás idiomas no los toca. Las claves que faltan vuelven al inglés. Las
+notas son archivos aparte: `assets/every_tunnel/notes/<idioma>/<id>.txt` (`es` sirve a todos
+los `es_*`, `en` al resto). El español ya está hecho: escríbelo en `es_es.json`, ejecuta
+`python3 tools/lang/spanish_variants.py` para copiarlo a los demás idiomas en español y
+mantén `notes/es/` al día con `notes/en/` (`LangFilesTest` rompe el build si una clave, una
+variable o una nota no coincide).
 
 ## Añadir una página a la guía
 

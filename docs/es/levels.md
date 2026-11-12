@@ -110,7 +110,7 @@ cualquier nivel.
 
 | Clave | Significado |
 |---|---|
-| `title` | Texto grande en pantalla ("Level 2"); vacío no muestra nada |
+| `title` | Texto grande en pantalla: una clave de traducción (`title.every_tunnel.level_2`, "Level 2" en `en_us.json`; un texto que no sea clave se muestra tal cual); vacío no muestra nada |
 | `subtitle` | Texto más pequeño debajo |
 | `sound` | Evento de sonido que suena en la cabeza del jugador |
 | `manual` | `true`: el título y el sonido esperan al código del propio nivel en vez de salir al entrar andando (el del nivel 5, al abrirse su esclusa) |

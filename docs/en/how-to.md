@@ -97,8 +97,11 @@ player's bound keys.
 Copy `assets/every_tunnel/lang/en_us.json` to the language's file (`es_es.json`...) and
 translate the values. The block names in `en_us.json` are rewritten by
 `tools/blocks/generate.py`; other languages are not touched by it. Missing keys fall back to
-English. *(The `es_*.json` files only hold the guide screen's words for now; a full Spanish
-translation of the game is planned for later.)*
+English. Notes are separate files: `assets/every_tunnel/notes/<lang>/<id>.txt` (`es` serves
+every `es_*` locale, `en` the rest). Spanish is done: write it in `es_es.json`, run
+`python3 tools/lang/spanish_variants.py` to copy it to the other Spanish locales, and keep
+`notes/es/` in step with `notes/en/` (`LangFilesTest` fails the build if a key, a
+placeholder or a note differs).
 
 ## Add a guide page
 

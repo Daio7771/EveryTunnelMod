@@ -1,0 +1,14 @@
+LÍNEA DE PRESIÓN - AJUSTES
+
+Las válvulas A a E alimentan la línea que mantiene la puerta cerrada.
+Cada válvula necesita su número exacto de giros completos.
+Solo giran en un sentido. Si te pasas, la válvula vuelve a cero.
+Todas suenan igual. No se oye cuál falla.
+
+Válvula A: {A:word}
+Válvula B: {B:word}
+Válvula C: {C:word}
+Válvula D: {D:word}
+Válvula E: {E:word}
+
+Cuando las cinco están bien, el cierre se suelta.

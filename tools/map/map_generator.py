@@ -71,8 +71,8 @@ LEVEL_SIGN = "B1"
 NEXT_LEVEL_SIGN = "B2"
 # The elevator's floor indicator counts these down during the intro (FloorIndicatorBlock.LABELS).
 ELEVATOR_FLOORS = ["3", "2", "1", "G", "B1"]
-LEVEL_TITLE = "Level 1"          # shown when the elevator doors open
-NEXT_LEVEL_TITLE = "Level 2"     # shown on walking into the next level
+LEVEL_TITLE = "title.every_tunnel.level_1"          # shown when the elevator doors open
+NEXT_LEVEL_TITLE = "title.every_tunnel.level_2"     # shown on walking into the next level
 # The new game's intro: seconds waiting in the closed elevator while the song plays.
 INTRO_SECONDS = 25
 INTRO_MUSIC = "every_tunnel:music.elevator"
@@ -195,7 +195,7 @@ LEVEL_2 = dict(
 LEVEL_3 = dict(
     LEVEL_SIGN="B3",
     NEXT_LEVEL_SIGN="B4",            # over the door at the end of the bunker corridor
-    TITLE="Level 3",                 # shown on walking into the antechamber
+    TITLE="title.every_tunnel.level_3",                 # shown on walking into the antechamber
     # Air blocks over the floor; doors through walls are lower than the spaces they join.
     HEIGHTS=dict(corridor=4, room=4, library=12, antechamber=3, stairs=4),
     DOOR_HEIGHTS=dict(room=3, library=4),
@@ -365,7 +365,7 @@ LEVEL_3 = dict(
 # with x1 and z1 exclusive, the sizes are of the air inside. The user's table, with its rooms at 2/3 (its
 # corridors kept) and a wall between the rooms that touched (Security, Hall, Bar).
 LEVEL_4 = dict(
-    TITLE="Level 4",
+    TITLE="title.every_tunnel.level_4",
     FLOOR_Y=9,                       # the world y of the main floor's blocks (the B4 door's floor)
     # (id, name, box, height, kind); kinds: "piece" gives a piece, "rest", "key", "neutral".
     ROOMS=[
@@ -470,7 +470,7 @@ LAB_AIR_PHONE = {**LAB_AIR, "random": LAB_AIR["random"] + [
     {"sound": "every_tunnel:ambient.offices.phone", "interval": [90, 240], "distance": [10, 16], "volume": 0.8}]}
 
 LEVEL_5 = dict(
-    TITLE="Level 5",
+    TITLE="title.every_tunnel.level_5",
     FLOOR_Y=9,                       # the world y of layer 1's floor blocks (Level 4's floor)
     LAYER_DROP=10,                   # layer 2's floor blocks are this much lower
     ROOM_HEIGHT=5,

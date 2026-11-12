@@ -93,7 +93,7 @@ con un comentario KDoc que cuenta más.
 | `ModItems.kt` | Batería, botella de agua, tarjeta; la pestaña creativa |
 | `LabItems.kt` | La llave inglesa del nivel 5: un arma pesada que no se desgasta |
 | `ChemicalBlocks.kt` | La mezcladora del nivel 5: sus depósitos (un frasco cada uno), su cuerpo (el botón), las luces rojas de la alarma |
-| `TerminalHooks.kt` | Los ordenadores del nivel 5 (`LabTerminalBlock`): qué muestra cada pantalla, enviado al cliente |
+| `TerminalHooks.kt` | Los ordenadores del nivel 5 (`LabTerminalBlock`): qué muestra cada pantalla, como claves de traducción (`terminal.every_tunnel.*`) que traduce el cliente |
 | `BriefingBlocks.kt` | La pizarra de seguridad del nivel 5: las doce partes del corcho (un clic derecho lee la ficha de la columna donde cae) y la placa de encima |
 | `FuseHolderBlock.kt` | Un hueco de la caja de fusibles del nivel 5: solo admite el fusible de su amperaje; llena la caja, se encienden sus luces y la palanca de al lado funciona |
 | `ModEntities.kt` | El tipo de entidad del Pale man y su huevo; el asiento de la taquilla |

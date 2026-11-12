@@ -10,8 +10,10 @@ the [last section](#notes-for-ai-assistants) adds what an assistant needs to kno
 - **Code, comments, commit messages, in-game text: English.**
 - **Docs:** English and Spanish, the same pages in `docs/en/` and `docs/es/`. Change both in
   the same commit.
-- The game itself is English only for now (`en_us.json`); a Spanish translation is planned
-  for later. The in-game guide is already in both.
+- The game is in English (`en_us.json`, the reference) and Spanish from Spain (`es_es.json`,
+  also copied to the other `es_*` locales by `tools/lang/spanish_variants.py`). The painted
+  wall messages (`wall.every_tunnel.*`) stay in English on purpose. The in-game guide and the
+  notes are in both.
 
 ## Public pages
 

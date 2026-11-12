@@ -43,7 +43,7 @@ is soft jazz, a bed if you need one, and everything is very glad you came.
   and water bottles left lying around by previous guards.
 - **A complete demo.** Its own main menu, an elevator intro, four levels, 10 achievements,
   an ending and credits. The game saves as you go, and CONTINUE takes you back.
-- **An in-game guide** (main menu, GUIDE), in English and Spanish.
+- **An in-game guide** (main menu, GUIDE), and the whole game in English and Spanish (Spain).
 - **Looks right with or without shaders.** Tuned for Complementary Reimagined, with material
   maps for every texture. Plays fine on plain Minecraft too.
 

@@ -93,7 +93,7 @@ KDoc comment that says more.
 | `ModItems.kt` | Battery, water bottle, keycard; the creative tab |
 | `LabItems.kt` | Level 5's wrench: a heavy weapon that never wears out |
 | `ChemicalBlocks.kt` | Level 5's mixer: its tanks (a reagent flask each), its body (the button), the alarm's red lights |
-| `TerminalHooks.kt` | Level 5's computers (`LabTerminalBlock`): what each screen shows, sent to the client |
+| `TerminalHooks.kt` | Level 5's computers (`LabTerminalBlock`): what each screen shows, as translation keys (`terminal.every_tunnel.*`) the client translates |
 | `BriefingBlocks.kt` | Level 5's safety briefing: the cork board's twelve parts (a right click reads the sheet of the column it lands in) and the plate over it |
 | `FuseHolderBlock.kt` | A slot of Level 5's fuse box: takes only the fuse of its amperage; the box full, its lamps light and the lever beside it works |
 | `ModEntities.kt` | The Pale man entity type and spawn egg; the locker seat |
