@@ -101,6 +101,7 @@ object CloudGameHooks {
             if (player == null || running.cloud.isRemoved) {
                 iterator.remove()
                 if (!running.cloud.isRemoved) running.cloud.discard()
+                else EveryTunnel.LOGGER.warn("The entry corridor's Cloud was removed while its game was on: the game is over")
                 continue
             }
             if (DeathHooks.isDying(player)) continue

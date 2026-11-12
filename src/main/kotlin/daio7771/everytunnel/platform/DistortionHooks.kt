@@ -195,10 +195,16 @@ object DistortionHooks {
         }
     }
 
-    /** The Hunters and Distortions of [levelId] (null: the debug ones of no level) in [world], gone. */
+    /**
+     * The Hunters and Distortions of [levelId] (null: the debug ones of no level) in [world], gone. Not the Cloud of
+     * the entry corridor's game ([DistortionCloudEntity.inGame], [CloudGameHooks]): the level is built while the player
+     * may already be in that corridor, and the build's end ([levelBuilt]) once took it from a game that had just begun.
+     * A death ([restart]) and a new game ([clearAll]) still remove it.
+     */
     private fun discard(world: ServerWorld, levelId: String?) {
         KeptEntities.forget { (it is HunterEntity && it.levelId == levelId) || (it is DistortionEntity && it.levelId == levelId) }
         for (entity in world.iterateEntities().toList()) {
+            if (entity is DistortionCloudEntity && entity.inGame) continue
             val of = when (entity) {
                 is HunterEntity -> entity.levelId
                 is DistortionEntity -> entity.levelId
