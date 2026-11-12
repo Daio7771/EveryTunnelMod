@@ -50,6 +50,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | El drenaje del nivel 5 | `ambient.drain.water` (bucle: el agua por los canales, gorgoteos, un rumor grave), `ambient.drain.pumps` (bucle: las bombas de la Pump room, fuertes), `ambient.drain.creak` (una tubería que cruje a lo lejos, metal contra metal, 4 variaciones) y el `ambient.drip` del garaje; por zona (`ZONE_AMBIENCE` de `LEVEL_5`). La trampilla cerrándose sobre el jugador es la trampilla de hierro vanilla con pitch 0.6 | síntesis / vanilla |
 | Los Hunters del nivel 5 | `entity.hunter.shriek` (empieza una persecución), `.attack`, `.death`, `.ambient` (3 variaciones cada uno) | síntesis |
 | Las Distortions del nivel 5 | `entity.distortion_cloud.whisper` (bucle), `.appear`, `.kill`, `.leave`; `entity.distortion_junior.whisper` (bucle), `.stare` (bucle, el juego le sube el tono), `.die`. Los susurros son aire a través de formantes de vocales que cambian, sin voz | síntesis |
+| El director del nivel 5 | `voice.director.boss_01` a `boss_20` (sus líneas en la cinemática, con los subtítulos de `cutscene/director.json`), `voice.director.loop_1` a `loop_6` (lo que repite después); planas, en Voz/Habla, desde `tools/sounds/voices.py` | ElevenLabs (ver arriba) |
 
 ## Quién reproduce qué
 

@@ -1,0 +1,392 @@
+{
+  "lines": [
+    {
+      "id": "boss_01",
+      "part": 1,
+      "ms": 3681,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_01_1"
+        }
+      ]
+    },
+    {
+      "id": "boss_02",
+      "part": 1,
+      "ms": 5020,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_02_1"
+        },
+        {
+          "at": 3280,
+          "text": "subtitle.every_tunnel.director.boss_02_2"
+        }
+      ]
+    },
+    {
+      "id": "boss_03",
+      "part": 1,
+      "ms": 4552,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_03_1"
+        },
+        {
+          "at": 2620,
+          "text": "subtitle.every_tunnel.director.boss_03_2"
+        }
+      ]
+    },
+    {
+      "id": "boss_04",
+      "part": 1,
+      "ms": 4027,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_04_1"
+        },
+        {
+          "at": 2640,
+          "text": "subtitle.every_tunnel.director.boss_04_2"
+        }
+      ]
+    },
+    {
+      "id": "boss_05",
+      "part": 2,
+      "ms": 9760,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_05_1"
+        },
+        {
+          "at": 4717,
+          "text": "subtitle.every_tunnel.director.boss_05_2"
+        },
+        {
+          "at": 8560,
+          "text": "subtitle.every_tunnel.director.boss_05_3"
+        }
+      ]
+    },
+    {
+      "id": "boss_06",
+      "part": 2,
+      "ms": 2520,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_06_1"
+        }
+      ]
+    },
+    {
+      "id": "boss_07",
+      "part": 2,
+      "ms": 3880,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_07_1"
+        },
+        {
+          "at": 2120,
+          "text": "subtitle.every_tunnel.director.boss_07_2"
+        }
+      ]
+    },
+    {
+      "id": "boss_08",
+      "part": 2,
+      "ms": 7251,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_08_1"
+        },
+        {
+          "at": 3190,
+          "text": "subtitle.every_tunnel.director.boss_08_2"
+        },
+        {
+          "at": 6210,
+          "text": "subtitle.every_tunnel.director.boss_08_3"
+        }
+      ]
+    },
+    {
+      "id": "boss_09",
+      "part": 2,
+      "ms": 4600,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_09_1"
+        },
+        {
+          "at": 2720,
+          "text": "subtitle.every_tunnel.director.boss_09_2"
+        }
+      ]
+    },
+    {
+      "id": "boss_10",
+      "part": 2,
+      "ms": 5997,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_10_1"
+        },
+        {
+          "at": 3380,
+          "text": "subtitle.every_tunnel.director.boss_10_2"
+        },
+        {
+          "at": 4650,
+          "text": "subtitle.every_tunnel.director.boss_10_3"
+        }
+      ]
+    },
+    {
+      "id": "boss_11",
+      "part": 3,
+      "ms": 5695,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_11_1"
+        },
+        {
+          "at": 4160,
+          "text": "subtitle.every_tunnel.director.boss_11_2"
+        }
+      ]
+    },
+    {
+      "id": "boss_12",
+      "part": 3,
+      "ms": 7880,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_12_1"
+        },
+        {
+          "at": 2180,
+          "text": "subtitle.every_tunnel.director.boss_12_2"
+        },
+        {
+          "at": 3490,
+          "text": "subtitle.every_tunnel.director.boss_12_3"
+        },
+        {
+          "at": 6780,
+          "text": "subtitle.every_tunnel.director.boss_12_4"
+        }
+      ]
+    },
+    {
+      "id": "boss_13",
+      "part": 3,
+      "ms": 4500,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_13_1"
+        },
+        {
+          "at": 3640,
+          "text": "subtitle.every_tunnel.director.boss_13_2"
+        }
+      ]
+    },
+    {
+      "id": "boss_14",
+      "part": 3,
+      "ms": 6900,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_14_1"
+        },
+        {
+          "at": 2480,
+          "text": "subtitle.every_tunnel.director.boss_14_2"
+        },
+        {
+          "at": 3550,
+          "text": "subtitle.every_tunnel.director.boss_14_3"
+        }
+      ]
+    },
+    {
+      "id": "boss_15",
+      "part": 3,
+      "ms": 5382,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_15_1"
+        },
+        {
+          "at": 2350,
+          "text": "subtitle.every_tunnel.director.boss_15_2"
+        },
+        {
+          "at": 4490,
+          "text": "subtitle.every_tunnel.director.boss_15_3"
+        }
+      ]
+    },
+    {
+      "id": "boss_16",
+      "part": 3,
+      "ms": 6190,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_16_1"
+        },
+        {
+          "at": 4250,
+          "text": "subtitle.every_tunnel.director.boss_16_2"
+        }
+      ]
+    },
+    {
+      "id": "boss_17",
+      "part": 4,
+      "ms": 3861,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_17_1"
+        },
+        {
+          "at": 2990,
+          "text": "subtitle.every_tunnel.director.boss_17_2"
+        }
+      ]
+    },
+    {
+      "id": "boss_18",
+      "part": 4,
+      "ms": 3233,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_18_1"
+        },
+        {
+          "at": 1750,
+          "text": "subtitle.every_tunnel.director.boss_18_2"
+        }
+      ]
+    },
+    {
+      "id": "boss_19",
+      "part": 4,
+      "ms": 3400,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_19_1"
+        },
+        {
+          "at": 2050,
+          "text": "subtitle.every_tunnel.director.boss_19_2"
+        }
+      ]
+    },
+    {
+      "id": "boss_20",
+      "part": 4,
+      "ms": 1604,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.boss_20_1"
+        }
+      ]
+    }
+  ],
+  "loop": [
+    {
+      "id": "loop_1",
+      "part": 0,
+      "ms": 2895,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.loop_1_1"
+        }
+      ]
+    },
+    {
+      "id": "loop_2",
+      "part": 0,
+      "ms": 2440,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.loop_2_1"
+        }
+      ]
+    },
+    {
+      "id": "loop_3",
+      "part": 0,
+      "ms": 3480,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.loop_3_1"
+        },
+        {
+          "at": 2510,
+          "text": "subtitle.every_tunnel.director.loop_3_2"
+        }
+      ]
+    },
+    {
+      "id": "loop_4",
+      "part": 0,
+      "ms": 3140,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.loop_4_1"
+        }
+      ]
+    },
+    {
+      "id": "loop_5",
+      "part": 0,
+      "ms": 1580,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.loop_5_1"
+        }
+      ]
+    },
+    {
+      "id": "loop_6",
+      "part": 0,
+      "ms": 2260,
+      "cues": [
+        {
+          "at": 0,
+          "text": "subtitle.every_tunnel.director.loop_6_1"
+        }
+      ]
+    }
+  ]
+}

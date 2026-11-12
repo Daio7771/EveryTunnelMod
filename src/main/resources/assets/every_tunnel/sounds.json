@@ -1126,5 +1126,135 @@
     "sounds": [
       "every_tunnel:player/tinnitus_1"
     ]
+  },
+  "voice.director.boss_01": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_01"
+    ]
+  },
+  "voice.director.boss_02": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_02"
+    ]
+  },
+  "voice.director.boss_03": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_03"
+    ]
+  },
+  "voice.director.boss_04": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_04"
+    ]
+  },
+  "voice.director.boss_05": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_05"
+    ]
+  },
+  "voice.director.boss_06": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_06"
+    ]
+  },
+  "voice.director.boss_07": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_07"
+    ]
+  },
+  "voice.director.boss_08": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_08"
+    ]
+  },
+  "voice.director.boss_09": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_09"
+    ]
+  },
+  "voice.director.boss_10": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_10"
+    ]
+  },
+  "voice.director.boss_11": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_11"
+    ]
+  },
+  "voice.director.boss_12": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_12"
+    ]
+  },
+  "voice.director.boss_13": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_13"
+    ]
+  },
+  "voice.director.boss_14": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_14"
+    ]
+  },
+  "voice.director.boss_15": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_15"
+    ]
+  },
+  "voice.director.boss_16": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_16"
+    ]
+  },
+  "voice.director.boss_17": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_17"
+    ]
+  },
+  "voice.director.boss_18": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_18"
+    ]
+  },
+  "voice.director.boss_19": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_19"
+    ]
+  },
+  "voice.director.boss_20": {
+    "sounds": [
+      "every_tunnel:voice/director/boss_20"
+    ]
+  },
+  "voice.director.loop_1": {
+    "sounds": [
+      "every_tunnel:voice/director/loop_1"
+    ]
+  },
+  "voice.director.loop_2": {
+    "sounds": [
+      "every_tunnel:voice/director/loop_2"
+    ]
+  },
+  "voice.director.loop_3": {
+    "sounds": [
+      "every_tunnel:voice/director/loop_3"
+    ]
+  },
+  "voice.director.loop_4": {
+    "sounds": [
+      "every_tunnel:voice/director/loop_4"
+    ]
+  },
+  "voice.director.loop_5": {
+    "sounds": [
+      "every_tunnel:voice/director/loop_5"
+    ]
+  },
+  "voice.director.loop_6": {
+    "sounds": [
+      "every_tunnel:voice/director/loop_6"
+    ]
   }
 }

@@ -86,7 +86,7 @@ object DirectorSceneHooks {
         buf.writeDouble(him.position.z)
         buf.writeFloat(him.yaw)
         ServerPlayNetworking.send(player, START_PACKET_ID, buf)
-        EveryTunnel.LOGGER.info("Level 5: the director's scene begins ({} s)", DirectorScene.SCENE.totalTicks / 20)
+        EveryTunnel.LOGGER.info("Level 5: the director's scene begins ({} s)", DirectorScene.SCENE.cutscene.totalTicks / 20)
     }
 
     /** `/everytunnel director`: his scene can play again, and [player] stands before his door. */
@@ -108,7 +108,7 @@ object DirectorSceneHooks {
             running = null
             return
         }
-        if (server.ticks - scene.startTick >= DirectorScene.SCENE.totalTicks) {
+        if (server.ticks - scene.startTick >= DirectorScene.SCENE.cutscene.totalTicks) {
             finish(server, skipped = false)
             return
         }

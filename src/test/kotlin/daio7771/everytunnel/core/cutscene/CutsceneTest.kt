@@ -41,7 +41,7 @@ class CutsceneTest {
 
     @Test
     fun `the scene starts and ends in the player's eyes`() {
-        val scene = DirectorScene.SCENE
+        val scene = DirectorScene.SCENE.cutscene
         val frame = SceneFrame(0.0, 64.0, 0.0, 90.0)
         val eyes = CameraPose(-15.0, 65.6, 0.0, -90.0, 5.0)
         val player = Triple(-15.0, 65.6, 0.0)
@@ -52,7 +52,7 @@ class CutsceneTest {
 
     @Test
     fun `shots follow the fly in and the bands slide in and out`() {
-        val scene = DirectorScene.SCENE
+        val scene = DirectorScene.SCENE.cutscene
         assertEquals(-1, scene.shotAt(0.0))
         assertEquals(0, scene.shotAt(scene.flyInTicks.toDouble()))
         assertEquals(scene.shots.size, scene.shotAt(scene.shotsEnd.toDouble()))
@@ -65,7 +65,7 @@ class CutsceneTest {
 
     @Test
     fun `the first shot looks at his face`() {
-        val scene = DirectorScene.SCENE
+        val scene = DirectorScene.SCENE.cutscene
         val frame = SceneFrame(0.0, 64.0, 0.0, 90.0)
         val eyes = CameraPose(-15.0, 65.6, 0.0, -90.0, 5.0)
         val pose = scene.pose(scene.flyInTicks.toDouble(), frame, eyes, Triple(-15.0, 65.6, 0.0))
@@ -85,5 +85,46 @@ class CutsceneTest {
         assertFalse(late.press(0L))
         assertFalse(late.showing(3000L))
         assertFalse(late.press(3000L))
+    }
+
+    @Test
+    fun `his lines follow one another with pauses, the mask's the longest`() {
+        val timeline = DirectorScene.SCENE
+        val lines = timeline.lines
+        assertEquals(20, lines.size)
+        assertEquals("boss_01", lines.first().line.id)
+        for ((a, b) in lines.zipWithNext()) {
+            assertTrue(b.start > a.end, "${b.line.id} starts after ${a.line.id} ends")
+            assertEquals(DirectorScene.ticks(a.line.ms), a.end - a.start)
+        }
+        val mask = lines.indexOfFirst { it.line.id == DirectorScene.MASK_LINE }
+        val maskGap = lines[mask].start - lines[mask - 1].end
+        assertTrue(lines.zipWithNext().all { (a, b) -> b.start - a.end <= maskGap })
+    }
+
+    @Test
+    fun `cuts fall in the pauses, never while he speaks`() {
+        val timeline = DirectorScene.SCENE
+        val scene = timeline.cutscene
+        var cut = scene.flyInTicks
+        for (shot in scene.shots) {
+            cut += shot.ticks
+            assertTrue(timeline.lines.none { cut > it.start && cut < it.end }, "a cut at $cut")
+        }
+        assertTrue(timeline.lines.last().end < scene.shotsEnd)
+    }
+
+    @Test
+    fun `subtitles show only while their line is under way`() {
+        val timeline = DirectorScene.SCENE
+        assertTrue(timeline.subtitles.size >= timeline.lines.size)
+        for ((a, b) in timeline.subtitles.zipWithNext()) assertTrue(a.end <= b.start)
+        for (sub in timeline.subtitles) {
+            val line = timeline.lines.first { sub.key.contains(it.line.id) }
+            assertTrue(sub.start >= line.start && sub.start < line.end, sub.key)
+        }
+        assertEquals(null, timeline.subtitleAt(0.0))
+        val first = timeline.lines.first()
+        assertEquals("subtitle.every_tunnel.director.boss_01_1", timeline.subtitleAt(first.start + 1.0)?.key)
     }
 }

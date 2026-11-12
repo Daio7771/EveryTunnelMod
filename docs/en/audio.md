@@ -48,6 +48,7 @@ registered in `platform.ModSounds`. Any of them can be tried with
 | Level 5's drain | `ambient.drain.water` (loop: water down the channels, gurgles, a low rush), `ambient.drain.pumps` (loop: the Pump room's pumps, loud), `ambient.drain.creak` (a pipe creaking far off, metal on metal, 4 variations), and the garage's `ambient.drip`; by zone (`ZONE_AMBIENCE` in `LEVEL_5`). The hatch shutting over the player is vanilla's iron trapdoor at pitch 0.6 | synth / vanilla |
 | Level 5's Hunters | `entity.hunter.shriek` (a chase starts), `.attack`, `.death`, `.ambient` (3 variations each) | synth |
 | Level 5's Distortions | `entity.distortion_cloud.whisper` (loop), `.appear`, `.kill`, `.leave`; `entity.distortion_junior.whisper` (loop), `.stare` (loop, its pitch raised by the game), `.die`. The whispers are breath through moving vowel formants, no voice | synth |
+| Level 5's director | `voice.director.boss_01` to `boss_20` (his lines in the cinematic, subtitled by `cutscene/director.json`), `voice.director.loop_1` to `loop_6` (what he repeats afterwards); flat, under Voice/Speech, from `tools/sounds/voices.py` | ElevenLabs (see above) |
 
 ## Who plays what
 

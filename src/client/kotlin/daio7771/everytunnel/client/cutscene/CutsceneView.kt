@@ -1,5 +1,6 @@
 package daio7771.everytunnel.client.cutscene
 
+import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.effects.ScreenFade
 import daio7771.everytunnel.core.cutscene.CameraPose
 import daio7771.everytunnel.core.cutscene.DirectorScene
@@ -12,6 +13,8 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.Perspective
+import net.minecraft.client.sound.PositionedSoundInstance
+import net.minecraft.client.sound.SoundInstance
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityDimensions
 import net.minecraft.entity.EntityPose
@@ -19,6 +22,8 @@ import net.minecraft.entity.EntityType
 import net.minecraft.nbt.NbtCompound
 import net.minecraft.network.listener.ClientPlayPacketListener
 import net.minecraft.network.packet.Packet
+import net.minecraft.sound.SoundCategory
+import net.minecraft.util.Identifier
 import net.minecraft.util.Util
 import net.minecraft.world.World
 
@@ -26,10 +31,12 @@ import net.minecraft.world.World
  * The director's scene on the client ([DirectorScene], started by `platform.DirectorSceneHooks`): the view
  * leaves the player for a camera of its own, which [DirectorScene.SCENE] moves tick by tick (the game blends
  * between ticks; a cut jumps), the HUD goes (`InGameHudMixin`), and a [CutsceneScreen] takes the keys and the
- * mouse and draws the bands and the notice to skip. The player stays where they stood, seen from outside.
+ * mouse and draws the bands, his subtitles and the notice to skip. The player stays where they stood, seen
+ * from outside. His lines play on their ticks, flat (the same in every shot), under Voice/Speech; nothing
+ * else of the scene makes a sound.
  *
  * Skipping (the jump key twice, [SkipPrompt]) fades to black and asks the server to end it; its answer, like
- * the scene's own end, gives the player their view back ([stop]), out of black if skipped.
+ * the scene's own end, gives the player their view back ([stop]), out of black if skipped, his voice cut.
  */
 object CutsceneView {
 
@@ -47,6 +54,7 @@ object CutsceneView {
     private var hudWasHidden = false
     private var perspective = Perspective.FIRST_PERSON
     private var skippedAt = 0L
+    private var voice: SoundInstance? = null
 
     val skip = SkipPrompt()
 
@@ -88,6 +96,8 @@ object CutsceneView {
         if (!active()) return
         frame = null
         camera = null
+        voice?.let { client.soundManager.stop(it) }
+        voice = null
         client.options.hudHidden = hudWasHidden
         client.options.perspective = perspective
         client.player?.let { client.setCameraEntity(it) }
@@ -106,7 +116,11 @@ object CutsceneView {
     }
 
     /** How far the bands are in, at this frame. */
-    fun bands(tickDelta: Float): Double = DirectorScene.SCENE.bands(tick + tickDelta.toDouble())
+    fun bands(tickDelta: Float): Double = DirectorScene.SCENE.cutscene.bands(tick + tickDelta.toDouble())
+
+    /** The lang key of his subtitle on screen at this frame, or null. */
+    fun subtitle(tickDelta: Float): String? =
+        if (skippedAt != 0L) null else DirectorScene.SCENE.subtitleAt(tick + tickDelta.toDouble())?.key
 
     /** The black of a skip on its way, at this frame: 0 none, 1 all. */
     fun skipBlack(): Float =
@@ -114,8 +128,12 @@ object CutsceneView {
 
     private fun tick(client: MinecraftClient) {
         val cam = camera ?: return
-        if (tick < DirectorScene.SCENE.totalTicks) tick++
+        val timeline = DirectorScene.SCENE
+        if (tick < timeline.cutscene.totalTicks) tick++
         place(cam, tick)
+        if (skippedAt == 0L) {
+            timeline.lines.firstOrNull { it.start == tick }?.let { speak(client, it.line.id) }
+        }
         // Another screen may have taken over (and gone): the keys stay the scene's.
         if (client.currentScreen == null) client.setScreen(CutsceneScreen())
     }
@@ -123,7 +141,7 @@ object CutsceneView {
     /** Puts [cam] at [n] ticks, on its way to [n] + 1 (the game blends between); across a cut, at [n] + 1 already. */
     private fun place(cam: Entity, n: Int) {
         val at = frame ?: return
-        val scene = DirectorScene.SCENE
+        val scene = DirectorScene.SCENE.cutscene
         val player = MinecraftClient.getInstance().player
         val playerEyes = if (player != null) Triple(player.x, player.eyeY, player.z) else Triple(eyes.x, eyes.y, eyes.z)
         val next = scene.pose(n + 1.0, at, eyes, playerEyes)
@@ -141,6 +159,16 @@ object CutsceneView {
         cam.setPos(then.x, then.y - EYE, then.z)
         cam.yaw = then.yaw.toFloat()
         cam.pitch = then.pitch.toFloat()
+    }
+
+    private fun speak(client: MinecraftClient, id: String) {
+        voice?.let { client.soundManager.stop(it) }
+        val sound = PositionedSoundInstance(
+            Identifier(EveryTunnel.MOD_ID, "voice.director.$id"), SoundCategory.VOICE, 1f, 1f, SoundInstance.createRandom(),
+            false, 0, SoundInstance.AttenuationType.NONE, 0.0, 0.0, 0.0, true,
+        )
+        voice = sound
+        client.soundManager.play(sound)
     }
 
     /** A camera nobody sees: never in the world, its eyes [EYE] over its feet. */
