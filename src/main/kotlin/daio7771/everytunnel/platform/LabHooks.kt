@@ -33,8 +33,8 @@ import java.util.UUID
  *   meeting in the middle, moved a quarter of a block a step ([SlidingDoor]).
  *   Then the level's loot goes out ([LootSpawner]), its Hunters and Distortions ([DistortionHooks]), and the
  *   figure at the end of the corridor ([LabFigureHooks]), once a game, the test subjects ([SubjectHooks]), the
- *   guard's body in the drain ([DeadGuardHooks]), the director in his chair ([DirectorHooks]); the
- *   chemical puzzle starts afresh ([ChemicalHooks]).
+ *   guard's body in the drain ([DeadGuardHooks]), the director in his chair ([DirectorHooks]); the false exit's
+ *   floor is whole ([FalseExitHooks]); the chemical puzzle starts afresh ([ChemicalHooks]).
  *
  * What stands is not undone when the world opens: nobody can reach it until its next build. A game
  * continued in Level 5 builds it behind the loading screen ([beginAgain], [ContinueGame]); the airlock is
@@ -158,6 +158,7 @@ object LabHooks {
         SubjectHooks.levelBuilt(server, level)
         DeadGuardHooks.levelBuilt(server, level)
         DirectorHooks.levelBuilt(server, level)
+        FalseExitHooks.levelBuilt()
         ChemicalHooks.levelBuilt()
         DrainHooks.levelBuilt()
         ContinueGame.labBuilt(server)

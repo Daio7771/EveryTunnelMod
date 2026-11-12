@@ -36,7 +36,7 @@ import daio7771.everytunnel.client.render.WallMessageRenderer
 import daio7771.everytunnel.client.render.WallTextRenderer
 import daio7771.everytunnel.client.render.LootRenderer
 import daio7771.everytunnel.client.screen.DeathScreen
-import daio7771.everytunnel.client.screen.EndOfDemoScreen
+import daio7771.everytunnel.client.screen.FinalCreditsScreen
 import daio7771.everytunnel.client.screen.NoteScreen
 import daio7771.everytunnel.client.screen.SafeScreen
 import daio7771.everytunnel.client.screen.TerminalScreen
@@ -108,7 +108,7 @@ object EveryTunnelClient : ClientModInitializer {
         DirectorVoice.register()
         DeathScreen.register()
         TerminalScreen.register()
-        EndOfDemoScreen.register()
+        FinalCreditsScreen.register()
         NoteScreen.register()
         SafeScreen.register()
         LoadingCover.register()

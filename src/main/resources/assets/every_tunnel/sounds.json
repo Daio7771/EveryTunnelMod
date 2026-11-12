@@ -1007,12 +1007,25 @@
       }
     ]
   },
+  "music.credits": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/credits_1",
+        "stream": true
+      }
+    ]
+  },
   "music.elevator": {
     "sounds": [
       {
         "name": "every_tunnel:music/elevator_1",
         "stream": true
       }
+    ]
+  },
+  "music.fall": {
+    "sounds": [
+      "every_tunnel:music/fall_1"
     ]
   },
   "music.lounge": {

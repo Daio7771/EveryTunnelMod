@@ -139,7 +139,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `shutter` | `LevelEntryHooks` | La abertura que una persiana cierra tras el jugador que llega del nivel anterior |
 | `keycard_door` | `KeycardHooks` | Las puertas de hierro que abre un lector de tarjetas; una partida nueva las cierra y bloquea los lectores |
 | `lights_stay` | `KeycardHooks` | Sus luces siguen encendidas al coger la tarjeta (el pozo de escaleras a B3) |
-| `end` | `EndingHooks` | Entrar termina la demo |
+| `end` | `EndingHooks` | Entrar termina el juego (ningún nivel la tiene ahora: termina en la falsa salida del nivel 5) |
 | `big_door_shut` | `LoungeClosingHooks` | Al entrar se cierra de golpe la puerta grande, una vez abierta |
 | `cinema_wakes` | `LoungeClosingHooks` | Al entrar durante el apagón empieza el ojo del Cinema |
 | `b4_door_open` | `LoungeHooks` | Entrar abre la puerta a B4 |

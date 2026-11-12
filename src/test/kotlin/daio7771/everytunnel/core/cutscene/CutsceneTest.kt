@@ -207,4 +207,31 @@ class CutsceneTest {
         assertTrue(loop.gaze(3) < loop.gaze(2))
         assertEquals(0.0, loop.gaze(20), eps)
     }
+
+    @Test
+    fun `the credits fill the song, intro, four screens, tools, thanks, Level 6, black`() {
+        assertEquals(6.0, FinalCredits.screenStart(0), eps)
+        assertEquals(78.0, FinalCredits.TOOLS_AT, eps)
+        assertEquals(86.0, FinalCredits.THANKS_AT, eps)
+        assertEquals(88.0, FinalCredits.NEXT_AT, eps)
+        assertEquals(92.0, FinalCredits.BLACK_AT, eps)
+        assertTrue(FinalCredits.BLACK_AT + 2.0 <= FinalCredits.LENGTH)
+        assertEquals(-1, FinalCredits.screenAt(5.9))
+        assertEquals(0, FinalCredits.screenAt(6.0))
+        assertEquals(3, FinalCredits.screenAt(77.9))
+        assertEquals(-1, FinalCredits.screenAt(78.0))
+        assertEquals(3, FinalCredits.groupAt(85.9))
+    }
+
+    @Test
+    fun `a screen's title types, its lines come in order before its credits, and it all fades out`() {
+        assertEquals(0, FinalCredits.typed(1.0, 10))
+        assertEquals(10, FinalCredits.typed(5.0, 10))
+        val times = (0 until 4).map { FinalCredits.lineAt(it, 4) }
+        assertEquals(2.5, times.first(), eps)
+        assertTrue(times.zipWithNext().all { (a, b) -> a < b } && times.last() < 11.0)
+        assertEquals(1.0, FinalCredits.inScreen(16.0, 12.0), eps)
+        assertEquals(0.5, FinalCredits.inScreen(17.5, 12.0), eps)
+        assertEquals(0.0, FinalCredits.inScreen(11.0, 12.0), eps)
+    }
 }

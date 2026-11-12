@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.util.Identifier
 import java.util.UUID
 
@@ -19,9 +20,10 @@ import java.util.UUID
  * ([LoadingHooks.isLoading]): a game saved after the end opens with the player still in that
  * zone, until the new game takes them to the elevator.
  *
- * The screen fades to black, and the client shows "End of demo" with the credits
- * (`client.screen.EndOfDemoScreen`), then saves and goes back to the title screen. Opening
- * the world again starts a new game, as it always does ([LoadingHooks]).
+ * The screen fades to black, and the client rolls the final credits
+ * (`client.screen.FinalCreditsScreen`), then saves and goes back to the title screen. Opening
+ * the world again starts a new game, as it always does ([LoadingHooks]). No level has such a zone
+ * now: the game ends down Level 5's false exit ([theEnd], from [FalseExitHooks]).
  */
 object EndingHooks {
 
@@ -59,6 +61,17 @@ object EndingHooks {
         }
         ServerTickEvents.END_SERVER_TICK.register(::tick)
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> endings.remove(handler.player.uuid) }
+    }
+
+    /**
+     * The end of the game (Level 5's fall, [FalseExitHooks]), the screen already black: the saved game is erased and
+     * the client rolls the final credits at once.
+     */
+    fun theEnd(player: ServerPlayerEntity) {
+        ContinueGame.finished(player)
+        EveryTunnel.LOGGER.info("{} reached the end", player.name.string)
+        PlaytestLog.endOfDemo(player)
+        if (ServerPlayNetworking.canSend(player, ENDING_PACKET_ID)) ServerPlayNetworking.send(player, ENDING_PACKET_ID, PacketByteBufs.empty())
     }
 
     private fun tick(server: MinecraftServer) {

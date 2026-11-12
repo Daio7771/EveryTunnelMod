@@ -19,6 +19,7 @@ import net.minecraft.client.option.Perspective
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.entity.Entity
+import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.entity.EntityDimensions
 import net.minecraft.entity.EntityPose
 import net.minecraft.entity.EntityType
@@ -29,6 +30,7 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import net.minecraft.util.Util
 import net.minecraft.util.math.MathHelper
+import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 
 /**
@@ -149,9 +151,19 @@ object CutsceneView {
         val y = MathHelper.lerp(delta.toDouble(), player.prevY, player.y) - cam.y
         val z = MathHelper.lerp(delta.toDouble(), player.prevZ, player.z) - cam.z
         if (x * x + (y + player.standingEyeHeight) * (y + player.standingEyeHeight) + z * z < NEAR * NEAR) return
+        standStill(player)
         val dispatcher = client.entityRenderDispatcher
         val yaw = MathHelper.lerp(delta, player.prevYaw, player.yaw)
         dispatcher.render(player, x, y, z, yaw, delta, matrices, consumers, dispatcher.getLight(player, delta))
+    }
+
+    /**
+     * The player stands still in the scene's shots: no step left in their legs from walking to the door, nor from the
+     * server putting them back in place (each of its moves would count as a step), and no drift.
+     */
+    private fun standStill(player: PlayerEntity) {
+        player.limbAnimator.setSpeed(0f)
+        player.velocity = Vec3d.ZERO
     }
 
     /** The director at this moment of his scene (a skip shows him as he ends it: breathing, the mask off). */
@@ -168,6 +180,7 @@ object CutsceneView {
 
     private fun tick(client: MinecraftClient) {
         val cam = camera ?: return
+        client.player?.let(::standStill)
         val timeline = DirectorScene.SCENE
         if (tick < timeline.cutscene.totalTicks) tick++
         place(cam, tick)

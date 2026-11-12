@@ -210,7 +210,8 @@ con un comentario KDoc que cuenta más.
 | `BoxHooks.kt` | El puzle de las cajas del nivel 3: cajas al azar, llevarlas, la estantería, la muerte, depuración |
 | `HidingHooks.kt` | Esconderse en taquillas: entrar, salir, sin ruido dentro, salir en partida nueva |
 | `AchievementHooks.kt` | Conseguir logros: qué da cada uno, avisar al cliente |
-| `EndingHooks.kt` | El final de la demo: fundido, pantalla final |
+| `EndingHooks.kt` | El final del juego: la partida guardada borrada, los créditos finales |
+| `FalseExitHooks.kt` | La falsa salida del nivel 5: el suelo sobre el pozo que cede, la caída, el negro |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
 | `PlaytestLog.kt` | El registro `[playtest]` |
@@ -309,7 +310,7 @@ con un comentario KDoc que cuenta más.
 | `EraseSaveScreen.kt` | El aviso antes de que Ctrl+Shift+D borre la partida guardada |
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |
 | `LoadingTips.kt` | Consejos que van cambiando, con las teclas del jugador |
-| `EndOfDemoScreen.kt` | "End of demo" y los créditos que suben |
+| `FinalCreditsScreen.kt` | Los créditos finales, al ritmo de su canción: dibujos, títulos tecleados, herramientas, "Level 6 coming soon"; la música de la caída |
 | `TerminalScreen.kt` | La pantalla de un ordenador del nivel 5, tecleada en verde sobre negro |
 | `DeathScreen.kt` | La pantalla de muerte: "Killed by", quién te mató y un consejo sobre el negro al morir, y "Try again" |
 

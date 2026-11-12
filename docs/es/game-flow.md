@@ -57,7 +57,6 @@ créditos y al cerrarse una pantalla sin mundo abierto (Escape en las opciones).
   papel blanco gastado que se desplaza con la rueda, con pestañas de papel para saltar entre
   el índice y cada página. Sale en el idioma del juego (español para cualquier `es_*`, inglés
   en los demás). El idioma en sí se cambia en OPTIONS.
-  Su última pestaña, **Créditos**, pasa los créditos (`EndOfDemoScreen.credits`) y vuelve.
 - **ACHIEVEMENTS** muestra los [logros](#logros) (`AchievementsScreen`) en el mismo papel
   gastado.
 - **EXIT** cierra el juego.
@@ -603,17 +602,28 @@ no esté.
 
 ## 12. El final
 
-Los créditos son para el final del nivel 5, que aún no está construido: de momento ninguna zona de los
-niveles tiene la etiqueta `end`. Lo que hace `platform.EndingHooks` con una:
+El juego termina en la falsa salida del nivel 5, pasado el director (`platform.FalseExitHooks`):
 
-1. La pantalla funde a negro en 2,5 s.
-2. El servidor envía `ending`; el cliente abre `EndOfDemoScreen`: aparece "End of demo" y
-   luego suben los créditos (entre ellos el crédito CC BY de la música) hasta "Thank you
-   for playing."
-3. Cualquier tecla tras un momento, Esc o un tiempo límite guardan el mundo y vuelven al
-   menú principal.
+1. Al pisar el último tramo del pasillo, la tapa sobre el pozo, el suelo se viene abajo como el túnel
+   del nivel 3: `event.collapse`, la cámara tiembla (`collapse_shake`), polvo y las luces de alrededor
+   parpadean.
+2. Un momento después la tapa cae bajo el jugador (sus bloques caen con él) y las luces se apagan; nada
+   le hace daño. La música de la caída suena en su cabeza (`music.fall`, `false_exit_fall`).
+3. A los dos segundos de caída la pantalla se queda en negro (`screen_fade`); tras el último golpe de la
+   música, tres segundos de negro y silencio, y el servidor borra la partida guardada y envía `ending`
+   (`EndingHooks.theEnd`).
+4. El cliente muestra los créditos finales (`FinalCreditsScreen`), al ritmo de su canción de 94 s
+   (`core.cutscene.FinalCredits`): "THE END" un momento antes de que entre la canción, suave, y luego
+   "Every Tunnel"; cuatro pantallas de 18 s, cada una con
+   uno de los dibujos del autor (`tools/gui/credits_art.py`) a un lado, alternando, y al otro su título
+   tecleado y sus líneas una a una, con sus créditos debajo; las herramientas, un grupo cada 2 s;
+   "Thank you for playing"; "Level 6 coming soon" en el morado de los dibujos; negro. Los textos son
+   las claves de idioma `every_tunnel.credits.*`.
+5. Al acabar, o con Esc en cualquier momento (la canción y la pantalla se funden), se guarda el mundo
+   y vuelve el menú principal.
 
-La partida guardada se borra: solo queda NEW GAME.
+La partida guardada se borra: solo queda NEW GAME. Una zona con la etiqueta `end` aún terminaría el
+juego a la antigua (un fundido y los mismos créditos); ningún nivel la tiene ahora.
 
 ## Muerte
 

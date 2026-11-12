@@ -639,6 +639,59 @@ def string_voice(t, freq, seconds, rng, vibrato_cents=12.0, detune_cents=6.0):
     return out / 3.0
 
 
+def fall_tension(rng, variant):
+    """Level 5's end: the false exit's floor gives way and the player falls down the pit. Five seconds: a cluster of
+    saws in fifths, octaves and rubbing seconds gliding up and opening out; a heartbeat (two thumps) speeding up;
+    a dissonant metallic drone (inharmonic partials, scraped resonances) swelling under it; a dull hit at the end,
+    where the screen has gone black. Chosen by the author out of five drafts (the first)."""
+    seconds = 5.0
+    n = samples(seconds)
+    t = time_axis(n)
+
+    def saw_glide(freq):
+        phase = np.cumsum(freq) / SR + rng.random()
+        return 2.0 * (phase % 1.0) - 1.0
+
+    curve = 55.0 * 1.6 ** (t / seconds)
+    strings = np.zeros(n)
+    for v, ratio in enumerate((1.0, 1.5, 2.0, 2.12, 3.0, 1.06, 4.0)):
+        strings += saw_glide(curve * ratio * (1.0 + 0.018 * (v - 3.5) / 7))
+    k = (t / seconds) ** 1.5
+    strings = (lowpass(strings, 300) * (1 - k) + lowpass(strings, 3500) * k) * envelope(n, [(0, 0.1), (seconds * 0.9, 1.0), (seconds, 1.0)])
+
+    def thump(at, freq=48.0, tau=0.18, amp=1.0):
+        y = np.zeros(n)
+        i = int(at * SR)
+        tt = t[i:] - at
+        y[i:] = np.sin(TAU * np.cumsum(freq * (1 + 1.5 * np.exp(-tt / 0.02))) / SR) * np.exp(-tt / tau) * amp
+        click = np.zeros(n)
+        m = min(samples(0.004), n - i)
+        click[i:i + m] = rng.standard_normal(m) * 0.3 * amp
+        return y + lowpass(click, 2000)
+
+    pulse, at, gap = np.zeros(n), 0.2, 0.9
+    while at < seconds * 0.92:
+        pulse += thump(at, amp=0.5 + 0.5 * at / seconds)
+        pulse += thump(at + 0.16 * gap / 0.9, amp=0.3 + 0.3 * at / seconds)      # the heart's second beat
+        at += gap
+        gap = max(0.14, gap * 0.82)
+    pulse += thump(seconds * 0.94, freq=36.0, tau=0.9, amp=2.2)
+    pulse += lowpass(rng.standard_normal(n), 180) * envelope(n, [(0, 0), (seconds * 0.94, 0), (seconds * 0.95, 0.8), (seconds, 0)])
+
+    partials = (1.0, 1.59, 2.4, 3.89, 6.3, 8.1)
+    metal = np.zeros(n)
+    for i, ratio in enumerate(partials):
+        wobble = 1 + 0.004 * np.sin(TAU * (0.3 + 0.17 * i) * t)
+        metal += np.sin(TAU * np.cumsum(97.0 * ratio * wobble * (1 + 0.15 * t / seconds)) / SR + rng.random() * TAU) / (1 + i * 0.6)
+    metal += sum(resonator(rng.standard_normal(n) * 0.05, 97.0 * ratio * 1.01, 60) for ratio in partials[2:])
+    metal *= envelope(n, [(0, 0.05), (seconds * 0.95, 1.0), (seconds, 1.0)])
+
+    parts = [(0.5, strings), (0.9, pulse), (0.35, metal)]
+    left = sum(g * x for g, x in parts)
+    right = sum(g * (np.roll(x, int(SR * 0.009 * (k % 3))) if k else x) for k, (g, x) in enumerate(parts))
+    return fade(stereo(left * 0.7 + right * 0.3, right * 0.7 + left * 0.3), 0.05, 0.02)
+
+
 def tension_strings(rng, seconds=60.0):
     """Dissonant string clusters that slowly swell, a tremolo layer and a thin high squeal."""
     n = samples(seconds)
@@ -2258,6 +2311,8 @@ SOUNDS = [
           observer_chase, -1.0, stream=True),
     Sound("event.collapse", "Level progress", "Level 3: the bunker tunnel's ceiling coming down behind the player (groan, cracks, slabs, rubble)",
           "stereo", False, 1, bunker_collapse, -1.0),
+    Sound("music.fall", "Level progress", "Level 5's end: falling down the false exit's pit (rising strings, a racing heart, a metal drone, a hit in the black)",
+          "stereo", False, 1, fall_tension, -1.0),
     Sound("block.hatch.open", "Level progress", "Level 3's bunker hatch opening by itself (bolt, trapdoors banging up, the shaft booming); Level 5's drain hatch",
           "mono", False, 1, hatch_open, -1.0, attenuation=48),
     Sound("event.observer.alert", "Level progress", "Level 3: something far off noticed (a box went on the shelf); a placeholder for the observant guard",

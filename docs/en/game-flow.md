@@ -57,7 +57,6 @@ screen closes with no world open (Escape in the options).
   worn white paper, scrolled with the wheel, with paper tabs to jump between the contents and
   each page. It is in the game's language (Spanish for any `es_*`, English otherwise). The
   language itself is changed in OPTIONS.
-  Its last tab, **Credits**, rolls the credits (`EndOfDemoScreen.credits`) and comes back.
 - **ACHIEVEMENTS** lists the [achievements](#achievements) (`AchievementsScreen`) on the same
   worn paper.
 - **EXIT** closes the game.
@@ -566,15 +565,27 @@ door is built with both levels, so it stands whole even when Level 4 does not.
 
 ## 12. The end
 
-The credits are for the end of Level 5, which is not built yet: for now no zone in the levels is
-tagged `end`. What `platform.EndingHooks` does with one:
+The game ends down Level 5's false exit, past the director (`platform.FalseExitHooks`):
 
-1. The screen fades to black over 2.5 s.
-2. The server sends `ending`; the client opens `EndOfDemoScreen`: "End of demo" fades in,
-   then the credits roll (the CC BY music credit among them) until "Thank you for playing."
-3. Any key after a moment, Esc, or a timeout saves the world and returns to the main menu.
+1. Stepping onto the corridor's last stretch, the lid over the pit, brings the floor down as
+   Level 3's tunnel came down: `event.collapse`, the camera shaking (`collapse_shake`), dust, the
+   lights round it flickering.
+2. A moment later the lid falls away under the player (its blocks falling with them) and the lights
+   go out; nothing hurts them. The fall's music plays in their head (`music.fall`, `false_exit_fall`).
+3. Two seconds down the screen goes black (`screen_fade`); after the music's last hit, three seconds
+   of black and silence, then the server erases the saved game and sends `ending` (`EndingHooks.theEnd`).
+4. The client shows the final credits (`FinalCreditsScreen`), timed to their 94 s song
+   (`core.cutscene.FinalCredits`): "THE END" a moment before the song comes in, gently, then "Every
+   Tunnel"; four screens of 18 s, each with one
+   of the author's drawings (`tools/gui/credits_art.py`) on one side, in turn, and on the other its
+   title typed out and its lines one by one, its credits under both; the tools, a group every 2 s;
+   "Thank you for playing"; "Level 6 coming soon" in the drawings' purple; black. The texts are the
+   lang keys `every_tunnel.credits.*`.
+5. At the end, or with Esc at any moment (the song and the screen fade out), the world is saved and
+   the main menu comes back.
 
-The saved game is erased: only NEW GAME remains.
+The saved game is erased: only NEW GAME remains. A zone tagged `end` would still end the game
+the old way (a fade, then the same credits); no level has one now.
 
 ## Death
 

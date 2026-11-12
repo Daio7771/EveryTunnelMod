@@ -104,4 +104,8 @@ CUTS = [
     # Mono: it comes out of Level 4's ceiling speakers. Own work, see own/SOURCES.md.
     Cut("music.lounge", "everytunnel_nivel4_jazz.wav", "Level 4's jazz, without piano, by the project's author", "mono",
         segments=[(0.0, 112.6)], fade_in=0.0, fade_out=0.0, peak_db=-1.0, attenuation=64, folder="own"),
+    # Stereo, in the head: the final credits' song, whole (its fade in and a skip's fade out are the game's,
+    # client.screen.FinalCreditsScreen). Own work, see own/SOURCES.md.
+    Cut("music.credits", "everytunnel_final_credits.wav", "The final credits' song, by the project's author", "stereo",
+        segments=[(0.0, 94.0)], fade_in=0.0, fade_out=0.3, peak_db=-1.0, folder="own"),
 ]

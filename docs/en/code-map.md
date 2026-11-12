@@ -210,7 +210,8 @@ KDoc comment that says more.
 | `BoxHooks.kt` | Level 3's box puzzle: boxes out at random, carrying, the shelf, death, debug |
 | `HidingHooks.kt` | Hiding in lockers: in, out, no noise inside, out on a new game |
 | `AchievementHooks.kt` | Earning achievements: what earns each, telling the client |
-| `EndingHooks.kt` | The end of the demo: fade, end screen |
+| `EndingHooks.kt` | The end of the game: the saved game erased, the final credits |
+| `FalseExitHooks.kt` | Level 5's false exit: the floor over the pit giving way, the fall, the black |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
 | `PlaytestLog.kt` | The `[playtest]` log |
@@ -309,7 +310,7 @@ KDoc comment that says more.
 | `EraseSaveScreen.kt` | The warning before Ctrl+Shift+D erases the saved game |
 | `LoadingScreen.kt` | The loading screen and `LoadingCover`, which draws it over everything |
 | `LoadingTips.kt` | Rotating tips with the player's keys |
-| `EndOfDemoScreen.kt` | "End of demo" and the rolling credits |
+| `FinalCreditsScreen.kt` | The final credits, timed to their song: drawings, typed titles, tools, "Level 6 coming soon"; the fall's music |
 | `TerminalScreen.kt` | A Level 5 computer's screen, typed out green on black |
 | `DeathScreen.kt` | The death screen: "Killed by", the killer and a tip on the black of dying, and "Try again" |
 

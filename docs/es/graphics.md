@@ -138,5 +138,5 @@ una cámara fija (`client.menu.MenuScene`), sin ningún mundo cargado.
   arriba a la izquierda).
 - El único efecto de pantalla es la viñeta de agotamiento: sin niebla, grano ni desenfoque.
 - El jugador es el vigilante nocturno: uniforme negro con detalles amarillos.
-- Créditos como de película: subida lenta sobre negro.
+- Créditos como de película sobre negro, al ritmo de su canción: los dibujos a línea del autor junto a títulos tecleados, una pantalla cada vez.
 - El menú principal: negro, un logo serif blanco y gastado, minimalista.

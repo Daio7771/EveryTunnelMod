@@ -127,5 +127,5 @@ Behind the main menu, a parking hall seen down its aisle from a fixed camera
 - A Minecraft-style HUD (vanilla icon sizes, outlined, lit from the top left).
 - The only screen effect is the exhaustion vignette: no fog, grain or blur.
 - The player is the night guard: black uniform with yellow details.
-- Film-like credits: slow roll on black.
+- Film-like credits on black, timed to their song: the author's line drawings beside typed titles, a screen at a time.
 - The main menu: black, a worn white serif logo, minimal.

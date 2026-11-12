@@ -63,7 +63,7 @@ o reproduce:
 | `client.effects` | Todo lo que se oye (ambiente, zumbido, latido, respiración, música) y el fundido de pantalla |
 | `client.hud` | Barras de estado, viñeta de agotamiento, el foco de la linterna sin shaders, la vista desde la taquilla, el aviso de logro |
 | `client.render` | El renderizador del Pale man, el botín en el suelo, el uniforme del vigilante |
-| `client.screen` | Menú principal, guía del jugador, logros, pantalla de carga y consejos, fin de la demo y créditos, la figura del menú |
+| `client.screen` | Menú principal, guía del jugador, logros, pantalla de carga y consejos, los créditos finales, la figura del menú |
 
 Las mixins están en Java: `src/main/java/.../mixin/` (comunes) y
 `src/client/java/.../mixin/client/` (cliente). Ver [Mixins](#mixins).
@@ -129,7 +129,8 @@ Todos los ids son `every_tunnel:<nombre>`. API de red de Fabric (estilo 1.20.1,
 | `screen_fade` | servidor → cliente | `DeathHooks` | Oscuridad objetivo (0 a 1) y segundos para llegar |
 | `loading` | servidor → cliente | `LoadingHooks` | Estado de carga: `0` cargando, `1` listo |
 | `loading_done` | cliente → servidor | `LoadingCover` | El cliente ha dibujado el mundo y ha hecho el fundido de entrada |
-| `ending` | servidor → cliente | `EndingHooks` | Abrir la pantalla de fin de la demo |
+| `ending` | servidor → cliente | `EndingHooks` | Pasar los créditos finales |
+| `false_exit_fall` | servidor → cliente | `FalseExitHooks` | Poner la música de la caída, en la cabeza del jugador |
 
 El estado del Pale man llega a los clientes como dato sincronizado de la entidad
 (`PaleManEntity.brainState`), no como paquete.

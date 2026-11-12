@@ -38,8 +38,7 @@ import kotlin.math.roundToInt
  *   [GuideMarkdown]. The language follows Minecraft's: Spanish for any `es_*`, English
  *   otherwise (and English when a language has no pages).
  * - The first section is the contents: the guide's title and every page's title, which open it
- *   when clicked. Each page's tab shows its title (its first `#` heading). The last tab,
- *   Credits, rolls the credits ([EndOfDemoScreen.credits]) and comes back here.
+ *   when clicked. Each page's tab shows its title (its first `#` heading).
  * - Changing section turns the page (vanilla's book page sound) and goes back to the top.
  * - Keys: up/down and page up/down scroll, Home/End, left/right or Tab change section, Esc (or
  *   BACK at the top left) goes back to the menu. The menu's music keeps playing ([MenuMusic]).
@@ -106,17 +105,16 @@ class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("scree
 
     // --- Layout ------------------------------------------------------------------------
 
-    /** The last tab is not a section: it rolls the credits ([EndOfDemoScreen.credits]). */
-    private val creditsTab: Int get() = pages.size + 1
+    /** The last tab: the last page's. */
+    private val lastTab: Int get() = pages.size
 
     private fun sectionLabel(index: Int): Text = when (index) {
         0 -> Text.translatable("screen.every_tunnel.guide.contents")
-        creditsTab -> Text.translatable("screen.every_tunnel.guide.credits")
         else -> Text.literal(pages[index - 1].title)
     }
 
     private fun layoutFor(): Layout {
-        val labelWidth = (0..creditsTab).maxOfOrNull { textRenderer.getWidth(sectionLabel(it)) } ?: 0
+        val labelWidth = (0..lastTab).maxOfOrNull { textRenderer.getWidth(sectionLabel(it)) } ?: 0
         val tabWidth = (labelWidth + TAB_PAD * 2 + TAB_OVERLAP).coerceIn(TAB_MIN, TAB_MAX)
         val backWidth = textRenderer.getWidth(backText) + MARGIN * 2
         val side = maxOf(backWidth, tabWidth + TAB_ACTIVE_OUT + MARGIN)
@@ -224,7 +222,7 @@ class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("scree
 
     private fun drawTabs(context: DrawContext, mouseX: Int, mouseY: Int) {
         val hovered = tabAt(mouseX, mouseY)
-        for (index in 0..creditsTab) {
+        for (index in 0..lastTab) {
             val (x, y, w) = tabRect(index)
             paper(context, x, y, w, TAB_HEIGHT, 0, index * TAB_HEIGHT)
             if (index != section) context.fill(x, y, x + w, y + TAB_HEIGHT, if (index == hovered) TAB_HOVER_SHADE else TAB_SHADE)
@@ -300,7 +298,7 @@ class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("scree
     private fun overBack(mouseX: Int, mouseY: Int): Boolean =
         mouseX in (MARGIN - 4)..(MARGIN + textRenderer.getWidth(backText) + 4) && mouseY in MARGIN..(MARGIN + 13)
 
-    private fun tabAt(mouseX: Int, mouseY: Int): Int? = (0..creditsTab).firstOrNull { index ->
+    private fun tabAt(mouseX: Int, mouseY: Int): Int? = (0..lastTab).firstOrNull { index ->
         val (x, y, w) = tabRect(index)
         mouseX in (layout.sheetRight + 1)..(x + w) && mouseY in y until y + TAB_HEIGHT
     }
@@ -358,10 +356,6 @@ class GuideScreen(private val parent: Screen?) : Screen(Text.translatable("scree
 
     /** Turns to a section, from its top. */
     private fun open(index: Int) {
-        if (index == creditsTab) {
-            client?.setScreen(EndOfDemoScreen.credits(this))
-            return
-        }
         if (index == section) return
         section = index
         laid = layOut(index)

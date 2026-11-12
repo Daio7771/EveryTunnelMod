@@ -136,7 +136,7 @@ the server starts (levels built together name the same one). The function must e
 | `elevator_door` | `IntroHooks` | Blocks of the elevator doors, closed during the intro and slid open after |
 | `shutter` | `LevelEntryHooks` | The opening a rolling shutter closes behind the player who walks in from the previous level |
 | `keycard_door` | `KeycardHooks` | The iron doors a card reader opens; a new game closes them and locks the readers |
-| `end` | `EndingHooks` | Walking in ends the demo |
+| `end` | `EndingHooks` | Walking in ends the game (no level has one now: it ends down Level 5's false exit) |
 | `big_door_shut` | `LoungeClosingHooks` | Walking in slams the big door, once it is open |
 | `cinema_wakes` | `LoungeClosingHooks` | Walking in during the blackout starts the Cinema's eye |
 | `b4_door_open` | `LoungeHooks` | Walking in opens the door to B4 |

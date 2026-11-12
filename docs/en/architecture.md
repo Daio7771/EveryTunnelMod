@@ -61,7 +61,7 @@ draws or plays:
 | `client.effects` | Everything heard (ambience, hum, heartbeat, breathing, music) and the screen fade |
 | `client.hud` | Status bars, exhaustion vignette, the no-shader flashlight spot, the locker view, the achievement toast |
 | `client.render` | The Pale man's renderer, loot on the floor, the guard uniform |
-| `client.screen` | Main menu, player guide, achievements, loading screen and tips, end of demo and credits, the menu figure |
+| `client.screen` | Main menu, player guide, achievements, loading screen and tips, the final credits, the menu figure |
 
 Mixins live in Java: `src/main/java/.../mixin/` (common) and
 `src/client/java/.../mixin/client/` (client). See [Mixins](#mixins).
@@ -125,7 +125,8 @@ All ids are `every_tunnel:<name>`. Fabric networking API (1.20.1 style,
 | `screen_fade` | server → client | `DeathHooks` | Target darkness (0 to 1) and seconds to get there |
 | `loading` | server → client | `LoadingHooks` | Loading state: `0` loading, `1` ready |
 | `loading_done` | client → server | `LoadingCover` | The client has drawn the world and faded in |
-| `ending` | server → client | `EndingHooks` | Open the end-of-demo screen |
+| `ending` | server → client | `EndingHooks` | Roll the final credits |
+| `false_exit_fall` | server → client | `FalseExitHooks` | Play the fall's music, in the player's head |
 
 The Pale man's state reaches clients as tracked entity data (`PaleManEntity.brainState`),
 not as a packet.
