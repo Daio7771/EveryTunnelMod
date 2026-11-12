@@ -32,7 +32,7 @@ import net.minecraft.world.PersistentState
  *   New games are counted by [PaleManSpawner.newGames], which sends him home too.
  * - **Alerts:** a box put on Storage's shelf ([BoxHooks]) is an alert ([alert]); every Observer in
  *   that world takes the alerts newer than the last he took ([alertsSince]), and every player
- *   there sees "He's coming. Hide." in the middle of the screen.
+ *   there sees "He's coming." and "Hide." in the middle of the screen.
  * - **A player's death** sends the Observers of that level home ([sendHome], from [DeathHooks]).
  */
 object ObserverHooks {
@@ -66,11 +66,15 @@ object ObserverHooks {
         for (player in world.players) warn(player)
     }
 
-    /** A warning in big dark red letters in the middle of the screen: "He's coming. Hide." by default. */
+    /**
+     * A warning in big dark red letters in the middle of the screen: "He's coming." by default, and "Hide." under it
+     * in smaller ones. Two lines, because the screen's title is drawn at four times the size and never wraps:
+     * a sentence in one line ran off the screen in Spanish.
+     */
     fun warn(player: ServerPlayerEntity, key: String = "message.every_tunnel.observer_coming") {
         val network = player.networkHandler
         network.sendPacket(TitleFadeS2CPacket(WARNING_FADE_IN, WARNING_STAY, WARNING_FADE_OUT))
-        network.sendPacket(SubtitleS2CPacket(Text.empty()))
+        network.sendPacket(SubtitleS2CPacket(Text.translatable("message.every_tunnel.observer_hide").formatted(Formatting.DARK_RED)))
         network.sendPacket(TitleS2CPacket(Text.translatable(key).formatted(Formatting.DARK_RED)))
     }
 

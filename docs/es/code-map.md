@@ -207,7 +207,7 @@ con un comentario KDoc que cuenta más.
 | `WallMessageBlock.kt` | Un mensaje pintado en la pared: el bloque y sus datos |
 | `SafeLevelHooks.kt` | Niveles sin riesgo: sin daño (el nivel 4) |
 | `SuiteBedHooks.kt` | Descansar en una cama: fundido a negro, vida y estamina llenas |
-| `BookPhaseHooks.kt` | Mientras los libros están fuera: el reloj en la cabeza y el aviso "He's near. Hide." |
+| `BookPhaseHooks.kt` | Mientras los libros están fuera: el reloj en la cabeza y el aviso "He's near." |
 | `BoxHooks.kt` | El puzle de las cajas del nivel 3: cajas al azar, llevarlas, la estantería, la muerte, depuración |
 | `HidingHooks.kt` | Esconderse en taquillas: entrar, salir, sin ruido dentro, salir en partida nueva |
 | `AchievementHooks.kt` | Conseguir logros: qué da cada uno, avisar al cliente |
@@ -285,6 +285,7 @@ con un comentario KDoc que cuenta más.
 | `DeadGuardRenderer.kt` | Renderizador de GeckoLib del guardia anterior, sentado, con el uniforme del jugador gastado |
 | `LabFigureRenderer.kt` | La figura que se ve desde el Lobby del nivel 5, con el modelo del jugador, una silueta oscura |
 | `HunterRenderer.kt` | Renderizador de GeckoLib de los Hunters, con los ojos brillando |
+| `EyesGlowLayer.kt` | El brillo de los ojos de los Hunters y las Distortions: la textura `_glowmask` dibujada otra vez con la capa `eyes` de vanilla (sustituye a `AutoGlowingGeoLayer` de GeckoLib, que recortaba los ojos de la textura base) |
 | `DistortionRenderer.kt` | Renderizador y modelo de GeckoLib de las Distortions: giradas hacia su yaw, el glitch, el ojo del Junior agrietándose |
 | `PaleManModel.kt` | Su modelo de GeckoLib, más la postura encorvada bajo techos bajos |
 | `BoxShelfRenderer.kt` | Las cajas moradas en la estantería, a brillo completo |

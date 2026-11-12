@@ -261,8 +261,8 @@ silencio.
   última vez (corriendo si ya corría), mira alrededor y vuelve andando: un jugador recién
   visto tiene un momento para agacharse fuera de su alcance, meterse detrás de una estantería
   o esconderse en una taquilla sin que lo vea. Una caja en la estantería de
-  Storage le hace ir corriendo allí, más rápido aún, y sale "He's coming. Hide." en grande y en
-  rojo oscuro; mira alrededor y vuelve corriendo (solo tras una caja; tras una búsqueda vuelve
+  Storage le hace ir corriendo allí, más rápido aún, y sale "He's coming." en grande y en
+  rojo oscuro, con "Hide." debajo; mira alrededor y vuelve corriendo (solo tras una caja; tras una búsqueda vuelve
   andando). La taquilla de Storage está justo al lado de la
   estantería (él entra por la puerta). A un jugador al
   que ve meterse en una taquilla lo saca y muere. No hace ningún ruido propio, ni pasos; cuando viene
@@ -300,7 +300,7 @@ silencio.
   reloj de la biblioteca suena en la cabeza del jugador cuando el Observer está a 24 bloques o
   menos, tic y tac, cada 0,75 s en el borde y hasta cada 0,25 s a 4 bloques o menos, más fuerte
   cuanto más cerca (`event.observer.tick` / `tock`); y la primera vez que se acerca a 16
-  bloques sale "He's near. Hide." como el aviso de las cajas (otra vez solo después de haberse
+  bloques sale "He's near." como el aviso de las cajas, con "Hide." debajo (otra vez solo después de haberse
   alejado a más de 24; no si ya va a por el jugador).
 - En el centro de la biblioteca, la **trampilla del búnker**: dos hojas de chapa estriada de acero oscuro
   (`bunker_trapdoor`, una trampilla que nadie abre a mano) con una banda amarilla y negra junto a

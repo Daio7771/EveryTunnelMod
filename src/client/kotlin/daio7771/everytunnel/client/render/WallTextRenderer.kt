@@ -25,7 +25,7 @@ import org.joml.Matrix4f
  * - [WallTextBlockEntity.Style.LAB]: the same plate in Level 5's printed white plastic, black letters.
  * - [WallTextBlockEntity.Style.LETTERS]: big dark grey letters [LETTERS_HEIGHT] of a block high
  *   straight on the wall, a darker shadow under them for relief; they may run over several
- *   blocks either side ([rendersOutsideBoundingBox]).
+ *   blocks either side ([rendersOutsideBoundingBox]), shrunk to fit if they would be wider than [LETTERS_MAX_WIDTH].
  * - [WallTextBlockEntity.Style.DIPLOMA] and [WallTextBlockEntity.Style.PLAQUE] ([multiline]): one line per line of the
  *   text, centred; a certificate on cream paper in a dark wood frame, its first line larger, a gold seal at its foot,
  *   or a small brass plaque, both as wide as their longest line needs.
@@ -51,7 +51,9 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         val brass = entity.style == WallTextBlockEntity.Style.BRASS
         val lab = entity.style == WallTextBlockEntity.Style.LAB
         val plate = entity.style == WallTextBlockEntity.Style.PLATE || brass || lab
-        val scale = (if (plate) PLATE_TEXT_HEIGHT else LETTERS_HEIGHT) / GLYPH_HEIGHT
+        val fullScale = (if (plate) PLATE_TEXT_HEIGHT else LETTERS_HEIGHT) / GLYPH_HEIGHT
+        // Big lettering shrinks, all of it, rather than run past the wall behind it (a longer translation did).
+        val scale = if (!plate && width * fullScale > LETTERS_MAX_WIDTH) LETTERS_MAX_WIDTH / width else fullScale
         // Kept to an edge: the whole thing (with the plate's margins) starts EDGE_GAP in from it.
         val halfWidth = (width / 2f + if (plate) PAD_X + RIM else 0f) * scale
         val shift = entity.align * (0.5f - EDGE_GAP - halfWidth)              // align -1: left end at -0.5 + EDGE_GAP
@@ -144,6 +146,8 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         const val GLYPH_HEIGHT = 8f
         const val PLATE_TEXT_HEIGHT = 0.16f
         const val LETTERS_HEIGHT = 0.6f
+        /** The widest big lettering may be (blocks): the wall of Level 3's stairs, where the only one is, is 8 wide. */
+        const val LETTERS_MAX_WIDTH = 7.4f
         /** How far off the wall's face the text sits (blocks), so it never flickers into it. */
         const val WALL_GAP = 0.01
         /** How far in from the block's edge an aligned text starts (blocks). */

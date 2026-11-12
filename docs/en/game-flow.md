@@ -246,7 +246,7 @@ silent.
   sprint, and a caught player dies. Out of his sight for 1.5 s, he goes to where he saw them
   last (running if he was), looks round and walks home: a player just spotted has a moment to
   sneak out of his range, duck behind a shelf or get into a locker unseen. A box on Storage's shelf brings him running there, faster
-  still, and "He's coming. Hide." shows in big dark red letters; he looks round and runs home
+  still, and "He's coming." shows in big dark red letters with "Hide." under it; he looks round and runs home
   (only after a box; after a search he walks).
   Storage's locker stands right beside the shelf (he comes in by the door). A player he sees get into a locker is pulled out and
   dies. He makes no sound of his own, not even footsteps; walking your way he
@@ -279,8 +279,8 @@ silent.
   While the books are out (`BookPhaseHooks`, rules in `systems.ObserverNearness`), the
   library's clock ticks in the player's head whenever the Observer is within 24 blocks, tick
   and tock, every 0.75 s at the edge down to every 0.25 s within 4 blocks, louder as he nears
-  (`event.observer.tick` / `tock`); and when he first comes within 16 blocks, "He's near.
-  Hide." shows like the box warning (again only once he has been farther than 24; not while
+  (`event.observer.tick` / `tock`); and when he first comes within 16 blocks, "He's near."
+  shows like the box warning, with "Hide." under it (again only once he has been farther than 24; not while
   he is already after the player).
 - In the library's centre, the **bunker hatch**: two leaves of dark steel checker plate
   (`bunker_trapdoor`, a trapdoor nobody opens by hand) with a yellow and black band along their

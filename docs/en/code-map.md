@@ -207,7 +207,7 @@ KDoc comment that says more.
 | `WallMessageBlock.kt` | A message painted on a wall: the block and its data |
 | `SafeLevelHooks.kt` | Levels without risk: no damage (Level 4) |
 | `SuiteBedHooks.kt` | Resting in a bed: fade to black, health and stamina full |
-| `BookPhaseHooks.kt` | While the books are out: the clock in the head and the "He's near. Hide." warning |
+| `BookPhaseHooks.kt` | While the books are out: the clock in the head and the "He's near." warning |
 | `BoxHooks.kt` | Level 3's box puzzle: boxes out at random, carrying, the shelf, death, debug |
 | `HidingHooks.kt` | Hiding in lockers: in, out, no noise inside, out on a new game |
 | `AchievementHooks.kt` | Earning achievements: what earns each, telling the client |
@@ -285,6 +285,7 @@ KDoc comment that says more.
 | `DeadGuardRenderer.kt` | GeckoLib renderer for the guard before you, sitting, in the player's uniform worn out |
 | `LabFigureRenderer.kt` | The figure seen from Level 5's Lobby, on the player's model, a dark shape |
 | `HunterRenderer.kt` | GeckoLib renderer for the Hunters, their eyes glowing |
+| `EyesGlowLayer.kt` | The glow of the Hunters' and Distortions' eyes: the `_glowmask` texture drawn again with vanilla's `eyes` layer (it replaces GeckoLib's `AutoGlowingGeoLayer`, which cut the eyes out of the base texture) |
 | `DistortionRenderer.kt` | GeckoLib renderer and model for the Distortions: turned to their yaw, the glitch, the Junior's cracking eye |
 | `PaleManModel.kt` | His GeckoLib model, plus the stoop under low ceilings |
 | `BoxShelfRenderer.kt` | The purple boxes on the box shelf, full bright |
