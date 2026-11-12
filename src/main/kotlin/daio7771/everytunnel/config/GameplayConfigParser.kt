@@ -133,6 +133,7 @@ object GameplayConfigParser {
         gameCreepStart = f.double("game_creep_start", d.gameCreepStart, min = 0.0, max = 10.0),
         gameCreepEnd = f.double("game_creep_end", d.gameCreepEnd, min = 0.0, max = 10.0),
         gameHurry = f.double("game_hurry", d.gameHurry, min = 0.0, max = 0.9),
+        gameDarkLift = f.double("game_dark_lift", d.gameDarkLift, min = 0.0, max = 1.0),
     ).also { f.reportUnknownKeys() }
 
     private fun junior(f: JsonFields, d: JuniorConfig) = JuniorConfig(

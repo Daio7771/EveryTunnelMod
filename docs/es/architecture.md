@@ -171,7 +171,7 @@ Las mínimas: una mixin solo donde Fabric API no tiene evento.
 | `GameRendererMixin` | `tiltViewWhenHurt` (final) | Hace temblar la cámara en el derrumbe del túnel del nivel 3 (`CameraShake`) |
 | `InGameHudMixin` | `renderStatusBars`, `renderExperienceBar` | Oculta las barras de vanilla mientras el HUD del mod las sustituye |
 | `AbstractClientPlayerEntityMixin` | `getSkinTexture`, `getModel`, `getCapeTexture` | Todos los jugadores llevan el uniforme del vigilante en los mundos con niveles |
-| `LightmapTextureManagerMixin` | `update` (gamma) | El brillo cuenta como Moody en los niveles |
+| `LightmapTextureManagerMixin` | `update` (gamma) | El brillo cuenta como Moody en los niveles (algo subido sin shaders en el juego del pasillo de entrada de Level 5) |
 | `MinecraftClientMixin` | `setScreen` | Sustituye la pantalla de título de vanilla por el menú principal |
 | `MusicTrackerMixin` | `tick` | Sin música de vanilla en ningún sitio |
 | `ScreenMixin` | `renderWithTooltip` | Dibuja la pantalla de carga encima de las de vanilla |

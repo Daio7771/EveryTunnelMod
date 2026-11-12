@@ -66,7 +66,10 @@ Otros shader packs pueden necesitar sus propios ajustes; solo se gestiona Comple
 
 `LightmapTextureManagerMixin`: en los niveles la opción de Brillo cuenta como **Moody**,
 esté como esté, para que la oscuridad sea oscura en cualquier pantalla. La opción en sí no
-se cambia nunca; fuera de los niveles funciona como siempre.
+se cambia nunca; fuera de los niveles funciona como siempre. Una excepción: sin shaders, mientras dura el juego del pasillo de entrada de Level 5, se
+sube un poco por encima de Moody (`game_dark_lift`, con transición suave,
+`DistortionEffect.brightnessLift`), porque la única luz de ese pasillo es la de la Cloud y un
+pack de shaders da a la oscuridad un mínimo que el lightmap de vanilla no da.
 
 ## Luces
 

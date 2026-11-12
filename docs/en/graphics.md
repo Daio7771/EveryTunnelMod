@@ -63,7 +63,10 @@ Other shader packs may need their own settings; only Complementary is handled.
 
 `LightmapTextureManagerMixin`: in the levels the Brightness option counts as **Moody**,
 whatever it is set to, so the dark is dark on every screen. The option itself is never
-changed; outside the levels it works as usual.
+changed; outside the levels it works as usual. One exception: without shaders, while Level 5's
+entry corridor game runs, it is lifted a little off Moody (`game_dark_lift`, eased in and out,
+`DistortionEffect.brightnessLift`), because that corridor's only light is the Cloud's and a
+shader pack gives the dark a minimum that vanilla's lightmap does not.
 
 ## Lights
 

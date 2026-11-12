@@ -228,6 +228,7 @@ Every key and its default:
 | `game_back_min_seconds`, `game_back_max_seconds` | 2.5, 3.5 | ...and a leg back, with it in front |
 | `game_creep_start`, `game_creep_end` | 2.4, 3.6 | Blocks a second it creeps after the player, at the start and at the end (a walk is about 4.3) |
 | `game_hurry` | 0.35 | Share by which the legs are shorter at the end |
+| `game_dark_lift` | 0.3 | Without shaders, how far the Brightness is lifted from Moody (0) towards Bright (1) while the game runs; shader packs already give the dark a minimum |
 | **`junior`** | | Level 5's Distortion Junior |
 | `range` | 8 | Blocks from its eye within which it troubles the player (never through a wall) |
 | `stare_seconds` | 4 | Seconds of staring at its eye, without looking away, that end it |

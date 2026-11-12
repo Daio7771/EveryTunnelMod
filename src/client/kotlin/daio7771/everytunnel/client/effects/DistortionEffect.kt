@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.GlStateManager
 import com.mojang.blaze3d.systems.RenderSystem
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.ClientResources
+import daio7771.everytunnel.client.ShaderMode
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.core.level.Position
 import daio7771.everytunnel.entities.Gaze
@@ -74,6 +75,8 @@ object DistortionEffect {
     private var trouble = 0f
     /** How violet the picture is (0 to 1), eased. */
     private var violet = 0f
+    /** How much of the entry corridor's dark lift is on (0 to 1), eased: 1 while the game's Cloud is about. */
+    private var darkLift = 0f
     /** The game's Cloud's jumps as last seen, by entity id; ticks left of the cue of the last one. */
     private val jumpsSeen = HashMap<Int, Int>()
     private var cue = 0
@@ -91,11 +94,20 @@ object DistortionEffect {
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> stop() }
     }
 
+    /**
+     * How far the Brightness is lifted from Moody (0 to 1) for `LightmapTextureManagerMixin`: only without shaders and
+     * while the entry corridor's game runs, `game_dark_lift` of the config. A shader pack gives the dark a minimum
+     * that vanilla's lightmap does not, and the corridor's only light is the Cloud's.
+     */
+    fun brightnessLift(): Double =
+        if (ShaderMode.shadersOn) 0.0 else darkLift * ConfigManager.gameplay.cloud.gameDarkLift
+
     private fun stop() {
         loops.clear()
         cloudStare = 0f
         trouble = 0f
         violet = 0f
+        darkLift = 0f
         jumpsSeen.clear()
         cue = 0
         static = null
@@ -113,6 +125,7 @@ object DistortionEffect {
 
         var stare = 0f
         var lit = false
+        var gameRunning = false
         var game: DistortionCloudEntity? = null
         var junior: DistortionJuniorEntity? = null
         var juniorDistance = Double.MAX_VALUE
@@ -127,6 +140,7 @@ object DistortionEffect {
             if (entity.ending || !active) continue
             if (entity is DistortionCloudEntity && distance <= CLOUD_RANGE) stare = maxOf(stare, entity.stare)
             if (entity is DistortionCloudEntity && entity.inGame) {
+                gameRunning = true
                 if (distance <= VIOLET_RANGE) lit = true
                 if (distance <= HEAR_RANGE) game = entity
                 val seen = jumpsSeen.put(entity.id, entity.jumps)
@@ -146,6 +160,7 @@ object DistortionEffect {
         }
         cloudStare += (stare - cloudStare) * if (stare > cloudStare) 0.6f else 0.2f
         violet += ((if (lit) 1f else 0f) - violet) * VIOLET_EASING
+        darkLift += ((if (gameRunning) 1f else 0f) - darkLift) * DARK_LIFT_EASING
         if (static?.isDone != false && game != null) {
             static = Follow(game, ModSounds.CLOUD_GAME_STATIC, { e -> if (e.ending) 0f else STATIC_VOLUME },
                 { e -> STATIC_PITCH + STATIC_RISE * (e as DistortionCloudEntity).progress }, ambient = true).also(client.soundManager::play)
@@ -320,6 +335,8 @@ object DistortionEffect {
     /** Blocks within which a chasing Cloud turns the picture violet, and how fast it turns. */
     private const val VIOLET_RANGE = 20.0
     private const val VIOLET_EASING = 0.12f
+    /** How fast the corridor's dark lift comes in and goes (about a second). */
+    private const val DARK_LIFT_EASING = 0.08f
     /** The violet the picture is multiplied by. */
     private const val VIOLET_R = 0.72f
     private const val VIOLET_G = 0.42f

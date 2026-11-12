@@ -233,6 +233,7 @@ Cada clave y su valor por defecto:
 | `game_back_min_seconds`, `game_back_max_seconds` | 2.5, 3.5 | ...y un tramo hacia atrás, con ella delante |
 | `game_creep_start`, `game_creep_end` | 2.4, 3.6 | Bloques por segundo a los que se acerca al jugador, al principio y al final (andando se va a unos 4.3) |
 | `game_hurry` | 0.35 | Parte en que los tramos son más cortos al final |
+| `game_dark_lift` | 0.3 | Sin shaders, cuánto se sube el Brillo desde Moody (0) hacia Brillante (1) mientras dura el juego; los shaders ya dan un mínimo a la oscuridad |
 | **`junior`** | | El Distortion Junior del nivel 5 |
 | `range` | 8 | Bloques desde su ojo a los que molesta al jugador (nunca a través de una pared) |
 | `stare_seconds` | 4 | Segundos mirándole al ojo, sin apartar la vista, que acaban con él |

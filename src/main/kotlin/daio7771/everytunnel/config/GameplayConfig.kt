@@ -134,6 +134,11 @@ data class CloudConfig(
     val gameCreepEnd: Double = 3.6,
     /** Share by which the legs are shorter at the end. */
     val gameHurry: Double = 0.35,
+    /**
+     * Without shaders, how far the Brightness is lifted from Moody (0) towards Bright (1) while the game runs:
+     * the corridor has no light but the Cloud's, and a shader pack gives the dark a minimum that vanilla does not.
+     */
+    val gameDarkLift: Double = 0.3,
 )
 
 /** Level 5's Distortion Junior: it never kills (`entities.JuniorClock`, `platform.DistortionJuniorEntity`). */
