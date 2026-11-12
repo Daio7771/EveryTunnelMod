@@ -2,6 +2,7 @@ package daio7771.everytunnel.client
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.cutscene.CutsceneView
+import daio7771.everytunnel.client.cutscene.DirectorVoice
 import daio7771.everytunnel.client.effects.AmbiencePlayer
 import daio7771.everytunnel.client.effects.BreathingEffect
 import daio7771.everytunnel.client.effects.FlashlightEffect
@@ -104,6 +105,7 @@ object EveryTunnelClient : ClientModInitializer {
         DetectorHud.register()
         ScreenFade.register() // after the HUD, so the black covers it
         CutsceneView.register()
+        DirectorVoice.register()
         DeathScreen.register()
         TerminalScreen.register()
         EndOfDemoScreen.register()

@@ -472,6 +472,8 @@ object ModBlocks {
     val MINI_DIORITE: Block = register("mini_diorite", PropBlock(props(MapColor.WHITE, BlockSoundGroup.STONE).noCollision(), listOf(box(5, 0, 5, 11, 6, 11))))
     val PAPER_STACK: Block = register("paper_stack", PropBlock(props(MapColor.WHITE, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(2, 0, 3, 14, 3, 14))))
     val COFFEE_CUP: Block = register("coffee_cup", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(6, 0, 6, 11, 4, 10))))
+    /** The director's mask, face up on his desk once he has taken it off ([DirectorSceneHooks]); not in the map. */
+    val DIRECTOR_MASK: Block = register("director_mask", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(4, 0, 4, 12, 1, 12))))
     val DESK_LAMP_MODERN: Block = register(
         "desk_lamp_modern", PropBlock(props(MapColor.BLACK, ModSoundGroups.METAL_PIPE).noCollision().luminance { 9 }, listOf(box(4, 0, 4, 12, 12, 11))),
     )

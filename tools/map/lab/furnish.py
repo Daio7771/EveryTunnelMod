@@ -310,6 +310,9 @@ POINTS = [
     # The director, in his chair behind the desk, facing the door (DirectorHooks; his cinematic,
     # DirectorScene, plays round him).
     ("director", 3, 257, 59, "west", ["director"]),
+    # Just inside his door, facing him: where his scene puts you (his door shuts behind you), and the restart point
+    # once it is over (DirectorSceneHooks; no zone of its own, ContinueGame).
+    ("checkpoint_director", 3, 243, 59, "east", ["restart_point", "director_inside"]),
     # In the anteroom, before his door: where `/everytunnel director` puts you to see his scene again.
     ("director_door_outside", 3, 240, 59, "east", ["director_debug"]),
 ]

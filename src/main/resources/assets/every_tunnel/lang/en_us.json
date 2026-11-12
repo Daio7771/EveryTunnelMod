@@ -476,5 +476,6 @@
   "subtitle.every_tunnel.director.loop_3_2": "That's all I have.",
   "subtitle.every_tunnel.director.loop_4_1": "You're standing very still. Are you alright?",
   "subtitle.every_tunnel.director.loop_5_1": "Please. Go.",
-  "subtitle.every_tunnel.director.loop_6_1": "Whenever you're ready."
+  "subtitle.every_tunnel.director.loop_6_1": "Whenever you're ready.",
+  "block.every_tunnel.director_mask": "Mask"
 }

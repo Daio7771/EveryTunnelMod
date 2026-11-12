@@ -1594,6 +1594,16 @@ def monitor_tex(rng):
     return img
 
 
+def mask_tex(rng):
+    """The film's mask (tools/entity/film_walker.py) on its 8 x 8 face in the middle, its edge round it."""
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "entity"))
+    from film_walker import MASK_SHADE, paint_mask                     # noqa: E402
+    img = new(MASK_SHADE)
+    noise(img, rng, 3)
+    paint_mask(img, random.Random(rng.random()), (4, 4, 8, 8))
+    return img
+
+
 def plastic_tex(rng, colour, kind=None):
     """Plain moulded plastic or fabric, for small props; kind adds detail."""
     img = new(colour)
@@ -3795,6 +3805,10 @@ def build():
     prop("desk_lamp_modern", "Desk Lamp", {**office, "y": "modern_lamp_glow"},
          [el((5, 0, 5), (11, 1, 11), "k"), el((7.5, 1, 7.5), (8.5, 11, 8.5), "s"),
           el((4, 11, 4), (12, 12, 10), "k", down="y")], ao=False)
+    # The director's mask (the Cinema film's, tools/entity/film_walker.py), laid face up on his desk once he has
+    # taken it off in his scene (platform.DirectorSceneHooks), its brow towards him; never in the map itself.
+    a.texture("director_mask", mask_tex(r("director_mask")), T.PLASTIC.but(smoothness=0.4, relief=0.1))
+    prop("director_mask", "Mask", {"k": "director_mask"}, [el((4, 0, 4), (12, 1, 12), "k")], ao=False)
     # The ceiling's square panel lights.
     a.texture("panel_light_on", plastic_tex(r("panel_light_on"), (250, 250, 246)), lit_tubes)
     a.texture("panel_light_off", plastic_tex(r("panel_light_off"), (150, 150, 148)), T.PLASTIC.but(smoothness=0.6))

@@ -41,7 +41,8 @@ import java.nio.file.Path
  * always stands.
  *
  * A level may also have restart points inside it (zones tagged [RESTART_TAG], each with a spawn point tagged the
- * same inside it: Level 5's Lab hall and, in the drain, its Junction). Walking in makes it the checkpoint, the same
+ * same inside it: Level 5's Lab hall and, in the drain, its Junction; or with no zone, reached by code: the
+ * director's office once his scene is over, [restartPoint]). Walking in makes it the checkpoint, the same
  * way ([Checkpoint]: `level/point`): what the player carries is noted, and a death ([DeathHooks]) or CONTINUE
  * comes back there, not to the level's start. It is never taken back by an earlier one (of an earlier level, or
  * listed earlier in the level's file).
@@ -132,6 +133,9 @@ object ContinueGame {
         if (current != null && current.order >= level.order) return
         checkpoint(player, level)
     }
+
+    /** [player] has passed [level]'s restart point [pointId] some other way than walking into its zone (the director's scene). */
+    fun restartPoint(player: ServerPlayerEntity, level: LevelDefinition, pointId: String) = restartPointReached(player, level, pointId)
 
     private fun restartPointReached(player: ServerPlayerEntity, level: LevelDefinition, pointId: String) {
         val progress = ProgressService.get()

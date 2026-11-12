@@ -1,0 +1,42 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "k": "every_tunnel:block/director_mask",
+    "particle": "every_tunnel:block/director_mask"
+  },
+  "elements": [
+    {
+      "from": [
+        4,
+        0,
+        4
+      ],
+      "to": [
+        12,
+        1,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#k"
+        },
+        "east": {
+          "texture": "#k"
+        },
+        "south": {
+          "texture": "#k"
+        },
+        "west": {
+          "texture": "#k"
+        },
+        "up": {
+          "texture": "#k"
+        },
+        "down": {
+          "texture": "#k"
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

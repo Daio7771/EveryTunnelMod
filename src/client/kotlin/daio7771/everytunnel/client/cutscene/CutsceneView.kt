@@ -6,10 +6,13 @@ import daio7771.everytunnel.core.cutscene.CameraPose
 import daio7771.everytunnel.core.cutscene.DirectorScene
 import daio7771.everytunnel.core.cutscene.SceneFrame
 import daio7771.everytunnel.core.cutscene.SkipPrompt
+import daio7771.everytunnel.platform.DirectorEntity
 import daio7771.everytunnel.platform.DirectorSceneHooks
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.option.Perspective
@@ -25,6 +28,7 @@ import net.minecraft.network.packet.Packet
 import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import net.minecraft.util.Util
+import net.minecraft.util.math.MathHelper
 import net.minecraft.world.World
 
 /**
@@ -32,8 +36,8 @@ import net.minecraft.world.World
  * leaves the player for a camera of its own, which [DirectorScene.SCENE] moves tick by tick (the game blends
  * between ticks; a cut jumps), the HUD goes (`InGameHudMixin`), and a [CutsceneScreen] takes the keys and the
  * mouse and draws the bands, his subtitles and the notice to skip. The player stays where they stood, seen
- * from outside. His lines play on their ticks, flat (the same in every shot), under Voice/Speech; nothing
- * else of the scene makes a sound.
+ * from outside ([drawPlayer]). His lines play on their ticks, flat (the same in every shot), under Voice/Speech; nothing
+ * else of the scene makes a sound. The director takes his moves from it ([DirectorEntity.poseSource]).
  *
  * Skipping (the jump key twice, [SkipPrompt]) fades to black and asks the server to end it; its answer, like
  * the scene's own end, gives the player their view back ([stop]), out of black if skipped, his voice cut.
@@ -46,6 +50,9 @@ object CutsceneView {
     /** Skipping fades to black this fast before the scene ends, and out of it this slowly after. */
     private const val SKIP_FADE_MS = 250L
     private const val SKIP_FADE_OUT_S = 0.6f
+
+    /** The player is not drawn with the camera nearer their eyes than this (blocks). */
+    private const val NEAR = 1.2
 
     private var frame: SceneFrame? = null
     private var eyes = CameraPose(0.0, 0.0, 0.0, 0.0, 0.0)
@@ -71,6 +78,7 @@ object CutsceneView {
             client.execute { stop(client, skipped) }
         }
         ClientTickEvents.END_CLIENT_TICK.register(::tick)
+        WorldRenderEvents.AFTER_ENTITIES.register(::drawPlayer)
         ClientPlayConnectionEvents.DISCONNECT.register { _, client -> client.execute { stop(client, false) } }
     }
 
@@ -89,6 +97,7 @@ object CutsceneView {
         client.options.perspective = Perspective.FIRST_PERSON
         client.setCameraEntity(camera)
         client.setScreen(CutsceneScreen())
+        DirectorEntity.poseSource = ::directorPose
     }
 
     /** The view back to the player, out of black if [skipped]. Safe to call when nothing plays. */
@@ -96,6 +105,7 @@ object CutsceneView {
         if (!active()) return
         frame = null
         camera = null
+        DirectorEntity.poseSource = null
         voice?.let { client.soundManager.stop(it) }
         voice = null
         client.options.hudHidden = hudWasHidden
@@ -122,6 +132,36 @@ object CutsceneView {
     fun subtitle(tickDelta: Float): String? =
         if (skippedAt != 0L) null else DirectorScene.SCENE.subtitleAt(tick + tickDelta.toDouble())?.key
 
+    /**
+     * The player, seen from the scene's camera: the game leaves its own player out whenever the view is another
+     * entity's (as when spectating), so it is drawn here, with the world's other entities; but not while the camera
+     * is still in (or just out of) their head.
+     */
+    private fun drawPlayer(context: WorldRenderContext) {
+        if (!active()) return
+        val client = MinecraftClient.getInstance()
+        val player = client.player ?: return
+        val matrices = context.matrixStack() ?: return
+        val consumers = context.consumers() ?: return
+        val delta = context.tickDelta()
+        val cam = context.camera().pos
+        val x = MathHelper.lerp(delta.toDouble(), player.prevX, player.x) - cam.x
+        val y = MathHelper.lerp(delta.toDouble(), player.prevY, player.y) - cam.y
+        val z = MathHelper.lerp(delta.toDouble(), player.prevZ, player.z) - cam.z
+        if (x * x + (y + player.standingEyeHeight) * (y + player.standingEyeHeight) + z * z < NEAR * NEAR) return
+        val dispatcher = client.entityRenderDispatcher
+        val yaw = MathHelper.lerp(delta, player.prevYaw, player.yaw)
+        dispatcher.render(player, x, y, z, yaw, delta, matrices, consumers, dispatcher.getLight(player, delta))
+    }
+
+    /** The director at this moment of his scene (a skip shows him as he ends it: breathing, the mask off). */
+    private fun directorPose(): DirectorEntity.Pose {
+        val timeline = DirectorScene.SCENE
+        val at = tick + MinecraftClient.getInstance().tickDelta.toDouble()
+        if (skippedAt != 0L) return DirectorEntity.Pose(null, 0.0, true)
+        return DirectorEntity.Pose(timeline.actionAt(at), timeline.gazeAt(at), tick >= timeline.maskDown)
+    }
+
     /** The black of a skip on its way, at this frame: 0 none, 1 all. */
     fun skipBlack(): Float =
         if (skippedAt == 0L) 0f else ((Util.getMeasuringTimeMs() - skippedAt) / SKIP_FADE_MS.toFloat()).coerceIn(0f, 1f)
@@ -144,11 +184,13 @@ object CutsceneView {
         val scene = DirectorScene.SCENE.cutscene
         val player = MinecraftClient.getInstance().player
         val playerEyes = if (player != null) Triple(player.x, player.eyeY, player.z) else Triple(eyes.x, eyes.y, eyes.z)
-        val next = scene.pose(n + 1.0, at, eyes, playerEyes)
+        // The way back is into their eyes now: the scene puts them inside the door.
+        val back = if (player != null) CameraPose(player.x, player.eyeY, player.z, player.yaw.toDouble(), player.pitch.toDouble()) else eyes
+        val next = scene.pose(n + 1.0, at, eyes, playerEyes, back)
         val now = if (scene.shotAt(n.toDouble()) != scene.shotAt(n + 1.0) && scene.shotAt(n.toDouble()) >= 0) {
             next
         } else {
-            scene.pose(n.toDouble(), at, eyes, playerEyes)
+            scene.pose(n.toDouble(), at, eyes, playerEyes, back)
         }
         val then = next.yawNear(now.yaw)
         cam.prevX = now.x

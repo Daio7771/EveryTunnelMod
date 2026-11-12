@@ -42,6 +42,22 @@ def px(img, origin, x, y, colour):
     img.putpixel((origin[0] + x, origin[1] + y), (*colour, 255))
 
 
+def paint_mask(img, rng, face):
+    """The mask's face on an 8 x 8 rectangle `face` (x, y, width, height): pale, slanted hollow eyes, a jagged
+    grin (also the director's, tools/entity/director.py)."""
+    fill(img, rng, face, MASK, 3)
+    o = face[:2]
+    for x, y in ((1, 2), (2, 2), (2, 3), (3, 3), (6, 2), (5, 2), (5, 3), (4, 3)):     # eyes slanting in, angry
+        px(img, o, x, y, HOLLOW)
+    for x in (3, 4):                                                                    # a slit for a nose
+        px(img, o, x, 4, MASK_SHADE)
+    for x, y in ((1, 5), (2, 6), (3, 5), (4, 6), (5, 5), (6, 6), (1, 6), (6, 5)):       # the grin's teeth
+        px(img, o, x, y, HOLLOW)
+    for x in range(8):                                                                  # the brow and the jaw in shadow
+        px(img, o, x, 1, MASK_SHADE)
+        px(img, o, x, 7, MASK_SHADE)
+
+
 def paint():
     rng = random.Random(14)
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
@@ -71,18 +87,7 @@ def paint():
         px(img, front, x, y, SUIT_DARK)
 
     # The mask covers the whole face: pale, with slanted hollow eyes and a jagged grin.
-    face = faces(HEAD)["front"]
-    fill(img, rng, face, MASK, 3)
-    o = face[:2]
-    for x, y in ((1, 2), (2, 2), (2, 3), (3, 3), (6, 2), (5, 2), (5, 3), (4, 3)):     # eyes slanting in, angry
-        px(img, o, x, y, HOLLOW)
-    for x in (3, 4):                                                                    # a slit for a nose
-        px(img, o, x, 4, MASK_SHADE)
-    for x, y in ((1, 5), (2, 6), (3, 5), (4, 6), (5, 5), (6, 6), (1, 6), (6, 5)):       # the grin's teeth
-        px(img, o, x, y, HOLLOW)
-    for x in range(8):                                                                  # the brow and the jaw in shadow
-        px(img, o, x, 1, MASK_SHADE)
-        px(img, o, x, 7, MASK_SHADE)
+    paint_mask(img, rng, faces(HEAD)["front"])
     for side in ("right", "left"):                                                      # the strap round the head
         x, y, w, _ = faces(HEAD)[side]
         for k in range(w):

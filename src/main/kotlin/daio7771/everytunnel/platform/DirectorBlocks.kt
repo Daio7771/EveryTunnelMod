@@ -10,6 +10,8 @@ import net.minecraft.block.ShapeContext
 import net.minecraft.block.entity.BlockEntity
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvents
 import net.minecraft.state.StateManager
 import net.minecraft.state.property.DirectionProperty
 import net.minecraft.state.property.EnumProperty
@@ -28,12 +30,16 @@ import net.minecraft.world.World
 /**
  * One leaf of a pair of doors that open together (Level 5's director's door): opening or shutting one by hand
  * does the same to the leaf beside it, the same block facing the same way, hinged on the other side. Opening
- * the director's starts his scene ([DirectorSceneHooks]).
+ * the director's starts his scene ([DirectorSceneHooks]); from then on it is locked (a locked latch rattles).
  */
 class PairedDoorBlock(settings: Settings, type: BlockSetType) : DoorBlock(settings, type) {
 
     @Deprecated("Deprecated in Java")
     override fun onUse(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult): ActionResult {
+        if (DirectorSceneHooks.doorLocked) {
+            if (!world.isClient) world.playSound(null, pos, SoundEvents.BLOCK_CHEST_LOCKED, SoundCategory.BLOCKS, 1f, 1f)
+            return ActionResult.success(world.isClient)
+        }
         @Suppress("DEPRECATION")
         val result = super.onUse(state, world, pos, player, hand, hit)
         if (!result.isAccepted) return result

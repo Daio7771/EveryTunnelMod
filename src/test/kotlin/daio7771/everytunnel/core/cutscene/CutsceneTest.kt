@@ -127,4 +127,84 @@ class CutsceneTest {
         val first = timeline.lines.first()
         assertEquals("subtitle.every_tunnel.director.boss_01_1", timeline.subtitleAt(first.start + 1.0)?.key)
     }
+
+    @Test
+    fun `his mask comes off in the long pause and lands while he says it is hot`() {
+        val timeline = DirectorScene.SCENE
+        val lines = timeline.lines.associateBy { it.line.id }
+        val mask = timeline.actions.single { it.name == "mask_off" }
+        assertEquals(lines.getValue("boss_05").end, mask.start)
+        val hot = lines.getValue(DirectorScene.MASK_LINE)
+        assertTrue(timeline.maskDown in hot.start..hot.end)
+        assertTrue(mask.start + DirectorScene.MASK_TICKS < lines.getValue("boss_07").start)
+    }
+
+    @Test
+    fun `he stands, points, and sits again before his last line ends`() {
+        val timeline = DirectorScene.SCENE
+        val names = timeline.actions.map { it.name }
+        assertEquals(listOf("stand", "point", "stand", "idle"), names.takeLast(4))
+        assertEquals(timeline.actions.indices.toList(), timeline.actions.map { it.index })
+        assertTrue(timeline.actions.zipWithNext().all { (a, b) -> a.start <= b.start })
+        val last = timeline.lines.last()
+        assertTrue(timeline.actions.last().start < last.end)
+    }
+
+    @Test
+    fun `he looks at the player but where he looks away`() {
+        val timeline = DirectorScene.SCENE
+        val lines = timeline.lines.associateBy { it.line.id }
+        fun middle(id: String) = lines.getValue(id).let { (it.start + it.end) / 2.0 }
+        assertEquals(1.0, timeline.gazeAt(middle("boss_01")), eps)
+        assertEquals(0.0, timeline.gazeAt(middle("boss_12")), eps)
+        assertEquals(0.0, timeline.gazeAt(middle("boss_20")), eps)
+        assertEquals(0.0, timeline.gazeAt(timeline.cutscene.totalTicks.toDouble()), eps)
+        assertEquals(null, timeline.actionAt(0.0))
+    }
+
+    @Test
+    fun `the camera flies back to where the player stands at the end`() {
+        val scene = DirectorScene.SCENE.cutscene
+        val frame = SceneFrame(0.0, 64.0, 0.0, 90.0)
+        val eyes = CameraPose(-17.0, 65.6, 0.0, -90.0, 5.0)
+        val inside = CameraPose(-14.0, 65.6, 0.5, -90.0, 0.0)
+        val player = Triple(-14.0, 65.6, 0.5)
+        assertEquals(eyes, scene.pose(0.0, frame, eyes, player, inside))
+        assertEquals(inside, scene.pose(scene.totalTicks.toDouble(), frame, eyes, player, inside))
+    }
+
+    private fun phrases() = (1..6).map { VoiceLine("loop_$it", 0, 2000, emptyList()) }
+
+    @Test
+    fun `he repeats his phrases from the last to the first, and round again`() {
+        val loop = DirectorLoop(phrases(), kotlin.random.Random(1))
+        loop.start(0)
+        val said = mutableListOf<String>()
+        for (t in 0..20 * 60 * 20) loop.tick(t, inRoom = true)?.let { said += it.id }
+        assertEquals(listOf("loop_6", "loop_5", "loop_4", "loop_3", "loop_2", "loop_1", "loop_6"), said.take(7))
+    }
+
+    @Test
+    fun `he speaks every 20 to 30 seconds, only with the player in the room`() {
+        val loop = DirectorLoop(phrases(), kotlin.random.Random(7))
+        loop.start(0)
+        val times = mutableListOf<Int>()
+        for (t in 0..10 * 60 * 20) loop.tick(t, inRoom = true)?.let { times += t }
+        assertTrue(times.first() in DirectorLoop.MIN_GAP..DirectorLoop.MAX_GAP)
+        for ((a, b) in times.zipWithNext()) assertTrue(b - a - 40 in DirectorLoop.MIN_GAP..DirectorLoop.MAX_GAP, "${b - a}")
+        val away = DirectorLoop(phrases(), kotlin.random.Random(7))
+        away.start(0)
+        for (t in 0..2000) assertEquals(null, away.tick(t, inRoom = false))
+        assertEquals(null, away.tick(2001, inRoom = true))
+        val back = (2001..2001 + DirectorLoop.BACK_IN).firstNotNullOfOrNull { t -> away.tick(t, inRoom = true)?.let { t } }
+        assertTrue(back != null && back >= 2000 + DirectorLoop.BACK_IN)
+    }
+
+    @Test
+    fun `he looks at the player less each time`() {
+        val loop = DirectorLoop(phrases())
+        assertEquals(1.0, loop.gaze(0), eps)
+        assertTrue(loop.gaze(3) < loop.gaze(2))
+        assertEquals(0.0, loop.gaze(20), eps)
+    }
 }

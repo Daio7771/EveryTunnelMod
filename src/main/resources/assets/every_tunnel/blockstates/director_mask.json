@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/director_mask"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/director_mask",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/director_mask",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/director_mask",
+      "y": 270
+    }
+  }
+}

@@ -94,16 +94,21 @@ class Cutscene(val shots: List<Shot>, val flyInTicks: Int, val flyOutTicks: Int)
         return shots.size
     }
 
-    /** The camera at [tick] (fractional) in [frame], the player's [eyes] where they stood when it began, [playerEyes] now. */
-    fun pose(tick: Double, frame: SceneFrame, eyes: CameraPose, playerEyes: Triple<Double, Double, Double>): CameraPose {
+    /**
+     * The camera at [tick] (fractional) in [frame]: out of the player's [eyes] where they stood when it began, back
+     * into [back] (where they stand at its end, if the scene moved them), [playerEyes] where they are now.
+     */
+    fun pose(
+        tick: Double, frame: SceneFrame, eyes: CameraPose, playerEyes: Triple<Double, Double, Double>, back: CameraPose = eyes,
+    ): CameraPose {
         if (tick < flyInTicks) return CameraPose.blend(eyes, shotPose(0, 0.0, frame, playerEyes), ease(tick / flyInTicks))
         var t = tick - flyInTicks
         for ((i, shot) in shots.withIndex()) {
             if (t < shot.ticks) return shotPose(i, t / shot.ticks, frame, playerEyes)
             t -= shot.ticks
         }
-        if (t < flyOutTicks) return CameraPose.blend(shotPose(shots.size - 1, 1.0, frame, playerEyes), eyes, ease(t / flyOutTicks))
-        return eyes
+        if (t < flyOutTicks) return CameraPose.blend(shotPose(shots.size - 1, 1.0, frame, playerEyes), back, ease(t / flyOutTicks))
+        return back
     }
 
     /** How far the bands are in at [tick]: 0 out, 1 all the way in. */
