@@ -252,7 +252,11 @@ silent.
   dies. He makes no sound of his own, not even footsteps; walking your way he
   brings a slow clock and a drone (`music.observer.approach`), running at you the clock gone
   mad (`music.observer.chase`). A new game or a death sends him back to his spawn point; every rebuild of the map
-  kills him, like the Pale men, and his spawn point spawns him again when a player walks in. Starting numbers, to tune by
+  kills him, like the Pale men, and his spawn point spawns him again when a player walks in. The rebuild also
+  discards him itself (`/kill` on a living thing plays its death for a second first, and his spawn point
+  is forgotten only when he is gone) and puts one back for each level a player is already in, so a world
+  opened inside Level 3 (CONTINUE) has him; `core.spawn.PostLedger` keeps a dying or late-loading leftover
+  from wiping the record of the one that replaced it. Starting numbers, to tune by
   playing (`ObserverSettings`; the log says how fast each run really was, "[observer] ran ...").
 - **Lockers to hide in:** every room has at least one (the Lockers and Changing rooms are
   full of them; the library has none). Right-clicking a locker from in front of its door

@@ -54,6 +54,7 @@ KDoc comment that says more.
 | `death/DeathCause.kt` | What the death screen names (the killer, thirst, the fall, deep water) and where it shows |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 | `hiding/LookLimit.kt` | How far the head turns inside a locker |
+| `spawn/PostLedger.kt` | Which creature owns each spawn point, so a dying or late-loading leftover never wipes the record of the one that replaced it (the Observer) |
 
 ### `systems/`
 
@@ -144,7 +145,7 @@ KDoc comment that says more.
 | `PaleManEntity.kt` | The entity: hearing, walls, territory, pathing, hits, sounds, animations |
 | `PaleManSpawner.kt` | Spawns one per `pale_man` spawn point, once per world; new-game counter |
 | `ObserverEntity.kt` | The Observer: sight (cone, range, walls), moving and looking round, catching, pulling out of lockers |
-| `ObserverHooks.kt` | Spawns the Observer, passes him the box alerts, sends him home on a death |
+| `ObserverHooks.kt` | Spawns the Observer, passes him the box alerts, sends him home on a death; on a map rebuild discards the old ones and puts one back |
 | `HunterEntity.kt` | A Hunter: sight (cone, range, walls), telling its group, moving, hits, sounds, animations |
 | `DistortionEntity.kt` | What the Cloud and the Junior share: floating, untouchable, facing the player, stare and going synced, smoke |
 | `DistortionCloudEntity.kt` | The Distortion Cloud: who looks its way, killing, going; the entry corridor's game's one |

@@ -118,6 +118,10 @@ class ObserverEntity(type: EntityType<out HostileEntity>, world: World) : Hostil
     override fun mobTick() {
         super.mobTick()
         val world = world as? ServerWorld ?: return
+        if (!ObserverHooks.claim(this)) {
+            discard()
+            return
+        }
         val newGames = PaleManSpawner.newGames(world.server)
         if (newGames != newGamesSeen) {
             if (newGamesSeen >= 0) goHome()
@@ -349,8 +353,10 @@ class ObserverEntity(type: EntityType<out HostileEntity>, world: World) : Hostil
     }
 
     override fun remove(reason: RemovalReason) {
-        if (!world.isClient && (reason == RemovalReason.KILLED || reason == RemovalReason.DISCARDED)) {
-            homeKey?.let { ObserverHooks.forget(it) }
+        // Once: a killed Observer is discarded by the rebuild while his death still plays, and the death's own
+        // removal (20 ticks later) must not forget the spawn point again.
+        if (!world.isClient && !isRemoved && (reason == RemovalReason.KILLED || reason == RemovalReason.DISCARDED)) {
+            homeKey?.let { ObserverHooks.forget(it, uuid) }
         }
         super.remove(reason)
     }

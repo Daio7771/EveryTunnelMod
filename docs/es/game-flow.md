@@ -270,7 +270,11 @@ silencio.
   (`music.observer.approach`), y cuando corre a por ti, el reloj desbocado
   (`music.observer.chase`). Una partida nueva o una muerte lo devuelven
   a su punto de spawn; cada reconstrucción del mapa lo mata, como a los Pale men, y su punto
-  de spawn lo vuelve a generar cuando entra un jugador. Números de partida, a ajustar jugando (`ObserverSettings`; el log dice a
+  de spawn lo vuelve a generar cuando entra un jugador. La reconstrucción también
+  lo descarta ella misma (`/kill` sobre algo vivo reproduce antes su muerte durante un segundo, y su punto
+  de spawn solo se olvida cuando ya no está) y pone uno de nuevo por cada nivel en el que ya hay un jugador,
+  de modo que un mundo abierto dentro del Nivel 3 (CONTINUAR) lo tiene; `core.spawn.PostLedger` evita que un
+  sobrante que aún muere o que carga tarde borre el registro del que lo sustituyó. Números de partida, a ajustar jugando (`ObserverSettings`; el log dice a
   qué velocidad corrió de verdad en cada carrera, "[observer] ran ...").
 - **Taquillas para esconderse:** cada sala tiene al menos una (las salas Lockers y Changing
   room están llenas; la biblioteca no tiene). Un clic derecho en una taquilla desde delante
