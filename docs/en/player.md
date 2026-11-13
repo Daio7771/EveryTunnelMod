@@ -52,6 +52,10 @@ save, and it changes nothing else.
 - While exhausted: heavy breathing in the player's head (`client.effects.BreathingEffect`),
   the screen edges darken and swell with each breath (`client.hud.ExhaustionVignette`),
   and panting is a noise for the Pale man once per second.
+- **Energy from food** (`food.energy_seconds`, 10): sprinting and jumping cost nothing and stamina stays full (an
+  exhausted player is not any more) while it lasts (`ResourceSystem.eat`, `ResourceState.energySeconds`; not saved with
+  the world). A food eaten while it still lasts is eaten all the same and wasted: no more time. The HUD's lungs are gold
+  meanwhile (`ResourceSyncPacket.energised`). In a safe level (Level 4) stamina is free anyway, so it changes nothing there.
 
 ### Thirst
 
@@ -71,8 +75,9 @@ player cannot drink ("You are not thirsty"). Consumed outside Creative.
 ### Eating
 
 `ModItems` (`food_plate`, `food_popcorn`, `food_snack`, the same effect in all three),
-`platform.FoodHooks`: hold use for 1.5 s to eat, +8 health (4 hearts). A noise like drinking; a
-player at full health cannot eat ("You are not hurt"). Consumed outside Creative.
+`platform.FoodHooks`: hold use for 1.5 s to eat: +8 health (4 hearts, nothing at full health) and 10 s of
+unlimited energy (see [Stamina](#stamina)). It can be eaten at full health and in any level. A noise like drinking.
+Consumed outside Creative.
 
 ### The flashlight
 
@@ -101,7 +106,7 @@ The light itself is drawn on the client, see [Graphics](graphics.md#the-flashlig
 `platform.LootSpawner` and `platform.LootBlock`:
 
 - The first time a player enters a level, a `LootBlock` is placed at every spawn point
-  tagged `battery`, `water`, `keycard`, `food_plate`, `food_popcorn`, `food_snack`, `wrench`, `detector` or a fuse (`fuse_5a`...). The client draws it as the item itself, lying
+  tagged `battery`, `water`, `keycard`, `food_plate`, `food_popcorn`, `food_snack`, `wrench` or a fuse (`fuse_5a`...). The client draws it as the item itself, lying
   flat (`client.render.LootRenderer`); it has no collision. Level 4, built in play, gets its loot
   once it stands.
 - **Right-click** picks it up; the spot is empty.
@@ -114,7 +119,10 @@ The light itself is drawn on the client, see [Graphics](graphics.md#the-flashlig
 - **The wrench** (`platform.WrenchItem`): a heavy weapon held like a sword. A full blow takes
   `wrench.damage` (7, three and a half hearts) and comes about once a second (`wrench.attacks_per_second`),
   pushes a little, and rings out in metal (`item.wrench.hit`). It never wears out.
-- **The radiation detector:** it works from anywhere in the inventory and uses nothing. It notices the
+- **The radiation detector:** it is not an item: in Level 5 the player has it on them from the airlock on, and it
+  does not work in the way in (the zones tagged `no_detector`: the entry corridor and its frame). The server tells the
+  client where it works (`ResourceSyncPacket.detector`, `ResourceHooks`). `ModItems.DETECTOR` stays registered only
+  so older worlds and saved inventories load; nothing gives or places it. It uses nothing. It notices the
   nearest Distortion Cloud within `detector.range` (16) blocks, never through a wall, and clicks in the
   player's head like a Geiger counter: its counts fall at random, about 1.5 a second at the edge and more with
   each step nearer, up to a crackle of about 120 a second right next to it. Each tick draws how many fall in it
@@ -135,12 +143,12 @@ experience bar.
 ```
 
 - Hearts shake when health is low.
-- Lungs turn grey while exhausted.
+- Lungs turn grey while exhausted, and gold while a food's energy lasts.
 - The battery row blinks red below the low battery warning.
 
 Icons: `textures/gui/hud_icons.png`, painted by `tools/gui/hud_icons.py`.
 
-While the player carries Level 5's detector, `client.hud.DetectorHud` draws the radiation sign to the right
+Where Level 5's detector works, `client.hud.DetectorHud` draws the radiation sign to the right
 of the right-hand rows, between them: grey with nothing in range, filled in yellow and black from the bottom
 up as a Cloud comes nearer. Within `detector.danger_range` (8) a red warning triangle blinks fast beside it
 (`textures/gui/detector_icons.png`, from the same tool).
@@ -185,6 +193,7 @@ Every key and its default:
 | **`food`** | | |
 | `heal` | 8 | Health one food gives back |
 | `eat_seconds` | 1.5 | Time spent eating |
+| `energy_seconds` | 10 | Seconds of unlimited energy a food gives (0 = none) |
 | **`flashlight`** | | |
 | `battery_max_seconds` | 180 | Seconds of light from a full battery |
 | `low_battery_warning_percent` | 20 | Below this the HUD blinks and the beam flickers |

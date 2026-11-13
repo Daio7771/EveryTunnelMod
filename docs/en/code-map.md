@@ -54,6 +54,7 @@ KDoc comment that says more.
 | `death/DeathCause.kt` | What the death screen names (the killer, thirst, the fall, deep water) and where it shows |
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 | `hiding/LookLimit.kt` | How far the head turns inside a locker |
+| `progress/LeftBehind.kt` | What is of no use from a level on and is taken out of the inventory at its start (the keycard from Level 3, the master card from Level 5) |
 | `spawn/PostLedger.kt` | Which creature owns each spawn point, so a dying or late-loading leftover never wipes the record of the one that replaced it (the Observer) |
 
 ### `systems/`
@@ -174,7 +175,7 @@ KDoc comment that says more.
 | `ResourceSyncPacket.kt` | The resources packet to the client |
 | `FlashlightHooks.kt` | The flashlight toggle request, battery items, feedback |
 | `DrinkHooks.kt` | Drinking water bottles |
-| `FoodHooks.kt` | Eating: health back |
+| `FoodHooks.kt` | Eating: health back and 10 s of unlimited energy, at any health |
 | `WaterDispenserHooks.kt` | Drinking at a water dispenser that gives water (Level 3's kitchen) |
 | `JumpCounter.kt` | Jumps per player from the vanilla statistic |
 | `NoiseHooks.kt` | Turns steps, jumps, landings, panting and game events into noises |
@@ -210,7 +211,7 @@ KDoc comment that says more.
 | `LabDoorHooks.kt` | Level 5's locked doors: the levers, the south route opening on walking out of the Office |
 | `BreakerHooks.kt` | Level 4's Maintenance room: levers, button, counter, power for the reader |
 | `SafeHooks.kt` | The safes in the Suites: the combinations, the block, the result from the client |
-| `ContinueGame.kt` | The saved game: checkpoints (a level's restart points: the one inside the zone walked into), CONTINUE, putting Level 4 back |
+| `ContinueGame.kt` | The saved game: checkpoints (a level's restart points: the one inside the zone walked into), CONTINUE, putting Level 4 back; takes what is of no use from a level on out of the inventory before it is saved (`core/progress/LeftBehind.kt`) |
 | `WallMessageBlock.kt` | A message painted on a wall: the block and its data |
 | `SafeLevelHooks.kt` | Levels without risk: no damage (Level 4) |
 | `SuiteBedHooks.kt` | Resting in a bed: fade to black, health and stamina full |
@@ -257,7 +258,7 @@ KDoc comment that says more.
 | `AmbiencePlayer.kt` | Level loop and random positioned sounds |
 | `FluorescentHum.kt` | Hum of the 4 nearest lights |
 | `HeartbeatEffect.kt` | Heartbeat by distance to the Pale man |
-| `DetectorEffect.kt` | Level 5's detector: the nearest Cloud in sight, the Geiger clicks |
+| `DetectorEffect.kt` | Level 5's detector (no item: where the server says it works): the nearest Cloud in sight, the Geiger clicks |
 | `DistortionEffect.kt` | The Distortions on the senses: whispers, the screen distorting at a Cloud, the violet of the entry corridor's, the Junior's tremor and drift |
 | `CameraShake.kt` | The camera shaking in Level 3's tunnel collapse |
 | `FilmPlayer.kt` | The Cinema's film on its screen, and the projector's sound |

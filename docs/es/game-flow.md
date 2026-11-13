@@ -50,7 +50,7 @@ flowchart TD
 juego la abriría (`MinecraftClientMixin`): al arrancar, al salir de un mundo, tras los
 créditos y al cerrarse una pantalla sin mundo abierto (Escape en las opciones).
 
-- **NEW GAME** abre Noname Complex; con una partida guardada lo sustituye **CONTINUE** (`platform.ContinueGame`), y Ctrl+Shift+D borra esa partida tras preguntar (`EraseSaveScreen`). Una partida guardada tiene: puntos de control al inicio de cada nivel, el nivel 4 como se dejó (`core.save.LoungeSave`), salvo coger la llave, y se borra con los créditos. Si el mundo falta, dice "The map is missing. Reinstall the
+- **NEW GAME** abre Noname Complex; con una partida guardada lo sustituye **CONTINUE** (`platform.ContinueGame`), y Ctrl+Shift+D borra esa partida tras preguntar (`EraseSaveScreen`). Una partida guardada tiene: puntos de control al inicio de cada nivel (con el inventario de entonces; antes se saca, en silencio, lo que ya no sirve de ese nivel en adelante: la tarjeta de acceso al llegar al nivel 3, la tarjeta maestra y sus cuatro piezas al llegar al nivel 5, `core.progress.LeftBehind`), el nivel 4 como se dejó (`core.save.LoungeSave`), salvo coger la llave, y se borra con los créditos. Si el mundo falta, dice "The map is missing. Reinstall the
   mod."
 - **OPTIONS** abre las opciones de vanilla.
 - **GUIDE** abre la [guía del jugador](guide/01-how-to-play.md) (`GuideScreen`): una hoja de
@@ -460,8 +460,8 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
   inoxidable, melamina blanca, plástico verde quirófano. El Lobby: mostrador de recepción, asientos, plantas;
   desde él, al fondo del pasillo hacia el anillo, una figura oscura mira hacia atrás y, cuando se la mira, se
   gira y desaparece tras la esquina, una vez por partida (`LabFigureHooks`, `LabFigureEntity`). El Workshop:
-  bancos con paneles de herramientas, estanterías de frascos, cajas de herramientas; **la llave inglesa y el
-  detector** están en su banco central (ver [Sistemas del jugador](player.md#herramientas-del-nivel-5)). La sala
+  bancos con paneles de herramientas, estanterías de frascos, cajas de herramientas; **la llave inglesa** está en su banco
+  central (ver [Sistemas del jugador](player.md#herramientas-del-nivel-5); el detector no es un objeto: el jugador lo lleva desde la esclusa). La sala
   de espera: filas de asientos y, en su pared norte, la pizarra de seguridad, un gran corcho bajo una placa
   impresa, SAFETY BRIEFING (`BriefingBoardBlock`, `BriefingSignBlock`): una columna para los Hunters, la Cloud,
   el Junior y el equipo, con un dibujo a lápiz clavado sobre su ficha técnica (qué hace cada cosa y cómo

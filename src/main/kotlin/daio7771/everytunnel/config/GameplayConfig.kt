@@ -54,6 +54,8 @@ data class FoodConfig(
     val heal: Double = 8.0,
     /** Seconds the use key is held to eat. */
     val eatSeconds: Double = 1.5,
+    /** Seconds of unlimited energy a food gives: sprinting and jumping cost no stamina. 0 gives none. */
+    val energySeconds: Double = 10.0,
 )
 
 /** Level 5's wrench, a heavy weapon (`platform.WrenchItem`). */

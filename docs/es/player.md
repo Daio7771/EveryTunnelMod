@@ -53,6 +53,11 @@ cambia nada más.
   los bordes de la pantalla se oscurecen y laten con cada respiración
   (`client.hud.ExhaustionVignette`), y el jadeo es un ruido para el Pale man una vez por
   segundo.
+- **Energía de la comida** (`food.energy_seconds`, 10): mientras dura, esprintar y saltar no cuestan nada y la stamina se
+  mantiene llena (un jugador agotado deja de estarlo) (`ResourceSystem.eat`, `ResourceState.energySeconds`; no se guarda
+  con el mundo). Una comida que se come mientras aún dura se come igualmente y se desperdicia: no suma tiempo. Los
+  pulmones del HUD se ven dorados entretanto (`ResourceSyncPacket.energised`). En un nivel seguro (el Nivel 4) la stamina
+  ya es gratis, así que ahí no cambia nada.
 
 ### Sed
 
@@ -72,8 +77,9 @@ lleno no puede beber ("You are not thirsty"). Se gasta fuera de Creativo.
 ### Comer
 
 `ModItems` (`food_plate`, `food_popcorn`, `food_snack`, con el mismo efecto los tres),
-`platform.FoodHooks`: mantén pulsado usar 1,5 s para comer, +8 de vida (4 corazones). Hace un ruido
-como beber; con la vida llena no se puede comer ("You are not hurt"). Se consume fuera de Creativo.
+`platform.FoodHooks`: mantén pulsado usar 1,5 s para comer: +8 de vida (4 corazones, nada con la vida llena) y 10 s de
+energía ilimitada (véase [Stamina](#stamina)). Se puede comer con la vida llena y en cualquier nivel. Hace un ruido
+como beber. Se consume fuera de Creativo.
 
 ### La linterna
 
@@ -105,7 +111,7 @@ La luz en sí se dibuja en el cliente, ver [Gráficos](graphics.md#la-linterna).
 `platform.LootSpawner` y `platform.LootBlock`:
 
 - La primera vez que un jugador entra en un nivel, se coloca un `LootBlock` en cada punto
-  de aparición con la etiqueta `battery`, `water`, `keycard`, `food_plate`, `food_popcorn`, `food_snack`, `wrench`, `detector` o un fusible (`fuse_5a`...). El cliente lo dibuja como el
+  de aparición con la etiqueta `battery`, `water`, `keycard`, `food_plate`, `food_popcorn`, `food_snack`, `wrench` o un fusible (`fuse_5a`...). El cliente lo dibuja como el
   propio objeto, tumbado (`client.render.LootRenderer`); no tiene colisión. El nivel 4, construido
   en plena partida, recibe su botín cuando está en pie.
 - **Clic derecho** lo recoge; el sitio queda vacío.
@@ -118,7 +124,10 @@ La luz en sí se dibuja en el cliente, ver [Gráficos](graphics.md#la-linterna).
 - **La llave inglesa** (`platform.WrenchItem`): un arma pesada que se lleva como una espada. Un golpe completo
   quita `wrench.damage` (7, tres corazones y medio), llega más o menos una vez por segundo
   (`wrench.attacks_per_second`), empuja un poco y suena a metal (`item.wrench.hit`). No se desgasta nunca.
-- **El detector de radiación:** funciona desde cualquier sitio del inventario y no gasta nada. Nota la
+- **El detector de radiación:** no es un objeto: en el nivel 5 el jugador lo lleva encima desde la esclusa, y no
+  funciona en la entrada (las zonas con la etiqueta `no_detector`: el pasillo de entrada y su marco). El servidor le
+  dice al cliente dónde funciona (`ResourceSyncPacket.detector`, `ResourceHooks`). `ModItems.DETECTOR` sigue registrado
+  solo para que carguen los mundos y los inventarios guardados antiguos; nada lo da ni lo coloca. No gasta nada. Nota la
   Distortion Cloud más cercana a menos de `detector.range` (16) bloques, nunca a través de una pared, y chasquea en
   la cabeza del jugador como un contador Geiger: sus cuentas caen al azar, unas 1,5 por segundo en el borde y más
   a cada paso que se acerca, hasta crepitar a unas 120 por segundo pegado a ella. Cada tick sortea cuántas caen
@@ -139,12 +148,12 @@ armadura, el aire y la barra de experiencia de vanilla.
 ```
 
 - Los corazones tiemblan con poca vida.
-- Los pulmones se vuelven grises agotado.
+- Los pulmones se vuelven grises agotado, y dorados mientras dura la energía de una comida.
 - La fila de batería parpadea en rojo por debajo del aviso de batería baja.
 
 Iconos: `textures/gui/hud_icons.png`, pintados por `tools/gui/hud_icons.py`.
 
-Mientras el jugador lleva el detector del nivel 5, `client.hud.DetectorHud` dibuja el símbolo de radiación a la
+Donde funciona el detector del nivel 5, `client.hud.DetectorHud` dibuja el símbolo de radiación a la
 derecha de las filas de la derecha, entre ellas: gris sin nada al alcance, y se llena de amarillo y negro de abajo
 arriba conforme se acerca una Cloud. A menos de `detector.danger_range` (8) parpadea rápido a su lado un triángulo
 rojo de peligro (`textures/gui/detector_icons.png`, de la misma herramienta).
@@ -190,6 +199,7 @@ Cada clave y su valor por defecto:
 | **`food`** | | |
 | `heal` | 8 | Vida que devuelve una comida |
 | `eat_seconds` | 1,5 | Tiempo que se tarda en comer |
+| `energy_seconds` | 10 | Segundos de energía ilimitada que da una comida (0 = ninguno) |
 | **`flashlight`** | | |
 | `battery_max_seconds` | 180 | Segundos de luz de una batería llena |
 | `low_battery_warning_percent` | 20 | Por debajo, el HUD parpadea y el haz falla |

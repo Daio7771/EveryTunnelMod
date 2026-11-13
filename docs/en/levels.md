@@ -162,6 +162,7 @@ the server starts (levels built together name the same one). The function must e
 | `cloud_game` | `CloudGameHooks` | Level 5's entry corridor, from its start line: walking in starts the Cloud's game (as Halt plays it), walking out ends it |
 | `dead_battery` | `ResourceHooks` | The battery is empty there and no battery item helps; walking out, it is full again |
 | `no_sprint` | `ResourceHooks` | Nobody sprints there |
+| `no_detector` | `ResourceHooks` | Level 5's radiation detector does not work there (the entry corridor and its frame); it works in the rest of the level |
 | `no_checkpoint` | `ContinueGame` | No checkpoint is made there: the level's waits for its first zone without the tag |
 | `back_to_key` | `DeathHooks` | A death there goes back to Level 4 by the Master Key's table, as before it was taken |
 | `deep_water` | `DeepWaterHooks` | Level 5's pools: falling into their deep water pulls the player under, and they drown |
@@ -174,7 +175,7 @@ the server starts (levels built together name the same one). The function must e
 | `player` | `RespawnHooks`, `DeathHooks`, `NewGame` | The level start: where a player restarts. The first one is used |
 | `pale_man` | `PaleManSpawner` | A Pale man spawns here the first time a player enters the level |
 | `battery` | `LootSpawner` | A battery lying on the floor |
-| `wrench`, `detector` | `LootSpawner` | Level 5's wrench and radiation detector, lying on the floor |
+| `wrench` | `LootSpawner` | Level 5's wrench, lying on the floor (the radiation detector has no item any more; `detector` is still a loot name for older maps) |
 | `lab_lever` | `LabDoorHooks` | A lever of Level 5 at that block; named `lever_<door zone id>`, it opens that door |
 | `restart_point` | `ContinueGame`, `DeathHooks` | Where a death or CONTINUE restarts once its zone was walked into (Level 5's Lab hall) |
 | `hunters` | `DistortionHooks` | Level 5: a group of three Hunters, round that point, facing its way |
@@ -254,7 +255,7 @@ Level 5, the laboratory, is built in play (`LabHooks`), its three layers (plan, 
 - The Lab hall and the Junction are tagged `restart_point`.
 - **Spawn points:** `player_start` (the Lobby, by the way in), `checkpoint` (the Lab hall, tagged
   `restart_point`), `cloud_game_start` and `cloud_game_end` (tagged `cloud_game`, the line the entry corridor's game runs down), `lever_stairs_door` and `lever_shortcut_door` (tagged `lab_lever`), and layer 1's
-  (`tools/map/lab/furnish.py`): `wrench` and `detector` (the Workshop's island bench), the fuses `fuse_5a`,
+  (`tools/map/lab/furnish.py`): `wrench` (the Workshop's island bench), the fuses `fuse_5a`,
   `fuse_10a`, `fuse_20a`, `fuse_30a` (tagged the same), the safety briefing's cards `ch1_l5_card_*` (tagged `note`, each at its column's cell in the board's bottom row),
   `hunters_fuse_box` (tagged `hunters` and `harmless`), `lab_figure` and `lab_figure_exit`; and layer 2's:
   `subject_1` to `subject_4` (tagged `subject`), the cards `ch1_l5_card_s1` to `_s4`, the computers `terminal_*`

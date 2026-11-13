@@ -50,7 +50,7 @@ flowchart TD
 it (`MinecraftClientMixin`): at start-up, after leaving a world, after the credits, and when a
 screen closes with no world open (Escape in the options).
 
-- **NEW GAME** opens Noname Complex; with a saved game **CONTINUE** takes its place (`platform.ContinueGame`), and Ctrl+Shift+D erases that game after asking (`EraseSaveScreen`). A saved game has: checkpoints at each level's start, Level 4 kept as it was left (`core.save.LoungeSave`), but for taking the key, and erased by the credits. If the world is missing it says "The map is missing.
+- **NEW GAME** opens Noname Complex; with a saved game **CONTINUE** takes its place (`platform.ContinueGame`), and Ctrl+Shift+D erases that game after asking (`EraseSaveScreen`). A saved game has: checkpoints at each level's start (with the inventory then; what is of no use from that level on is taken out first, in silence: the keycard on reaching Level 3, the master card and its four corners on reaching Level 5, `core.progress.LeftBehind`), Level 4 kept as it was left (`core.save.LoungeSave`), but for taking the key, and erased by the credits. If the world is missing it says "The map is missing.
   Reinstall the mod."
 - **OPTIONS** opens vanilla's options.
 - **GUIDE** opens the [player guide](guide/01-how-to-play.md) (`GuideScreen`): one sheet of
@@ -433,8 +433,8 @@ industrial, and up its stairs the director's office (the boss's scene is still t
 - **Layer 1, the tutorial.** The Lobby: a reception desk, seats, plants; seen from it, far down the corridor
   to the ring, a dark figure stands looking back, and once looked at it turns and goes round the corner, once
   a game (`LabFigureHooks`, `LabFigureEntity`). The Workshop: benches with pegboards, shelves of jars, tool
-  chests; **the wrench and the detector** lie on its island bench (see
-  [Player systems](player.md#level-5s-tools)). The Waiting room: rows of seats, and on its north wall the
+  chests; **the wrench** lies on its island bench (see
+  [Player systems](player.md#level-5s-tools); the detector is not an item: the player has it from the airlock on). The Waiting room: rows of seats, and on its north wall the
   safety briefing, a big cork board under a printed plate, SAFETY BRIEFING (`BriefingBoardBlock`,
   `BriefingSignBlock`): a column for each of the Hunters, the Cloud, the Junior and the equipment, a pencil
   drawing of it pinned over its technical sheet (what each does and how to deal with it: the level's

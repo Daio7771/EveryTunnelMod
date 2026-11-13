@@ -37,6 +37,10 @@ import java.util.UUID
  *   one tagged [DEAD_BATTERY_TAG] the battery is empty: walking in, it drops to nothing (a flashlight
  *   on goes out as if run down), no battery item helps, and walking out it is full again (Level 5's
  *   entry corridor, where the only light is the Cloud's).
+ * - The radiation detector has no item: in Level 5, outside the zones tagged [NO_DETECTOR_TAG] (the way in, before the
+ *   airlock), the client is told it works ([ResourceSyncPacket.detector]; `client.effects.DetectorEffect`).
+ * - A food's energy ([FoodHooks], `ResourceState.energySeconds`) runs down here with the rest and is sent as
+ *   [ResourceSyncPacket.energised], so the HUD's stamina row is gold while it lasts. It is not saved with the world.
  * - Death resets resources to full (full battery, flashlight off).
  * - States are saved with the world (`data/every_tunnel_resources.dat` in the
  *   save folder) and synced to the client with [ResourceSyncPacket].
@@ -45,6 +49,9 @@ object ResourceHooks {
 
     const val NO_SPRINT_TAG = "no_sprint"
     const val DEAD_BATTERY_TAG = "dead_battery"
+    /** Level 5's zones where the detector does not work (the way in, before the airlock): tagged [NO_DETECTOR_TAG]. */
+    const val NO_DETECTOR_TAG = "no_detector"
+    private const val DETECTOR_LEVEL = "level_5"
     private const val TICK_SECONDS = 1.0 / 20.0
     private const val SAVE_ID = "every_tunnel_resources"
 
@@ -107,7 +114,9 @@ object ResourceHooks {
             if (step.damage > 0.0) player.damage(player.damageSources.dryOut(), step.damage.toFloat())
             if (step.batteryDied) FlashlightHooks.batteryDied(player)
 
-            sync(player, packetOf(true, step.state, config, safe, noSprint, player.uuid in inDark))
+            val level = PlayerLocationTracker.locationOf(player.uuid).levelId
+            val detector = level == DETECTOR_LEVEL && NO_DETECTOR_TAG !in tags
+            sync(player, packetOf(true, step.state, config, safe, noSprint, player.uuid in inDark, detector))
         }
     }
 
@@ -126,9 +135,10 @@ object ResourceHooks {
 
     private fun packetOf(
         active: Boolean, s: ResourceState, config: GameplayConfig, safe: Boolean = false, noSprint: Boolean = false, dark: Boolean = false,
+        detector: Boolean = false,
     ) = ResourceSyncPacket.of(
         active, s.stamina, config.stamina.max, s.thirst, config.thirst.max, s.exhausted,
-        s.flashlightOn, s.battery, config.flashlight.batteryMaxSeconds, safe, noSprint, dark,
+        s.flashlightOn, s.battery, config.flashlight.batteryMaxSeconds, safe, noSprint, dark, s.energySeconds > 0.0, detector,
     )
 
     private fun sync(player: ServerPlayerEntity, packet: ResourceSyncPacket) {

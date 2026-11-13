@@ -54,6 +54,7 @@ con un comentario KDoc que cuenta más.
 | `death/DeathCause.kt` | Lo que nombra la pantalla de muerte (quién te mató, la sed, la caída, el agua honda) y dónde sale |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
 | `spawn/PostLedger.kt` | Qué criatura es dueña de cada punto de spawn, para que un sobrante que aún muere o que carga tarde no borre el registro del que lo sustituyó (el Observer) |
+| `progress/LeftBehind.kt` | Lo que no sirve de un nivel en adelante y se quita del inventario al empezarlo (la tarjeta de acceso desde el Nivel 3, la tarjeta maestra desde el Nivel 5) |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
 
 ### `systems/`
@@ -174,7 +175,7 @@ con un comentario KDoc que cuenta más.
 | `ResourceSyncPacket.kt` | El paquete de recursos al cliente |
 | `FlashlightHooks.kt` | La petición de encender la linterna, las baterías, los avisos |
 | `DrinkHooks.kt` | Beber botellas de agua |
-| `FoodHooks.kt` | Comer: devuelve vida |
+| `FoodHooks.kt` | Comer: devuelve vida y da 10 s de energía ilimitada, con cualquier vida |
 | `WaterDispenserHooks.kt` | Beber en un dispensador de agua que da agua (la cocina del nivel 3) |
 | `JumpCounter.kt` | Saltos por jugador a partir de la estadística de vanilla |
 | `NoiseHooks.kt` | Convierte pasos, saltos, aterrizajes, jadeos y game events en ruidos |
@@ -210,7 +211,7 @@ con un comentario KDoc que cuenta más.
 | `LabDoorHooks.kt` | Las puertas bloqueadas del nivel 5: las palancas, la ruta sur que se abre al salir de la Office |
 | `BreakerHooks.kt` | La sala de mantenimiento del nivel 4: palancas, botón, contador, corriente del lector |
 | `SafeHooks.kt` | Las cajas fuertes de las Suites: combinaciones, bloque, resultado del cliente |
-| `ContinueGame.kt` | La partida guardada: puntos de control (los puntos de reinicio de un nivel: el que hay dentro de la zona en la que se entra), CONTINUE, recuperar el nivel 4 |
+| `ContinueGame.kt` | La partida guardada: puntos de control (los puntos de reinicio de un nivel: el que hay dentro de la zona en la que se entra), CONTINUE, recuperar el nivel 4; saca del inventario, antes de guardarlo, lo que ya no sirve de un nivel en adelante (`core/progress/LeftBehind.kt`) |
 | `WallMessageBlock.kt` | Un mensaje pintado en la pared: el bloque y sus datos |
 | `SafeLevelHooks.kt` | Niveles sin riesgo: sin daño (el nivel 4) |
 | `SuiteBedHooks.kt` | Descansar en una cama: fundido a negro, vida y estamina llenas |
@@ -257,7 +258,7 @@ con un comentario KDoc que cuenta más.
 | `AmbiencePlayer.kt` | Bucle del nivel y sonidos aleatorios con posición |
 | `FluorescentHum.kt` | Zumbido de las 4 luces más cercanas |
 | `HeartbeatEffect.kt` | Latido según la distancia al Pale man |
-| `DetectorEffect.kt` | El detector del nivel 5: la Cloud más cercana a la vista, los chasquidos Geiger |
+| `DetectorEffect.kt` | El detector del nivel 5 (sin objeto: donde el servidor dice que funciona): la Cloud más cercana a la vista, los chasquidos Geiger |
 | `DistortionEffect.kt` | Las Distortions en los sentidos: susurros, la pantalla distorsionándose ante una Cloud, el violeta de las del pasillo de entrada, el temblor y la deriva del Junior |
 | `CameraShake.kt` | La cámara temblando en el derrumbe del túnel del nivel 3 |
 | `FilmPlayer.kt` | La película del Cinema en su pantalla, y el sonido del proyector |

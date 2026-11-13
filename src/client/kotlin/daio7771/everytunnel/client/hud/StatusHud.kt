@@ -25,7 +25,7 @@ import kotlin.math.ceil
  * experience bar. Elsewhere the vanilla HUD is untouched.
  *
  * - Hearts shake when health is low.
- * - Stamina (lungs) turns grey while exhausted.
+ * - Stamina (lungs) turns grey while exhausted, and gold while a food's energy lasts.
  * - The battery row blinks red below `flashlight.low_battery_warning_percent`.
  * - In a safe level thirst and the battery are paused: both rows are dimmed, without the blink.
  *
@@ -34,12 +34,13 @@ import kotlin.math.ceil
  * - v=0 stamina (lungs), v=9 thirst (water drop), v=18 battery, v=27 health (heart)
  * - u=0 empty container, u=9 full, u=18 half (left half only, drawn over the container)
  * - u=27/36/45: the same three as an alternate state (stamina: exhausted, battery: low)
+ * - u=54/63/72: the stamina row again, gold (a food's energy)
  * Full and half icons only contain the filled pixels; the container is drawn first.
  */
 object StatusHud {
 
     private val ICONS = Identifier(EveryTunnel.MOD_ID, "textures/gui/hud_icons.png")
-    private const val ICONS_WIDTH = 64
+    private const val ICONS_WIDTH = 81
     private const val ICONS_HEIGHT = 36
 
     private const val ICON_SIZE = 9
@@ -51,6 +52,7 @@ object StatusHud {
     private const val BATTERY_V = 18
     private const val HEALTH_V = 27
     private const val ALTERNATE_U = 27
+    private const val GOLD_U = 54
 
     /** Brightness and opacity of a paused row. */
     private const val PAUSED_SHADE = 0.55f
@@ -79,22 +81,23 @@ object StatusHud {
 
         // Health (vanilla hearts), bottom left.
         val lowHealth = player.health <= 4f
-        drawBar(context, left, bottomRow, fraction(player.health, player.maxHealth), HEALTH_V, alternate = false, rightToLeft = false) { i ->
+        drawBar(context, left, bottomRow, fraction(player.health, player.maxHealth), HEALTH_V, uBase = 0, rightToLeft = false) { i ->
             if (lowHealth && shake(time, i)) 1 else 0
         }
 
         // Stamina, top left.
-        drawBar(context, left, topRow, fraction(resources.stamina, resources.staminaMax), STAMINA_V, alternate = resources.exhausted, rightToLeft = false)
+        val staminaU = if (resources.energised) GOLD_U else if (resources.exhausted) ALTERNATE_U else 0
+        drawBar(context, left, topRow, fraction(resources.stamina, resources.staminaMax), STAMINA_V, uBase = staminaU, rightToLeft = false)
 
         if (resources.safe) RenderSystem.setShaderColor(PAUSED_SHADE, PAUSED_SHADE, PAUSED_SHADE, PAUSED_SHADE)
 
         // Thirst, bottom right.
-        drawBar(context, right, bottomRow, fraction(resources.thirst, resources.thirstMax), THIRST_V, alternate = false, rightToLeft = true)
+        drawBar(context, right, bottomRow, fraction(resources.thirst, resources.thirstMax), THIRST_V, uBase = 0, rightToLeft = true)
 
         // Flashlight battery, top right.
         val low = resources.batteryLow(ConfigManager.gameplay.flashlight.lowBatteryWarningPercent)
         val blinkOn = (time / 8) % 2 == 0
-        drawBar(context, right, topRow, fraction(resources.battery, resources.batteryMax), BATTERY_V, alternate = low && blinkOn && !resources.safe, rightToLeft = true)
+        drawBar(context, right, topRow, fraction(resources.battery, resources.batteryMax), BATTERY_V, uBase = if (low && blinkOn && !resources.safe) ALTERNATE_U else 0, rightToLeft = true)
 
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f)
         RenderSystem.disableBlend()
@@ -105,11 +108,10 @@ object StatusHud {
      * end at [x] and grow to the left, like vanilla hunger.
      */
     private fun drawBar(
-        context: DrawContext, x: Int, y: Int, fraction: Double, v: Int, alternate: Boolean, rightToLeft: Boolean,
+        context: DrawContext, x: Int, y: Int, fraction: Double, v: Int, uBase: Int, rightToLeft: Boolean,
         yOffset: (Int) -> Int = { 0 },
     ) {
         val halves = halvesOf(fraction)
-        val uBase = if (alternate) ALTERNATE_U else 0
         for (i in 0 until ICONS_PER_BAR) {
             val iconX = if (rightToLeft) x - i * ICON_SPACING - ICON_SIZE else x + i * ICON_SPACING
             val iconY = y + yOffset(i)

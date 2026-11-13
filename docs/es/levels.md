@@ -164,6 +164,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `cloud_game` | `CloudGameHooks` | El pasillo de entrada del nivel 5, desde su línea de salida: al entrar empieza el juego de la Cloud (como el de Halt), al salir se acaba |
 | `dead_battery` | `ResourceHooks` | Ahí la batería está vacía y ninguna pila sirve; al salir vuelve a estar llena |
 | `no_sprint` | `ResourceHooks` | Ahí nadie esprinta |
+| `no_detector` | `ResourceHooks` | Ahí no funciona el detector de radiación del nivel 5 (el pasillo de entrada y su marco); en el resto del nivel sí |
 | `no_checkpoint` | `ContinueGame` | Ahí no se guarda punto de control: el del nivel espera a su primera zona sin la etiqueta |
 | `back_to_key` | `DeathHooks` | Morir ahí devuelve al nivel 4 junto a la mesa de la Master Key, como antes de cogerla |
 | `deep_water` | `DeepWaterHooks` | Las piscinas del nivel 5: caer en su agua honda arrastra al jugador al fondo, y se ahoga |
@@ -176,7 +177,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `player` | `RespawnHooks`, `DeathHooks`, `NewGame` | El inicio del nivel: donde reinicia el jugador. Se usa el primero |
 | `pale_man` | `PaleManSpawner` | Aquí aparece un Pale man la primera vez que un jugador entra en el nivel |
 | `battery` | `LootSpawner` | Una batería en el suelo |
-| `wrench`, `detector` | `LootSpawner` | La llave inglesa y el detector de radiación del nivel 5, en el suelo |
+| `wrench` | `LootSpawner` | La llave inglesa del nivel 5, en el suelo (el detector de radiación ya no tiene objeto; `detector` sigue siendo un nombre de botín para mapas antiguos) |
 | `lab_lever` | `LabDoorHooks` | Una palanca del nivel 5 en ese bloque; si se llama `lever_<id de la zona de la puerta>`, abre esa puerta |
 | `restart_point` | `ContinueGame`, `DeathHooks` | Donde reinician una muerte o CONTINUE una vez se ha entrado en su zona (el Lab hall del nivel 5) |
 | `hunters` | `DistortionHooks` | Nivel 5: un grupo de tres Hunters, alrededor de ese punto, mirando hacia donde mira |
@@ -263,7 +264,7 @@ repite su id:
 - **Puntos de aparición:** `player_start` (el Lobby, junto a la entrada), `checkpoint` (el Lab hall, con la
   etiqueta `restart_point`), `cloud_game_start` y `cloud_game_end` (con la etiqueta `cloud_game`, la línea por la que
   va el juego del pasillo de entrada), `lever_stairs_door` y `lever_shortcut_door` (con la etiqueta `lab_lever`), y los de la
-  capa 1 (`tools/map/lab/furnish.py`): `wrench` y `detector` (el banco central del Workshop), los fusibles `fuse_5a`,
+  capa 1 (`tools/map/lab/furnish.py`): `wrench` (el banco central del Workshop), los fusibles `fuse_5a`,
   `fuse_10a`, `fuse_20a`, `fuse_30a` (con la misma etiqueta), las fichas de la pizarra de seguridad `ch1_l5_card_*` (etiqueta `note`, cada una en la celda de su columna en la fila de abajo),
   `hunters_fuse_box` (etiquetas `hunters` y `harmless`), `lab_figure` y `lab_figure_exit`; y los de la capa 2:
   `subject_1` a `subject_4` (etiqueta `subject`), las fichas `ch1_l5_card_s1` a `_s4`, los ordenadores `terminal_*`

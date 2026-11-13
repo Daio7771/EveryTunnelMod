@@ -2,6 +2,6 @@ EQUIPMENT SHEET - WRENCH AND DETECTOR
 
 Wrench: heavy steel, very resistant. It will outlast anything you hit with it. Slow to swing: make each blow count.
 
-Radiation detector: works from your pocket. It clicks when a Distortion Cloud is within sixteen metres with nothing in between, faster as it comes nearer, until the clicks run into a crackle. A red triangle means it is close.
+Radiation detector: you already have it on you. It clicks when a Distortion Cloud is within sixteen metres with nothing in between, faster as it comes nearer, until the clicks run into a crackle. A red triangle means it is close.
 
 It registers nothing else.

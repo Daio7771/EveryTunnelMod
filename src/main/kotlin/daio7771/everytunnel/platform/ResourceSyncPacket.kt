@@ -32,6 +32,10 @@ data class ResourceSyncPacket(
     val noSprint: Boolean = false,
     /** Where the battery is dead (a zone tagged `dead_battery`): no battery item helps there. */
     val deadBattery: Boolean = false,
+    /** A food's energy lasts: the HUD's stamina row is gold. */
+    val energised: Boolean = false,
+    /** The radiation detector works here: Level 5, from the airlock on (not in a zone tagged `no_detector`). */
+    val detector: Boolean = false,
 ) {
     fun write(buf: PacketByteBuf) {
         buf.writeBoolean(active)
@@ -46,6 +50,8 @@ data class ResourceSyncPacket(
         buf.writeBoolean(safe)
         buf.writeBoolean(noSprint)
         buf.writeBoolean(deadBattery)
+        buf.writeBoolean(energised)
+        buf.writeBoolean(detector)
     }
 
     /** True while the battery is below the low battery warning percentage. */
@@ -69,6 +75,8 @@ data class ResourceSyncPacket(
             safe: Boolean = false,
             noSprint: Boolean = false,
             deadBattery: Boolean = false,
+            energised: Boolean = false,
+            detector: Boolean = false,
         ) = ResourceSyncPacket(
             active,
             if (active) round(stamina) else 0f,
@@ -82,6 +90,8 @@ data class ResourceSyncPacket(
             active && safe,
             active && noSprint,
             active && deadBattery,
+            active && energised,
+            active && detector,
         )
 
         fun read(buf: PacketByteBuf) = ResourceSyncPacket(
@@ -97,6 +107,8 @@ data class ResourceSyncPacket(
             safe = buf.readBoolean(),
             noSprint = buf.readBoolean(),
             deadBattery = buf.readBoolean(),
+            energised = buf.readBoolean(),
+            detector = buf.readBoolean(),
         )
 
         private fun round(value: Double): Float = Math.round(value * 10.0) / 10f

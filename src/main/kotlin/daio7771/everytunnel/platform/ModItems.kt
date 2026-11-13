@@ -32,16 +32,17 @@ import net.minecraft.world.World
  *   `thirst.drink_seconds` to drink it (see [DrinkHooks]); consumed outside Creative.
  *
  * - Food (a plate, popcorn, a snack; `/give @s every_tunnel:food_plate`): hold use for
- *   `food.eat_seconds` to eat it and get `food.heal` health back (see [FoodHooks]); the same
- *   effect in all three. Consumed outside Creative.
+ *   `food.eat_seconds` to eat it: `food.heal` health back and `food.energy_seconds` of unlimited
+ *   energy (see [FoodHooks]); the same effect in all three. Consumed outside Creative.
  *
  * - Level 4's puzzle items ([LoungePuzzleHooks]): four records, four film reels, and the four
  *   corners of the golden master card, the card itself and the Master Key. One each.
  *
  * - Darts ([DartHooks]): three from the Game room's tray; right-click throws one straight away.
  *
- * - Level 5's wrench ([WrenchItem]), a heavy weapon that never wears out, and radiation detector: carried
- *   anywhere in the inventory, it notices the Distortion Cloud (`client.effects.DetectorEffect`).
+ * - Level 5's wrench ([WrenchItem]), a heavy weapon that never wears out. The radiation detector is no longer given
+ *   or placed anywhere: the player has it on them in Level 5 from the airlock on ([ResourceHooks], `client.effects.DetectorEffect`).
+ *   [DETECTOR] stays registered only so older worlds and saved inventories load; it does nothing.
  *
  * - Keycard: the night guard's security card. Lost in Level 2; the exit's card reader
  *   ([CardReaderBlock]) only opens for a player carrying it.
@@ -85,6 +86,7 @@ object ModItems {
     val DART: Item = DartItem(Item.Settings().maxCount(DartHooks.DART_COUNT))
 
     val WRENCH: Item = WrenchItem(Item.Settings().maxCount(1))
+    /** Kept registered for older worlds and saved inventories; nothing gives or places it, and it does nothing. */
     val DETECTOR: Item = Item(Item.Settings().maxCount(1))
 
     /** Level 5's fuses, for the fuse box by the stairs' lever ([FuseHolderBlock]): their amperages, in order. */
@@ -120,7 +122,6 @@ object ModItems {
             entries.add(FOOD_SNACK)
             entries.add(DART)
             entries.add(WRENCH)
-            entries.add(DETECTOR)
             FUSES.forEach(entries::add)
             REAGENTS.forEach(entries::add)
             for ((_, item) in puzzleItems) entries.add(item)
@@ -233,10 +234,7 @@ private class FoodItem(settings: Settings) : Item(settings) {
 
     override fun use(world: World, user: PlayerEntity, hand: Hand): TypedActionResult<ItemStack> {
         val stack = user.getStackInHand(hand)
-        if (!FoodHooks.canEat(user)) {
-            if (user is ServerPlayerEntity) FoodHooks.explainRefused(user)
-            return TypedActionResult.fail(stack)
-        }
+        if (!FoodHooks.canEat(user)) return TypedActionResult.fail(stack)
         user.setCurrentHand(hand)
         return TypedActionResult.consume(stack)
     }

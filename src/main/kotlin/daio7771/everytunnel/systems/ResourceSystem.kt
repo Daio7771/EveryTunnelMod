@@ -18,6 +18,8 @@ data class ResourceState(
     val regenCooldown: Double = 0.0,
     /** Seconds spent with empty thirst since the last thirst damage. */
     val thirstDamageTimer: Double = 0.0,
+    /** Seconds left of the energy a food gives: sprinting and jumping cost no stamina, which stays full. */
+    val energySeconds: Double = 0.0,
 ) {
     companion object {
         fun full(config: GameplayConfig) =
@@ -40,6 +42,9 @@ enum class FlashlightToggle { TURNED_ON, TURNED_OFF, BATTERY_EMPTY }
 /** Result of using a battery item. */
 enum class BatteryInsert { REFILLED, ALREADY_FULL }
 
+/** Result of eating a food: its energy starts, or it was eaten while the last one's still lasts and is wasted. */
+enum class FoodEnergy { STARTED, WASTED }
+
 /**
  * Stamina, thirst and flashlight battery simulation.
  *
@@ -50,6 +55,9 @@ enum class BatteryInsert { REFILLED, ALREADY_FULL }
  *   player takes damage at a fixed interval.
  * - In a safe level nothing runs down: sprinting and jumping cost no stamina, which keeps
  *   recovering; thirst and the battery stay as they are; there is no thirst damage.
+ * - A food eaten ([eat]) gives `food.energy_seconds` of energy: sprinting and jumping cost no stamina,
+ *   which is kept full (an exhausted player is not any more). Another food eaten before it ends has no
+ *   effect and is wasted: the time is not extended.
  * - The flashlight is built-in equipment (no item, nothing in the hand). Its battery
  *   drains one second per second while it is on; at 0 it switches off, and a
  *   battery item refills it.
@@ -105,7 +113,9 @@ object ResourceSystem {
         // Stamina
         var stamina = state.stamina.coerceAtMost(s.max)
         var cooldown = state.regenCooldown
-        val used = !input.safe && (input.sprinting || input.jumps > 0)
+        val energised = state.energySeconds > 0.0
+        val energySeconds = (state.energySeconds - dtSeconds).coerceAtLeast(0.0)
+        val used = !input.safe && !energised && (input.sprinting || input.jumps > 0)
         if (used) {
             if (input.sprinting) stamina -= s.sprintDrainPerSecond * dtSeconds
             stamina -= s.jumpCost * input.jumps
@@ -116,6 +126,10 @@ object ResourceSystem {
             cooldown = (cooldown - dtSeconds).coerceAtLeast(0.0)
         } else {
             stamina += s.regenPerSecond * dtSeconds
+        }
+        if (energised) {
+            stamina = s.max
+            cooldown = 0.0
         }
         stamina = stamina.coerceIn(0.0, s.max)
 
@@ -151,9 +165,14 @@ object ResourceSystem {
             }
         }
 
-        val next = ResourceState(stamina, thirst, battery, flashlightOn, exhausted, cooldown, damageTimer)
+        val next = ResourceState(stamina, thirst, battery, flashlightOn, exhausted, cooldown, damageTimer, energySeconds)
         return ResourceStep(next, damage, batteryDied)
     }
+
+    /** A food eaten: `food.energy_seconds` of energy, unless the last food's still lasts (then it is wasted). */
+    fun eat(state: ResourceState, config: GameplayConfig): Pair<ResourceState, FoodEnergy> =
+        if (state.energySeconds > 0.0) state to FoodEnergy.WASTED
+        else state.copy(energySeconds = config.food.energySeconds) to FoodEnergy.STARTED
 
     /** Rested in a bed: stamina full and no longer exhausted. */
     fun rested(state: ResourceState, config: GameplayConfig): ResourceState =

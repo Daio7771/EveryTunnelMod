@@ -5,8 +5,8 @@ import daio7771.everytunnel.client.ClientResources
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.core.detector.Detector
 import daio7771.everytunnel.platform.DistortionEntity
-import daio7771.everytunnel.platform.ModItems
 import daio7771.everytunnel.platform.ModSounds
+import daio7771.everytunnel.platform.ResourceSyncPacket
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.minecraft.client.MinecraftClient
@@ -26,7 +26,8 @@ import java.util.Random
 import kotlin.math.sqrt
 
 /**
- * Level 5's radiation detector, working from anywhere in the inventory: it notices the nearest
+ * Level 5's radiation detector, which the player always has on them there (no item: [ResourceSyncPacket.detector],
+ * set by the server from the laboratory's airlock on): it notices the nearest
  * Distortion Cloud (an entity of the type tag `every_tunnel:radiation_sources`) within
  * `detector.range` blocks, never through a wall (nothing solid between the player's eyes and it), and
  * clicks in the player's head like a Geiger counter, more counts as it comes nearer ([Detector]).
@@ -39,8 +40,8 @@ object DetectorEffect {
     private val SOURCES: TagKey<EntityType<*>> = TagKey.of(RegistryKeys.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "radiation_sources"))
     private const val VOLUME = 0.6f
 
-    /** The player carries a detector. */
-    var carrying = false
+    /** The detector works here: the server says so ([ResourceSyncPacket.detector]). */
+    var working = false
         private set
 
     /** Distance to the Cloud it reads, or null for none. */
@@ -55,7 +56,7 @@ object DetectorEffect {
     }
 
     private fun stop() {
-        carrying = false
+        working = false
         distance = null
     }
 
@@ -64,8 +65,8 @@ object DetectorEffect {
         val world = client.world
         if (player == null || world == null || !ClientResources.current.active || player.isSpectator) return stop()
         if (client.isPaused) return
-        carrying = (0 until player.inventory.size()).any { player.inventory.getStack(it).isOf(ModItems.DETECTOR) }
-        if (!carrying) {
+        working = ClientResources.current.detector
+        if (!working) {
             distance = null
             return
         }

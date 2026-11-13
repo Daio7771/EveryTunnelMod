@@ -4,12 +4,15 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.level.LevelDefinition
 import daio7771.everytunnel.core.progress.Checkpoint
+import daio7771.everytunnel.core.progress.LeftBehind
 import daio7771.everytunnel.core.save.LoungeSave
 import daio7771.everytunnel.systems.ResourceSystem
 import daio7771.everytunnel.world.LevelTriggers
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
+import net.minecraft.item.ItemStack
+import net.minecraft.registry.Registries
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.MinecraftServer
@@ -147,6 +150,7 @@ object ContinueGame {
             if (current.levelId == level.id && order.indexOf(current.pointId) > order.indexOf(pointId)) return
         }
         progress.setCheckpoint(player, Checkpoint(level.id, pointId).toString())
+        leaveBehind(player, level)
         progress.saveInventory(player)
         setMarker(player.server, true)
         level.spawnPoint(pointId)?.let { point ->
@@ -160,10 +164,34 @@ object ContinueGame {
     private fun checkpoint(player: ServerPlayerEntity, level: LevelDefinition) {
         val progress = ProgressService.get()
         progress.setCheckpoint(player, level.id)
+        leaveBehind(player, level)
         progress.saveInventory(player)
         setMarker(player.server, true)
         player.server.playerManager.saveAllPlayerData()
         EveryTunnel.LOGGER.info("{}: checkpoint at {}", player.name.string, level.id)
+    }
+
+    /**
+     * Takes out of [player]'s inventory what is of no use from [level] on ([LeftBehind]): the keycard from Level 3, the master
+     * card from Level 5. Silently. Done before the inventory is saved for a checkpoint, and again on continuing a game saved before.
+     */
+    private fun leaveBehind(player: ServerPlayerEntity, level: LevelDefinition) {
+        val useless = LeftBehind.uselessFrom(level.order)
+        if (useless.isEmpty()) return
+        val inventory = player.inventory
+        var taken = 0
+        for (list in listOf(inventory.main, inventory.offHand, inventory.armor)) {
+            for (i in list.indices) {
+                val id = Registries.ITEM.getId(list[i].item)
+                if (id.namespace == EveryTunnel.MOD_ID && id.path in useless) {
+                    list[i] = ItemStack.EMPTY
+                    taken++
+                }
+            }
+        }
+        if (taken == 0) return
+        inventory.markDirty()
+        EveryTunnel.LOGGER.info("{}: {} item(s) left behind on reaching {}", player.name.string, taken, level.id)
     }
 
     private fun setMarker(server: MinecraftServer, on: Boolean) {
@@ -191,6 +219,7 @@ object ContinueGame {
         ResourceSystem.reset(player.uuid)
         player.changeGameMode(GameMode.SURVIVAL)
         EveryTunnel.LOGGER.info("{}: continuing from {}", player.name.string, level.id)
+        leaveBehind(player, level)
         if (level.id == LEVEL_4) {
             LoungeHooks.toCorridor(player)
             waiting = player
@@ -206,6 +235,7 @@ object ContinueGame {
             return true
         }
         progress.restoreInventory(player)
+        leaveBehind(player, level)
         progress.setLevel3Books(player, 0)
         toStart(player, level, checkpoint.pointId)
         IntroHooks.doorsOpenIfDone(player, level)
@@ -242,6 +272,7 @@ object ContinueGame {
         val level = LevelManager.get(LEVEL_5) ?: return
         val progress = ProgressService.get()
         progress.restoreInventory(player)
+        leaveBehind(player, level)
         toStart(player, level, Checkpoint.parse(progress.checkpoint(player))?.pointId)
         EveryTunnel.LOGGER.info("{}: Level 5 stands again", player.name.string)
     }

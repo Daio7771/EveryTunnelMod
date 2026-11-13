@@ -83,6 +83,7 @@ object GameplayConfigParser {
     private fun food(f: JsonFields, d: FoodConfig) = FoodConfig(
         heal = f.double("heal", d.heal, min = 0.0),
         eatSeconds = f.double("eat_seconds", d.eatSeconds, min = 0.05, max = 10.0),
+        energySeconds = f.double("energy_seconds", d.energySeconds, min = 0.0, max = 600.0),
     ).also { f.reportUnknownKeys() }
 
     private fun wrench(f: JsonFields, d: WrenchConfig) = WrenchConfig(

@@ -185,4 +185,54 @@ class ResourceSystemTest {
         assertEquals(40.0, rested.thirst, 1e-9)
         assertEquals(5.0, rested.battery, 1e-9)
     }
+
+    @Test
+    fun `a food's energy lets the player sprint and jump for free, with stamina kept full`() {
+        val (energised, started) = ResourceSystem.eat(ResourceState.full(config), config)
+        assertEquals(FoodEnergy.STARTED, started)
+        assertEquals(10.0, energised.energySeconds, 1e-9)
+
+        val sprinted = run(energised, ResourceInput(sprinting = true, jumps = 3), 5)
+        assertEquals(100.0, sprinted.stamina, 1e-9)
+        assertFalse(sprinted.exhausted)
+        assertEquals(5.0, sprinted.energySeconds, 1e-9)
+    }
+
+    @Test
+    fun `the energy ends after its seconds and stamina drains again`() {
+        val energised = ResourceSystem.eat(ResourceState.full(config), config).first
+        val after = run(energised, sprint, 10)
+        assertEquals(0.0, after.energySeconds, 1e-9)
+        assertEquals(100.0, after.stamina, 1e-9)
+        assertEquals(90.0, run(after, sprint, 1).stamina, 1e-9, "the first second after it ends costs again")
+    }
+
+    @Test
+    fun `energy gives an exhausted player their stamina back at once`() {
+        val exhausted = run(ResourceState.full(config), sprint, 10)
+        assertTrue(exhausted.exhausted)
+        val energised = ResourceSystem.eat(exhausted, config).first
+        val next = ResourceSystem.step(energised, idle, 1.0, config).state
+        assertEquals(100.0, next.stamina, 1e-9)
+        assertFalse(next.exhausted)
+    }
+
+    @Test
+    fun `a food eaten while the energy lasts is wasted and does not extend it`() {
+        val first = ResourceSystem.eat(ResourceState.full(config), config).first
+        val partway = run(first, idle, 4)
+        val (second, result) = ResourceSystem.eat(partway, config)
+        assertEquals(FoodEnergy.WASTED, result)
+        assertEquals(partway, second)
+        assertEquals(6.0, second.energySeconds, 1e-9)
+        // And once it has ended, the next one gives energy again.
+        assertEquals(FoodEnergy.STARTED, ResourceSystem.eat(run(first, idle, 10), config).second)
+    }
+
+    @Test
+    fun `energy leaves thirst and the battery as they are`() {
+        val energised = ResourceSystem.eat(ResourceState.full(config), config).first
+        val after = run(energised, sprint, 2)
+        assertEquals(100.0 - 2 * 2.0, after.thirst, 1e-9, "thirst still drains, twice as fast while sprinting")
+    }
 }

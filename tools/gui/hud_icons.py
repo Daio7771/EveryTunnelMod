@@ -4,7 +4,7 @@ art direction, outlined in near black, lit from the top left.
 
 Run after changing anything here (from the repository root):   python3 tools/gui/hud_icons.py
 
-Writes src/main/resources/assets/every_tunnel/textures/gui/hud_icons.png (64x36, committed)
+Writes src/main/resources/assets/every_tunnel/textures/gui/hud_icons.png (81x36, committed)
 and tools/gui/output/hud_icons_preview.png (git-ignored; enlarged, on a dark background).
 Also writes textures/gui/vignette.png: black, transparent in the middle and darker towards
 the edges, for the exhaustion vignette (client/hud/ExhaustionVignette.kt), and
@@ -18,6 +18,7 @@ Layout (what StatusHud expects), icons at (u, v):
 - rows: v=0 stamina (lungs), v=9 thirst (water drop), v=18 battery, v=27 health (heart)
 - u=0 empty container, u=9 full, u=18 half (the left half only, drawn over the container)
 - u=27/36/45: the same three in an alternate state (stamina: exhausted, battery: low)
+- u=54/63/72: the stamina row again, gold, while a food's energy lasts (a row of its own: GOLD)
 Full and half icons only contain their filled pixels.
 
 Each icon is a 9x9 mask: '#' outline, 'o' fill, 'h' highlight, 's' shade, '.' transparent.
@@ -91,6 +92,11 @@ COLOURS = {
     ("heart", False): ((176, 38, 52), (232, 120, 128), (120, 22, 34)),
 }
 ROWS = {"lungs": 0, "drop": 9, "battery": 18, "heart": 27}
+
+# The stamina row while a food's energy lasts: (fill, highlight, shade) and the container's outline
+GOLD = ((255, 206, 64), (255, 240, 150), (206, 140, 24))
+GOLD_OUTLINE = (150, 100, 12, 255)
+GOLD_U = 54
 
 
 def draw(img, u, v, mask, part, colours, alternate_outline=None):
@@ -221,7 +227,7 @@ def main():
     vignette().save(TEXTURE.parent / "vignette.png")
     detector_icons().save(TEXTURE.parent / "detector_icons.png")
     turn_icon().save(TEXTURE.parent / "turn_icon.png")
-    img = Image.new("RGBA", (64, 36), (0, 0, 0, 0))
+    img = Image.new("RGBA", (81, 36), (0, 0, 0, 0))
     for name, v in ROWS.items():
         for alternate in (False, True):
             colours = COLOURS.get((name, alternate))
@@ -232,11 +238,14 @@ def main():
             draw(img, u0, v, MASKS[name], "container", colours, outline)
             draw(img, u0 + 9, v, MASKS[name], "full", colours)
             draw(img, u0 + 18, v, MASKS[name], "half", colours)
+    draw(img, GOLD_U, ROWS["lungs"], MASKS["lungs"], "container", GOLD, GOLD_OUTLINE)
+    draw(img, GOLD_U + 9, ROWS["lungs"], MASKS["lungs"], "full", GOLD)
+    draw(img, GOLD_U + 18, ROWS["lungs"], MASKS["lungs"], "half", GOLD)
     TEXTURE.parent.mkdir(parents=True, exist_ok=True)
     img.save(TEXTURE)
 
     OUT.mkdir(exist_ok=True)
-    big = img.resize((64 * 10, 36 * 10), Image.NEAREST)
+    big = img.resize((81 * 10, 36 * 10), Image.NEAREST)
     preview = Image.new("RGBA", big.size, (34, 36, 40, 255))
     preview.alpha_composite(big)
     preview.save(OUT / "hud_icons_preview.png")

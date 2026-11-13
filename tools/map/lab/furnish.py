@@ -2,7 +2,7 @@
 Level 5, furnished: a cold, clean laboratory used until recently (stainless steel, white melamine, surgical
 green plastic), room by room, in plan coordinates (see level.py), and what lies in it or happens there.
 
-- Layer 1, the tutorial: the wrench and the detector, the fuses, the safety briefing's cards, the fuse box by
+- Layer 1, the tutorial: the wrench, the fuses, the safety briefing's cards, the fuse box by
   the stairs' lever, the harmless Hunters that guard it, the figure seen from the Lobby.
 - Layer 2: the subjects (one in each sealed test chamber, with a drip stand and a tray of instruments; an
   experiment card by each window), the Lab hall, the Office (its computer tells the chemical puzzle's
@@ -67,7 +67,7 @@ FURNITURE = {
         + [("potted_plant", x, z, "south", 1) for x, z in ((2, 7), (20, 7), (2, 21), (20, 21))]
         + [("lab_poster", 2, 9, "east", 2), ("lab_poster", 2, 18, "east", 2)]
         # The Workshop: benches with pegboards over them along the north wall, an island bench in the
-        # middle (the wrench and the detector on it), shelves of jars, tool chests, a cart, a whiteboard.
+        # middle (the wrench on it), shelves of jars, tool chests, a cart, a whiteboard.
         + row("lab_bench", 30, 37, 2, "south") + row("tool_board", 30, 37, 2, "south", 2)
         + row("lab_bench", 46, 52, 2, "south") + row("tool_board", 46, 52, 2, "south", 2)
         + row("lab_bench", 38, 45, 7, "north")
@@ -258,12 +258,12 @@ ALARMS = [(110, 50, "south"), (135, 50, "south"), (110, 69, "north"), (135, 69, 
 HATCH = (128, 75)
 
 # (id, tag, layer, x, z, y): what lies about, in plain sight on furniture. Layer 1: the wrench and the
-# detector; the missing fuses, one in each room; a snack and water in the Lockers, a battery in the Waiting
+# detector (none: the player has it on them from the airlock on); the missing fuses, one in each room; a snack and water in the Lockers, a battery in the Waiting
 # room. Layer 2: a battery in the Office, the four reagents on their cabinet by the mixer, and Storage's
 # supplies, which its Hunters guard. Nothing in the subjects' corridor, the Lab hall or the chemical room
 # but the reagents.
 LOOT = [
-    ("wrench", "wrench", 1, 40, 7, 2), ("detector", "detector", 1, 43, 7, 2),     # the Workshop's island
+    ("wrench", "wrench", 1, 40, 7, 2),                                              # the Workshop's island
     ("fuse_10a", "fuse_10a", 1, 14, 9, 2),                                        # the Lobby's desk
     ("fuse_30a", "fuse_30a", 1, 53, 4, 2),                                        # a tool chest in the Workshop
     ("fuse_5a", "fuse_5a", 1, 74, 6, 2),                                          # the Waiting room's cabinet

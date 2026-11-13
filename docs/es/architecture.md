@@ -122,7 +122,7 @@ Todos los ids son `every_tunnel:<nombre>`. API de red de Fabric (estilo 1.20.1,
 
 | Id | Dirección | Lo envía | Qué lleva |
 |---|---|---|---|
-| `resources` | servidor → cliente | `ResourceSyncPacket` | Stamina, sed, batería, linterna encendida, agotado, activo, seguro; redondeado a 0,1 y enviado solo si cambia |
+| `resources` | servidor → cliente | `ResourceSyncPacket` | Stamina, sed, batería, linterna encendida, agotado, activo, seguro, con energía (la de una comida), detector (nivel 5, desde la esclusa); redondeado a 0,1 y enviado solo si cambia |
 | `toggle_flashlight` | cliente → servidor | `FlashlightControls` | Se pulsó la tecla de la linterna |
 | `ambience` | servidor → cliente | `AmbienceHooks` | El ambiente del nivel actual del jugador |
 | `intro_music` | servidor → cliente | `IntroHooks` | Empezar o terminar (distorsionar y apagar) la canción de la intro |

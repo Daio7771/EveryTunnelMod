@@ -13,7 +13,7 @@ import net.minecraft.util.Identifier
 import kotlin.math.ceil
 
 /**
- * Level 5's detector on the HUD, while the player carries one ([DetectorEffect]): the radiation sign
+ * Level 5's detector on the HUD, while it works ([DetectorEffect]): the radiation sign
  * to the right of the right-hand rows (battery and thirst, [StatusHud]), between them. Greyed out with
  * nothing in range; yellow and black fill it from the bottom up as a Distortion Cloud comes nearer.
  * Within `detector.danger_range` a red warning triangle blinks fast beside it.
@@ -37,7 +37,7 @@ object DetectorHud {
     private fun render(context: DrawContext) {
         val client = MinecraftClient.getInstance()
         val player = client.player ?: return
-        if (!DetectorEffect.carrying || !ClientResources.current.active || player.isSpectator) return
+        if (!DetectorEffect.working || !ClientResources.current.active || player.isSpectator) return
         if (client.interactionManager?.hasStatusBars() != true) return
 
         val x = context.scaledWindowWidth / 2 + 91 + GAP

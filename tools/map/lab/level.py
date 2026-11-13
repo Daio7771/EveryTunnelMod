@@ -810,8 +810,10 @@ class Lab:
     # the false exit with its pit (the boss's scene).
     # The entry corridor (the Cloud's game, CloudGameHooks, in its zone `cloud_game`): the battery dead, no sprinting, no
     # checkpoint yet, and a death there goes back to Level 4's key (ResourceHooks, ContinueGame, DeathHooks); its frame
-    # holds no checkpoint either.
-    TAGS = {"entry": ["dead_battery", "no_sprint", "no_checkpoint", "back_to_key"], "frame": ["no_checkpoint", "back_to_key"],
+    # holds no checkpoint either. Nor does the radiation detector work there (ResourceHooks: it has no item, the player has it
+    # on them from the airlock on).
+    TAGS = {"entry": ["dead_battery", "no_sprint", "no_checkpoint", "back_to_key", "no_detector"],
+            "frame": ["no_checkpoint", "back_to_key", "no_detector"],
             "airlock": ["lab_airlock"], "airlock_rear": ["lab_airlock_rear"], "airlock_front": ["lab_welcome"],
             "locked": ["lab_door"], "hub": ["restart_point", "cloud", "first_cloud"], "north_route": ["cloud"],
             "south_route": ["cloud"], "puzzle": ["chemical_room"], "grate": ["lab_grate"], "hatch": ["lab_drain"],
