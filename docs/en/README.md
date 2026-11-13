@@ -36,7 +36,7 @@ Read them in this order the first time:
 | [Debugging](debugging.md) | Debug commands and the `[playtest]` log |
 | [How-to recipes](how-to.md) | Adding a level, a sound, a block, a tip, a config value... |
 | [Code map](code-map.md) | Every source file and what it does |
-| [Contributing](contributing.md) | Conventions, testing, commits, rules for AI assistants |
+| [Contributing](contributing.md) | Conventions, creature life cycles, testing, commits, rules for AI assistants |
 
 ## Player guide
 

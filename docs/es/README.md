@@ -38,7 +38,7 @@ La primera vez, léelas en este orden:
 | [Depuración](debugging.md) | Comandos de depuración y el registro `[playtest]` |
 | [Recetas](how-to.md) | Añadir un nivel, un sonido, un bloque, un consejo, un valor de configuración... |
 | [Mapa del código](code-map.md) | Cada archivo fuente y lo que hace |
-| [Cómo contribuir](contributing.md) | Convenciones, tests, commits, reglas para asistentes de IA |
+| [Cómo contribuir](contributing.md) | Convenciones, ciclos de vida de las criaturas, tests, commits, reglas para asistentes de IA |
 
 ## Guía del jugador
 

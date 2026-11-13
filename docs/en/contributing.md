@@ -45,6 +45,39 @@ for maintainers (how to publish, checklists): those go in `docs/`, such as
 - **Generated content stays generated.** Change the Python tool and rerun it; never edit
   generated JSON, PNG or OGG files by hand.
 
+## Creatures
+
+Every creature of the mod (every entity) follows one of three life cycles. Choose the one that
+fits before writing its hooks, and say which in the KDoc of its file.
+
+| Life cycle | Creatures | How it is put in and taken out |
+|---|---|---|
+| **Posted**: saved with the world, one per spawn point | Pale man, Observer | Spawned by its hooks (`PaleManSpawner`, `ObserverHooks`) the first time a player walks into its level. The spawn points already filled are recorded in `data/every_tunnel_<name>.dat` ("level/point" keys); `homeKey` and `newGamesSeen` are in its NBT |
+| **Kept**: never saved, made again whenever its level is built | Hunter, Distortion Cloud and Junior, Subject, dead guard, director, lab figure | Its type disables saving. It is put in only through `KeptEntities.spawn`, which brings it back if its chunk unloads, and taken out with `KeptEntities.forget` plus `discard()` when the level is put back |
+| **Passing**: lives for a moment | Dart, locker seat, film walker | Spawned and discarded by whatever needs it. Nothing is recorded |
+
+- **Never clean a creature up with `/kill`.** On a living thing `/kill` is damage, not removal:
+  the creature plays its death for 20 ticks and only then leaves the world. For that second it
+  still stands there and its spawn point still looks filled, so a hook that runs right after the
+  `kill` spawns nothing, and once he is gone nobody spawns him again. This left Level 3 without
+  its Observer after CONTINUE. Discard from Kotlin: `entity.discard()` removes it at once. (The
+  `kill` lines in the map generator are for worlds without the mod; the mod discards by itself,
+  see `ObserverHooks.levelsRebuilt`.)
+- **A rebuild of the map is a reset.** `NewGame.levelsRebuilt` is where each kind of creature
+  gets rid of what the build left and puts back what its level needs; `NewGame.resetWorld` does
+  the same for a new game and for CONTINUE. A new kind of creature has to be wired into both
+  where it applies, or it will keep stale ones or have none.
+- **A spawn point is forgotten once, and only by its owner.** A posted creature that is removed
+  frees its point, but a second removal (the dying one, after its replacement was spawned) or a
+  leftover loaded late from its chunk must not free the point of the one that replaced it.
+  `core.spawn.PostLedger` keeps who owns each point (`ObserverHooks.claim` and `forget`).
+  `PaleManSpawner` does not use it yet: it spawns again on the next level change.
+- **A creature's state lives in the creature.** What it is doing (patrol, chase, flags) is saved
+  in its own NBT (`writeCustomDataToNbt`). The world's `.dat` files only record what no single
+  entity can: which posts are filled, the new-game count. Do not keep one in the other.
+- **Read the log.** A posted creature logs when it is spawned ("Observer spawned at ..."); after
+  a CONTINUE, no such line means it is missing.
+
 ## Assets and licences
 
 - Everything own (code, tools, assets, story, docs): all rights reserved (`LICENSE.txt`),

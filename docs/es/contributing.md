@@ -49,6 +49,40 @@ como [Publicar en CurseForge](building-and-release.md#publicar-en-curseforge).
 - **El contenido generado sigue siendo generado.** Cambia la herramienta Python y vuelve a
   ejecutarla; nunca edites a mano los JSON, PNG u OGG generados.
 
+## Criaturas
+
+Toda criatura del mod (toda entidad) sigue uno de tres ciclos de vida. Elige el que encaje antes
+de escribir sus hooks, y di cuál en el KDoc de su archivo.
+
+| Ciclo de vida | Criaturas | Cómo se pone y se quita |
+|---|---|---|
+| **Con puesto**: se guarda con el mundo, una por punto de spawn | Pale man, Observer | La genera su hook (`PaleManSpawner`, `ObserverHooks`) la primera vez que un jugador entra en su nivel. Los puntos de spawn ya ocupados se anotan en `data/every_tunnel_<nombre>.dat` (claves "nivel/punto"); `homeKey` y `newGamesSeen` van en su NBT |
+| **Mantenida**: nunca se guarda, se rehace cada vez que se construye su nivel | Hunter, Distortion Cloud y Junior, Subject, guardia muerto, director, figura del laboratorio | Su tipo desactiva el guardado. Solo se pone con `KeptEntities.spawn`, que la devuelve si su chunk se descarga, y se quita con `KeptEntities.forget` más `discard()` cuando el nivel se vuelve a poner |
+| **Pasajera**: vive un momento | Dart, asiento de taquilla, FilmWalker | La genera y la descarta lo que la necesita. No se anota nada |
+
+- **Nunca limpies una criatura con `/kill`.** Sobre algo vivo, `/kill` es daño, no borrado: la
+  criatura reproduce su muerte durante 20 ticks y solo entonces sale del mundo. Durante ese
+  segundo sigue ahí y su punto de spawn sigue pareciendo ocupado, así que un hook que se ejecute
+  justo después del `kill` no genera nada, y cuando ella desaparece nadie la vuelve a generar.
+  Así se quedó el Nivel 3 sin su Observer tras CONTINUAR. Descarta desde Kotlin:
+  `entity.discard()` la quita al instante. (Las líneas `kill` del generador del mapa son para
+  mundos sin el mod; el mod descarta por su cuenta, véase `ObserverHooks.levelsRebuilt`.)
+- **Reconstruir el mapa es un reinicio.** En `NewGame.levelsRebuilt` cada tipo de criatura se
+  deshace de lo que dejó la construcción y repone lo que su nivel necesita; `NewGame.resetWorld`
+  hace lo mismo en una partida nueva y al CONTINUAR. Un tipo nuevo de criatura tiene que
+  engancharse a ambos donde corresponda, o conservará restos o no tendrá ninguna.
+- **Un punto de spawn se olvida una sola vez, y solo por su dueña.** Una criatura con puesto que
+  se quita libera su punto, pero una segunda baja (la que aún moría, después de generar a su
+  sustituta) o un sobrante que carga tarde desde su chunk no deben liberar el punto de la que la
+  sustituyó. `core.spawn.PostLedger` guarda quién es dueña de cada punto (`ObserverHooks.claim`
+  y `forget`). `PaleManSpawner` aún no lo usa: vuelve a generar en el siguiente cambio de nivel.
+- **El estado de una criatura vive en la criatura.** Lo que está haciendo (patrulla, persecución,
+  banderas) se guarda en su propio NBT (`writeCustomDataToNbt`). Los `.dat` del mundo solo anotan
+  lo que ninguna entidad puede: qué puestos están ocupados, la cuenta de partidas nuevas. No
+  guardes uno dentro del otro.
+- **Mira el log.** Una criatura con puesto escribe cuando se genera ("Observer spawned at ...");
+  tras un CONTINUAR, si no sale esa línea, falta.
+
 ## Recursos y licencias
 
 - Todo lo propio (código, herramientas, recursos, historia, documentación): todos los
