@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.0.1
+
+Fixes and small changes since 1.0. The requirements are the same (Minecraft 1.20.1, Fabric Loader,
+LambDynamicLights and Cardinal Components API).
+
+### Changes
+
+- **Food gives you energy.** Eating a plate, popcorn or a snack now also gives you 10 seconds of
+  unlimited energy: sprinting and jumping cost nothing and the energy bar turns gold. Eat another
+  before it ends and it is wasted. You can eat at full health, too.
+- **The radiation detector is part of your gear.** In Level 5 there is nothing to pick up: it works
+  from the airlock on. It does not work in the dark corridor that leads in.
+- **What you no longer need stays behind.** The Employee of the Month's keycard is taken from you
+  when you reach Level 3, and the master card and its four corners when you reach Level 5.
+
+### Fixes
+
+- The watcher of Level 3 still did not appear when you pressed CONTINUE inside Level 3. This time he does.
+- Picking up a box or a book and moving it about in the inventory screen could leave one more of it
+  than there should be (eleven boxes). It no longer does.
+
+Updating from 1.0: replace the old jar in mods/. The map updates itself on the next launch.
+
 ## 1.0: Chapter 1 complete
 
 What is new since 0.4. The requirements are the same (Minecraft 1.20.1, Fabric Loader,

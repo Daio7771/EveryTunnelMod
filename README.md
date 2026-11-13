@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>A singleplayer psychological horror mod for Minecraft 1.20.1 (Fabric)</b><br>
-  Chapter 1 · Levels 1 to 5 · version 1.0
+  Chapter 1 · Levels 1 to 5 · version 1.0.1
 </p>
 
 ---

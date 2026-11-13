@@ -132,7 +132,7 @@ All in `gradle.properties`:
 | Cardinal Components | 5.2.3 |
 | Sound Physics Remastered (dev) | fabric-1.20.1-1.5.1 |
 | Sodium / Iris / Indium (dev) | 0.5.13 / 1.7.6 / 1.0.36 |
-| Mod version | `mod_version` (1.0, shown in the main menu as "v1.0": the line is `menu.every_tunnel.version`, which takes the version) |
+| Mod version | `mod_version` (1.0.1, shown in the main menu as "v1.0.1": the line is `menu.every_tunnel.version`, which takes the version) |
 
 ## Open release questions
 
