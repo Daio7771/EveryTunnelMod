@@ -192,7 +192,7 @@ con un comentario KDoc que cuenta más.
 | `KeycardHooks.kt` | Ola de apagado, restaurar luces, bloquear lectores |
 | `ValveHooks.kt` | El puzle de las válvulas del nivel 3: cifras por partida, comprobar giros, abrir la puerta, reiniciar |
 | `NoteHooks.kt` | Leer una nota (tablón o folio): busca su id y la envía con las cifras de las válvulas |
-| `CarryHooks.kt` | Llevar una caja o un libro: en la mano, sin soltarlo, sin correr, de vuelta al morir |
+| `CarryHooks.kt` | Llevar una caja o un libro: en la mano, sin soltarlo, sin correr, de vuelta al morir; en el puntero del ratón o en la cuadrícula de crafteo de la pantalla del inventario sigue contando como llevado |
 | `BookHooks.kt` | El puzle de los libros del nivel 3: aparecen, se entregan en el mostrador, se abre la trampilla, depuración |
 | `CollapseHooks.kt` | El derrumbe del túnel del nivel 3: sonido, temblor, escombros, polvo, luces parpadeando; se deshace al morir o en partida nueva |
 | `LoungeHooks.kt` | Del nivel 3 al 4: la puerta a B4, borrar y construir por tandas, la puerta de Reception |

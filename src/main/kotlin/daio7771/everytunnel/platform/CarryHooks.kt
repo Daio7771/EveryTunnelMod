@@ -29,6 +29,9 @@ import java.util.UUID
  * - it cannot be thrown away: dropped (Q, or out of the inventory), it comes straight back;
  * - the player cannot sprint (here, and on the client: `client.ClientResources`);
  * - hiding in a locker with it is fine;
+ * - moving it about in the inventory screen is fine: on the mouse pointer, or in the inventory's
+ *   crafting grid, it is still carried ([heldAbove]); closing the screen gives it back to the
+ *   inventory, and [tick] moves it to the hand again;
  * - dying ([died]), or losing it any other way, puts it back where it was picked up, as it lay.
  *
  * Putting it where it belongs is the puzzle's own ([release] then forgets it). A new game or a
@@ -65,7 +68,9 @@ object CarryHooks {
             if (!WorldRules.active || item.stack.item !in items) return@register
             val stack = item.stack.copy()
             item.discard()
-            val carrier = (item.owner as? ServerPlayerEntity)?.takeIf { it.uuid in carried && !isCarrying(it) }
+            // The thrower is looked at by their inventory only: dropping it from the mouse pointer spawns the item
+            // before the pointer is emptied, so it still shows in their hands for that moment ([heldAbove]).
+            val carrier = (item.owner as? ServerPlayerEntity)?.takeIf { it.uuid in carried && !inInventory(it) }
                 ?: world.players.filter { it.uuid in carried && !isCarrying(it) }.minByOrNull { it.squaredDistanceTo(item) }
                 ?: return@register
             val inventory = carrier.inventory
@@ -74,11 +79,27 @@ object CarryHooks {
         }
     }
 
-    /** Anything carried in the inventory? */
-    fun isCarrying(player: ServerPlayerEntity): Boolean = player.inventory.containsAny { it.item in items }
+    /** Anything carried: in the inventory, or held above it with the mouse ([heldAbove])? */
+    fun isCarrying(player: ServerPlayerEntity): Boolean = inInventory(player) || heldAbove(player).any { it.item in items }
+
+    private fun inInventory(player: ServerPlayerEntity): Boolean = player.inventory.containsAny { it.item in items }
 
     /** Carrying [item] in particular? */
-    fun isCarrying(player: ServerPlayerEntity, item: Item): Boolean = player.inventory.containsAny { it.isOf(item) }
+    fun isCarrying(player: ServerPlayerEntity, item: Item): Boolean =
+        player.inventory.containsAny { it.isOf(item) } || heldAbove(player).any { it.isOf(item) }
+
+    /**
+     * The stacks that are the player's but not in their inventory at this moment: the one on the mouse pointer
+     * while a screen is open, and the ones in that screen's other slots (the inventory screen's crafting grid).
+     * Picking a carried thing up with the mouse takes it out of the inventory for as long as it is held; without
+     * this it looked lost, [tick] put it back where it lay, and putting it down again in the inventory made one more.
+     */
+    private fun heldAbove(player: ServerPlayerEntity): List<ItemStack> {
+        val handler = player.currentScreenHandler
+        val stacks = mutableListOf(handler.cursorStack)
+        for (slot in handler.slots) if (slot.inventory !== player.inventory) stacks += slot.stack
+        return stacks
+    }
 
     private fun tick(server: MinecraftServer) {
         for (player in server.playerManager.playerList) {
@@ -166,6 +187,21 @@ object CarryHooks {
             for (i in list.indices) if (list[i].item in items) list[i] = ItemStack.EMPTY
         }
         inventory.markDirty()
+        // Also what the mouse holds or the crafting grid keeps (a death with the inventory open): closing the
+        // screen would hand it back to the inventory, one more of it than the world has.
+        val handler = player.currentScreenHandler
+        var changed = false
+        if (handler.cursorStack.item in items) {
+            handler.cursorStack = ItemStack.EMPTY
+            changed = true
+        }
+        for (slot in handler.slots) {
+            if (slot.inventory !== inventory && slot.stack.item in items) {
+                slot.stack = ItemStack.EMPTY
+                changed = true
+            }
+        }
+        if (changed) handler.syncState()
     }
 
     private fun putBack(server: MinecraftServer, player: ServerPlayerEntity) {

@@ -229,7 +229,7 @@ silent.
   `box_shelf`; the boxes on it drawn by `BoxShelfRenderer`): right-clicking a place on it puts
   the box there, "3 / 10" shows above the hotbar, and the Observer is alerted (he comes running;
   far off, something is heard noticing, `event.observer.alert`). With all ten up, "Master of the Boxes"
-  is earned and the books appear. Carrying follows `CarryHooks` (for the books too). Dying
+  is earned and the books appear. Carrying follows `CarryHooks` (for the books too); picking it up with the mouse in the inventory screen and moving it about is fine, it still counts as carried (before, it looked lost and the box came back to its place while the one in the inventory stayed: eleven boxes). Dying
   puts a carried box back where it was found; the shelf keeps its boxes. `/everytunnel boxes` tells where they are, `boxes fill`
   fills all but the last.
 - **The Observer** (`ObserverEntity`, decisions in `entities.ObserverBrain`, spawned by

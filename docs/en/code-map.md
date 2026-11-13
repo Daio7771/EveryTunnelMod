@@ -192,7 +192,7 @@ KDoc comment that says more.
 | `KeycardHooks.kt` | Lights-out wave, restoring lights, locking readers |
 | `ValveHooks.kt` | Level 3's valve puzzle: digits per new game, checking turns, opening the door, resetting |
 | `NoteHooks.kt` | Reading a note (board or sheet): finds its id, sends it with the valve digits |
-| `CarryHooks.kt` | Carrying a box or a book: in the hand, never dropped, no sprint, back on death |
+| `CarryHooks.kt` | Carrying a box or a book: in the hand, never dropped, no sprint, back on death; on the mouse pointer or in the crafting grid of the inventory screen it still counts as carried |
 | `BookHooks.kt` | Level 3's book puzzle: books appear, handed in at the counter, the hatch opens, debug |
 | `CollapseHooks.kt` | Level 3's tunnel collapse: sound, shake, rubble, dust, flickering lights; undone on a death or new game |
 | `LoungeHooks.kt` | From Level 3 to Level 4: the door to B4, erasing and building in steps, Reception's door |

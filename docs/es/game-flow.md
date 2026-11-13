@@ -242,7 +242,7 @@ silencio.
   dibuja `BoxShelfRenderer`): un clic derecho en un hueco deja ahí la caja, sale "3 / 10"
   encima de la barra y se avisa al Observer (viene corriendo; a lo lejos se oye que algo se ha
   dado cuenta, `event.observer.alert`). Con las diez puestas se consigue "Master of the
-  Boxes" y aparecen los libros. Llevarlas sigue `CarryHooks` (los libros también). Al morir,
+  Boxes" y aparecen los libros. Llevarlas sigue `CarryHooks` (los libros también); cogerla con el ratón en la pantalla del inventario y moverla está permitido, sigue contando como llevada (antes parecía perdida y la caja volvía a su sitio mientras la del inventario se quedaba: once cajas). Al morir,
   una caja en la mano vuelve a donde estaba; la estantería conserva las suyas. `/everytunnel boxes` dice dónde están y
   `boxes fill` llena todo menos el último hueco.
 - **El Observer** (`ObserverEntity`, decisiones en `entities.ObserverBrain`, generado por
