@@ -109,6 +109,15 @@ object ModEntities {
             .trackRangeBlocks(64)
             .build()
 
+    /** The scientist at his bench in Chapter 2's prologue ([PrologueSceneHooks]). Never saved. */
+    val SCIENTIST: EntityType<ScientistEntity> =
+        FabricEntityTypeBuilder.create<ScientistEntity>(SpawnGroup.MISC) { type, world -> ScientistEntity(type, world) }
+            .dimensions(EntityDimensions.fixed(0.6f, 1.8f))
+            .disableSaving()
+            .disableSummon()
+            .trackRangeBlocks(64)
+            .build()
+
     /** A test subject in its sealed chamber (Level 5, [SubjectHooks]). Never saved. */
     val SUBJECT: EntityType<SubjectEntity> =
         FabricEntityTypeBuilder.create<SubjectEntity>(SpawnGroup.MISC) { type, world -> SubjectEntity(type, world) }
@@ -145,6 +154,7 @@ object ModEntities {
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "subject"), SUBJECT)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "dead_guard"), DEAD_GUARD)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "director"), DIRECTOR)
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "scientist"), SCIENTIST)
         FabricDefaultAttributeRegistry.register(LAB_FIGURE, LabFigureEntity.createAttributes())
     }
 }

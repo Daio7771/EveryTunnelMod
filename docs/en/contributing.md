@@ -54,7 +54,7 @@ fits before writing its hooks, and say which in the KDoc of its file.
 |---|---|---|
 | **Posted**: saved with the world, one per spawn point | Pale man, Observer | Spawned by its hooks (`PaleManSpawner`, `ObserverHooks`) the first time a player walks into its level. The spawn points already filled are recorded in `data/every_tunnel_<name>.dat` ("level/point" keys); `homeKey` and `newGamesSeen` are in its NBT |
 | **Kept**: never saved, made again whenever its level is built | Hunter, Distortion Cloud and Junior, Subject, dead guard, director, lab figure | Its type disables saving. It is put in only through `KeptEntities.spawn`, which brings it back if its chunk unloads, and taken out with `KeptEntities.forget` plus `discard()` when the level is put back |
-| **Passing**: lives for a moment | Dart, locker seat, film walker | Spawned and discarded by whatever needs it. Nothing is recorded |
+| **Passing**: lives for a moment | Dart, locker seat, film walker, the prologue's scientist | Spawned and discarded by whatever needs it. Nothing is recorded |
 
 - **Never clean a creature up with `/kill`.** On a living thing `/kill` is damage, not removal:
   the creature plays its death for 20 ticks and only then leaves the world. For that second it

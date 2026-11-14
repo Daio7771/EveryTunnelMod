@@ -18,7 +18,8 @@ data class Action(val index: Int, val name: String, val start: Int, val blendTic
 /**
  * A scene's camera ([cutscene]) with its voice [lines] and their [subtitles], what the director does
  * ([actions]), when he looks away from the player ([lookAway], tick ranges), and the tick his mask lies on the
- * desk ([maskDown]), all on the same ticks.
+ * desk ([maskDown]), all on the same ticks. A scene that opens out of black has the screen black for
+ * [blackTicks], then fading out over [fadeTicks] ([blackAt]).
  */
 class Timeline(
     val cutscene: Cutscene,
@@ -27,7 +28,16 @@ class Timeline(
     val actions: List<Action> = emptyList(),
     val lookAway: List<IntRange> = emptyList(),
     val maskDown: Int = Int.MAX_VALUE,
+    val blackTicks: Int = 0,
+    val fadeTicks: Int = 0,
 ) {
+
+    /** How black the screen is at [tick] (fractional): 1 all black, 0 clear. */
+    fun blackAt(tick: Double): Double = when {
+        tick < blackTicks -> 1.0
+        fadeTicks > 0 && tick < blackTicks + fadeTicks -> 1.0 - Cutscene.ease((tick - blackTicks) / fadeTicks)
+        else -> 0.0
+    }
 
     /** The subtitle on screen at [tick] (fractional), or null. */
     fun subtitleAt(tick: Double): Subtitle? = subtitles.firstOrNull { tick >= it.start && tick < it.end }

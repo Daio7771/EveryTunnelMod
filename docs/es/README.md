@@ -32,7 +32,7 @@ La primera vez, léelas en este orden:
 | [El ruido y el Pale man](noise-and-pale-man.md) | El sistema de ruido, su IA de oído, su entidad y su música |
 | [Audio](audio.md) | Cada evento de sonido, los reproductores del cliente, cómo se hacen los sonidos |
 | [Gráficos](graphics.md) | Con y sin shaders, luces, brillo, texturas, dirección de arte |
-| [Sistema de cinemáticas](cinematic-system.md) | La escena del director (cámara guiada, voz, subtítulos, saltar), la caída y los créditos finales |
+| [Sistema de cinemáticas](cinematic-system.md) | La escena del director (cámara guiada, voz, subtítulos, saltar), la caída, los créditos finales y el prólogo del Chapter 2 |
 | [Herramientas Python](tools.md) | Los generadores del mapa, sonidos, bloques, arte de entidades y GUI |
 | [Compilación y release](building-and-release.md) | Tareas de Gradle, mundos de desarrollo, el jar de release |
 | [Depuración](debugging.md) | Comandos de depuración y el registro `[playtest]` |

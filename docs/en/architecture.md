@@ -131,6 +131,9 @@ All ids are `every_tunnel:<name>`. Fabric networking API (1.20.1 style,
 | `director_scene_start` | server → client | `DirectorSceneHooks` | Begin the director's scene; carries where he sits (x, y, z as doubles, yaw as a float) |
 | `director_scene_end` | server → client | `DirectorSceneHooks` | The scene is over; carries whether it was skipped (boolean) |
 | `director_scene_skip` | client → server | `CutsceneView` | The player pressed jump a second time: end the scene now (no payload) |
+| `prologue_scene_start` | server → client | `PrologueSceneHooks` | Begin Chapter 2's prologue; carries where the scientist stands (x, y, z as doubles, yaw as a float) |
+| `prologue_scene_end` | server → client | `PrologueSceneHooks` | The prologue is over; carries whether it was skipped (boolean) |
+| `prologue_scene_skip` | client → server | `CutsceneView` | The player pressed jump a second time: end the prologue now (no payload) |
 | `director_phrase` | server → client | `DirectorLoopHooks` | Play one of his phrases after the scene; carries its id (string) |
 
 The Pale man's state reaches clients as tracked entity data (`PaleManEntity.brainState`),

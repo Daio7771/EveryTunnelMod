@@ -512,5 +512,6 @@
   "screen.every_tunnel.congrats.text": "You made it to the end of Every Tunnel.\nThank you for spending the night shift down here, in the dark, listening to every step. This game was made for exactly that, and you saw it through.\nI hope the Noname Complex stays with you for a while. Thank you for playing.\n- Daio7771",
   "screen.every_tunnel.congrats.time": "Time played",
   "screen.every_tunnel.congrats.deaths": "Deaths",
-  "screen.every_tunnel.congrats.close": "CLOSE"
+  "screen.every_tunnel.congrats.close": "CLOSE",
+  "entity.every_tunnel.scientist": "The Scientist"
 }

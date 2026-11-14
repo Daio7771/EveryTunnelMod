@@ -64,8 +64,13 @@ sealed interface Look {
     data object Player : Look
 }
 
-/** One shot: the camera glides from [from] to [to] (eased) over [ticks], looking at [look]. Shots meet in a cut. */
-data class Shot(val ticks: Int, val from: Local, val to: Local, val look: Look)
+/**
+ * One shot: the camera glides from [from] to [to] (eased) over [ticks], looking at [look]; if [lookTo] is another
+ * place it looks at [look] to begin with and its aim moves to [lookTo] along the same ease (a camera tracking
+ * sideways keeps its heading by moving the place it looks at as it goes; a pan is the aim moving alone). Shots
+ * meet in a cut.
+ */
+data class Shot(val ticks: Int, val from: Local, val to: Local, val look: Look, val lookTo: Look = look)
 
 /**
  * A cinematic laid out in ticks: black bands slide in ([BANDS_TICKS]) while the camera flies out of the
@@ -123,7 +128,10 @@ class Cutscene(val shots: List<Shot>, val flyInTicks: Int, val flyOutTicks: Int)
         val e = ease(t)
         val (x, y, z) = frame.at(lerp(shot.from.forward, shot.to.forward, e), lerp(shot.from.right, shot.to.right, e), lerp(shot.from.up, shot.to.up, e))
         val (tx, ty, tz) = when (val look = shot.look) {
-            is Look.At -> frame.at(look.place.forward, look.place.right, look.place.up)
+            is Look.At -> {
+                val end = (shot.lookTo as? Look.At)?.place ?: look.place
+                frame.at(lerp(look.place.forward, end.forward, e), lerp(look.place.right, end.right, e), lerp(look.place.up, end.up, e))
+            }
             Look.Player -> playerEyes
         }
         return CameraPose.looking(x, y, z, tx, ty, tz)

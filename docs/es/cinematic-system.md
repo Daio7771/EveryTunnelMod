@@ -183,18 +183,47 @@ cuando cede el suelo de la falsa salida.
 Los textos de los créditos son las claves `every_tunnel.credits.*`; los dibujos, los de
 `tools/gui/credits_art.py`.
 
+## El prólogo del Chapter 2
+
+El Chapter 2 abre con su propia cinemática, **el prólogo**, que vive solo en la rama privada hasta que se
+publiquen los niveles 1 y 2 del capítulo. Es la segunda escena que juega `CutsceneView` (`Kind.PROLOGUE`): la
+misma cámara, bandas, subtítulos y salto, pero no está en un nivel. Por ahora la empieza
+`/everytunnel prologue` (el inicio del capítulo todavía no existe).
+
+- **La sala** no está en el mapa. `tools/prologue/room.py` escribe un plano (`cutscene/prologue_room.json`:
+  rellenos, bloques sueltos, las luces del techo, dónde está el científico y dónde se sujeta al jugador);
+  cuando empieza la escena, `PrologueSceneHooks` lo coloca en una esquina fija muy por encima del mundo
+  (2048, 200, 2048), lejos de todos los niveles, y lo borra al terminar. Un laboratorio moderno y limpio de
+  20 x 5 x 9 con una mesa larga contra el muro norte.
+- **El científico** es `ScientistEntity` (GeckoLib, `tools/entity/scientist.py`), una criatura *pasajera*: nace
+  con la escena, se descarta con ella y nunca se guarda. Está de pie en la mesa con bata blanca, de espaldas a
+  la cámara, manipulando tubos (`animation.scientist.work`).
+- **Los planos** se dan desde él (`PrologueScene`, un `SceneFrame` a sus pies mirando al norte, así que su
+  derecha es +x): la escena sale de negro (la pantalla está negra 30 ticks mientras los chunks de la sala llegan
+  al cliente y luego se aclara en 50: `Timeline.blackTicks` / `fadeTicks`, los dibuja `CutsceneScreen`), un
+  travelling de 16 s por la mesa de izquierda a derecha (+x) cuya mirada se mueve con la cámara
+  (`Shot.lookTo`), que se detiene detrás de él y a su izquierda cuando él entra en el encuadre, y luego una
+  parada mientras la mirada gira hasta su espalda. Sin vuelo desde los ojos del jugador ni de vuelta: el
+  jugador no está en la escena (no se dibuja: `Kind.drawsPlayer`).
+- **El jugador** se sujeta en una esquina de la sala, sin daño, y al final, jugada o saltada, se le devuelve
+  adonde estaba (`finish`); si sale del mundo durante la escena se le devuelve antes (`abort`), así que una
+  partida guardada nunca queda dentro de la sala.
+- **Todavía no:** la voz y los subtítulos, los sonidos del laboratorio (zumbido, contador Geiger, drone), el
+  contador, la grabadora y los tubos, la transformación en Pale man, el corte a negro y el título.
+
 ## Añadir otra cinemática
 
-Hoy `CutsceneView` y `CutsceneScreen` leen `DirectorScene.SCENE` directamente, así que hay una sola
-escena. Una segunda necesita, por este orden:
+`CutsceneView` juega un `Kind` (el del director, el del prólogo): cada uno nombra su `Timeline`, el paquete
+que lo salta, la clave de idioma del hablante (ninguna en el prólogo) y el prefijo de sus sonidos de voz. Una
+nueva necesita, por este orden:
 
 1. Un objeto de escena en `core/cutscene` que construya un `Timeline` (una `Cutscene` de `Shot`s en
-   un `SceneFrame`, más lo que vaya sobre ella), y un test de su temporización en `CutsceneTest`.
-2. Que `CutsceneView` y `CutsceneScreen` reciban un `Timeline` en vez del del director: el paquete de
-   inicio llevaría qué escena y su marco.
-3. Un hook como `DirectorSceneHooks`: un disparador, sujetar al jugador y negarle el daño, un único
-   `finish` para el final y para un salto, el estado posterior, y qué pasa si el jugador sale o se
-   vuelve a construir el nivel.
+   un `SceneFrame`, más lo que vaya sobre ella), y un test de su temporización (`CutsceneTest`, `PrologueTest`).
+2. Un `CutsceneView.Kind` nuevo y sus paquetes de inicio y fin, registrados en `CutsceneView.register`: el
+   paquete de inicio lleva el marco de la escena.
+3. Un hook como `DirectorSceneHooks` o `PrologueSceneHooks`: un disparador, sujetar al jugador y negarle el
+   daño, un único `finish` para el final y para un salto, el estado posterior, y qué pasa si el jugador sale o
+   se vuelve a construir el nivel.
 4. Archivos de voz, si tiene voces: `tools/sounds/voices.py` está escrito para los del director (un
    hablante nuevo necesita su lista, su etiqueta y sus claves), y se aplica la regla de sonido de
    [Audio](audio.md): la voz del director es la única excepción con IA.

@@ -38,6 +38,8 @@ KDoc comment that says more.
 | `camera/CameraAim.kt` | Where a security camera's head points, turning towards a target no faster than its servo |
 | `cutscene/Cutscene.kt` | A cinematic as plain data: camera poses, a scene's frame, shots, the fly-in and fly-out, the black bands |
 | `cutscene/DirectorScene.kt` | The director's scene timed from his voice: framings, subtitles, his gestures, where he looks away, his mask; `SkipPrompt` (skipping by pressing twice) |
+| `cutscene/PrologueScene.kt` | Chapter 2's prologue timeline: the tracking shot along the bench and the hold on the scientist, from him; opens out of black |
+| `cutscene/RoomPlan.kt` | The prologue room's plan (read from `cutscene/prologue_room.json`) and `BlockSpec`, a block with its states |
 | `cutscene/DirectorLines.kt` | The director's voice lines and their subtitle cues, read from `cutscene/director.json` |
 | `cutscene/DirectorLoop.kt` | The phrases he repeats after his scene: their order, the gaps, how much he looks at the player |
 | `cutscene/FinalCredits.kt` | The final credits' timeline (drawn by `FinalCreditsScreen`) |
@@ -158,6 +160,7 @@ KDoc comment that says more.
 | `DirectorEntity.kt` | The director in his chair (GeckoLib): moves with the client's scene, mask and gaze synced; `DirectorHooks` puts him there with the level |
 | `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
+| `ScientistEntity.kt` | The prologue's scientist (GeckoLib, a passing creature): works at his bench as long as he stands |
 | `DirectorBlocks.kt` | Level 5's anteroom and office: the director's double door that opens both leaves at once, the security camera block, the wall of CCTV screens |
 | `DeepWaterHooks.kt` | Level 5's deep water (the drain's pools): falling in pulls the player under, and they drown |
 | `DrainHooks.kt` | Level 5's drain: the hatch slamming shut once the player is down its ladder, open again on a death before the Junction |
@@ -221,6 +224,7 @@ KDoc comment that says more.
 | `AchievementHooks.kt` | Earning achievements: what earns each, telling the client |
 | `EndingHooks.kt` | The end of the game: the saved game erased, the final credits, the game's numbers sent with them |
 | `FalseExitHooks.kt` | Level 5's false exit: the floor over the pit giving way, the fall, the black |
+| `PrologueSceneHooks.kt` | Chapter 2's prologue: builds its room out of the way, spawns the scientist, holds the player, skipping, the end (the player back where they were, the room cleared); started by `/everytunnel prologue` |
 | `DirectorSceneHooks.kt` | The director's scene: starts when his door is opened, holds the player, the door's slam, skipping, the end (a restart point inside his door); `DirectorLoopHooks`, in the same file, sends his phrases after it |
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
@@ -292,6 +296,7 @@ KDoc comment that says more.
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
 | `SubjectRenderer.kt` | GeckoLib renderer for the subjects, each stage its body and skin |
 | `DeadGuardRenderer.kt` | GeckoLib renderer for the guard before you, sitting, in the player's uniform worn out |
+| `ScientistRenderer.kt` | GeckoLib renderer for the prologue's scientist, turned to his yaw |
 | `DirectorRenderer.kt` | GeckoLib renderer for the director: his model, texture and animations, turned to his yaw |
 | `LabFigureRenderer.kt` | The figure seen from Level 5's Lobby, on the player's model, a dark shape |
 | `HunterRenderer.kt` | GeckoLib renderer for the Hunters, their eyes glowing |
@@ -307,7 +312,7 @@ KDoc comment that says more.
 
 | File | What it does |
 |---|---|
-| `CutsceneView.kt` | A cinematic on the client: a camera of its own moved tick by tick, the HUD off, the player drawn from outside, the director's pose, his lines, skipping |
+| `CutsceneView.kt` | A cinematic on the client (the director's or the prologue's, a `Kind`): a camera of its own moved tick by tick, the HUD off, the player drawn from outside (not in the prologue), the director's pose, voice lines, skipping, the black a scene opens out of |
 | `CutsceneScreen.kt` | The screen that takes the keys and the mouse during a cinematic: the black bands, the subtitles, the notice to skip |
 | `DirectorVoice.kt` | His phrases after the scene: played flat, subtitled over the HUD |
 
@@ -351,6 +356,7 @@ See [Architecture](architecture.md#mixins) for the target and reason of each.
 | `assets/every_tunnel/lang/es_*.json` | The Spanish translation (`es_es.json`, copied to the other `es_*` by `tools/lang/spanish_variants.py`) |
 | `assets/every_tunnel/guide/` | Not in `src/`: copied from `docs/*/guide/` by the build (`copyGuide`) |
 | `assets/every_tunnel/sounds.json`, `sounds/` | Sound events and `.ogg` files (from `tools/sounds/export.py`) |
+| `assets/every_tunnel/cutscene/prologue_room.json` | The prologue's laboratory: fills, blocks, lights, where the scientist and the player stand (from `tools/prologue/room.py`) |
 | `assets/every_tunnel/cutscene/director.json` | The director's voice lines: part, length and subtitle cues (from `tools/sounds/voices.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | From `tools/blocks`, `tools/entity`, `tools/gui` |
 | `assets/every_tunnel/geo/`, `animations/` | The Pale man's GeckoLib files |

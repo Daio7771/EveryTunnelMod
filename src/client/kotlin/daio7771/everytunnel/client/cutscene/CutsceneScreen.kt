@@ -9,9 +9,9 @@ import org.lwjgl.glfw.GLFW
 /**
  * Open while a cinematic plays ([CutsceneView]): it takes every key and the mouse (the player can neither move
  * nor look; the cursor is hidden), never pauses the game, and Escape does nothing. It draws the black bands,
- * 2.39:1 on a 16:9 screen, sliding in and out, his subtitles in the bottom band (whole cues, white after his
- * name in grey, centred, two lines at most), the notice to skip in the bottom right corner, and a skip's
- * black. The jump key skips ([CutsceneView.skipPressed]).
+ * 2.39:1 on a 16:9 screen, sliding in and out, the subtitles in the bottom band (whole cues, white after the
+ * speaker's name in grey if the scene has one, centred, two lines at most), the notice to skip in the bottom
+ * right corner, the black a scene opens out of and a skip's black. The jump key skips ([CutsceneView.skipPressed]).
  */
 class CutsceneScreen : Screen(Text.empty()) {
 
@@ -48,16 +48,17 @@ class CutsceneScreen : Screen(Text.empty()) {
             context.drawText(textRenderer, text, -textRenderer.getWidth(text), 0, color, false)
             matrices.pop()
         }
-        val black = CutsceneView.skipBlack()
+        val black = maxOf(CutsceneView.skipBlack(), CutsceneView.openingBlack(client.tickDelta))
         if (black > 0f) context.fill(0, 0, width, height, ((black * 255).toInt() shl 24))
     }
 
     override fun renderBackground(context: DrawContext) = Unit
 
     private fun drawSubtitle(context: DrawContext, key: String, band: Int) {
-        val text = Text.translatable(SPEAKER).styled { it.withColor(SPEAKER_GREY) }
-            .append(Text.literal(" "))
-            .append(Text.translatable(key).styled { it.withColor(WHITE) })
+        val speech = Text.translatable(key).styled { it.withColor(WHITE) }
+        val text = CutsceneView.speaker()?.let {
+            Text.translatable(it).styled { name -> name.withColor(SPEAKER_GREY) }.append(Text.literal(" ")).append(speech)
+        } ?: speech
         val lines = textRenderer.wrapLines(text, (width * SUBTITLE_WIDTH).toInt())
         val step = textRenderer.fontHeight + 2
         var y = height - band / 2 - (lines.size * step - 2) / 2
@@ -73,7 +74,6 @@ class CutsceneScreen : Screen(Text.empty()) {
         private const val BLACK = 0xFF000000.toInt()
         private const val NOTICE_GREY = 0xA8A8A8
         private const val NOTICE_SCALE = 0.75f
-        private const val SPEAKER = "subtitle.every_tunnel.speaker.director"
         private const val SPEAKER_GREY = 0x9A9A9A
         private const val WHITE = 0xFFFFFF
         /** A subtitle line is at most this share of the screen's width. */

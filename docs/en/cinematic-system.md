@@ -176,18 +176,47 @@ phrases stop when the false exit's floor gives way.
 The credits' texts are the lang keys `every_tunnel.credits.*`; the drawings are
 `tools/gui/credits_art.py`'s.
 
+## Chapter 2's prologue
+
+Chapter 2 opens with its own cinematic, **the prologue**, which lives only on the private branch until
+Levels 1 and 2 of the chapter are published. It is the second scene `CutsceneView` plays (`Kind.PROLOGUE`):
+the same camera, bands, subtitles and skip, but it is not in a level. `/everytunnel prologue` starts it for now
+(the chapter's own start does not exist yet).
+
+- **The room** is not in the map. `tools/prologue/room.py` writes a plan (`cutscene/prologue_room.json`:
+  fills, single blocks, the ceiling's lights, where the scientist stands and where the player is held); when the
+  scene starts, `PrologueSceneHooks` places it at a fixed corner high over the world (2048, 200, 2048), far from
+  every level, and clears it when the scene ends. A modern, clean laboratory 20 x 5 x 9 with one long bench
+  along its north wall.
+- **The scientist** is `ScientistEntity` (GeckoLib, `tools/entity/scientist.py`), a *passing* creature: spawned
+  with the scene, discarded with it, never saved. He stands at the bench in a white coat, back to the camera,
+  working with tubes (`animation.scientist.work`).
+- **The shots** are given from him (`PrologueScene`, a `SceneFrame` at his feet facing north, so his right is +x):
+  the scene opens out of black (the screen is black 30 ticks while the room's chunks reach the client, then
+  fades out over 50: `Timeline.blackTicks` / `fadeTicks`, drawn by `CutsceneScreen`), a 16 s tracking shot
+  along the bench from left to right (+x) whose aim moves with the camera (`Shot.lookTo`), coming to a stop
+  behind him and to his left as he enters the frame, then a hold while the aim turns onto his back. No fly-in
+  from the player's eyes and no fly-out: the player is not in the scene (it is not drawn:
+  `Kind.drawsPlayer`).
+- **The player** is held in the room's corner, unharmed, and put back where they were at the end, played
+  through or skipped (`finish`); if they leave the world during it they are put back first (`abort`), so a saved
+  game is never left inside the room.
+- **Not there yet:** the voice and subtitles, the lab's sounds (hum, Geiger counter, drone), the counter,
+  recorder and tube props, the transformation into a Pale man, the cut to black and the title.
+
 ## Adding another cinematic
 
-Today `CutsceneView` and `CutsceneScreen` read `DirectorScene.SCENE` directly, so there is one
-scene. A second one needs, in this order:
+`CutsceneView` plays a `Kind` (the director's, the prologue's): each names its `Timeline`, the packet that skips
+it, the speaker's lang key (none for the prologue) and its voice sounds' prefix. A new one needs, in this
+order:
 
 1. A scene object in `core/cutscene` that builds a `Timeline` (a `Cutscene` of `Shot`s in a
-   `SceneFrame`, plus whatever rides on it), and a test for its timing in `CutsceneTest`.
-2. `CutsceneView` and `CutsceneScreen` taking a `Timeline` instead of the director's: the start
-   packet would carry which scene and its frame.
-3. A hook like `DirectorSceneHooks`: a trigger, holding the player and refusing damage, one
-   `finish` for the end and for a skip, the state afterwards, and what happens if the player leaves
-   or the level is built again.
+   `SceneFrame`, plus whatever rides on it), and a test for its timing (`CutsceneTest`, `PrologueTest`).
+2. A new `CutsceneView.Kind` and its start and end packets, registered in `CutsceneView.register`: the start
+   packet carries the scene's frame.
+3. A hook like `DirectorSceneHooks` or `PrologueSceneHooks`: a trigger, holding the player and refusing damage,
+   one `finish` for the end and for a skip, the state afterwards, and what happens if the player leaves or the
+   level is built again.
 4. Voice files, if it has voices: `tools/sounds/voices.py` is written for the director's files (a
    new speaker needs its own list, speaker label and keys), and the sound rule in
    [Audio](audio.md) applies: the director's voice is the one AI exception.

@@ -4,10 +4,13 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.effects.ScreenFade
 import daio7771.everytunnel.core.cutscene.CameraPose
 import daio7771.everytunnel.core.cutscene.DirectorScene
+import daio7771.everytunnel.core.cutscene.PrologueScene
 import daio7771.everytunnel.core.cutscene.SceneFrame
 import daio7771.everytunnel.core.cutscene.SkipPrompt
+import daio7771.everytunnel.core.cutscene.Timeline
 import daio7771.everytunnel.platform.DirectorEntity
 import daio7771.everytunnel.platform.DirectorSceneHooks
+import daio7771.everytunnel.platform.PrologueSceneHooks
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
@@ -34,17 +37,34 @@ import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 
 /**
- * The director's scene on the client ([DirectorScene], started by `platform.DirectorSceneHooks`): the view
- * leaves the player for a camera of its own, which [DirectorScene.SCENE] moves tick by tick (the game blends
- * between ticks; a cut jumps), the HUD goes (`InGameHudMixin`), and a [CutsceneScreen] takes the keys and the
- * mouse and draws the bands, his subtitles and the notice to skip. The player stays where they stood, seen
- * from outside ([drawPlayer]). His lines play on their ticks, flat (the same in every shot), under Voice/Speech; nothing
- * else of the scene makes a sound. The director takes his moves from it ([DirectorEntity.poseSource]).
+ * A cinematic on the client: the director's scene ([DirectorScene], started by `platform.DirectorSceneHooks`)
+ * or Chapter 2's prologue ([PrologueScene], by `platform.PrologueSceneHooks`), each a [Kind]. The view leaves the
+ * player for a camera of its own, which the scene's timeline moves tick by tick (the game blends between ticks;
+ * a cut jumps), the HUD goes (`InGameHudMixin`), and a [CutsceneScreen] takes the keys and the mouse and draws
+ * the bands, the subtitles and the notice to skip, and the black a scene opens out of. In the director's scene
+ * the player stays where they stood, seen from outside ([drawPlayer]); the prologue never draws them. Voice
+ * lines play on their ticks, flat (the same in every shot), under Voice/Speech; nothing else of a scene makes a
+ * sound. The director takes his moves from it ([DirectorEntity.poseSource]).
  *
  * Skipping (the jump key twice, [SkipPrompt]) fades to black and asks the server to end it; its answer, like
- * the scene's own end, gives the player their view back ([stop]), out of black if skipped, his voice cut.
+ * the scene's own end, gives the player their view back ([stop]), out of black if skipped, the voice cut.
  */
 object CutsceneView {
+
+    /**
+     * The scenes this view plays: each one's [timeline], the packet that skips it, the lang key of the speaker's
+     * name before the subtitles (null: none), the prefix of its voice sounds, and whether the player is drawn.
+     */
+    enum class Kind(
+        val timeline: () -> Timeline,
+        val skipPacket: Identifier,
+        val speaker: String?,
+        val voicePrefix: String,
+        val drawsPlayer: Boolean,
+    ) {
+        DIRECTOR({ DirectorScene.SCENE }, DirectorSceneHooks.SKIP_PACKET_ID, "subtitle.every_tunnel.speaker.director", "voice.director.", true),
+        PROLOGUE({ PrologueScene.SCENE }, PrologueSceneHooks.SKIP_PACKET_ID, null, "voice.prologue.", false),
+    }
 
     /** The camera's eyes are this high over its feet: a standing player's, so handing the view over moves nothing. */
     private const val EYE = 1.62f
@@ -57,6 +77,7 @@ object CutsceneView {
     private const val NEAR = 1.2
 
     private var frame: SceneFrame? = null
+    private var kind = Kind.DIRECTOR
     private var eyes = CameraPose(0.0, 0.0, 0.0, 0.0, 0.0)
     private var tick = 0
     private var camera: Entity? = null
@@ -73,9 +94,17 @@ object CutsceneView {
     fun register() {
         ClientPlayNetworking.registerGlobalReceiver(DirectorSceneHooks.START_PACKET_ID) { client, _, buf, _ ->
             val (x, y, z, yaw) = DirectorSceneHooks.readStart(buf)
-            client.execute { start(client, SceneFrame(x, y, z, yaw)) }
+            client.execute { start(client, Kind.DIRECTOR, SceneFrame(x, y, z, yaw)) }
         }
         ClientPlayNetworking.registerGlobalReceiver(DirectorSceneHooks.END_PACKET_ID) { client, _, buf, _ ->
+            val skipped = buf.readBoolean()
+            client.execute { stop(client, skipped) }
+        }
+        ClientPlayNetworking.registerGlobalReceiver(PrologueSceneHooks.START_PACKET_ID) { client, _, buf, _ ->
+            val (x, y, z, yaw) = PrologueSceneHooks.readStart(buf)
+            client.execute { start(client, Kind.PROLOGUE, SceneFrame(x, y, z, yaw)) }
+        }
+        ClientPlayNetworking.registerGlobalReceiver(PrologueSceneHooks.END_PACKET_ID) { client, _, buf, _ ->
             val skipped = buf.readBoolean()
             client.execute { stop(client, skipped) }
         }
@@ -84,10 +113,11 @@ object CutsceneView {
         ClientPlayConnectionEvents.DISCONNECT.register { _, client -> client.execute { stop(client, false) } }
     }
 
-    private fun start(client: MinecraftClient, at: SceneFrame) {
+    private fun start(client: MinecraftClient, scene: Kind, at: SceneFrame) {
         val player = client.player ?: return
         val world = client.world ?: return
         if (active()) stop(client, false)
+        kind = scene
         frame = at
         eyes = CameraPose(player.x, player.eyeY, player.z, player.yaw.toDouble(), player.pitch.toDouble())
         tick = 0
@@ -99,7 +129,7 @@ object CutsceneView {
         client.options.perspective = Perspective.FIRST_PERSON
         client.setCameraEntity(camera)
         client.setScreen(CutsceneScreen())
-        DirectorEntity.poseSource = ::directorPose
+        if (scene == Kind.DIRECTOR) DirectorEntity.poseSource = ::directorPose
     }
 
     /** The view back to the player, out of black if [skipped]. Safe to call when nothing plays. */
@@ -124,15 +154,21 @@ object CutsceneView {
     fun skipPressed() {
         if (skippedAt != 0L || !skip.press(Util.getMeasuringTimeMs())) return
         skippedAt = Util.getMeasuringTimeMs()
-        ClientPlayNetworking.send(DirectorSceneHooks.SKIP_PACKET_ID, PacketByteBufs.empty())
+        ClientPlayNetworking.send(kind.skipPacket, PacketByteBufs.empty())
     }
 
     /** How far the bands are in, at this frame. */
-    fun bands(tickDelta: Float): Double = DirectorScene.SCENE.cutscene.bands(tick + tickDelta.toDouble())
+    fun bands(tickDelta: Float): Double = kind.timeline().cutscene.bands(tick + tickDelta.toDouble())
 
-    /** The lang key of his subtitle on screen at this frame, or null. */
+    /** The lang key of the subtitle on screen at this frame, or null. */
     fun subtitle(tickDelta: Float): String? =
-        if (skippedAt != 0L) null else DirectorScene.SCENE.subtitleAt(tick + tickDelta.toDouble())?.key
+        if (skippedAt != 0L) null else kind.timeline().subtitleAt(tick + tickDelta.toDouble())?.key
+
+    /** The lang key of the speaker's name to show before the subtitles, or null for none. */
+    fun speaker(): String? = kind.speaker
+
+    /** The black a scene opens out of, at this frame: 0 none, 1 all. */
+    fun openingBlack(tickDelta: Float): Float = kind.timeline().blackAt(tick + tickDelta.toDouble()).toFloat()
 
     /**
      * The player, seen from the scene's camera: the game leaves its own player out whenever the view is another
@@ -140,7 +176,7 @@ object CutsceneView {
      * is still in (or just out of) their head.
      */
     private fun drawPlayer(context: WorldRenderContext) {
-        if (!active()) return
+        if (!active() || !kind.drawsPlayer) return
         val client = MinecraftClient.getInstance()
         val player = client.player ?: return
         val matrices = context.matrixStack() ?: return
@@ -181,7 +217,7 @@ object CutsceneView {
     private fun tick(client: MinecraftClient) {
         val cam = camera ?: return
         client.player?.let(::standStill)
-        val timeline = DirectorScene.SCENE
+        val timeline = kind.timeline()
         if (tick < timeline.cutscene.totalTicks) tick++
         place(cam, tick)
         if (skippedAt == 0L) {
@@ -194,7 +230,7 @@ object CutsceneView {
     /** Puts [cam] at [n] ticks, on its way to [n] + 1 (the game blends between); across a cut, at [n] + 1 already. */
     private fun place(cam: Entity, n: Int) {
         val at = frame ?: return
-        val scene = DirectorScene.SCENE.cutscene
+        val scene = kind.timeline().cutscene
         val player = MinecraftClient.getInstance().player
         val playerEyes = if (player != null) Triple(player.x, player.eyeY, player.z) else Triple(eyes.x, eyes.y, eyes.z)
         // The way back is into their eyes now: the scene puts them inside the door.
@@ -219,7 +255,7 @@ object CutsceneView {
     private fun speak(client: MinecraftClient, id: String) {
         voice?.let { client.soundManager.stop(it) }
         val sound = PositionedSoundInstance(
-            Identifier(EveryTunnel.MOD_ID, "voice.director.$id"), SoundCategory.VOICE, 1f, 1f, SoundInstance.createRandom(),
+            Identifier(EveryTunnel.MOD_ID, "${kind.voicePrefix}$id"), SoundCategory.VOICE, 1f, 1f, SoundInstance.createRandom(),
             false, 0, SoundInstance.AttenuationType.NONE, 0.0, 0.0, 0.0, true,
         )
         voice = sound

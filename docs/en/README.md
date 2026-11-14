@@ -30,7 +30,7 @@ Read them in this order the first time:
 | [Noise and the Pale man](noise-and-pale-man.md) | The noise system, his hearing AI, his entity and music |
 | [Audio](audio.md) | Every sound event, the client players, how sounds are made |
 | [Graphics](graphics.md) | With and without shaders, lights, brightness, textures, art direction |
-| [Cinematic system](cinematic-system.md) | The director's scene (guided camera, voice, subtitles, skipping), the fall and the final credits |
+| [Cinematic system](cinematic-system.md) | The director's scene (guided camera, voice, subtitles, skipping), the fall, the final credits and Chapter 2's prologue |
 | [Python tools](tools.md) | The generators for map, sounds, blocks, entity art and GUI |
 | [Building and release](building-and-release.md) | Gradle tasks, dev worlds, the release jar |
 | [Debugging](debugging.md) | Debug commands and the `[playtest]` log |

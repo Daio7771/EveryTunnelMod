@@ -135,6 +135,9 @@ Todos los ids son `every_tunnel:<nombre>`. API de red de Fabric (estilo 1.20.1,
 | `director_scene_start` | servidor → cliente | `DirectorSceneHooks` | Empezar la escena del director; lleva dónde se sienta (x, y, z como double, orientación como float) |
 | `director_scene_end` | servidor → cliente | `DirectorSceneHooks` | La escena ha terminado; lleva si se saltó (booleano) |
 | `director_scene_skip` | cliente → servidor | `CutsceneView` | El jugador pulsó saltar por segunda vez: acabar la escena ya (sin contenido) |
+| `prologue_scene_start` | servidor → cliente | `PrologueSceneHooks` | Empezar el prólogo del Chapter 2; lleva dónde está el científico (x, y, z como double, orientación como float) |
+| `prologue_scene_end` | servidor → cliente | `PrologueSceneHooks` | El prólogo ha terminado; lleva si se saltó (booleano) |
+| `prologue_scene_skip` | cliente → servidor | `CutsceneView` | El jugador pulsó saltar por segunda vez: acabar el prólogo ya (sin contenido) |
 | `director_phrase` | servidor → cliente | `DirectorLoopHooks` | Poner una de sus frases tras la escena; lleva su id (cadena) |
 
 El estado del Pale man llega a los clientes como dato sincronizado de la entidad

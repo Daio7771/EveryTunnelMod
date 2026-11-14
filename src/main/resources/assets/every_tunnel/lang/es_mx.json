@@ -401,6 +401,7 @@
   "block.every_tunnel.month_plaque": "Placa de Empleado del mes",
   "block.every_tunnel.monitor_bank": "Pantalla de CCTV",
   "entity.every_tunnel.director": "El Director",
+  "entity.every_tunnel.scientist": "El Científico",
   "subtitle.every_tunnel.speaker.director": "DIRECTOR:",
   "subtitle.every_tunnel.director.boss_01_1": "Oh. Llegas pronto. Siéntate, cuidado con los papeles.",
   "subtitle.every_tunnel.director.boss_02_1": "Tú eres el nuevo, ¿verdad? El catorce.",
