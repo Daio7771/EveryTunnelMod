@@ -221,6 +221,12 @@ the same camera, bands, subtitles and skip, but it is not in a level. `/everytun
   fourth are the same voice three times over (the original, a copy 7 semitones down and a copy 7 up, kept in step
   by rubberband), 4 dB softer and squeezed, coming in over the first words, so the voice turns with him; the fourth
   ends dry (`prologue_voices.py`).
+- **Weight for the change.** Everything that covers the model swap is on the same ticks (`PrologueScene.shake`,
+  `flash`, `vignette`, `PrologueCues.lightOn`): the camera shakes (a faint tremor from his first signs, a jolt at
+  each stage, a violent one at the change; `CutsceneView.shaken`), a dark vignette closes in on the screen's edges
+  and opens again after the change, a white flash burns the change itself, dark ash and ink come off him at each
+  stage and burst out at the change (the server's vanilla particles), and when the lights come back only every
+  other one does, so the Pale man stands half in shadow.
 - **The cut.** When the scream ends the screen goes black at once (`Timeline.cutAt`) and the hum, the drone and the
   counter stop dead. After 2 s of black and silence "CHAPTER 2" is typed on it letter by letter (`TitleCue`, drawn
   by `CutsceneScreen`, `title.every_tunnel.chapter_2`), a low blow on its first letter, held 3 s and faded; the

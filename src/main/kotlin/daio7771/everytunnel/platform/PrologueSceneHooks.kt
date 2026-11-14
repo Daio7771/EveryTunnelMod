@@ -16,6 +16,7 @@ import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.network.PacketByteBuf
+import net.minecraft.particle.ParticleTypes
 import net.minecraft.registry.Registries
 import net.minecraft.registry.RegistryKey
 import net.minecraft.server.MinecraftServer
@@ -77,7 +78,7 @@ object PrologueSceneHooks {
         val scientist: UUID?,
         val plan: RoomPlan,
         val stands: Vec3d,
-        var lightsOn: Boolean = true,
+        val lit: BooleanArray = BooleanArray(plan.lights.size) { true },
     )
 
     private var running: Running? = null
@@ -169,11 +170,12 @@ object PrologueSceneHooks {
     /** The scene's cues at tick [t]: the lights, and how far the scientist has gone. */
     private fun cue(world: ServerWorld, scene: Running, t: Int) {
         val cues = PrologueScene.PLAN.cues
-        val lights = cues.lightsOn(t)
-        if (lights != scene.lightsOn) {
-            scene.lightsOn = lights
-            val state = state(if (lights) LAMP else CEILING)
-            for (light in scene.plan.lights) world.setBlockState(at(light), state, FLAGS)
+        for ((i, light) in scene.plan.lights.withIndex()) {
+            val on = cues.lightOn(t, i)
+            if (on != scene.lit[i]) {
+                scene.lit[i] = on
+                world.setBlockState(at(light), state(if (on) LAMP else CEILING), FLAGS)
+            }
         }
         val scientist = scene.scientist?.let { world.getEntity(it) } as? ScientistEntity ?: return
         val stage = cues.stageAt(t)
@@ -182,6 +184,16 @@ object PrologueSceneHooks {
         // Each stage turns him a little more from the bench towards the camera.
         val frame = SceneFrame(scene.stands.x, scene.stands.y, scene.stands.z, scene.plan.scientist.yaw.toDouble())
         scientist.refreshPositionAndAngles(scene.stands.x, scene.stands.y, scene.stands.z, PrologueScene.facing(frame, stage).toFloat(), 0f)
+        // Dark ash and ink come off him at each stage, and burst out of him at the change.
+        val count = when (stage) { ScientistEntity.SICK -> 10; ScientistEntity.STRETCHED -> 18; ScientistEntity.PALE -> 70; else -> 0 }
+        if (count > 0) {
+            val burst = stage == ScientistEntity.PALE
+            val spread = if (burst) 0.45 else 0.3
+            val speed = if (burst) 0.09 else 0.03
+            world.spawnParticles(ParticleTypes.ASH, scene.stands.x, scene.stands.y + 1.0, scene.stands.z, count * 2, spread, 0.8, spread, speed)
+            world.spawnParticles(ParticleTypes.SQUID_INK, scene.stands.x, scene.stands.y + 1.0, scene.stands.z, count, spread, 0.8, spread, speed)
+            if (burst) world.spawnParticles(ParticleTypes.LARGE_SMOKE, scene.stands.x, scene.stands.y + 0.8, scene.stands.z, 25, 0.4, 0.6, 0.4, 0.04)
+        }
         EveryTunnel.LOGGER.info("Prologue: the scientist is at stage {} (tick {})", stage, t)
     }
 

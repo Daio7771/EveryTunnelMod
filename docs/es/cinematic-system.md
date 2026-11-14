@@ -232,6 +232,12 @@ misma cámara, bandas, subtítulos y salto, pero no está en un nivel. Por ahora
   (la original, una copia 7 semitonos abajo y otra 7 arriba, mantenidas al compás con rubberband), 4 dB más suaves
   y comprimidas, entrando poco a poco en las primeras palabras, de modo que la voz cambia con él; la cuarta
   termina en seco (`prologue_voices.py`).
+- **Peso para el cambio.** Todo lo que tapa el cambio de modelo va en los mismos ticks (`PrologueScene.shake`,
+  `flash`, `vignette`, `PrologueCues.lightOn`): la cámara tiembla (un leve temblor desde sus primeras señales, una
+  sacudida en cada etapa, una violenta en el cambio; `CutsceneView.shaken`), una viñeta oscura se cierra sobre los
+  bordes de la pantalla y se abre tras el cambio, un destello blanco quema el cambio mismo, sale ceniza y tinta
+  oscuras de él en cada etapa y brotan en el cambio (partículas del juego, desde el servidor), y cuando vuelven las
+  luces solo vuelve una de cada dos, así que el Pale man queda a medias entre sombras.
 - **El corte.** Cuando acaba el grito la pantalla se pone negra de golpe (`Timeline.cutAt`) y el zumbido, el drone y
   el contador se paran en seco. Tras 2 s de negro y silencio se teclea sobre él «CHAPTER 2» letra a letra
   (`TitleCue`, lo dibuja `CutsceneScreen`, `title.every_tunnel.chapter_2`), un golpe grave en su primera letra, se

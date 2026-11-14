@@ -74,6 +74,10 @@ object CutsceneView {
     private const val SKIP_FADE_MS = 250L
     private const val SKIP_FADE_OUT_S = 0.6f
 
+    /** At full strength the prologue's shake moves the camera this far (blocks) and turns it this far (degrees). */
+    private const val SHAKE_MOVE = 0.05
+    private const val SHAKE_TURN = 2.4
+
     /** The player is not drawn with the camera nearer their eyes than this (blocks). */
     private const val NEAR = 1.2
 
@@ -258,16 +262,40 @@ object CutsceneView {
         } else {
             scene.pose(n.toDouble(), at, eyes, playerEyes, back)
         }
-        val then = next.yawNear(now.yaw)
-        cam.prevX = now.x
-        cam.prevY = now.y - EYE
-        cam.prevZ = now.z
-        cam.prevYaw = now.yaw.toFloat()
-        cam.prevPitch = now.pitch.toFloat()
+        val before = shaken(now, n)
+        val after = shaken(next.yawNear(now.yaw), n + 1)
+        val then = after.yawNear(before.yaw)
+        cam.prevX = before.x
+        cam.prevY = before.y - EYE
+        cam.prevZ = before.z
+        cam.prevYaw = before.yaw.toFloat()
+        cam.prevPitch = before.pitch.toFloat()
         cam.setPos(then.x, then.y - EYE, then.z)
         cam.yaw = then.yaw.toFloat()
         cam.pitch = then.pitch.toFloat()
     }
+
+    /** [pose] shaken as the prologue's cues say at tick [n]: a little in place and in aim, by noise that is the same every time. */
+    private fun shaken(pose: CameraPose, n: Int): CameraPose {
+        if (kind != Kind.PROLOGUE) return pose
+        val amount = PrologueScene.shake(n.toDouble(), PrologueScene.PLAN.cues)
+        if (amount <= 0.0) return pose
+        fun noise(axis: Int): Double {
+            val v = Math.sin(n * 12.9898 + axis * 78.233) * 43758.5453
+            return (v - Math.floor(v)) * 2.0 - 1.0
+        }
+        return CameraPose(
+            pose.x + noise(0) * SHAKE_MOVE * amount, pose.y + noise(1) * SHAKE_MOVE * amount, pose.z + noise(2) * SHAKE_MOVE * amount,
+            pose.yaw + noise(3) * SHAKE_TURN * amount, pose.pitch + noise(4) * SHAKE_TURN * amount,
+        )
+    }
+
+    /** The prologue's white flash (0..1) and dark vignette (0..1) at this frame; 0 in any other scene. */
+    fun flash(tickDelta: Float): Float =
+        if (kind != Kind.PROLOGUE) 0f else PrologueScene.flash(tick + tickDelta.toDouble(), PrologueScene.PLAN.cues).toFloat()
+
+    fun vignette(tickDelta: Float): Float =
+        if (kind != Kind.PROLOGUE) 0f else PrologueScene.vignette(tick + tickDelta.toDouble(), PrologueScene.PLAN.cues).toFloat()
 
     private fun speak(client: MinecraftClient, id: String) {
         voice?.let { client.soundManager.stop(it) }

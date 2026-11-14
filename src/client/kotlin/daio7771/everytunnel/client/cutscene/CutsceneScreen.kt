@@ -49,9 +49,30 @@ class CutsceneScreen : Screen(Text.empty()) {
             context.drawText(textRenderer, text, -textRenderer.getWidth(text), 0, color, false)
             matrices.pop()
         }
+        val vignette = CutsceneView.vignette(client.tickDelta)
+        if (vignette > 0.01f) drawVignette(context, vignette)
+        val flash = CutsceneView.flash(client.tickDelta)
+        if (flash > 0.01f) context.fill(0, 0, width, height, ((flash * 255).toInt() shl 24) or WHITE)
         val black = maxOf(CutsceneView.skipBlack(), CutsceneView.openingBlack(client.tickDelta))
         if (black > 0f) context.fill(0, 0, width, height, ((black * 255).toInt() shl 24))
         CutsceneView.title()?.let { drawTitle(context, it, CutsceneView.sceneTick(client.tickDelta)) }
+    }
+
+    /** The screen's edges darkened by [strength] (0..1): a gradient over the top and bottom and strips down the sides. */
+    private fun drawVignette(context: DrawContext, strength: Float) {
+        val dark = (strength * 255).toInt().coerceIn(0, 255)
+        val depth = (height * VIGNETTE_DEPTH).toInt()
+        context.fillGradient(0, 0, width, depth, (dark shl 24), 0)
+        context.fillGradient(0, height - depth, width, height, 0, (dark shl 24))
+        val side = (width * VIGNETTE_DEPTH).toInt()
+        val strips = 16
+        for (i in 0 until strips) {
+            val a = (dark * (1f - i / strips.toFloat())).toInt()
+            val x = side * i / strips
+            val w = side / strips + 1
+            context.fill(x, 0, x + w, height, a shl 24)
+            context.fill(width - x - w, 0, width - x, height, a shl 24)
+        }
     }
 
     /** The title, on the black: its letters typed one by one from where the whole word will begin, so none shifts; fading out at the end. */
@@ -93,6 +114,9 @@ class CutsceneScreen : Screen(Text.empty()) {
         private const val NOTICE_SCALE = 0.75f
         private const val SPEAKER_GREY = 0x9A9A9A
         private const val WHITE = 0xFFFFFF
+
+        /** How far into the screen the vignette reaches (a share of its height or width). */
+        private const val VIGNETTE_DEPTH = 0.22f
 
         /** The title's size: big, over the bands' black. */
         private const val TITLE_SCALE = 3.5f

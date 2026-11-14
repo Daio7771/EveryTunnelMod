@@ -209,6 +209,48 @@ class PrologueTest {
         assertTrue(abs(wrap(PrologueScene.facing(frame, PrologueStages.PALE) - plan.scientist.yaw)) > 90.0, "he has turned round from the bench")
     }
 
+    @Test
+    fun `the camera shakes harder at each stage and violently at the change`() {
+        assertEquals(0.0, PrologueScene.shake(cues.trembleAt - 1.0, cues), eps)
+        assertEquals(0.0, PrologueScene.shake(cues.cutAt + 1.0, cues), eps)
+        val tremor = PrologueScene.shake(cues.trembleAt + 5.0, cues)
+        assertTrue(tremor in 0.0..0.15, "a faint tremor at first: $tremor")
+        val sick = PrologueScene.shake(cues.sickAt.toDouble(), cues)
+        val stretched = PrologueScene.shake(cues.stretchAt.toDouble(), cues)
+        val change = PrologueScene.shake(cues.swapAt.toDouble(), cues)
+        assertTrue(sick > tremor && stretched > sick && change > stretched, "$tremor $sick $stretched $change")
+        assertEquals(1.0, change, 0.01)
+        assertTrue(PrologueScene.shake(cues.swapAt + 80.0, cues) < 0.2, "it dies away to a tremor while he unfolds")
+    }
+
+    @Test
+    fun `the flash burns the change white and is gone in a moment`() {
+        assertEquals(0.0, PrologueScene.flash(cues.swapAt - 1.0, cues), eps)
+        assertTrue(PrologueScene.flash(cues.swapAt.toDouble(), cues) > 0.8)
+        assertTrue(PrologueScene.flash(cues.swapAt + 10.0, cues) < PrologueScene.flash(cues.swapAt + 2.0, cues))
+        assertEquals(0.0, PrologueScene.flash(cues.swapAt + 40.0, cues), eps)
+    }
+
+    @Test
+    fun `the vignette closes in until the change and opens after it`() {
+        val ticks = (cues.trembleAt..cues.swapAt + 70).map { PrologueScene.vignette(it.toDouble(), cues) }
+        assertTrue(ticks.all { it in 0.0..1.0 })
+        assertEquals(0.0, PrologueScene.vignette(cues.trembleAt - 1.0, cues), eps)
+        assertTrue(PrologueScene.vignette(cues.swapAt.toDouble(), cues) > PrologueScene.vignette(cues.trembleAt + 20.0, cues))
+        assertEquals(0.0, PrologueScene.vignette(cues.swapAt + 61.0, cues), eps)
+    }
+
+    @Test
+    fun `after the change only every other light comes back`() {
+        val n = plan.lights.size
+        val back = cues.darkBeats.last().last + 1
+        assertTrue((0 until n).all { cues.lightOn(0, it) }, "all on at the start")
+        assertTrue((0 until n).all { !cues.lightOn(cues.swapAt, it) }, "all off in the change's beat")
+        val after = (0 until n).count { cues.lightOn(back, it) }
+        assertEquals((n + 1) / 2, after, "half of them")
+        assertTrue(cues.lightOn(back, 0) && !cues.lightOn(back, 1))
+    }
+
     // ---- black, the title, the end
 
     @Test

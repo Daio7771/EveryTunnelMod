@@ -1,7 +1,11 @@
 package daio7771.everytunnel.core.cutscene
 
+import kotlin.math.PI
+import kotlin.math.exp
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
+import kotlin.math.sin
 import kotlin.math.roundToInt
 
 /** The stages of the scientist's change, in order (`platform.ScientistEntity` is drawn from them). */
@@ -37,6 +41,12 @@ data class PrologueCues(
 
     /** Are the ceiling's lights on at [tick]? */
     fun lightsOn(tick: Int): Boolean = darkBeats.none { tick in it }
+
+    /**
+     * Is the [index]th of the ceiling's lights on at [tick]? All of them are, outside the beats, until the change; once
+     * he is a Pale man only every other one comes back, so he stands half in shadow.
+     */
+    fun lightOn(tick: Int, index: Int): Boolean = lightsOn(tick) && (tick <= swapAt || index % 2 == 0)
 
     /** How far he has gone at [tick]: one of [PrologueStages]. */
     fun stageAt(tick: Int): Int = when {
@@ -131,6 +141,12 @@ object PrologueScene {
     private const val SHORTEST_GAP = 4
     private const val BEAT = 2
     private const val CHANGE_BEAT = 4
+
+    /** The flash's strength at its peak and how long it lasts; the vignette's, and how long it takes to open after the change. */
+    private const val FLASH_PEAK = 0.9
+    private const val FLASH_TICKS = 30.0
+    private const val VIGNETTE_MAX = 0.6
+    private const val VIGNETTE_OPENS = 60.0
 
     /** How far round to the camera he is turned at each stage (the bench is 0, the camera 1). */
     private const val TURNED_SICK = 0.3
@@ -251,6 +267,29 @@ object PrologueScene {
         if (round > 180.0) round -= 360.0
         if (round < -180.0) round += 360.0
         return frame.yaw + round * share
+    }
+
+    /**
+     * How hard the camera shakes at [tick] (0..1): a tremor that grows from his first signs, a jolt at each stage that dies
+     * away and a violent one at the change.
+     */
+    fun shake(tick: Double, cues: PrologueCues): Double {
+        if (tick < cues.trembleAt || tick > cues.cutAt) return 0.0
+        val growing = 0.08 * ((tick - cues.trembleAt) / (cues.swapAt - cues.trembleAt)).coerceIn(0.0, 1.0)
+        fun jolt(at: Int, strength: Double, ticks: Double) = if (tick < at) 0.0 else strength * exp(-(tick - at) / ticks)
+        return min(1.0, growing + jolt(cues.sickAt, 0.35, 8.0) + jolt(cues.stretchAt, 0.5, 10.0) + jolt(cues.swapAt, 1.0, 22.0))
+    }
+
+    /** The white flash of the change (0..1): all of it at [PrologueCues.swapAt], gone in a few ticks. */
+    fun flash(tick: Double, cues: PrologueCues): Double =
+        if (tick < cues.swapAt || tick > cues.swapAt + FLASH_TICKS) 0.0 else FLASH_PEAK * exp(-(tick - cues.swapAt) / 5.0)
+
+    /** The dark vignette at the screen's edges (0..1): it closes in, pulsing, from his first signs, and opens again after the change. */
+    fun vignette(tick: Double, cues: PrologueCues): Double {
+        if (tick < cues.trembleAt || tick > cues.swapAt + VIGNETTE_OPENS) return 0.0
+        val pulse = 0.8 + 0.2 * sin(tick * PI / 6.0)
+        if (tick <= cues.swapAt) return VIGNETTE_MAX * ((tick - cues.trembleAt) / (cues.swapAt - cues.trembleAt)).coerceIn(0.0, 1.0) * pulse
+        return VIGNETTE_MAX * (1.0 - (tick - cues.swapAt) / VIGNETTE_OPENS) * pulse
     }
 
     /** The lab's hum (0..1): in over the first second, the black's, then flat, and dead at the cut. */
