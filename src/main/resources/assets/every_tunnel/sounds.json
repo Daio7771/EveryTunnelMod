@@ -907,6 +907,27 @@
       "every_tunnel:event/observer/tock_2"
     ]
   },
+  "event.prologue.crack": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/prologue/crack_1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:event/prologue/crack_2",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "every_tunnel:event/prologue/crack_3",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "event.prologue.title": {
+    "sounds": [
+      "every_tunnel:event/prologue/title_1"
+    ]
+  },
   "event.puzzle.solved": {
     "sounds": [
       {
@@ -1085,6 +1106,11 @@
         "name": "every_tunnel:music/prologue/drone_1",
         "stream": true
       }
+    ]
+  },
+  "music.prologue.reveal": {
+    "sounds": [
+      "every_tunnel:music/prologue/reveal_1"
     ]
   },
   "music.stinger.heard": {

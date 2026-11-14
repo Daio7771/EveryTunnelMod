@@ -8,6 +8,7 @@ import daio7771.everytunnel.core.cutscene.PrologueScene
 import daio7771.everytunnel.core.cutscene.SceneFrame
 import daio7771.everytunnel.core.cutscene.SkipPrompt
 import daio7771.everytunnel.core.cutscene.Timeline
+import daio7771.everytunnel.core.cutscene.TitleCue
 import daio7771.everytunnel.platform.DirectorEntity
 import daio7771.everytunnel.platform.DirectorSceneHooks
 import daio7771.everytunnel.platform.PrologueSceneHooks
@@ -133,13 +134,16 @@ object CutsceneView {
         if (scene == Kind.PROLOGUE) {
             val counter = PrologueScene.COUNTER
             val (x, y, z) = at.at(counter.forward, counter.right, counter.up)
-            PrologueSound.start(client, Vec3d(x, y, z))
+            val (lx, ly, lz) = at.at(0.0, 0.0, 3.2)
+            val (hx, hy, hz) = at.at(0.0, 0.0, 1.2)
+            PrologueSound.start(client, counterAt = Vec3d(x, y, z), lightsAt = Vec3d(lx, ly, lz), hisAt = Vec3d(hx, hy, hz))
         }
     }
 
     /** The view back to the player, out of black if [skipped]. Safe to call when nothing plays. */
     fun stop(client: MinecraftClient, skipped: Boolean) {
         if (!active()) return
+        val scene = kind
         frame = null
         camera = null
         DirectorEntity.poseSource = null
@@ -150,7 +154,8 @@ object CutsceneView {
         client.options.perspective = perspective
         client.player?.let { client.setCameraEntity(it) }
         if (client.currentScreen is CutsceneScreen) client.setScreen(null)
-        if (skipped) {
+        // A skip, and the prologue's end (on its black), give the view back out of black.
+        if (skipped || scene == Kind.PROLOGUE) {
             ScreenFade.fadeTo(1f, 0f)
             ScreenFade.fadeTo(0f, SKIP_FADE_OUT_S)
         }
@@ -173,7 +178,12 @@ object CutsceneView {
     /** The lang key of the speaker's name to show before the subtitles, or null for none. */
     fun speaker(): String? = kind.speaker
 
-    /** The black a scene opens out of, at this frame: 0 none, 1 all. */
+    /** The title the scene types on its black, if it has one, and this frame's tick (fractional). */
+    fun title(): TitleCue? = kind.timeline().title
+
+    fun sceneTick(tickDelta: Float): Double = tick + tickDelta.toDouble()
+
+    /** The black a scene opens out of, and falls into at its cut, at this frame: 0 none, 1 all. */
     fun openingBlack(tickDelta: Float): Float = kind.timeline().blackAt(tick + tickDelta.toDouble()).toFloat()
 
     /**
@@ -228,7 +238,7 @@ object CutsceneView {
         place(cam, tick)
         if (skippedAt == 0L) {
             timeline.lines.firstOrNull { it.start == tick }?.let { speak(client, it.line.id) }
-            if (kind == Kind.PROLOGUE) PrologueSound.tick(client, tick, timeline.cutscene.totalTicks)
+            if (kind == Kind.PROLOGUE) PrologueSound.tick(client, tick)
         }
         // Another screen may have taken over (and gone): the keys stay the scene's.
         if (client.currentScreen == null) client.setScreen(CutsceneScreen())

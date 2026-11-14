@@ -38,7 +38,7 @@ KDoc comment that says more.
 | `camera/CameraAim.kt` | Where a security camera's head points, turning towards a target no faster than its servo |
 | `cutscene/Cutscene.kt` | A cinematic as plain data: camera poses, a scene's frame, shots, the fly-in and fly-out, the black bands |
 | `cutscene/DirectorScene.kt` | The director's scene timed from his voice: framings, subtitles, his gestures, where he looks away, his mask; `SkipPrompt` (skipping by pressing twice) |
-| `cutscene/PrologueScene.kt` | Chapter 2's prologue timeline: the tracking shot along the bench and the hold on the scientist, from him; opens out of black |
+| `cutscene/PrologueScene.kt` | Chapter 2's prologue: the timeline from the scientist (tracking shot, settling, creeping in), the four lines, subtitles, the opening black, the flicker's beats, the stages of his change, the cut to black and the typed title (`PrologueCues`, `PrologueStages`, `PrologueScenePlan`); the hum, drone and Geiger curves |
 | `cutscene/RoomPlan.kt` | The prologue room's plan (read from `cutscene/prologue_room.json`) and `BlockSpec`, a block with its states |
 | `cutscene/PrologueLines.kt` | The scientist's voice lines and their subtitle cues, read from `cutscene/prologue.json` |
 | `cutscene/GeigerClicks.kt` | A Geiger counter's counts tick by tick: a seeded Poisson process at a rate that can rise |
@@ -162,7 +162,7 @@ KDoc comment that says more.
 | `DirectorEntity.kt` | The director in his chair (GeckoLib): moves with the client's scene, mask and gaze synced; `DirectorHooks` puts him there with the level |
 | `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
-| `ScientistEntity.kt` | The prologue's scientist (GeckoLib, a passing creature): works at his bench as long as he stands |
+| `ScientistEntity.kt` | The prologue's scientist (GeckoLib, a passing creature): works at his bench, trembles, falls sick, stretches, then is a Pale man (`stage`, set by the scene) |
 | `DirectorBlocks.kt` | Level 5's anteroom and office: the director's double door that opens both leaves at once, the security camera block, the wall of CCTV screens |
 | `DeepWaterHooks.kt` | Level 5's deep water (the drain's pools): falling in pulls the player under, and they drown |
 | `DrainHooks.kt` | Level 5's drain: the hatch slamming shut once the player is down its ladder, open again on a death before the Junction |
@@ -298,7 +298,7 @@ KDoc comment that says more.
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
 | `SubjectRenderer.kt` | GeckoLib renderer for the subjects, each stage its body and skin |
 | `DeadGuardRenderer.kt` | GeckoLib renderer for the guard before you, sitting, in the player's uniform worn out |
-| `ScientistRenderer.kt` | GeckoLib renderer for the prologue's scientist, turned to his yaw |
+| `ScientistRenderer.kt` | GeckoLib renderer for the prologue's scientist, turned to his yaw; `ScientistModel` draws him as the man, in his sick skin or, once changed, as the Level 2 Pale man (eyes glowing) |
 | `DirectorRenderer.kt` | GeckoLib renderer for the director: his model, texture and animations, turned to his yaw |
 | `LabFigureRenderer.kt` | The figure seen from Level 5's Lobby, on the player's model, a dark shape |
 | `HunterRenderer.kt` | GeckoLib renderer for the Hunters, their eyes glowing |
@@ -316,7 +316,7 @@ KDoc comment that says more.
 |---|---|
 | `CutsceneView.kt` | A cinematic on the client (the director's or the prologue's, a `Kind`): a camera of its own moved tick by tick, the HUD off, the player drawn from outside (not in the prologue), the director's pose, voice lines, skipping, the black a scene opens out of |
 | `CutsceneScreen.kt` | The screen that takes the keys and the mouse during a cinematic: the black bands, the subtitles, the notice to skip |
-| `PrologueSound.kt` | The prologue's laboratory: the hum and the drone (volume following the scene) and the radiation counter's positional Geiger clicks |
+| `PrologueSound.kt` | The prologue's sound: the hum and the drone (volume following the scene), the radiation counter's positional Geiger clicks, the flicker, a crack of bones at each stage, the Pale man's hit and breathing, the title's blow, all dead at the cut |
 | `DirectorVoice.kt` | His phrases after the scene: played flat, subtitled over the HUD |
 
 ### `menu/`

@@ -5,6 +5,7 @@ import daio7771.everytunnel.core.cutscene.BlockSpec
 import daio7771.everytunnel.core.cutscene.Cell
 import daio7771.everytunnel.core.cutscene.PrologueScene
 import daio7771.everytunnel.core.cutscene.RoomPlan
+import daio7771.everytunnel.core.cutscene.SceneFrame
 import daio7771.everytunnel.core.cutscene.Spot
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -38,6 +39,12 @@ import java.util.UUID
  * were and the room is cleared out of the world. Leaving the world during it puts the player back too
  * ([abort]), so a saved game is never left inside the room.
  *
+ * While it runs this also does what the scene's cues say ([PrologueScene.PLAN]): his hands begin to shake
+ * ([ScientistEntity.TREMBLING]), the ceiling's lights flicker (the lamps swapped for plain ceiling and back, the
+ * counter's and the tubes' own glow staying) and, in the long beats of it, he goes through [ScientistEntity.SICK] and
+ * [ScientistEntity.STRETCHED] and, in the last beat, becomes a Pale man ([ScientistEntity.PALE]), turning a little
+ * more towards the camera each time. The camera, the voice and the sound are the client's, on the same ticks.
+ *
  * For now it is started by `/everytunnel prologue` (the game's chapter 2 does not exist yet). Its state lives
  * in memory only.
  */
@@ -49,6 +56,10 @@ object PrologueSceneHooks {
 
     /** The room's cell 0, 0, 0 (the corner of its air): high over the world's levels, a long way from them. */
     private val ORIGIN = BlockPos(2048, 200, 2048)
+
+    /** The ceiling's lamps, and what takes their place while the lights are off. */
+    private const val LAMP = "every_tunnel:lab_ceiling_light"
+    private const val CEILING = "minecraft:white_concrete"
 
     /** Blocks are placed without shape updates (the plan gives every state) but with light and listeners. */
     private const val FLAGS = Block.NOTIFY_LISTENERS or Block.FORCE_STATE
@@ -64,6 +75,9 @@ object PrologueSceneHooks {
         val hold: Vec3d,
         val holdYaw: Float,
         val scientist: UUID?,
+        val plan: RoomPlan,
+        val stands: Vec3d,
+        var lightsOn: Boolean = true,
     )
 
     private var running: Running? = null
@@ -113,7 +127,7 @@ object PrologueSceneHooks {
         val hold = at(plan.viewer)
         running = Running(
             player.uuid, player.server.ticks, world.registryKey, player.pos, player.yaw, player.pitch,
-            hold, plan.viewer.yaw, scientist?.uuid,
+            hold, plan.viewer.yaw, scientist?.uuid, plan, stands,
         )
         player.velocity = Vec3d.ZERO
         player.isSprinting = false
@@ -139,15 +153,36 @@ object PrologueSceneHooks {
             running = null
             return
         }
-        if (server.ticks - scene.startTick >= PrologueScene.SCENE.cutscene.totalTicks) {
+        val t = server.ticks - scene.startTick
+        if (t >= PrologueScene.SCENE.cutscene.totalTicks) {
             finish(server, skipped = false)
             return
         }
+        server.getWorld(scene.world)?.let { cue(it, scene, t) }
         // Held there: the client takes their keys, this keeps them there whatever it does.
         if (player.pos.squaredDistanceTo(scene.hold) > 0.0025) {
             player.networkHandler.requestTeleport(scene.hold.x, scene.hold.y, scene.hold.z, scene.holdYaw, 0f)
         }
         player.velocity = Vec3d.ZERO
+    }
+
+    /** The scene's cues at tick [t]: the lights, and how far the scientist has gone. */
+    private fun cue(world: ServerWorld, scene: Running, t: Int) {
+        val cues = PrologueScene.PLAN.cues
+        val lights = cues.lightsOn(t)
+        if (lights != scene.lightsOn) {
+            scene.lightsOn = lights
+            val state = state(if (lights) LAMP else CEILING)
+            for (light in scene.plan.lights) world.setBlockState(at(light), state, FLAGS)
+        }
+        val scientist = scene.scientist?.let { world.getEntity(it) } as? ScientistEntity ?: return
+        val stage = cues.stageAt(t)
+        if (stage <= scientist.stage) return
+        scientist.stage = stage
+        // Each stage turns him a little more from the bench towards the camera.
+        val frame = SceneFrame(scene.stands.x, scene.stands.y, scene.stands.z, scene.plan.scientist.yaw.toDouble())
+        scientist.refreshPositionAndAngles(scene.stands.x, scene.stands.y, scene.stands.z, PrologueScene.facing(frame, stage).toFloat(), 0f)
+        EveryTunnel.LOGGER.info("Prologue: the scientist is at stage {} (tick {})", stage, t)
     }
 
     /** The scene's end, played through or skipped: the scientist gone, the player back where they were, the room cleared. */

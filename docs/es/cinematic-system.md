@@ -188,41 +188,62 @@ Los textos de los créditos son las claves `every_tunnel.credits.*`; los dibujos
 El Chapter 2 abre con su propia cinemática, **el prólogo**, que vive solo en la rama privada hasta que se
 publiquen los niveles 1 y 2 del capítulo. Es la segunda escena que juega `CutsceneView` (`Kind.PROLOGUE`): la
 misma cámara, bandas, subtítulos y salto, pero no está en un nivel. Por ahora la empieza
-`/everytunnel prologue` (el inicio del capítulo todavía no existe).
+`/everytunnel prologue` (el inicio del capítulo todavía no existe). Dura cerca de 1 min 15 s.
 
 - **La sala** no está en el mapa. `tools/prologue/room.py` escribe un plano (`cutscene/prologue_room.json`:
-  rellenos, bloques sueltos, las luces del techo, dónde está el científico y dónde se sujeta al jugador);
-  cuando empieza la escena, `PrologueSceneHooks` lo coloca en una esquina fija muy por encima del mundo
-  (2048, 200, 2048), lejos de todos los niveles, y lo borra al terminar. Un laboratorio moderno y limpio de
-  20 x 5 x 9 con una mesa larga contra el muro norte.
+  rellenos, bloques sueltos, las luces del techo, dónde está el científico, de dónde suena el contador de
+  radiación y dónde se sujeta al jugador); cuando empieza la escena, `PrologueSceneHooks` lo coloca en una esquina
+  fija muy por encima del mundo (2048, 200, 2048), lejos de todos los niveles, y lo borra al terminar. Un
+  laboratorio moderno y limpio de 20 x 5 x 9 con una mesa larga contra el muro norte: matraces, microscopios,
+  monitores, gradillas de tubos, una grabadora y el contador de radiación (tres bloques de
+  `tools/blocks/generate.py`: una pantalla ámbar animada cuyas cifras y barra suben, una luz roja que parpadea,
+  tubos con un brillo tenue).
 - **El científico** es `ScientistEntity` (GeckoLib, `tools/entity/scientist.py`), una criatura *pasajera*: nace
   con la escena, se descarta con ella y nunca se guarda. Está de pie en la mesa con bata blanca, de espaldas a
-  la cámara, manipulando tubos (`animation.scientist.work`).
+  la cámara, manipulando tubos. Su `stage` (uno de `PrologueStages`, sincronizado con el cliente) lo pone la
+  escena: trabajando, temblando, **enfermo** (piel azul-blanca con venas y ojos lechosos, `scientist_pale.png`,
+  encorvado sobre sus manos que se crispan), **estirado** (la misma piel, brazos y piernas una mitad más largos
+  escalando sus huesos, el cuerpo estirado y delgado, la cabeza echada hacia atrás) y **Pale**, cuando
+  `client.render.ScientistModel` lo dibuja con el modelo, la textura, la animación (`listen`) y los ojos
+  brillantes del Pale man del nivel 2. No hay arte nuevo del monstruo.
 - **Los planos** se dan desde él (`PrologueScene`, un `SceneFrame` a sus pies mirando al norte, así que su
   derecha es +x): la escena sale de negro (la pantalla está negra 30 ticks mientras los chunks de la sala llegan
   al cliente y luego se aclara en 50: `Timeline.blackTicks` / `fadeTicks`, los dibuja `CutsceneScreen`), un
   travelling de 16 s por la mesa de izquierda a derecha (+x) cuya mirada se mueve con la cámara
-  (`Shot.lookTo`), que se detiene detrás de él y a su izquierda cuando él entra en el encuadre, y luego una
-  parada mientras la mirada gira hasta su espalda. Sin vuelo desde los ojos del jugador ni de vuelta: el
-  jugador no está en la escena (no se dibuja: `Kind.drawsPlayer`).
+  (`Shot.lookTo`), que se detiene detrás de él y a su izquierda cuando él entra en el encuadre; un plano de
+  asentamiento mientras la mirada gira hasta su espalda durante su entrada de registro; y desde su tercera línea
+  un avance lento sobre él. Sin vuelo desde los ojos del jugador ni de vuelta: el jugador no está en la escena (no
+  se dibuja: `Kind.drawsPlayer`).
+- **La voz marca el ritmo.** Su entrada de registro (`prologue_01`, `prologue_02`) empieza 1,5 s después de que la
+  cámara se detenga, cada línea tras la anterior con una pausa (`PrologueScene.build`, a partir de
+  `cutscene/prologue.json`, que escribe `tools/sounds/prologue_voices.py`, el cual también convierte los cuatro MP3
+  del usuario a Ogg con una sola ganancia para el grupo). Los subtítulos salen enteros, un fragmento cada vez, sin
+  nombre de hablante (es alguien a quien el juego no nombra); la voz es plana, bajo Voz/Habla.
+- **El cambio** (`PrologueCues`, todo en los ticks de la escena). Tras una pausa de 3 s empieza la tercera línea y
+  le tiemblan las manos. Desde su segundo fragmento (qué está pasando) las luces del techo parpadean, cada pulso
+  uno o dos ticks a oscuras y con huecos cada vez más cortos entre ellos (`PrologueScene.flicker`): el servidor cambia
+  las lámparas por techo liso y vuelta (el brillo propio del contador y de los tubos se queda), el cliente pone el
+  parpadeo de un fluorescente en cada pulso. Cada destello lo encuentra más cambiado: dos de los pulsos, más largos
+  (4 ticks), esconden las etapas **enfermo** y **estirado**, un tick dentro de cada uno, con un crujido de huesos
+  (`event.prologue.crack`) y un giro algo más desde la mesa hacia la cámara (`PrologueScene.facing`). La tercera
+  línea va cortada justo tras su último "loud"; en el último pulso, que lo esconde, se convierte en el Pale man de
+  cara a la cámara, encorvado y más pequeño, y se despliega hasta su altura en 1,8 s (`ScientistEntity.unfolded`, lo dibuja `ScientistRenderer`) mientras cae el golpe del stinger del nivel 2 y empieza su respiración. La cuarta línea, su grito,
+  empieza 6 ticks después. Desde "WHAT'S HAPPENING", la tercera línea y toda la cuarta son la misma voz tres veces
+  (la original, una copia 7 semitonos abajo y otra 7 arriba, mantenidas al compás con rubberband), 4 dB más suaves
+  y comprimidas, entrando poco a poco en las primeras palabras, de modo que la voz cambia con él; la cuarta
+  termina en seco (`prologue_voices.py`).
+- **El corte.** Cuando acaba el grito la pantalla se pone negra de golpe (`Timeline.cutAt`) y el zumbido, el drone y
+  el contador se paran en seco. Tras 2 s de negro y silencio se teclea sobre él «CHAPTER 2» letra a letra
+  (`TitleCue`, lo dibuja `CutsceneScreen`, `title.every_tunnel.chapter_2`), un golpe grave en su primera letra, se
+  mantiene 3 s y se desvanece; la escena acaba y la vista vuelve al jugador saliendo del negro.
+- **El sonido del laboratorio** es `client.cutscene.PrologueSound`: el zumbido de las luces (plano), un drone
+  debajo cuyo volumen sube hasta el cambio, y los clics Geiger del contador de radiación, posicionales desde el
+  contador de la mesa (`PrologueScene.COUNTER`, comprobado contra el plano de la sala), cada vez más rápidos
+  (`GeigerClicks`, un proceso de Poisson con semilla, así que suena igual cada vez).
 - **El jugador** se sujeta en una esquina de la sala, sin daño, y al final, jugada o saltada, se le devuelve
   adonde estaba (`finish`); si sale del mundo durante la escena se le devuelve antes (`abort`), así que una
   partida guardada nunca queda dentro de la sala.
-- **La voz marca la parada.** Su entrada de registro (`prologue_01`, `prologue_02`) empieza 1,5 s después de que la
-  cámara se detenga, cada línea tras la anterior con una pausa, y la escena acaba 3 s después de la última
-  (`PrologueScene.build`, a partir de `cutscene/prologue.json`, que escribe `tools/sounds/prologue_voices.py`, el
-  cual también convierte los cuatro MP3 del usuario a Ogg con una sola ganancia para el grupo). Los subtítulos salen
-  enteros, un fragmento cada vez, sin nombre de hablante (es alguien a quien el juego no nombra); la voz es plana,
-  bajo Voz/Habla.
-- **El sonido del laboratorio** es `client.cutscene.PrologueSound`: el zumbido de las luces (plano), un drone
-  debajo cuyo volumen sube con la escena, y los clics Geiger del contador de radiación, posicionales desde el
-  contador de la mesa (`PrologueScene.COUNTER`, comprobado contra el plano de la sala), cada vez más rápidos
-  (`GeigerClicks`, un proceso de Poisson con semilla, así que suena igual cada vez).
-- **Los objetos** de la mesa son tres bloques nuevos (`tools/blocks/generate.py`): el contador de radiación (una
-  pantalla ámbar animada cuyas cifras y barra suben), la grabadora de voz (una luz roja que parpadea) y una
-  gradilla de tubos de ensayo con un brillo tenue.
-- **Todavía no:** la transformación en Pale man (y las líneas `prologue_03` y `prologue_04`, ya convertidas), el
-  corte a negro y el título.
+- **Todavía no:** el enlace con el nivel 1 del Chapter 2 (la escena acaba y devuelve al jugador).
 
 ## Añadir otra cinemática
 

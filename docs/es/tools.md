@@ -34,7 +34,7 @@ git).
 | `tools/entity/distortion.py` | Geometría, animaciones, texturas y máscaras de brillo de la Distortion Cloud y el Junior (el ojo del Junior agrietándose en cuatro fases) | las Distortions del nivel 5 |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (la skin del uniforme) | el uniforme |
 | `tools/entity/dead_guard.py` | El guardia anterior: un cuerpo de jugador sentado contra una pared, la cabeza caída, con la skin del uniforme gastada (después de `guard.py`) | el Hideout del nivel 5 |
-| `tools/entity/scientist.py` | La geometría del científico (de pie, con bata blanca y la falda de la bata como una caja más), sus animaciones (quieto, trabajando en la mesa) y su textura | el prólogo del Chapter 2 |
+| `tools/entity/scientist.py` | La geometría del científico (de pie, con bata blanca y la falda de la bata como una caja más), sus animaciones (quieto, trabajando en la mesa, temblando, enfermo, estirado) y dos texturas (sano, enfermo) | el prólogo del Chapter 2 |
 | `tools/prologue/room.py` | `cutscene/prologue_room.json`: el laboratorio del prólogo (rellenos, bloques, luces del techo, dónde están el científico y el jugador), que el mod construye al empezar la escena | la sala; véase [Sistema de cinemáticas](cinematic-system.md) |
 | `tools/entity/director.py` | La geometría del director (sentado, con la máscara de la película del Cinema en su propia placa), sus animaciones (respirar, gestos, quitarse la máscara, levantarse, señalar) y su textura | el director del nivel 5 |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png`, `turn_icon.png` | los iconos del HUD, el detector del nivel 5, el símbolo de girar del pasillo de entrada |
@@ -49,7 +49,7 @@ git).
 | `tools/gui/guide_paper.py` | `guide_paper.png` (mosaico sin costuras), `guide_stains.png` | el papel de la guía |
 | `tools/sounds/generate.py` | WAV de prueba y una página para escucharlos (`tools/sounds/out/index.html`) | un sonido, para oírlo |
 | `tools/sounds/export.py` | Los `.ogg` y `sounds.json` en el mod | un sonido, para meterlo en el juego |
-| `tools/sounds/prologue_voices.py` | Las cuatro líneas del científico como Ogg en `tools/sounds/voice/` (de los MP3 del usuario, una sola ganancia para el grupo), `cutscene/prologue.json` y el texto de los fragmentos en `en_us.json` (el español, a mano) | su voz o sus palabras; véase [Sistema de cinemáticas](cinematic-system.md) |
+| `tools/sounds/prologue_voices.py` | Las cuatro líneas del científico como Ogg en `tools/sounds/voice/` (de los MP3 del usuario, una sola ganancia para el grupo; la tercera cortada tras su última palabra, desde "WHAT'S HAPPENING" y toda la cuarta en tres capas: original, grave y aguda; los fragmentos situados por el ajuste de las pausas a la puntuación y los de la primera línea a mano, a partir de una medición de sus siete tramos de voz), `cutscene/prologue.json` y el texto de los fragmentos en `en_us.json` (el español, a mano) | su voz o sus palabras; véase [Sistema de cinemáticas](cinematic-system.md) |
 | `tools/sounds/voices.py` | `cutscene/director.json` y los subtítulos del director en `en_us.json`, a partir de sus archivos de voz (`tools/sounds/voice/`) | una de sus voces o sus palabras; véase [Sistema de cinemáticas](cinematic-system.md) |
 
 ## Mapa

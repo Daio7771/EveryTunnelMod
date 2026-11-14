@@ -38,7 +38,7 @@ con un comentario KDoc que cuenta más.
 | `camera/CameraAim.kt` | Hacia dónde apunta la cabeza de una cámara de seguridad, girando hacia un objetivo no más rápido que su servo |
 | `cutscene/Cutscene.kt` | Una cinemática como datos: poses de cámara, el marco de una escena, planos, el vuelo de entrada y de salida, las bandas negras |
 | `cutscene/DirectorScene.kt` | La escena del director medida con su voz: encuadres, subtítulos, sus gestos, cuándo aparta la vista, su máscara; `SkipPrompt` (saltar pulsando dos veces) |
-| `cutscene/PrologueScene.kt` | La línea de tiempo del prólogo del Chapter 2: el travelling por la mesa y la parada en el científico, desde él; sale de negro |
+| `cutscene/PrologueScene.kt` | El prólogo del Chapter 2: la línea de tiempo desde el científico (travelling, asentamiento, avance), las cuatro líneas, los subtítulos, el negro de apertura, los pulsos del parpadeo, las etapas de su cambio, el corte a negro y el título tecleado (`PrologueCues`, `PrologueStages`, `PrologueScenePlan`); las curvas del zumbido, el drone y el Geiger |
 | `cutscene/RoomPlan.kt` | El plano de la sala del prólogo (leído de `cutscene/prologue_room.json`) y `BlockSpec`, un bloque con sus estados |
 | `cutscene/PrologueLines.kt` | Las líneas de voz del científico y sus subtítulos, leídas de `cutscene/prologue.json` |
 | `cutscene/GeigerClicks.kt` | Los recuentos de un contador Geiger tick a tick: un proceso de Poisson con semilla a un ritmo que puede subir |
@@ -162,7 +162,7 @@ con un comentario KDoc que cuenta más.
 | `DirectorEntity.kt` | El director en su silla (GeckoLib): se mueve con la escena del cliente, con máscara y mirada sincronizadas; `DirectorHooks` lo pone ahí con el nivel |
 | `LabHallHooks.kt` | El golpe de cuerdas y la primera Cloud del Lab hall, una vez por partida |
 | `ChemicalHooks.kt` | El puzle químico: la pareja de la partida, la mezcladora, la alarma y sus enemigos, la rejilla disolviéndose, la trampilla |
-| `ScientistEntity.kt` | El científico del prólogo (GeckoLib, criatura pasajera): trabaja en su mesa mientras esté de pie |
+| `ScientistEntity.kt` | El científico del prólogo (GeckoLib, criatura pasajera): trabaja en su mesa, tiembla, enferma, se estira y luego es un Pale man (`stage`, que pone la escena) |
 | `DirectorBlocks.kt` | La antesala y el despacho del nivel 5: la puerta doble del director que abre sus dos hojas a la vez, el bloque de la cámara de seguridad, el muro de monitores CCTV |
 | `DeepWaterHooks.kt` | El agua honda del nivel 5 (las piscinas del drenaje): al caer, algo arrastra al jugador al fondo y se ahoga |
 | `DrainHooks.kt` | El drenaje del nivel 5: la trampilla cerrándose de golpe cuando el jugador ha bajado su escalera, abierta otra vez si muere antes de la Junction |
@@ -298,7 +298,7 @@ con un comentario KDoc que cuenta más.
 | `ObserverRenderer.kt` | Renderizador de GeckoLib del Observer; su cabeza gira con la de la entidad |
 | `SubjectRenderer.kt` | Renderizador de GeckoLib de los sujetos, cada fase con su cuerpo y su piel |
 | `DeadGuardRenderer.kt` | Renderizador de GeckoLib del guardia anterior, sentado, con el uniforme del jugador gastado |
-| `ScientistRenderer.kt` | Renderizador de GeckoLib del científico del prólogo, girado a su orientación |
+| `ScientistRenderer.kt` | Renderizador de GeckoLib del científico del prólogo, girado a su orientación; `ScientistModel` lo dibuja como el hombre, con su piel enferma o, ya cambiado, como el Pale man del nivel 2 (ojos brillantes) |
 | `DirectorRenderer.kt` | Renderizador de GeckoLib del director: su modelo, su textura y sus animaciones, girado a su orientación |
 | `LabFigureRenderer.kt` | La figura que se ve desde el Lobby del nivel 5, con el modelo del jugador, una silueta oscura |
 | `HunterRenderer.kt` | Renderizador de GeckoLib de los Hunters, con los ojos brillando |
@@ -316,7 +316,7 @@ con un comentario KDoc que cuenta más.
 |---|---|
 | `CutsceneView.kt` | Una cinemática en el cliente (la del director o la del prólogo, un `Kind`): una cámara propia movida tick a tick, el HUD apagado, el jugador dibujado desde fuera (no en el prólogo), la pose del director, líneas de voz, saltar, el negro del que sale una escena |
 | `CutsceneScreen.kt` | La pantalla que se queda con las teclas y el ratón durante una cinemática: las bandas negras, los subtítulos, el aviso para saltar |
-| `PrologueSound.kt` | El laboratorio del prólogo: el zumbido y el drone (con el volumen siguiendo la escena) y los clics Geiger posicionales del contador de radiación |
+| `PrologueSound.kt` | El sonido del prólogo: el zumbido y el drone (con el volumen siguiendo la escena), los clics Geiger posicionales del contador de radiación, el parpadeo, un crujido de huesos en cada etapa, el golpe y la respiración del Pale man, el golpe del título, todo muerto en el corte |
 | `DirectorVoice.kt` | Sus frases tras la escena: sonando planas, subtituladas sobre el HUD |
 
 ### `menu/`

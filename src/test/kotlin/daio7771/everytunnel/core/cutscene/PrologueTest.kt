@@ -2,22 +2,32 @@ package daio7771.everytunnel.core.cutscene
 
 import com.google.gson.JsonParser
 import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.sin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertTrue
 
-/** The prologue's timeline, its room's plan and the camera's moving aim. */
+/** The prologue's timeline, its cues, its room's plan, its sound curves and the camera's moving aim. */
 class PrologueTest {
 
     private val eps = 1e-6
     private val plan = RoomPlan.load()
     private val scene = PrologueScene.SCENE.cutscene
+    private val cues = PrologueScene.PLAN.cues
+    private val voice = PrologueLines.load()
+    private val lines = PrologueScene.SCENE.lines
 
     /** The scientist's frame in the room's own coordinates: where he stands, facing the way the plan says. */
     private val frame = SceneFrame(plan.scientist.x, plan.scientist.y, plan.scientist.z, plan.scientist.yaw.toDouble())
 
     private fun at(tick: Double) = scene.pose(tick, frame, CameraPose(0.0, 0.0, 0.0, 0.0, 0.0), Triple(0.0, 0.0, 0.0))
+
+    /** [degrees] turned into -180..180, so 180 and -180 (both north) compare equal. */
+    private fun wrap(degrees: Double): Double = ((degrees + 180.0) % 360.0 + 360.0) % 360.0 - 180.0
+
+    // ---- the camera
 
     @Test
     fun `a shot whose aim moves with the camera keeps its heading`() {
@@ -55,49 +65,47 @@ class PrologueTest {
         assertTrue(abs(at(PrologueScene.TRAVEL + 1.0).x - stop.x) < 0.02, "and slow as it holds")
     }
 
-    /** [degrees] turned into -180..180, so 180 and -180 (both north) compare equal. */
-    private fun wrap(degrees: Double): Double = ((degrees + 180.0) % 360.0 + 360.0) % 360.0 - 180.0
-
     @Test
     fun `while tracking the camera looks north at the bench, then turns onto his back`() {
         val north = 180.0
         for (tick in listOf(0.0, PrologueScene.TRAVEL / 2.0, PrologueScene.TRAVEL.toDouble())) {
             assertEquals(0.0, wrap(at(tick).yaw - north), 1e-3, "tick $tick")
         }
-        val end = at(scene.totalTicks - Cutscene.BANDS_TICKS - 1e-6)
-        val toHim = CameraPose.looking(end.x, end.y, end.z, plan.scientist.x, plan.scientist.y + 1.3, plan.scientist.z + 0.0)
-        assertTrue(abs(wrap(end.yaw - toHim.yaw)) < 12.0, "ends looking at his back: ${end.yaw} vs ${toHim.yaw}")
-        assertTrue(wrap(end.yaw - north) > 5.0, "turned to its right (towards the east, where he is)")
+        val settled = at(lines[2].start.toDouble())
+        val toHim = CameraPose.looking(settled.x, settled.y, settled.z, plan.scientist.x, plan.scientist.y + 1.3, plan.scientist.z + 0.0)
+        assertTrue(abs(wrap(settled.yaw - toHim.yaw)) < 12.0, "settled on his back before he shakes: ${settled.yaw} vs ${toHim.yaw}")
+        assertTrue(wrap(settled.yaw - north) > 5.0, "turned to its right (towards the east, where he is)")
     }
 
     @Test
     fun `the camera never leaves the room`() {
-        for (tick in 0..scene.totalTicks) {
+        // Up to the end of the last shot: after it only the bands slide out, under black, and the camera is handed back to the player.
+        for (tick in 0 until scene.shotsEnd) {
             val pose = at(tick.toDouble())
             assertTrue(plan.insideInterior(pose.x, pose.y, pose.z), "tick $tick: ${pose.x}, ${pose.y}, ${pose.z}")
         }
     }
 
     @Test
-    fun `the scene opens out of black and ends with the bands out`() {
-        val timeline = PrologueScene.SCENE
-        assertEquals(1.0, timeline.blackAt(0.0), eps)
-        assertEquals(1.0, timeline.blackAt(timeline.blackTicks - 1.0), eps)
-        assertTrue(timeline.blackAt(timeline.blackTicks + timeline.fadeTicks / 2.0) in 0.01..0.99, "half way, half black")
-        assertEquals(0.0, timeline.blackAt((timeline.blackTicks + timeline.fadeTicks).toDouble()), eps)
-        assertEquals(timeline.lines.last().end + PrologueScene.TAIL + Cutscene.BANDS_TICKS, scene.totalTicks)
-        assertEquals(0.0, scene.bands(scene.totalTicks.toDouble()), eps)
-        assertEquals(1.0, scene.bands(Cutscene.BANDS_TICKS.toDouble()), eps)
+    fun `the camera creeps in while he changes, never jumping`() {
+        val first = lines[2].start
+        var previous = at(first.toDouble())
+        for (tick in first + 1 until scene.shotsEnd) {
+            val pose = at(tick.toDouble())
+            assertTrue(abs(pose.x - previous.x) < 0.05 && abs(pose.z - previous.z) < 0.05, "tick $tick: a jump")
+            previous = pose
+        }
     }
 
-    private val voice = PrologueLines.load()
+    // ---- the voice
 
     @Test
-    fun `his log entry begins after the camera stops, each line after the one before`() {
-        val lines = PrologueScene.SCENE.lines
-        assertEquals(PrologueScene.PLAYED, lines.map { it.line.id })
+    fun `his four lines come one after the other, the first after the camera stops`() {
+        assertEquals(listOf("prologue_01", "prologue_02", "prologue_03", "prologue_04"), lines.map { it.line.id })
         assertEquals(PrologueScene.TRAVEL + PrologueScene.LEAD, lines[0].start)
-        for ((a, b) in lines.zipWithNext()) assertEquals(a.end + PrologueScene.LINE_GAP, b.start)
+        assertEquals(lines[0].end + PrologueScene.LINE_GAP, lines[1].start)
+        assertEquals(lines[1].end + PrologueScene.TURN_PAUSE, lines[2].start)
+        assertEquals(lines[2].end + PrologueScene.REVEAL_GAP, lines[3].start)
         for (l in lines) assertEquals(DirectorScene.ticks(l.line.ms), l.end - l.start)
         assertTrue(lines.first().start > PrologueScene.TRAVEL, "the camera is at rest before he speaks")
     }
@@ -105,7 +113,6 @@ class PrologueTest {
     @Test
     fun `subtitles come with the voice and never ahead of it or into the next line`() {
         val timeline = PrologueScene.SCENE
-        val lines = timeline.lines
         for (sub in timeline.subtitles) {
             val line = lines.last { it.start <= sub.start }
             val next = lines.getOrNull(lines.indexOf(line) + 1)
@@ -119,40 +126,154 @@ class PrologueTest {
     }
 
     @Test
-    fun `every cue of his four lines has its text in English and in Spanish`() {
+    fun `every cue of his four lines and the title have their text in English and in Spanish`() {
         fun keys(file: String): Set<String> {
             val stream = PrologueTest::class.java.classLoader.getResourceAsStream("assets/every_tunnel/lang/$file.json")!!
             return stream.use { JsonParser.parseString(it.reader().readText()).asJsonObject.keySet() }
         }
         val en = keys("en_us")
         val es = keys("es_es")
-        assertEquals(listOf("prologue_01", "prologue_02", "prologue_03", "prologue_04"), voice.lines.map { it.id })
-        for (cue in voice.lines.flatMap { it.cues }) {
-            assertTrue(cue.key in en, "${cue.key} in en_us")
-            assertTrue(cue.key in es, "${cue.key} in es_es")
+        for (key in voice.lines.flatMap { it.cues }.map { it.key } + PrologueScene.TITLE_KEY) {
+            assertTrue(key in en, "$key in en_us")
+            assertTrue(key in es, "$key in es_es")
         }
     }
 
+    // ---- the cues
+
     @Test
-    fun `the radiation counter sounds from where the plan puts its block`() {
-        val place = frame.at(PrologueScene.COUNTER.forward, PrologueScene.COUNTER.right, PrologueScene.COUNTER.up)
-        assertEquals(plan.counter.x, place.first, eps)
-        assertEquals(plan.counter.y, place.second, eps)
-        assertEquals(plan.counter.z, place.third, eps)
-        assertTrue(plan.puts.any { it.at == Cell(plan.counter.x.toInt(), 1, plan.counter.z.toInt()) && it.block.startsWith("every_tunnel:radiation_counter") })
-        assertTrue(plan.puts.any { it.block.startsWith("every_tunnel:voice_recorder") })
-        assertTrue(plan.puts.count { it.block.startsWith("every_tunnel:tube_rack") } >= 3)
+    fun `his hands shake with the third line and he changes as it ends`() {
+        assertEquals(lines[2].start, cues.trembleAt)
+        assertEquals(lines[2].end, cues.swapAt)
+        assertEquals(lines[3].end, cues.cutAt)
+        assertEquals(cues.cutAt + PrologueScene.SILENCE, cues.titleAt)
+    }
+
+    @Test
+    fun `the lights flicker faster and faster from his second cue, the last beat round the change`() {
+        val beats = cues.darkBeats
+        assertTrue(beats.size >= 5, "a real flicker: ${beats.size} beats")
+        assertTrue(beats.first().first >= lines[2].start + voice.line("prologue_03").cues[1].atMs / 50, "not before he says what is happening")
+        val gaps = beats.zipWithNext().map { (a, b) -> b.first - a.last - 1 }
+        assertTrue(gaps.all { it >= 3 }, "light between beats: $gaps")
+        // The last gap is only what is left before the beat of the final change, and may be longer: a held breath.
+        assertTrue(gaps.dropLast(1).zipWithNext().all { (a, b) -> b <= a }, "ever shorter: $gaps")
+        val change = beats.last()
+        assertTrue(cues.swapAt in change, "the change happens in the dark")
+        assertTrue(cues.swapAt - 2 in change && cues.swapAt + 3 in change)
+        assertTrue(!cues.lightsOn(cues.swapAt) && cues.lightsOn(change.last + 1), "the lights come back with him already changed")
+        assertTrue(cues.lightsOn(0) && cues.lightsOn(cues.trembleAt))
+        assertTrue(beats.zipWithNext().all { (a, b) -> a.last < b.first }, "in order, apart")
+    }
+
+    @Test
+    fun `he goes through the stages one at a time, each hidden in a long dark beat`() {
+        assertTrue(cues.trembleAt < cues.sickAt && cues.sickAt < cues.stretchAt && cues.stretchAt < cues.swapAt)
+        for (at in listOf(cues.sickAt, cues.stretchAt)) {
+            val beat = cues.darkBeats.single { at in it }
+            assertEquals(4, beat.last - beat.first + 1, "a long beat")
+            assertEquals(beat.first + 1, at, "a tick into the dark")
+            assertTrue(cues.darkBeats.last() != beat, "not the last beat")
+        }
+        assertEquals(
+            listOf(
+                PrologueStages.WORKING, PrologueStages.TREMBLING, PrologueStages.SICK, PrologueStages.STRETCHED, PrologueStages.PALE,
+            ),
+            listOf(0, cues.trembleAt, cues.sickAt, cues.stretchAt, cues.swapAt).map { cues.stageAt(it) },
+        )
+        assertEquals(PrologueStages.TREMBLING, cues.stageAt(cues.sickAt - 1))
+        assertEquals(PrologueStages.PALE, cues.stageAt(cues.cutAt))
+        assertEquals(listOf(1, 2, 3, 4), cues.changes.map { it.second })
+        assertTrue(cues.changes.zipWithNext().all { (a, b) -> a.first < b.first })
+    }
+
+    @Test
+    fun `at each stage he turns a little more from the bench towards the camera`() {
+        val bench = frame.yaw
+        val toCamera = PrologueScene.facing(frame, PrologueStages.PALE)
+        assertEquals(bench, PrologueScene.facing(frame, PrologueStages.WORKING), eps)
+        assertEquals(bench, PrologueScene.facing(frame, PrologueStages.TREMBLING), eps)
+        val turned = listOf(PrologueStages.SICK, PrologueStages.STRETCHED, PrologueStages.PALE).map { abs(PrologueScene.facing(frame, it) - bench) }
+        assertTrue(turned[0] > 10.0 && turned[0] < turned[1] && turned[1] < turned[2], "turning: $turned")
+        assertEquals(0.0, wrap(toCamera - PrologueScene.facingCamera(frame)), 1e-6)
+    }
+
+    @Test
+    fun `facing the camera, the Pale man looks at where it settled`() {
+        val yaw = Math.toRadians(PrologueScene.facing(frame, PrologueStages.PALE))
+        val ahead = Pair(-sin(yaw), cos(yaw))
+        val settled = at(cues.swapAt.toDouble())
+        val toCamera = Pair(settled.x - frame.x, settled.z - frame.z)
+        val length = Math.hypot(toCamera.first, toCamera.second)
+        assertTrue((ahead.first * toCamera.first + ahead.second * toCamera.second) / length > 0.95, "looks at the camera")
+        assertTrue(abs(wrap(PrologueScene.facing(frame, PrologueStages.PALE) - plan.scientist.yaw)) > 90.0, "he has turned round from the bench")
+    }
+
+    // ---- black, the title, the end
+
+    @Test
+    fun `the scene opens out of black, goes black at the cut and stays so`() {
+        val timeline = PrologueScene.SCENE
+        assertEquals(1.0, timeline.blackAt(0.0), eps)
+        assertEquals(1.0, timeline.blackAt(timeline.blackTicks - 1.0), eps)
+        assertTrue(timeline.blackAt(timeline.blackTicks + timeline.fadeTicks / 2.0) in 0.01..0.99, "half way, half black")
+        assertEquals(0.0, timeline.blackAt((timeline.blackTicks + timeline.fadeTicks).toDouble()), eps)
+        assertEquals(0.0, timeline.blackAt(cues.cutAt - 1.0), eps, "clear to the last tick of the scream")
+        assertEquals(1.0, timeline.blackAt(cues.cutAt.toDouble()), eps, "dry")
+        assertEquals(1.0, timeline.blackAt(scene.totalTicks.toDouble()), eps)
+    }
+
+    @Test
+    fun `the title is typed on the black, held and faded, and the scene ends after it`() {
+        val title = PrologueScene.SCENE.title!!
+        assertEquals(PrologueScene.TITLE_KEY, title.key)
+        assertEquals(cues.titleAt, title.start)
+        assertEquals(0, title.visible(title.start - 1.0, 9))
+        assertEquals(9, title.visible(title.start + title.typeTicks.toDouble(), 9))
+        assertEquals(5, title.visible(title.start + title.typeTicks / 2.0, 9), "half the letters half way")
+        val typedWords = listOf(9, 10).map { title.visible(title.start + title.typeTicks / 2.0, it) }
+        assertTrue(typedWords[1] >= typedWords[0], "a longer translation types as long")
+        assertEquals(1.0, title.alpha(title.start + title.typeTicks + title.hold - 1.0), eps)
+        assertTrue(title.alpha(title.end - title.fade / 2.0) in 0.4..0.6)
+        assertEquals(0.0, title.alpha(title.end.toDouble()), eps)
+        assertEquals(title.end + Cutscene.BANDS_TICKS, scene.totalTicks)
+    }
+
+    // ---- sound
+
+    @Test
+    fun `the hum and the drone are dead at the cut, the counter silent`() {
+        val cut = cues.cutAt
+        assertEquals(0.0, PrologueScene.humLevel(0.0, cut), eps)
+        assertEquals(1.0, PrologueScene.humLevel(cut / 2.0, cut), eps)
+        assertEquals(1.0, PrologueScene.humLevel(cut - 1.0, cut), eps)
+        assertEquals(0.0, PrologueScene.humLevel(cut.toDouble(), cut), eps)
+        assertEquals(0.0, PrologueScene.droneLevel(cut.toDouble(), cues.swapAt, cut), eps)
+        assertEquals(0.0, PrologueScene.geigerRate(cut.toDouble(), cut), eps)
+    }
+
+    @Test
+    fun `the drone rises to the change and stays there`() {
+        val swap = cues.swapAt
+        val cut = cues.cutAt
+        assertEquals(0.0, PrologueScene.droneLevel(0.0, swap, cut), eps)
+        val early = PrologueScene.droneLevel(swap * 0.2, swap, cut)
+        val late = PrologueScene.droneLevel(swap * 0.8, swap, cut)
+        assertTrue(early in 0.05..0.4, "a murmur at first: $early")
+        assertTrue(late > 2 * early, "rising: $early then $late")
+        assertEquals(1.0, PrologueScene.droneLevel(swap.toDouble(), swap, cut), 1e-6)
+        assertEquals(1.0, PrologueScene.droneLevel(cut - 1.0, swap, cut), 1e-6, "full through his scream")
     }
 
     @Test
     fun `the counter clicks faster and faster`() {
-        val total = scene.totalTicks
-        val rates = (0..total step 20).map { PrologueScene.geigerRate(it.toDouble(), total) }
+        val cut = cues.cutAt
+        val rates = (0 until cut step 20).map { PrologueScene.geigerRate(it.toDouble(), cut) }
         assertTrue(rates.zipWithNext().all { (a, b) -> b >= a })
         assertTrue(rates.last() > 2 * rates.first())
         val clicks = GeigerClicks(7)
         fun mean(rate: Double) = (0 until 20_000).sumOf { clicks.counts(it, rate) } / 20_000.0
-        assertEquals(1.0 / 20.0 * 1.0, mean(1.0), 0.01)
+        assertEquals(1.0 / 20.0, mean(1.0), 0.01)
         assertEquals(10.0 / 20.0, mean(10.0), 0.03)
     }
 
@@ -165,17 +286,17 @@ class PrologueTest {
         assertTrue((0 until 1000).all { a.counts(it, 400.0) in 0..12 }, "never more than a tick can hold")
     }
 
+    // ---- the room
+
     @Test
-    fun `the hum is in for the black and out at the end, the drone rises`() {
-        val total = scene.totalTicks
-        assertEquals(0.0, PrologueScene.humLevel(0.0, total), eps)
-        assertEquals(1.0, PrologueScene.humLevel(total / 2.0, total), eps)
-        assertEquals(0.0, PrologueScene.humLevel(total.toDouble(), total), eps)
-        assertEquals(0.0, PrologueScene.droneLevel(0.0, total), eps)
-        val early = PrologueScene.droneLevel(total * 0.2, total)
-        val late = PrologueScene.droneLevel(total * 0.8, total)
-        assertTrue(early in 0.05..0.4, "a murmur at first: $early")
-        assertTrue(late > 2 * early, "rising: $early then $late")
+    fun `the radiation counter sounds from where the plan puts its block`() {
+        val place = frame.at(PrologueScene.COUNTER.forward, PrologueScene.COUNTER.right, PrologueScene.COUNTER.up)
+        assertEquals(plan.counter.x, place.first, eps)
+        assertEquals(plan.counter.y, place.second, eps)
+        assertEquals(plan.counter.z, place.third, eps)
+        assertTrue(plan.puts.any { it.at == Cell(plan.counter.x.toInt(), 1, plan.counter.z.toInt()) && it.block.startsWith("every_tunnel:radiation_counter") })
+        assertTrue(plan.puts.any { it.block.startsWith("every_tunnel:voice_recorder") })
+        assertTrue(plan.puts.count { it.block.startsWith("every_tunnel:tube_rack") } >= 3)
     }
 
     @Test

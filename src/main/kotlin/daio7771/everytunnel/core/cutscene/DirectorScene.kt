@@ -16,10 +16,35 @@ data class Subtitle(val key: String, val start: Int, val end: Int)
 data class Action(val index: Int, val name: String, val start: Int, val blendTicks: Int, val loops: Boolean)
 
 /**
+ * A title typed on black: the lang key [key], typed over [typeTicks] from tick [start] (letter by letter, however
+ * long the text is in the player's language), held for [hold], faded out over [fade].
+ */
+data class TitleCue(val key: String, val start: Int, val typeTicks: Int, val hold: Int, val fade: Int) {
+
+    /** The tick the title is gone. */
+    val end: Int = start + typeTicks + hold + fade
+
+    /** How many of a text's [length] letters are typed at [tick] (fractional). */
+    fun visible(tick: Double, length: Int): Int {
+        if (tick < start) return 0
+        return Math.ceil(length * ((tick - start) / typeTicks).coerceIn(0.0, 1.0)).toInt().coerceIn(0, length)
+    }
+
+    /** How opaque it is at [tick]: full while typed and held, fading out over [fade]. */
+    fun alpha(tick: Double): Double = when {
+        tick < start -> 0.0
+        tick < start + typeTicks + hold -> 1.0
+        tick < end -> 1.0 - (tick - start - typeTicks - hold) / fade
+        else -> 0.0
+    }
+}
+
+/**
  * A scene's camera ([cutscene]) with its voice [lines] and their [subtitles], what the director does
  * ([actions]), when he looks away from the player ([lookAway], tick ranges), and the tick his mask lies on the
  * desk ([maskDown]), all on the same ticks. A scene that opens out of black has the screen black for
- * [blackTicks], then fading out over [fadeTicks] ([blackAt]).
+ * [blackTicks], then fading out over [fadeTicks]; one that ends in a cut goes black at [cutAt] and stays so ([blackAt]),
+ * and may type a [title] on it.
  */
 class Timeline(
     val cutscene: Cutscene,
@@ -30,10 +55,13 @@ class Timeline(
     val maskDown: Int = Int.MAX_VALUE,
     val blackTicks: Int = 0,
     val fadeTicks: Int = 0,
+    val cutAt: Int = Int.MAX_VALUE,
+    val title: TitleCue? = null,
 ) {
 
     /** How black the screen is at [tick] (fractional): 1 all black, 0 clear. */
     fun blackAt(tick: Double): Double = when {
+        tick >= cutAt -> 1.0
         tick < blackTicks -> 1.0
         fadeTicks > 0 && tick < blackTicks + fadeTicks -> 1.0 - Cutscene.ease((tick - blackTicks) / fadeTicks)
         else -> 0.0

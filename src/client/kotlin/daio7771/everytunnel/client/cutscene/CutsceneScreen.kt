@@ -1,5 +1,6 @@
 package daio7771.everytunnel.client.cutscene
 
+import daio7771.everytunnel.core.cutscene.TitleCue
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.Text
@@ -50,6 +51,22 @@ class CutsceneScreen : Screen(Text.empty()) {
         }
         val black = maxOf(CutsceneView.skipBlack(), CutsceneView.openingBlack(client.tickDelta))
         if (black > 0f) context.fill(0, 0, width, height, ((black * 255).toInt() shl 24))
+        CutsceneView.title()?.let { drawTitle(context, it, CutsceneView.sceneTick(client.tickDelta)) }
+    }
+
+    /** The title, on the black: its letters typed one by one from where the whole word will begin, so none shifts; fading out at the end. */
+    private fun drawTitle(context: DrawContext, cue: TitleCue, tick: Double) {
+        val text = Text.translatable(cue.key).string
+        val typed = cue.visible(tick, text.length)
+        val alpha = cue.alpha(tick)
+        if (typed <= 0 || alpha < 0.02) return
+        val matrices = context.matrices
+        matrices.push()
+        matrices.scale(TITLE_SCALE, TITLE_SCALE, 1f)
+        val x = (width / TITLE_SCALE - textRenderer.getWidth(text)) / 2f
+        val y = (height / TITLE_SCALE - textRenderer.fontHeight) / 2f
+        context.drawText(textRenderer, text.take(typed), x.toInt(), y.toInt(), ((alpha * 255).toInt() shl 24) or WHITE, true)
+        matrices.pop()
     }
 
     override fun renderBackground(context: DrawContext) = Unit
@@ -76,6 +93,10 @@ class CutsceneScreen : Screen(Text.empty()) {
         private const val NOTICE_SCALE = 0.75f
         private const val SPEAKER_GREY = 0x9A9A9A
         private const val WHITE = 0xFFFFFF
+
+        /** The title's size: big, over the bands' black. */
+        private const val TITLE_SCALE = 3.5f
+
         /** A subtitle line is at most this share of the screen's width. */
         private const val SUBTITLE_WIDTH = 0.6
     }

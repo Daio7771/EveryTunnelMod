@@ -1781,6 +1781,43 @@ def lab_air(rng, variant):
     return stereo(sides[0], sides[1])
 
 
+def prologue_crack(rng, variant):
+    """Chapter 2's prologue: a stage of the scientist's change, the sound of a body giving way: a run of dry cracks a few
+    hundredths of a second apart (joints, like knuckles or green wood, each a sharp click with a short hollow ring), a dull
+    wet thump under the first, and the thin creak of something stretched too far, rising and breaking off."""
+    n = samples(1.1)
+    t = time_axis(n)
+    y = np.zeros(n)
+    at = 0.0
+    for _ in range(int(rng.integers(3, 6))):
+        at += rng.uniform(0.025, 0.12)
+        base = rng.uniform(550.0, 1500.0)
+        y += rng.uniform(0.6, 1.0) * knock(n, rng, at, base, [1.0, 1.9, 2.7], [1.0, 0.5, 0.25], [0.012, 0.007, 0.004], click=1.0, click_hi=9000.0)
+    y += 0.55 * glide_tone(52.0 + 26.0 * np.exp(-t / 0.09)) * np.exp(-t / 0.13)
+    creak = bandpass(rng.standard_normal(n), 1300.0, 3400.0, order=2)
+    creak *= envelope(n, [(0.0, 0.0), (0.12, 0.0), (0.4, 0.18), (0.62, 0.0), (1.1, 0.0)]) * (0.6 + 0.4 * np.sin(TAU * rng.uniform(38.0, 60.0) * t))
+    y += creak
+    return fade(drive(y / np.max(np.abs(y)), 1.2), 0.001, 0.25)
+
+
+def prologue_title_hit(rng, variant):
+    """Chapter 2's title landing on the black: one low blow, a sub tone dropping from 62 to 31 Hz, a dark detuned cluster
+    swelling out of it and dying over a couple of seconds, a dull thump at the front and a rumble under the tail.
+    Nothing high in it: it should be felt more than heard."""
+    n = samples(5.0)
+    t = time_axis(n)
+    sub = glide_tone(31.0 + 31.0 * np.exp(-t / 0.18)) * np.exp(-t / 1.1)
+    swell = ((1.0 - np.exp(-t / 0.12)) * np.exp(-t / 1.7))[:, None]
+    cluster = lowpass(detuned_cluster(t, [41.2, 43.7, 61.7, 65.4], rng), 420.0, order=2) * swell
+    thump = burst(n, rng, 0.0, 0.3, hi=500.0, tau=0.07, amp=0.9)
+    tail = np.exp(-t / 1.9)
+    left = sub + thump + 0.4 * shaped_noise(n, rng, exponent=2.0, lo=20.0, hi=130.0) * tail
+    right = sub + 0.9 * thump + 0.4 * shaped_noise(n, rng, exponent=2.0, lo=20.0, hi=130.0) * tail
+    left, right = left[:, None], right[:, None]
+    y = 0.5 * cluster + np.concatenate([left, right], axis=1)
+    return fade(drive(y, 1.4), 0.002, 0.8)
+
+
 def prologue_hum(rng, variant):
     """Chapter 2's prologue: a clean modern laboratory's hum, the same everywhere in the shot: the lights' mains hum at
     100 Hz with its harmonics and a faint high buzz, a fridge's low tone, and the ventilation's soft hiss. Quieter and
@@ -2406,6 +2443,12 @@ SOUNDS = [
     Sound("event.lab.sting", "Level progress", "Level 5: walking into the Lab hall, a stab of low strings out of tune", "stereo", False, 1, lab_sting, -2.0),
     Sound("ambient.lab.air", "Level 5 ambience", "The lab (layer 1): the air handling, ducts rushing softly, a fan, a low rumble",
           "stereo", True, 1, lab_air, -6.0, stream=True, game_volume=0.6),
+    Sound("event.prologue.crack", "Chapter 2 prologue", "A stage of the scientist's change: dry cracks of joints, a dull thump, the creak of something stretched too far (3 variations)",
+          "mono", False, 3, prologue_crack, -3.0, attenuation=24),
+    Sound("music.prologue.reveal", "Chapter 2 prologue", "The scientist becomes a Pale man: the hit of \"he heard you\" (the Level 2 stinger's own), as he turns to the camera",
+          "stereo", False, 1, lambda rng, variant: stinger_heard(rng, 1), -1.0),
+    Sound("event.prologue.title", "Chapter 2 prologue", "\"CHAPTER 2\" landing on the black: one low blow, felt more than heard", "stereo", False, 1,
+          prologue_title_hit, -1.0),
     Sound("ambient.prologue.hum", "Chapter 2 prologue", "The prologue's laboratory: the lights' hum, a fridge, the ventilation's hiss (plays flat, the same in every shot)",
           "stereo", True, 1, prologue_hum, -8.0, stream=True, game_volume=0.5),
     Sound("music.prologue.drone", "Chapter 2 prologue", "The prologue's tension: a low drone, two tones a semitone apart beating, a thin whine (its volume rises with the scene)",

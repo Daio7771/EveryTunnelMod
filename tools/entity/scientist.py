@@ -14,8 +14,11 @@ Run after changing anything here (from the repository root):   python3 tools/ent
 Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   geo/entity/scientist.geo.json                a player's body (the 64x64 skin's boxes, wide arms) with the coat's
                                                skirt as one more box over the thighs
-  animations/entity/scientist.animation.json   idle, work
+  animations/entity/scientist.animation.json   idle, work, tremble (the first signs: "my hands"), sick (hunched,
+                                               the hands curling), stretch (arms and legs lengthening, the head
+                                               thrown back): the stages of his change, before he is a Pale man
   textures/entity/scientist.png                nothing of him glows
+  textures/entity/scientist_pale.png           the same, sick: pale blue-white skin, milky eyes, grey lips, dark veins
 and, in tools/entity/output/ (git-ignored): scientist_preview.png (front, back, side standing; side working; the
 face close).
 
@@ -52,6 +55,15 @@ TROUSERS, TROUSERS_SHADE = (58, 62, 72), (44, 48, 58)
 SHOE = (26, 26, 30)
 BADGE, BADGE_BAND = (246, 246, 244), (70, 110, 170)
 PEN = (40, 70, 160)
+
+# The sick man's skin (scientist_pale.png): the same drawing in the colours of a body that is giving up: a blue-white
+# skin with dark rings, eyes gone milky (the iris barely darker than the white), grey lips, no stubble showing.
+PALE_COLOURS = {
+    "SKIN": (222, 226, 234), "SKIN_SHADE": (192, 198, 212), "SKIN_DARK": (110, 116, 140), "STUBBLE": (176, 180, 194),
+    "EYE_WHITE": (244, 244, 248), "IRIS": (222, 224, 234), "LIPS": (146, 148, 170),
+}
+MAN_COLOURS = {name: globals()[name] for name in PALE_COLOURS}
+VEIN = (92, 102, 146)
 
 # The coat's skirt: 8 wide, 6 high, 4 deep, from the waist over the thighs, a little wider than the body; its UV
 # in the body's overlay layer's place.
@@ -212,12 +224,34 @@ def paint_skirt(img, rng):
         put(img, back, 3, y, COAT_DARK)                               # the vent at the back
 
 
-def texture():
+def paint_veins(img):
+    """Dark blue veins under the sick man's skin: on the face and down the sides of the head, on his hands."""
+    face = skin_faces(part("head"))["front"][:2]
+    for x, y in ((0, 2), (1, 1), (6, 1), (7, 2), (0, 5), (7, 5), (2, 5), (5, 5), (1, 6), (6, 6)):
+        put(img, face, x, y, VEIN)
+    for side in ("right", "left"):
+        x0, y0, w, _ = skin_faces(part("head"))[side]
+        for k, y in ((1, 4), (2, 5), (4, 5), (5, 6)):
+            put(img, (x0, y0), k, y, VEIN)
+    for arm in ("right_arm", "left_arm"):
+        u, v, w, h, d = part(arm)
+        for x in range(0, 2 * (w + d), 2):
+            img.putpixel((u + x, v + d + h - 2), (*VEIN, 255))
+
+
+def texture(pale=False):
+    """The scientist's skin; [pale] is the sick one (the module's colours swapped for [PALE_COLOURS] while it is drawn)."""
     rng = random.Random("scientist")
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-    paint_coat(img, rng)
-    paint_head(img, rng)
-    paint_skirt(img, rng)
+    globals().update(PALE_COLOURS if pale else MAN_COLOURS)
+    try:
+        paint_coat(img, rng)
+        paint_head(img, rng)
+        paint_skirt(img, rng)
+        if pale:
+            paint_veins(img)
+    finally:
+        globals().update(MAN_COLOURS)
     return img
 
 
@@ -269,6 +303,47 @@ def animations():
                                         7.2: (-66, 11, 0), 8: (-60, 8, 0)})},
         "left_arm": {"rotation": keys({0: (-62, -8, 0), 3.0: (-62, -8, 0), 3.6: (-70, -14, 0), 4.2: (-62, -8, 0),
                                        6.0: (-62, -8, 0), 6.8: (-72, -16, 0), 7.4: (-62, -8, 0), 8: (-62, -8, 0)})}}}
+    # "My hands...": both arms come up in front of his chest, his head bowed to look at them, and the whole of him
+    # shakes (1.2 s, looping): each part's turn drawn at random, once, from a fixed seed, so the file is the same
+    # every time. The game blends into it from working, so the arms rise by themselves.
+    shake = random.Random("tremble")
+
+    def jitter(base, spread, steps=12, length=1.2):
+        frames = {}
+        for i in range(steps):
+            frames[length * i / steps] = tuple(round(b + shake.uniform(-sp, sp), 2) for b, sp in zip(base, spread))
+        frames[length] = frames[0.0]
+        return frames
+    a["tremble"] = {"loop": True, "animation_length": 1.2, "bones": {
+        "body": {"rotation": keys(jitter((-11, 0, 0), (1.5, 1.2, 1.5)), easing="linear")},
+        "head": {"rotation": keys(jitter((26, 0, 0), (4, 5, 4)), easing="linear")},
+        "right_arm": {"rotation": keys(jitter((-88, 14, 0), (6, 6, 5)), easing="linear")},
+        "left_arm": {"rotation": keys(jitter((-86, -14, 0), (6, 6, 5)), easing="linear")}}}
+    # The first stage of his change, "sick" (1.4 s, looping): bent double over his own hands, which he holds up and
+    # curls and shakes harder, the head hung low, the knees giving (the legs turn the other way to each other).
+    a["sick"] = {"loop": True, "animation_length": 1.4, "bones": {
+        "body": {"rotation": keys(jitter((-24, 0, 0), (2.5, 3, 2.5), steps=14, length=1.4), easing="linear")},
+        "head": {"rotation": keys(jitter((34, 0, 0), (5, 7, 6), steps=14, length=1.4), easing="linear")},
+        "right_arm": {"rotation": keys(jitter((-96, 22, 0), (9, 8, 7), steps=14, length=1.4), easing="linear")},
+        "left_arm": {"rotation": keys(jitter((-92, -22, 0), (9, 8, 7), steps=14, length=1.4), easing="linear")},
+        "right_leg": {"rotation": keys(jitter((-12, 0, 0), (2, 1, 1), steps=14, length=1.4), easing="linear")},
+        "left_leg": {"rotation": keys(jitter((9, 0, 0), (2, 1, 1), steps=14, length=1.4), easing="linear")}}}
+    # The second stage, "stretch" (1.6 s, looping): his arms grow half as long again and hang forward, his legs a
+    # little longer (the root rises by as much, so his feet stay on the floor), the body drawn straight and thin, the head
+    # thrown back and twitching. Scales are about each limb's own pivot (the shoulder, the hip).
+    long_arm, long_leg = 1.45, 1.12
+
+    def stretch(base, spread):
+        return keys(jitter(base, spread, steps=16, length=1.6), easing="linear")
+
+    a["stretch"] = {"loop": True, "animation_length": 1.6, "bones": {
+        "root": {"position": keys({0: (0, 1.44, 0), 1.6: (0, 1.44, 0)}, easing="linear")},
+        "body": {"rotation": stretch((-6, 0, 0), (1.5, 2, 2))},
+        "head": {"rotation": stretch((-24, 0, 0), (5, 9, 8))},
+        "right_arm": {"rotation": stretch((-38, 10, 0), (7, 6, 6)), "scale": keys({0: (1, long_arm, 1), 1.6: (1, long_arm, 1)}, easing="linear")},
+        "left_arm": {"rotation": stretch((-34, -10, 0), (7, 6, 6)), "scale": keys({0: (1, long_arm, 1), 1.6: (1, long_arm, 1)}, easing="linear")},
+        "right_leg": {"scale": keys({0: (1, long_leg, 1), 1.6: (1, long_leg, 1)}, easing="linear")},
+        "left_leg": {"scale": keys({0: (1, long_leg, 1), 1.6: (1, long_leg, 1)}, easing="linear")}}}
     return {"format_version": "1.8.0", "geckolib_format_version": 2,
             "animations": {f"animation.scientist.{name}": anim for name, anim in a.items()}}
 
@@ -304,6 +379,7 @@ def main():
     tex = texture()
     write_json(ASSETS / "geo" / "entity" / "scientist.geo.json", geo(bones))
     tex.save(ASSETS / "textures" / "entity" / "scientist.png")
+    texture(pale=True).save(ASSETS / "textures" / "entity" / "scientist_pale.png")
     write_json(ASSETS / "animations" / "entity" / "scientist.animation.json", animations())
     write_preview(tex)
     lang_path = ASSETS / "lang" / "en_us.json"

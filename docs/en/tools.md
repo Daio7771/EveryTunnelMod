@@ -32,7 +32,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/entity/distortion.py` | The Distortion Cloud's and Junior's geometry, animations, textures and glow masks (the Junior's eye cracking in four stages) | Level 5's Distortions |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (the uniform skin) | the uniform |
 | `tools/entity/dead_guard.py` | The guard before you: a player's body sitting against a wall, head dropped, in the uniform skin worn out (run after `guard.py`) | Level 5's Hideout |
-| `tools/entity/scientist.py` | The scientist's geometry (standing, in a white coat, with the coat's skirt as an extra box), animations (idle, working at the bench) and texture | Chapter 2's prologue |
+| `tools/entity/scientist.py` | The scientist's geometry (standing, in a white coat, with the coat's skirt as an extra box), animations (idle, working at the bench, trembling, sick, stretched) and two textures (healthy, sick) | Chapter 2's prologue |
 | `tools/prologue/room.py` | `cutscene/prologue_room.json`: the prologue's laboratory (fills, blocks, ceiling lights, where the scientist and the player stand), which the mod builds when the scene starts | the room; see [Cinematic system](cinematic-system.md) |
 | `tools/entity/director.py` | The director's geometry (sitting, the Cinema film's mask on its own plate), animations (breathing, gestures, mask off, standing, pointing) and texture | Level 5's director |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png`, `turn_icon.png` | HUD icons, Level 5's detector, the entry corridor's turn round sign |
@@ -47,7 +47,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/gui/guide_paper.py` | `guide_paper.png` (seamless tile), `guide_stains.png` | the guide's paper |
 | `tools/sounds/generate.py` | WAV previews and a listening page (`tools/sounds/out/index.html`) | a sound, to listen |
 | `tools/sounds/export.py` | `.ogg` files and `sounds.json` in the mod | a sound, to ship it |
-| `tools/sounds/prologue_voices.py` | The scientist's four lines as Ogg in `tools/sounds/voice/` (from the user's MP3s, one gain for the group), `cutscene/prologue.json` and the cues' text in `en_us.json` (the Spanish is by hand) | his voice or his words; see [Cinematic system](cinematic-system.md) |
+| `tools/sounds/prologue_voices.py` | The scientist's four lines as Ogg in `tools/sounds/voice/` (from the user's MP3s, one gain for the group; the third cut after its last word, from "WHAT'S HAPPENING" on and the whole fourth in three layers: original, deep and high; the cues placed by the pauses' fit to the punctuation, and the first line's by hand from a measurement of its seven stretches of voice), `cutscene/prologue.json` and the cues' text in `en_us.json` (the Spanish is by hand) | his voice or his words; see [Cinematic system](cinematic-system.md) |
 | `tools/sounds/voices.py` | `cutscene/director.json` and the director's subtitles in `en_us.json`, from his voice files (`tools/sounds/voice/`) | one of his voices or his words; see [Cinematic system](cinematic-system.md) |
 
 ## Map

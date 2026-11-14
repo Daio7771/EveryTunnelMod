@@ -10,11 +10,11 @@
           "text": "subtitle.every_tunnel.ch2.prologue_01_1"
         },
         {
-          "at": 2340,
+          "at": 4800,
           "text": "subtitle.every_tunnel.ch2.prologue_01_2"
         },
         {
-          "at": 6210,
+          "at": 7860,
           "text": "subtitle.every_tunnel.ch2.prologue_01_3"
         }
       ]
@@ -29,7 +29,7 @@
           "text": "subtitle.every_tunnel.ch2.prologue_02_1"
         },
         {
-          "at": 5270,
+          "at": 4790,
           "text": "subtitle.every_tunnel.ch2.prologue_02_2"
         }
       ]
@@ -37,7 +37,7 @@
     {
       "id": "prologue_03",
       "part": 0,
-      "ms": 7810,
+      "ms": 7670,
       "cues": [
         {
           "at": 0,

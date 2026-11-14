@@ -181,40 +181,58 @@ The credits' texts are the lang keys `every_tunnel.credits.*`; the drawings are
 Chapter 2 opens with its own cinematic, **the prologue**, which lives only on the private branch until
 Levels 1 and 2 of the chapter are published. It is the second scene `CutsceneView` plays (`Kind.PROLOGUE`):
 the same camera, bands, subtitles and skip, but it is not in a level. `/everytunnel prologue` starts it for now
-(the chapter's own start does not exist yet).
+(the chapter's own start does not exist yet). It lasts about 1 min 15 s.
 
 - **The room** is not in the map. `tools/prologue/room.py` writes a plan (`cutscene/prologue_room.json`:
-  fills, single blocks, the ceiling's lights, where the scientist stands and where the player is held); when the
-  scene starts, `PrologueSceneHooks` places it at a fixed corner high over the world (2048, 200, 2048), far from
-  every level, and clears it when the scene ends. A modern, clean laboratory 20 x 5 x 9 with one long bench
-  along its north wall.
+  fills, single blocks, the ceiling's lights, where the scientist stands, where the radiation counter sounds and
+  where the player is held); when the scene starts, `PrologueSceneHooks` places it at a fixed corner high over the
+  world (2048, 200, 2048), far from every level, and clears it when the scene ends. A modern, clean laboratory
+  20 x 5 x 9 with one long bench along its north wall: beakers, microscopes, monitors, tube racks, a recorder and
+  the radiation counter (three blocks of `tools/blocks/generate.py`: an animated amber screen whose digits and
+  bar climb, a blinking red light, glowing tubes).
 - **The scientist** is `ScientistEntity` (GeckoLib, `tools/entity/scientist.py`), a *passing* creature: spawned
   with the scene, discarded with it, never saved. He stands at the bench in a white coat, back to the camera,
-  working with tubes (`animation.scientist.work`).
+  working with tubes. His `stage` (one of `PrologueStages`, synced to the client) is the scene's: working,
+  trembling, **sick** (a pale blue-white skin with veins and milky eyes, `scientist_pale.png`, bent over his
+  curling hands), **stretched** (the same skin, his arms and legs half as long again by scaling their bones, the
+  body drawn thin, the head thrown back) and **Pale**, when `client.render.ScientistModel` draws him with the
+  Level 2 Pale man's own model, texture, animation (`listen`) and glowing eyes. There is no new monster art.
 - **The shots** are given from him (`PrologueScene`, a `SceneFrame` at his feet facing north, so his right is +x):
   the scene opens out of black (the screen is black 30 ticks while the room's chunks reach the client, then
   fades out over 50: `Timeline.blackTicks` / `fadeTicks`, drawn by `CutsceneScreen`), a 16 s tracking shot
   along the bench from left to right (+x) whose aim moves with the camera (`Shot.lookTo`), coming to a stop
-  behind him and to his left as he enters the frame, then a hold while the aim turns onto his back. No fly-in
-  from the player's eyes and no fly-out: the player is not in the scene (it is not drawn:
-  `Kind.drawsPlayer`).
+  behind him and to his left as he enters the frame; a settling shot while the aim turns onto his back during
+  his log entry; and from his third line a slow creep in on him. No fly-in from the player's eyes and no
+  fly-out: the player is not in the scene (it is not drawn: `Kind.drawsPlayer`).
+- **The voice sets the pace.** His log entry (`prologue_01`, `prologue_02`) begins 1.5 s after the camera stops, each
+  line after the one before with a pause (`PrologueScene.build`, from `cutscene/prologue.json`, written by
+  `tools/sounds/prologue_voices.py`, which also turns the user's four MP3s into Ogg with one gain for the
+  group). Subtitles come whole, a cue at a time, with no speaker's name (he is nobody the game names); the voice
+  is flat under Voice/Speech.
+- **The change** (`PrologueCues`, all on the scene's ticks). After a 3 s pause the third line begins and his hands
+  shake. From its second cue (what is happening) the ceiling's lights flicker, each beat a dark tick or two
+  and the gaps between them shorter every time (`PrologueScene.flicker`): the server swaps the lamps for plain ceiling
+  and back (the counter's and the tubes' own glow stays), the client plays a fluorescent's flicker on each beat. Each
+  flash finds him more changed: two of the beats, longer (4 ticks), hide the **sick** and **stretched** stages, a
+  tick into each, with a crack of bones (`event.prologue.crack`) and a turn a little more from the bench towards the
+  camera (`PrologueScene.facing`). The third line is cut right after its last "loud"; in the last beat, which hides
+  it, he becomes the Pale man, facing the camera, curled over and smaller, and unfolds to his full height over 1.8 s (`ScientistEntity.unfolded`, drawn by `ScientistRenderer`) as the Level 2 stinger's hit lands and his breathing starts. The
+  fourth line, his scream, begins 6 ticks later. From "WHAT'S HAPPENING" on, the third line and the whole of the
+  fourth are the same voice three times over (the original, a copy 7 semitones down and a copy 7 up, kept in step
+  by rubberband), 4 dB softer and squeezed, coming in over the first words, so the voice turns with him; the fourth
+  ends dry (`prologue_voices.py`).
+- **The cut.** When the scream ends the screen goes black at once (`Timeline.cutAt`) and the hum, the drone and the
+  counter stop dead. After 2 s of black and silence "CHAPTER 2" is typed on it letter by letter (`TitleCue`, drawn
+  by `CutsceneScreen`, `title.every_tunnel.chapter_2`), a low blow on its first letter, held 3 s and faded; the
+  scene ends and the view comes back to the player out of black.
+- **The lab's sound** is `client.cutscene.PrologueSound`: the lights' hum (flat), a drone under it whose
+  volume rises to the change, and the radiation counter's Geiger clicks, positional from the counter on the bench
+  (`PrologueScene.COUNTER`, checked against the room's plan), ever faster (`GeigerClicks`, a seeded Poisson
+  process, so it sounds the same each time).
 - **The player** is held in the room's corner, unharmed, and put back where they were at the end, played
   through or skipped (`finish`); if they leave the world during it they are put back first (`abort`), so a saved
   game is never left inside the room.
-- **The voice sets the hold.** His log entry (`prologue_01`, `prologue_02`) begins 1.5 s after the camera stops,
-  each line after the one before with a pause, and the scene ends 3 s after the last (`PrologueScene.build`,
-  from `cutscene/prologue.json`, written by `tools/sounds/prologue_voices.py`, which also turns the user's four
-  MP3s into Ogg with one gain for the group). Subtitles come whole, a cue at a time, with no speaker's name (he is
-  nobody the game names); the voice is flat under Voice/Speech.
-- **The lab's sound** is `client.cutscene.PrologueSound`: the lights' hum (flat), a drone under it whose
-  volume rises with the scene, and the radiation counter's Geiger clicks, positional from the counter on the bench
-  (`PrologueScene.COUNTER`, checked against the room's plan), ever faster (`GeigerClicks`, a seeded Poisson
-  process, so it sounds the same each time).
-- **The props** on the bench are three new blocks (`tools/blocks/generate.py`): the radiation counter (an
-  animated amber screen whose digits and bar climb), the voice recorder (a blinking red light) and a rack of
-  glowing test tubes.
-- **Not there yet:** the transformation into a Pale man (and the lines `prologue_03` and `prologue_04`, already
-  converted), the cut to black and the title.
+- **Not there yet:** the hand-over to Chapter 2's Level 1 (the scene ends and gives the player back).
 
 ## Adding another cinematic
 
