@@ -66,7 +66,7 @@ créditos y al cerrarse una pantalla sin mundo abierto (Escape en las opciones).
   [Gráficos](graphics.md#la-escena-del-menú).
 - **Ctrl+Shift+V** cambia a la pantalla de título de vanilla (otros mundos, multijugador,
   mods) y vuelve.
-- `MenuMusic` toca `music.menu`, luego 15 s de silencio, una y otra vez; `MusicTrackerMixin`
+- `MenuMusic` toca la pista del capítulo que muestra el menú (`music.menu`, `music.menu.chapter_2`), luego 15 s de silencio, una y otra vez; `MusicTrackerMixin`
   mantiene la música de vanilla apagada en todas partes.
 
 ## 3. Abrir el mundo

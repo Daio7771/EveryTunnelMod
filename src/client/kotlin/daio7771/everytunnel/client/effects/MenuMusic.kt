@@ -22,8 +22,8 @@ import net.minecraft.util.Identifier
  * Vanilla's music never plays at all (`MusicTrackerMixin`).
  *
  * Chapter 1's theme is the author's piano (`tools/sounds/menu_piano.py`): a piece that ends on a
- * fade, not a loop. Chapter 2's soundtrack does not exist yet: without a track's event in sounds.json that
- * chapter's menu is silent (it will be `music.menu.chapter_2`).
+ * fade, not a loop. Chapter 2's is a waltz for an old piano and a violin that leaves for the middle, on a worn disc (`tools/sounds/menu_theme_ch2.py`); a chapter
+ * whose track's event is missing from sounds.json has a silent menu.
  */
 object MenuMusic {
 

@@ -13,12 +13,13 @@ y la respiración del Pale man, su propio latido, cuánto ruido hacen sus propio
 - **Una excepción con crédito:** la canción del ascensor, "Local Forecast – Elevator" de
   Kevin MacLeod (CC BY 4.0). Su crédito debe viajar con el mod (`CREDITS.md`, el jar, los
   créditos finales, `fabric.mod.json`).
-- **Nada de música con IA.** Los servicios gratuitos de música con IA solo permiten uso no
-  comercial.
+- **Nada de audio de generadores de IA.** Los servicios gratuitos de música con IA solo
+  permiten uso no comercial. La música escrita y sintetizada en código por las herramientas de
+  Python (el tema del menú del Chapter 2, por ejemplo) no es eso, y está bien.
 - **Una excepción con IA: las voces con IA.** Las voces de los personajes son de la biblioteca
   de ElevenLabs (plan de pago, no clonadas), generadas por el usuario y entregadas como
   archivos mono: hasta ahora la del director (sus líneas en la cinemática del nivel 5 y las
-  frases que repite después) y la del científico (el prólogo del Chapter 2). Nada más es IA.
+  frases que repite después) y la del científico (el prólogo del Chapter 2). Ningún otro audio viene de un servicio de IA.
 - **Archivos secos.** Los sonidos no llevan reverberación: Sound Physics Remastered añade la
   reverberación y el sonido amortiguado tras los muros dentro del juego. Las ejecuciones de
   desarrollo siempre lo incluyen, para juzgar los sonidos con él.
@@ -44,7 +45,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | Jugador | `player.heartbeat` (4 variaciones), `player.tinnitus`, `player.breathing_exhausted`, `player.drink` | síntesis / CC0 (respiración, tragos) |
 | El Pale man | `entity.pale_man.step`, `.step_run`, `entity.pale_man.breathing` | síntesis / CC0 (respiración) |
 | El Observer | `music.observer.approach`, `music.observer.chase` (sin pasos: lo delata su música); en la fase de los libros `event.observer.tick` / `tock` (el reloj de la biblioteca en la cabeza, más rápido cuanto más cerca) | síntesis |
-| Música | `music.menu`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | síntesis / CC BY (ascensor) |
+| Música | `music.menu`, `music.menu.chapter_2`, `music.elevator`, `music.tension.pulse`, `.rising`, `.strings`, `music.chase`, `music.stinger.heard` | síntesis / CC BY (ascensor) |
 | Eventos | `event.death`, `event.death.reveal` (al aparecer el texto de la pantalla de muerte), `event.level_transition`, `event.observer.alert` (provisional), `event.collapse` (el derrumbe del túnel del nivel 3) | síntesis |
 | Nivel 5 | `block.airlock.close`, `block.airlock.open` (la esclusa y las puertas bloqueadas), `item.wrench.hit` (3 variaciones), `item.detector.click`, `.clicks`, `.crackle` (el detector, un contador Geiger: una cuenta, de dos a cuatro, de seis a doce en un tick; 6 variaciones cada uno), `event.lab.unlock` (la ruta sur al abrirse, a lo lejos), `block.fuse.insert`, `block.fuse.reject`, `block.fuse.power` (la caja de fusibles), `block.breaker.dead` (la palanca de las escaleras sin corriente), `block.mixer.fill`, `block.mixer.run`, `block.grate.dissolve`, `event.lab.alarm` (el puzle químico), `event.lab.sting` (al entrar al Lab hall), `block.terminal.key` (los ordenadores), `block.camera.servo` (la cámara de la antesala al girar, 3 variaciones) | síntesis |
 | El laboratorio del nivel 5 | `ambient.lab.air` (bucle: la ventilación, el aire por los conductos, un ventilador, un rumor grave), `ambient.lab.compressor` (el compresor de una nevera en algún sitio, arrancando o parando), `ambient.lab.duct` (un conducto de chapa que cede y cruje, 4 variaciones); en las zonas de la capa 1 desde el Lobby, y en las de la capa 2 además con el teléfono lejano del nivel 3 (`ambient.offices.phone`) (`ZONE_AMBIENCE` de `LEVEL_5`). La trampilla del drenaje al abrirse es el `block.hatch.open` del nivel 3. Las luces de la capa 1, empotradas en el techo, no hacen ruido; las colgadas de la capa 2 zumban por su cuenta (`block.fluorescent.hum`). El juego del pasillo de entrada: `ambient.cloud_game.static` (bucle: una estática monótona, un siseo seco con un zumbido tonal y chasquidos), que suena sin venir de ningún sitio mientras su Cloud está cerca y sube de tono hacia el final (`DistortionEffect`) | síntesis |
@@ -90,7 +91,7 @@ importa: Sound Physics los amortigua, y suena a algo detrás del muro.
 La música de vanilla nunca suena (`MusicTrackerMixin`). Tras la pantalla de carga todo está
 en silencio y entra con fundido junto a la imagen (`SoundSystemMixin`).
 
-## El tema del menú
+## Los temas del menú
 
 `music.menu`, sintetizado por `menu_piano.py` (compuesto por el usuario; `menu_theme` en
 `catalog.py` lo llama): unos 70 s de piano de fieltro lento e inquietante en 3/4 a 54 bpm,
@@ -101,6 +102,30 @@ silencio y lo vuelve a tocar. Al salir de un mundo se recargan los recursos, lo 
 el motor de sonido y lo corta; entonces vuelve a empezar al momento (`SoundSystemMixin`
 avisa a `MenuMusic`). Se exporta con el pico a -2,9 dB, unos -16,8 LUFS como el tema
 anterior.
+
+`music.menu.chapter_2`, escrito en código (`menu_theme_ch2.py`; `menu_theme_chapter_2` en
+`catalog.py` lo llama): un vals lento en re menor para un piano vertical desafinado y un violín
+solo, en un disco antiguo gastado, de unos 77 s. La forma sigue el tema de menú de dibujos de los
+años 30 que señaló el usuario (violín en tono menor, una frase de 20 s dicha dos veces) y las
+notas son nuestras, en tres partes. A (6 compases, 3/4 a 54 bpm sobre Dm | Dm | Gm | A7 | Dm |
+A7): el piano toca la melodía en octavas sobre el vals (bajo en el 1, acorde en el 2 y 3, un poco
+tarde, con el pedal cambiado cada compás) y rueda el último acorde; el violín solo la dobla muy
+suave. B (8 compases, el violín se va): el piano solo, más suave, con el vals aflojándose (el
+tempo se frena hacia la mitad y se recupera, acordes arrastrados, un tiempo vacío) por un camino
+que nunca aterriza donde apunta, con acordes prestados y notas a un semitono: tras el A7 llega
+si bemol mayor, no re menor; la melodía se apoya en un la bemol sobre sol menor; fa menor; mi
+bemol mayor sobre un re en el bajo; un re menor suave; sol *mayor* con un si natural donde antes
+había si bemol; un A7sus4 cuyo re cae al do sostenido; y el A7 rodado hacia arriba hacia la
+vuelta. A' (6 compases): vuelve el violín al frente, la línea una octava más arriba y más
+fuerte, y el último compás va a si bemol mayor en vez de a casa con la melodía sosteniendo el
+re, así que no resuelve. El piano es el SoundFont CC0 "Old Piano FB" con FluidSynth
+(`sampler.Part`); el violín es el Solo Violin CC0 de VSCO 2 CE, tocado por
+`sampler.SamplePlayer` (la nota grabada más cercana, desplazada, con las tomas suave y fuerte
+mezcladas según la velocidad). El acabado es sintético: una sala pequeña y oscura, wow y
+flutter, un sonido de banda limitada y algo saturado, siseo, crujido y algún chasquido.
+`MenuMusic` lo toca como el del Chapter 1 (una vez, 15 s de silencio, otra vez) en el menú del
+Chapter 2; pico a -5,2 dB, unos -16,8 LUFS. Solo se distribuye el `.ogg` renderizado; las
+muestras (`tools/sounds/soundfonts/`, fuentes y licencias en su `SOURCES.md`) no.
 
 ## Hacer y cambiar sonidos
 

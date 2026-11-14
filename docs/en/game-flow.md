@@ -65,7 +65,7 @@ screen closes with no world open (Escape in the options).
   the right to show the hall. See [Graphics](graphics.md#the-menu-scene).
 - **Ctrl+Shift+V** swaps to vanilla's title screen (other worlds, multiplayer, mods) and
   back.
-- `MenuMusic` plays `music.menu`, then 15 s of silence, again and again; `MusicTrackerMixin` keeps vanilla music off everywhere.
+- `MenuMusic` plays the track of the chapter the menu shows (`music.menu`, `music.menu.chapter_2`), then 15 s of silence, again and again; `MusicTrackerMixin` keeps vanilla music off everywhere.
 
 ## 3. Opening the world
 

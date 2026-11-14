@@ -90,15 +90,18 @@ de escribir sus hooks, y di cuál en el KDoc de su archivo.
   0.2.0 era MIT.
 - Solo se mete una librería en el jar si su licencia permite compartirla (la de
   LambDynamicLights no); cada una que vaya dentro se lista en `CREDITS.md`.
-- Grabaciones: **solo CC0**, con su fuente en `tools/sounds/cc0/SOURCES.md`.
+- Grabaciones: **solo CC0**, con su fuente en `tools/sounds/cc0/SOURCES.md`. Los SoundFonts y
+  juegos de muestras de la música muestreada igual: CC0, listados en `tools/sounds/soundfonts/SOURCES.md`, descargados
+  por `fetch.py` y nunca en git.
 - Lo que necesite crédito (hoy solo la canción del ascensor) va en
   `tools/sounds/licensed/`, `CREDITS.md`, `fabric.mod.json` y los créditos finales.
-- **Nada de música ni recursos generados con IA en el juego.** El concept art hecho con IA
+- **Nada de audio ni recursos generados con IA en el juego** (nada de un servicio generador; la
+  música y los sonidos escritos y sintetizados en código por las herramientas están bien). El concept art hecho con IA
   solo se puede usar como referencia (`tools/entity/reference/`), nunca se distribuye. La
   única excepción son las **voces con IA**: voces de la biblioteca de ElevenLabs (no
   clonadas), generadas por el usuario y entregadas como archivos (la del director en el nivel 5,
   la del científico en el prólogo del Chapter 2; ver [Audio](audio.md)). La música y todos los
-  demás sonidos siguen sin IA.
+  demás sonidos siguen fuera de los servicios de IA.
 
 ## Pruebas
 

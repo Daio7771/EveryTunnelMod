@@ -15,6 +15,7 @@ import numpy as np
 
 import audio_io
 import menu_piano
+import menu_theme_ch2
 from scipy import signal as sp_signal
 from dsp import (
     SR, TAU, bandpass, burst, crossfade_loop, damped_partials, drive, envelope, fade, fft_filter,
@@ -2123,6 +2124,14 @@ def menu_theme(rng):
     return menu_piano.render()
 
 
+def menu_theme_chapter_2(rng):
+    """
+    Chapter 2's main menu: a slow waltz for an old upright piano and a solo violin that leaves for the middle, on a
+    worn disc (menu_theme_ch2.py; CC0 samples). Not a loop either: it ends on a hanging chord and a fade.
+    """
+    return menu_theme_ch2.render(rng)
+
+
 def material(fn, impact):
     return lambda rng, variant: fn(rng, variant, impact)
 
@@ -2491,6 +2500,9 @@ SOUNDS = [
     # Peak -2.9 dB: about -16.8 LUFS, as loud as the earlier theme.
     Sound("music.menu", "Menu", "Main menu theme: slow, uneasy felt piano in 3/4 (plays once, 1:10)", "stereo", False, 1,
           lambda rng, variant: menu_theme(rng), -2.9, stream=True),
+    # Peak -5.2 dB: about -16.8 LUFS, as loud as the Chapter 1 theme.
+    Sound("music.menu.chapter_2", "Menu", "Chapter 2's menu theme: a slow waltz for an old upright piano and a solo violin that leaves for the middle, on a worn disc (plays once, 1:17)",
+          "stereo", False, 1, lambda rng, variant: menu_theme_chapter_2(rng), -5.2, stream=True),
 ] + [
     sound
     for name, fn, use in MATERIALS

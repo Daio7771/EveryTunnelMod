@@ -1084,6 +1084,14 @@
       }
     ]
   },
+  "music.menu.chapter_2": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/menu/chapter_2_1",
+        "stream": true
+      }
+    ]
+  },
   "music.observer.approach": {
     "sounds": [
       {

@@ -12,6 +12,10 @@ parámetros. Todos usan semilla: los mismos parámetros siempre dan el mismo res
   o más nueva, para MP3). En Arch: `sudo pacman -S python-numpy python-scipy libsndfile`.
   Se usa el paquete `soundfile` si está instalado; si no, se llama a libsndfile
   directamente.
+- **La música muestreada** (`music.menu.chapter_2`) necesita además el programa **FluidSynth**
+  (`sudo pacman -S fluidsynth`) y sus muestras: ejecuta una vez
+  `python3 -I tools/sounds/soundfonts/fetch.py` (unos 80 MB, CC0, no están en git). Sin ellos,
+  `export.py` se detiene con un mensaje que lo dice.
 - **El logo** necesita una fuente serif de rótulo (se usó Noto Serif Display). El PNG está
   en git, así que la fuente solo hace falta para cambiarlo.
 
@@ -189,6 +193,18 @@ dsp.py: utilidades DSP · audio_io.py: leer/escribir audio
   sonidos mecánicos nuevos. (`ring` es otra función, más antigua.)
 - `menu_piano.py`: el tema del menú, una pieza de piano del usuario, llamada desde
   `catalog.py`. Tiene sus propias funciones y semilla para coincidir con el original.
+- `menu_theme_ch2.py`: el tema del menú del Chapter 2 (un vals para un piano viejo y un violín solo
+  que se va en la parte central, en un disco gastado), con las notas escritas en código, llamado desde `catalog.py`. Toma
+  prestadas las funciones de `menu_piano.py` y añade el acabado de grabación antigua (wow y
+  flutter, límite de banda, siseo, crujido).
+- `sampler.py`: toca una partitura con muestras CC0. Un `Part` es un instrumento de un SoundFont
+  tocado por FluidSynth (sus notas, controladores y pitch bends en segundos; `render()` escribe
+  un MIDI de un tick por milisegundo y ejecuta `fluidsynth` en seco, sin su reverb ni chorus).
+  Un `SamplePlayer` hace lo mismo con una carpeta de grabaciones WAV sin SoundFont (el violín
+  solo). Ambos devuelven audio estéreo para que la pieza lo mezcle.
+- `soundfonts/`: `fetch.py` descarga los instrumentos CC0 con su SHA-256 (el SoundFont
+  Old Piano FB de FreePats y los WAV del violín solo de VSCO 2 CE, en `solo_violin.sha256`); `SOURCES.md` los
+  lista. Los `.sf2`, `solo_violin/` y `files/` están fuera de git.
 - `dsp.py`: 44,1 kHz, ruido con semilla (con `peaks` resonantes si se quiere), envolventes,
   filtros, `struck()` (modos que suenan desde el reposo, movidos por un impulso de fuerza cuya
   duración apaga los agudos, en parejas que baten). Los bucles se construyen "en

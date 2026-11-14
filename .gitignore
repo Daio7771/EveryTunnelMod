@@ -35,3 +35,8 @@ tools/gui/output/
 
 # Claude Code local settings
 .claude/
+
+# SoundFonts for the sampled music (fetched by tools/sounds/soundfonts/fetch.py; all CC0)
+tools/sounds/soundfonts/files/
+tools/sounds/soundfonts/*.sf2
+tools/sounds/soundfonts/solo_violin/
