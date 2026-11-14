@@ -61,8 +61,8 @@ créditos y al cerrarse una pantalla sin mundo abierto (Escape en las opciones).
   gastado.
 - **EXIT** cierra el juego.
 - Detrás de todo, una planta del aparcamiento vista a lo largo de su pasillo desde una cámara
-  fija (`MenuScene`), con lámparas que parpadean de vez en cuando. El logo y las opciones van
-  sobre negro, que se difumina hacia la derecha para dejar ver la planta. Ver
+  fija (`MenuScene`), con lámparas que parpadean de vez en cuando. El logo (en el menú del Capítulo 2 con "CHAPTER 2"
+  debajo) y las opciones van sobre negro, que se difumina hacia la derecha para dejar ver la planta. Ver
   [Gráficos](graphics.md#la-escena-del-menú).
 - **Ctrl+Shift+V** cambia a la pantalla de título de vanilla (otros mundos, multijugador,
   mods) y vuelve.

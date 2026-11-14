@@ -29,6 +29,7 @@ con un comentario KDoc que cuenta más.
 | `level/LevelParser.kt` | Lee un archivo de nivel; documenta cada clave |
 | `guide/GuideMarkdown.kt` | Lee una página de la guía del jugador (el subconjunto de Markdown) en bloques |
 | `menu/LampFlicker.kt` | Cuándo parpadean las lámparas de la escena del menú |
+| `menu/LogoRun.kt` | El easter egg del logo del menú: cuándo se apagan las palabras dejando RUN encendido, y por cuánto tiempo |
 | `menu/BlockLight.kt` | Luz de bloque para una caja de bloques sin mundo (la escena del menú) |
 | `achievement/Achievement.kt` | Los once logros, en el orden de la lista, por id |
 | `puzzle/ValveCode.kt` | El puzle de las válvulas del nivel 3: cifras al azar, un giro, resuelto |
@@ -332,7 +333,7 @@ con un comentario KDoc que cuenta más.
 
 | Archivo | Qué hace |
 |---|---|
-| `MainMenuScreen.kt` | El menú principal |
+| `MainMenuScreen.kt` | El menú principal (el logo de tiza en capas, con su easter egg de RUN y la línea del Chapter 2 debajo) |
 | `AchievementsScreen.kt` | La pantalla ACHIEVEMENTS: la lista en papel |
 | `Paper.kt` | Papel gastado (mosaico, manchas, bordes, tintas) para la guía y los logros |
 | `GuideScreen.kt` | La guía del jugador: una hoja de papel con scroll y pestañas |

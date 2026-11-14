@@ -61,7 +61,7 @@ screen closes with no world open (Escape in the options).
   worn paper.
 - **EXIT** closes the game.
 - Behind it all, a parking hall seen down its aisle from a fixed camera (`MenuScene`), its
-  lamps flickering now and then. The logo and options sit on black, which fades out towards
+  lamps flickering now and then. The logo (in Chapter 2's menu with "CHAPTER 2" under it) and options sit on black, which fades out towards
   the right to show the hall. See [Graphics](graphics.md#the-menu-scene).
 - **Ctrl+Shift+V** swaps to vanilla's title screen (other worlds, multiplayer, mods) and
   back.

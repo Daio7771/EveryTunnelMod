@@ -6,6 +6,7 @@ import daio7771.everytunnel.client.AchievementStore
 import daio7771.everytunnel.client.effects.MenuMusic
 import daio7771.everytunnel.client.menu.MenuScene
 import daio7771.everytunnel.core.achievement.Achievement
+import daio7771.everytunnel.core.menu.LogoRun
 import daio7771.everytunnel.platform.ChapterRequest
 import daio7771.everytunnel.platform.ContinueGame
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
@@ -23,6 +24,7 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.Util
 import org.lwjgl.glfw.GLFW
 import java.io.File
+import kotlin.random.Random
 
 /**
  * Every Tunnel's main menu, in place of vanilla's title screen (`MinecraftClientMixin`): the
@@ -49,8 +51,11 @@ import java.io.File
  * - Ctrl+Shift+V, not shown anywhere, swaps to vanilla's title screen (other worlds, mods,
  *   multiplayer) and back. Vanilla's stays until the player joins a world.
  *
- * The logo is `textures/gui/logo.png` (`tools/gui/logo.py`); without that texture, the name
- * in big letters.
+ * The logo is chalk on a blackboard (`tools/gui/logo.py`), in two layers: `textures/gui/logo_rest.png`, the words and
+ * the tunnel emblem, and `logo_run.png`, the R of EVERY and the U and N of TUNNEL. Now and then ([LogoRun]) the words
+ * flicker out and those three letters, which read RUN, stay lit alone for a moment before the words come back. In
+ * Chapter 2's menu `logo_chapter_2.png`, "CHAPTER 2", is drawn under the logo (and goes out with the words). Without
+ * the textures, the name in big letters.
  */
 class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
 
@@ -73,6 +78,7 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     }
 
     private val openedAtMs = Util.getMeasuringTimeMs()
+    private val logoRun = LogoRun(Random.Default)
     private var selected = 0
     private var notice: Text? = null
     private var noticeUntilMs = 0L
@@ -106,6 +112,10 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     }
 
     override fun shouldCloseOnEsc(): Boolean = false
+
+    override fun tick() {
+        logoRun.tick()
+    }
 
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
         val layout = layout()
@@ -169,16 +179,20 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
      * the logo shrinks (down to [MIN_LOGO_HEIGHT]) so nothing overlaps on short screens or
      * with a big GUI scale.
      */
-    private data class Layout(val left: Int, val logoTop: Int, val logoHeight: Int, val optionsTop: Int)
+    private data class Layout(val left: Int, val logoTop: Int, val logoHeight: Int, val subtitleHeight: Int, val optionsTop: Int)
 
     private fun layout(): Layout {
         val left = (width * LEFT).toInt()
         val gap = minOf(LOGO_GAP, height / 20 + 6)
-        // Room left for the logo above the options, and above the notice and version line.
+        // Room left for the logo (and Chapter 2's line under it) above the options, and above the notice and version line.
         val below = gap + optionsHeight() + BOTTOM_RESERVE
-        val logoHeight = minOf(LOGO_HEIGHT, height - TOP_MARGIN - below, (width - left * 2) / 2).coerceAtLeast(MIN_LOGO_HEIGHT)
-        val logoTop = (height * LOGO_TOP).toInt().coerceAtMost(height - below - logoHeight).coerceAtLeast(TOP_MARGIN)
-        return Layout(left, logoTop, logoHeight, logoTop + logoHeight + gap)
+        val subtitleShare = if (chapter == 2) LOGO_SUBTITLE_H / LOGO_TEXTURE_H.toFloat() else 0f
+        val logoHeight = minOf(LOGO_HEIGHT, ((height - TOP_MARGIN - below) / (1f + subtitleShare)).toInt(), (width - left * 2) / 2)
+            .coerceAtLeast(MIN_LOGO_HEIGHT)
+        val subtitleHeight = (logoHeight * subtitleShare).toInt()
+        val whole = logoHeight + subtitleHeight
+        val logoTop = (height * LOGO_TOP).toInt().coerceAtMost(height - below - whole).coerceAtLeast(TOP_MARGIN)
+        return Layout(left, logoTop, logoHeight, subtitleHeight, logoTop + whole + gap)
     }
 
     private fun optionsHeight(): Int = (options.size - 1) * LINE_HEIGHT + (9 * OPTION_SCALE).toInt()
@@ -205,12 +219,16 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         val client = client ?: return
         val left = layout.left
         val top = layout.logoTop
-        if (client.resourceManager.getResource(LOGO).isPresent) {
+        if (client.resourceManager.getResource(LOGO_REST).isPresent && client.resourceManager.getResource(LOGO_RUN).isPresent) {
             val h = layout.logoHeight
             val w = h * 2
-            context.setShaderColor(1f, 1f, 1f, fade)
+            val words = fade * logoRun.wordsLevel
             RenderSystem.enableBlend()
-            context.drawTexture(LOGO, left, top, w, h, 0f, 0f, LOGO_TEXTURE_W, LOGO_TEXTURE_H, LOGO_TEXTURE_W, LOGO_TEXTURE_H)
+            // The words and the emblem, which the run puts out; then RUN, always lit, drawn once more while it glows.
+            drawLayer(context, LOGO_REST, left, top, w, h, LOGO_TEXTURE_H, words)
+            drawLayer(context, LOGO_RUN, left, top, w, h, LOGO_TEXTURE_H, fade)
+            if (logoRun.glow > 0f) drawLayer(context, LOGO_RUN, left, top, w, h, LOGO_TEXTURE_H, fade * logoRun.glow * GLOW)
+            if (layout.subtitleHeight > 0) drawLayer(context, LOGO_CHAPTER_2, left, top + h, w, layout.subtitleHeight, LOGO_SUBTITLE_H, words)
             RenderSystem.disableBlend()
             context.setShaderColor(1f, 1f, 1f, 1f)
             return
@@ -223,6 +241,13 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         context.drawText(textRenderer, Text.literal("EVERY"), 0, 0, argb(LOGO_COLOR, fade), false)
         context.drawText(textRenderer, Text.literal("TUNNEL"), 0, 10, argb(LOGO_COLOR, fade), false)
         context.matrices.pop()
+    }
+
+    /** One 512-wide layer of the logo at ([x], [y]), [w] by [h], as light as [alpha]; [textureHeight] is the texture's. */
+    private fun drawLayer(context: DrawContext, texture: Identifier, x: Int, y: Int, w: Int, h: Int, textureHeight: Int, alpha: Float) {
+        if (alpha < 0.01f) return
+        context.setShaderColor(1f, 1f, 1f, alpha.coerceAtMost(1f))
+        context.drawTexture(texture, x, y, w, h, 0f, 0f, LOGO_TEXTURE_W, textureHeight, LOGO_TEXTURE_W, textureHeight)
     }
 
     private fun hoveredOption(mouseX: Int, mouseY: Int, layout: Layout): Int? {
@@ -313,9 +338,15 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     }
 
     companion object {
-        private val LOGO = Identifier(EveryTunnel.MOD_ID, "textures/gui/logo.png")
-        private const val LOGO_TEXTURE_W = 256
-        private const val LOGO_TEXTURE_H = 128
+        private val LOGO_REST = Identifier(EveryTunnel.MOD_ID, "textures/gui/logo_rest.png")
+        private val LOGO_RUN = Identifier(EveryTunnel.MOD_ID, "textures/gui/logo_run.png")
+        private val LOGO_CHAPTER_2 = Identifier(EveryTunnel.MOD_ID, "textures/gui/logo_chapter_2.png")
+        /** The textures' sizes: the two layers of the logo are 512 by 256, Chapter 2's line 512 by 64. */
+        private const val LOGO_TEXTURE_W = 512
+        private const val LOGO_TEXTURE_H = 256
+        private const val LOGO_SUBTITLE_H = 64
+        /** How much brighter RUN shines at the most, as a share of the alpha of a second pass over itself. */
+        private const val GLOW = 0.55f
         /** The logo's height when there is room (it is twice as wide), and the least it shrinks to. */
         private const val LOGO_HEIGHT = 100
         private const val MIN_LOGO_HEIGHT = 24

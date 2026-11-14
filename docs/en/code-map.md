@@ -29,6 +29,7 @@ KDoc comment that says more.
 | `level/LevelParser.kt` | Parses one level file; documents every key |
 | `guide/GuideMarkdown.kt` | Reads a player guide page (the Markdown subset) into blocks |
 | `menu/LampFlicker.kt` | When the menu scene's lamps flicker |
+| `menu/LogoRun.kt` | The menu logo's easter egg: when the words flicker out and leave RUN lit, and for how long |
 | `menu/BlockLight.kt` | Block light for a box of blocks with no world (the menu scene) |
 | `achievement/Achievement.kt` | The eleven achievements, in list order, by id |
 | `puzzle/ValveCode.kt` | Level 3's valve puzzle: random digits, a turn, solved |
@@ -332,7 +333,7 @@ KDoc comment that says more.
 
 | File | What it does |
 |---|---|
-| `MainMenuScreen.kt` | The main menu |
+| `MainMenuScreen.kt` | The main menu (the chalk logo in layers, its RUN easter egg and Chapter 2's line under it included) |
 | `AchievementsScreen.kt` | The ACHIEVEMENTS screen: the list on paper |
 | `Paper.kt` | Worn paper (tile, stains, edges, inks) for the guide and the achievements |
 | `GuideScreen.kt` | The player guide: a scrolling paper sheet with tabs |

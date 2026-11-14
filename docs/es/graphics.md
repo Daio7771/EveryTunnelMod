@@ -142,4 +142,7 @@ una cámara fija (`client.menu.MenuScene`), sin ningún mundo cargado.
 - El único efecto de pantalla es la viñeta de agotamiento: sin niebla, grano ni desenfoque.
 - El jugador es el vigilante nocturno: uniforme negro con detalles amarillos.
 - Créditos como de película sobre negro, al ritmo de su canción: los dibujos a línea del autor junto a títulos tecleados, una pantalla cada vez.
-- El menú principal: negro, un logo serif blanco y gastado, minimalista.
+- El menú principal: negro, un logo de tiza (letras dibujadas a mano, un emblema de túnel, como el
+  icono del proyecto), minimalista. El logo tiene un easter egg: de vez en cuando las palabras se
+  apagan parpadeando y solo quedan encendidas la R de EVERY y la U y la N de TUNNEL, que dicen RUN
+  (`LogoRun`).

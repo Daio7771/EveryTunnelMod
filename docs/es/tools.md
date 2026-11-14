@@ -16,8 +16,8 @@ parámetros. Todos usan semilla: los mismos parámetros siempre dan el mismo res
   (`sudo pacman -S fluidsynth`) y sus muestras: ejecuta una vez
   `python3 -I tools/sounds/soundfonts/fetch.py` (unos 80 MB, CC0, no están en git). Sin ellos,
   `export.py` se detiene con un mensaje que lo dice.
-- **El logo** necesita una fuente serif de rótulo (se usó Noto Serif Display). El PNG está
-  en git, así que la fuente solo hace falta para cambiarlo.
+- **El logo** solo necesita Pillow y numpy: dibuja él mismo sus letras de tiza, sin fuente. Los
+  PNG están en git.
 
 Ejecuta cada herramienta **desde la raíz del repositorio**. Cada una escribe su resultado
 real en `src/` (va a git) y las vistas previas en su propia carpeta `output/` (ignorada por
@@ -43,7 +43,7 @@ git).
 | `tools/prologue/room.py` | `cutscene/prologue_room.json`: el laboratorio del prólogo (rellenos, bloques, luces del techo, dónde están el científico y el jugador), que el mod construye al empezar la escena | la sala; véase [Sistema de cinemáticas](cinematic-system.md) |
 | `tools/entity/director.py` | La geometría del director (sentado, con la máscara de la película del Cinema en su propia placa), sus animaciones (respirar, gestos, quitarse la máscara, levantarse, señalar) y su textura | el director del nivel 5 |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png`, `turn_icon.png` | los iconos del HUD, el detector del nivel 5, el símbolo de girar del pasillo de entrada |
-| `tools/gui/logo.py` | `logo.png` | el logo |
+| `tools/gui/logo.py` | `logo_rest.png`, `logo_run.png`, `logo_chapter_2.png` (el logo en tiza, en dos capas, y la línea del Chapter 2; `--write` los escribe, si no solo hace una vista previa) | el logo |
 | `tools/gui/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | el foco sin shaders |
 | `tools/gui/locker_view.py` | `locker_view.png` | la vista desde dentro de una taquilla |
 | `tools/gui/safe_dial.py` | `safe_dial.png` | el dial de las cajas fuertes de las Suites |
