@@ -3,6 +3,7 @@ package daio7771.everytunnel.client.screen
 import com.mojang.blaze3d.systems.RenderSystem
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.AchievementStore
+import daio7771.everytunnel.client.effects.MenuMusic
 import daio7771.everytunnel.client.menu.MenuScene
 import daio7771.everytunnel.core.achievement.Achievement
 import daio7771.everytunnel.platform.ChapterRequest
@@ -29,13 +30,18 @@ import java.io.File
  * a parking hall whose lamps flicker now and then ([MenuScene]); the black fades out towards
  * the right ([drawShade]) to show it. Its music is [MenuMusic].
  *
- * - With a saved game ([ContinueGame]) CONTINUE comes first and goes on with it; NEW GAME is always there. NEW GAME
- *   opens the chapters ([ChapterScreen]): CHAPTER 1 opens Noname Complex (installed by `client.MapWorldInstaller`),
- *   behind the loading screen ([LoadingCover]), after asking if it would erase a saved game ([EraseSaveScreen]);
- *   CHAPTER 2 carries a padlock until the achievement "Nothing in There" is earned, which only warns
- *   ([SpoilerAlertScreen]) and lets it be played anyway; for now it opens the world only to play the prologue
- *   ([ChapterRequest]) and comes back here. Ctrl+Shift+D, explained in the guide, erases the saved game after asking
- *   ([EraseSaveScreen]).
+ * - The menu is a chapter's: [chapter], 1 to begin with, gives it its scene and its music ([MenuScene.show],
+ *   [MenuMusic.setChapter]). SELECT CHAPTER swaps the options for the chapters, CHAPTER 1, CHAPTER 2 and BACK, in
+ *   the same menu: moving over one previews its scene and music through a short fade, choosing one makes it the
+ *   menu's (the whole menu is then that chapter's, and stays so, for as long as the game runs, when the menu comes
+ *   back after a world); BACK (or Escape) leaves it as it was. CHAPTER 2 carries a padlock until the achievement
+ *   "Nothing in There" is earned.
+ * - The way into the game depends on the state, one option and not two. In Chapter 1's menu, with a saved game
+ *   ([ContinueGame]) it is CONTINUE, which goes on with it; without one it is NEW GAME, which opens Noname Complex
+ *   (installed by `client.MapWorldInstaller`), behind the loading screen ([LoadingCover]). Starting over is
+ *   Ctrl+Shift+D, explained in the guide: it erases the saved game after asking ([EraseSaveScreen]), and NEW GAME is back.
+ *   In Chapter 2's menu it is NEW GAME, which only warns ([SpoilerAlertScreen]) and lets it be played anyway while
+ *   Chapter 2 is locked, opens the world only to play the prologue ([ChapterRequest]) and comes back here.
  * - OPTIONS opens vanilla's options (the language is changed there); GUIDE opens the player
  *   guide ([GuideScreen], whose last tab rolls the credits); ACHIEVEMENTS lists the
  *   achievements ([AchievementsScreen]); EXIT closes the game.
@@ -50,7 +56,11 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
 
     private enum class Option(val key: String) {
         NEW_GAME("menu.every_tunnel.new_game"),
+        SELECT_CHAPTER("menu.every_tunnel.select_chapter"),
         CONTINUE("menu.every_tunnel.continue"),
+        CHAPTER_1("menu.every_tunnel.chapter_1"),
+        CHAPTER_2("menu.every_tunnel.chapter_2"),
+        BACK("menu.every_tunnel.back"),
         OPTIONS("menu.every_tunnel.options"),
         GUIDE("menu.every_tunnel.guide"),
         ACHIEVEMENTS("menu.every_tunnel.achievements"),
@@ -68,9 +78,19 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     private var noticeUntilMs = 0L
     private var hasSave = false
 
-    /** What the menu offers now: CONTINUE too, if there is a saved game. */
+    /** The chapter this menu is (1 or 2): its scene, its music and its way into the game. */
+    private var chapter = rememberedChapter
+
+    /** The chapters are showing instead of the options. */
+    private var choosingChapter = false
+
+    /** What the menu offers now: the chapters, or one way into the game (CONTINUE in Chapter 1 with a saved game, else NEW GAME), SELECT CHAPTER and the rest. */
     private val options: List<Option>
-        get() = (if (hasSave) listOf(Option.CONTINUE) else emptyList()) + Option.NEW_GAME + Option.REST
+        get() = if (choosingChapter) listOf(Option.CHAPTER_1, Option.CHAPTER_2, Option.BACK)
+        else listOf(if (hasSave && chapter == 1) Option.CONTINUE else Option.NEW_GAME, Option.SELECT_CHAPTER) + Option.REST
+
+    /** Chapter 2 is locked until the achievement "Nothing in There" is earned: it only warns. */
+    private val chapterTwoLocked: Boolean get() = Achievement.NOTHING_THERE !in AchievementStore.unlocked
 
     override fun init() {
         hasSave = saveMarker()?.isFile == true
@@ -90,7 +110,10 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
         val layout = layout()
         // The scene first (it clears the depth buffer), or plain black without it.
+        showSelected()
         if (MenuScene.render()) drawShade(context, layout) else context.fill(0, 0, width, height, 0xFF000000.toInt())
+        // Changing scene goes through black.
+        MenuScene.fade().takeIf { it > 0f }?.let { context.fill(0, 0, width, height, ((it * 255f).toInt().coerceIn(0, 255)) shl 24) }
 
         // Everything fades in from black when the menu first opens.
         val fade = ((Util.getMeasuringTimeMs() - openedAtMs) / FADE_IN_MS.toFloat()).coerceIn(0f, 1f)
@@ -109,7 +132,9 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
             context.matrices.translate(left.toFloat(), y.toFloat(), 0f)
             context.matrices.scale(OPTION_SCALE, OPTION_SCALE, 1f)
             if (chosen) context.drawText(textRenderer, Text.literal(">"), -12, 0, argb(SELECTED_COLOR, fade), false)
-            context.drawText(textRenderer, label, 0, 0, argb(if (chosen) SELECTED_COLOR else OPTION_COLOR, fade), false)
+            val colour = if (chosen) SELECTED_COLOR else OPTION_COLOR
+            context.drawText(textRenderer, label, 0, 0, argb(colour, fade), false)
+            if (option == Option.CHAPTER_2 && chapterTwoLocked) padlock(context, textRenderer.getWidth(label) + 8, -1, argb(colour, fade))
             context.matrices.pop()
         }
 
@@ -117,6 +142,26 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
             context.drawText(textRenderer, it, left, top + optionsHeight() + NOTICE_GAP, argb(NOTICE_COLOR, fade), false)
         }
         context.drawText(textRenderer, versionText, left, height - VERSION_FROM_BOTTOM, argb(VERSION_COLOR, fade), false)
+    }
+
+    /** The scene and the music of the chapter the cursor is on while the chapters show, else of the menu's chapter. */
+    private fun showSelected() {
+        val shown = when (if (choosingChapter) options.getOrNull(selected) else null) {
+            Option.CHAPTER_1 -> 1
+            Option.CHAPTER_2 -> 2
+            else -> chapter
+        }
+        MenuScene.show(if (shown == 2) MenuScene.LAB else MenuScene.GARAGE)
+        MenuMusic.setChapter(shown)
+    }
+
+    /** A small padlock, 8 wide and 11 high at ([x], [y]) (in the option's scaled units): the shackle's arch over a body. */
+    private fun padlock(context: DrawContext, x: Int, y: Int, colour: Int) {
+        context.fill(x + 1, y, x + 7, y + 1, colour)
+        context.fill(x + 1, y + 1, x + 2, y + 5, colour)
+        context.fill(x + 6, y + 1, x + 7, y + 5, colour)
+        context.fill(x, y + 5, x + 8, y + 11, colour)
+        context.fill(x + 3, y + 7, x + 5, y + 9, 0xFF0A0A0B.toInt())
     }
 
     /**
@@ -211,6 +256,7 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
             GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> selected = (selected + options.size - 1) % options.size
             GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> selected = (selected + 1) % options.size
             GLFW.GLFW_KEY_ENTER, GLFW.GLFW_KEY_KP_ENTER, GLFW.GLFW_KEY_SPACE -> choose(options[selected])
+            GLFW.GLFW_KEY_ESCAPE -> if (choosingChapter) chooseChapter(false) else return super.keyPressed(keyCode, scanCode, modifiers)
             else -> return super.keyPressed(keyCode, scanCode, modifiers)
         }
         return true
@@ -219,14 +265,15 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     private fun choose(option: Option) {
         val client = client ?: return
         when (option) {
-            Option.NEW_GAME -> client.setScreen(
-                ChapterScreen(
-                    this, locked = Achievement.NOTHING_THERE !in AchievementStore.unlocked,
-                    onChapterOne = ::startChapterOne,
-                    onChapterTwo = { open(client, continuing = false, prologue = true) },
-                    onLocked = { client.setScreen(SpoilerAlertScreen(this) { open(client, continuing = false, prologue = true) }) },
-                ),
-            )
+            Option.NEW_GAME -> when {
+                chapter == 1 -> open(client, false)
+                chapterTwoLocked -> client.setScreen(SpoilerAlertScreen(this) { open(client, continuing = false, prologue = true) })
+                else -> open(client, continuing = false, prologue = true)
+            }
+            Option.SELECT_CHAPTER -> chooseChapter(true)
+            Option.BACK -> chooseChapter(false)
+            Option.CHAPTER_1 -> becomeChapter(1)
+            Option.CHAPTER_2 -> becomeChapter(2)
             Option.CONTINUE -> open(client, true)
             Option.OPTIONS -> client.setScreen(OptionsScreen(this, client.options))
             Option.GUIDE -> client.setScreen(GuideScreen(this))
@@ -235,14 +282,17 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         }
     }
 
-    /** Chapter 1 from the start: asks first if that would erase a saved game. */
-    private fun startChapterOne() {
-        val client = client ?: return
-        if (!hasSave) return open(client, false)
-        client.setScreen(EraseSaveScreen(this, "menu.every_tunnel.erase.warning") {
-            eraseSave()
-            client.execute { open(client, false) }
-        })
+    /** Shows the chapters in place of the options (or the options again), the cursor on this chapter's (or on SELECT CHAPTER). */
+    private fun chooseChapter(on: Boolean) {
+        choosingChapter = on
+        selected = if (on) chapter - 1 else options.indexOf(Option.SELECT_CHAPTER)
+    }
+
+    /** The menu is [number]'s from now on (its scene and music already showing): the options come back. */
+    private fun becomeChapter(number: Int) {
+        chapter = number
+        rememberedChapter = number
+        chooseChapter(false)
     }
 
     private fun open(client: MinecraftClient, continuing: Boolean, prologue: Boolean = false) {
@@ -295,6 +345,9 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         private const val SELECTED_COLOR = 0xE8ECF0
         private const val VERSION_COLOR = 0x3A3E44
         private const val NOTICE_COLOR = 0xA05050
+
+        /** The chapter the menu was last left as, for as long as the game runs (the menu is made again after each world). */
+        private var rememberedChapter = 1
 
         /** True while vanilla's title screen was asked for (Ctrl+Shift+V), until the player joins a world. */
         @JvmStatic

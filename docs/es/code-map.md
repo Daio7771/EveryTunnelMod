@@ -272,7 +272,7 @@ con un comentario KDoc que cuenta más.
 | `BreathingEffect.kt` | Respiración fuerte agotado |
 | `TensionMusic.kt` | Capas de música según el estado de los Pale men |
 | `IntroMusic.kt` | La canción del ascensor y su parada de cinta |
-| `MenuMusic.kt` | El tema del menú |
+| `MenuMusic.kt` | La música del menú, una pista por capítulo, con fundido de una a otra cuando el menú cambia de capítulo |
 | `FlashlightEffect.kt` | Calcula el haz cada tick; parpadeo de batería baja |
 | `ScreenFade.kt` | Fundidos a negro que manda el servidor |
 
@@ -324,7 +324,7 @@ con un comentario KDoc que cuenta más.
 
 | Archivo | Qué hace |
 |---|---|
-| `MenuScene.kt` | La planta del aparcamiento detrás del menú: la carga, la ilumina, la hace parpadear y la dibuja |
+| `MenuScene.kt` | Las escenas detrás del menú principal, una por capítulo (la planta del aparcamiento, el laboratorio del prólogo con cámara a la deriva): las carga, las ilumina, las hace parpadear y las dibuja, con fundido por negro de una a otra |
 | `MenuSceneView.kt` | Los bloques y la luz de la escena como un mundo para el renderizador de bloques |
 | `RotatedModel.kt` | Un modelo cocinado girado por cuartos de vuelta (los bloques girados de la escena) |
 
@@ -338,7 +338,6 @@ con un comentario KDoc que cuenta más.
 | `GuideScreen.kt` | La guía del jugador: una hoja de papel con scroll y pestañas |
 | `NoteScreen.kt` | Una nota leída en el papel de la guía sobre el juego, con los huecos rellenos |
 | `SafeScreen.kt` | El dial de una caja fuerte, que se gira y se escucha |
-| `ChapterScreen.kt` | El modal de NUEVA PARTIDA: CAPÍTULO 1 y CAPÍTULO 2, el segundo con candado y una línea hasta ganar "Nothing in There" |
 | `SpoilerAlertScreen.kt` | La alerta de spoiler antes de jugar un Capítulo 2 bloqueado: JUGAR IGUAL o VOLVER |
 | `EraseSaveScreen.kt` | El aviso antes de que Ctrl+Shift+D borre la partida guardada |
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |

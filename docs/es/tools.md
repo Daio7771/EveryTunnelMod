@@ -35,6 +35,7 @@ git).
 | `tools/entity/guard.py` | `textures/entity/guard.png` (la skin del uniforme) | el uniforme |
 | `tools/entity/dead_guard.py` | El guardia anterior: un cuerpo de jugador sentado contra una pared, la cabeza caída, con la skin del uniforme gastada (después de `guard.py`) | el Hideout del nivel 5 |
 | `tools/entity/scientist.py` | La geometría del científico (de pie, con bata blanca y la falda de la bata como una caja más), sus animaciones (quieto, trabajando en la mesa, temblando, enfermo, estirado) y dos texturas (sano, enfermo) | el prólogo del Chapter 2 |
+| `tools/prologue/menu_scene.py` | `menu/lab_scene.json`: el laboratorio del prólogo como escena del menú principal del Capítulo 2 (el plano de room.py, sin científico; la cámara a la deriva por la mesa) | la sala, o la cámara del menú |
 | `tools/prologue/room.py` | `cutscene/prologue_room.json`: el laboratorio del prólogo (rellenos, bloques, luces del techo, dónde están el científico y el jugador), que el mod construye al empezar la escena | la sala; véase [Sistema de cinemáticas](cinematic-system.md) |
 | `tools/entity/director.py` | La geometría del director (sentado, con la máscara de la película del Cinema en su propia placa), sus animaciones (respirar, gestos, quitarse la máscara, levantarse, señalar) y su textura | el director del nivel 5 |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png`, `turn_icon.png` | los iconos del HUD, el detector del nivel 5, el símbolo de girar del pasillo de entrada |

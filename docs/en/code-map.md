@@ -272,7 +272,7 @@ KDoc comment that says more.
 | `BreathingEffect.kt` | Heavy breathing when exhausted |
 | `TensionMusic.kt` | Music layers from the Pale men's state |
 | `IntroMusic.kt` | The elevator song and its tape-stop fade |
-| `MenuMusic.kt` | The menu theme |
+| `MenuMusic.kt` | The menu's music, one track for each chapter, fading from one to the other as the menu changes chapter |
 | `FlashlightEffect.kt` | Computes the beam each tick; low-battery flicker |
 | `ScreenFade.kt` | Black fades sent by the server |
 
@@ -324,7 +324,7 @@ KDoc comment that says more.
 
 | File | What it does |
 |---|---|
-| `MenuScene.kt` | The parking hall behind the main menu: loads, lights, flickers and draws it |
+| `MenuScene.kt` | The scenes behind the main menu, one for each chapter (the parking hall, the prologue's laboratory with a drifting camera): loads, lights, flickers and draws them, fading through black from one to the other |
 | `MenuSceneView.kt` | The scene's blocks and light as a world for the block renderer |
 | `RotatedModel.kt` | A baked model turned by quarter turns (the scene's turned blocks) |
 
@@ -338,7 +338,6 @@ KDoc comment that says more.
 | `GuideScreen.kt` | The player guide: a scrolling paper sheet with tabs |
 | `NoteScreen.kt` | A note read on the guide's paper over the game, placeholders filled |
 | `SafeScreen.kt` | A safe's dial, turned and listened to |
-| `ChapterScreen.kt` | NEW GAME's modal: CHAPTER 1 and CHAPTER 2, the second with a padlock and a line until "Nothing in There" is earned |
 | `SpoilerAlertScreen.kt` | The spoiler alert before a locked Chapter 2 is played: PLAY ANYWAY or BACK |
 | `EraseSaveScreen.kt` | The warning before Ctrl+Shift+D erases the saved game |
 | `LoadingScreen.kt` | The loading screen and `LoadingCover`, which draws it over everything |

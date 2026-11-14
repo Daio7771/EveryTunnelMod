@@ -181,7 +181,7 @@ The credits' texts are the lang keys `every_tunnel.credits.*`; the drawings are
 Chapter 2 opens with its own cinematic, **the prologue**, which lives only on the private branch until
 Levels 1 and 2 of the chapter are published. It is the second scene `CutsceneView` plays (`Kind.PROLOGUE`):
 the same camera, bands, subtitles and skip, but it is not in a level. `/everytunnel prologue` starts it for now
-(the chapter's own start does not exist yet) and by the main menu: NEW GAME opens a modal with CHAPTER 1 and CHAPTER 2, and CHAPTER 2 opens the world only for the prologue (`ChapterRequest`: no map build, no new game; a saved game of Chapter 1 is not touched), plays it and leaves for the menu. CHAPTER 2 carries a padlock until the achievement "Nothing in There" is earned, which only shows a spoiler alert that can be played through. It lasts about 1 min 15 s.
+(the chapter's own start does not exist yet) and by the main menu: SELECT CHAPTER lists CHAPTER 1 and CHAPTER 2, and choosing CHAPTER 2 turns the whole menu into Chapter 2's (the prologue's laboratory behind it), whose NEW GAME opens the world only for the prologue (`ChapterRequest`: no map build, no new game; a saved game of Chapter 1 is not touched), plays it and leaves for the menu. CHAPTER 2 carries a padlock until the achievement "Nothing in There" is earned, which only shows a spoiler alert that can be played through. It lasts about 1 min 15 s.
 
 - **The room** is not in the map. `tools/prologue/room.py` writes a plan (`cutscene/prologue_room.json`:
   fills, single blocks, the ceiling's lights, where the scientist stands, where the radiation counter sounds and

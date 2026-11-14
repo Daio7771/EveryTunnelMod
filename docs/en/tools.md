@@ -33,6 +33,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/entity/guard.py` | `textures/entity/guard.png` (the uniform skin) | the uniform |
 | `tools/entity/dead_guard.py` | The guard before you: a player's body sitting against a wall, head dropped, in the uniform skin worn out (run after `guard.py`) | Level 5's Hideout |
 | `tools/entity/scientist.py` | The scientist's geometry (standing, in a white coat, with the coat's skirt as an extra box), animations (idle, working at the bench, trembling, sick, stretched) and two textures (healthy, sick) | Chapter 2's prologue |
+| `tools/prologue/menu_scene.py` | `menu/lab_scene.json`: the prologue's laboratory as Chapter 2's main menu scene (room.py's plan, no scientist; the camera drifting slowly along the bench) | the room, or the menu's camera |
 | `tools/prologue/room.py` | `cutscene/prologue_room.json`: the prologue's laboratory (fills, blocks, ceiling lights, where the scientist and the player stand), which the mod builds when the scene starts | the room; see [Cinematic system](cinematic-system.md) |
 | `tools/entity/director.py` | The director's geometry (sitting, the Cinema film's mask on its own plate), animations (breathing, gestures, mask off, standing, pointing) and texture | Level 5's director |
 | `tools/gui/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png`, `turn_icon.png` | HUD icons, Level 5's detector, the entry corridor's turn round sign |
