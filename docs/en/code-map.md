@@ -163,6 +163,7 @@ KDoc comment that says more.
 | `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
 | `ScientistEntity.kt` | The prologue's scientist (GeckoLib, a passing creature): works at his bench, trembles, falls sick, stretches, then is a Pale man (`stage`, set by the scene) |
+| `ChapterRequest.kt` | What the menu's Chapter 2 asked for: the world opens only for the prologue (no map build, no new game) and the client leaves for the menu afterwards |
 | `DirectorBlocks.kt` | Level 5's anteroom and office: the director's double door that opens both leaves at once, the security camera block, the wall of CCTV screens |
 | `DeepWaterHooks.kt` | Level 5's deep water (the drain's pools): falling in pulls the player under, and they drown |
 | `DrainHooks.kt` | Level 5's drain: the hatch slamming shut once the player is down its ladder, open again on a death before the Junction |
@@ -337,6 +338,8 @@ KDoc comment that says more.
 | `GuideScreen.kt` | The player guide: a scrolling paper sheet with tabs |
 | `NoteScreen.kt` | A note read on the guide's paper over the game, placeholders filled |
 | `SafeScreen.kt` | A safe's dial, turned and listened to |
+| `ChapterScreen.kt` | NEW GAME's modal: CHAPTER 1 and CHAPTER 2, the second with a padlock and a line until "Nothing in There" is earned |
+| `SpoilerAlertScreen.kt` | The spoiler alert before a locked Chapter 2 is played: PLAY ANYWAY or BACK |
 | `EraseSaveScreen.kt` | The warning before Ctrl+Shift+D erases the saved game |
 | `LoadingScreen.kt` | The loading screen and `LoadingCover`, which draws it over everything |
 | `LoadingTips.kt` | Rotating tips with the player's keys |

@@ -73,6 +73,9 @@ object LoadingHooks {
         /** Server tick the new game started (or was skipped), or -1. */
         var preparedTick = -1L
         var lightSent = false
+
+        /** The menu asked only for Chapter 2's prologue ([ChapterRequest]): it plays once the loading screen is gone. */
+        var prologue = false
         /** Server tick [STATE_READY] was sent, or -1. */
         var readyTick = -1L
         var done = false
@@ -116,6 +119,11 @@ object LoadingHooks {
 
     private fun startBuilds(server: MinecraftServer) {
         building = false
+        if (ChapterRequest.prologueOnly) {
+            // The prologue has its own room: no level is needed, so none is built.
+            EveryTunnel.LOGGER.info("Only Chapter 2's prologue was asked for: the map is not rebuilt")
+            return
+        }
         val ids = LevelManager.all().sortedBy { it.order }.mapNotNull { it.build }.distinct()
         if (ids.isEmpty()) return
         val functions = server.commandFunctionManager
@@ -168,7 +176,9 @@ object LoadingHooks {
             if (!state.prepared) {
                 state.prepared = true
                 state.preparedTick = now
-                if (WorldRules.appliesTo(player.isCreative, player.isSpectator)) {
+                if (ChapterRequest.prologueOnly) {
+                    state.prologue = true
+                } else if (WorldRules.appliesTo(player.isCreative, player.isSpectator)) {
                     val continuing = ContinueGame.requested && ContinueGame.start(player)
                     ContinueGame.requested = false
                     if (!continuing) NewGame.start(player)
@@ -204,6 +214,7 @@ object LoadingHooks {
                 iterator.remove()
                 unfreeze(player)
                 EveryTunnel.LOGGER.info("{}: loaded", player.name.string)
+                if (state.prologue) PrologueSceneHooks.startFromMenu(player)
             }
         }
     }

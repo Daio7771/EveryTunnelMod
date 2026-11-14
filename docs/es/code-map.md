@@ -163,6 +163,7 @@ con un comentario KDoc que cuenta más.
 | `LabHallHooks.kt` | El golpe de cuerdas y la primera Cloud del Lab hall, una vez por partida |
 | `ChemicalHooks.kt` | El puzle químico: la pareja de la partida, la mezcladora, la alarma y sus enemigos, la rejilla disolviéndose, la trampilla |
 | `ScientistEntity.kt` | El científico del prólogo (GeckoLib, criatura pasajera): trabaja en su mesa, tiembla, enferma, se estira y luego es un Pale man (`stage`, que pone la escena) |
+| `ChapterRequest.kt` | Lo que pidió el Capítulo 2 del menú: el mundo se abre solo para el prólogo (sin reconstruir el mapa ni nueva partida) y el cliente sale al menú después |
 | `DirectorBlocks.kt` | La antesala y el despacho del nivel 5: la puerta doble del director que abre sus dos hojas a la vez, el bloque de la cámara de seguridad, el muro de monitores CCTV |
 | `DeepWaterHooks.kt` | El agua honda del nivel 5 (las piscinas del drenaje): al caer, algo arrastra al jugador al fondo y se ahoga |
 | `DrainHooks.kt` | El drenaje del nivel 5: la trampilla cerrándose de golpe cuando el jugador ha bajado su escalera, abierta otra vez si muere antes de la Junction |
@@ -337,6 +338,8 @@ con un comentario KDoc que cuenta más.
 | `GuideScreen.kt` | La guía del jugador: una hoja de papel con scroll y pestañas |
 | `NoteScreen.kt` | Una nota leída en el papel de la guía sobre el juego, con los huecos rellenos |
 | `SafeScreen.kt` | El dial de una caja fuerte, que se gira y se escucha |
+| `ChapterScreen.kt` | El modal de NUEVA PARTIDA: CAPÍTULO 1 y CAPÍTULO 2, el segundo con candado y una línea hasta ganar "Nothing in There" |
+| `SpoilerAlertScreen.kt` | La alerta de spoiler antes de jugar un Capítulo 2 bloqueado: JUGAR IGUAL o VOLVER |
 | `EraseSaveScreen.kt` | El aviso antes de que Ctrl+Shift+D borre la partida guardada |
 | `LoadingScreen.kt` | La pantalla de carga y `LoadingCover`, que la dibuja encima de todo |
 | `LoadingTips.kt` | Consejos que van cambiando, con las teclas del jugador |

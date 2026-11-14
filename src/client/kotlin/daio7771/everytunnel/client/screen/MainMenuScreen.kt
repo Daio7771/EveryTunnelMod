@@ -2,8 +2,11 @@ package daio7771.everytunnel.client.screen
 
 import com.mojang.blaze3d.systems.RenderSystem
 import daio7771.everytunnel.EveryTunnel
-import daio7771.everytunnel.platform.ContinueGame
+import daio7771.everytunnel.client.AchievementStore
 import daio7771.everytunnel.client.menu.MenuScene
+import daio7771.everytunnel.core.achievement.Achievement
+import daio7771.everytunnel.platform.ChapterRequest
+import daio7771.everytunnel.platform.ContinueGame
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents
@@ -26,9 +29,13 @@ import java.io.File
  * a parking hall whose lamps flicker now and then ([MenuScene]); the black fades out towards
  * the right ([drawShade]) to show it. Its music is [MenuMusic].
  *
- * - The first option depends on the saved game ([ContinueGame]): without one NEW GAME opens Noname Complex
- *   (installed by `client.MapWorldInstaller`), behind the loading screen ([LoadingCover]); with one, CONTINUE
- *   goes on with it. Ctrl+Shift+D, explained in the guide, erases it after asking ([EraseSaveScreen]).
+ * - With a saved game ([ContinueGame]) CONTINUE comes first and goes on with it; NEW GAME is always there. NEW GAME
+ *   opens the chapters ([ChapterScreen]): CHAPTER 1 opens Noname Complex (installed by `client.MapWorldInstaller`),
+ *   behind the loading screen ([LoadingCover]), after asking if it would erase a saved game ([EraseSaveScreen]);
+ *   CHAPTER 2 carries a padlock until the achievement "Nothing in There" is earned, which only warns
+ *   ([SpoilerAlertScreen]) and lets it be played anyway; for now it opens the world only to play the prologue
+ *   ([ChapterRequest]) and comes back here. Ctrl+Shift+D, explained in the guide, erases the saved game after asking
+ *   ([EraseSaveScreen]).
  * - OPTIONS opens vanilla's options (the language is changed there); GUIDE opens the player
  *   guide ([GuideScreen], whose last tab rolls the credits); ACHIEVEMENTS lists the
  *   achievements ([AchievementsScreen]); EXIT closes the game.
@@ -61,9 +68,9 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     private var noticeUntilMs = 0L
     private var hasSave = false
 
-    /** What the menu offers now: one way into the game, by whether there is a saved game. */
+    /** What the menu offers now: CONTINUE too, if there is a saved game. */
     private val options: List<Option>
-        get() = listOf(if (hasSave) Option.CONTINUE else Option.NEW_GAME) + Option.REST
+        get() = (if (hasSave) listOf(Option.CONTINUE) else emptyList()) + Option.NEW_GAME + Option.REST
 
     override fun init() {
         hasSave = saveMarker()?.isFile == true
@@ -212,7 +219,14 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     private fun choose(option: Option) {
         val client = client ?: return
         when (option) {
-            Option.NEW_GAME -> open(client, false)
+            Option.NEW_GAME -> client.setScreen(
+                ChapterScreen(
+                    this, locked = Achievement.NOTHING_THERE !in AchievementStore.unlocked,
+                    onChapterOne = ::startChapterOne,
+                    onChapterTwo = { open(client, continuing = false, prologue = true) },
+                    onLocked = { client.setScreen(SpoilerAlertScreen(this) { open(client, continuing = false, prologue = true) }) },
+                ),
+            )
             Option.CONTINUE -> open(client, true)
             Option.OPTIONS -> client.setScreen(OptionsScreen(this, client.options))
             Option.GUIDE -> client.setScreen(GuideScreen(this))
@@ -221,10 +235,22 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         }
     }
 
-    private fun open(client: MinecraftClient, continuing: Boolean) {
+    /** Chapter 1 from the start: asks first if that would erase a saved game. */
+    private fun startChapterOne() {
+        val client = client ?: return
+        if (!hasSave) return open(client, false)
+        client.setScreen(EraseSaveScreen(this, "menu.every_tunnel.erase.warning") {
+            eraseSave()
+            client.execute { open(client, false) }
+        })
+    }
+
+    private fun open(client: MinecraftClient, continuing: Boolean, prologue: Boolean = false) {
         ContinueGame.requested = continuing
+        ChapterRequest.prologueOnly = prologue
         val world = client.levelStorage.savesDirectory.resolve(WORLD_FOLDER)
         if (!world.resolve("level.dat").toFile().isFile) {
+            ChapterRequest.prologueOnly = false
             notice = Text.translatable("menu.every_tunnel.world_missing")
             noticeUntilMs = Util.getMeasuringTimeMs() + 5000L
             EveryTunnel.LOGGER.warn("No map world at {}", world)

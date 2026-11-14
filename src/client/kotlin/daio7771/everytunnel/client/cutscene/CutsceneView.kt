@@ -9,6 +9,7 @@ import daio7771.everytunnel.core.cutscene.SceneFrame
 import daio7771.everytunnel.core.cutscene.SkipPrompt
 import daio7771.everytunnel.core.cutscene.Timeline
 import daio7771.everytunnel.core.cutscene.TitleCue
+import daio7771.everytunnel.platform.ChapterRequest
 import daio7771.everytunnel.platform.DirectorEntity
 import daio7771.everytunnel.platform.DirectorSceneHooks
 import daio7771.everytunnel.platform.PrologueSceneHooks
@@ -19,6 +20,8 @@ import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.minecraft.client.MinecraftClient
+import net.minecraft.client.gui.screen.MessageScreen
+import net.minecraft.client.gui.screen.TitleScreen
 import net.minecraft.client.option.Perspective
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.client.sound.SoundInstance
@@ -31,6 +34,7 @@ import net.minecraft.nbt.NbtCompound
 import net.minecraft.network.listener.ClientPlayPacketListener
 import net.minecraft.network.packet.Packet
 import net.minecraft.sound.SoundCategory
+import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import net.minecraft.util.Util
 import net.minecraft.util.math.MathHelper
@@ -111,7 +115,11 @@ object CutsceneView {
         }
         ClientPlayNetworking.registerGlobalReceiver(PrologueSceneHooks.END_PACKET_ID) { client, _, buf, _ ->
             val skipped = buf.readBoolean()
-            client.execute { stop(client, skipped) }
+            client.execute {
+                stop(client, skipped)
+                // The world was opened only for the prologue (the menu's Chapter 2): back to the menu.
+                if (ChapterRequest.prologueOnly) leaveForMenu(client)
+            }
         }
         ClientTickEvents.END_CLIENT_TICK.register(::tick)
         WorldRenderEvents.AFTER_ENTITIES.register(::drawPlayer)
@@ -142,6 +150,14 @@ object CutsceneView {
             val (hx, hy, hz) = at.at(0.0, 0.0, 1.2)
             PrologueSound.start(client, counterAt = Vec3d(x, y, z), lightsAt = Vec3d(lx, ly, lz), hisAt = Vec3d(hx, hy, hz))
         }
+    }
+
+    /** Leaves the world, saving it, for the main menu (the title screen is the menu: `MinecraftClientMixin`). */
+    private fun leaveForMenu(client: MinecraftClient) {
+        val singleplayer = client.isInSingleplayer
+        client.world?.disconnect()
+        if (singleplayer) client.disconnect(MessageScreen(Text.translatable("menu.savingLevel"))) else client.disconnect()
+        client.setScreen(TitleScreen())
     }
 
     /** The view back to the player, out of black if [skipped]. Safe to call when nothing plays. */

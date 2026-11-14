@@ -46,8 +46,9 @@ import java.util.UUID
  * [ScientistEntity.STRETCHED] and, in the last beat, becomes a Pale man ([ScientistEntity.PALE]), turning a little
  * more towards the camera each time. The camera, the voice and the sound are the client's, on the same ticks.
  *
- * For now it is started by `/everytunnel prologue` (the game's chapter 2 does not exist yet). Its state lives
- * in memory only.
+ * For now it is started by `/everytunnel prologue` and by the main menu's NEW GAME, Chapter 2 ([ChapterRequest],
+ * [startFromMenu]: the world opens only for it, and the client leaves for the menu when it ends); the game's chapter 2
+ * does not exist yet. Its state lives in memory only.
  */
 object PrologueSceneHooks {
 
@@ -94,7 +95,10 @@ object PrologueSceneHooks {
         ServerPlayConnectionEvents.DISCONNECT.register { handler, server ->
             if (running?.player == handler.player.uuid) abort(server, handler.player)
         }
-        ServerLifecycleEvents.SERVER_STOPPED.register { running = null }
+        ServerLifecycleEvents.SERVER_STOPPED.register {
+            running = null
+            ChapterRequest.prologueOnly = false
+        }
     }
 
     fun isRunning(player: ServerPlayerEntity): Boolean = running?.player == player.uuid
@@ -141,6 +145,17 @@ object PrologueSceneHooks {
         ServerPlayNetworking.send(player, START_PACKET_ID, buf)
         EveryTunnel.LOGGER.info("Prologue: begins ({} s), room at {}", PrologueScene.SCENE.cutscene.totalTicks / 20, ORIGIN.toShortString())
         return null
+    }
+
+    /**
+     * The main menu asked only for the prologue ([ChapterRequest]) and [player] is in: it begins. If it cannot, the
+     * request is dropped and the player stays in the world, told why.
+     */
+    fun startFromMenu(player: ServerPlayerEntity) {
+        val why = start(player) ?: return
+        EveryTunnel.LOGGER.warn("Prologue from the menu: {}", why)
+        ChapterRequest.prologueOnly = false
+        player.sendMessage(net.minecraft.text.Text.literal(why))
     }
 
     /** (x, y, z, yaw) of where the scientist stands. */
