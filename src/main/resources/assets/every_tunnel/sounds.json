@@ -140,6 +140,15 @@
       }
     ]
   },
+  "ambient.prologue.hum": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/prologue/hum_1",
+        "stream": true,
+        "volume": 0.5
+      }
+    ]
+  },
   "ambient.relay": {
     "sounds": [
       "every_tunnel:ambient/relay_1",
@@ -1070,6 +1079,14 @@
       }
     ]
   },
+  "music.prologue.drone": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/prologue/drone_1",
+        "stream": true
+      }
+    ]
+  },
   "music.stinger.heard": {
     "sounds": [
       "every_tunnel:music/stinger/heard_1",
@@ -1268,6 +1285,26 @@
   "voice.director.loop_6": {
     "sounds": [
       "every_tunnel:voice/director/loop_6"
+    ]
+  },
+  "voice.prologue_01": {
+    "sounds": [
+      "every_tunnel:voice/prologue/prologue_01"
+    ]
+  },
+  "voice.prologue_02": {
+    "sounds": [
+      "every_tunnel:voice/prologue/prologue_02"
+    ]
+  },
+  "voice.prologue_03": {
+    "sounds": [
+      "every_tunnel:voice/prologue/prologue_03"
+    ]
+  },
+  "voice.prologue_04": {
+    "sounds": [
+      "every_tunnel:voice/prologue/prologue_04"
     ]
   }
 }

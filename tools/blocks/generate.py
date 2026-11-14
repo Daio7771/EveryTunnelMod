@@ -1926,6 +1926,49 @@ def monitor_screen_tex(rng):
     return img
 
 
+def counter_screen_frames(rng, frames=16):
+    """The prologue's radiation counter: an amber readout on a dark screen, its digits and the bar under them
+    climbing frame after frame (3.4, 3.8 ... 9.4), the last third of the bar red. Only the top 16 x 8 of each frame is
+    shown, on the screen's face."""
+    amber, red, dim, ground = (255, 176, 48, 255), (232, 72, 40, 255), (62, 40, 18, 255), (24, 14, 8, 255)
+    out = []
+    for k in range(frames):
+        img = Image.new("RGBA", (16, 16), ground)
+        value = round(3.4 + 0.4 * k, 1)
+        whole, tenth = int(value), int(round(value * 10)) % 10
+        hundredth = (k * 7 + 3) % 10                        # the last digit flickers on its own
+        for x, ch in ((2, str(whole)), (8, str(tenth)), (12, str(hundredth))):
+            dart_text(img, x, 1, ch, amber)
+        img.putpixel((6, 5), amber)
+        lit = 1 + round(13 * k / (frames - 1))
+        for x in range(1, 15):
+            img.putpixel((x, 7), (red if x > 9 else amber) if x <= lit else dim)
+        out.append(img)
+    return out
+
+
+def recorder_top_frames(rng):
+    """The voice recorder from above, 9 x 16 of the frame (the box is 4 x 7 px): a silver grille at the top, a small
+    window, the red recording light (on in the first frame, off in the second) and two buttons."""
+    out = []
+    for on in (True, False):
+        img = Image.new("RGBA", (16, 16), (30, 32, 36, 255))
+        for y in range(1, 6):
+            for x in range(2, 7):
+                img.putpixel((x, y), (150, 154, 160, 255) if (x + y) % 2 else (96, 100, 108, 255))
+        for x in range(2, 7):
+            for y in (7, 8):
+                img.putpixel((x, y), (60, 90, 70, 255))
+        led = (255, 48, 36, 255) if on else (88, 22, 20, 255)
+        for x, y in ((4, 10), (4, 11)):
+            img.putpixel((x, y), led)
+        for x in (2, 3, 5, 6):
+            img.putpixel((x, 13), (120, 122, 128, 255))
+            img.putpixel((x, 14), (84, 86, 92, 255))
+        out.append(img)
+    return out
+
+
 def lab_coat_tex(rng):
     """A white lab coat hung up: its collar, the line of its buttons, a pocket with a pen."""
     img = melamine_tex(rng, (238, 240, 236))
@@ -3607,6 +3650,25 @@ def build():
          [el((3, 0, 4), (6, 5, 7), "g"), el((7, 0, 6), (10, 4, 9), "g"), el((10.5, 0, 3), (13.5, 3, 6), "g"), el((11.5, 3, 4), (12.5, 6, 5), "g")])
     prop("lab_monitor", "Monitor", {"k": "lab_black", "s": "monitor_screen"},
          [el((2, 3, 7), (14, 12, 8.5), "k", north=("s", (0, 0, 16, 16))), el((7, 0.5, 8.5), (9, 3, 9.5), "k"), el((5, 0, 7), (11, 0.5, 11), "k")])
+    # Chapter 2's prologue, on the scientist's bench: a radiation counter whose amber screen keeps climbing (animated),
+    # a voice recorder with its red light blinking (animated), and racks of test tubes with a faint glow.
+    a.animated["counter_screen"] = (counter_screen_frames(r("counter_screen")), 8)
+    a.animated["recorder_top"] = (recorder_top_frames(r("recorder_top")), 20)
+    a.texture("counter_yellow", plastic_tex(r("counter_yellow"), (206, 168, 40)), T.PLASTIC.but(smoothness=0.4))
+    prop("radiation_counter", "Radiation Counter", {"k": "lab_black", "s": "counter_screen", "y": "counter_yellow", "m": "lab_steel"},
+         [el((2, 0, 5), (14, 9, 11), "k", north=("k", (0, 0, 16, 16))), el((3, 3, 4.9), (13, 8, 5), "s", north=("s", (0, 0, 16, 8))),
+          el((2, 8, 5), (14, 9, 11), "y", up=("y", (0, 0, 16, 16))), el((11, 1, 4.4), (13, 2.8, 5), "m"),
+          el((3, 1, 4.4), (5, 2.8, 5), "m")])
+    prop("voice_recorder", "Voice Recorder", {"k": "lab_black", "t": "recorder_top"},
+         [el((6, 0, 4), (10, 1.6, 11), "k", up=("t", (0, 0, 9, 16)))])
+    for name, colour in (("blue", REAGENT_COLOURS[0]), ("amber", REAGENT_COLOURS[1]), ("green", REAGENT_COLOURS[2])):
+        a.texture(f"tube_{name}", plastic_tex(r(f"tube_{name}"), colour), T.Material(0.8, relief=0.0))
+    tubes = [el((2, 0, 5.5), (14, 1.5, 8.5), "m"), el((2, 7, 5.5), (14, 8, 8.5), "m")]
+    for i, liquid in enumerate(("tube_blue", "tube_amber", "tube_green", "tube_amber", "tube_blue", "tube_green")):
+        x = 3 + 2 * i
+        tubes += [el((x, 1.5, 6.5), (x + 1.2, 10, 7.7), "g"), el((x + 0.1, 1.6, 6.6), (x + 1.1, 1.6 + 4 + (i % 3), 7.6), liquid)]
+    prop("tube_rack", "Tube Rack", {"m": "lab_steel", "g": "lab_glass", "tube_blue": "tube_blue", "tube_amber": "tube_amber",
+                                    "tube_green": "tube_green"}, tubes)
     prop("lab_coat", "Lab Coat", {"c": "lab_coat", "s": "lab_steel"},
          [el((4, 1, 14), (12, 14, 15.5), "c", north=("c", (0, 0, 16, 16))), el((7.5, 14, 15), (8.5, 15.5, 16), "s")], ao=False)
     # By each test subject: a drip stand, its tube hanging down and out to the front (towards the subject), and a

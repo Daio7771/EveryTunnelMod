@@ -12,7 +12,8 @@ Run after changing anything here (from the repository root):   python3 tools/pro
 
 Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   cutscene/prologue_room.json     the plan (read by core.cutscene.RoomPlan): fills, single blocks, the ceiling's
-                                  lights, where the scientist stands and where the player is held
+                                  lights, where the scientist stands, where the radiation counter sounds and where
+                                  the player is held
 
 The bench is two blocks deep (z = 0 and 1) with its front towards the room (facing south), 1 block high: the
 scientist stands at z = 2 facing it, his hands over its edge. The props stand on it (y = 1) facing south too.
@@ -43,18 +44,18 @@ VENTS = ((4, 4), (12, 4), (16, 4))
 PROPS = [
     (1, 0, "lab_monitor"), (1, 1, "lab_beakers"),
     (2, 1, "microscope"),
-    (3, 0, "lab_monitor"), (3, 1, "lab_beakers"),
+    (3, 0, "lab_monitor"), (3, 1, "tube_rack"),
     (4, 1, "glove_box"),
     (5, 0, "microscope"), (5, 1, "lab_beakers"),
-    (6, 1, "lab_beakers"),
+    (6, 1, "tube_rack"),
     (7, 0, "lab_monitor"),
     (8, 1, "microscope"),
     (9, 0, "glove_box"), (9, 1, "lab_beakers"),
-    (10, 1, "lab_beakers"),
-    (11, 0, "lab_monitor"),
+    (10, 1, "tube_rack"),
+    (11, 0, "lab_monitor"), (11, 1, "radiation_counter"),     # its screen is in frame as the camera stops
     (12, 1, "microscope"),
-    (13, 0, "lab_monitor"), (13, 1, "lab_beakers"),
-    (14, 1, "lab_beakers"),                       # his hands are over these
+    (13, 0, "lab_monitor"), (13, 1, "voice_recorder"),          # the log is dictated into it
+    (14, 1, "tube_rack"),                         # his hands are over this
     (15, 1, "lab_beakers"),
     (16, 0, "lab_monitor"),
     (17, 1, "coffee_cup"),
@@ -70,6 +71,8 @@ WALL_DECOR = [
 # The scientist stands at the bench's front, his feet on the floor, facing north (yaw 180); the player (not
 # drawn) is held in the room's south-west corner.
 SCIENTIST = {"at": [14.5, 0.0, 2.5], "yaw": 180.0}
+# The radiation counter's screen (the Geiger clicks come from here): the middle of its block, at its height.
+COUNTER = {"at": [11.5, 1.35, 1.5], "yaw": 180.0}
 VIEWER = {"at": [1.5, 0.0, 7.5], "yaw": 0.0}
 
 
@@ -101,6 +104,11 @@ def build():
 
 
 def checks(blocks, lights):
+    states = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel" / "blockstates"
+    for _, block in blocks:
+        name = block.split("[")[0]
+        if name.startswith(MOD) and not (states / f"{name[len(MOD):]}.json").exists():
+            raise SystemExit(f"{name} is not a block of the mod (no blockstate): run tools/blocks/generate.py?")
     cells = [c for c, _ in blocks]
     if len(cells) != len(set(cells)):
         raise SystemExit("two blocks in one cell")
@@ -130,6 +138,7 @@ def main():
         "blocks": [{"at": list(at), "block": block} for at, block in blocks],
         "lights": [list(c) for c in lights],
         "scientist": SCIENTIST,
+        "counter": COUNTER,
         "viewer": VIEWER,
     }
     text = ("{\n" + ",\n".join(

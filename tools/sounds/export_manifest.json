@@ -25,6 +25,7 @@
   "ambient/offices/phone_2": "ee90b1555357af11",
   "ambient/offices/phone_3": "060e09967dd5fcdb",
   "ambient/offices/room_tone_1": "7ec86f4e764414d0",
+  "ambient/prologue/hum_1": "c166dc7f4a5b9598",
   "ambient/relay_1": "974d320e2967912f",
   "ambient/relay_2": "b51870ac53541d57",
   "ambient/relay_3": "a86ffab12ed2715a",
@@ -267,6 +268,7 @@
   "music/menu_1": "5a952440eb991737",
   "music/observer/approach_1": "305a840b66690ba5",
   "music/observer/chase_1": "58bfc40681276f09",
+  "music/prologue/drone_1": "df625711aa80e9a3",
   "music/stinger/heard_1": "1824eb0c69fc5ae4",
   "music/stinger/heard_2": "fda2553a410e9c14",
   "music/stinger/heard_3": "3378111ffa087b02",
@@ -309,5 +311,9 @@
   "voice/director/loop_3": "abcfb3b3ca864e4d",
   "voice/director/loop_4": "c36ca2afc48642c1",
   "voice/director/loop_5": "0c8c8b4360b40453",
-  "voice/director/loop_6": "43521cd1964f16db"
+  "voice/director/loop_6": "43521cd1964f16db",
+  "voice/prologue/prologue_01": "3a6d5c35f71866bf",
+  "voice/prologue/prologue_02": "2f388663fa0a73c5",
+  "voice/prologue/prologue_03": "c3894dcba9ed18d1",
+  "voice/prologue/prologue_04": "168a3e94d58ae809"
 }

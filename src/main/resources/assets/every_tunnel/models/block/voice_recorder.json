@@ -1,0 +1,48 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "k": "every_tunnel:block/lab_black",
+    "t": "every_tunnel:block/recorder_top",
+    "particle": "every_tunnel:block/lab_black"
+  },
+  "elements": [
+    {
+      "from": [
+        6,
+        0,
+        4
+      ],
+      "to": [
+        10,
+        1.6,
+        11
+      ],
+      "faces": {
+        "north": {
+          "texture": "#k"
+        },
+        "east": {
+          "texture": "#k"
+        },
+        "south": {
+          "texture": "#k"
+        },
+        "west": {
+          "texture": "#k"
+        },
+        "up": {
+          "texture": "#t",
+          "uv": [
+            0,
+            0,
+            9,
+            16
+          ]
+        },
+        "down": {
+          "texture": "#k"
+        }
+      }
+    }
+  ]
+}

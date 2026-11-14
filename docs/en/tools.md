@@ -47,6 +47,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/gui/guide_paper.py` | `guide_paper.png` (seamless tile), `guide_stains.png` | the guide's paper |
 | `tools/sounds/generate.py` | WAV previews and a listening page (`tools/sounds/out/index.html`) | a sound, to listen |
 | `tools/sounds/export.py` | `.ogg` files and `sounds.json` in the mod | a sound, to ship it |
+| `tools/sounds/prologue_voices.py` | The scientist's four lines as Ogg in `tools/sounds/voice/` (from the user's MP3s, one gain for the group), `cutscene/prologue.json` and the cues' text in `en_us.json` (the Spanish is by hand) | his voice or his words; see [Cinematic system](cinematic-system.md) |
 | `tools/sounds/voices.py` | `cutscene/director.json` and the director's subtitles in `en_us.json`, from his voice files (`tools/sounds/voice/`) | one of his voices or his words; see [Cinematic system](cinematic-system.md) |
 
 ## Map

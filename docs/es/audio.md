@@ -15,9 +15,10 @@ y la respiración del Pale man, su propio latido, cuánto ruido hacen sus propio
   créditos finales, `fabric.mod.json`).
 - **Nada de música con IA.** Los servicios gratuitos de música con IA solo permiten uso no
   comercial.
-- **Una excepción con IA: la voz del director.** Sus líneas en la cinemática del nivel 5, y
-  las frases que repite después, son voces de la biblioteca de ElevenLabs (plan de pago, no
-  clonadas), generadas por el usuario y entregadas como archivos mono. Nada más es IA.
+- **Una excepción con IA: las voces con IA.** Las voces de los personajes son de la biblioteca
+  de ElevenLabs (plan de pago, no clonadas), generadas por el usuario y entregadas como
+  archivos mono: hasta ahora la del director (sus líneas en la cinemática del nivel 5 y las
+  frases que repite después) y la del científico (el prólogo del Chapter 2). Nada más es IA.
 - **Archivos secos.** Los sonidos no llevan reverberación: Sound Physics Remastered añade la
   reverberación y el sonido amortiguado tras los muros dentro del juego. Las ejecuciones de
   desarrollo siempre lo incluyen, para juzgar los sonidos con él.
@@ -51,6 +52,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | Los Hunters del nivel 5 | `entity.hunter.shriek` (empieza una persecución), `.attack`, `.death`, `.ambient` (3 variaciones cada uno) | síntesis |
 | Las Distortions del nivel 5 | `entity.distortion_cloud.whisper` (bucle), `.appear`, `.kill`, `.leave`; `entity.distortion_junior.whisper` (bucle), `.stare` (bucle, el juego le sube el tono), `.die`. Los susurros son aire a través de formantes de vocales que cambian, sin voz | síntesis |
 | El director del nivel 5 | `voice.director.boss_01` a `boss_20` (sus líneas en la cinemática, con los subtítulos de `cutscene/director.json`), `voice.director.loop_1` a `loop_6` (lo que repite después); planas, en Voz/Habla, desde `tools/sounds/voices.py` | ElevenLabs (ver arriba) |
+| El prólogo del Chapter 2 | `voice.prologue_01` a `prologue_04` (las cuatro líneas del científico, subtituladas por `cutscene/prologue.json`; planas, bajo Voz/Habla; ElevenLabs, de `tools/sounds/prologue_voices.py`), `ambient.prologue.hum` (bucle: el zumbido de las luces, una nevera, la ventilación; plano, control Ambiente) y `music.prologue.drone` (bucle: un drone grave, dos tonos a un semitono batiendo; su volumen sube con la escena), los dos los reproduce `client.cutscene.PrologueSound`; los clics Geiger del contador de radiación son los `item.detector.click`, `.clicks`, `.crackle` del nivel 5, desde el contador de la mesa (posicionales, cada vez más rápidos) | voces: voces con IA, el resto sintético |
 
 ## Quién reproduce qué
 

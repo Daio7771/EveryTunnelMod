@@ -513,5 +513,17 @@
   "screen.every_tunnel.congrats.time": "Time played",
   "screen.every_tunnel.congrats.deaths": "Deaths",
   "screen.every_tunnel.congrats.close": "CLOSE",
-  "entity.every_tunnel.scientist": "The Scientist"
+  "entity.every_tunnel.scientist": "The Scientist",
+  "block.every_tunnel.radiation_counter": "Radiation Counter",
+  "block.every_tunnel.voice_recorder": "Voice Recorder",
+  "block.every_tunnel.tube_rack": "Tube Rack",
+  "subtitle.every_tunnel.ch2.prologue_01_1": "Log entry. Day six.",
+  "subtitle.every_tunnel.ch2.prologue_01_2": "Samples are stable, readings within range.",
+  "subtitle.every_tunnel.ch2.prologue_01_3": "Same as yesterday, really.",
+  "subtitle.every_tunnel.ch2.prologue_02_1": "The counter keeps climbing, but it's probably the old sensor.",
+  "subtitle.every_tunnel.ch2.prologue_02_2": "I'll replace it tomorrow.",
+  "subtitle.every_tunnel.ch2.prologue_03_1": "Something's wrong... my hands...",
+  "subtitle.every_tunnel.ch2.prologue_03_2": "WHAT'S HAPPENING?! IT'S SO LOUD!",
+  "subtitle.every_tunnel.ch2.prologue_03_3": "EVERYTHING IS SO LOUD!",
+  "subtitle.every_tunnel.ch2.prologue_04_1": "MY EYES! I CAN'T\u2014 AAAAAHHH!"
 }

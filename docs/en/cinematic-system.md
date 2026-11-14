@@ -201,8 +201,20 @@ the same camera, bands, subtitles and skip, but it is not in a level. `/everytun
 - **The player** is held in the room's corner, unharmed, and put back where they were at the end, played
   through or skipped (`finish`); if they leave the world during it they are put back first (`abort`), so a saved
   game is never left inside the room.
-- **Not there yet:** the voice and subtitles, the lab's sounds (hum, Geiger counter, drone), the counter,
-  recorder and tube props, the transformation into a Pale man, the cut to black and the title.
+- **The voice sets the hold.** His log entry (`prologue_01`, `prologue_02`) begins 1.5 s after the camera stops,
+  each line after the one before with a pause, and the scene ends 3 s after the last (`PrologueScene.build`,
+  from `cutscene/prologue.json`, written by `tools/sounds/prologue_voices.py`, which also turns the user's four
+  MP3s into Ogg with one gain for the group). Subtitles come whole, a cue at a time, with no speaker's name (he is
+  nobody the game names); the voice is flat under Voice/Speech.
+- **The lab's sound** is `client.cutscene.PrologueSound`: the lights' hum (flat), a drone under it whose
+  volume rises with the scene, and the radiation counter's Geiger clicks, positional from the counter on the bench
+  (`PrologueScene.COUNTER`, checked against the room's plan), ever faster (`GeigerClicks`, a seeded Poisson
+  process, so it sounds the same each time).
+- **The props** on the bench are three new blocks (`tools/blocks/generate.py`): the radiation counter (an
+  animated amber screen whose digits and bar climb), the voice recorder (a blinking red light) and a rack of
+  glowing test tubes.
+- **Not there yet:** the transformation into a Pale man (and the lines `prologue_03` and `prologue_04`, already
+  converted), the cut to black and the title.
 
 ## Adding another cinematic
 
@@ -219,7 +231,7 @@ order:
    level is built again.
 4. Voice files, if it has voices: `tools/sounds/voices.py` is written for the director's files (a
    new speaker needs its own list, speaker label and keys), and the sound rule in
-   [Audio](audio.md) applies: the director's voice is the one AI exception.
+   [Audio](audio.md) applies: AI voices are the one AI exception.
 5. This page, the code map and the packets table, in both languages.
 
 ## Debugging

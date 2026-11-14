@@ -40,6 +40,8 @@ KDoc comment that says more.
 | `cutscene/DirectorScene.kt` | The director's scene timed from his voice: framings, subtitles, his gestures, where he looks away, his mask; `SkipPrompt` (skipping by pressing twice) |
 | `cutscene/PrologueScene.kt` | Chapter 2's prologue timeline: the tracking shot along the bench and the hold on the scientist, from him; opens out of black |
 | `cutscene/RoomPlan.kt` | The prologue room's plan (read from `cutscene/prologue_room.json`) and `BlockSpec`, a block with its states |
+| `cutscene/PrologueLines.kt` | The scientist's voice lines and their subtitle cues, read from `cutscene/prologue.json` |
+| `cutscene/GeigerClicks.kt` | A Geiger counter's counts tick by tick: a seeded Poisson process at a rate that can rise |
 | `cutscene/DirectorLines.kt` | The director's voice lines and their subtitle cues, read from `cutscene/director.json` |
 | `cutscene/DirectorLoop.kt` | The phrases he repeats after his scene: their order, the gaps, how much he looks at the player |
 | `cutscene/FinalCredits.kt` | The final credits' timeline (drawn by `FinalCreditsScreen`) |
@@ -314,6 +316,7 @@ KDoc comment that says more.
 |---|---|
 | `CutsceneView.kt` | A cinematic on the client (the director's or the prologue's, a `Kind`): a camera of its own moved tick by tick, the HUD off, the player drawn from outside (not in the prologue), the director's pose, voice lines, skipping, the black a scene opens out of |
 | `CutsceneScreen.kt` | The screen that takes the keys and the mouse during a cinematic: the black bands, the subtitles, the notice to skip |
+| `PrologueSound.kt` | The prologue's laboratory: the hum and the drone (volume following the scene) and the radiation counter's positional Geiger clicks |
 | `DirectorVoice.kt` | His phrases after the scene: played flat, subtitled over the HUD |
 
 ### `menu/`
@@ -356,6 +359,7 @@ See [Architecture](architecture.md#mixins) for the target and reason of each.
 | `assets/every_tunnel/lang/es_*.json` | The Spanish translation (`es_es.json`, copied to the other `es_*` by `tools/lang/spanish_variants.py`) |
 | `assets/every_tunnel/guide/` | Not in `src/`: copied from `docs/*/guide/` by the build (`copyGuide`) |
 | `assets/every_tunnel/sounds.json`, `sounds/` | Sound events and `.ogg` files (from `tools/sounds/export.py`) |
+| `assets/every_tunnel/cutscene/prologue.json` | The scientist's voice lines: length and subtitle cues (from `tools/sounds/prologue_voices.py`) |
 | `assets/every_tunnel/cutscene/prologue_room.json` | The prologue's laboratory: fills, blocks, lights, where the scientist and the player stand (from `tools/prologue/room.py`) |
 | `assets/every_tunnel/cutscene/director.json` | The director's voice lines: part, length and subtitle cues (from `tools/sounds/voices.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | From `tools/blocks`, `tools/entity`, `tools/gui` |

@@ -208,8 +208,21 @@ misma cámara, bandas, subtítulos y salto, pero no está en un nivel. Por ahora
 - **El jugador** se sujeta en una esquina de la sala, sin daño, y al final, jugada o saltada, se le devuelve
   adonde estaba (`finish`); si sale del mundo durante la escena se le devuelve antes (`abort`), así que una
   partida guardada nunca queda dentro de la sala.
-- **Todavía no:** la voz y los subtítulos, los sonidos del laboratorio (zumbido, contador Geiger, drone), el
-  contador, la grabadora y los tubos, la transformación en Pale man, el corte a negro y el título.
+- **La voz marca la parada.** Su entrada de registro (`prologue_01`, `prologue_02`) empieza 1,5 s después de que la
+  cámara se detenga, cada línea tras la anterior con una pausa, y la escena acaba 3 s después de la última
+  (`PrologueScene.build`, a partir de `cutscene/prologue.json`, que escribe `tools/sounds/prologue_voices.py`, el
+  cual también convierte los cuatro MP3 del usuario a Ogg con una sola ganancia para el grupo). Los subtítulos salen
+  enteros, un fragmento cada vez, sin nombre de hablante (es alguien a quien el juego no nombra); la voz es plana,
+  bajo Voz/Habla.
+- **El sonido del laboratorio** es `client.cutscene.PrologueSound`: el zumbido de las luces (plano), un drone
+  debajo cuyo volumen sube con la escena, y los clics Geiger del contador de radiación, posicionales desde el
+  contador de la mesa (`PrologueScene.COUNTER`, comprobado contra el plano de la sala), cada vez más rápidos
+  (`GeigerClicks`, un proceso de Poisson con semilla, así que suena igual cada vez).
+- **Los objetos** de la mesa son tres bloques nuevos (`tools/blocks/generate.py`): el contador de radiación (una
+  pantalla ámbar animada cuyas cifras y barra suben), la grabadora de voz (una luz roja que parpadea) y una
+  gradilla de tubos de ensayo con un brillo tenue.
+- **Todavía no:** la transformación en Pale man (y las líneas `prologue_03` y `prologue_04`, ya convertidas), el
+  corte a negro y el título.
 
 ## Añadir otra cinemática
 
@@ -226,7 +239,7 @@ nueva necesita, por este orden:
    se vuelve a construir el nivel.
 4. Archivos de voz, si tiene voces: `tools/sounds/voices.py` está escrito para los del director (un
    hablante nuevo necesita su lista, su etiqueta y sus claves), y se aplica la regla de sonido de
-   [Audio](audio.md): la voz del director es la única excepción con IA.
+   [Audio](audio.md): las voces con IA son la única excepción con IA.
 5. Esta página, el mapa del código y la tabla de paquetes, en los dos idiomas.
 
 ## Depuración

@@ -1,5 +1,6 @@
 package daio7771.everytunnel.core.cutscene
 
+import com.google.gson.JsonParser
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -63,7 +64,7 @@ class PrologueTest {
         for (tick in listOf(0.0, PrologueScene.TRAVEL / 2.0, PrologueScene.TRAVEL.toDouble())) {
             assertEquals(0.0, wrap(at(tick).yaw - north), 1e-3, "tick $tick")
         }
-        val end = at(PrologueScene.TRAVEL + PrologueScene.HOLD - 1e-6)
+        val end = at(scene.totalTicks - Cutscene.BANDS_TICKS - 1e-6)
         val toHim = CameraPose.looking(end.x, end.y, end.z, plan.scientist.x, plan.scientist.y + 1.3, plan.scientist.z + 0.0)
         assertTrue(abs(wrap(end.yaw - toHim.yaw)) < 12.0, "ends looking at his back: ${end.yaw} vs ${toHim.yaw}")
         assertTrue(wrap(end.yaw - north) > 5.0, "turned to its right (towards the east, where he is)")
@@ -84,15 +85,97 @@ class PrologueTest {
         assertEquals(1.0, timeline.blackAt(timeline.blackTicks - 1.0), eps)
         assertTrue(timeline.blackAt(timeline.blackTicks + timeline.fadeTicks / 2.0) in 0.01..0.99, "half way, half black")
         assertEquals(0.0, timeline.blackAt((timeline.blackTicks + timeline.fadeTicks).toDouble()), eps)
-        assertEquals(PrologueScene.TRAVEL + PrologueScene.HOLD + Cutscene.BANDS_TICKS, scene.totalTicks)
+        assertEquals(timeline.lines.last().end + PrologueScene.TAIL + Cutscene.BANDS_TICKS, scene.totalTicks)
         assertEquals(0.0, scene.bands(scene.totalTicks.toDouble()), eps)
         assertEquals(1.0, scene.bands(Cutscene.BANDS_TICKS.toDouble()), eps)
     }
 
+    private val voice = PrologueLines.load()
+
     @Test
-    fun `a longer hold is only longer`() {
-        val longer = PrologueScene.build(PrologueScene.HOLD + 100).cutscene
-        assertEquals(scene.totalTicks + 100, longer.totalTicks)
+    fun `his log entry begins after the camera stops, each line after the one before`() {
+        val lines = PrologueScene.SCENE.lines
+        assertEquals(PrologueScene.PLAYED, lines.map { it.line.id })
+        assertEquals(PrologueScene.TRAVEL + PrologueScene.LEAD, lines[0].start)
+        for ((a, b) in lines.zipWithNext()) assertEquals(a.end + PrologueScene.LINE_GAP, b.start)
+        for (l in lines) assertEquals(DirectorScene.ticks(l.line.ms), l.end - l.start)
+        assertTrue(lines.first().start > PrologueScene.TRAVEL, "the camera is at rest before he speaks")
+    }
+
+    @Test
+    fun `subtitles come with the voice and never ahead of it or into the next line`() {
+        val timeline = PrologueScene.SCENE
+        val lines = timeline.lines
+        for (sub in timeline.subtitles) {
+            val line = lines.last { it.start <= sub.start }
+            val next = lines.getOrNull(lines.indexOf(line) + 1)
+            assertTrue(sub.start >= line.start, "${sub.key} is not ahead of its line")
+            assertTrue(sub.end > sub.start, "${sub.key} is on screen")
+            assertTrue(next == null || sub.end <= next.start, "${sub.key} ends before the next line")
+        }
+        assertEquals(lines.sumOf { it.line.cues.size }, timeline.subtitles.size)
+        assertEquals(null, timeline.subtitleAt(lines.first().start - 1.0), "nothing before he speaks")
+        assertEquals(lines.first().line.cues.first().key, timeline.subtitleAt(lines.first().start.toDouble())?.key)
+    }
+
+    @Test
+    fun `every cue of his four lines has its text in English and in Spanish`() {
+        fun keys(file: String): Set<String> {
+            val stream = PrologueTest::class.java.classLoader.getResourceAsStream("assets/every_tunnel/lang/$file.json")!!
+            return stream.use { JsonParser.parseString(it.reader().readText()).asJsonObject.keySet() }
+        }
+        val en = keys("en_us")
+        val es = keys("es_es")
+        assertEquals(listOf("prologue_01", "prologue_02", "prologue_03", "prologue_04"), voice.lines.map { it.id })
+        for (cue in voice.lines.flatMap { it.cues }) {
+            assertTrue(cue.key in en, "${cue.key} in en_us")
+            assertTrue(cue.key in es, "${cue.key} in es_es")
+        }
+    }
+
+    @Test
+    fun `the radiation counter sounds from where the plan puts its block`() {
+        val place = frame.at(PrologueScene.COUNTER.forward, PrologueScene.COUNTER.right, PrologueScene.COUNTER.up)
+        assertEquals(plan.counter.x, place.first, eps)
+        assertEquals(plan.counter.y, place.second, eps)
+        assertEquals(plan.counter.z, place.third, eps)
+        assertTrue(plan.puts.any { it.at == Cell(plan.counter.x.toInt(), 1, plan.counter.z.toInt()) && it.block.startsWith("every_tunnel:radiation_counter") })
+        assertTrue(plan.puts.any { it.block.startsWith("every_tunnel:voice_recorder") })
+        assertTrue(plan.puts.count { it.block.startsWith("every_tunnel:tube_rack") } >= 3)
+    }
+
+    @Test
+    fun `the counter clicks faster and faster`() {
+        val total = scene.totalTicks
+        val rates = (0..total step 20).map { PrologueScene.geigerRate(it.toDouble(), total) }
+        assertTrue(rates.zipWithNext().all { (a, b) -> b >= a })
+        assertTrue(rates.last() > 2 * rates.first())
+        val clicks = GeigerClicks(7)
+        fun mean(rate: Double) = (0 until 20_000).sumOf { clicks.counts(it, rate) } / 20_000.0
+        assertEquals(1.0 / 20.0 * 1.0, mean(1.0), 0.01)
+        assertEquals(10.0 / 20.0, mean(10.0), 0.03)
+    }
+
+    @Test
+    fun `the same seed and tick always count the same`() {
+        val a = GeigerClicks(3)
+        val b = GeigerClicks(3)
+        for (tick in 0 until 500) assertEquals(a.counts(tick, 6.0), b.counts(tick, 6.0))
+        assertEquals(0, a.counts(10, 0.0))
+        assertTrue((0 until 1000).all { a.counts(it, 400.0) in 0..12 }, "never more than a tick can hold")
+    }
+
+    @Test
+    fun `the hum is in for the black and out at the end, the drone rises`() {
+        val total = scene.totalTicks
+        assertEquals(0.0, PrologueScene.humLevel(0.0, total), eps)
+        assertEquals(1.0, PrologueScene.humLevel(total / 2.0, total), eps)
+        assertEquals(0.0, PrologueScene.humLevel(total.toDouble(), total), eps)
+        assertEquals(0.0, PrologueScene.droneLevel(0.0, total), eps)
+        val early = PrologueScene.droneLevel(total * 0.2, total)
+        val late = PrologueScene.droneLevel(total * 0.8, total)
+        assertTrue(early in 0.05..0.4, "a murmur at first: $early")
+        assertTrue(late > 2 * early, "rising: $early then $late")
     }
 
     @Test

@@ -39,7 +39,7 @@ data class BlockSpec(val id: String, val states: Map<String, String>) {
  * The prologue's room as `tools/prologue/room.py` writes it into `assets/every_tunnel/cutscene/prologue_room.json`:
  * what to place, in order ([fills] then [puts], each over the one before), the [shell] it is built in (everything
  * in it is cleared when the scene is over) and the [interior] of air in it, the ceiling's [lights] (cells to turn
- * off and on), where the [scientist] stands and where the [viewer] (the player, not drawn) is held. Plain Kotlin;
+ * off and on), where the [scientist] stands, where the radiation [counter] sounds (the Geiger clicks) and where the [viewer] (the player, not drawn) is held. Plain Kotlin;
  * `platform.PrologueSceneHooks` places it at its origin in the world.
  */
 class RoomPlan(
@@ -49,6 +49,7 @@ class RoomPlan(
     val puts: List<Put>,
     val lights: List<Cell>,
     val scientist: Spot,
+    val counter: Spot,
     val viewer: Spot,
 ) {
 
@@ -76,6 +77,7 @@ class RoomPlan(
                 root.getAsJsonArray("blocks").map { Put(cell(it.asJsonObject["at"]), it.asJsonObject["block"].asString) },
                 root.getAsJsonArray("lights").map(::cell),
                 spot("scientist"),
+                spot("counter"),
                 spot("viewer"),
             )
         }

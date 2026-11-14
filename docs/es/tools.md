@@ -49,6 +49,7 @@ git).
 | `tools/gui/guide_paper.py` | `guide_paper.png` (mosaico sin costuras), `guide_stains.png` | el papel de la guía |
 | `tools/sounds/generate.py` | WAV de prueba y una página para escucharlos (`tools/sounds/out/index.html`) | un sonido, para oírlo |
 | `tools/sounds/export.py` | Los `.ogg` y `sounds.json` en el mod | un sonido, para meterlo en el juego |
+| `tools/sounds/prologue_voices.py` | Las cuatro líneas del científico como Ogg en `tools/sounds/voice/` (de los MP3 del usuario, una sola ganancia para el grupo), `cutscene/prologue.json` y el texto de los fragmentos en `en_us.json` (el español, a mano) | su voz o sus palabras; véase [Sistema de cinemáticas](cinematic-system.md) |
 | `tools/sounds/voices.py` | `cutscene/director.json` y los subtítulos del director en `en_us.json`, a partir de sus archivos de voz (`tools/sounds/voice/`) | una de sus voces o sus palabras; véase [Sistema de cinemáticas](cinematic-system.md) |
 
 ## Mapa

@@ -40,6 +40,8 @@ con un comentario KDoc que cuenta más.
 | `cutscene/DirectorScene.kt` | La escena del director medida con su voz: encuadres, subtítulos, sus gestos, cuándo aparta la vista, su máscara; `SkipPrompt` (saltar pulsando dos veces) |
 | `cutscene/PrologueScene.kt` | La línea de tiempo del prólogo del Chapter 2: el travelling por la mesa y la parada en el científico, desde él; sale de negro |
 | `cutscene/RoomPlan.kt` | El plano de la sala del prólogo (leído de `cutscene/prologue_room.json`) y `BlockSpec`, un bloque con sus estados |
+| `cutscene/PrologueLines.kt` | Las líneas de voz del científico y sus subtítulos, leídas de `cutscene/prologue.json` |
+| `cutscene/GeigerClicks.kt` | Los recuentos de un contador Geiger tick a tick: un proceso de Poisson con semilla a un ritmo que puede subir |
 | `cutscene/DirectorLines.kt` | Las líneas de voz del director y sus subtítulos, leídas de `cutscene/director.json` |
 | `cutscene/DirectorLoop.kt` | Las frases que repite tras su escena: su orden, las pausas, cuánto mira al jugador |
 | `cutscene/FinalCredits.kt` | La línea de tiempo de los créditos finales (los dibuja `FinalCreditsScreen`) |
@@ -314,6 +316,7 @@ con un comentario KDoc que cuenta más.
 |---|---|
 | `CutsceneView.kt` | Una cinemática en el cliente (la del director o la del prólogo, un `Kind`): una cámara propia movida tick a tick, el HUD apagado, el jugador dibujado desde fuera (no en el prólogo), la pose del director, líneas de voz, saltar, el negro del que sale una escena |
 | `CutsceneScreen.kt` | La pantalla que se queda con las teclas y el ratón durante una cinemática: las bandas negras, los subtítulos, el aviso para saltar |
+| `PrologueSound.kt` | El laboratorio del prólogo: el zumbido y el drone (con el volumen siguiendo la escena) y los clics Geiger posicionales del contador de radiación |
 | `DirectorVoice.kt` | Sus frases tras la escena: sonando planas, subtituladas sobre el HUD |
 
 ### `menu/`
@@ -356,6 +359,7 @@ Ver [Arquitectura](architecture.md#mixins) para el objetivo y el motivo de cada 
 | `assets/every_tunnel/lang/es_*.json` | La traducción al español (`es_es.json`, copiada a los demás `es_*` por `tools/lang/spanish_variants.py`) |
 | `assets/every_tunnel/guide/` | No está en `src/`: lo copia de `docs/*/guide/` la compilación (`copyGuide`) |
 | `assets/every_tunnel/sounds.json`, `sounds/` | Eventos de sonido y archivos `.ogg` (de `tools/sounds/export.py`) |
+| `assets/every_tunnel/cutscene/prologue.json` | Las líneas de voz del científico: duración y subtítulos (de `tools/sounds/prologue_voices.py`) |
 | `assets/every_tunnel/cutscene/prologue_room.json` | El laboratorio del prólogo: rellenos, bloques, luces, dónde están el científico y el jugador (de `tools/prologue/room.py`) |
 | `assets/every_tunnel/cutscene/director.json` | Las líneas de voz del director: parte, duración y subtítulos (de `tools/sounds/voices.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | De `tools/blocks`, `tools/entity`, `tools/gui` |

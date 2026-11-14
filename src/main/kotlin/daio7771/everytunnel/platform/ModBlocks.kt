@@ -411,6 +411,13 @@ object ModBlocks {
     val GLOVE_BOX: Block = register("glove_box", PropBlock(props(MapColor.WHITE, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(4, 0, 5, 12, 5, 11))))
     val LAB_BEAKERS: Block = register("lab_beakers", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 14, 6, 9))))
     val LAB_MONITOR: Block = register("lab_monitor", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision(), listOf(box(2, 0, 7, 14, 12, 11))))
+    /**
+     * Chapter 2's prologue, on the scientist's bench (`tools/prologue/room.py`): a radiation counter whose amber screen
+     * keeps climbing, a voice recorder with its red light blinking, a rack of glowing test tubes. Only to look at.
+     */
+    val RADIATION_COUNTER: Block = register("radiation_counter", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision().luminance { 6 }, listOf(box(2, 0, 5, 14, 9, 11))))
+    val VOICE_RECORDER: Block = register("voice_recorder", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision().luminance { 2 }, listOf(box(6, 0, 4, 10, 2, 11))))
+    val TUBE_RACK: Block = register("tube_rack", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision().luminance { 4 }, listOf(box(2, 0, 5, 14, 10, 9))))
     /** Someone's white coat on a hook, and a jacket left over a chair: they left in a hurry, or did not leave. */
     val LAB_COAT: Block = register("lab_coat", PropBlock(props(MapColor.WHITE, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(4, 1, 14, 12, 16, 16))))
     val CHAIR_JACKET: Block = register("chair_jacket", PropBlock(props(MapColor.GREEN, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 13, 8, 13), box(3, 8, 12, 13, 16, 13))))

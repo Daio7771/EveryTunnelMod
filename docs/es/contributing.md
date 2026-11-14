@@ -95,8 +95,9 @@ de escribir sus hooks, y di cuál en el KDoc de su archivo.
   `tools/sounds/licensed/`, `CREDITS.md`, `fabric.mod.json` y los créditos finales.
 - **Nada de música ni recursos generados con IA en el juego.** El concept art hecho con IA
   solo se puede usar como referencia (`tools/entity/reference/`), nunca se distribuye. La
-  única excepción es la voz del director en el nivel 5: voces de la biblioteca de ElevenLabs
-  (no clonadas), generadas por el usuario (ver [Audio](audio.md)). La música y todos los
+  única excepción son las **voces con IA**: voces de la biblioteca de ElevenLabs (no
+  clonadas), generadas por el usuario y entregadas como archivos (la del director en el nivel 5,
+  la del científico en el prólogo del Chapter 2; ver [Audio](audio.md)). La música y todos los
   demás sonidos siguen sin IA.
 
 ## Pruebas

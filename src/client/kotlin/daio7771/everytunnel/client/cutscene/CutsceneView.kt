@@ -43,8 +43,8 @@ import net.minecraft.world.World
  * a cut jumps), the HUD goes (`InGameHudMixin`), and a [CutsceneScreen] takes the keys and the mouse and draws
  * the bands, the subtitles and the notice to skip, and the black a scene opens out of. In the director's scene
  * the player stays where they stood, seen from outside ([drawPlayer]); the prologue never draws them. Voice
- * lines play on their ticks, flat (the same in every shot), under Voice/Speech; nothing else of a scene makes a
- * sound. The director takes his moves from it ([DirectorEntity.poseSource]).
+ * lines play on their ticks, flat (the same in every shot), under Voice/Speech; the director's scene makes no other
+ * sound, the prologue's laboratory has its own ([PrologueSound]). The director takes his moves from it ([DirectorEntity.poseSource]).
  *
  * Skipping (the jump key twice, [SkipPrompt]) fades to black and asks the server to end it; its answer, like
  * the scene's own end, gives the player their view back ([stop]), out of black if skipped, the voice cut.
@@ -63,7 +63,7 @@ object CutsceneView {
         val drawsPlayer: Boolean,
     ) {
         DIRECTOR({ DirectorScene.SCENE }, DirectorSceneHooks.SKIP_PACKET_ID, "subtitle.every_tunnel.speaker.director", "voice.director.", true),
-        PROLOGUE({ PrologueScene.SCENE }, PrologueSceneHooks.SKIP_PACKET_ID, null, "voice.prologue.", false),
+        PROLOGUE({ PrologueScene.SCENE }, PrologueSceneHooks.SKIP_PACKET_ID, null, "voice.", false),
     }
 
     /** The camera's eyes are this high over its feet: a standing player's, so handing the view over moves nothing. */
@@ -130,6 +130,11 @@ object CutsceneView {
         client.setCameraEntity(camera)
         client.setScreen(CutsceneScreen())
         if (scene == Kind.DIRECTOR) DirectorEntity.poseSource = ::directorPose
+        if (scene == Kind.PROLOGUE) {
+            val counter = PrologueScene.COUNTER
+            val (x, y, z) = at.at(counter.forward, counter.right, counter.up)
+            PrologueSound.start(client, Vec3d(x, y, z))
+        }
     }
 
     /** The view back to the player, out of black if [skipped]. Safe to call when nothing plays. */
@@ -138,6 +143,7 @@ object CutsceneView {
         frame = null
         camera = null
         DirectorEntity.poseSource = null
+        PrologueSound.stop(client)
         voice?.let { client.soundManager.stop(it) }
         voice = null
         client.options.hudHidden = hudWasHidden
@@ -222,6 +228,7 @@ object CutsceneView {
         place(cam, tick)
         if (skippedAt == 0L) {
             timeline.lines.firstOrNull { it.start == tick }?.let { speak(client, it.line.id) }
+            if (kind == Kind.PROLOGUE) PrologueSound.tick(client, tick, timeline.cutscene.totalTicks)
         }
         // Another screen may have taken over (and gone): the keys stay the scene's.
         if (client.currentScreen == null) client.setScreen(CutsceneScreen())

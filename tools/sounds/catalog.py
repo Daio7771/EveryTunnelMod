@@ -1781,6 +1781,47 @@ def lab_air(rng, variant):
     return stereo(sides[0], sides[1])
 
 
+def prologue_hum(rng, variant):
+    """Chapter 2's prologue: a clean modern laboratory's hum, the same everywhere in the shot: the lights' mains hum at
+    100 Hz with its harmonics and a faint high buzz, a fridge's low tone, and the ventilation's soft hiss. Quieter and
+    cleaner than Level 5's air; nothing moves in it. Loops: its tones have whole cycles in the loop, the noise is
+    built circularly."""
+    seconds = 10.0
+    n = samples(seconds)
+    t = time_axis(n)
+    sides = []
+    for _ in range(2):
+        mains = 0.5 * mains_hum(t, 100.0, rng, harmonics=14, tilt=1.6)
+        buzz = np.sin(TAU * loop_frequency(rng.uniform(5200.0, 5600.0), seconds) * t + rng.uniform(0, TAU))
+        buzz *= 0.012 * (0.6 + 0.4 * smooth_random(n, 0.3, rng, periodic=True))
+        fridge = 0.12 * np.sin(TAU * loop_frequency(rng.uniform(48.0, 52.0), seconds) * t + rng.uniform(0, TAU))
+        hiss = 0.05 * shaped_noise(n, rng, exponent=0.8, lo=700.0, hi=7000.0, order=2)
+        sides.append(mains * (1.0 + 0.02 * smooth_random(n, 0.4, rng, periodic=True)) + buzz + fridge + hiss)
+    return stereo(sides[0], sides[1])
+
+
+def prologue_drone(rng, variant):
+    """Chapter 2's prologue: the tension under the shot, a low drone that never resolves: two tones a semitone apart
+    beating slowly (55 and 58.3 Hz) over a fifth and a tritone above them, a dark rumble, and a thin high whine that
+    drifts in and out. Plays quietly and rises with the scene (the game sets its volume). Loops: whole cycles."""
+    seconds = 40.0
+    n = samples(seconds)
+    t = time_axis(n)
+    tones = ((55.0, 1.0, -0.2), (58.27, 0.8, 0.2), (82.41, 0.35, 0.3), (77.78, 0.3, -0.3), (110.0, 0.12, 0.0))
+    y = np.zeros((n, 2))
+    for freq, level, position in tones:
+        f = loop_frequency(freq, seconds)
+        wobble = 1.0 + 0.25 * smooth_random(n, 0.08, rng, periodic=True)
+        tone = (np.sin(TAU * f * t + rng.uniform(0, TAU)) + 0.25 * np.sin(TAU * 2 * f * t + rng.uniform(0, TAU))) * wobble
+        y += pan(level * tone, position)
+    rumble = shaped_noise(n, rng, exponent=2.0, lo=20.0, hi=120.0)
+    y += stereo(0.5 * rumble, 0.5 * shaped_noise(n, rng, exponent=2.0, lo=20.0, hi=120.0))
+    whine = np.sin(TAU * loop_frequency(rng.uniform(3300.0, 3700.0), seconds) * t + rng.uniform(0, TAU))
+    whine *= 0.012 * np.clip(smooth_random(n, 0.05, rng, periodic=True), 0.0, None)
+    y += stereo(whine, whine[::-1])
+    return y
+
+
 def cloud_game_static(rng, variant):
     """Level 5's entry corridor, while its Cloud is about (the game played as Halt plays it): a monotone static, a
     broad dry hiss with a steady buzzing tone in it, a crackle here and there, the whole of it fluttering slowly. The
@@ -2365,6 +2406,10 @@ SOUNDS = [
     Sound("event.lab.sting", "Level progress", "Level 5: walking into the Lab hall, a stab of low strings out of tune", "stereo", False, 1, lab_sting, -2.0),
     Sound("ambient.lab.air", "Level 5 ambience", "The lab (layer 1): the air handling, ducts rushing softly, a fan, a low rumble",
           "stereo", True, 1, lab_air, -6.0, stream=True, game_volume=0.6),
+    Sound("ambient.prologue.hum", "Chapter 2 prologue", "The prologue's laboratory: the lights' hum, a fridge, the ventilation's hiss (plays flat, the same in every shot)",
+          "stereo", True, 1, prologue_hum, -8.0, stream=True, game_volume=0.5),
+    Sound("music.prologue.drone", "Chapter 2 prologue", "The prologue's tension: a low drone, two tones a semitone apart beating, a thin whine (its volume rises with the scene)",
+          "stereo", True, 1, prologue_drone, -6.0, stream=True),
     Sound("ambient.cloud_game.static", "Level 5 ambience", "Level 5's entry corridor, while its Cloud is about: a monotone static, its pitch raised in game",
           "stereo", True, 1, cloud_game_static, -8.0, stream=True, game_volume=0.6),
     Sound("ambient.lab.compressor", "Level 5 ambience", "A fridge compressor off in the lab, starting (1) or stopping (2)", "mono", False, 2, lab_compressor, -3.0,
