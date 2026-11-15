@@ -20,26 +20,28 @@ data class Ch2L1IntroSpec(val line: String, val flyInTicks: Int, val flyOutTicks
  * {
  *   "zones": ["speaker_entrance", "speaker_lab", "speaker_main", "speaker_west"],
  *   "emitters": { "speaker_lab": "speaker_lab_src" },
- *   "volume": 3.0, "ding_seconds": 1.5,
- *   "fixed": [ { "line": "rowan_loyal_a1", "after": "ACT1_TASK1", "delay_seconds": 3 } ],
+ *   "volume": 3.0, "ding_seconds": 1.5, "after_terminal_seconds": 1,
+ *   "fixed": [ { "line": "rowan_loyal_a1", "after": "ACT1_TASK2", "delay_seconds": 0 } ],
  *   "pool": ["rowan_loyal_a2", "rowan_loyal_a3", "rowan_loyal_a5"],
  *   "cooldown_seconds": [75, 120],
  *   "intro": { "line": "rowan_loyal_a1", "fly_in_ticks": 10, "fly_out_ticks": 20,
- *              "shots": [ { "camera": "a1_cam_speaker", "look": "speaker_entrance_src", "ticks": 55 } ] }
+ *              "shots": [ { "camera": "player", "look": "speaker_lab_src", "ticks": 135 } ] }
  * }
  * ```
  *
  * A zone is an anchor zone of `anchors.json` and its emitter the point anchor of the ceiling speaker that speaks in it. A
- * line is a voice line (`voice.<id>`). The fixed lines play at their moment; the pool lines once each, in random order, with a
- * cooldown (a random number of seconds between the two) after the one before; never two at once, and only while the
- * player stands in a zone; when it is not in one, a line waits for them. Reaching [Ch2L1State.ACT2_FOLLOW] cancels
- * everything. `rowan_loyal_a6` is in neither list: it is kept for the office's scene.
+ * line is a voice line (`voice.<id>`). The first fixed line is the opening: Rowan says nothing before it, and it comes when the
+ * first task is done and the player has left the terminal ([afterTerminalTicks] later). The fixed lines play at their moment; the pool
+ * lines once each, in random order, with a cooldown (a random number of seconds between the two) after the one before, and only after
+ * the opening; never two at once, and only while the player stands in a zone; when it is not in one, a line waits for them. Reaching
+ * [Ch2L1State.ACT2_FOLLOW] cancels everything. `rowan_loyal_a6` is in neither list: it is kept for the office's scene.
  */
 data class Ch2L1Speakers(
     val zones: List<String>,
     val emitters: Map<String, String>,
     val volume: Float,
     val dingTicks: Int,
+    val afterTerminalTicks: Int,
     val fixed: List<Ch2L1FixedLine>,
     val pool: List<String>,
     val cooldownMinTicks: Int,
@@ -65,12 +67,13 @@ object Ch2L1SpeakersParser {
         val emitters = parseEmitters(fields, zones)
         val volume = fields.double("volume", 3.0, min = 0.5, max = 10.0).toFloat()
         val dingTicks = (fields.double("ding_seconds", 1.5, min = 0.0, max = 10.0) * 20).toInt()
+        val afterTerminal = (fields.double("after_terminal_seconds", 1.0, min = 0.0, max = 60.0) * 20).toInt()
         val fixed = parseFixed(fields)
         val pool = if (fields.has("pool")) fields.stringList("pool") else listOf("rowan_loyal_a2", "rowan_loyal_a3", "rowan_loyal_a5")
         val (min, max) = parseCooldown(fields)
         val intro = if (fields.has("intro")) parseIntro(fields.child("intro")) else null
         fields.reportUnknownKeys()
-        return Result(Ch2L1Speakers(zones, emitters, volume, dingTicks, fixed, pool, min, max, intro), problems.toList())
+        return Result(Ch2L1Speakers(zones, emitters, volume, dingTicks, afterTerminal, fixed, pool, min, max, intro), problems.toList())
     }
 
     private fun parseEmitters(fields: JsonFields, zones: List<String>): Map<String, String> {
@@ -84,7 +87,7 @@ object Ch2L1SpeakersParser {
     private fun parseFixed(fields: JsonFields): List<Ch2L1FixedLine> {
         if (!fields.has("fixed")) {
             return listOf(
-                Ch2L1FixedLine("rowan_loyal_a1", Ch2L1State.ACT1_TASK1, 60),
+                Ch2L1FixedLine("rowan_loyal_a1", Ch2L1State.ACT1_TASK2, 0),
                 Ch2L1FixedLine("rowan_loyal_a4", Ch2L1State.ACT1_TASK3, 100),
             )
         }
@@ -173,6 +176,11 @@ class Ch2L1SpeakerSchedule(
         played += lines
     }
 
+    /** Nothing plays before [untilTick] (the player has just left the terminal: a beat before Rowan speaks). */
+    fun holdUntil(untilTick: Long) {
+        busyUntil = maxOf(busyUntil, untilTick)
+    }
+
     /** The player reached [state] at tick [now]. */
     fun onState(state: Ch2L1State, now: Long) {
         if (state.ordinal >= Ch2L1Speakers.CANCELLED_FROM.ordinal) {
@@ -184,11 +192,11 @@ class Ch2L1SpeakerSchedule(
         for (fixed in data.fixed) {
             if (fixed.after == state && fixed.line !in played && due.none { it.line == fixed.line }) due += Due(fixed.line, now + fixed.delayTicks)
         }
-        // A player put past the first task (by a command, a skip) has not heard the opening line and never will: it counts as said.
-        val opening = data.fixed.firstOrNull()?.line
-        if (opening != null && state.ordinal > Ch2L1State.ACT1_TASK1.ordinal && opening !in played) {
-            played += opening
-            due.removeAll { it.line == opening }
+        // A player put past the opening's state (by a command, a skip) has not heard the opening line and never will: it counts as said.
+        val first = data.fixed.firstOrNull()
+        if (first != null && state.ordinal > first.after.ordinal && first.line !in played) {
+            played += first.line
+            due.removeAll { it.line == first.line }
         }
         val inAct1 = state.ordinal >= Ch2L1State.ACT1_TASK1.ordinal
         if (inAct1 && !poolOpen && openingLinePlayed()) openPool(now)

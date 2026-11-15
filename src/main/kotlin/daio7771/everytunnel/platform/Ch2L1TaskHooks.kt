@@ -52,8 +52,12 @@ object Ch2L1TaskHooks {
     /** To the server: the player asks to register the tube of this index (a var int). */
     val OS_REGISTER_PACKET = Identifier(EveryTunnel.MOD_ID, "ch2l1_os_register")
 
+    /** To the server: the player left NonameOS (the screen closed, however it was). */
+    val OS_CLOSED_PACKET = Identifier(EveryTunnel.MOD_ID, "ch2l1_os_closed")
+
     private const val KEY = "every_tunnel.ch2.l1."
     private val holds = HashMap<UUID, HoldTracker>()
+    private val terminalOpen = HashSet<UUID>()
 
     private val progress get() = ProgressService.get()
     private val tasks get() = Ch2L1DataLoader.tasks
@@ -64,8 +68,19 @@ object Ch2L1TaskHooks {
             val index = buf.readVarInt()
             server.execute { registerSample(player, index) }
         }
-        ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> holds.remove(handler.player.uuid) }
+        ServerPlayNetworking.registerGlobalReceiver(OS_CLOSED_PACKET) { server, player, _, _, _ ->
+            server.execute {
+                if (terminalOpen.remove(player.uuid)) Ch2L1SpeakerHooks.terminalClosed(player)
+            }
+        }
+        ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->
+            holds.remove(handler.player.uuid)
+            terminalOpen.remove(handler.player.uuid)
+        }
     }
+
+    /** The player has NonameOS open: nothing speaks to them while they do (see [Ch2L1SpeakerHooks]). */
+    fun isTerminalOpen(player: ServerPlayerEntity): Boolean = player.uuid in terminalOpen
 
     // --- where things are -------------------------------------------------------------------------
 
@@ -120,6 +135,7 @@ object Ch2L1TaskHooks {
     /** NonameOS's registry, as it stands, to the client (opening the screen if it is not open). */
     private fun sendOs(player: ServerPlayerEntity, done: Boolean) {
         if (!ServerPlayNetworking.canSend(player, OS_OPEN_PACKET)) return
+        terminalOpen += player.uuid
         val buf = PacketByteBufs.create()
         buf.writeVarInt(tasks.tubes.size)
         tasks.tubes.forEach { buf.writeString(it.code) }

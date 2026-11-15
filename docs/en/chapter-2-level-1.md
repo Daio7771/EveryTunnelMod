@@ -214,20 +214,22 @@ had they played. The plan's props are put back from the plan itself (`Ch2L1Build
 `rowan_loyal_a1` to `a6`, from the ceiling speakers (`ceiling_speaker` blocks) of four zones, `speaker_entrance`, `speaker_lab`, `speaker_main` and
 `speaker_west`, each with its emitter anchor (`speaker_<zone>_src`). The rules:
 
-- `a1` three seconds after clocking in (`ACT1_TASK1`); `a4` five seconds after the analyzer (`ACT1_TASK3`).
-- The pool `a2`, `a3`, `a5` once each, in random order, each after a cooldown of 75 to 120 s from the end of the line before; never two at once.
+- **Rowan says nothing until the first task is done.** `a1`, the opening, comes when the last sample is registered **and the player has left NonameOS** (the client
+  tells the server when the screen closes, `ch2l1_os_closed`), a beat later (`after_terminal_seconds`, 1 s); nothing speaks to a player who has NonameOS open. `a4` five seconds after
+  the analyzer (`ACT1_TASK3`).
+- The pool `a2`, `a3`, `a5` (it opens after `a1`) once each, in random order, each after a cooldown of 75 to 120 s from the end of the line before; never two at once.
 - Only while the player stands in a speaker zone (otherwise the line waits for them to come back); none from `ACT2_FOLLOW` on, which also stops what is playing.
-- `a6` is in neither list: it is kept for the office's scene. A player put past the first task by a command is taken to have heard `a1`.
+- `a6` is in neither list: it is kept for the office's scene. A player put past `ACT1_TASK2` by a command is taken to have heard `a1`.
 - Each line is the chime (`event.ch2l1.ding`, two soft bell notes; `ding_seconds` long) and then the voice, both sent to that player alone from the zone's speaker with `volume` 3, so they carry
   all through the zone (`attenuation_distance` 48 in `sounds.json`); the subtitles are the usual ones (`Ch2L1Subtitles`). `tools/sounds/ch2_l1_voices.py` runs the six `rowan_loyal_*`
   files through a loudspeaker filter (band-limited, a little drive, a slap of the corridor) before it writes them.
 
-**The first announcement is a cinematic** (`a1`; `core.ch2l1.Ch2L1IntroScene`, `platform.Ch2L1IntroHooks`): the player cannot move, the black bands slide in,
-the camera flies out of their eyes to the shots of `speakers.json` (`intro.shots`: the ceiling speaker seen from below, the LAB's wide shot from its
-corner), the chime sounds as the first one begins, the voice follows it, and the camera flies back into their eyes as the bands go. It is the machinery of the director's
-scene and the prologue (`Cutscene`, `Timeline`, `CutsceneView.Kind.FACTORY`), with the shots' places read from anchors (`a1_cam_speaker`, `a1_cam_lab`,
-`a1_look_lab`, the speakers' emitters) in world coordinates, so moving the map moves the shots; skippable with the jump key pressed twice, like the others. The
-other announcements have no bands: the chime, the voice and its subtitle, and the player walks on.
+**The first announcement is a cinematic** (`a1`; `core.ch2l1.Ch2L1IntroScene`, `platform.Ch2L1IntroHooks`): when the player leaves NonameOS after the first task they cannot move,
+the black bands slide in and the camera turns out of their own eyes, where they stand, to a fixed ceiling speaker (`speakers.json`, `intro.shots`: `camera: "player"`
+looking at `speaker_lab_src`, the LAB's speaker, which hangs near the terminal), the chime sounds from it as the shot begins, the voice follows, and the camera flies back
+into their eyes as the bands go. It is the machinery of the director's scene and the prologue (`Cutscene`, `Timeline`, `CutsceneView.Kind.FACTORY`); a shot's camera is an anchor
+(or `player`) and what it looks at an anchor, in world coordinates, so moving the map moves the shot, and more shots can be added in the file; skippable with the jump key pressed
+twice, like the others. The other announcements have no bands: the chime, the voice and its subtitle, and the player walks on.
 
 `/et ch2 l1 tasks` shows how far the player is and anything `tasks.json` or `speakers.json` names that `anchors.json` does not have
 (`core.ch2l1.Ch2L1Wiring`, which `/et reload` also reports).
@@ -276,4 +278,4 @@ character) come with the phase that gives them, and will run on the command too,
 `Ch2L1StateTest` (the order, `next`, `parse`), `Ch2L1AnchorsParserTest` (the format, every kind of problem) and
 `Ch2L1DataTest` (the jar's files, which copy wins, the fallbacks), `Ch2L1VoicesTest` (the 32 lines, their sound events, Oggs
 and cues, the texts in both languages) `Ch2L1SkinsTest` (the skins' format) and `Ch2L1ObjectivesTest` (one objective per step, in both languages) and `Ch2L1MapPlanTest` (the plan's blocks and doors, the
-anchors standing on its floors), all in `core/ch2l1`; `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1SpeakersTest` (the file and every rule of the schedule: three seconds, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say. `PlayerProgressTest` covers the state and the flag in the progress.
+anchors standing on its floors), all in `core/ch2l1`; `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1SpeakersTest` (the file and every rule of the schedule: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say. `PlayerProgressTest` covers the state and the flag in the progress.

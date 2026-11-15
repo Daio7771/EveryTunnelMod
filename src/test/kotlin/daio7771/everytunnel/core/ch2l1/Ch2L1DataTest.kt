@@ -32,7 +32,7 @@ class Ch2L1DataTest {
             "paper_medical", "paper_contract_14", "painting", "card_slide_start", "card_slide_end", "rowan_spawn",
             "restricted_door_east", "sealed_door",
             "task1_terminal_block", "task2_analyzer_block", "task3_broom_block", "speaker_entrance_src", "speaker_lab_src", "speaker_main_src",
-            "speaker_west_src", "a1_cam_speaker", "a1_cam_lab", "a1_look_lab",
+            "speaker_west_src",
         ) + (1..6).map { "taquillas_npc_%02d".format(it) } + (1..3).map { "task1_tube_$it" }
         for (id in points) assertTrue(anchors.point(id) != null, "no anchor $id")
         val zones = listOf(

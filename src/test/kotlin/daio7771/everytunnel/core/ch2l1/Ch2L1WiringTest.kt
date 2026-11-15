@@ -23,7 +23,7 @@ class Ch2L1WiringTest {
         assertTrue(problems.any { "task2_analyzer_block" in it })
         assertTrue(problems.any { "task3_dirt_spots" in it })
         assertTrue(problems.any { "speaker_lab" in it })
-        assertTrue(problems.any { "a1_cam_speaker" in it })
+        assertTrue(problems.any { "speaker_lab_src" in it })
     }
 
     @Test

@@ -46,8 +46,19 @@ class Ch2L1IntroSceneTest {
     }
 
     @Test
+    fun `the jar's scene is one shot from the player's own eyes at the LAB's speaker`() {
+        assertEquals(1, spec.shots.size)
+        assertEquals(Ch2L1IntroScene.PLAYER, spec.shots[0].camera)
+        assertEquals("speaker_lab_src", spec.shots[0].look)
+        val built = Ch2L1IntroScene.build(spec, anchors, frame, 4830, "k", 30).built!!
+        val shot = built.timeline.cutscene.shots.single()
+        assertEquals(daio7771.everytunnel.core.cutscene.Local(0.0, 0.0, 1.62), shot.from, "the camera does not leave their eyes")
+        assertEquals(shot.from, shot.to)
+    }
+
+    @Test
     fun `an anchor the scene names that is missing is told, and there is no scene`() {
-        val broken = spec.copy(shots = listOf(Ch2L1IntroShot("no_such_camera", null, "a1_look_lab", 10)))
+        val broken = spec.copy(shots = listOf(Ch2L1IntroShot("no_such_camera", null, "speaker_lab_src", 10)))
         val result = Ch2L1IntroScene.build(broken, anchors, frame, 1000, "k", 30)
         assertNull(result.built)
         assertNotNull(result.problem)

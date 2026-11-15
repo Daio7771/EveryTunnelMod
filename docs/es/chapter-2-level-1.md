@@ -219,19 +219,21 @@ comando con el nivel como estaría si se hubiera jugado. Los objetos del plano s
 `rowan_loyal_a1` a `a6`, desde los altavoces de techo (bloques `ceiling_speaker`) de cuatro zonas, `speaker_entrance`, `speaker_lab`, `speaker_main` y
 `speaker_west`, cada una con su ancla emisora (`speaker_<zona>_src`). Las reglas:
 
-- `a1` tres segundos después de fichar (`ACT1_TASK1`); `a4` cinco segundos después del analizador (`ACT1_TASK3`).
-- El grupo `a2`, `a3`, `a5` una vez cada uno, en orden aleatorio, cada uno tras un enfriamiento de 75 a 120 s desde el final de la línea anterior; nunca dos a la vez.
+- **Rowan no dice nada hasta que se acaba la primera tarea.** `a1`, la apertura, llega cuando se registra la última muestra **y el jugador ha salido de NonameOS** (el cliente
+  avisa al servidor al cerrarse la pantalla, `ch2l1_os_closed`), un momento después (`after_terminal_seconds`, 1 s); nada habla a un jugador que tiene NonameOS abierto. `a4` cinco segundos
+  después del analizador (`ACT1_TASK3`).
+- El grupo `a2`, `a3`, `a5` (se abre tras `a1`) una vez cada uno, en orden aleatorio, cada uno tras un enfriamiento de 75 a 120 s desde el final de la línea anterior; nunca dos a la vez.
 - Solo mientras el jugador está en una zona con altavoz (si no, la línea espera a que vuelva); ninguno desde `ACT2_FOLLOW`, que además corta lo que suena.
-- `a6` no está en ninguna lista: se reserva para la escena del despacho. A un jugador puesto más allá de la primera tarea por un comando se le da por oído el `a1`.
+- `a6` no está en ninguna lista: se reserva para la escena del despacho. A un jugador puesto más allá de `ACT1_TASK2` por un comando se le da por oído el `a1`.
 - Cada línea es el timbre (`event.ch2l1.ding`, dos notas suaves de campana; dura `ding_seconds`) y luego la voz, enviados solo a ese jugador desde el altavoz de la zona con `volume` 3, así que
   llegan a toda la zona (`attenuation_distance` 48 en `sounds.json`); los subtítulos son los de siempre (`Ch2L1Subtitles`). `tools/sounds/ch2_l1_voices.py` pasa los seis
   `rowan_loyal_*` por un filtro de megafonía (banda estrecha, algo de saturación, un eco de pasillo) antes de escribirlos.
 
-**El primer aviso es una cinemática** (`a1`; `core.ch2l1.Ch2L1IntroScene`, `platform.Ch2L1IntroHooks`): el jugador no puede moverse, las barras negras
-entran, la cámara sale de sus ojos hacia las tomas de `speakers.json` (`intro.shots`: el altavoz de techo visto desde abajo, el plano general del LAB desde
-su esquina), el timbre suena al empezar la primera, la voz le sigue y la cámara vuelve a sus ojos mientras las barras se van. Es la maquinaria de la escena del
-director y del prólogo (`Cutscene`, `Timeline`, `CutsceneView.Kind.FACTORY`), con los lugares de las tomas leídos de anclas (`a1_cam_speaker`, `a1_cam_lab`,
-`a1_look_lab`, los emisores de los altavoces) en coordenadas del mundo, así que mover el mapa mueve las tomas; se salta con la tecla de saltar pulsada dos veces, como las
+**El primer aviso es una cinemática** (`a1`; `core.ch2l1.Ch2L1IntroScene`, `platform.Ch2L1IntroHooks`): cuando el jugador sale de NonameOS tras la primera tarea no puede moverse,
+las barras negras entran y la cámara se gira desde sus propios ojos, donde está, hacia un altavoz de techo fijo (`speakers.json`, `intro.shots`: `camera: "player"` mirando a
+`speaker_lab_src`, el altavoz del LAB, que cuelga cerca del terminal), el timbre suena desde él al empezar la toma, la voz le sigue y la cámara vuelve a sus ojos mientras las
+barras se van. Es la maquinaria de la escena del director y del prólogo (`Cutscene`, `Timeline`, `CutsceneView.Kind.FACTORY`); la cámara de una toma es un ancla (o `player`) y lo que
+mira otra ancla, en coordenadas del mundo, así que mover el mapa mueve la toma, y se pueden añadir más tomas en el archivo; se salta con la tecla de saltar pulsada dos veces, como las
 demás. Los otros avisos no tienen barras: el timbre, la voz y su subtítulo, y el jugador sigue caminando.
 
 `/et ch2 l1 tasks` muestra cuánto ha avanzado el jugador y todo lo que `tasks.json` o `speakers.json` nombran y `anchors.json` no tiene
@@ -281,4 +283,4 @@ personaje) llegan con la fase que se los dé, y también se ejecutarán con el c
 `Ch2L1StateTest` (el orden, `next`, `parse`), `Ch2L1AnchorsParserTest` (el formato, cada tipo de problema) y `Ch2L1DataTest`
 (los archivos del jar, qué copia gana, los respaldos), `Ch2L1VoicesTest` (las 32 líneas, sus eventos de sonido, Ogg y
 fragmentos, los textos en los dos idiomas) `Ch2L1SkinsTest` (el formato de las skins) y `Ch2L1ObjectivesTest` (un objetivo por paso, en los dos idiomas) y `Ch2L1MapPlanTest` (los bloques y puertas del plan, las anclas
-sobre sus suelos), todos en `core/ch2l1`; `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador: tres segundos, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas. `PlayerProgressTest` cubre el estado y la marca en el progreso.
+sobre sus suelos), todos en `core/ch2l1`; `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas. `PlayerProgressTest` cubre el estado y la marca en el progreso.

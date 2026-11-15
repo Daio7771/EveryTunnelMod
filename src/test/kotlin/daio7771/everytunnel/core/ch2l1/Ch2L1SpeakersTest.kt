@@ -24,15 +24,17 @@ class Ch2L1SpeakersTest {
         val result = Ch2L1SpeakersParser.parse(document)
         assertEquals(emptyList(), result.problems)
         val speakers = result.speakers
-        assertEquals(listOf("rowan_loyal_a1" to 60, "rowan_loyal_a4" to 100), speakers.fixed.map { it.line to it.delayTicks })
-        assertEquals(listOf(Ch2L1State.ACT1_TASK1, Ch2L1State.ACT1_TASK3), speakers.fixed.map { it.after })
+        assertEquals(listOf("rowan_loyal_a1" to 0, "rowan_loyal_a4" to 100), speakers.fixed.map { it.line to it.delayTicks })
+        assertEquals(listOf(Ch2L1State.ACT1_TASK2, Ch2L1State.ACT1_TASK3), speakers.fixed.map { it.after })
+        assertEquals(20, speakers.afterTerminalTicks)
         assertEquals(listOf("rowan_loyal_a2", "rowan_loyal_a3", "rowan_loyal_a5"), speakers.pool)
         assertTrue("rowan_loyal_a6" !in speakers.pool && speakers.fixed.none { it.line == "rowan_loyal_a6" }, "a6 is kept for the office")
         assertEquals(75 * 20 to 120 * 20, speakers.cooldownMinTicks to speakers.cooldownMaxTicks)
         assertEquals(setOf("speaker_entrance", "speaker_lab", "speaker_main", "speaker_west"), speakers.zones.toSet())
         assertNotNull(speakers.intro)
         assertEquals("rowan_loyal_a1", speakers.intro!!.line)
-        assertEquals(2, speakers.intro!!.shots.size)
+        assertEquals(1, speakers.intro!!.shots.size)
+        assertEquals(Ch2L1IntroScene.PLAYER, speakers.intro!!.shots[0].camera)
     }
 
     @Test
@@ -48,19 +50,33 @@ class Ch2L1SpeakersTest {
     }
 
     @Test
-    fun `the first line plays three seconds after the first task begins, and not before`() {
+    fun `Rowan says nothing until the first task is done`() {
         val s = schedule()
         s.onState(Ch2L1State.ACT1_CLOCKIN, 0)
-        assertNull(s.tick(1000, true), "nothing before clocking in")
-        s.onState(Ch2L1State.ACT1_TASK1, 1000)
-        assertNull(s.tick(1059, true))
-        assertEquals("rowan_loyal_a1", s.tick(1060, true))
+        for (t in 0L..30_000L step 7) assertNull(s.tick(t, true), "nothing before clocking in, at $t")
+        s.onState(Ch2L1State.ACT1_TASK1, 30_000)
+        for (t in 30_000L..400_000L step 7) assertNull(s.tick(t, true), "nothing during the first task, not even the pool, at $t")
+        s.onState(Ch2L1State.ACT1_TASK2, 400_000)
+        assertEquals("rowan_loyal_a1", s.tick(400_000, true), "the opening comes as the first task ends")
+    }
+
+    @Test
+    fun `leaving the terminal holds the opening a beat`() {
+        val s = schedule()
+        s.onState(Ch2L1State.ACT1_TASK1, 0)
+        s.onState(Ch2L1State.ACT1_TASK2, 100)
+        // the terminal is open (the caller says no zone), then the player leaves it at tick 160 and a second goes by
+        assertNull(s.tick(150, false))
+        s.holdUntil(160 + 20)
+        assertNull(s.tick(170, true))
+        assertNull(s.tick(179, true))
+        assertEquals("rowan_loyal_a1", s.tick(180, true))
     }
 
     @Test
     fun `a line waits for the player to be in a zone`() {
         val s = schedule()
-        s.onState(Ch2L1State.ACT1_TASK1, 0)
+        s.onState(Ch2L1State.ACT1_TASK2, 0)
         assertNull(s.tick(100, false))
         assertNull(s.tick(5000, false))
         assertEquals("rowan_loyal_a1", s.tick(5001, true))
@@ -69,7 +85,7 @@ class Ch2L1SpeakersTest {
     @Test
     fun `never two at once, and the pool starts only after the first line plus a cooldown`() {
         val s = schedule()
-        s.onState(Ch2L1State.ACT1_TASK1, 0)
+        s.onState(Ch2L1State.ACT1_TASK2, 0)
         assertEquals("rowan_loyal_a1", s.tick(60, true))
         // it takes until 260; the cooldown (75 to 120 s) runs from its end
         for (t in 61..260L) assertNull(s.tick(t, true), "at $t")
@@ -84,7 +100,7 @@ class Ch2L1SpeakersTest {
     @Test
     fun `each pool line plays once, in some order, and never a6 nor the fixed ones`() {
         val s = schedule(7)
-        s.onState(Ch2L1State.ACT1_TASK1, 0)
+        s.onState(Ch2L1State.ACT1_TASK2, 0)
         val said = mutableListOf<String>()
         for (t in 0L..400_000L) s.tick(t, true)?.let { said += it }
         assertEquals("rowan_loyal_a1", said.first())
@@ -95,7 +111,7 @@ class Ch2L1SpeakersTest {
     @Test
     fun `the fourth line plays five seconds after the second task, even over the cooldown`() {
         val s = schedule()
-        s.onState(Ch2L1State.ACT1_TASK1, 0)
+        s.onState(Ch2L1State.ACT1_TASK2, 0)
         s.tick(60, true)
         s.onState(Ch2L1State.ACT1_TASK3, 1000)
         assertNull(s.tick(1099, true))
@@ -105,29 +121,28 @@ class Ch2L1SpeakersTest {
     @Test
     fun `act two cancels everything`() {
         val s = schedule()
-        s.onState(Ch2L1State.ACT1_TASK1, 0)
+        s.onState(Ch2L1State.ACT1_TASK2, 0)
         s.onState(Ch2L1State.ACT1_TASK3, 100)
         s.onState(Ch2L1State.ACT2_FOLLOW, 110)
         for (t in 0L..300_000L step 7) assertNull(s.tick(t, true))
     }
 
     @Test
-    fun `a player put past the first task never hears the opening and the pool still opens`() {
+    fun `a player put past the opening's state never hears it and the rest still plays`() {
         val s = schedule()
-        s.onState(Ch2L1State.ACT1_TASK2, 0)
+        s.onState(Ch2L1State.ACT1_TASK3, 0)
         assertTrue("rowan_loyal_a1" in s.playedLines)
-        var said: String? = null
-        var t = 0L
-        while (said == null && t < 10_000L) said = s.tick(t++, true)
-        assertNotNull(said)
-        assertTrue(said in data.pool)
+        val said = mutableListOf<String>()
+        for (t in 0L..400_000L) s.tick(t, true)?.let { said += it }
+        assertEquals(listOf("rowan_loyal_a4") + said.drop(1), said, "the fourth line first, five seconds in")
+        assertEquals((data.pool + "rowan_loyal_a4").toSet(), said.toSet())
     }
 
     @Test
     fun `what was heard before leaving is not said again`() {
         val s = schedule()
         s.restore(listOf("rowan_loyal_a1", "rowan_loyal_a2"))
-        s.onState(Ch2L1State.ACT1_TASK1, 0)
+        s.onState(Ch2L1State.ACT1_TASK2, 0)
         val said = mutableListOf<String>()
         for (t in 0L..400_000L) s.tick(t, true)?.let { said += it }
         assertEquals(listOf("rowan_loyal_a3", "rowan_loyal_a5").toSet(), said.toSet())

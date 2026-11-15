@@ -60,6 +60,13 @@ object Ch2L1IntroHooks {
 
     fun isRunning(player: ServerPlayerEntity): Boolean = running?.player == player.uuid
 
+    /** Where the chime comes from: the speaker the first shot looks at (the cinematic turns to it), else [fallback]. */
+    fun speakerOf(fallback: Vec3d): Vec3d {
+        val shot = Ch2L1DataLoader.speakers.intro?.shots?.firstOrNull() ?: return fallback
+        val at = Ch2L1DataLoader.data.anchors.point(shot.look)?.position ?: return fallback
+        return Vec3d(at.x, at.y, at.z)
+    }
+
     /** The scene seen from [frame] (where the player stands), or null: no cinematic in `speakers.json`, or an anchor of it is missing. */
     fun build(frame: SceneFrame): Ch2L1IntroScene.Built? {
         val speakers = Ch2L1DataLoader.speakers

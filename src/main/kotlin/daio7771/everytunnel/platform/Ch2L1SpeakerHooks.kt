@@ -24,8 +24,10 @@ import java.util.UUID
  * random one of the pool now and then, never two at once, only in a speaker zone, none from Act 2 on); this object keeps one for each
  * player playing the level, ticks it, and plays what it says from the ceiling speaker of the zone the player is in: the chime
  * ([ModSounds.CH2L1_DING]) now and the voice (`voice.<id>`, its subtitles drawn by the client) when the chime is over, both
- * straight to that player (`PlaySoundS2CPacket`, heard all through the zone: [Ch2L1Speakers.volume]). The first announcement is
- * the cinematic ([Ch2L1IntroHooks]) instead, which plays its own chime and voice. What a player has heard is in their progress
+ * straight to that player (`PlaySoundS2CPacket`, heard all through the zone: [Ch2L1Speakers.volume]). Nothing speaks while the player has
+ * NonameOS open ([Ch2L1TaskHooks.isTerminalOpen]), and when they leave it there is a beat ([Ch2L1Speakers.afterTerminalTicks]) before the
+ * opening line. The first announcement is the cinematic ([Ch2L1IntroHooks]) instead, from the speaker it turns to, which plays its own
+ * chime and voice. What a player has heard is in their progress
  * (`heard_<line>`), so leaving the world does not repeat it; going back to the start of the level forgets it.
  * Server thread only.
  */
@@ -80,6 +82,12 @@ object Ch2L1SpeakerHooks {
         }
     }
 
+    /** The player left NonameOS: a beat before anything is said. */
+    fun terminalClosed(player: ServerPlayerEntity) {
+        if (!Ch2L1.active(player)) return
+        entryOf(player, player.server).schedule.holdUntil(player.server.ticks + speakers.afterTerminalTicks.toLong())
+    }
+
     /** What is playing from the loudspeakers goes quiet. */
     private fun stop(player: ServerPlayerEntity) {
         val ids = speakers.fixed.map { it.line } + speakers.pool
@@ -102,7 +110,7 @@ object Ch2L1SpeakerHooks {
                 }
             }
             val zone = zoneOf(player)
-            val line = entry.schedule.tick(now, zone != null) ?: continue
+            val line = entry.schedule.tick(now, zone != null && !Ch2L1TaskHooks.isTerminalOpen(player)) ?: continue
             play(player, entry, line, zone?.let(::emitter), now)
         }
     }
@@ -121,7 +129,7 @@ object Ch2L1SpeakerHooks {
     private fun play(player: ServerPlayerEntity, entry: Entry, line: String, from: Vec3d?, now: Long) {
         ProgressService.get().setCh2L1Counter(player, HEARD + line, 1)
         val source = from ?: player.pos.add(0.0, 2.0, 0.0)
-        if (line == speakers.intro?.line && Ch2L1IntroHooks.start(player, source)) return
+        if (line == speakers.intro?.line && Ch2L1IntroHooks.start(player, Ch2L1IntroHooks.speakerOf(source))) return
         EveryTunnel.LOGGER.info("Chapter 2 Level 1: the loudspeakers say {} to {}", line, player.gameProfile.name)
         send(player, ModSounds.CH2L1_DING, source)
         entry.queued = Queued(line, now + speakers.dingTicks, source)

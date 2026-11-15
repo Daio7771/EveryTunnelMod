@@ -37,6 +37,11 @@ class NonameOsScreen(
 
     override fun shouldPause(): Boolean = false
 
+    /** Logging off, by Escape, by the batch closing or by anything else: the server waits for this before Rowan speaks. */
+    override fun removed() {
+        ClientPlayNetworking.send(Ch2L1TaskHooks.OS_CLOSED_PACKET, PacketByteBufs.empty())
+    }
+
     /** The server's answer: the registry as it stands now. */
     fun update(codes: List<String>, taken: Int, registered: Int, done: Boolean) {
         this.codes = codes

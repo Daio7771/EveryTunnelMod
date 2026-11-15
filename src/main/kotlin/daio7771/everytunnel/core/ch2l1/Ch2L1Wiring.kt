@@ -28,8 +28,8 @@ object Ch2L1Wiring {
             if (emitter == null || anchors.point(emitter) == null) out += "the speaker of the zone \"$zone\" has no anchor (\"${emitter ?: "none"}\")"
         }
         speakers.intro?.shots?.forEach { shot ->
-            point("speakers.json", shot.camera)
-            shot.cameraTo?.let { point("speakers.json", it) }
+            if (shot.camera != Ch2L1IntroScene.PLAYER) point("speakers.json", shot.camera)
+            shot.cameraTo?.takeIf { it != Ch2L1IntroScene.PLAYER }?.let { point("speakers.json", it) }
             point("speakers.json", shot.look)
         }
         return out
