@@ -14,7 +14,7 @@
     "door_after": "meeting_01", "door_seconds": 3.5,
     "card_line": "meeting_12", "card_sentence": 1,
     "tremble_lines": ["meeting_03_a"], "laugh_lines": ["meeting_04_b"],
-    "glance_every_seconds": [6, 12], "glance_seconds": [1, 1.8], "crossed_arms": [2, 5],
+    "glance_every_seconds": [6, 12], "glance_seconds": [1, 1.8],
     "leave_path": "meeting_leave", "leave_gap_seconds": [1.5, 3], "leave_pace": 1.8, "exit": "taquillas_exit"
   }
 }

@@ -132,10 +132,7 @@ la reunión) y Rowan, por los altavoces (`rowan_loyal_a1` a `a6`) y en su despac
 `tools/sounds/ch2_l1_voices.py` las convierte (Ogg mono, una ganancia para cada uno de los dos grupos, el de la unión y el
 de Rowan, de modo que cada uno quede a -18 LUFS como las líneas del director), corta cada una en fragmentos de subtítulo
 por sus pausas y escribe `cutscene/ch2_l1_voices.json`; `export.py` hace de cada una un evento de
-sonido, `voice.<id>` (`/playsound every_tunnel:voice.follow_01 voice @s`). Tres tomas acaban antes que su texto
-(`meeting_07`, `08_b` y `09` solo dicen su primera frase; `CUT_TAKES` en la herramienta): el resto del texto sale tras la
-voz, sin voz, el tiempo que se tarda en leerlo, y la duración de la línea lo cubre. Una toma regenerada entra con su
-nombre de archivo de siempre, y su entrada sale de `CUT_TAKES`. Las `rowan_loyal_*` ya suenan por los altavoces del Acto 1 (véase
+sonido, `voice.<id>` (`/playsound every_tunnel:voice.follow_01 voice @s`). Las `rowan_loyal_*` ya suenan por los altavoces del Acto 1 (véase
 [Acto 1](#acto-1-las-tareas-y-los-altavoces)); las demás las reproducirán los sistemas de las fases siguientes.
 
 **Los subtítulos están siempre activos.** `client.hud.Ch2L1Subtitles` escucha al gestor de sonido, así que cuando empieza
@@ -296,7 +293,7 @@ Lo lleva `chapter2.level1.platform.Ch2L1Act2Hooks`, desde `cutscenes/meeting.jso
 claves opcionales; `Ch2L1Wiring` comprueba las anclas y caminos que nombra):
 
 - **La espera** (`ACT1_TASK3`): el compañero (skin `coworker`) aparece en `coworker_wait`, la esquina del anillo junto a la escoba, mientras
-  el jugador sigue en el LAB, y espera allí de brazos cruzados, con la mirada puesta en el jugador mientras barre.
+  el jugador sigue en el LAB, y espera allí quieto, con los brazos colgando y la mirada puesta en el jugador mientras barre.
 - **Seguirle** (`ACT2_FOLLOW`, al barrer la última mancha): dice `follow_01` desde donde está (una voz del nivel como cualquier otra: salen
   sus subtítulos; nada más se escribe encima, así que barrer las manchas no da mensaje, el panel las cuenta) y, al acabar, recorre a
   paso ligero (`pace`, por el paseo de los trabajadores) `coworker_route` (el anillo, el pasillo principal, la segunda puerta de las taquillas) hasta
@@ -315,7 +312,7 @@ claves opcionales; `Ch2L1Wiring` comprueba las anclas y caminos que nombra):
   Sus subtítulos van frase a frase tras el nombre de quien habla (`CutsceneView.Kind.subtitleText` y `speakerAt`). En los mismos ticks el
   servidor dirige a la gente (`FactoryNpcEntity.direction`): todos miran a quien habla (el compañero se gira hacia él con todo el cuerpo, y vuelve al jugador en sus propias líneas), y cada uno mira a la puerta de vez en cuando
   (`Ch2L1Glances`); quien habla gesticula (`TALKING`), worker_a tiembla en `tremble_lines`, worker_b se sacude de risa en `laugh_lines`; los
-  de `crossed_arms` escuchan de brazos cruzados, cambiando el peso de pie; el miembro más cercano a la puerta va a `<puerta>_inside` y la
+  demás escuchan con los brazos quietos, colgando, cambiando el peso de pie; el miembro más cercano a la puerta va a `<puerta>_inside` y la
   cierra; y cuando el compañero llega a "Take this" (`card_line`, `card_sentence`) alarga el brazo (`OFFERING`) y el jugador recibe la
   **copia de tarjeta del laboratorio** (`lab_badge_copy`, la tarjeta del Chapter 1 recoloreada por `tools/blocks/generate.py`; solo abre la
   puerta del laboratorio auxiliar, fase 6).

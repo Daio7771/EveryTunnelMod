@@ -142,16 +142,11 @@
       "id": "meeting_07",
       "text": "every_tunnel.ch2.l1.meeting_07",
       "speaker": "every_tunnel.ch2.l1.speaker.coworker",
-      "ms": 5211,
+      "ms": 2351,
       "cues": [
         {
           "at": 0,
-          "from": 0,
-          "to": 1
-        },
-        {
-          "at": 2351,
-          "from": 1
+          "from": 0
         }
       ]
     },
@@ -159,21 +154,11 @@
       "id": "meeting_08_b",
       "text": "every_tunnel.ch2.l1.meeting_08",
       "speaker": "every_tunnel.ch2.l1.speaker.worker_b",
-      "ms": 6738,
+      "ms": 2768,
       "cues": [
         {
           "at": 0,
-          "from": 0,
-          "to": 1
-        },
-        {
-          "at": 2768,
-          "from": 1,
-          "to": 2
-        },
-        {
-          "at": 4268,
-          "from": 2
+          "from": 0
         }
       ]
     },
@@ -181,21 +166,11 @@
       "id": "meeting_09",
       "text": "every_tunnel.ch2.l1.meeting_09",
       "speaker": "every_tunnel.ch2.l1.speaker.coworker",
-      "ms": 7139,
+      "ms": 2194,
       "cues": [
         {
           "at": 0,
-          "from": 0,
-          "to": 1
-        },
-        {
-          "at": 2194,
-          "from": 1,
-          "to": 3
-        },
-        {
-          "at": 5639,
-          "from": 3
+          "from": 0
         }
       ]
     },

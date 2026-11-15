@@ -54,8 +54,6 @@ data class Ch2L1MeetingSpec(
     /** Nervous: every so often each listener glances at the door for a moment. */
     val glanceEveryTicks: Ch2L1Span = Ch2L1Span.seconds(6.0, 12.0),
     val glanceTicks: Ch2L1Span = Ch2L1Span.seconds(1.0, 1.8),
-    /** The members (0-based, in the group's order) who listen with their arms crossed. */
-    val crossedArms: List<Int> = listOf(2, 5),
     /** The way everyone leaves the lockers after it, one by one, the coworker first; and where a skip puts the player. */
     val leavePath: String = "meeting_leave",
     val leaveGapTicks: Ch2L1Span = Ch2L1Span.seconds(1.5, 3.0),
@@ -89,7 +87,7 @@ data class Ch2L1Act2(val follow: Ch2L1FollowSpec = Ch2L1FollowSpec(), val meetin
  *                "doors": ["lockers_door_1", "lockers_door_2"], "lines": ["meeting_01", "..."], "gap_seconds": 0.5, "turn_seconds": 0.6,
  *                "fly_in_seconds": 1, "fly_out_seconds": 1, "door_after": "meeting_01", "door_seconds": 3.5,
  *                "card_line": "meeting_12", "card_sentence": 1, "tremble_lines": ["meeting_03_a"], "laugh_lines": ["meeting_04_b"],
- *                "glance_every_seconds": [6, 12], "glance_seconds": [1, 1.8], "crossed_arms": [2, 5],
+ *                "glance_every_seconds": [6, 12], "glance_seconds": [1, 1.8],
  *                "leave_path": "meeting_leave", "leave_gap_seconds": [1.5, 3], "leave_pace": 1.8, "exit": "taquillas_exit" }
  * }
  * ```
@@ -135,7 +133,6 @@ object Ch2L1Act2Parser {
             laughLines = if (m.has("laugh_lines")) m.stringList("laugh_lines") else md.laughLines,
             glanceEveryTicks = span(m, "glance_every_seconds", md.glanceEveryTicks),
             glanceTicks = span(m, "glance_seconds", md.glanceTicks),
-            crossedArms = if (m.has("crossed_arms")) ints(m, "crossed_arms") else md.crossedArms,
             leavePath = m.string("leave_path", md.leavePath),
             leaveGapTicks = span(m, "leave_gap_seconds", md.leaveGapTicks),
             leavePace = m.double("leave_pace", md.leavePace, min = 0.3, max = 4.0),
@@ -162,10 +159,6 @@ object Ch2L1Act2Parser {
         }
         return Ch2L1Span.seconds(min, max)
     }
-
-    private fun ints(fields: JsonFields, key: String): List<Int> =
-        fields.array(key)?.mapNotNull { e -> number(e)?.toInt().also { if (it == null) fields.problems += "${fields.pathOf(key)}: $e is not a number, ignored" } }
-            ?: emptyList()
 
     private fun number(e: JsonElement): Double? = if (e.isJsonPrimitive && e.asJsonPrimitive.isNumber) e.asDouble else null
 }

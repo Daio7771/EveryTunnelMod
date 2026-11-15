@@ -10,6 +10,7 @@ import net.minecraft.client.render.entity.model.BipedEntityModel
 import net.minecraft.client.render.entity.model.EntityModelLayers
 import net.minecraft.client.model.ModelPart
 import net.minecraft.util.Identifier
+import kotlin.math.cos
 import kotlin.math.max
 import kotlin.math.sin
 
@@ -17,8 +18,9 @@ import kotlin.math.sin
  * The factory's people (Rowan, the coworker, the workers) on the player's model with classic 4 px arms, each with the
  * skin the entity says (`textures/entity/npc/<skin>.png`: Rowan's is the author's, the workers' are made by
  * `tools/entity/workers.py`). Only the skins' base layer is used. The arms follow the entity's [FactoryNpcEntity.npcPose]
- * ([FactoryNpcModel]): out in front at a keyboard, moving with the words when talking, still with a nod now and then when listening;
- * in the meeting, trembling, laughing, crossed while they wait shifting their weight, or held out handing something over.
+ * ([FactoryNpcModel]): out in front at a keyboard, moving with the words when talking, hanging still when they do nothing with
+ * them (a nod now and then and the weight shifting when listening); in the meeting, trembling, laughing, or held out handing
+ * something over.
  * Where the head looks is the entity's own (the server's gaze); each person's movements are a little out of step with the rest's.
  */
 class FactoryNpcRenderer(context: EntityRendererFactory.Context) :
@@ -73,15 +75,6 @@ class FactoryNpcRenderer(context: EntityRendererFactory.Context) :
                     leftArm.yaw = -0.55f
                     head.pitch = -0.3f + heave * 0.08f
                 }
-                Ch2L1Pose.ARMS_CROSSED -> {
-                    rightArm.pitch = -0.95f
-                    rightArm.yaw = 0.65f
-                    leftArm.pitch = -0.85f
-                    leftArm.yaw = -0.65f
-                    rightArm.roll = 0f
-                    leftArm.roll = 0f
-                    shiftWeight(t, phase)
-                }
                 Ch2L1Pose.OFFERING -> {
                     rightArm.pitch = -1.3f
                     rightArm.yaw = -0.1f
@@ -89,7 +82,19 @@ class FactoryNpcRenderer(context: EntityRendererFactory.Context) :
                 }
                 Ch2L1Pose.NONE -> {}
             }
+            if (entity.npcPose == Ch2L1Pose.NONE || entity.npcPose == Ch2L1Pose.LISTENING) armsDown(limbAngle, limbDistance)
             hat.copyTransform(head)
+        }
+
+        /** Doing nothing with their hands: the arms hang still, swinging only with the stride (not the vanilla idle sway). */
+        private fun armsDown(limbAngle: Float, limbDistance: Float) {
+            val swing = cos(limbAngle * 0.6662f) * limbDistance
+            rightArm.pitch = -swing
+            leftArm.pitch = swing
+            rightArm.yaw = 0f
+            leftArm.yaw = 0f
+            rightArm.roll = 0f
+            leftArm.roll = 0f
         }
 
         /** Standing a long while: the weight goes slowly from one foot to the other. */

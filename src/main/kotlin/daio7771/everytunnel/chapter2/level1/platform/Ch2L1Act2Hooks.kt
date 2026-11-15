@@ -226,7 +226,7 @@ object Ch2L1Act2Hooks {
             if (npc.direction == null) {
                 npc.direction = FactoryNpcEntity.Direction().apply {
                     face = Ch2L1DataLoader.data.anchors.point(member.at)?.yaw
-                    pose = if (i in spec.meeting.crossedArms) Ch2L1Pose.ARMS_CROSSED else Ch2L1Pose.NONE
+                    pose = Ch2L1Pose.NONE
                 }
             }
         }
@@ -261,7 +261,7 @@ object Ch2L1Act2Hooks {
 
     // --- waiting by the broom --------------------------------------------------------------------------
 
-    /** The coworker by the broom, arms crossed, watching the player when they are near. */
+    /** The coworker by the broom, standing still, watching the player when they are near. */
     private fun waitForPlayer(player: ServerPlayerEntity) {
         val world = Ch2L1Npcs.world(player.server) ?: return
         val anchor = Ch2L1DataLoader.data.anchors.point(spec.follow.waitAnchor) ?: return
@@ -269,7 +269,7 @@ object Ch2L1Act2Hooks {
         val d = coworker.direction ?: FactoryNpcEntity.Direction().also { coworker.direction = it }
         d.walkTo = Vec3d(anchor.position.x, anchor.position.y, anchor.position.z)
         d.face = anchor.yaw
-        d.pose = Ch2L1Pose.ARMS_CROSSED
+        d.pose = Ch2L1Pose.NONE
         d.lookAt = if (coworker.squaredDistanceTo(player) < WATCH_RANGE * WATCH_RANGE) eyes(player) else null
     }
 
@@ -486,7 +486,6 @@ object Ch2L1Act2Hooks {
                     npc === speaker && beat!!.line.id in spec.trembleLines -> Ch2L1Pose.TREMBLING
                     npc === speaker && beat!!.line.id in spec.laughLines -> Ch2L1Pose.LAUGHING
                     npc === speaker -> Ch2L1Pose.TALKING
-                    i in spec.crossedArms -> Ch2L1Pose.ARMS_CROSSED
                     else -> Ch2L1Pose.LISTENING
                 }
                 if (closing && !m.doorClosed && built.doorCloses >= 0 && t >= built.doorCloses && (d.arrived || t >= built.doorEnd - 5)) {

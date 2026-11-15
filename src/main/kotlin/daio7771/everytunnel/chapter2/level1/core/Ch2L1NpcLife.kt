@@ -34,9 +34,6 @@ enum class Ch2L1Pose {
     /** Shaking with laughter, hands on the belly. */
     LAUGHING,
 
-    /** Arms crossed, shifting from one foot to the other: waiting, uneasy. */
-    ARMS_CROSSED,
-
     /** One arm held out, handing something over. */
     OFFERING;
 

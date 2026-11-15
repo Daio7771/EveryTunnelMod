@@ -101,13 +101,6 @@ ROWAN = [
     ("rowan_office_c8", "row_sus8.mp3", "rowan"),
 ]
 
-# Takes that end before their text does (the generator cut them): how many of the text's sentences the voice says. The
-# rest of the text shows after the voice, unvoiced, as long as it takes to read (READ_MS_PER_CHAR, at least
-# MIN_TAIL_CUE_MS a cue), and the line's length covers it, so the scene waits for it.
-CUT_TAKES = {"meeting_07": 1, "meeting_08_b": 1, "meeting_09": 1}
-READ_MS_PER_CHAR = 65
-MIN_TAIL_CUE_MS = 1500
-
 GROUPS = {"union": UNION, "rowan": ROWAN}
 LINES = UNION + ROWAN
 
@@ -191,12 +184,8 @@ def cue_groups(text):
 
 def timed_cues(line_id, text):
     """[(ms from the line's start, first sentence, sentence it ends before, cue text)] and the line's length in ms:
-    voices.timed_cues on this tool's files. A cut take (CUT_TAKES) is timed on the sentences it says, then the rest
-    follows unvoiced."""
+    voices.timed_cues on this tool's files."""
     x = read(line_id)
-    sentences = voices.sentences(text)
-    said_count = CUT_TAKES.get(line_id, len(sentences))
-    text = " ".join(sentences[:said_count])
     groups = cue_groups(text)
     gaps, start, end = voices.pauses(x)
     total = voices.spoken(text)
@@ -218,9 +207,6 @@ def timed_cues(line_id, text):
     if len(merged) > 1 and ms - merged[-1][0] < MIN_LAST_CUE_MS:
         last = merged.pop()
         merged[-1] = (merged[-1][0], merged[-1][1], last[2], merged[-1][3] + " " + last[3])
-    for first, end, cue in cue_groups(" ".join(sentences[said_count:])):   # the unvoiced rest, after the voice
-        merged.append((ms, said_count + first, said_count + end, cue))
-        ms += max(MIN_TAIL_CUE_MS, len(cue) * READ_MS_PER_CHAR)
     return merged, ms
 
 

@@ -128,10 +128,7 @@ Rowan, on the loudspeakers (`rowan_loyal_a1` to `a6`) and in his office (`rowan_
 `tools/sounds/ch2_l1_voices.py` converts them (mono Ogg, one gain for each of the two groups, the union's and Rowan's, so
 that each sits at -18 LUFS as the director's lines do), cuts each into subtitle cues at its pauses and writes
 `cutscene/ch2_l1_voices.json`; `export.py` makes each a sound event, `voice.<id>`
-(`/playsound every_tunnel:voice.follow_01 voice @s`). Three takes end before their text does (`meeting_07`, `08_b` and
-`09` say only their first sentence; `CUT_TAKES` in the tool): the rest of the text shows after the voice, unvoiced, as
-long as it takes to read, and the line's length covers it. A regenerated take goes in with its old file name, and its
-entry leaves `CUT_TAKES`. The `rowan_loyal_*` now play from Act 1's loudspeakers (see
+(`/playsound every_tunnel:voice.follow_01 voice @s`). The `rowan_loyal_*` now play from Act 1's loudspeakers (see
 [Act 1](#act-1-the-tasks-and-the-loudspeakers)); the systems of the later phases play the rest.
 
 **The subtitles are always on.** `client.hud.Ch2L1Subtitles` listens to the sound manager, so whenever one of the level's
@@ -291,7 +288,7 @@ twice, like the others. The other announcements have no bands: the chime, the vo
 optional; the anchors and paths it names are checked by `Ch2L1Wiring`):
 
 - **Waiting** (`ACT1_TASK3`): the coworker (skin `coworker`) is put at `coworker_wait`, the corner of the ring by the broom, while the
-  player is still in the LAB, and stands there arms crossed, his eyes on the player while they sweep.
+  player is still in the LAB, and stands there still, his arms hanging, his eyes on the player while they sweep.
 - **Following** (`ACT2_FOLLOW`, when the last spot is swept): he says `follow_01` from where he stands (a voice of the level like any
   other: its subtitles show; nothing else is written over them, so sweeping the spots gives no message, the panel counts them) and,
   when it ends, walks briskly (`pace`, times the workers' stroll) `coworker_route` (the ring, the main corridor, the lockers' second door) to
@@ -309,8 +306,8 @@ optional; the anchors and paths it names are checked by `Ch2L1Wiring`):
   the coworker's spot or that of the group's member with their skin), and to the door for `door_seconds` after `door_after`. Its subtitles
   go a cue at a time after the speaker's name (`CutsceneView.Kind.subtitleText` and `speakerAt`). On the same ticks the server directs the
   people (`FactoryNpcEntity.direction`): everyone looks at the speaker (the coworker turns to them, body and all, and back to the player for his own lines), and now and then each glances at the door (`Ch2L1Glances`); the
-  speaker gestures (`TALKING`), worker_a trembles in `tremble_lines`, worker_b shakes laughing in `laugh_lines`; those in `crossed_arms`
-  listen with their arms crossed, shifting their weight; the member nearest the door walks to `<door>_inside` and shuts it; and as the
+  speaker gestures (`TALKING`), worker_a trembles in `tremble_lines`, worker_b shakes laughing in `laugh_lines`; the others
+  listen with their arms hanging still, shifting their weight; the member nearest the door walks to `<door>_inside` and shuts it; and as the
   coworker reaches "Take this" (`card_line`, `card_sentence`) he holds his arm out (`OFFERING`) and the player gets the **lab badge's copy**
   (`lab_badge_copy`, Chapter 1's keycard recoloured by `tools/blocks/generate.py`; it opens only the auxiliary lab's door, phase 6).
 - **The end**: when the last line ends everyone leaves along `meeting_leave`, the coworker first, the rest one by one
