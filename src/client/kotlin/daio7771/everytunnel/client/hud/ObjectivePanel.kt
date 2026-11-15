@@ -47,7 +47,7 @@ object ObjectivePanel {
 
         val font = MinecraftClient.getInstance().textRenderer
         val screenWidth = context.scaledWindowWidth
-        val lines = font.wrapLines(Text.translatable(key), (screenWidth * WIDTH).toInt().coerceAtLeast(MIN_WIDTH))
+        val lines = font.wrapLines(Ch2L1Client.objectiveText(key), (screenWidth * WIDTH).toInt().coerceAtLeast(MIN_WIDTH))
         val title = Text.translatable(Ch2L1Objectives.TITLE_KEY)
         val step = font.fontHeight + 2
         val inner = maxOf(font.getWidth(title), lines.maxOf { font.getWidth(it) })

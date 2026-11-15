@@ -63,6 +63,10 @@ con un comentario KDoc que cuenta más.
 | `ch2l1/Ch2L1AnchorsParser.kt` | Lee `anchors.json` y cuenta cada problema con su ruta JSON |
 | `ch2l1/Ch2L1Data.kt` | Los archivos de datos del nivel: cuáles hay, qué copia gana (la de la carpeta de config sobre la del jar), qué da uno que falta o está roto |
 | `ch2l1/Ch2L1Voices.kt` | Las líneas de voz del nivel (clave del texto, hablante, duración, fragmentos de subtítulo como rangos de frases, de `cutscene/ch2_l1_voices.json`), `Ch2L1Sentences` y `Ch2L1Skins`, el aspecto de sus personas |
+| `ch2l1/Ch2L1Tasks.kt` | El archivo de tareas (`tasks.json`), su lector, `Ch2L1Bits` (conjuntos de cosas como bits de un Int) y `HoldTracker` (un clic mantenido sobre un objetivo) |
+| `ch2l1/Ch2L1Speakers.kt` | El archivo de los altavoces (`speakers.json`), su lector y `Ch2L1SpeakerSchedule`: qué suena y cuándo, por las reglas del plan, sin reloj propio |
+| `ch2l1/Ch2L1IntroScene.kt` | La cinemática del primer aviso: tomas desde anclas, en la maquinaria de las otras escenas |
+| `ch2l1/Ch2L1Wiring.kt` | Comprueba que lo que nombran `tasks.json` y `speakers.json` está en `anchors.json` |
 | `ch2l1/Ch2L1Objectives.kt` | El objetivo que muestra el panel en cada estado: una clave de lang por estado, ninguna en las cinemáticas ni al final |
 | `ch2l1/Ch2L1MapPlan.kt` | El mapa del nivel como plan que construir: la caja que vaciar, las cajas de un bloque, las lámparas, el origen, la huella del plan (de `map.json`) |
 | `spawn/PostLedger.kt` | Qué criatura es dueña de cada punto de spawn, para que un sobrante que aún muere o que carga tarde no borre el registro del que lo sustituyó (el Observer) |
@@ -245,6 +249,10 @@ con un comentario KDoc que cuenta más.
 | `Ch2L1Npcs.kt` | Ponerlas delante del jugador y quitarlas (`/et ch2 l1 npc`) |
 | `Ch2L1Build.kt` | Construye el nivel desde su plan a razón de 8.000 celdas por tick (y lo vacía), recuerda qué plan construyó, comprueba antes cada bloque |
 | `TimeClockBlock.kt` | El reloj de fichar del Nivel 1 del Chapter 2: un lector de tarjetas (mismos modelos) que ficha al nuevo empleado, rojo y luego verde |
+| `Ch2L1TaskBlocks.kt` | El tubo de muestra, el terminal de NonameOS, el analizador, la escoba apoyada y la suciedad de las tareas del Capítulo 2: cada uno pasa su uso a `Ch2L1TaskHooks` |
+| `Ch2L1TaskHooks.kt` | Las tres tareas del Acto 1: los usos, los contadores en el progreso, los paquetes y los objetos del mundo siguiendo al estado |
+| `Ch2L1SpeakerHooks.kt` | Los altavoces de Rowan: un planificador por jugador, el timbre y la voz desde el altavoz de techo de la zona |
+| `Ch2L1IntroHooks.kt` | La cinemática del primer aviso en el servidor: sujeta al jugador, el timbre, el final o el salto |
 | `LinkedDoorBlock.kt` | Una hoja de un par de puertas que se abren y se cierran a la vez a mano (`factory_door`, con el aspecto de la puerta de laboratorio); sin escena, a diferencia de `PairedDoorBlock` |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
 | `PlaytestLog.kt` | El registro `[playtest]` |

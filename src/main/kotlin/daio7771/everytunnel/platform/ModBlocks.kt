@@ -551,6 +551,12 @@ object ModBlocks {
     )
     /** White, a tall window: Level 5's layer 1 rooms' doors, in pairs, opened by hand. */
     val LAB_DOOR: Block = register("lab_door", DoorBlock(door(), SERVICE_DOOR))
+    /** Chapter 2 Level 1's tasks ([Ch2L1TaskHooks]): a tube on the bench, the terminal that registers them, the analyzer, the broom, the dirt. */
+    val SAMPLE_TUBE: Block = register("sample_tube", SampleTubeBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(6.5, 0, 6.5, 9.5, 9.5, 9.5))))
+    val NONAME_TERMINAL: Block = register("noname_terminal", NonameTerminalBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision().luminance { 3 }, listOf(box(3, 0, 1, 13, 12, 11))))
+    val ANALYZER: Block = register("analyzer", AnalyzerBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(2, 0, 3, 14, 10, 13))))
+    val LEANING_BROOM: Block = register("leaning_broom", LeaningBroomBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(6, 0, 9, 10, 16, 16))))
+    val DIRT_SPOT: Block = register("dirt_spot", DirtSpotBlock(props(MapColor.BROWN, BlockSoundGroup.GRAVEL).noCollision(), listOf(box(0, 0, 0, 16, 1, 16))))
     /** The lab door's look (it borrows its models), for Chapter 2's factory: a pair of leaves opens and shuts at once by hand. */
     val FACTORY_DOOR: Block = register("factory_door", LinkedDoorBlock(door(), SERVICE_DOOR))
     /** Glass with no frame drawn on each block, a faint tint and a sheen that runs on from one block to the next: Chapter 2's windows. */

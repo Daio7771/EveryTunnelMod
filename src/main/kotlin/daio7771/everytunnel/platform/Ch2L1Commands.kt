@@ -37,7 +37,10 @@ import net.minecraft.util.hit.HitResult
  * - `/et ch2 l1 npc <skin>`: puts a person of the factory in front of you (`rowan`, `coworker`, `worker_a`, `worker_b`,
  *   `generic_1` to `generic_3`), to see its skin; `/et ch2 l1 npc clear` takes them all away ([Ch2L1Npcs]).
  *
- * The level's voices have no command: `/playsound every_tunnel:voice.<id> voice @s` plays any of them, with its subtitles.
+ * `/et ch2 l1 tasks` shows how far the player is in the three tasks (and what the data names that is missing), `tasks reset` starts them over
+ * ([Ch2L1TaskHooks]); `intro` plays the first announcement's cinematic and `say <rowan_loyal_a1..a6>` an announcement, from the speaker of
+ * the zone the player stands in ([Ch2L1IntroHooks], [Ch2L1SpeakerHooks]). The other voices have no command:
+ * `/playsound every_tunnel:voice.<id> voice @s` plays any of them, with its subtitles.
  */
 object Ch2L1Commands {
 
@@ -47,6 +50,10 @@ object Ch2L1Commands {
 
     private val SKIN_NAMES = SuggestionProvider<ServerCommandSource> { _, builder ->
         CommandSource.suggestMatching(Ch2L1Skins.ALL, builder)
+    }
+
+    private val LOUDSPEAKER_LINES = SuggestionProvider<ServerCommandSource> { _, builder ->
+        CommandSource.suggestMatching((1..6).map { "rowan_loyal_a$it" }, builder)
     }
 
     private val STATE_NAMES = SuggestionProvider<ServerCommandSource> { _, builder ->
@@ -84,6 +91,18 @@ object Ch2L1Commands {
                                     ),
                                 )
                                 .then(CommandManager.literal("skip").executes(::skip))
+                                .then(
+                                    CommandManager.literal("tasks").executes(::tasks)
+                                        .then(CommandManager.literal("reset").executes(::resetTasks)),
+                                )
+                                .then(CommandManager.literal("intro").executes(::intro))
+                                .then(
+                                    CommandManager.literal("say").then(
+                                        CommandManager.argument("line", StringArgumentType.word())
+                                            .suggests(LOUDSPEAKER_LINES)
+                                            .executes(::say),
+                                    ),
+                                )
                                 .then(
                                     CommandManager.literal("npc")
                                         .then(CommandManager.literal("clear").executes(::clearNpcs))
@@ -185,6 +204,45 @@ object Ch2L1Commands {
             return 0
         }
         reply(context, "Chapter 2 Level 1: now in $state.")
+        return 1
+    }
+
+    /** `/et ch2 l1 tasks`: how far the player is in the three tasks of Act 1, and anything `tasks.json` or `speakers.json` names that is missing. */
+    private fun tasks(context: CommandContext<ServerCommandSource>): Int {
+        Ch2L1TaskHooks.status(context.source.playerOrThrow).forEach { reply(context, it) }
+        val problems = daio7771.everytunnel.core.ch2l1.Ch2L1Wiring.problems(
+            Ch2L1DataLoader.data.anchors, Ch2L1DataLoader.tasks, Ch2L1DataLoader.speakers,
+        )
+        problems.forEach { reply(context, "Problem: $it") }
+        return if (problems.isEmpty()) 1 else 0
+    }
+
+    private fun resetTasks(context: CommandContext<ServerCommandSource>): Int {
+        Ch2L1TaskHooks.reset(context.source.playerOrThrow)
+        reply(context, "The three tasks start over (the tubes, the broom and the dirt are back where the state says).")
+        return 1
+    }
+
+    /** `/et ch2 l1 intro`: the first announcement's cinematic, now. */
+    private fun intro(context: CommandContext<ServerCommandSource>): Int {
+        val player = context.source.playerOrThrow
+        val speakers = Ch2L1DataLoader.speakers
+        val emitter = speakers.emitters.values.firstOrNull()?.let { Ch2L1DataLoader.data.anchors.point(it) }?.position
+        val from = emitter?.let { net.minecraft.util.math.Vec3d(it.x, it.y, it.z) } ?: player.pos.add(0.0, 2.0, 0.0)
+        if (!Ch2L1IntroHooks.start(player, from)) {
+            reply(context, "The cinematic cannot play: another one is running, or speakers.json has no \"intro\" or one of its anchors is missing (see the log).")
+            return 0
+        }
+        return 1
+    }
+
+    /** `/et ch2 l1 say <line>`: Rowan's announcement now (the chime, then the voice), from the speaker of the zone the player is in. */
+    private fun say(context: CommandContext<ServerCommandSource>): Int {
+        val line = StringArgumentType.getString(context, "line")
+        if (!Ch2L1SpeakerHooks.say(context.source.playerOrThrow, line)) {
+            reply(context, "No voice line called $line (try one of rowan_loyal_a1 to a6).")
+            return 0
+        }
         return 1
     }
 

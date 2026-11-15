@@ -65,6 +65,10 @@ KDoc comment that says more.
 | `ch2l1/Ch2L1AnchorsParser.kt` | Reads `anchors.json`, reporting every problem with its JSON path |
 | `ch2l1/Ch2L1Data.kt` | The level's data files: which there are, which copy wins (the config folder's over the jar's), what a missing or broken one gives |
 | `ch2l1/Ch2L1Voices.kt` | The level's voice lines (text key, speaker, length, subtitle cues as ranges of sentences, from `cutscene/ch2_l1_voices.json`), `Ch2L1Sentences` and `Ch2L1Skins`, the look of its people |
+| `ch2l1/Ch2L1Tasks.kt` | The tasks' file (`tasks.json`), its parser, `Ch2L1Bits` (sets of things as the bits of an Int) and `HoldTracker` (a click held on one target) |
+| `ch2l1/Ch2L1Speakers.kt` | The loudspeakers' file (`speakers.json`), its parser and `Ch2L1SpeakerSchedule`: what plays when, by the plan's rules, with no clock of its own |
+| `ch2l1/Ch2L1IntroScene.kt` | The first announcement's cinematic: shots from anchors, in the machinery of the other scenes |
+| `ch2l1/Ch2L1Wiring.kt` | Checks that what `tasks.json` and `speakers.json` name is in `anchors.json` |
 | `ch2l1/Ch2L1Objectives.kt` | The objective the panel shows in each state: one lang key per state, none in the cinematics and at the end |
 | `ch2l1/Ch2L1MapPlan.kt` | The level's map as a plan to build: the box to empty, the boxes of one block, the lamps, the origin, the plan's fingerprint (from `map.json`) |
 | `spawn/PostLedger.kt` | Which creature owns each spawn point, so a dying or late-loading leftover never wipes the record of the one that replaced it (the Observer) |
@@ -245,6 +249,10 @@ KDoc comment that says more.
 | `Ch2L1Npcs.kt` | Putting them in front of the player and taking them away (`/et ch2 l1 npc`) |
 | `Ch2L1Build.kt` | Builds the level from its plan in steps of 8,000 cells a tick (and empties it), remembers which plan it built, checks every block first |
 | `TimeClockBlock.kt` | The time clock of Chapter 2's Level 1: a card reader (same models) that clocks the new hire in, red and then green |
+| `Ch2L1TaskBlocks.kt` | The sample tube, NonameOS's terminal, the analyzer, the leaning broom and the dirt of Chapter 2's tasks: each hands its use to `Ch2L1TaskHooks` |
+| `Ch2L1TaskHooks.kt` | The three tasks of Act 1: the uses, the counters in the progress, the packets, and the world's props following the state |
+| `Ch2L1SpeakerHooks.kt` | Rowan's loudspeakers: one schedule for each player, the chime and the voice from the zone's ceiling speaker |
+| `Ch2L1IntroHooks.kt` | The first announcement's cinematic on the server: holds the player, the chime, the end or the skip |
 | `LinkedDoorBlock.kt` | One leaf of a pair of doors that open and shut together by hand (`factory_door`, the lab door's look); no scene, unlike `PairedDoorBlock` |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
 | `PlaytestLog.kt` | The `[playtest]` log |

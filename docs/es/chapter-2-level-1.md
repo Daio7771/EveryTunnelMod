@@ -40,7 +40,9 @@ Todo lo ajustable es JSON, no código: cambiar un ritmo, una ruta o un texto es 
 | Archivo | Contiene | Quién lo lee |
 |---|---|---|
 | `anchors.json` | Los lugares con nombre: puntos (una posición y hacia dónde mira) y zonas (una caja) | `Ch2L1AnchorsParser`, con tipos |
-| `speakers.json`, `tasks.json`, `patrols.json`, `npcs.json` | Los altavoces, las tareas, las patrullas, los personajes | Vacíos (`{}`) hasta que la fase que los construye les dé su lector |
+| `tasks.json` | Las tres tareas del Acto 1: qué anclas tienen los tubos, el terminal, el analizador, la escoba y la suciedad, y cuánto dura cada una | `Ch2L1TasksParser`, con tipos |
+| `speakers.json` | Los altavoces de Rowan: las zonas y sus altavoces de techo, las líneas fijas y el grupo, el enfriamiento, la cinemática del primer aviso | `Ch2L1SpeakersParser`, con tipos |
+| `patrols.json`, `npcs.json` | Las patrullas, los personajes | Vacíos (`{}`) hasta que la fase que los construye les dé su lector |
 | `cutscenes/meeting.json`, `cutscenes/office.json` | Las dos cinemáticas | Lo mismo |
 
 El jar lleva los valores por defecto, en `data/every_tunnel/ch2/l1/`. **Para ajustar sin reconstruir**, pon un archivo del
@@ -111,8 +113,8 @@ un bloque o un estado que el juego no conoce falla con un mensaje y deja el mund
 nuevo sobre lo que hay, y **`/et ch2 l1 unbuild` vacía la zona: hazlo antes de empaquetar el mundo en un jar** (`packMapWorld`
 comprime también los archivos de región, y el mapa es del Chapter 2, no del mundo del Chapter 1).
 
-**Todavía no hay:** mobiliario (llega con la fase que lo necesita: el terminal y el analizador en la 3, las taquillas en la 4 y
-la 5, el escritorio y los papeles en la 6), los carteles de texto ("NIVEL 2", "Acceso restringido", los nombres de las salas: el
+**Todavía no hay:** mobiliario (llega con la fase que lo necesita: el banco con los tubos, el terminal, el analizador, la escoba, la suciedad y los
+altavoces de techo llegaron con la 3; las taquillas son de la 4 y la 5, el escritorio y los papeles en la 6), los carteles de texto ("NIVEL 2", "Acceso restringido", los nombres de las salas: el
 plan no puede llevar los datos de un bloque de texto) y el teclado del despacho (un bloque de la fase 6, con su ancla
 `office_keypad`). Tampoco está el paso del prólogo al nivel: `enter` se llama a mano.
 
@@ -125,8 +127,8 @@ la reunión) y Rowan, por los altavoces (`rowan_loyal_a1` a `a6`) y en su despac
 `tools/sounds/ch2_l1_voices.py` las convierte (Ogg mono, una ganancia para cada uno de los dos grupos, el de la unión y el
 de Rowan, de modo que cada uno quede a -18 LUFS como las líneas del director), corta cada una en fragmentos de subtítulo
 por sus pausas y escribe `cutscene/ch2_l1_voices.json`; `export.py` hace de cada una un evento de
-sonido, `voice.<id>` (`/playsound every_tunnel:voice.follow_01 voice @s`). Todavía no las reproduce nada: lo harán los
-sistemas de las fases siguientes.
+sonido, `voice.<id>` (`/playsound every_tunnel:voice.follow_01 voice @s`). Las `rowan_loyal_*` ya suenan por los altavoces del Acto 1 (véase
+[Acto 1](#acto-1-las-tareas-y-los-altavoces)); las demás las reproducirán los sistemas de las fases siguientes.
 
 **Los subtítulos están siempre activos.** `client.hud.Ch2L1Subtitles` escucha al gestor de sonido, así que cuando empieza
 a sonar una voz del nivel, la haya iniciado quien sea, sus fragmentos salen sobre el HUD, cada uno desde su momento: el
@@ -187,6 +189,54 @@ del estado del jugador (`Ch2L1Objectives`: una clave de lang por estado, bajo `e
 cinemáticas ni al final), sobre una franja tenue. Aparece con un fundido cuando cambia el objetivo y no hace ruido. El cliente
 lee el estado del progreso del jugador, así que no hay paquete propio.
 
+## Acto 1: las tareas y los altavoces
+
+**Las tres tareas** (`platform.Ch2L1TaskHooks`; los bloques de `Ch2L1TaskBlocks.kt` solo le pasan su uso; dónde está cada cosa y cuánto dura es
+`tasks.json`):
+
+1. **Muestras** (`ACT1_TASK1`): haz clic en los tres `sample_tube` del banco junto a la pared oeste del LAB (cada uno desaparece, con un pitido:
+   1/3, 2/3, 3/3) y luego en el `noname_terminal`. Abre **NonameOS** (`client.screen.NonameOsScreen`, fósforo verde en el marco de los monitores del
+   Nivel 5): la ventana SAMPLE REGISTRY, una fila por tubo con su código (`S-0412`...), su estado y un botón REGISTER; un clic llena una barra durante
+   `register_seconds` y pide al servidor que lo registre (`ch2l1_os_register`), que responde con el registro tal como queda (`ch2l1_os_open`); el
+   último cierra el lote, la pantalla cierra sesión sola y el estado pasa a `ACT1_TASK2`. El registro es una ventana de una pantalla hecha para
+   reutilizarse en los documentos de las fases siguientes.
+2. **Analizador** (`ACT1_TASK2`): un clic **mantenido** sobre el `analyzer` (un bloque nuevo, hecho por `tools/blocks/generate.py`) durante
+   `calibrate_seconds`. El juego repite un clic mantenido cada 4 ticks; `core.ch2l1.HoldTracker` cuenta los ticks mientras los usos llegan con menos
+   de 8 de diferencia y sobre el mismo bloque, así que apartar la vista o soltar lo reinicia. Lo muestran una barra (`client.hud.HoldBar`, del paquete
+   `ch2l1_hold`) y un pitido que sube de tono. Luego, `ACT1_TASK3`.
+3. **Barrer** (`ACT1_TASK3`): la `leaning_broom` apoyada en la pared este del tramo oeste del anillo; un clic la coge (el objeto `broom` va a la
+   mano del jugador; solo existe para esta tarea y se retira al terminarla). Luego un clic mantenido durante `sweep_seconds` sobre cada una de las diez
+   `dirt_spot` del suelo frente al cristal del laboratorio auxiliar la barre (un siseo y una nubecilla). La última termina la tarea: `ACT2_FOLLOW`.
+
+Cuánto ha avanzado el jugador son unos contadores de su progreso (`ProgressService.ch2L1Counter`: los tubos cogidos, las muestras registradas y la
+suciedad barrida como bits, si cogió la escoba, y `heard_<línea>` para los avisos), así que sobrevive a salir del mundo; el cliente también los lee:
+el panel de objetivos muestra "(1/3)" mientras se cogen los tubos y luego mientras se registran, y "(4/10)" para la suciedad (`objective.count`). Cada
+cambio de estado (jugando, `state`, `skip`) lleva contadores y mundo a lo que el estado significa (`Ch2L1TaskHooks.onState`, `reconcile`): los
+tubos, la escoba y la suciedad están donde el jugador aún no ha llegado y no están donde ya ha pasado, así que una tarea se puede probar por
+comando con el nivel como estaría si se hubiera jugado. Los objetos del plano se vuelven a poner desde el propio plano (`Ch2L1Build.planState`).
+
+**Los altavoces** (`platform.Ch2L1SpeakerHooks`, reglas en `core.ch2l1.Ch2L1SpeakerSchedule`, datos en `speakers.json`): los avisos de Rowan
+`rowan_loyal_a1` a `a6`, desde los altavoces de techo (bloques `ceiling_speaker`) de cuatro zonas, `speaker_entrance`, `speaker_lab`, `speaker_main` y
+`speaker_west`, cada una con su ancla emisora (`speaker_<zona>_src`). Las reglas:
+
+- `a1` tres segundos después de fichar (`ACT1_TASK1`); `a4` cinco segundos después del analizador (`ACT1_TASK3`).
+- El grupo `a2`, `a3`, `a5` una vez cada uno, en orden aleatorio, cada uno tras un enfriamiento de 75 a 120 s desde el final de la línea anterior; nunca dos a la vez.
+- Solo mientras el jugador está en una zona con altavoz (si no, la línea espera a que vuelva); ninguno desde `ACT2_FOLLOW`, que además corta lo que suena.
+- `a6` no está en ninguna lista: se reserva para la escena del despacho. A un jugador puesto más allá de la primera tarea por un comando se le da por oído el `a1`.
+- Cada línea es el timbre (`event.ch2l1.ding`, dos notas suaves de campana; dura `ding_seconds`) y luego la voz, enviados solo a ese jugador desde el altavoz de la zona con `volume` 3, así que
+  llegan a toda la zona (`attenuation_distance` 48 en `sounds.json`); los subtítulos son los de siempre (`Ch2L1Subtitles`). `tools/sounds/ch2_l1_voices.py` pasa los seis
+  `rowan_loyal_*` por un filtro de megafonía (banda estrecha, algo de saturación, un eco de pasillo) antes de escribirlos.
+
+**El primer aviso es una cinemática** (`a1`; `core.ch2l1.Ch2L1IntroScene`, `platform.Ch2L1IntroHooks`): el jugador no puede moverse, las barras negras
+entran, la cámara sale de sus ojos hacia las tomas de `speakers.json` (`intro.shots`: el altavoz de techo visto desde abajo, el plano general del LAB desde
+su esquina), el timbre suena al empezar la primera, la voz le sigue y la cámara vuelve a sus ojos mientras las barras se van. Es la maquinaria de la escena del
+director y del prólogo (`Cutscene`, `Timeline`, `CutsceneView.Kind.FACTORY`), con los lugares de las tomas leídos de anclas (`a1_cam_speaker`, `a1_cam_lab`,
+`a1_look_lab`, los emisores de los altavoces) en coordenadas del mundo, así que mover el mapa mueve las tomas; se salta con la tecla de saltar pulsada dos veces, como las
+demás. Los otros avisos no tienen barras: el timbre, la voz y su subtítulo, y el jugador sigue caminando.
+
+`/et ch2 l1 tasks` muestra cuánto ha avanzado el jugador y todo lo que `tasks.json` o `speakers.json` nombran y `anchors.json` no tiene
+(`core.ch2l1.Ch2L1Wiring`, que `/et reload` también informa).
+
 ## Comandos de depuración
 
 `platform.Ch2L1Commands`, nivel de operador 2, **solo en ejecuciones de desarrollo** (como explica
@@ -207,6 +257,10 @@ lee el estado del progreso del jugador, así que no hay paquete propio.
 | `/et ch2 l1 skip` | Te pasa al siguiente estado |
 | `/et ch2 l1 npc <skin>` | Pone delante de ti a una persona de la fábrica, para ver su skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` a `generic_3`) |
 | `/et ch2 l1 npc clear` | Las quita todas |
+| `/et ch2 l1 tasks` | Cuánto has avanzado en las tres tareas, y lo que los datos nombran y falta |
+| `/et ch2 l1 tasks reset` | Las tres tareas empiezan de nuevo: los tubos, la escoba y la suciedad vuelven adonde dice el estado |
+| `/et ch2 l1 intro` | La cinemática del primer aviso, ahora |
+| `/et ch2 l1 say <rowan_loyal_a1..a6>` | Un aviso ahora (el timbre y luego la voz), desde el altavoz de la zona donde estás |
 
 `state` y `skip` cambian el estado y, con él, el objetivo del panel; el resto de los efectos de un estado (un objeto, un
 personaje) llegan con la fase que se los dé, y también se ejecutarán con el comando, que es lo que permite probar cada fase sin jugar las anteriores.
@@ -227,4 +281,4 @@ personaje) llegan con la fase que se los dé, y también se ejecutarán con el c
 `Ch2L1StateTest` (el orden, `next`, `parse`), `Ch2L1AnchorsParserTest` (el formato, cada tipo de problema) y `Ch2L1DataTest`
 (los archivos del jar, qué copia gana, los respaldos), `Ch2L1VoicesTest` (las 32 líneas, sus eventos de sonido, Ogg y
 fragmentos, los textos en los dos idiomas) `Ch2L1SkinsTest` (el formato de las skins) y `Ch2L1ObjectivesTest` (un objetivo por paso, en los dos idiomas) y `Ch2L1MapPlanTest` (los bloques y puertas del plan, las anclas
-sobre sus suelos), todos en `core/ch2l1`; `PlayerProgressTest` cubre el estado y la marca en el progreso.
+sobre sus suelos), todos en `core/ch2l1`; `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador: tres segundos, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas. `PlayerProgressTest` cubre el estado y la marca en el progreso.

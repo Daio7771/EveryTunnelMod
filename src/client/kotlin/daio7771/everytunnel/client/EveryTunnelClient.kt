@@ -20,7 +20,9 @@ import daio7771.everytunnel.client.hud.Ch2L1Subtitles
 import daio7771.everytunnel.client.hud.ExhaustionVignette
 import daio7771.everytunnel.client.hud.FlashlightOverlay
 import daio7771.everytunnel.client.hud.LockerView
+import daio7771.everytunnel.client.hud.HoldBar
 import daio7771.everytunnel.client.hud.ObjectivePanel
+import daio7771.everytunnel.client.screen.NonameOsScreen
 import daio7771.everytunnel.client.hud.AchievementToast
 import daio7771.everytunnel.client.hud.DetectorHud
 import daio7771.everytunnel.client.hud.StatusHud
@@ -112,6 +114,8 @@ object EveryTunnelClient : ClientModInitializer {
         DirectorVoice.register()
         Ch2L1Subtitles.register()
         ObjectivePanel.register()
+        HoldBar.register()
+        NonameOsScreen.register()
         DeathScreen.register()
         TerminalScreen.register()
         FinalCreditsScreen.register()
@@ -148,7 +152,7 @@ object EveryTunnelClient : ClientModInitializer {
             RenderLayer.getCutout(),
             ModBlocks.SHOPPING_CART, ModBlocks.CABLE_TRAY, ModBlocks.HANGING_CABLE, ModBlocks.STAIN, ModBlocks.PUDDLE,
             ModBlocks.METAL_GRATING, ModBlocks.VALVE, ModBlocks.POTTED_PLANT, ModBlocks.WALL_CLOCK, ModBlocks.DRAIN_LADDER,
-            ModBlocks.CHALK_ARROW,
+            ModBlocks.CHALK_ARROW, ModBlocks.DIRT_SPOT,
         )
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.FACTORY_GLASS, RenderLayer.getTranslucent())
         ClientTickEvents.END_CLIENT_TICK.register { client ->

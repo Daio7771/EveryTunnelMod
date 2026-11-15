@@ -130,6 +130,38 @@ PILLARS = [(11, 25, 13, 27)]
 LOCKED_SPACES = {"aux_lab", "office", "level2"}
 
 CLOCK = {"at": (29, 1, 9), "facing": "north"}      # on the entrance's south wall, between its first two doors
+# Furniture and props, by cell: task 1's bench along the LAB's west wall with its three tubes and the terminal, task 2's analyzer on a
+# bench against the LAB's south wall, task 3's broom against the east wall of the ring's west stretch and the dirt on its floor, and
+# the ceiling speakers of the four zones where Rowan's announcements are heard (each in the last layer of air).
+SPEAKERS = {"speaker_entrance": (29, 8, 6), "speaker_lab": (47, 5, 29), "speaker_main": (25, 4, 29), "speaker_west": (18, 3, 60)}
+TUBES = [(32, 1, 22), (32, 1, 23), (32, 1, 24)]
+TERMINAL = (32, 1, 26)
+ANALYZER = (51, 1, 46)
+BROOM = (19, 0, 54)
+DIRT_SPOTS = [(18, 55), (16, 57), (19, 58), (17, 60), (18, 62), (16, 63), (19, 65), (17, 66), (18, 68), (16, 54)]
+FACINGS = ["north", "east", "south", "west"]
+
+
+def props():
+    """{(x, y, z): block} of everything that is furniture or a prop: see the constants above."""
+    bench = MOD + "lab_bench[facing={},left=false,right=false]"
+    out = {}
+    for z in range(21, 29):
+        out[(32, 0, z)] = bench.format("east")
+    for cell in TUBES:
+        out[cell] = MOD + "sample_tube[facing=east]"
+    out[TERMINAL] = MOD + "noname_terminal[facing=east]"
+    for x in range(50, 54):
+        out[(x, 0, 46)] = bench.format("north")
+    out[ANALYZER] = MOD + "analyzer[facing=north]"
+    out[BROOM] = MOD + "leaning_broom[facing=west]"
+    for i, (x, z) in enumerate(DIRT_SPOTS):
+        out[(x, 0, z)] = MOD + f"dirt_spot[facing={FACINGS[i % 4]}]"
+    for cell in SPEAKERS.values():
+        out[cell] = MOD + "ceiling_speaker[facing=north]"
+    return out
+
+
 CAMERA_FREE = {"lockers"}                          # the one space with no (decorative) security cameras
 
 
@@ -232,6 +264,7 @@ class Level:
                     out[cell] = f"{block}[facing={facing},half={half},hinge={hinge},open=false,powered=false]"
         x, y, z = CLOCK["at"]
         out[(x, y, z)] = f"{MOD}time_clock[facing={CLOCK['facing']},unlocked=false]"
+        out.update(props())
         return out
 
     def fills(self):
@@ -308,8 +341,19 @@ def named_places(level):
     cl = CLOCK["at"]
     add("spawn_clockin", cl[0] + 0.5, 6.5, 0, False)
     add("time_clock", cl[0] + 0.5, cl[2] + 0.5, 180, False, y=cl[1])
-    add("task1_terminal", 35.5, 28.5, 270, True)
-    add("task2_analyzer", 52.5, 35.5, 180, True)
+    add("task1_terminal", 34.5, 26.5, 90, False)
+    add("task2_analyzer", 51.5, 44.5, 0, False)
+    # The blocks of the tasks (tasks.json names them) and what the first announcement's cinematic looks at and from.
+    for i, (x, y, z) in enumerate(TUBES):
+        add(f"task1_tube_{i + 1}", x + 0.5, z + 0.5, 0, False, y=float(y))
+    add("task1_terminal_block", TERMINAL[0] + 0.5, TERMINAL[2] + 0.5, 0, False, y=float(TERMINAL[1]))
+    add("task2_analyzer_block", ANALYZER[0] + 0.5, ANALYZER[2] + 0.5, 0, False, y=float(ANALYZER[1]))
+    add("task3_broom_block", BROOM[0] + 0.5, BROOM[2] + 0.5, 0, False, y=float(BROOM[1]))
+    for zone_id, (x, y, z) in SPEAKERS.items():
+        add(f"{zone_id}_src", x + 0.5, z + 0.5, 0, False, y=y + 0.9)
+    add("a1_cam_speaker", 31.2, 8.3, 0, False, y=1.3)
+    add("a1_cam_lab", 32.6, 11.6, 0, False, y=4.3)
+    add("a1_look_lab", 47.0, 29.0, 0, False, y=1.2)
     # Six people round the lockers' column (a 2 x 2 at x 11..12, z 25..26), looking at it.
     col = (12.0, 26.0)
     for i in range(6):
@@ -353,7 +397,7 @@ def named_places(level):
     zone("ring_south", "ring", box=(16, 69, 62, 73))
     zone("ring_west", "ring", box=(16, 52, 20, 69))
     zone("ring_east", "ring", box=(58, 52, 62, 69))
-    zone("task3_sweep_area", "ring", True, box=(16, 52, 20, 69))
+    zone("task3_sweep_area", "ring", box=(16, 52, 20, 69))
     zone("aux_lab", "aux_lab")
     zone("aux_lab_glass", "ring", True, box=(16, 52, 17, 69))
     zone("prologue_set", "aux_lab", True, box=(1, 64, 15, 72))
@@ -362,14 +406,16 @@ def named_places(level):
     zone("office", "office")
     zone("wc_east", "wc_east")
     zone("level2_corridor", "level2")
-    zone("speaker_lab", "lab", True)
-    zone("speaker_main", "main_corridor", True)
-    zone("speaker_west", "ring", True, box=(16, 52, 20, 69))
+    zone("speaker_entrance", "entrance")
+    zone("speaker_lab", "lab")
+    zone("speaker_main", "main_corridor")
+    zone("speaker_west", "ring", box=(16, 52, 20, 69))
 
     paths = []
     # The middle of the ring (its stretches are 4 wide: the middle is where two blocks meet) and of the authorized corridor.
     ring_pts = [(18.0, 50.0), (39.0, 50.0), (60.0, 50.0), (60.0, 60.0), (60.0, 71.0), (48.0, 71.0), (36.0, 71.0), (18.0, 71.0), (18.0, 60.0)]
     paths.append(("patrol_a_waypoints", [(x, 0.0, z) for x, z in ring_pts], True, True))
+    paths.append(("task3_dirt_spots", [(x + 0.5, 0.0, z + 0.5) for x, z in DIRT_SPOTS], False, False))
     paths.append(("patrol_b_waypoints", [(21.0, 0.0, 76.0), (38.0, 0.0, 76.0), (58.0, 0.0, 76.0)], False, True))
     return a, zones, paths
 
@@ -394,6 +440,8 @@ def check(level):
                 raise SystemExit(f"door {door[0]} does not join two spaces at {a} and {b}")
     # Everyone stands on air with room over their head, except what is fixed to a wall.
     for anchor_id, (x, y, z), _, _ in anchors:
+        if anchor_id.endswith("_block") or anchor_id.endswith("_src") or anchor_id.startswith(("a1_", "task1_tube_")):
+            continue
         if anchor_id in ("time_clock", "office_keypad", "paper_medical", "paper_contract_14", "painting", "card_slide_start", "card_slide_end", "sealed_door", "restricted_door_east", "aux_lab_door", "door_anchor"):
             continue
         cell = (int(x), int(y), int(z))

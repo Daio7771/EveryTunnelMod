@@ -279,6 +279,18 @@
       "every_tunnel:block/cardboard/step_4"
     ]
   },
+  "block.ch2l1.blip": {
+    "sounds": [
+      "every_tunnel:block/ch2l1/blip_1"
+    ]
+  },
+  "block.ch2l1.sweep": {
+    "sounds": [
+      "every_tunnel:block/ch2l1/sweep_1",
+      "every_tunnel:block/ch2l1/sweep_2",
+      "every_tunnel:block/ch2l1/sweep_3"
+    ]
+  },
   "block.dart.hit": {
     "sounds": [
       "every_tunnel:block/dart/hit_1",
@@ -829,6 +841,14 @@
       {
         "name": "every_tunnel:event/breaker/power_1",
         "attenuation_distance": 32
+      }
+    ]
+  },
+  "event.ch2l1.ding": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l1/ding_1",
+        "attenuation_distance": 48
       }
     ]
   },
@@ -1433,32 +1453,50 @@
   },
   "voice.rowan_loyal_a1": {
     "sounds": [
-      "every_tunnel:voice/ch2l1/rowan_loyal_a1"
+      {
+        "name": "every_tunnel:voice/ch2l1/rowan_loyal_a1",
+        "attenuation_distance": 48
+      }
     ]
   },
   "voice.rowan_loyal_a2": {
     "sounds": [
-      "every_tunnel:voice/ch2l1/rowan_loyal_a2"
+      {
+        "name": "every_tunnel:voice/ch2l1/rowan_loyal_a2",
+        "attenuation_distance": 48
+      }
     ]
   },
   "voice.rowan_loyal_a3": {
     "sounds": [
-      "every_tunnel:voice/ch2l1/rowan_loyal_a3"
+      {
+        "name": "every_tunnel:voice/ch2l1/rowan_loyal_a3",
+        "attenuation_distance": 48
+      }
     ]
   },
   "voice.rowan_loyal_a4": {
     "sounds": [
-      "every_tunnel:voice/ch2l1/rowan_loyal_a4"
+      {
+        "name": "every_tunnel:voice/ch2l1/rowan_loyal_a4",
+        "attenuation_distance": 48
+      }
     ]
   },
   "voice.rowan_loyal_a5": {
     "sounds": [
-      "every_tunnel:voice/ch2l1/rowan_loyal_a5"
+      {
+        "name": "every_tunnel:voice/ch2l1/rowan_loyal_a5",
+        "attenuation_distance": 48
+      }
     ]
   },
   "voice.rowan_loyal_a6": {
     "sounds": [
-      "every_tunnel:voice/ch2l1/rowan_loyal_a6"
+      {
+        "name": "every_tunnel:voice/ch2l1/rowan_loyal_a6",
+        "attenuation_distance": 48
+      }
     ]
   },
   "voice.rowan_office_c1": {

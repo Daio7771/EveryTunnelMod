@@ -2,6 +2,7 @@ package daio7771.everytunnel.client.cutscene
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.effects.ScreenFade
+import daio7771.everytunnel.client.hud.Ch2L1Subtitles
 import daio7771.everytunnel.core.cutscene.CameraPose
 import daio7771.everytunnel.core.cutscene.DirectorScene
 import daio7771.everytunnel.core.cutscene.PrologueScene
@@ -9,6 +10,7 @@ import daio7771.everytunnel.core.cutscene.SceneFrame
 import daio7771.everytunnel.core.cutscene.SkipPrompt
 import daio7771.everytunnel.core.cutscene.Timeline
 import daio7771.everytunnel.core.cutscene.TitleCue
+import daio7771.everytunnel.platform.Ch2L1IntroHooks
 import daio7771.everytunnel.platform.ChapterRequest
 import daio7771.everytunnel.platform.DirectorEntity
 import daio7771.everytunnel.platform.DirectorSceneHooks
@@ -42,8 +44,9 @@ import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 
 /**
- * A cinematic on the client: the director's scene ([DirectorScene], started by `platform.DirectorSceneHooks`)
- * or Chapter 2's prologue ([PrologueScene], by `platform.PrologueSceneHooks`), each a [Kind]. The view leaves the
+ * A cinematic on the client: the director's scene ([DirectorScene], started by `platform.DirectorSceneHooks`),
+ * Chapter 2's prologue ([PrologueScene], by `platform.PrologueSceneHooks`) or the first loudspeaker announcement of
+ * Chapter 2's Level 1 ([daio7771.everytunnel.core.ch2l1.Ch2L1IntroScene], by `platform.Ch2L1IntroHooks`), each a [Kind]. The view leaves the
  * player for a camera of its own, which the scene's timeline moves tick by tick (the game blends between ticks;
  * a cut jumps), the HUD goes (`InGameHudMixin`), and a [CutsceneScreen] takes the keys and the mouse and draws
  * the bands, the subtitles and the notice to skip, and the black a scene opens out of. In the director's scene
@@ -69,6 +72,7 @@ object CutsceneView {
     ) {
         DIRECTOR({ DirectorScene.SCENE }, DirectorSceneHooks.SKIP_PACKET_ID, "subtitle.every_tunnel.speaker.director", "voice.director.", true),
         PROLOGUE({ PrologueScene.SCENE }, PrologueSceneHooks.SKIP_PACKET_ID, null, "voice.", false),
+        FACTORY({ Ch2L1IntroHooks.clientTimeline() }, Ch2L1IntroHooks.SKIP_PACKET_ID, "every_tunnel.ch2.l1.speaker.rowan_loudspeaker", "voice.", false),
     }
 
     /** The camera's eyes are this high over its feet: a standing player's, so handing the view over moves nothing. */
@@ -121,6 +125,17 @@ object CutsceneView {
                 if (ChapterRequest.prologueOnly) leaveForMenu(client)
             }
         }
+        ClientPlayNetworking.registerGlobalReceiver(Ch2L1IntroHooks.START_PACKET_ID) { client, _, buf, _ ->
+            val (x, y, z, yaw) = Ch2L1IntroHooks.readStart(buf)
+            client.execute {
+                val at = SceneFrame(x, y, z, yaw)
+                if (Ch2L1IntroHooks.clientBegin(at)) start(client, Kind.FACTORY, at)
+            }
+        }
+        ClientPlayNetworking.registerGlobalReceiver(Ch2L1IntroHooks.END_PACKET_ID) { client, _, buf, _ ->
+            val skipped = buf.readBoolean()
+            client.execute { stop(client, skipped) }
+        }
         ClientTickEvents.END_CLIENT_TICK.register(::tick)
         WorldRenderEvents.AFTER_ENTITIES.register(::drawPlayer)
         ClientPlayConnectionEvents.DISCONNECT.register { _, client -> client.execute { stop(client, false) } }
@@ -170,6 +185,7 @@ object CutsceneView {
         PrologueSound.stop(client)
         voice?.let { client.soundManager.stop(it) }
         voice = null
+        Ch2L1Subtitles.clear()
         client.options.hudHidden = hudWasHidden
         client.options.perspective = perspective
         client.player?.let { client.setCameraEntity(it) }

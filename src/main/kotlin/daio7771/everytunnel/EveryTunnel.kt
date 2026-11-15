@@ -10,6 +10,9 @@ import daio7771.everytunnel.platform.Ch2L1
 import daio7771.everytunnel.platform.Ch2L1Build
 import daio7771.everytunnel.platform.Ch2L1Commands
 import daio7771.everytunnel.platform.Ch2L1DataLoader
+import daio7771.everytunnel.platform.Ch2L1IntroHooks
+import daio7771.everytunnel.platform.Ch2L1SpeakerHooks
+import daio7771.everytunnel.platform.Ch2L1TaskHooks
 import daio7771.everytunnel.platform.CloudGameHooks
 import daio7771.everytunnel.platform.ChemicalHooks
 import daio7771.everytunnel.platform.CollapseHooks
@@ -104,6 +107,9 @@ object EveryTunnel : ModInitializer {
         Ch2L1DataLoader.register()
         Ch2L1.register()
         Ch2L1Build.register()
+        Ch2L1TaskHooks.register()
+        Ch2L1SpeakerHooks.register()
+        Ch2L1IntroHooks.register()
         WorldRulesHooks.register()
         LevelTrackingHooks.register()
         AmbienceHooks.register()

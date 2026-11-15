@@ -120,18 +120,52 @@ class Ch2L1MapPlanTest {
         assertEquals(plan.worldZ(c.z) + 0.5, anchor.z)
     }
 
+    /** The block of the plan at the world cell of an anchor (the cell its position is in), or null. */
+    private fun blockAt(x: Double, y: Double, z: Double): String? =
+        cells[Cell(floor(x).toInt() - plan.origin.x, floor(y).toInt() - plan.origin.y, floor(z).toInt() - plan.origin.z)]
+
+    private fun blockOf(anchorId: String): String? = anchors.point(anchorId)!!.position.let { blockAt(it.x, it.y, it.z) }
+
+    @Test
+    fun `the blocks of the tasks and the speakers stand in the plan where their anchors say`() {
+        val tasks = Ch2L1TasksParser.parse(Ch2L1DataParser.parse(emptyMap(), Ch2L1Files.readAllBundled()).data.document("tasks")).tasks
+        for (tube in tasks.tubes) assertTrue(blockOf(tube.anchor)!!.startsWith("every_tunnel:sample_tube"), tube.anchor)
+        assertTrue(blockOf(tasks.terminalAnchor)!!.startsWith("every_tunnel:noname_terminal"))
+        assertTrue(blockOf(tasks.analyzerAnchor)!!.startsWith("every_tunnel:analyzer"))
+        assertTrue(blockOf(tasks.broomAnchor)!!.startsWith("every_tunnel:leaning_broom"))
+        val dirt = anchors.path(tasks.dirtPath)!!
+        assertEquals(10, dirt.points.size)
+        for ((i, p) in dirt.points.withIndex()) {
+            assertTrue(blockAt(p.x, p.y, p.z)!!.startsWith("every_tunnel:dirt_spot"), "spot $i at $p")
+            assertStandsOnTheFloor("dirt $i", p.x, p.y, p.z, ignoreOwnBlock = true)
+        }
+        for (zone in listOf("entrance", "lab", "main", "west").map { "speaker_$it" }) {
+            assertTrue(blockOf("${zone}_src")!!.startsWith("every_tunnel:ceiling_speaker"), zone)
+        }
+    }
+
+    @Test
+    fun `the player stands in front of the terminal and the analyzer, in reach`() {
+        for ((stand, block) in listOf("task1_terminal" to "task1_terminal_block", "task2_analyzer" to "task2_analyzer_block")) {
+            val a = anchors.point(stand)!!.position
+            val b = anchors.point(block)!!.position
+            val reach = Math.sqrt((a.x - b.x) * (a.x - b.x) + (a.y + 1.62 - b.y) * (a.y + 1.62 - b.y) + (a.z - b.z) * (a.z - b.z))
+            assertTrue(reach < 3.5, "$stand is $reach blocks from $block")
+        }
+    }
+
     /** The anchors a player or a person stands on: feet on a floor of the plan, room over the head, nothing solid in the way. */
     private val standing = listOf(
         "spawn_clockin", "taquillas_exit", "task1_terminal", "task2_analyzer", "predecessor_locker", "chamber_02", "chamber_log",
         "authorization_desk", "desk_anchor", "rowan_spawn", "patrol_a_pause",
     ) + (1..6).map { "taquillas_npc_%02d".format(it) }
 
-    private fun assertStandsOnTheFloor(what: String, x: Double, y: Double, z: Double) {
+    private fun assertStandsOnTheFloor(what: String, x: Double, y: Double, z: Double, ignoreOwnBlock: Boolean = false) {
         val px = floor(x).toInt() - plan.origin.x
         val py = floor(y).toInt() - plan.origin.y
         val pz = floor(z).toInt() - plan.origin.z
         assertTrue(solid(px, py - 1, pz), "$what at $x, $y, $z has no floor under it")
-        assertTrue(!solid(px, py, pz) && !solid(px, py + 1, pz), "$what at $x, $y, $z is inside a block")
+        assertTrue((ignoreOwnBlock || !solid(px, py, pz)) && !solid(px, py + 1, pz), "$what at $x, $y, $z is inside a block")
     }
 
     @Test
@@ -144,7 +178,7 @@ class Ch2L1MapPlanTest {
 
     @Test
     fun `the patrols' points stand on the floor too`() {
-        for (path in anchors.paths) for ((i, p) in path.points.withIndex()) assertStandsOnTheFloor("${path.id}[$i]", p.x, p.y, p.z)
+        for (path in anchors.paths.filter { it.id.startsWith("patrol_") }) for ((i, p) in path.points.withIndex()) assertStandsOnTheFloor("${path.id}[$i]", p.x, p.y, p.z)
     }
 
     @Test

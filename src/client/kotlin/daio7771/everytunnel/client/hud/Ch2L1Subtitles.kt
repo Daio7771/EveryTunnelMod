@@ -39,6 +39,11 @@ object Ch2L1Subtitles {
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> line = null }
     }
 
+    /** Nothing is shown any more (a cinematic that was skipped cut the voice off). */
+    fun clear() {
+        line = null
+    }
+
     private fun onSound(sound: SoundInstance) {
         val id = sound.id
         if (id.namespace != EveryTunnel.MOD_ID) return

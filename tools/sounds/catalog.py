@@ -2024,6 +2024,29 @@ def terminal_key(rng, variant):
     return knock(n, rng, 0.0, rng.uniform(1800, 2400), [1.0, 1.9], [0.4, 0.15], [0.008, 0.005], click=0.5, click_hi=8000.0)
 
 
+def ch2l1_ding(rng, variant):
+    """The loudspeaker's chime before an announcement (Chapter 2 Level 1): two soft bell notes, the second a third lower."""
+    n = samples(1.7)
+    ratios, amps = [1.0, 2.0, 3.01, 4.2], [1.0, 0.45, 0.2, 0.08]
+    y = knock(n, rng, 0.0, 880.0, ratios, amps, [0.5, 0.3, 0.2, 0.1], click=0.12, click_hi=6000.0)
+    y += 0.9 * knock(n, rng, 0.45, 698.5, ratios, amps, [0.7, 0.4, 0.25, 0.12], click=0.12, click_hi=6000.0)
+    return lowpass(y, 7000.0)
+
+
+def ch2l1_sweep(rng, variant):
+    """A broom drawn over a floor: a soft grainy swish of bristles with a little grit under it."""
+    n = samples(0.6)
+    y = _noise(n, rng, 1500.0, 7000.0) * envelope(n, [(0.0, 0.0), (0.08, 0.7), (0.3, 1.0), (0.55, 0.0)])
+    y += 0.4 * _noise(n, rng, 300.0, 1200.0) * envelope(n, [(0.0, 0.0), (0.12, 0.6), (0.35, 0.4), (0.58, 0.0)])
+    return 0.5 * y
+
+
+def ch2l1_blip(rng, variant):
+    """A small electronic pip of a lab instrument (a sample taken, a calibration step); the game pitches it up as it goes."""
+    n = samples(0.14)
+    return damped_partials(n, [880.0, 1760.0], [1.0, 0.2], [0.05, 0.03], rng, 0.0)
+
+
 def safe_tick(rng, variant):
     """A safe's dial passing a number: a tiny dry tick, high and short."""
     n = samples(0.05)
@@ -2474,6 +2497,10 @@ SOUNDS = [
           attenuation=24),
     Sound("ambient.drain.pumps", "Level 5 ambience", "The Pump room: the pumps running, loud and steady (thumps, valves, water forced through)",
           "stereo", True, 1, drain_pumps, -2.0, stream=True),
+    Sound("event.ch2l1.ding", "Chapter 2 Level 1", "The loudspeakers' chime before each of Rowan's announcements: two soft bell notes (ding-dong)",
+          "mono", False, 1, ch2l1_ding, -6.0, attenuation=48),
+    Sound("block.ch2l1.sweep", "Chapter 2 Level 1", "Task 3: the broom over the floor, a soft swish (3 variations)", "mono", False, 3, ch2l1_sweep, -10.0),
+    Sound("block.ch2l1.blip", "Chapter 2 Level 1", "Tasks 1 and 2: a small pip of a lab instrument, pitched up by the game as a task goes on", "mono", False, 1, ch2l1_blip, -8.0),
     Sound("block.terminal.key", "Level progress", "Level 5: a key of a lab computer's keyboard", "mono", False, 3, terminal_key, -10.0),
     Sound("entity.hunter.shriek", "Level 5 / Hunters", "A group of Hunters spotting someone: a rasping child-high shriek", "mono", False, 3, hunter_shriek, -2.0, attenuation=32),
     Sound("entity.hunter.attack", "Level 5 / Hunters", "A Hunter's swipe: a sleeve's swish and a scratch", "mono", False, 3, hunter_attack, -4.0),

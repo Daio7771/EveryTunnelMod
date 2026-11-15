@@ -1,1 +1,26 @@
-{}
+{
+  "zones": ["speaker_entrance", "speaker_lab", "speaker_main", "speaker_west"],
+  "emitters": {
+    "speaker_entrance": "speaker_entrance_src",
+    "speaker_lab": "speaker_lab_src",
+    "speaker_main": "speaker_main_src",
+    "speaker_west": "speaker_west_src"
+  },
+  "volume": 3.0,
+  "ding_seconds": 1.5,
+  "fixed": [
+    { "line": "rowan_loyal_a1", "after": "ACT1_TASK1", "delay_seconds": 3 },
+    { "line": "rowan_loyal_a4", "after": "ACT1_TASK3", "delay_seconds": 5 }
+  ],
+  "pool": ["rowan_loyal_a2", "rowan_loyal_a3", "rowan_loyal_a5"],
+  "cooldown_seconds": [75, 120],
+  "intro": {
+    "line": "rowan_loyal_a1",
+    "fly_in_ticks": 10,
+    "fly_out_ticks": 20,
+    "shots": [
+      { "camera": "a1_cam_speaker", "look": "speaker_entrance_src", "ticks": 55 },
+      { "camera": "a1_cam_lab", "look": "a1_look_lab", "ticks": 75 }
+    ]
+  }
+}

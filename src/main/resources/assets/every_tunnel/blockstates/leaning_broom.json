@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/leaning_broom"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/leaning_broom",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/leaning_broom",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/leaning_broom",
+      "y": 270
+    }
+  }
+}

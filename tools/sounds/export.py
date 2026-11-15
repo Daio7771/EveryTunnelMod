@@ -104,7 +104,8 @@ def main():
     for sound_id, relative, x in prologue_voices.sounds():
         export(sound_id, relative, x, stream=False)
     for sound_id, relative, x in ch2_l1_voices.sounds():
-        export(sound_id, relative, x, stream=False)
+        # Rowan's announcements come out of a ceiling speaker and are heard all through its zone (platform.Ch2L1SpeakerHooks).
+        export(sound_id, relative, x, stream=False, attenuation=48 if "rowan_loyal_" in sound_id else None)
 
     # Remove .ogg files that no sound produces any more.
     removed = 0

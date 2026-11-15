@@ -1,6 +1,10 @@
 package daio7771.everytunnel.client
 
+import daio7771.everytunnel.core.ch2l1.Ch2L1Bits
 import daio7771.everytunnel.core.ch2l1.Ch2L1Objectives
+import daio7771.everytunnel.core.ch2l1.Ch2L1Tasks
+import daio7771.everytunnel.platform.Ch2L1DataLoader
+import net.minecraft.text.Text
 import daio7771.everytunnel.core.ch2l1.Ch2L1State
 import daio7771.everytunnel.platform.ProgressService
 import net.minecraft.client.MinecraftClient
@@ -26,4 +30,26 @@ object Ch2L1Client {
 
     /** The lang key of the objective to show now, or null: not in the level, or the state has none. */
     fun objectiveKey(): String? = if (active()) Ch2L1Objectives.keyFor(state()) else null
+
+    /**
+     * The objective as the panel writes it: its text, and where the player is in it where it has a count ("(1/3)": the tubes taken, then the
+     * samples registered, in the first task; the dirt swept in the third). The player's counters come with their progress.
+     */
+    fun objectiveText(key: String): Text {
+        val player = MinecraftClient.getInstance().player ?: return Text.translatable(key)
+        val tasks = Ch2L1DataLoader.tasks
+        val service = ProgressService.get()
+        val (done, total) = when (state()) {
+            Ch2L1State.ACT1_TASK1 -> {
+                val taken = Ch2L1Bits.count(service.ch2L1Counter(player, Ch2L1Tasks.TUBES))
+                val count = if (taken < tasks.tubes.size) taken else Ch2L1Bits.count(service.ch2L1Counter(player, Ch2L1Tasks.REGISTERED))
+                count to tasks.tubes.size
+            }
+            Ch2L1State.ACT1_TASK3 ->
+                Ch2L1Bits.count(service.ch2L1Counter(player, Ch2L1Tasks.SWEPT)) to
+                    (Ch2L1DataLoader.data.anchors.path(tasks.dirtPath)?.points?.size ?: 0)
+            else -> 0 to 0
+        }
+        return if (total > 0) Text.translatable("every_tunnel.ch2.l1.objective.count", Text.translatable(key), done, total) else Text.translatable(key)
+    }
 }

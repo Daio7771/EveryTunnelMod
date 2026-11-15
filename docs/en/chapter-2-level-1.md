@@ -39,7 +39,9 @@ Everything adjustable is JSON, not code: changing a rhythm, a route or a text is
 | File | Holds | Read by |
 |---|---|---|
 | `anchors.json` | The named places: points (a position and a facing) and zones (a box) | `Ch2L1AnchorsParser`, typed |
-| `speakers.json`, `tasks.json`, `patrols.json`, `npcs.json` | The loudspeakers, the tasks, the patrols, the characters | Empty (`{}`) until the phase that builds them gives each its reader |
+| `tasks.json` | The three tasks of Act 1: which anchors hold the tubes, the terminal, the analyzer, the broom and the dirt, and how long each takes | `Ch2L1TasksParser`, typed |
+| `speakers.json` | Rowan's loudspeakers: the zones and their ceiling speakers, the fixed lines and the pool, the cooldown, the first announcement's cinematic | `Ch2L1SpeakersParser`, typed |
+| `patrols.json`, `npcs.json` | The patrols, the characters | Empty (`{}`) until the phase that builds them gives each its reader |
 | `cutscenes/meeting.json`, `cutscenes/office.json` | The two cinematics | The same |
 
 The jar holds the defaults, in `data/every_tunnel/ch2/l1/`. **To tune without rebuilding**, put a file of the same name in
@@ -107,8 +109,8 @@ with a block or a state the game does not know fails with a message and leaves t
 again over what is there, and **`/et ch2 l1 unbuild` empties the area: do it before packing the world into a jar**
 (`packMapWorld` zips the region files too, and the map belongs to Chapter 2, not to Chapter 1's world).
 
-**Not there yet:** furniture (it comes with the phase that needs it: the terminal and the analyzer in phase 3, the lockers in
-4 and 5, the desk and the papers in 6), the text signs ("LEVEL 2", "Restricted access", the room names: the plan cannot carry
+**Not there yet:** furniture (it comes with the phase that needs it: the bench with the tubes, the terminal and the analyzer, the broom, the dirt
+and the ceiling speakers came with phase 3; the lockers are for 4 and 5, the desk and the papers for 6), the text signs ("LEVEL 2", "Restricted access", the room names: the plan cannot carry
 a text block's data) and the office's keypad (a block of phase 6, with its anchor `office_keypad`). The hand-over from the
 prologue to the level is not there either: `enter` is called by hand.
 
@@ -121,7 +123,8 @@ Rowan, on the loudspeakers (`rowan_loyal_a1` to `a6`) and in his office (`rowan_
 `tools/sounds/ch2_l1_voices.py` converts them (mono Ogg, one gain for each of the two groups, the union's and Rowan's, so
 that each sits at -18 LUFS as the director's lines do), cuts each into subtitle cues at its pauses and writes
 `cutscene/ch2_l1_voices.json`; `export.py` makes each a sound event, `voice.<id>`
-(`/playsound every_tunnel:voice.follow_01 voice @s`). Nothing plays them yet: the systems of the later phases do.
+(`/playsound every_tunnel:voice.follow_01 voice @s`). The `rowan_loyal_*` now play from Act 1's loudspeakers (see
+[Act 1](#act-1-the-tasks-and-the-loudspeakers)); the systems of the later phases play the rest.
 
 **The subtitles are always on.** `client.hud.Ch2L1Subtitles` listens to the sound manager, so whenever one of the level's
 voices starts, however it was started, its cues show over the HUD, each from its time: the speaker's name in grey, then the
@@ -180,6 +183,55 @@ text of the player's state (`Ch2L1Objectives`: one lang key per state, under `ev
 cinematics and at the end), on a faint strip. It fades in when the objective changes and makes no sound. The client reads the
 state from the player's progress, so there is no packet of its own.
 
+## Act 1: the tasks and the loudspeakers
+
+**The three tasks** (`platform.Ch2L1TaskHooks`; the blocks in `Ch2L1TaskBlocks.kt` only hand their use to it; where things are and how long
+each takes is `tasks.json`):
+
+1. **Samples** (`ACT1_TASK1`): click the three `sample_tube`s on the bench along the LAB's west wall (each goes, with a pip: 1/3, 2/3, 3/3), then the
+   `noname_terminal`. It opens **NonameOS** (`client.screen.NonameOsScreen`, green phosphor in the frame of Level 5's monitors): the SAMPLE REGISTRY
+   window, a row for each tube with its code (`S-0412`...), its state and a REGISTER button; a click fills a bar over `register_seconds` and then
+   asks the server to register it (`ch2l1_os_register`), which answers with the registry as it stands (`ch2l1_os_open`); the last one closes
+   the batch, the screen logs off by itself and the state is `ACT1_TASK2`. The registry is one window of a screen made to be reused for the
+   documents of later phases.
+2. **Analyzer** (`ACT1_TASK2`): a click **held** on the `analyzer` (a new block, made by `tools/blocks/generate.py`) for `calibrate_seconds`.
+   The game repeats a held click every 4 ticks; `core.ch2l1.HoldTracker` counts the ticks while the uses come within 8 of each other and on the
+   same block, so looking away or letting go starts it over. A bar (`client.hud.HoldBar`, from the packet `ch2l1_hold`) and a pip that rises in pitch
+   show it. Then `ACT1_TASK3`.
+3. **Sweep** (`ACT1_TASK3`): the `leaning_broom` against the east wall of the ring's west stretch; a click takes it (the `broom` item goes to the
+   player's hand; it exists only for this task and is taken back at the end). Then a click held for `sweep_seconds` on each of the ten
+   `dirt_spot`s on the floor in front of the auxiliary lab's glass sweeps it (a swish and a puff). The last one ends the task:
+   `ACT2_FOLLOW`.
+
+How far the player has got is a few counters in their progress (`ProgressService.ch2L1Counter`: the tubes taken, the samples registered and the
+dirt swept as bits, whether the broom was taken, and `heard_<line>` for the announcements), so it survives leaving the world; the client reads them too:
+the objective panel shows "(1/3)" while the tubes are taken and then registered, and "(4/10)" for the dirt (`objective.count`). Every state
+change (playing, `state`, `skip`) brings counters and world to what the state means (`Ch2L1TaskHooks.onState`, `reconcile`): the tubes, the broom and
+the dirt stand where the player has not got yet and are gone where they have, so a task can be tried by command with the level as it would be
+had they played. The plan's props are put back from the plan itself (`Ch2L1Build.planState`).
+
+**The loudspeakers** (`platform.Ch2L1SpeakerHooks`, rules in `core.ch2l1.Ch2L1SpeakerSchedule`, data in `speakers.json`): Rowan's announcements
+`rowan_loyal_a1` to `a6`, from the ceiling speakers (`ceiling_speaker` blocks) of four zones, `speaker_entrance`, `speaker_lab`, `speaker_main` and
+`speaker_west`, each with its emitter anchor (`speaker_<zone>_src`). The rules:
+
+- `a1` three seconds after clocking in (`ACT1_TASK1`); `a4` five seconds after the analyzer (`ACT1_TASK3`).
+- The pool `a2`, `a3`, `a5` once each, in random order, each after a cooldown of 75 to 120 s from the end of the line before; never two at once.
+- Only while the player stands in a speaker zone (otherwise the line waits for them to come back); none from `ACT2_FOLLOW` on, which also stops what is playing.
+- `a6` is in neither list: it is kept for the office's scene. A player put past the first task by a command is taken to have heard `a1`.
+- Each line is the chime (`event.ch2l1.ding`, two soft bell notes; `ding_seconds` long) and then the voice, both sent to that player alone from the zone's speaker with `volume` 3, so they carry
+  all through the zone (`attenuation_distance` 48 in `sounds.json`); the subtitles are the usual ones (`Ch2L1Subtitles`). `tools/sounds/ch2_l1_voices.py` runs the six `rowan_loyal_*`
+  files through a loudspeaker filter (band-limited, a little drive, a slap of the corridor) before it writes them.
+
+**The first announcement is a cinematic** (`a1`; `core.ch2l1.Ch2L1IntroScene`, `platform.Ch2L1IntroHooks`): the player cannot move, the black bands slide in,
+the camera flies out of their eyes to the shots of `speakers.json` (`intro.shots`: the ceiling speaker seen from below, the LAB's wide shot from its
+corner), the chime sounds as the first one begins, the voice follows it, and the camera flies back into their eyes as the bands go. It is the machinery of the director's
+scene and the prologue (`Cutscene`, `Timeline`, `CutsceneView.Kind.FACTORY`), with the shots' places read from anchors (`a1_cam_speaker`, `a1_cam_lab`,
+`a1_look_lab`, the speakers' emitters) in world coordinates, so moving the map moves the shots; skippable with the jump key pressed twice, like the others. The
+other announcements have no bands: the chime, the voice and its subtitle, and the player walks on.
+
+`/et ch2 l1 tasks` shows how far the player is and anything `tasks.json` or `speakers.json` names that `anchors.json` does not have
+(`core.ch2l1.Ch2L1Wiring`, which `/et reload` also reports).
+
 ## Debug commands
 
 `platform.Ch2L1Commands`, operator level 2, **development runs only** (as [Debugging](debugging.md) explains for
@@ -200,6 +252,10 @@ state from the player's progress, so there is no packet of its own.
 | `/et ch2 l1 skip` | Moves you on to the next state |
 | `/et ch2 l1 npc <skin>` | Puts a person of the factory in front of you, to see its skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` to `generic_3`) |
 | `/et ch2 l1 npc clear` | Takes them all away |
+| `/et ch2 l1 tasks` | How far you are in the three tasks, and what the data names that is missing |
+| `/et ch2 l1 tasks reset` | The three tasks start over: the tubes, the broom and the dirt are back where the state says |
+| `/et ch2 l1 intro` | The first announcement's cinematic, now |
+| `/et ch2 l1 say <rowan_loyal_a1..a6>` | An announcement now (the chime, then the voice), from the speaker of the zone you stand in |
 
 `state` and `skip` change the state, and with it the objective on the panel; the rest of a state's effects (an object, a
 character) come with the phase that gives them, and will run on the command too, which is what makes every phase testable without playing the ones before.
@@ -220,4 +276,4 @@ character) come with the phase that gives them, and will run on the command too,
 `Ch2L1StateTest` (the order, `next`, `parse`), `Ch2L1AnchorsParserTest` (the format, every kind of problem) and
 `Ch2L1DataTest` (the jar's files, which copy wins, the fallbacks), `Ch2L1VoicesTest` (the 32 lines, their sound events, Oggs
 and cues, the texts in both languages) `Ch2L1SkinsTest` (the skins' format) and `Ch2L1ObjectivesTest` (one objective per step, in both languages) and `Ch2L1MapPlanTest` (the plan's blocks and doors, the
-anchors standing on its floors), all in `core/ch2l1`; `PlayerProgressTest` covers the state and the flag in the progress.
+anchors standing on its floors), all in `core/ch2l1`; `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1SpeakersTest` (the file and every rule of the schedule: three seconds, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say. `PlayerProgressTest` covers the state and the flag in the progress.

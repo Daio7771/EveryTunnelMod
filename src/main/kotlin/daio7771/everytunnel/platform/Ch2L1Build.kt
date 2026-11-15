@@ -92,6 +92,19 @@ object Ch2L1Build {
     /** The level stands in the world, built from the current plan. */
     fun isBuilt(server: MinecraftServer): Boolean = saved(server).fingerprint == plan.fingerprint
 
+    /** The block the plan puts at the world cell [pos], or null where no fill of the plan reaches (or its block is unknown). */
+    fun planState(pos: BlockPos): BlockState? {
+        val x = pos.x - plan.origin.x
+        val y = pos.y - plan.origin.y
+        val z = pos.z - plan.origin.z
+        val fill = plan.fills.lastOrNull { x in it.from.x..it.to.x && y in it.from.y..it.to.y && z in it.from.z..it.to.z } ?: return null
+        return try {
+            state(fill.block)
+        } catch (e: IllegalArgumentException) {
+            null
+        }
+    }
+
     /**
      * Builds the level if it is not built (or, with [rebuild], whatever there is), then calls [whenDone] on the server thread.
      * The world is the anchors' dimension; [Asked] says what happened.

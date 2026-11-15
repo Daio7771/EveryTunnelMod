@@ -105,6 +105,24 @@ GROUPS = {"union": UNION, "rowan": ROWAN}
 LINES = UNION + ROWAN
 
 
+def pa_filter(x, sr=44100):
+    """A loudspeaker's voice (the announcements of `rowan_loyal_*`): band-limited like a small horn, a little drive so it breaks up on
+    loud words, and a short slap of the corridor behind it. Back to the clean line's loudness."""
+    from scipy import signal
+    band = signal.butter(4, [380.0, 3600.0], btype="band", fs=sr, output="sos")
+    y = signal.sosfilt(band, x)
+    y = np.tanh(2.2 * y) / np.tanh(2.2)
+    room = np.zeros_like(y)
+    for delay_ms, gain in ((38, 0.22), (91, 0.12), (143, 0.06)):
+        d = int(sr * delay_ms / 1000)
+        room[d:] += y[:-d] * gain
+    y = y + signal.sosfilt(signal.butter(2, 2500.0, btype="low", fs=sr, output="sos"), room)
+    y *= np.sqrt(np.mean(x ** 2)) / max(np.sqrt(np.mean(y ** 2)), 1e-9)
+    ceiling = 0.97
+    peak = np.max(np.abs(y))
+    return y * (ceiling / peak) if peak > ceiling else y
+
+
 def md5(path):
     return hashlib.md5(path.read_bytes()).hexdigest()
 
@@ -125,6 +143,8 @@ def convert(group):
     VOICE.mkdir(parents=True, exist_ok=True)
     for (line_id, _, _), path in zip(lines, paths):
         x = prologue_voices.decode(path) * factor
+        if line_id.startswith("rowan_loyal_"):
+            x = pa_filter(x)
         peak = 20 * np.log10(np.max(np.abs(x)))
         audio_io.write_ogg(VOICE / f"{line_id}.ogg", x, 44100, OGG_QUALITY)
         print(f"{line_id}: {len(x) / 44100:5.2f} s, peak {peak:5.1f} dBFS")

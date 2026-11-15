@@ -74,6 +74,12 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
 
     override fun setCh2L1Active(player: PlayerEntity, active: Boolean) = change(player) { it.ch2l1Active = active }
 
+    override fun ch2L1Counter(player: PlayerEntity, key: String) = of(player).ch2l1Counter(key)
+
+    override fun setCh2L1Counter(player: PlayerEntity, key: String, value: Int) = change(player) { it.setCh2l1Counter(key, value) }
+
+    override fun clearCh2L1Counters(player: PlayerEntity, prefix: String) = change(player) { it.clearCh2l1Counters(prefix) }
+
     override fun addPlayTicks(player: PlayerEntity, ticks: Long) {
         val progress = of(player)
         progress.playTicks += ticks
@@ -131,6 +137,8 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             progress.lounge = if (tag.contains(LOUNGE, NbtElement.STRING_TYPE.toInt())) tag.getString(LOUNGE) else null
             progress.ch2l1State = Ch2L1State.parse(tag.getString(CH2_L1_STATE)) ?: Ch2L1State.START
             progress.ch2l1Active = tag.getBoolean(CH2_L1_ACTIVE)
+            val counters = tag.getCompound(CH2_L1_COUNTERS)
+            for (key in counters.keys) progress.setCh2l1Counter(key, counters.getInt(key))
             progress.playTicks = tag.getLong(PLAY_TICKS)
             progress.deaths = tag.getInt(DEATHS)
             inventory = tag.getList(INVENTORY, NbtElement.COMPOUND_TYPE.toInt())
@@ -147,6 +155,9 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             progress.lounge?.let { tag.putString(LOUNGE, it) }
             tag.putString(CH2_L1_STATE, progress.ch2l1State.name)
             tag.putBoolean(CH2_L1_ACTIVE, progress.ch2l1Active)
+            val counters = NbtCompound()
+            progress.ch2l1CounterMap.forEach { (key, value) -> counters.putInt(key, value) }
+            tag.put(CH2_L1_COUNTERS, counters)
             tag.putLong(PLAY_TICKS, progress.playTicks)
             tag.putInt(DEATHS, progress.deaths)
             tag.put(INVENTORY, inventory)
@@ -172,6 +183,7 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             const val LOUNGE = "lounge"
             const val CH2_L1_STATE = "ch2_l1_state"
             const val CH2_L1_ACTIVE = "ch2_l1_active"
+            const val CH2_L1_COUNTERS = "ch2_l1_counters"
             const val PLAY_TICKS = "play_ticks"
             const val DEATHS = "deaths"
             const val INVENTORY = "checkpoint_inventory"

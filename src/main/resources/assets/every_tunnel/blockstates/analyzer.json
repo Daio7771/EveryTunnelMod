@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/analyzer"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/analyzer",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/analyzer",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/analyzer",
+      "y": 270
+    }
+  }
+}

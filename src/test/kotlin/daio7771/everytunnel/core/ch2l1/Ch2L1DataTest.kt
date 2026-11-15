@@ -31,14 +31,16 @@ class Ch2L1DataTest {
             "aux_lab_door", "chamber_02", "chamber_log", "authorization_desk", "door_anchor", "desk_anchor", "office_keypad",
             "paper_medical", "paper_contract_14", "painting", "card_slide_start", "card_slide_end", "rowan_spawn",
             "restricted_door_east", "sealed_door",
-        ) + (1..6).map { "taquillas_npc_%02d".format(it) }
+            "task1_terminal_block", "task2_analyzer_block", "task3_broom_block", "speaker_entrance_src", "speaker_lab_src", "speaker_main_src",
+            "speaker_west_src", "a1_cam_speaker", "a1_cam_lab", "a1_look_lab",
+        ) + (1..6).map { "taquillas_npc_%02d".format(it) } + (1..3).map { "task1_tube_$it" }
         for (id in points) assertTrue(anchors.point(id) != null, "no anchor $id")
         val zones = listOf(
             "task3_sweep_area", "taquillas_trigger", "aux_lab_glass", "prologue_set", "authorized_corridor", "security_room",
-            "level2_corridor", "speaker_lab", "speaker_main", "speaker_west",
+            "level2_corridor", "speaker_entrance", "speaker_lab", "speaker_main", "speaker_west",
         )
         for (id in zones) assertTrue(anchors.zone(id) != null, "no zone $id")
-        for (id in listOf("patrol_a_waypoints", "patrol_b_waypoints")) assertTrue(anchors.path(id) != null, "no path $id")
+        for (id in listOf("patrol_a_waypoints", "patrol_b_waypoints", "task3_dirt_spots")) assertTrue(anchors.path(id) != null, "no path $id")
         assertTrue(anchors.point("spawn_clockin")?.provisional == false, "the spawn is measured on the map: it is not provisional")
         assertTrue(anchors.provisionalCount() > 0, "what depends on furniture is still provisional")
     }

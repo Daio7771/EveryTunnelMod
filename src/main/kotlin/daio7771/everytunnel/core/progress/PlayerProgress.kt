@@ -35,6 +35,27 @@ class PlayerProgress {
      */
     var ch2l1Active: Boolean = false
 
+    private val ch2l1Counters = linkedMapOf<String, Int>()
+
+    /**
+     * Chapter 2's Level 1 as a few whole numbers by name (`core.ch2l1.Ch2L1Tasks.TUBES`...: the tubes taken, the samples
+     * registered, the dirt swept as bits, whether the broom was taken, the announcements heard). A number that is 0 is
+     * not kept.
+     */
+    val ch2l1CounterMap: Map<String, Int>
+        get() = ch2l1Counters.toMap()
+
+    fun ch2l1Counter(key: String): Int = ch2l1Counters[key] ?: 0
+
+    fun setCh2l1Counter(key: String, value: Int) {
+        if (value == 0) ch2l1Counters.remove(key) else ch2l1Counters[key] = value
+    }
+
+    /** Forgets every counter whose name starts with [prefix] (all of them if it is empty). */
+    fun clearCh2l1Counters(prefix: String = "") {
+        ch2l1Counters.keys.removeAll { it.startsWith(prefix) }
+    }
+
     /** Server ticks played and deaths in this game, summed over its sessions: the congratulations window's numbers. Never negative. */
     var playTicks: Long = 0
         set(value) {
@@ -83,6 +104,7 @@ class PlayerProgress {
         lounge = null
         ch2l1State = Ch2L1State.START
         ch2l1Active = false
+        ch2l1Counters.clear()
         playTicks = 0
         deaths = 0
     }

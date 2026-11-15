@@ -1894,6 +1894,48 @@ def glove_box_tex(rng):
     return img
 
 
+def analyzer_front_tex(rng):
+    """The front of Chapter 2's bench analyzer (a 12 x 9 face, drawn in x 2..13, y 2..10 of the picture): pale casing, a dark
+    screen with a green trace, three lights and the slot the samples go in."""
+    img = new((214, 218, 218))
+    noise(img, rng, 2)
+    rect(img, 3, 3, 12, 6, (18, 34, 36))
+    for x, y in ((3, 5), (4, 5), (5, 4), (6, 5), (7, 6), (8, 5), (9, 3), (10, 4), (11, 5), (12, 5)):
+        px(img, x, y, (96, 230, 140))
+    for x, colour in ((4, (200, 64, 56)), (8, (222, 170, 60)), (11, (90, 210, 120))):
+        rect(img, x, 8, x + 1, 8, colour)
+    rect(img, 3, 10, 12, 10, (40, 44, 48))
+    return img
+
+
+def dirt_spot_tex(rng):
+    """A patch of dirt on a floor for the broom: a few dark blots of grime, nothing around them (a cutout, 16 x 16)."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for _ in range(5):
+        cx, cy, radius = rng.randint(3, 12), rng.randint(3, 12), rng.randint(2, 4)
+        for y in range(16):
+            for x in range(16):
+                if (x - cx) ** 2 + (y - cy) ** 2 <= radius * radius + rng.randint(-2, 2):
+                    img.putpixel((x, y), rng.choice([(70, 62, 52), (88, 78, 64), (54, 48, 42)]) + (255,))
+    return img
+
+
+def broom_tex(rng):
+    """Item: the broom of Chapter 2's third task, held like a tool: the handle from the lower left, the bristles at the far end."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for k in range(9):
+        px(img, 2 + k, 13 - k, (126, 90, 56, 255))
+        px(img, 3 + k, 13 - k, (96, 68, 42, 255))
+    straw = [(204, 176, 98, 255), (184, 152, 80, 255)]
+    for y in range(1, 7):
+        for x in range(10, 15):
+            if (x - 10) + (6 - y) <= 6:
+                px(img, x, y, straw[(x + y) % 2])
+    for x, y in ((9, 6), (10, 7), (9, 7), (10, 6)):
+        px(img, x, y, (70, 70, 74, 255))
+    return img
+
+
 def factory_glass_tex(rng):
     """Chapter 2's window glass: almost clear with a cool tint, no frame at the edges, and a pale diagonal sheen. The sheen
     runs along x - y = const, which wraps, so it goes on from one block to the next whichever way they are stacked."""
@@ -3448,6 +3490,24 @@ def build():
     a.block("factory_glass", "Factory Glass", {"variants": {"": {"model": f"{NS}:block/factory_glass"}}},
             {"parent": f"{NS}:block/factory_glass"})
 
+    # Chapter 2 Level 1's tasks (platform.Ch2L1Tasks): a sample tube on the bench, the terminal that registers them (the lab computer's
+    # look), the analyzer, the broom against a wall and the dirt on the floor.
+    prop("sample_tube", "Sample Tube", {"g": "tube_amber", "d": "lab_steel_dark"},
+         [el((6.5, 0, 6.5), (9.5, 8, 9.5), "g"), el((6, 8, 6), (10, 9.5, 10), "d")])
+    a.block("noname_terminal", "NonameOS Terminal", horizontal_blockstate("lab_terminal"), {"parent": f"{NS}:block/lab_terminal"})
+    a.texture("analyzer_front", analyzer_front_tex(r("analyzer_front")), T.PLASTIC.but(smoothness=0.7), tiles=False)
+    prop("analyzer", "Analyzer", {"w": "lab_white", "f": "analyzer_front", "d": "lab_steel_dark"},
+         [el((2, 0, 3), (14, 9, 13), "w", north=("f", (2, 2, 14, 11))), el((5, 9, 6), (11, 10, 10), "d")])
+    a.texture("broom_wood", plastic_tex(r("broom_wood"), (126, 90, 56)), T.Material(0.4, relief=0.3))
+    a.texture("broom_straw", plastic_tex(r("broom_straw"), (204, 176, 98)), T.Material(0.3, relief=0.4))
+    handle = el((7.5, 0, 11), (8.5, 15, 12), "w")
+    handle["rotation"] = {"angle": 13, "axis": "x", "origin": [8, 0, 11.5]}      # its top leans back, to the wall behind it
+    prop("leaning_broom", "Leaning Broom", {"w": "broom_wood", "s": "broom_straw"},
+         [handle, el((6, 0, 9.5), (10, 3.5, 13), "s")])
+    a.texture("dirt_spot", dirt_spot_tex(r("dirt_spot")), T.Material(0.1, relief=0.2), tiles=False)
+    prop("dirt_spot", "Dirt", {"d": "dirt_spot"},
+         [el((0, 0, 0), (16, 0.5, 16), "d", north=None, south=None, east=None, west=None, down=None)])
+
     # Chapter 2's factory door: the lab door's models and textures, a block of its own because its leaves open in pairs.
     a.block("factory_door", "Factory Door", {"variants": door_variants(f"{NS}:block/lab_door")},
             {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/lab_door"}})
@@ -3975,7 +4035,7 @@ def main():
                           ("record_still_water", lambda g: record_tex(g, (70, 110, 190))), ("record_chefs_plate", lambda g: record_tex(g, (150, 50, 60))),
                           ("reel_87", reel_tex), ("reel_94", reel_tex), ("reel_102", reel_tex), ("reel_120", reel_tex),
                           ("dart", dart_tex), ("master_card", master_card_tex), ("master_key", master_key_tex),
-                          ("wrench", wrench_tex), ("detector", detector_tex),
+                          ("wrench", wrench_tex), ("detector", detector_tex), ("broom", broom_tex),
                           *((f"fuse_{amps}a", lambda g, i=i: fuse_item_tex(g, i)) for i, amps in enumerate(FUSE_AMPS)),
                           *((f"reagent_{i + 1}", lambda g, i=i: reagent_item_tex(g, i)) for i in range(4)),
                           ("master_card_nw", lambda g: card_tex(g, 0, 0)), ("master_card_ne", lambda g: card_tex(g, 1, 0)),
@@ -3983,7 +4043,7 @@ def main():
         (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))
         # The wrench is held like a tool, the rest like things.
         write_json(ASSETS / "models" / "item" / f"{item}.json",
-                   {"parent": "minecraft:item/handheld" if item == "wrench" else "minecraft:item/generated",
+                   {"parent": "minecraft:item/handheld" if item in ("wrench", "broom") else "minecraft:item/generated",
                     "textures": {"layer0": f"{NS}:item/{item}"}})
 
     entity_dir = ASSETS / "textures" / "entity"

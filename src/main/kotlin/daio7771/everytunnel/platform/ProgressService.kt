@@ -53,6 +53,14 @@ interface ProgressService {
 
     fun setCh2L1Active(player: PlayerEntity, active: Boolean)
 
+    /** A named whole number of the player's Chapter 2 Level 1 (`PlayerProgress.ch2l1Counter`); 0 if it has none. */
+    fun ch2L1Counter(player: PlayerEntity, key: String): Int
+
+    fun setCh2L1Counter(player: PlayerEntity, key: String, value: Int)
+
+    /** Forgets the counters whose names start with [prefix] (every one if it is empty). */
+    fun clearCh2L1Counters(player: PlayerEntity, prefix: String = "")
+
     /** Adds [ticks] played to this game's total. Not synced to the client: it is counted every tick. */
     fun addPlayTicks(player: PlayerEntity, ticks: Long)
 

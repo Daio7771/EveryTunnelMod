@@ -4,6 +4,12 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.ch2l1.Ch2L1Data
 import daio7771.everytunnel.core.ch2l1.Ch2L1DataParser
 import daio7771.everytunnel.core.ch2l1.Ch2L1Files
+import daio7771.everytunnel.core.ch2l1.Ch2L1Speakers
+import daio7771.everytunnel.core.ch2l1.Ch2L1SpeakersParser
+import daio7771.everytunnel.core.ch2l1.Ch2L1Tasks
+import daio7771.everytunnel.core.ch2l1.Ch2L1TasksParser
+import daio7771.everytunnel.core.ch2l1.Ch2L1Wiring
+import com.google.gson.JsonObject
 import net.fabricmc.loader.api.FabricLoader
 import java.io.IOException
 import java.nio.file.Files
@@ -24,6 +30,16 @@ object Ch2L1DataLoader {
     /** The data as last read. Replaced as a whole, so a reader never sees half of a reload. */
     @Volatile
     var data: Ch2L1Data = Ch2L1Data.EMPTY
+        private set
+
+    /** The tasks' file ([Ch2L1Tasks]) as last read, parsed with [data]. */
+    @Volatile
+    var tasks: Ch2L1Tasks = Ch2L1Tasks.DEFAULT
+        private set
+
+    /** The loudspeakers' file ([Ch2L1Speakers]) as last read. */
+    @Volatile
+    var speakers: Ch2L1Speakers = Ch2L1SpeakersParser.parse(JsonObject()).speakers
         private set
 
     /** What a read found, for the log and for `/et reload`. */
@@ -67,8 +83,18 @@ object Ch2L1DataLoader {
         }
         val result = Ch2L1DataParser.parse(overrides, Ch2L1Files.readAllBundled())
         data = result.data
+        val tasksResult = Ch2L1TasksParser.parse(result.data.document("tasks"))
+        val speakersResult = Ch2L1SpeakersParser.parse(result.data.document("speakers"))
+        tasks = tasksResult.tasks
+        speakers = speakersResult.speakers
+        val wiring = Ch2L1Wiring.problems(result.data.anchors, tasks, speakers)
 
-        val report = Report(result.data, readProblems + result.problems, folder)
+        val report = Report(
+            result.data,
+            readProblems + result.problems + tasksResult.problems.map { "tasks.json: $it" } +
+                speakersResult.problems.map { "speakers.json: $it" } + wiring,
+            folder,
+        )
         val log = EveryTunnel.LOGGER
         log.info(report.lines().first())
         report.problems.forEach { log.warn("Chapter 2 Level 1 data: {}", it) }

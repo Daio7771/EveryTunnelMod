@@ -1,1 +1,20 @@
-{}
+{
+  "task1": {
+    "tubes": [
+      { "anchor": "task1_tube_1", "code": "S-0412" },
+      { "anchor": "task1_tube_2", "code": "S-0413" },
+      { "anchor": "task1_tube_3", "code": "S-0414" }
+    ],
+    "terminal": "task1_terminal_block",
+    "register_seconds": 1.2
+  },
+  "task2": {
+    "analyzer": "task2_analyzer_block",
+    "calibrate_seconds": 4.0
+  },
+  "task3": {
+    "broom": "task3_broom_block",
+    "dirt": "task3_dirt_spots",
+    "sweep_seconds": 1.5
+  }
+}

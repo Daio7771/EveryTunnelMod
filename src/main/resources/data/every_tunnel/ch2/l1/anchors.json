@@ -3,8 +3,21 @@
  "anchors": [
   {"id":"spawn_clockin","pos":[1053.5,64.0,1030.5],"yaw":0},
   {"id":"time_clock","pos":[1053.5,65,1033.5],"yaw":180},
-  {"id":"task1_terminal","pos":[1059.5,64.0,1052.5],"yaw":270,"provisional":true},
-  {"id":"task2_analyzer","pos":[1076.5,64.0,1059.5],"yaw":180,"provisional":true},
+  {"id":"task1_terminal","pos":[1058.5,64.0,1050.5],"yaw":90},
+  {"id":"task2_analyzer","pos":[1075.5,64.0,1068.5],"yaw":0},
+  {"id":"task1_tube_1","pos":[1056.5,65.0,1046.5],"yaw":0},
+  {"id":"task1_tube_2","pos":[1056.5,65.0,1047.5],"yaw":0},
+  {"id":"task1_tube_3","pos":[1056.5,65.0,1048.5],"yaw":0},
+  {"id":"task1_terminal_block","pos":[1056.5,65.0,1050.5],"yaw":0},
+  {"id":"task2_analyzer_block","pos":[1075.5,65.0,1070.5],"yaw":0},
+  {"id":"task3_broom_block","pos":[1043.5,64.0,1078.5],"yaw":0},
+  {"id":"speaker_entrance_src","pos":[1053.5,72.9,1030.5],"yaw":0},
+  {"id":"speaker_lab_src","pos":[1071.5,69.9,1053.5],"yaw":0},
+  {"id":"speaker_main_src","pos":[1049.5,68.9,1053.5],"yaw":0},
+  {"id":"speaker_west_src","pos":[1042.5,67.9,1084.5],"yaw":0},
+  {"id":"a1_cam_speaker","pos":[1055.2,65.3,1032.3],"yaw":0},
+  {"id":"a1_cam_lab","pos":[1056.6,68.3,1035.6],"yaw":0},
+  {"id":"a1_look_lab","pos":[1071.0,65.2,1053.0],"yaw":0},
   {"id":"taquillas_npc_01","pos":[1038.5,64.0,1051.5],"yaw":121,"provisional":true},
   {"id":"taquillas_npc_02","pos":[1036.5,64.0,1052.5],"yaw":169,"provisional":true},
   {"id":"taquillas_npc_03","pos":[1033.5,64.0,1051.5],"yaw":-121,"provisional":true},
@@ -41,7 +54,7 @@
   {"id":"ring_south","from":[1040,63,1093],"to":[1085,67,1096]},
   {"id":"ring_west","from":[1040,63,1076],"to":[1043,67,1092]},
   {"id":"ring_east","from":[1082,63,1076],"to":[1085,67,1092]},
-  {"id":"task3_sweep_area","from":[1040,63,1076],"to":[1043,67,1092],"provisional":true},
+  {"id":"task3_sweep_area","from":[1040,63,1076],"to":[1043,67,1092]},
   {"id":"aux_lab","from":[1025,63,1072],"to":[1038,68,1095]},
   {"id":"aux_lab_glass","from":[1040,63,1076],"to":[1040,67,1092],"provisional":true},
   {"id":"prologue_set","from":[1025,63,1088],"to":[1038,68,1095],"provisional":true},
@@ -50,12 +63,14 @@
   {"id":"office","from":[1053,63,1103],"to":[1064,67,1109]},
   {"id":"wc_east","from":[1066,63,1103],"to":[1071,67,1105]},
   {"id":"level2_corridor","from":[1087,63,1049],"to":[1097,67,1054]},
-  {"id":"speaker_lab","from":[1056,63,1035],"to":[1085,69,1070],"provisional":true},
-  {"id":"speaker_main","from":[1044,63,1035],"to":[1054,68,1070],"provisional":true},
-  {"id":"speaker_west","from":[1040,63,1076],"to":[1043,67,1092],"provisional":true}
+  {"id":"speaker_entrance","from":[1044,63,1025],"to":[1085,72,1033]},
+  {"id":"speaker_lab","from":[1056,63,1035],"to":[1085,69,1070]},
+  {"id":"speaker_main","from":[1044,63,1035],"to":[1054,68,1070]},
+  {"id":"speaker_west","from":[1040,63,1076],"to":[1043,67,1092]}
  ],
  "paths": [
   {"id":"patrol_a_waypoints","closed":true,"points":[[1042.0,64.0,1074.0],[1063.0,64.0,1074.0],[1084.0,64.0,1074.0],[1084.0,64.0,1084.0],[1084.0,64.0,1095.0],[1072.0,64.0,1095.0],[1060.0,64.0,1095.0],[1042.0,64.0,1095.0],[1042.0,64.0,1084.0]],"provisional":true},
+  {"id":"task3_dirt_spots","points":[[1042.5,64.0,1079.5],[1040.5,64.0,1081.5],[1043.5,64.0,1082.5],[1041.5,64.0,1084.5],[1042.5,64.0,1086.5],[1040.5,64.0,1087.5],[1043.5,64.0,1089.5],[1041.5,64.0,1090.5],[1042.5,64.0,1092.5],[1040.5,64.0,1078.5]]},
   {"id":"patrol_b_waypoints","points":[[1045.0,64.0,1100.0],[1062.0,64.0,1100.0],[1082.0,64.0,1100.0]],"provisional":true}
  ]
 }

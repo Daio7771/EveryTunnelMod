@@ -86,6 +86,9 @@ object ModItems {
     val DART: Item = DartItem(Item.Settings().maxCount(DartHooks.DART_COUNT))
 
     val WRENCH: Item = WrenchItem(Item.Settings().maxCount(1))
+
+    /** Chapter 2 Level 1's third task: the broom for the dirt of the west corridor ([Ch2L1TaskHooks]); nothing else uses it. */
+    val BROOM: Item = Item(Item.Settings().maxCount(1))
     /** Kept registered for older worlds and saved inventories; nothing gives or places it, and it does nothing. */
     val DETECTOR: Item = Item(Item.Settings().maxCount(1))
 
@@ -105,6 +108,7 @@ object ModItems {
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_popcorn"), FOOD_POPCORN)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "food_snack"), FOOD_SNACK)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "wrench"), WRENCH)
+        Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "broom"), BROOM)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "detector"), DETECTOR)
         FUSE_AMPS.zip(FUSES).forEach { (amps, fuse) -> Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "fuse_${amps}a"), fuse) }
         REAGENTS.forEachIndexed { i, reagent -> Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "reagent_${i + 1}"), reagent) }

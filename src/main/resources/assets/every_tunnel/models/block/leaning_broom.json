@@ -1,0 +1,83 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "w": "every_tunnel:block/broom_wood",
+    "s": "every_tunnel:block/broom_straw",
+    "particle": "every_tunnel:block/broom_wood"
+  },
+  "elements": [
+    {
+      "from": [
+        7.5,
+        0,
+        11
+      ],
+      "to": [
+        8.5,
+        15,
+        12
+      ],
+      "faces": {
+        "north": {
+          "texture": "#w"
+        },
+        "east": {
+          "texture": "#w"
+        },
+        "south": {
+          "texture": "#w"
+        },
+        "west": {
+          "texture": "#w"
+        },
+        "up": {
+          "texture": "#w"
+        },
+        "down": {
+          "texture": "#w"
+        }
+      },
+      "rotation": {
+        "angle": 13,
+        "axis": "x",
+        "origin": [
+          8,
+          0,
+          11.5
+        ]
+      }
+    },
+    {
+      "from": [
+        6,
+        0,
+        9.5
+      ],
+      "to": [
+        10,
+        3.5,
+        13
+      ],
+      "faces": {
+        "north": {
+          "texture": "#s"
+        },
+        "east": {
+          "texture": "#s"
+        },
+        "south": {
+          "texture": "#s"
+        },
+        "west": {
+          "texture": "#s"
+        },
+        "up": {
+          "texture": "#s"
+        },
+        "down": {
+          "texture": "#s"
+        }
+      }
+    }
+  ]
+}
