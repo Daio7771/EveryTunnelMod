@@ -245,6 +245,7 @@ KDoc comment that says more.
 | `Ch2L1Npcs.kt` | Putting them in front of the player and taking them away (`/et ch2 l1 npc`) |
 | `Ch2L1Build.kt` | Builds the level from its plan in steps of 8,000 cells a tick (and empties it), remembers which plan it built, checks every block first |
 | `TimeClockBlock.kt` | The time clock of Chapter 2's Level 1: a card reader (same models) that clocks the new hire in, red and then green |
+| `LinkedDoorBlock.kt` | One leaf of a pair of doors that open and shut together by hand (`factory_door`, the lab door's look); no scene, unlike `PairedDoorBlock` |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
 | `PlaytestLog.kt` | The `[playtest]` log |
 | `RunStatsHooks.kt` | Counts the time played into the player's progress (deaths are counted in `DeathHooks`), for the congratulations window |

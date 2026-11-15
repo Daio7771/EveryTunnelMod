@@ -82,21 +82,24 @@ por una puerta libre.
 
 | Espacio | X × Z (bloques) | Aire de alto |
 |---|---|---|
-| Entrada (media elipse, con tres puertas) | 34 × 9 | 9 |
-| Pasillo principal | 9 × 29 | 5 |
-| LAB | 24 × 29 | 6 |
+| Entrada (media elipse, con tres puertas) | 42 × 9 | 9 |
+| Pasillo principal | 11 × 36 | 5 |
+| LAB | 30 × 36 | 6 |
 | WC (oeste) · Taquillas (con una columna de 2 × 2) | 5 × 5 · 8 × 11 | 4 |
-| Anillo, de 3 de ancho, alrededor del comedor (44 × 23 con sus muros) · Comedor | 3 · 36 × 15 | 4 · 6 |
-| Laboratorio auxiliar (restringido) | 6 × 20 | 5 |
-| Pasillo autorizado · Seguridad · Despacho · WC (restringidos) | 43 × 3 · 13 × 6 · 12 × 7 · 6 × 3 | 4 |
+| Anillo, de 4 de ancho, alrededor del comedor (46 × 25 con sus muros) · Comedor | 4 · 36 × 15 | 4 · 6 |
+| Laboratorio auxiliar (restringido) | 14 × 24 | 5 |
+| Pasillo autorizado · Seguridad · Despacho · WC (restringidos) | 46 × 4 · 13 × 6 · 12 × 7 · 6 × 3 | 4 |
 | Pasillo "Nivel 2", tras la puerta sellada | 11 × 6 | 4 |
 
 El aspecto es el del laboratorio del prólogo, limpio y moderno: hormigón blanco, suelo gris claro, primera hilada de muro en gris
-oscuro, cristal (la pared del laboratorio auxiliar hacia el tramo oeste del anillo) y las lámparas de techo del laboratorio (124).
-Hay 21 puertas: **libres**, de madera clara, que se abren a mano (la del anillo al pasillo autorizado también es libre, pero es
-la entrada a una zona prohibida: el círculo rojo del dibujo); **cerradas con llave**, de hierro, que las manos no abren, para
-el laboratorio auxiliar, el despacho y la puerta sellada (las fases siguientes las abren con la credencial, el código y la
-tarjeta de Rowan); y una más de hierro en el extremo este del pasillo que no abre a nada. Las tres puertas de la entrada dan al
+oscuro, cristal (la pared del laboratorio auxiliar hacia el tramo oeste del anillo) y las lámparas de techo del laboratorio (152).
+El LAB, los pasillos y el laboratorio auxiliar se agrandaron tras el primer recorrido del nivel (las medidas del dibujo eran
+relativas). Hay 21 puertas, todas propias del mod (ninguna es de vanilla): **libres**, la puerta de laboratorio
+(`factory_door`: blanca, con una ventana alta; las dos hojas de un par se abren y se cierran a la vez a mano, `LinkedDoorBlock`,
+con las bisagras en los bordes exteriores; la del anillo al pasillo autorizado también es libre, pero es
+la entrada a una zona prohibida: el círculo rojo del dibujo); **cerradas con llave**, la puerta de emergencia gris (`emergency_door`), que las manos no
+abren, para el laboratorio auxiliar, el despacho y la puerta sellada (las fases siguientes las abren con la credencial, el
+código y la tarjeta de Rowan); y una más igual en el extremo este del pasillo que no abre a nada. Las tres puertas de la entrada dan al
 pasillo principal y al LAB, y el reloj de fichar cuelga de la pared sur de la entrada.
 
 **Dónde y cómo.** El plan se levanta en (1024, 64, 1024) del mundo del mapa, libre de los niveles del Chapter 1 y de la sala del

@@ -46,7 +46,7 @@ class Ch2L1MapPlanTest {
 
     @Test
     fun `every block is a vanilla one the map uses or a block of the mod with its blockstate`() {
-        val vanilla = setOf("white_concrete", "light_gray_concrete", "gray_concrete", "glass", "birch_door", "iron_door")
+        val vanilla = setOf("white_concrete", "light_gray_concrete", "gray_concrete", "glass")
         for (block in plan.fills.map { it.block }.toSet()) {
             val spec = BlockSpec.parse(block)
             val (namespace, name) = spec.id.split(":")
@@ -73,6 +73,38 @@ class Ch2L1MapPlanTest {
             val half = if ("half=lower" in block) "lower" else "upper"
             val other = if (half == "lower") Cell(c.x, c.y + 1, c.z) else Cell(c.x, c.y - 1, c.z)
             assertEquals(block.replace("half=$half", "half=${if (half == "lower") "upper" else "lower"}"), cells[other], "the other half of the door at $c")
+        }
+    }
+
+    @Test
+    fun `the doors are the mod's own, the factory door for hands and the emergency door for the locked ones`() {
+        val kinds = cells.values.map { BlockSpec.parse(it).id }.filter { it.endsWith("_door") }.toSet()
+        assertEquals(setOf("every_tunnel:factory_door", "every_tunnel:emergency_door"), kinds)
+    }
+
+    /**
+     * A door's hinge is read looking the way it faces: facing south, "left" is its cell's east edge; facing east, "left" is
+     * the north edge. The leaves of a pair, taken from the lowest x (south) or z (east), hinge on the outer edges, so they
+     * swing clear of the passage: right then left going south, left then right going east.
+     */
+    @Test
+    fun `the leaves of a pair of doors are hinged on the outer edges`() {
+        val leaves = cells.filter { (_, block) -> "_door[" in block && "half=lower" in block }
+            .map { (c, block) -> c to BlockSpec.parse(block).states }
+        assertTrue(leaves.isNotEmpty())
+        for (facing in listOf("south", "east")) {
+            val along: (Cell) -> Int = { if (facing == "south") it.x else it.z }
+            val across: (Cell) -> Int = { if (facing == "south") it.z else it.x }
+            val mine = leaves.filter { it.second["facing"] == facing }.sortedWith(compareBy({ across(it.first) }, { along(it.first) }))
+            assertTrue(mine.isNotEmpty(), "no door faces $facing")
+            var runStart = 0
+            for ((i, leaf) in mine.withIndex()) {
+                val previous = mine.getOrNull(i - 1)
+                if (previous == null || across(previous.first) != across(leaf.first) || along(previous.first) != along(leaf.first) - 1) runStart = i
+                val first = if (facing == "south") "right" else "left"
+                val second = if (facing == "south") "left" else "right"
+                assertEquals(if ((i - runStart) % 2 == 0) first else second, leaf.second["hinge"], "the hinge of the leaf at ${leaf.first} facing $facing")
+            }
         }
     }
 

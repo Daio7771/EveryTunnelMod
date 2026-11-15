@@ -3431,6 +3431,11 @@ def build():
         a.item_textures[door_id] = door_item_tex(halves["bottom"], halves["top"])
         a.loot_doors.add(door_id)
 
+    # Chapter 2's factory door: the lab door's models and textures, a block of its own because its leaves open in pairs.
+    a.block("factory_door", "Factory Door", {"variants": door_variants(f"{NS}:block/lab_door")},
+            {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/lab_door"}})
+    a.loot_doors.add("factory_door")
+
     # The exit sign: a lit box against the wall (PropBlock's shape: 2..14 x 2..8, 2 deep).
     a.texture("exit_sign", exit_sign_tex(r("exit_sign")), exit_sign_glow, tiles=False)
     a.models["exit_sign"] = model({"t": "exit_sign"}, [{

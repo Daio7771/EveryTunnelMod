@@ -550,6 +550,8 @@ object ModBlocks {
     )
     /** White, a tall window: Level 5's layer 1 rooms' doors, in pairs, opened by hand. */
     val LAB_DOOR: Block = register("lab_door", DoorBlock(door(), SERVICE_DOOR))
+    /** The lab door's look (it borrows its models), for Chapter 2's factory: a pair of leaves opens and shuts at once by hand. */
+    val FACTORY_DOOR: Block = register("factory_door", LinkedDoorBlock(door(), SERVICE_DOOR))
     /** A lit green EXIT sign on the wall above an exit; it stays lit when the power goes (its own battery). */
     val EXIT_SIGN: Block = register(
         "exit_sign",

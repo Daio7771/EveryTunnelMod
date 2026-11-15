@@ -79,21 +79,23 @@ room to stand, or if a restricted space can be reached by a free door.
 
 | Space | X × Z (blocks) | Air high |
 |---|---|---|
-| Entrance (half an ellipse, with three doors) | 34 × 9 | 9 |
-| Main corridor | 9 × 29 | 5 |
-| LAB | 24 × 29 | 6 |
+| Entrance (half an ellipse, with three doors) | 42 × 9 | 9 |
+| Main corridor | 11 × 36 | 5 |
+| LAB | 30 × 36 | 6 |
 | WC (west) · Lockers (with a 2 × 2 column) | 5 × 5 · 8 × 11 | 4 |
-| Ring, 3 wide, round the dining room (44 × 23 with its walls) · Dining room | 3 · 36 × 15 | 4 · 6 |
-| Auxiliary lab (restricted) | 6 × 20 | 5 |
-| Authorized corridor · Security · Office · WC (restricted) | 43 × 3 · 13 × 6 · 12 × 7 · 6 × 3 | 4 |
+| Ring, 4 wide, round the dining room (46 × 25 with its walls) · Dining room | 4 · 36 × 15 | 4 · 6 |
+| Auxiliary lab (restricted) | 14 × 24 | 5 |
+| Authorized corridor · Security · Office · WC (restricted) | 46 × 4 · 13 × 6 · 12 × 7 · 6 × 3 | 4 |
 | "Level 2" corridor, behind the sealed door | 11 × 6 | 4 |
 
 The look is the prologue's laboratory, clean and modern: white concrete, a light grey floor, a dark grey first course of wall,
-glass (the auxiliary lab's wall towards the ring's west stretch) and the lab's ceiling lamps (124). There are 21 doors: **free**
-ones of light wood, opened by hand; the one from the ring into the authorized corridor is free too, but it is the way into a
-forbidden zone (the drawing's red circle); **locked** ones of iron, which hands do not open, for the auxiliary lab, the
-office and the sealed door (the later phases open them with the badge, the code and Rowan's card); and one more of iron at the
-corridor's east end that opens onto nothing. The three doors of the entrance lead to the main corridor and the LAB, and the
+glass (the auxiliary lab's wall towards the ring's west stretch) and the lab's ceiling lamps (152). The LAB, the corridors and
+the auxiliary lab were enlarged after the first walk through the level (the drawing's measures were relative). There are 21
+doors, all the mod's own (none is vanilla): **free** ones, the lab door (`factory_door`: white, a tall window; a pair
+of leaves opens and shuts together by hand, `LinkedDoorBlock`, with the hinges on the outer edges); the one from the ring into the authorized corridor is free too, but it is the way into a
+forbidden zone (the drawing's red circle); **locked** ones, the grey emergency door (`emergency_door`), which hands do not open, for the auxiliary
+lab, the office and the sealed door (the later phases open them with the badge, the code and Rowan's card); and one more of
+them at the corridor's east end that opens onto nothing. The three doors of the entrance lead to the main corridor and the LAB, and the
 time clock hangs on the entrance's south wall.
 
 **Where and how.** The plan stands at (1024, 64, 1024) of the map world, free of Chapter 1's levels and of the prologue's room.

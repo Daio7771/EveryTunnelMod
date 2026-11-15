@@ -1,7 +1,8 @@
 """
 Chapter 2, Level 1: the factory. What is where (the spaces, the doors, the glass, the lights, the named places and the
 patrol paths) and how it becomes blocks. Drawn by the author on paper (relative sizes); the measures here are that
-drawing in blocks, with the 43 x 3 of the authorized corridor as the scale (about 16 px of the drawing a block).
+drawing in blocks, with the 43 x 3 of the authorized corridor as the scale (about 16 px of the drawing a block), grown
+after a first walk through the level (see SPACES).
 
 Plan coordinates, as in the other levels: x east, z south (the entrance is at the north), y up from the floor of the air
 (the floor's blocks are at y = -1). A space is a set of cells, each with the air above it up to its height; every cell next
@@ -30,7 +31,9 @@ BLOCKS = {
     "glass": "minecraft:glass",
     "light": MOD + "lab_ceiling_light",
 }
-DOOR_BLOCKS = {"normal": "minecraft:birch_door", "iron": "minecraft:iron_door"}
+# Level 5's doors: the lab's white one with a tall window (a pair of leaves opens at once), and the grey emergency one that
+# hands do not open.
+DOOR_BLOCKS = {"normal": MOD + "factory_door", "locked": MOD + "emergency_door"}
 DOOR_HEIGHT = 2
 LIGHT_SPACING = 5
 
@@ -69,62 +72,64 @@ def arch(sid, name, x0, x1, z0, z_base, height):
 
 
 # The spaces. Heights: 4 for corridors and small rooms, 5 for the main corridor and the auxiliary lab, 6 for the LAB and the
-# dining room, 9 under the entrance's arch.
+# dining room, 9 under the entrance's arch. After the first walk through it the LAB, the corridors and the auxiliary lab
+# grew: the LAB 30 x 36 (was 24 x 29), the main corridor 11 wide (was 9), the ring and the authorized corridor 4 (was 3)
+# and the auxiliary lab 14 x 24 (was 6 x 20). The ring's west stretch (x 16 .. 19) lies along the auxiliary lab's glass.
 SPACES = [
-    arch("entrance", "ENTRANCE", 12, 46, 1, 10, 9),
-    rect("main_corridor", "MAIN CORRIDOR", 12, 11, 21, 40, 5),
-    rect("lab", "LAB", 22, 11, 46, 40, 6),
-    rect("wc_west", "WC", 6, 11, 11, 16, 4),
-    rect("lockers", "LOCKERS", 3, 17, 11, 28, 4),
-    ring("ring", "RING", [(8, 41, 52, 44), (8, 61, 52, 64), (8, 44, 11, 61), (49, 44, 52, 61)], 4),
-    rect("dining", "DINING ROOM", 12, 45, 48, 60, 6),
-    rect("aux_lab", "AUXILIARY LAB", 1, 41, 7, 61, 5, restricted=True),
-    rect("authorized", "AUTHORIZED CORRIDOR", 7, 65, 50, 68, 4, restricted=True),
-    rect("security", "SECURITY", 7, 69, 20, 75, 4, restricted=True),
-    rect("office", "OFFICE", 21, 69, 33, 76, 4, restricted=True),
-    rect("wc_east", "WC", 34, 69, 40, 72, 4, restricted=True),
-    rect("level2", "LEVEL 2 CORRIDOR", 47, 21, 58, 27, 4, restricted=True),
+    arch("entrance", "ENTRANCE", 20, 62, 1, 10, 9),
+    rect("main_corridor", "MAIN CORRIDOR", 20, 11, 31, 47, 5),
+    rect("lab", "LAB", 32, 11, 62, 47, 6),
+    rect("wc_west", "WC", 14, 11, 19, 16, 4),
+    rect("lockers", "LOCKERS", 11, 17, 19, 28, 4),
+    ring("ring", "RING", [(16, 48, 62, 52), (16, 69, 62, 73), (16, 52, 20, 69), (58, 52, 62, 69)], 4),
+    rect("dining", "DINING ROOM", 21, 53, 57, 68, 6),
+    rect("aux_lab", "AUXILIARY LAB", 1, 48, 15, 72, 5, restricted=True),
+    rect("authorized", "AUTHORIZED CORRIDOR", 15, 74, 61, 78, 4, restricted=True),
+    rect("security", "SECURITY", 15, 79, 28, 85, 4, restricted=True),
+    rect("office", "OFFICE", 29, 79, 41, 86, 4, restricted=True),
+    rect("wc_east", "WC", 42, 79, 48, 82, 4, restricted=True),
+    rect("level2", "LEVEL 2 CORRIDOR", 63, 25, 74, 31, 4, restricted=True),
 ]
 
 # The doors: (id, the wall's axis, the wall's line, first cell along it, width, kind). Axis "z": the wall runs along x at
 # z = line, and the passage goes north to south; axis "x": the wall runs along z at x = line. Kinds: "normal" (a door of
-# light wood, opened by hand), "restricted" (the same, but the way into a forbidden zone: the drawing's red circle),
-# "locked" (an iron door that hands do not open: a later phase opens it, with a badge, a code or Rowan's card) and
-# "decor" (an iron door that opens onto nothing).
+# white steel with a window, opened by hand), "restricted" (the same, but the way into a forbidden zone: the drawing's red circle),
+# "locked" (a grey emergency door that hands do not open: a later phase opens it, with a badge, a code or Rowan's card) and
+# "decor" (the same grey door, opening onto nothing).
 DOORS = [
-    ("entrance_main", "z", 10, 15, 2, "normal"),
-    ("entrance_lab_1", "z", 10, 24, 2, "normal"),
-    ("entrance_lab_2", "z", 10, 34, 2, "normal"),
-    ("main_lab_1", "x", 21, 15, 2, "normal"),
-    ("main_lab_2", "x", 21, 36, 2, "normal"),
-    ("wc_west", "x", 11, 13, 1, "normal"),
-    ("lockers_1", "x", 11, 19, 2, "normal"),
-    ("lockers_2", "x", 11, 25, 2, "normal"),
-    ("main_ring", "z", 40, 13, 2, "normal"),
-    ("lab_ring", "z", 40, 30, 2, "normal"),
-    ("dining_n1", "z", 44, 20, 2, "normal"),
-    ("dining_n2", "z", 44, 37, 2, "normal"),
-    ("dining_s1", "z", 60, 16, 2, "normal"),
-    ("dining_s2", "z", 60, 35, 2, "normal"),
-    ("aux_lab", "x", 7, 42, 2, "locked"),
-    ("ring_authorized", "z", 64, 26, 2, "restricted"),
-    ("security", "z", 68, 13, 1, "normal"),
-    ("office", "z", 68, 23, 2, "locked"),
-    ("wc_east", "z", 68, 36, 1, "normal"),
-    ("sealed", "x", 46, 22, 4, "locked"),
-    ("restricted_east", "x", 50, 66, 1, "decor"),
+    ("entrance_main", "z", 10, 24, 2, "normal"),
+    ("entrance_lab_1", "z", 10, 34, 2, "normal"),
+    ("entrance_lab_2", "z", 10, 47, 2, "normal"),
+    ("main_lab_1", "x", 31, 16, 2, "normal"),
+    ("main_lab_2", "x", 31, 42, 2, "normal"),
+    ("wc_west", "x", 19, 13, 1, "normal"),
+    ("lockers_1", "x", 19, 19, 2, "normal"),
+    ("lockers_2", "x", 19, 25, 2, "normal"),
+    ("main_ring", "z", 47, 21, 2, "normal"),
+    ("lab_ring", "z", 47, 42, 2, "normal"),
+    ("dining_n1", "z", 52, 29, 2, "normal"),
+    ("dining_n2", "z", 52, 46, 2, "normal"),
+    ("dining_s1", "z", 68, 25, 2, "normal"),
+    ("dining_s2", "z", 68, 44, 2, "normal"),
+    ("aux_lab", "x", 15, 49, 2, "locked"),
+    ("ring_authorized", "z", 73, 34, 2, "restricted"),
+    ("security", "z", 78, 21, 1, "normal"),
+    ("office", "z", 78, 31, 2, "locked"),
+    ("wc_east", "z", 78, 44, 1, "normal"),
+    ("sealed", "x", 62, 26, 4, "locked"),
+    ("restricted_east", "x", 61, 75, 1, "decor"),
 ]
 
 # Walls of glass: (the wall's x, first z, last z, the top y): the auxiliary lab's, towards the ring's west stretch.
-GLASS_WALLS = [(7, 44, 60, 3)]
+GLASS_WALLS = [(15, 52, 68, 3)]
 
 # Solid columns inside a space: (x0, z0, x1, z1), the far corner excluded. The lockers' central one, 2 x 2.
-PILLARS = [(6, 21, 8, 23)]
+PILLARS = [(14, 21, 16, 23)]
 
 # What lies behind a locked door: the auxiliary lab (the coworker's badge), the office (Rowan's code) and the sealed zone.
 LOCKED_SPACES = {"aux_lab", "office", "level2"}
 
-CLOCK = {"at": (20, 1, 9), "facing": "north"}      # on the entrance's south wall, between its first two doors
+CLOCK = {"at": (29, 1, 9), "facing": "north"}      # on the entrance's south wall, between its first two doors
 CAMERA_FREE = {"lockers"}                          # the one space with no (decorative) security cameras
 
 
@@ -213,10 +218,15 @@ class Level:
             out[c] = BLOCKS["light"]
         for door in DOORS:
             _, axis, line, first, width, kind = door
-            block = DOOR_BLOCKS["iron" if kind in ("locked", "decor") else "normal"]
+            block = DOOR_BLOCKS["locked" if kind in ("locked", "decor") else "normal"]
             facing = "south" if axis == "z" else "east"
+            # A door's hinge side is seen looking the way it faces: a door facing south has its left hinge on the east edge
+            # of its cell, one facing east has it on the north edge. In a pair the hinges go on the outer edges, so the
+            # first leaf (the lowest x or z) hinges on its low edge: "right" going south, "left" going east.
+            low_edge = "right" if axis == "z" else "left"
+            high_edge = "left" if axis == "z" else "right"
             for i, k in enumerate(range(first, first + width)):
-                hinge = "left" if i % 2 == 0 else "right"
+                hinge = low_edge if i % 2 == 0 else high_edge
                 for half, y in (("lower", 0), ("upper", 1)):
                     cell = (k, y, line) if axis == "z" else (line, y, k)
                     out[cell] = f"{block}[facing={facing},half={half},hinge={hinge},open=false,powered=false]"
@@ -295,38 +305,37 @@ def named_places(level):
     def add(anchor_id, x, z, yaw, provisional, y=0.0):
         a.append((anchor_id, (x, y, z), yaw, provisional))
 
-    cx, cz = 20.5, 6.5
-    add("spawn_clockin", cx, cz, 0, False)
     cl = CLOCK["at"]
+    add("spawn_clockin", cl[0] + 0.5, 6.5, 0, False)
     add("time_clock", cl[0] + 0.5, cl[2] + 0.5, 180, False, y=cl[1])
-    add("task1_terminal", 25.5, 24.5, 270, True)
-    add("task2_analyzer", 38.5, 30.5, 180, True)
-    # Six people round the lockers' column (a 2 x 2 at x 6..7, z 21..22), looking at it.
-    col = (7.0, 22.0)
+    add("task1_terminal", 35.5, 28.5, 270, True)
+    add("task2_analyzer", 52.5, 35.5, 180, True)
+    # Six people round the lockers' column (a 2 x 2 at x 14..15, z 21..22), looking at it.
+    col = (15.0, 22.0)
     for i in range(6):
         ang = math.radians(60 * i + 30)
         x, z = col[0] + 2.7 * math.cos(ang), col[1] + 2.7 * math.sin(ang)
         x, z = math.floor(x) + 0.5, math.floor(z) + 0.5
         yaw = math.degrees(math.atan2(-(col[0] - x), col[1] - z))
         add(f"taquillas_npc_{i + 1:02d}", x, z, round(yaw), True)
-    add("predecessor_locker", 3.5, 26.5, 270, True)
-    add("taquillas_exit", 13.5, 22.5, -90, False)
-    add("aux_lab_door", 8.0, 43.0, 90, False)
-    add("chamber_02", 5.5, 52.5, -90, True)
-    add("chamber_log", 2.5, 47.5, 90, True)
-    add("authorization_desk", 2.5, 45.5, 90, True)
-    add("door_anchor", 24.0, 68.0, 0, False)
-    add("desk_anchor", 27.0, 72.5, 180, True)
-    add("office_keypad", 22.5, 67.5, 0, True, y=1.0)
-    add("paper_medical", 26.5, 72.5, 180, True, y=1.0)
-    add("paper_contract_14", 27.5, 72.5, 180, True, y=1.0)
-    add("painting", 32.5, 72.5, 90, True, y=2.0)
-    add("card_slide_start", 27.0, 71.0, 0, True, y=1.0)
-    add("card_slide_end", 27.0, 73.2, 0, True, y=1.0)
-    add("rowan_spawn", 24.5, 66.5, 0, True)
-    add("restricted_door_east", 50.0, 66.5, -90, False)
-    add("sealed_door", 46.0, 24.0, -90, False)
-    add("patrol_a_pause", 26.5, 62.5, 0, True)
+    add("predecessor_locker", 11.5, 26.5, 270, True)
+    add("taquillas_exit", 21.5, 22.5, -90, False)
+    add("aux_lab_door", 15.0, 50.0, 90, False)
+    add("chamber_02", 11.5, 60.5, -90, True)
+    add("chamber_log", 2.5, 56.5, 90, True)
+    add("authorization_desk", 2.5, 51.5, 90, True)
+    add("door_anchor", 32.0, 78.0, 0, False)
+    add("desk_anchor", 35.0, 82.5, 180, True)
+    add("office_keypad", 30.5, 77.5, 0, True, y=1.0)
+    add("paper_medical", 34.5, 82.5, 180, True, y=1.0)
+    add("paper_contract_14", 35.5, 82.5, 180, True, y=1.0)
+    add("painting", 40.5, 82.5, 90, True, y=2.0)
+    add("card_slide_start", 35.0, 81.0, 0, True, y=1.0)
+    add("card_slide_end", 35.0, 83.2, 0, True, y=1.0)
+    add("rowan_spawn", 32.5, 76.5, 0, True)
+    add("restricted_door_east", 61.0, 75.5, -90, False)
+    add("sealed_door", 62.0, 28.0, -90, False)
+    add("patrol_a_pause", 36.5, 70.5, 0, True)
 
     zones = []
 
@@ -340,14 +349,14 @@ def named_places(level):
     zone("wc_west", "wc_west")
     zone("taquillas_trigger", "lockers")
     zone("dining", "dining")
-    zone("ring_north", "ring", box=(8, 41, 52, 44))
-    zone("ring_south", "ring", box=(8, 61, 52, 64))
-    zone("ring_west", "ring", box=(8, 44, 11, 61))
-    zone("ring_east", "ring", box=(49, 44, 52, 61))
-    zone("task3_sweep_area", "ring", True, box=(8, 44, 11, 61))
+    zone("ring_north", "ring", box=(16, 48, 62, 52))
+    zone("ring_south", "ring", box=(16, 69, 62, 73))
+    zone("ring_west", "ring", box=(16, 52, 20, 69))
+    zone("ring_east", "ring", box=(58, 52, 62, 69))
+    zone("task3_sweep_area", "ring", True, box=(16, 52, 20, 69))
     zone("aux_lab", "aux_lab")
-    zone("aux_lab_glass", "ring", True, box=(8, 44, 9, 61))
-    zone("prologue_set", "aux_lab", True, box=(1, 56, 7, 61))
+    zone("aux_lab_glass", "ring", True, box=(16, 52, 17, 69))
+    zone("prologue_set", "aux_lab", True, box=(1, 64, 15, 72))
     zone("authorized_corridor", "authorized")
     zone("security_room", "security")
     zone("office", "office")
@@ -355,12 +364,13 @@ def named_places(level):
     zone("level2_corridor", "level2")
     zone("speaker_lab", "lab", True)
     zone("speaker_main", "main_corridor", True)
-    zone("speaker_west", "ring", True, box=(8, 44, 11, 61))
+    zone("speaker_west", "ring", True, box=(16, 52, 20, 69))
 
     paths = []
-    ring_pts = [(9.5, 42.5), (30.5, 42.5), (50.5, 42.5), (50.5, 52.5), (50.5, 62.5), (38.5, 62.5), (26.5, 62.5), (9.5, 62.5), (9.5, 52.5)]
+    # The middle of the ring (its stretches are 4 wide: the middle is where two blocks meet) and of the authorized corridor.
+    ring_pts = [(18.0, 50.0), (39.0, 50.0), (60.0, 50.0), (60.0, 60.0), (60.0, 71.0), (48.0, 71.0), (36.0, 71.0), (18.0, 71.0), (18.0, 60.0)]
     paths.append(("patrol_a_waypoints", [(x, 0.0, z) for x, z in ring_pts], True, True))
-    paths.append(("patrol_b_waypoints", [(13.5, 0.0, 66.5), (31.5, 0.0, 66.5), (48.5, 0.0, 66.5)], False, True))
+    paths.append(("patrol_b_waypoints", [(21.0, 0.0, 76.0), (38.0, 0.0, 76.0), (58.0, 0.0, 76.0)], False, True))
     return a, zones, paths
 
 

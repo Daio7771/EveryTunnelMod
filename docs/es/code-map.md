@@ -245,6 +245,7 @@ con un comentario KDoc que cuenta más.
 | `Ch2L1Npcs.kt` | Ponerlas delante del jugador y quitarlas (`/et ch2 l1 npc`) |
 | `Ch2L1Build.kt` | Construye el nivel desde su plan a razón de 8.000 celdas por tick (y lo vacía), recuerda qué plan construyó, comprueba antes cada bloque |
 | `TimeClockBlock.kt` | El reloj de fichar del Nivel 1 del Chapter 2: un lector de tarjetas (mismos modelos) que ficha al nuevo empleado, rojo y luego verde |
+| `LinkedDoorBlock.kt` | Una hoja de un par de puertas que se abren y se cierran a la vez a mano (`factory_door`, con el aspecto de la puerta de laboratorio); sin escena, a diferencia de `PairedDoorBlock` |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
 | `PlaytestLog.kt` | El registro `[playtest]` |
 | `RunStatsHooks.kt` | Cuenta el tiempo jugado en el progreso del jugador (las muertes se cuentan en `DeathHooks`), para la ventana de felicitación |
