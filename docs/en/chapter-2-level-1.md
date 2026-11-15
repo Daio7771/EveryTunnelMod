@@ -210,6 +210,13 @@ change (playing, `state`, `skip`) brings counters and world to what the state me
 the dirt stand where the player has not got yet and are gone where they have, so a task can be tried by command with the level as it would be
 had they played. The plan's props are put back from the plan itself (`Ch2L1Build.planState`).
 
+**The guide arrow** (`client.render.TaskArrow`, targets in `core.ch2l1.Ch2L1Guide`, settings in `tasks.json`'s `guide`): a filled V pointing down, blue with white
+edges, that turns on itself and bobs a little over the place of the player's current step, so that the way is clear when the LAB is full of benches and machines. It is drawn
+without a depth test (furniture does not hide it) and grows with distance so that it is readable across the room. It points at the nearest of what is left: the time clock before
+clocking in; the sample tubes not taken yet and then the terminal; the analyzer; the broom and then the patches of dirt not swept. It hides when the player comes within
+`hide_within` (1.5 blocks along the floor) of it, in a cinematic and with the HUD hidden; `height` (1.1) is how high it floats over the anchor and `enabled` turns it off.
+The later phases add the steps of Acts 2 and 3 to `Ch2L1Guide.targets`.
+
 **The loudspeakers** (`platform.Ch2L1SpeakerHooks`, rules in `core.ch2l1.Ch2L1SpeakerSchedule`, data in `speakers.json`): Rowan's announcements
 `rowan_loyal_a1` to `a6`, from the ceiling speakers (`ceiling_speaker` blocks) of four zones, `speaker_entrance`, `speaker_lab`, `speaker_main` and
 `speaker_west`, each with its emitter anchor (`speaker_<zone>_src`). The rules:
@@ -278,4 +285,4 @@ character) come with the phase that gives them, and will run on the command too,
 `Ch2L1StateTest` (the order, `next`, `parse`), `Ch2L1AnchorsParserTest` (the format, every kind of problem) and
 `Ch2L1DataTest` (the jar's files, which copy wins, the fallbacks), `Ch2L1VoicesTest` (the 32 lines, their sound events, Oggs
 and cues, the texts in both languages) `Ch2L1SkinsTest` (the skins' format) and `Ch2L1ObjectivesTest` (one objective per step, in both languages) and `Ch2L1MapPlanTest` (the plan's blocks and doors, the
-anchors standing on its floors), all in `core/ch2l1`; `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1SpeakersTest` (the file and every rule of the schedule: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say. `PlayerProgressTest` covers the state and the flag in the progress.
+anchors standing on its floors), all in `core/ch2l1`; `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say. `PlayerProgressTest` covers the state and the flag in the progress.

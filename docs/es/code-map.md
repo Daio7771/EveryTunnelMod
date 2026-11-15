@@ -66,6 +66,7 @@ con un comentario KDoc que cuenta más.
 | `ch2l1/Ch2L1Tasks.kt` | El archivo de tareas (`tasks.json`), su lector, `Ch2L1Bits` (conjuntos de cosas como bits de un Int) y `HoldTracker` (un clic mantenido sobre un objetivo) |
 | `ch2l1/Ch2L1Speakers.kt` | El archivo de los altavoces (`speakers.json`), su lector y `Ch2L1SpeakerSchedule`: qué suena y cuándo, por las reglas del plan, sin reloj propio |
 | `ch2l1/Ch2L1IntroScene.kt` | La cinemática del primer aviso: tomas desde anclas, en la maquinaria de las otras escenas |
+| `ch2l1/Ch2L1Guide.kt` | Adónde apunta la flecha guía en cada paso (el reloj, los tubos, el terminal, el analizador, la escoba, la suciedad), la más cercana, cuándo se oculta |
 | `ch2l1/Ch2L1Wiring.kt` | Comprueba que lo que nombran `tasks.json` y `speakers.json` está en `anchors.json` |
 | `ch2l1/Ch2L1Objectives.kt` | El objetivo que muestra el panel en cada estado: una clave de lang por estado, ninguna en las cinemáticas ni al final |
 | `ch2l1/Ch2L1MapPlan.kt` | El mapa del nivel como plan que construir: la caja que vaciar, las cajas de un bloque, las lámparas, el origen, la huella del plan (de `map.json`) |
@@ -312,7 +313,8 @@ con un comentario KDoc que cuenta más.
 | `LockerView.kt` | El interior de la puerta de la taquilla sobre la pantalla mientras te escondes |
 | `AchievementToast.kt` | El aviso "Achievement Unlocked!"; recibe los logros conseguidos |
 | `Ch2L1Subtitles.kt` | Los subtítulos de las voces del Nivel 1 del Chapter 2, mostrados cuando suena una (un oyente del gestor de sonido; siempre activos) |
-| `ObjectivePanel.kt` | El panel de objetivos del Nivel 1 del Chapter 2: arriba a la derecha, pequeño, aparece con un fundido al cambiar el objetivo |
+| `ObjectivePanel.kt` | El panel de objetivos del Nivel 1 del Chapter 2: arriba a la derecha, pequeño, aparece con un fundido al cambiar el objetivo, con la cuenta de una tarea ("(1/3)") |
+| `HoldBar.kt` | La barra de una tarea que pide un clic mantenido (el analizador, la suciedad), bajo la mira |
 | `SubtitleStrip.kt` | El subtítulo de una voz sobre el HUD: el hablante en gris, el texto en blanco, sobre una franja oscura |
 
 ### `render/`
@@ -328,6 +330,7 @@ con un comentario KDoc que cuenta más.
 | `SubjectRenderer.kt` | Renderizador de GeckoLib de los sujetos, cada fase con su cuerpo y su piel |
 | `DeadGuardRenderer.kt` | Renderizador de GeckoLib del guardia anterior, sentado, con el uniforme del jugador gastado |
 | `ScientistRenderer.kt` | Renderizador de GeckoLib del científico del prólogo, girado a su orientación; `ScientistModel` lo dibuja como el hombre, con su piel enferma o, ya cambiado, como el Pale man del nivel 2 (ojos brillantes) |
+| `TaskArrow.kt` | La flecha guía del Nivel 1 del Chapter 2: una V azul con bordes blancos que gira sobre el lugar del paso actual, vista a través de los muebles |
 | `FactoryNpcRenderer.kt` | Las personas de la fábrica sobre el modelo del jugador con brazos clásicos, cada una con su skin (`textures/entity/npc/`) |
 | `DirectorRenderer.kt` | Renderizador de GeckoLib del director: su modelo, su textura y sus animaciones, girado a su orientación |
 | `LabFigureRenderer.kt` | La figura que se ve desde el Lobby del nivel 5, con el modelo del jugador, una silueta oscura |
@@ -374,6 +377,7 @@ con un comentario KDoc que cuenta más.
 | `CongratulationsScreen.kt` | La ventana de felicitación sobre el menú principal tras los créditos: el Observer con su café, un agradecimiento, tiempo jugado y muertes |
 | `FinalCreditsScreen.kt` | Los créditos finales, al ritmo de su canción: dibujos, títulos tecleados, herramientas, "Level 6 coming soon"; la música de la caída |
 | `TerminalScreen.kt` | La pantalla de un ordenador del nivel 5, tecleada en verde sobre negro |
+| `NonameOsScreen.kt` | NonameOS, el terminal de la fábrica (la tarea 1 del Nivel 1 del Chapter 2): el registro de muestras con sus botones REGISTER |
 | `DeathScreen.kt` | La pantalla de muerte: "Killed by", quién te mató y un consejo sobre el negro al morir, y "Try again" |
 
 ### Mixins del cliente: `client/java/daio7771/everytunnel/mixin/client/`

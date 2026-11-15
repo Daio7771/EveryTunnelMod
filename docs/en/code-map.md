@@ -68,6 +68,7 @@ KDoc comment that says more.
 | `ch2l1/Ch2L1Tasks.kt` | The tasks' file (`tasks.json`), its parser, `Ch2L1Bits` (sets of things as the bits of an Int) and `HoldTracker` (a click held on one target) |
 | `ch2l1/Ch2L1Speakers.kt` | The loudspeakers' file (`speakers.json`), its parser and `Ch2L1SpeakerSchedule`: what plays when, by the plan's rules, with no clock of its own |
 | `ch2l1/Ch2L1IntroScene.kt` | The first announcement's cinematic: shots from anchors, in the machinery of the other scenes |
+| `ch2l1/Ch2L1Guide.kt` | Where the guide arrow points in each step (the clock, the tubes, the terminal, the analyzer, the broom, the dirt), the nearest of them, when it hides |
 | `ch2l1/Ch2L1Wiring.kt` | Checks that what `tasks.json` and `speakers.json` name is in `anchors.json` |
 | `ch2l1/Ch2L1Objectives.kt` | The objective the panel shows in each state: one lang key per state, none in the cinematics and at the end |
 | `ch2l1/Ch2L1MapPlan.kt` | The level's map as a plan to build: the box to empty, the boxes of one block, the lamps, the origin, the plan's fingerprint (from `map.json`) |
@@ -312,7 +313,8 @@ KDoc comment that says more.
 | `LockerView.kt` | The inside of a locker's door over the screen while hiding |
 | `AchievementToast.kt` | The "Achievement Unlocked!" toast; receives the earned achievements |
 | `Ch2L1Subtitles.kt` | The subtitles of Chapter 2's Level 1 voices, shown whenever one plays (a listener on the sound manager; always on) |
-| `ObjectivePanel.kt` | Chapter 2's Level 1 objective panel: top right, small, fades in when the objective changes |
+| `ObjectivePanel.kt` | Chapter 2's Level 1 objective panel: top right, small, fades in when the objective changes, with the count of a task ("(1/3)") |
+| `HoldBar.kt` | The bar of a task that takes a held click (the analyzer, the dirt), under the crosshair |
 | `SubtitleStrip.kt` | A voice's subtitle over the HUD: the speaker in grey, the text in white, on a dark strip |
 
 ### `render/`
@@ -328,6 +330,7 @@ KDoc comment that says more.
 | `SubjectRenderer.kt` | GeckoLib renderer for the subjects, each stage its body and skin |
 | `DeadGuardRenderer.kt` | GeckoLib renderer for the guard before you, sitting, in the player's uniform worn out |
 | `ScientistRenderer.kt` | GeckoLib renderer for the prologue's scientist, turned to his yaw; `ScientistModel` draws him as the man, in his sick skin or, once changed, as the Level 2 Pale man (eyes glowing) |
+| `TaskArrow.kt` | The guide arrow of Chapter 2's Level 1: a blue V with white edges that turns over the place of the current step, seen through furniture |
 | `FactoryNpcRenderer.kt` | The factory's people on the player's model with classic arms, each in its skin (`textures/entity/npc/`) |
 | `DirectorRenderer.kt` | GeckoLib renderer for the director: his model, texture and animations, turned to his yaw |
 | `LabFigureRenderer.kt` | The figure seen from Level 5's Lobby, on the player's model, a dark shape |
@@ -374,6 +377,7 @@ KDoc comment that says more.
 | `CongratulationsScreen.kt` | The congratulations window over the main menu after the credits: the Observer with his coffee, a thank-you, time played and deaths |
 | `FinalCreditsScreen.kt` | The final credits, timed to their song: drawings, typed titles, tools, "Level 6 coming soon"; the fall's music |
 | `TerminalScreen.kt` | A Level 5 computer's screen, typed out green on black |
+| `NonameOsScreen.kt` | NonameOS, the factory's terminal (Chapter 2 Level 1's task 1): the sample registry with its REGISTER buttons |
 | `DeathScreen.kt` | The death screen: "Killed by", the killer and a tip on the black of dying, and "Try again" |
 
 ### Client mixins: `client/java/daio7771/everytunnel/mixin/client/`

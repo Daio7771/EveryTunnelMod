@@ -215,6 +215,13 @@ cambio de estado (jugando, `state`, `skip`) lleva contadores y mundo a lo que el
 tubos, la escoba y la suciedad están donde el jugador aún no ha llegado y no están donde ya ha pasado, así que una tarea se puede probar por
 comando con el nivel como estaría si se hubiera jugado. Los objetos del plano se vuelven a poner desde el propio plano (`Ch2L1Build.planState`).
 
+**La flecha guía** (`client.render.TaskArrow`, destinos en `core.ch2l1.Ch2L1Guide`, ajustes en el `guide` de `tasks.json`): una V rellena que apunta hacia abajo, azul con
+bordes blancos, que gira sobre sí misma y sube y baja un poco sobre el lugar del paso actual del jugador, para que el camino quede claro cuando el LAB esté lleno de mesas
+y máquinas. Se dibuja sin prueba de profundidad (los muebles no la tapan) y crece con la distancia para leerse a través de la sala. Apunta a lo más cercano de lo que queda: el
+reloj de fichar antes de fichar; los tubos aún sin coger y luego el terminal; el analizador; la escoba y luego las manchas sin barrer. Se oculta cuando el jugador se acerca a
+menos de `hide_within` (1,5 bloques a lo largo del suelo), en una cinemática y con el HUD oculto; `height` (1,1) es cuánto flota sobre el ancla y `enabled` la apaga.
+Las fases siguientes añaden a `Ch2L1Guide.targets` los pasos de los Actos 2 y 3.
+
 **Los altavoces** (`platform.Ch2L1SpeakerHooks`, reglas en `core.ch2l1.Ch2L1SpeakerSchedule`, datos en `speakers.json`): los avisos de Rowan
 `rowan_loyal_a1` a `a6`, desde los altavoces de techo (bloques `ceiling_speaker`) de cuatro zonas, `speaker_entrance`, `speaker_lab`, `speaker_main` y
 `speaker_west`, cada una con su ancla emisora (`speaker_<zona>_src`). Las reglas:
@@ -283,4 +290,4 @@ personaje) llegan con la fase que se los dé, y también se ejecutarán con el c
 `Ch2L1StateTest` (el orden, `next`, `parse`), `Ch2L1AnchorsParserTest` (el formato, cada tipo de problema) y `Ch2L1DataTest`
 (los archivos del jar, qué copia gana, los respaldos), `Ch2L1VoicesTest` (las 32 líneas, sus eventos de sonido, Ogg y
 fragmentos, los textos en los dos idiomas) `Ch2L1SkinsTest` (el formato de las skins) y `Ch2L1ObjectivesTest` (un objetivo por paso, en los dos idiomas) y `Ch2L1MapPlanTest` (los bloques y puertas del plan, las anclas
-sobre sus suelos), todos en `core/ch2l1`; `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas. `PlayerProgressTest` cubre el estado y la marca en el progreso.
+sobre sus suelos), todos en `core/ch2l1`; `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas. `PlayerProgressTest` cubre el estado y la marca en el progreso.

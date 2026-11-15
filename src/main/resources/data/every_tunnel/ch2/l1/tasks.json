@@ -16,5 +16,10 @@
     "broom": "task3_broom_block",
     "dirt": "task3_dirt_spots",
     "sweep_seconds": 1.5
+  },
+  "guide": {
+    "enabled": true,
+    "height": 1.1,
+    "hide_within": 1.5
   }
 }

@@ -21,6 +21,7 @@ import daio7771.everytunnel.client.hud.ExhaustionVignette
 import daio7771.everytunnel.client.hud.FlashlightOverlay
 import daio7771.everytunnel.client.hud.LockerView
 import daio7771.everytunnel.client.hud.HoldBar
+import daio7771.everytunnel.client.render.TaskArrow
 import daio7771.everytunnel.client.hud.ObjectivePanel
 import daio7771.everytunnel.client.screen.NonameOsScreen
 import daio7771.everytunnel.client.hud.AchievementToast
@@ -115,6 +116,7 @@ object EveryTunnelClient : ClientModInitializer {
         Ch2L1Subtitles.register()
         ObjectivePanel.register()
         HoldBar.register()
+        TaskArrow.register()
         NonameOsScreen.register()
         DeathScreen.register()
         TerminalScreen.register()

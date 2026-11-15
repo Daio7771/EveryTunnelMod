@@ -69,6 +69,14 @@ class Ch2L1TasksTest {
     }
 
     @Test
+    fun `the guide can be turned off and moved`() {
+        val result = parse("""{ "guide": { "enabled": false, "height": 2, "hide_within": 3 } }""")
+        assertEquals(emptyList(), result.problems)
+        assertEquals(Ch2L1GuideSpec(false, 2.0, 3.0), result.tasks.guide)
+        assertTrue(parse("""{ "guide": { "height": "high" } }""").problems.any { "guide.height" in it })
+    }
+
+    @Test
     fun `bits hold a set of things`() {
         var mask = 0
         mask = Ch2L1Bits.with(mask, 0)

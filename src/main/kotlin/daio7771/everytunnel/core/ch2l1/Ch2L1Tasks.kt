@@ -7,13 +7,20 @@ import daio7771.everytunnel.util.JsonFields
 data class Ch2L1TubeSpec(val anchor: String, val code: String)
 
 /**
+ * The guide arrow (`client.render.TaskArrow`, [Ch2L1Guide]): whether it shows, how high over the anchor it floats ([height], blocks)
+ * and how near the player can come before it hides itself ([hideWithin], blocks along the floor).
+ */
+data class Ch2L1GuideSpec(val enabled: Boolean, val height: Double, val hideWithin: Double)
+
+/**
  * The three tasks of Act 1, from `tasks.json`: which anchors hold what, and how long each takes. Plain Kotlin.
  *
  * ```json
  * {
  *   "task1": { "tubes": [ { "anchor": "task1_tube_1", "code": "S-0412" } ], "terminal": "task1_terminal_block", "register_seconds": 1.2 },
  *   "task2": { "analyzer": "task2_analyzer_block", "calibrate_seconds": 4.0 },
- *   "task3": { "broom": "task3_broom_block", "dirt": "task3_dirt_spots", "sweep_seconds": 1.5 }
+ *   "task3": { "broom": "task3_broom_block", "dirt": "task3_dirt_spots", "sweep_seconds": 1.5 },
+ *   "guide": { "enabled": true, "height": 1.1, "hide_within": 1.5 }
  * }
  * ```
  *
@@ -30,6 +37,7 @@ data class Ch2L1Tasks(
     val broomAnchor: String,
     val dirtPath: String,
     val sweepSeconds: Double,
+    val guide: Ch2L1GuideSpec,
 ) {
     /** Ticks the registry's bar takes for one sample. */
     val registerTicks: Int get() = (registerSeconds * TICKS_PER_SECOND).toInt().coerceAtLeast(1)
@@ -62,6 +70,7 @@ object Ch2L1TasksParser {
         val one = fields.child("task1")
         val two = fields.child("task2")
         val three = fields.child("task3")
+        val guide = fields.child("guide")
 
         val tubes = parseTubes(one, fields.problems)
         val tasks = Ch2L1Tasks(
@@ -73,7 +82,13 @@ object Ch2L1TasksParser {
             broomAnchor = three.string("broom", "task3_broom_block"),
             dirtPath = three.string("dirt", "task3_dirt_spots"),
             sweepSeconds = three.double("sweep_seconds", 1.5, min = 0.2, max = 30.0),
+            guide = Ch2L1GuideSpec(
+                enabled = guide.boolean("enabled", true),
+                height = guide.double("height", 1.1, min = 0.0, max = 10.0),
+                hideWithin = guide.double("hide_within", 1.5, min = 0.0, max = 50.0),
+            ),
         )
+        guide.reportUnknownKeys()
         one.reportUnknownKeys()
         two.reportUnknownKeys()
         three.reportUnknownKeys()
