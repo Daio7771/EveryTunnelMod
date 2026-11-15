@@ -19,8 +19,13 @@ sealed interface Ch2L1StepSpec {
     data class Type(val at: String, val minSeconds: Double, val maxSeconds: Double) : Ch2L1StepSpec
 }
 
-/** A person of the factory's ordinary life: [skin], the [group] they belong to (the LAB's go in phase 8), where they start and what they do, over and over. */
-data class Ch2L1WorkerSpec(val id: String, val skin: String, val group: String, val spawn: String, val steps: List<Ch2L1StepSpec>)
+/**
+ * A person of the factory's ordinary life: [skin], the [group] they belong to (the LAB's go in phase 8), where they start and what they do, over
+ * and over; [pace]: their own walking pace (a multiple of `walk_speed`), null to draw one ([Ch2L1Life.pace]).
+ */
+data class Ch2L1WorkerSpec(
+    val id: String, val skin: String, val group: String, val spawn: String, val steps: List<Ch2L1StepSpec>, val pace: Double? = null,
+)
 
 /** One of a group's people, standing at the point anchor [at] facing the way it faces (the lockers' group of the meeting). */
 data class Ch2L1GroupMember(val skin: String, val at: String)
@@ -43,9 +48,15 @@ data class Ch2L1GroupMember(val skin: String, val at: String)
  *
  * A routine is a list of steps done in order and then over again: `stand` (seconds, a number or [min, max]), `walk` (a path anchor,
  * optionally `reverse`) and `type` (a point anchor, with `seconds`). Positions are anchors, so moving the map moves the people. [walkSpeed]
- * multiplies how fast they walk. The skin is one of [Ch2L1Skins.ALL].
+ * multiplies how fast they walk, and a worker's `pace` (optional) how fast that one does. The skin is one of [Ch2L1Skins.ALL]. `life`
+ * (optional) is how alive they look: [Ch2L1Life].
  */
-data class Ch2L1NpcData(val walkSpeed: Double, val workers: List<Ch2L1WorkerSpec>, val groups: Map<String, List<Ch2L1GroupMember>>) {
+data class Ch2L1NpcData(
+    val walkSpeed: Double,
+    val workers: List<Ch2L1WorkerSpec>,
+    val groups: Map<String, List<Ch2L1GroupMember>>,
+    val life: Ch2L1Life = Ch2L1Life.DEFAULT,
+) {
     companion object {
         val EMPTY = Ch2L1NpcData(1.0, emptyList(), emptyMap())
     }
@@ -69,14 +80,16 @@ object Ch2L1NpcsParser {
             val group = entry.string("group", "ambient")
             val spawn = entry.requiredString("spawn")
             val steps = parseSteps(entry, fields.problems)
+            val pace = if (entry.has("pace")) entry.double("pace", 1.0, min = 0.3, max = 3.0) else null
             entry.reportUnknownKeys()
             when {
                 id == null || spawn == null -> fields.problems += "workers[$i]: needs an id and a spawn anchor, skipped"
                 !ID.matches(id) -> fields.problems += "workers[$i]: the id \"$id\" is not a-z, 0-9 and _, skipped"
                 !seen.add(id) -> fields.problems += "workers[$i]: the id \"$id\" is repeated, skipped"
-                else -> workers += Ch2L1WorkerSpec(id, skin, group, spawn, steps)
+                else -> workers += Ch2L1WorkerSpec(id, skin, group, spawn, steps, pace)
             }
         }
+        val life = life(fields.child("life"))
         val groups = linkedMapOf<String, List<Ch2L1GroupMember>>()
         val groupsObject = fields.child("groups")
         val groupsJson = root.get("groups")
@@ -96,7 +109,38 @@ object Ch2L1NpcsParser {
         }
         groupsObject.reportUnknownKeys()
         fields.reportUnknownKeys()
-        return Result(Ch2L1NpcData(walkSpeed, workers, groups), fields.problems.toList())
+        return Result(Ch2L1NpcData(walkSpeed, workers, groups, life), fields.problems.toList())
+    }
+
+    private fun life(fields: JsonFields): Ch2L1Life {
+        val d = Ch2L1Life.DEFAULT
+        fun span(key: String, default: Ch2L1Span): Ch2L1Span {
+            if (!fields.has(key)) return default
+            val array = fields.array(key)
+            val numbers = array?.map { it.takeIf { e -> e.isJsonPrimitive && e.asJsonPrimitive.isNumber }?.asDouble }
+            val min = numbers?.getOrNull(0)
+            val max = numbers?.getOrNull(1)
+            if (numbers?.size != 2 || min == null || max == null || min < 0 || max < min) {
+                fields.problems += "${fields.pathOf(key)}: expected [min, max] seconds, using [${default.min / 20.0}, ${default.max / 20.0}]"
+                return default
+            }
+            return Ch2L1Span.seconds(min, max)
+        }
+        return Ch2L1Life(
+            paceSpread = fields.double("pace_spread", d.paceSpread, min = 0.0, max = 0.5),
+            accelTicks = (fields.double("accel_seconds", d.accelTicks / 20.0, min = 0.0, max = 5.0) * 20).toInt(),
+            turnDegrees = fields.double("turn_degrees", d.turnDegrees.toDouble(), min = 1.0, max = 90.0).toFloat(),
+            linger = fields.double("linger_chance", d.linger, min = 0.0, max = 1.0),
+            lingerTicks = span("linger_seconds", d.lingerTicks),
+            glanceTicks = span("glance_seconds", d.glanceTicks),
+            playerRange = fields.double("player_range", d.playerRange, min = 0.0, max = 16.0),
+            playerLookTicks = span("player_look_seconds", d.playerLookTicks),
+            playerCooldownTicks = span("player_cooldown_seconds", d.playerCooldownTicks),
+            chatRange = fields.double("chat_range", d.chatRange, min = 0.0, max = 8.0),
+            chatChance = fields.double("chat_chance", d.chatChance, min = 0.0, max = 1.0),
+            chatTicks = span("chat_seconds", d.chatTicks),
+            chatCooldownTicks = span("chat_cooldown_seconds", d.chatCooldownTicks),
+        ).also { fields.reportUnknownKeys() }
     }
 
     private fun objectAt(element: JsonElement, path: String, problems: MutableList<String>): JsonFields? {
@@ -216,21 +260,28 @@ object Ch2L1Routines {
  * Runs a routine, one tick at a time, for one person: told where they are, it says what to do now ([Command]). Plain Kotlin, no clock, no
  * world: the entity does what it says (walks toward a point, stands facing a way, types). A step ends when its time is up (stand, type)
  * or its last point is reached (walk); after the last step the routine begins again. Anyone who does not get nearer to a point for
- * [STUCK_TICKS] ticks (a bump, a door) is told to snap to it, so a routine never stops for good.
+ * [STUCK_TICKS] ticks (a bump, a door) is told to snap to it, so a routine never stops for good. On the way, at each point of a path but the
+ * first and the last, they stop a moment [linger] of the times (for [lingerTicks]), like someone who remembers something.
  */
-class Ch2L1RoutineRunner(private val steps: List<Ch2L1Step>, private val random: Random) {
+class Ch2L1RoutineRunner(
+    private val steps: List<Ch2L1Step>,
+    private val random: Random,
+    private val linger: Double = 0.0,
+    private val lingerTicks: Ch2L1Span = Ch2L1Span(0, 0),
+) {
 
     sealed interface Command {
         /** Stand still; face [yaw] if it is not null; [typing] with the arms out. */
         data class Stand(val yaw: Float?, val typing: Boolean) : Command
 
-        /** Walk to the point; [snap]: put them there, they are stuck. */
-        data class MoveTo(val x: Double, val y: Double, val z: Double, val snap: Boolean) : Command
+        /** Walk to the point; [last]: they stop there (they brake on the way); [snap]: put them there, they are stuck. */
+        data class MoveTo(val x: Double, val y: Double, val z: Double, val snap: Boolean, val last: Boolean = false) : Command
     }
 
     private var index = 0
     private var point = 0
     private var wait = -1
+    private var pause = 0
     private var arrived = false
     private var stuck = 0
     private var nearest = Double.MAX_VALUE
@@ -244,6 +295,10 @@ class Ch2L1RoutineRunner(private val steps: List<Ch2L1Step>, private val random:
                 return Command.Stand(null, false)
             }
             is Ch2L1Step.Walk -> {
+                if (pause > 0) {
+                    pause--
+                    return Command.Stand(null, false)
+                }
                 val target = step.points.getOrNull(point)
                 if (target == null) {
                     advance()
@@ -257,13 +312,20 @@ class Ch2L1RoutineRunner(private val steps: List<Ch2L1Step>, private val random:
                         advance()
                         return Command.Stand(null, false)
                     }
-                    return moveTo(step.points[point], x, z)
+                    if (point >= 2 && linger > 0 && random.nextDouble() < linger) {
+                        val ticks = lingerTicks.pick(random)
+                        if (ticks > 0) {
+                            pause = ticks - 1
+                            return Command.Stand(null, false)
+                        }
+                    }
+                    return moveTo(step.points[point], x, z, point == step.points.size - 1)
                 }
-                return moveTo(target, x, z)
+                return moveTo(target, x, z, point == step.points.size - 1)
             }
             is Ch2L1Step.Type -> {
                 if (!arrived) {
-                    if (!near(x, z, step.spot)) return moveTo(step.spot, x, z)
+                    if (!near(x, z, step.spot)) return moveTo(step.spot, x, z, true)
                     arrived = true
                     wait = pick(step.minTicks, step.maxTicks)
                 }
@@ -273,7 +335,7 @@ class Ch2L1RoutineRunner(private val steps: List<Ch2L1Step>, private val random:
         }
     }
 
-    private fun moveTo(target: Position, x: Double, z: Double): Command {
+    private fun moveTo(target: Position, x: Double, z: Double, last: Boolean): Command {
         val distance = distance(x, z, target)
         if (distance < nearest - HEADWAY) {
             nearest = distance
@@ -286,13 +348,14 @@ class Ch2L1RoutineRunner(private val steps: List<Ch2L1Step>, private val random:
             stuck = 0
             nearest = Double.MAX_VALUE
         }
-        return Command.MoveTo(target.x, target.y, target.z, snap)
+        return Command.MoveTo(target.x, target.y, target.z, snap, last)
     }
 
     private fun advance() {
         index = (index + 1) % steps.size
         point = 0
         wait = -1
+        pause = 0
         arrived = false
         stuck = 0
         nearest = Double.MAX_VALUE

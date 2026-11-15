@@ -1,5 +1,12 @@
 {
   "walk_speed": 1.0,
+  "life": {
+    "pace_spread": 0.15, "accel_seconds": 0.6, "turn_degrees": 9,
+    "linger_chance": 0.12, "linger_seconds": [0.6, 1.8],
+    "glance_seconds": [2, 5],
+    "player_range": 4.5, "player_look_seconds": [1.5, 3], "player_cooldown_seconds": [8, 16],
+    "chat_range": 2.4, "chat_chance": 0.4, "chat_seconds": [4, 8], "chat_cooldown_seconds": [30, 60]
+  },
   "workers": [
     {"id": "lab_01", "skin": "generic_1", "group": "lab", "spawn": "npc_lab_01", "routine": [{"type": "npc_lab_01", "seconds": [25, 45]}, {"stand": [2, 5]}]},
     {"id": "lab_02", "skin": "generic_2", "group": "lab", "spawn": "npc_lab_02", "routine": [{"type": "npc_lab_02", "seconds": [20, 40]}, {"stand": [2, 5]}]},

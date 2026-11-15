@@ -67,6 +67,7 @@ con un comentario KDoc que cuenta más.
 | `ch2l1/Ch2L1Speakers.kt` | El archivo de los altavoces (`speakers.json`), su lector y `Ch2L1SpeakerSchedule`: qué suena y cuándo, por las reglas del plan, sin reloj propio |
 | `ch2l1/Ch2L1IntroScene.kt` | La cinemática del primer aviso: tomas desde anclas, en la maquinaria de las otras escenas |
 | `ch2l1/Ch2L1Npcs.kt` | La gente de la fábrica: `npcs.json`, su lector, los pasos de una rutina con sus anclas buscadas y `Ch2L1RoutineRunner`, lo que hace una persona cada tick |
+| `ch2l1/Ch2L1NpcLife.kt` | Lo que hace que la gente de la fábrica parezca viva (`life` de `npcs.json`): `Ch2L1Gait` (andar y girar suave), `Ch2L1Gaze` (adónde mira la cabeza), `Ch2L1Chat` (charlas entre dos), `Ch2L1Pose` |
 | `ch2l1/Ch2L1Guide.kt` | Adónde apunta la flecha guía en cada paso (el reloj, los tubos, el terminal, el analizador, la escoba, la suciedad), la más cercana, cuándo se oculta |
 | `ch2l1/Ch2L1Wiring.kt` | Comprueba que lo que nombran `tasks.json` y `speakers.json` está en `anchors.json` |
 | `ch2l1/Ch2L1Objectives.kt` | El objetivo que muestra el panel en cada estado: una clave de lang por estado, ninguna en las cinemáticas ni al final |
@@ -247,8 +248,8 @@ con un comentario KDoc que cuenta más.
 | `Ch2L1.kt` | El Nivel 1 del Chapter 2: el estado de cada jugador y si lo está jugando (las reglas le siguen: `enter`, `leave`), guardados en su progreso; todo cambio pasa por aquí y llega a los oyentes |
 | `Ch2L1DataLoader.kt` | Lee los archivos JSON del nivel (la copia de la carpeta de config, si no la del jar) al arrancar y con `/et reload`, y guarda los datos actuales |
 | `Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc` (solo ejecuciones de desarrollo) |
-| `FactoryNpcEntity.kt` | Una persona del Nivel 1 del Chapter 2 (Rowan, el compañero, los trabajadores): un solo tipo de entidad, su skin sincronizada las distingue; un trabajador sigue su rutina tick a tick y puede estar tecleando; una criatura mantenida |
-| `Ch2L1Npcs.kt` | La gente de la fábrica: los trabajadores que se ponen mientras se juega el nivel y los del LAB que se quitan, los grupos y el `/et ch2 l1 npc` del desarrollador |
+| `FactoryNpcEntity.kt` | Una persona del Nivel 1 del Chapter 2 (Rowan, el compañero, los trabajadores): un solo tipo de entidad, su skin sincronizada las distingue; un trabajador sigue su rutina tick a tick (andar suave, a su ritmo), su cabeza mira sola, y su pose sincronizada dice si teclea, habla o escucha; una criatura mantenida |
+| `Ch2L1Npcs.kt` | La gente de la fábrica: los trabajadores que se ponen mientras se juega el nivel y los del LAB que se quitan, las charlas entre parejas, los grupos y el `/et ch2 l1 npc` del desarrollador |
 | `Ch2L1Build.kt` | Construye el nivel desde su plan a razón de 8.000 celdas por tick (y lo vacía), recuerda qué plan construyó, comprueba antes cada bloque |
 | `TimeClockBlock.kt` | El reloj de fichar del Nivel 1 del Chapter 2: un lector de tarjetas (mismos modelos) que ficha al nuevo empleado, rojo y luego verde |
 | `Ch2L1TaskBlocks.kt` | El tubo de muestra, el terminal de NonameOS, el analizador, la escoba apoyada y la suciedad de las tareas del Capítulo 2: cada uno pasa su uso a `Ch2L1TaskHooks` |
@@ -332,7 +333,7 @@ con un comentario KDoc que cuenta más.
 | `DeadGuardRenderer.kt` | Renderizador de GeckoLib del guardia anterior, sentado, con el uniforme del jugador gastado |
 | `ScientistRenderer.kt` | Renderizador de GeckoLib del científico del prólogo, girado a su orientación; `ScientistModel` lo dibuja como el hombre, con su piel enferma o, ya cambiado, como el Pale man del nivel 2 (ojos brillantes) |
 | `TaskArrow.kt` | La flecha guía del Nivel 1 del Chapter 2: una V azul con bordes blancos que gira sobre el lugar del paso actual, vista a través de los muebles |
-| `FactoryNpcRenderer.kt` | Las personas de la fábrica sobre el modelo del jugador con brazos clásicos, cada una con su skin (`textures/entity/npc/`) |
+| `FactoryNpcRenderer.kt` | Las personas de la fábrica sobre el modelo del jugador con brazos clásicos, cada una con su skin (`textures/entity/npc/`), brazos y cabeza según su pose (teclea, habla, escucha) |
 | `DirectorRenderer.kt` | Renderizador de GeckoLib del director: su modelo, su textura y sus animaciones, girado a su orientación |
 | `LabFigureRenderer.kt` | La figura que se ve desde el Lobby del nivel 5, con el modelo del jugador, una silueta oscura |
 | `HunterRenderer.kt` | Renderizador de GeckoLib de los Hunters, con los ojos brillando |

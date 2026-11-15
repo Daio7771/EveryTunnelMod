@@ -1,7 +1,11 @@
 package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.core.ch2l1.Ch2L1Chat
+import daio7771.everytunnel.core.ch2l1.Ch2L1Gaze
 import daio7771.everytunnel.core.ch2l1.Ch2L1GroupMember
+import daio7771.everytunnel.core.ch2l1.Ch2L1Life
+import daio7771.everytunnel.core.ch2l1.Ch2L1Pose
 import daio7771.everytunnel.core.ch2l1.Ch2L1RoutineRunner
 import daio7771.everytunnel.core.ch2l1.Ch2L1Routines
 import daio7771.everytunnel.core.ch2l1.Ch2L1State
@@ -24,6 +28,10 @@ import java.util.Random
  * - **The ordinary life** (`npcs.json`, `workers`): while a player plays the level, inside it and before its cinematic, [ensureAmbient]
  *   (every few seconds, and at once on entering) puts in each worker that is missing, with the routine the file gives it, where its
  *   spawn anchor says. The LAB's go away when the player reaches [Ch2L1State.ACT3_CUTSCENE] (phase 8), the others stay.
+ *   Each walks at their own pace and looks about (`life`, [FactoryNpcEntity]).
+ * - **Talks**: every few ticks, workers free to talk (not at a station, not just after a talk) who are within `chat_range` of each other are
+ *   paired up, nearest first; some of the pairs ([Ch2L1Life.chatChance]) stop to talk ([Ch2L1Chat]: their routines wait, they face each
+ *   other, one talks with their hands while the other listens, then they swap), the rest walk on.
  * - **A group** (`groups`): [spawnGroup] puts its people at their anchors, standing (the lockers' group of the meeting, which the phase of the
  *   meeting asks for), and [despawnGroup] takes a group out.
  * - **`/et ch2 l1 npc`**: the developer's tools ([spawnInFront] puts one person in front of them to see its skin; [clear] takes all away).
@@ -48,6 +56,7 @@ object Ch2L1Npcs {
 
     private fun tick(server: MinecraftServer) {
         if (server.ticks % CHECK_TICKS == 0) ensureAmbient(server)
+        tickTalks(server)
     }
 
     private fun world(server: MinecraftServer): ServerWorld? {
@@ -83,12 +92,12 @@ object Ch2L1Npcs {
         for (worker in data.workers) {
             if (worker.id in present) continue
             if (worker.group == LAB && lastState >= Ch2L1State.ACT3_CUTSCENE.ordinal) continue
-            if (spawnWorker(world, worker, data.walkSpeed)) count++
+            if (spawnWorker(world, worker, data.walkSpeed, data.life)) count++
         }
         return count
     }
 
-    private fun spawnWorker(world: ServerWorld, worker: Ch2L1WorkerSpec, walkSpeed: Double): Boolean {
+    private fun spawnWorker(world: ServerWorld, worker: Ch2L1WorkerSpec, walkSpeed: Double, life: Ch2L1Life): Boolean {
         val problems = mutableListOf<String>()
         val resolved = Ch2L1Routines.resolve(worker, Ch2L1DataLoader.data.anchors, problems)
         if (resolved == null) {
@@ -106,10 +115,69 @@ object Ch2L1Npcs {
                 skin = worker.skin
                 workerId = worker.id
                 group = worker.group
-                this.walkSpeed = walkSpeed
-                routine = Ch2L1RoutineRunner(resolved.steps, Random(seed))
+                pace = walkSpeed * life.pace(worker.pace, seed)
+                this.life = life
+                this.seed = seed
+                talkCooldown = life.chatCooldownTicks.pick(Random(seed + 1)) / 2
+                routine = Ch2L1RoutineRunner(resolved.steps, Random(seed), life.linger, life.lingerTicks)
             }
         } != null
+    }
+
+    // --- talks ---------------------------------------------------------------------------------------
+
+    /** A talk going on between [a] and [b]. */
+    private class Talk(val a: FactoryNpcEntity, val b: FactoryNpcEntity, val chat: Ch2L1Chat)
+
+    private val talks = mutableListOf<Talk>()
+
+    /** Ticks a worker who walked by someone without stopping to talk waits before the next chance. */
+    private const val PASSED_BY = 200
+
+    /** How often workers free to talk are paired up. */
+    private const val PAIR_TICKS = 5
+
+    /** The talks going on, a tick on; and every [PAIR_TICKS], new ones between workers free to talk who are close to each other. */
+    private fun tickTalks(server: MinecraftServer) {
+        talks.removeAll { talk ->
+            val going = !talk.a.isRemoved && !talk.b.isRemoved && talk.chat.tick()
+            if (going) {
+                talk.a.npcPose = if (talk.chat.firstTalks) Ch2L1Pose.TALKING else Ch2L1Pose.LISTENING
+                talk.b.npcPose = if (talk.chat.firstTalks) Ch2L1Pose.LISTENING else Ch2L1Pose.TALKING
+            } else {
+                end(talk.a)
+                end(talk.b)
+            }
+            !going
+        }
+        if (server.ticks % PAIR_TICKS != 0) return
+        val world = world(server) ?: return
+        val life = Ch2L1DataLoader.npcs.life
+        if (life.chatChance <= 0.0) return
+        val free = world.getEntitiesByType(ModEntities.FACTORY_NPC, levelBox()) {
+            it.routine != null && it.talkingTo == null && it.talkCooldown == 0 && it.mode != Ch2L1Gaze.Mode.TYPING
+        }
+        if (free.size < 2) return
+        val byId = free.associateBy { it.id }
+        val random = Random(server.ticks.toLong())
+        for ((first, second) in Ch2L1Chat.pairs(free.map { Ch2L1Chat.Person(it.id, it.x, it.z) }, life.chatRange)) {
+            val a = byId.getValue(first)
+            val b = byId.getValue(second)
+            if (random.nextDouble() >= life.chatChance) {
+                a.talkCooldown = PASSED_BY
+                b.talkCooldown = PASSED_BY
+                continue
+            }
+            a.talkingTo = b
+            b.talkingTo = a
+            talks += Talk(a, b, Ch2L1Chat(life.chatTicks.pick(random), random))
+        }
+    }
+
+    private fun end(person: FactoryNpcEntity) {
+        person.talkingTo = null
+        person.npcPose = Ch2L1Pose.NONE
+        person.talkCooldown = person.life.chatCooldownTicks.pick(Random(person.seed + person.age))
     }
 
     // --- groups -------------------------------------------------------------------------------------

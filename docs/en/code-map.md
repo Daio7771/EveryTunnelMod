@@ -69,6 +69,7 @@ KDoc comment that says more.
 | `ch2l1/Ch2L1Speakers.kt` | The loudspeakers' file (`speakers.json`), its parser and `Ch2L1SpeakerSchedule`: what plays when, by the plan's rules, with no clock of its own |
 | `ch2l1/Ch2L1IntroScene.kt` | The first announcement's cinematic: shots from anchors, in the machinery of the other scenes |
 | `ch2l1/Ch2L1Npcs.kt` | The factory's people: `npcs.json`, its parser, a routine's steps with their anchors looked up, and `Ch2L1RoutineRunner`, what a person does each tick |
+| `ch2l1/Ch2L1NpcLife.kt` | What makes the factory's people look alive (`npcs.json`'s `life`): `Ch2L1Gait` (eased walking and turning), `Ch2L1Gaze` (where the head looks), `Ch2L1Chat` (talks between two), `Ch2L1Pose` |
 | `ch2l1/Ch2L1Guide.kt` | Where the guide arrow points in each step (the clock, the tubes, the terminal, the analyzer, the broom, the dirt), the nearest of them, when it hides |
 | `ch2l1/Ch2L1Wiring.kt` | Checks that what `tasks.json` and `speakers.json` name is in `anchors.json` |
 | `ch2l1/Ch2L1Objectives.kt` | The objective the panel shows in each state: one lang key per state, none in the cinematics and at the end |
@@ -247,8 +248,8 @@ KDoc comment that says more.
 | `Ch2L1.kt` | Chapter 2's Level 1: each player's state and whether they are playing it (the rules follow them: `enter`, `leave`), kept in their progress; every change goes through it and reaches the listeners |
 | `Ch2L1DataLoader.kt` | Reads the level's JSON files (the config folder's copy, else the jar's) at launch and on `/et reload`, and holds the current data |
 | `Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc` (development runs only) |
-| `FactoryNpcEntity.kt` | A person of Chapter 2's Level 1 (Rowan, the coworker, the workers): one entity type, its synced skin tells them apart; a worker follows its routine tick by tick and may be typing; a kept creature |
-| `Ch2L1Npcs.kt` | The factory's people: the workers put in while the level is played and the LAB's taken out, the groups, and the developer's `/et ch2 l1 npc` |
+| `FactoryNpcEntity.kt` | A person of Chapter 2's Level 1 (Rowan, the coworker, the workers): one entity type, its synced skin tells them apart; a worker follows its routine tick by tick (eased walking, its own pace), its head looks about on its own, and its synced pose says if it types, talks or listens; a kept creature |
+| `Ch2L1Npcs.kt` | The factory's people: the workers put in while the level is played and the LAB's taken out, the talks between pairs, the groups, and the developer's `/et ch2 l1 npc` |
 | `Ch2L1Build.kt` | Builds the level from its plan in steps of 8,000 cells a tick (and empties it), remembers which plan it built, checks every block first |
 | `TimeClockBlock.kt` | The time clock of Chapter 2's Level 1: a card reader (same models) that clocks the new hire in, red and then green |
 | `Ch2L1TaskBlocks.kt` | The sample tube, NonameOS's terminal, the analyzer, the leaning broom and the dirt of Chapter 2's tasks: each hands its use to `Ch2L1TaskHooks` |
@@ -332,7 +333,7 @@ KDoc comment that says more.
 | `DeadGuardRenderer.kt` | GeckoLib renderer for the guard before you, sitting, in the player's uniform worn out |
 | `ScientistRenderer.kt` | GeckoLib renderer for the prologue's scientist, turned to his yaw; `ScientistModel` draws him as the man, in his sick skin or, once changed, as the Level 2 Pale man (eyes glowing) |
 | `TaskArrow.kt` | The guide arrow of Chapter 2's Level 1: a blue V with white edges that turns over the place of the current step, seen through furniture |
-| `FactoryNpcRenderer.kt` | The factory's people on the player's model with classic arms, each in its skin (`textures/entity/npc/`) |
+| `FactoryNpcRenderer.kt` | The factory's people on the player's model with classic arms, each in its skin (`textures/entity/npc/`), arms and head by their pose (typing, talking, listening) |
 | `DirectorRenderer.kt` | GeckoLib renderer for the director: his model, texture and animations, turned to his yaw |
 | `LabFigureRenderer.kt` | The figure seen from Level 5's Lobby, on the player's model, a dark shape |
 | `HunterRenderer.kt` | GeckoLib renderer for the Hunters, their eyes glowing |
