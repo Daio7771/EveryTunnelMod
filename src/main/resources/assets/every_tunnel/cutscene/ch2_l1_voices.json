@@ -45,7 +45,7 @@
       "id": "meeting_01",
       "text": "every_tunnel.ch2.l1.meeting_01",
       "speaker": "every_tunnel.ch2.l1.speaker.coworker",
-      "ms": 2768,
+      "ms": 5720,
       "cues": [
         {
           "at": 0,
@@ -53,8 +53,13 @@
           "to": 1
         },
         {
-          "at": 1210,
-          "from": 1
+          "at": 1300,
+          "from": 1,
+          "to": 2
+        },
+        {
+          "at": 3610,
+          "from": 2
         }
       ]
     },
@@ -137,11 +142,16 @@
       "id": "meeting_07",
       "text": "every_tunnel.ch2.l1.meeting_07",
       "speaker": "every_tunnel.ch2.l1.speaker.coworker",
-      "ms": 2351,
+      "ms": 5211,
       "cues": [
         {
           "at": 0,
-          "from": 0
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 2351,
+          "from": 1
         }
       ]
     },
@@ -149,15 +159,20 @@
       "id": "meeting_08_b",
       "text": "every_tunnel.ch2.l1.meeting_08",
       "speaker": "every_tunnel.ch2.l1.speaker.worker_b",
-      "ms": 2768,
+      "ms": 6738,
       "cues": [
         {
           "at": 0,
           "from": 0,
+          "to": 1
+        },
+        {
+          "at": 2768,
+          "from": 1,
           "to": 2
         },
         {
-          "at": 1480,
+          "at": 4268,
           "from": 2
         }
       ]
@@ -166,15 +181,20 @@
       "id": "meeting_09",
       "text": "every_tunnel.ch2.l1.meeting_09",
       "speaker": "every_tunnel.ch2.l1.speaker.coworker",
-      "ms": 2194,
+      "ms": 7139,
       "cues": [
         {
           "at": 0,
           "from": 0,
+          "to": 1
+        },
+        {
+          "at": 2194,
+          "from": 1,
           "to": 3
         },
         {
-          "at": 1575,
+          "at": 5639,
           "from": 3
         }
       ]
@@ -195,19 +215,7 @@
       "id": "meeting_11",
       "text": "every_tunnel.ch2.l1.meeting_11",
       "speaker": "every_tunnel.ch2.l1.speaker.coworker",
-      "ms": 1567,
-      "cues": [
-        {
-          "at": 0,
-          "from": 0
-        }
-      ]
-    },
-    {
-      "id": "meeting_12",
-      "text": "every_tunnel.ch2.l1.meeting_12",
-      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
-      "ms": 2690,
+      "ms": 5146,
       "cues": [
         {
           "at": 0,
@@ -215,8 +223,30 @@
           "to": 1
         },
         {
-          "at": 1270,
+          "at": 1310,
           "from": 1
+        }
+      ]
+    },
+    {
+      "id": "meeting_12",
+      "text": "every_tunnel.ch2.l1.meeting_12",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 6687,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 3560,
+          "from": 1,
+          "to": 3
+        },
+        {
+          "at": 5340,
+          "from": 3
         }
       ]
     },
@@ -241,15 +271,20 @@
       "id": "meeting_14_b",
       "text": "every_tunnel.ch2.l1.meeting_14",
       "speaker": "every_tunnel.ch2.l1.speaker.worker_b",
-      "ms": 1880,
+      "ms": 5720,
       "cues": [
         {
           "at": 0,
           "from": 0,
+          "to": 1
+        },
+        {
+          "at": 1700,
+          "from": 1,
           "to": 2
         },
         {
-          "at": 1135,
+          "at": 4230,
           "from": 2
         }
       ]

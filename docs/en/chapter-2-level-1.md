@@ -128,7 +128,10 @@ Rowan, on the loudspeakers (`rowan_loyal_a1` to `a6`) and in his office (`rowan_
 `tools/sounds/ch2_l1_voices.py` converts them (mono Ogg, one gain for each of the two groups, the union's and Rowan's, so
 that each sits at -18 LUFS as the director's lines do), cuts each into subtitle cues at its pauses and writes
 `cutscene/ch2_l1_voices.json`; `export.py` makes each a sound event, `voice.<id>`
-(`/playsound every_tunnel:voice.follow_01 voice @s`). The `rowan_loyal_*` now play from Act 1's loudspeakers (see
+(`/playsound every_tunnel:voice.follow_01 voice @s`). Three takes end before their text does (`meeting_07`, `08_b` and
+`09` say only their first sentence; `CUT_TAKES` in the tool): the rest of the text shows after the voice, unvoiced, as
+long as it takes to read, and the line's length covers it. A regenerated take goes in with its old file name, and its
+entry leaves `CUT_TAKES`. The `rowan_loyal_*` now play from Act 1's loudspeakers (see
 [Act 1](#act-1-the-tasks-and-the-loudspeakers)); the systems of the later phases play the rest.
 
 **The subtitles are always on.** `client.hud.Ch2L1Subtitles` listens to the sound manager, so whenever one of the level's
