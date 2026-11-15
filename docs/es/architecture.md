@@ -38,7 +38,8 @@ platform/                                           todo lo que toca Minecraft o
 | `core.level` | `LevelDefinition` y el parser del JSON de niveles |
 | `core.guide` | `GuideMarkdown`, el lector de las páginas de la guía del jugador |
 | `core.puzzle` | El código de las válvulas del nivel 3 y el texto de las notas |
-| `core.progress` | `PlayerProgress`, lo que ha hecho un jugador (piezas, notas, escenas) |
+| `core.progress` | `PlayerProgress`, lo que ha hecho un jugador (piezas, notas, escenas, dónde está en el Nivel 1 del Chapter 2) |
+| `core.ch2l1` | El Nivel 1 del Chapter 2: su máquina de estados, sus anclas y sus archivos de datos (véase [Chapter 2, Nivel 1](chapter-2-level-1.md)) |
 | `core.achievement` | `Achievement`, los once logros |
 | `core.hiding` | `LookLimit`, cuánto gira la cabeza en una taquilla |
 | `systems` | `ResourceSystem` (stamina, sed, batería), `NoiseSystem`, `FlashlightBeam` (matemática del haz) |
@@ -165,7 +166,8 @@ Sobrevive a la muerte y llega al cliente de ese jugador; una partida nueva lo bo
 
 Fuera del mundo, en la carpeta `config/` del juego: `every_tunnel/gameplay.json` (la
 configuración de juego) y `every_tunnel/shader_settings_applied.txt` (qué packs de shaders
-ya ha configurado `ShaderSettings`).
+ya ha configurado `ShaderSettings`) y, solo si el desarrollador los pone ahí, `every_tunnel/ch2/l1/*.json` (copias
+editadas de los datos del Nivel 1 del Chapter 2, que se leen con `/et reload`).
 
 ## Mixins
 

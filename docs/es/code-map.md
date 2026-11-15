@@ -52,12 +52,16 @@ con un comentario KDoc que cuenta más.
 | `puzzle/SafeDial.kt` | El dial de una caja: tics, clics, fijar un número cambiando de sentido |
 | `puzzle/darts/DartboardGeometry.kt` | Dónde cayó un dardo en el tablero: número y anillo, en las 4 orientaciones |
 | `film/FilmInfo.kt` | La película del Cinema: fotogramas, velocidad, qué fotograma en cada momento |
-| `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint |
+| `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint, estado en el Nivel 1 del Chapter 2 |
 | `ending/RunSummary.kt` | Los números de la ventana de felicitación: tiempo jugado y muertes de una partida, el tiempo como `H:MM:SS` |
 | `progress/Checkpoint.kt` | Un checkpoint como texto: el inicio de un nivel, o `nivel/punto` para un punto de reinicio dentro de él |
 | `detector/Detector.kt` | El detector del nivel 5: cuánto se llena su icono, cuándo sale el triángulo, cuántas cuentas Geiger caen por tick |
 | `death/DeathCause.kt` | Lo que nombra la pantalla de muerte (quién te mató, la sed, la caída, el agua honda) y dónde sale |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
+| `ch2l1/Ch2L1State.kt` | La máquina de estados del Nivel 1 del Chapter 2: sus diez estados, en el orden en que se juegan |
+| `ch2l1/Ch2L1Anchors.kt` | Los lugares con nombre del nivel, puntos y zonas, tal como los da `anchors.json` |
+| `ch2l1/Ch2L1AnchorsParser.kt` | Lee `anchors.json` y cuenta cada problema con su ruta JSON |
+| `ch2l1/Ch2L1Data.kt` | Los archivos de datos del nivel: cuáles hay, qué copia gana (la de la carpeta de config sobre la del jar), qué da uno que falta o está roto |
 | `spawn/PostLedger.kt` | Qué criatura es dueña de cada punto de spawn, para que un sobrante que aún muere o que carga tarde no borre el registro del que lo sustituyó (el Observer) |
 | `progress/LeftBehind.kt` | Lo que no sirve de un nivel en adelante y se quita del inventario al empezarlo (la tarjeta de acceso desde el Nivel 3, la tarjeta maestra desde el Nivel 5) |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
@@ -231,6 +235,9 @@ con un comentario KDoc que cuenta más.
 | `PrologueSceneHooks.kt` | El prólogo del Chapter 2: construye su sala aparte, genera al científico, sujeta al jugador, el salto, el final (el jugador de vuelta donde estaba, la sala borrada); lo empieza `/everytunnel prologue` |
 | `DirectorSceneHooks.kt` | La escena del director: empieza al abrir su puerta, sujeta al jugador, el portazo, el salto y el final (un punto de reinicio tras su puerta); `DirectorLoopHooks`, en el mismo archivo, manda sus frases después |
 | `DebugCommands.kt` | `/everytunnel ...` |
+| `Ch2L1.kt` | El Nivel 1 del Chapter 2: el estado de cada jugador, guardado en su progreso; todo cambio pasa por aquí y llega a los oyentes |
+| `Ch2L1DataLoader.kt` | Lee los archivos JSON del nivel (la copia de la carpeta de config, si no la del jar) al arrancar y con `/et reload`, y guarda los datos actuales |
+| `Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 anchors\|goto\|state\|skip` (solo ejecuciones de desarrollo) |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
 | `PlaytestLog.kt` | El registro `[playtest]` |
 | `RunStatsHooks.kt` | Cuenta el tiempo jugado en el progreso del jugador (las muertes se cuentan en `DeathHooks`), para la ventana de felicitación |
@@ -369,6 +376,7 @@ Ver [Arquitectura](architecture.md#mixins) para el objetivo y el motivo de cada 
 | `assets/every_tunnel/geo/`, `animations/` | Los archivos de GeckoLib del Pale man |
 | `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | La escena del menú (de `tools/map/map_generator.py`) |
 | `data/every_tunnel/loot_tables/` | Loot tables de los bloques |
+| `data/every_tunnel/ch2/l1/` | Los valores por defecto de los datos del Nivel 1 del Chapter 2: `anchors.json`, `speakers.json`, `tasks.json`, `patrols.json`, `npcs.json`, `cutscenes/*.json` |
 
 ## Tests: `test/kotlin/daio7771/everytunnel/`
 

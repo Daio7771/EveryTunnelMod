@@ -6,6 +6,8 @@ import daio7771.everytunnel.platform.AmbienceHooks
 import daio7771.everytunnel.platform.BookHooks
 import daio7771.everytunnel.platform.BookPhaseHooks
 import daio7771.everytunnel.platform.CarryHooks
+import daio7771.everytunnel.platform.Ch2L1Commands
+import daio7771.everytunnel.platform.Ch2L1DataLoader
 import daio7771.everytunnel.platform.CloudGameHooks
 import daio7771.everytunnel.platform.ChemicalHooks
 import daio7771.everytunnel.platform.CollapseHooks
@@ -97,6 +99,7 @@ object EveryTunnel : ModInitializer {
         ModEntities.register()
         ModSounds.register()
         LevelReloadListener.register()
+        Ch2L1DataLoader.register()
         WorldRulesHooks.register()
         LevelTrackingHooks.register()
         AmbienceHooks.register()
@@ -146,6 +149,7 @@ object EveryTunnel : ModInitializer {
         IntroHooks.register()
         LoadingHooks.register()
         DebugCommands.register()
+        Ch2L1Commands.register()
         DevWorlds.register()
         PlaytestLog.register()
         LOGGER.info("$MOD_NAME loaded")

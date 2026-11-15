@@ -39,6 +39,9 @@ the answers. The spawn eggs are in the Every Tunnel tab only in dev runs too.
 | `/everytunnel rebuilt` | Run by `garage:build` at its end: puts the loot back. Not for hand use |
 | `/everytunnel devworld save\|forget` | Dev runs only, see [Building](building-and-release.md#dev-worlds) |
 
+Chapter 2's Level 1 has commands of its own under `/et` (`reload`, `ch2 l1 anchors|goto|state|skip`), also dev runs only:
+see [Chapter 2, Level 1](chapter-2-level-1.md#debug-commands).
+
 Useful vanilla commands:
 
 - `/function garage:build`: rebuild the map by hand.

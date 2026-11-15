@@ -36,7 +36,8 @@ platform/                                           everything that touches Mine
 | `core.level` | `LevelDefinition` and the level JSON parser |
 | `core.guide` | `GuideMarkdown`, the reader of the player guide pages |
 | `core.puzzle` | Level 3's valve code and the notes' text |
-| `core.progress` | `PlayerProgress`, what a player has done (pieces, notes, scenes) |
+| `core.progress` | `PlayerProgress`, what a player has done (pieces, notes, scenes, where they are in Chapter 2's Level 1) |
+| `core.ch2l1` | Chapter 2's Level 1: its state machine, its anchors and its data files (see [Chapter 2, Level 1](chapter-2-level-1.md)) |
 | `core.achievement` | `Achievement`, the eleven achievements |
 | `core.hiding` | `LookLimit`, how far the head turns in a locker |
 | `systems` | `ResourceSystem` (stamina, thirst, battery), `NoiseSystem`, `FlashlightBeam` (beam math) |
@@ -160,7 +161,8 @@ It survives death and reaches that player's client; a new game clears it.
 
 Outside the world, in the game's `config/` folder: `every_tunnel/gameplay.json` (the
 gameplay config) and `every_tunnel/shader_settings_applied.txt` (which shader packs
-`ShaderSettings` has already set up).
+`ShaderSettings` has already set up), and, only when the developer puts them there, `every_tunnel/ch2/l1/*.json` (edited
+copies of Chapter 2's Level 1 data, read on `/et reload`).
 
 ## Mixins
 

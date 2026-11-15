@@ -1,9 +1,11 @@
 package daio7771.everytunnel.core.progress
 
+import daio7771.everytunnel.core.ch2l1.Ch2L1State
+
 /**
  * What one player has done in this game, kept through deaths and between sessions: the pieces
- * picked up (per level), the notes read, the scenes seen, Level 3's books and the current
- * checkpoint. Plain data, no Minecraft types: `platform.CardinalProgress` keeps one per player,
+ * picked up (per level), the notes read, the scenes seen, Level 3's books, the current
+ * checkpoint and where the player is in Chapter 2's Level 1. Plain data, no Minecraft types: `platform.CardinalProgress` keeps one per player,
  * saves it and sends it to the client.
  */
 class PlayerProgress {
@@ -23,6 +25,9 @@ class PlayerProgress {
 
     /** Level 4 as it was left, as text (`core.save.LoungeSave`), or null. */
     var lounge: String? = null
+
+    /** Where the player is in Chapter 2's Level 1 ([Ch2L1State]); [Ch2L1State.START] before they begin it. */
+    var ch2l1State: Ch2L1State = Ch2L1State.START
 
     /** Server ticks played and deaths in this game, summed over its sessions: the congratulations window's numbers. Never negative. */
     var playTicks: Long = 0
@@ -70,6 +75,7 @@ class PlayerProgress {
         level3Books = 0
         checkpoint = null
         lounge = null
+        ch2l1State = Ch2L1State.START
         playTicks = 0
         deaths = 0
     }
@@ -77,6 +83,6 @@ class PlayerProgress {
     /** One line for the debug command. */
     fun describe(): String {
         val pieceList = piecesByLevel.entries.joinToString("; ") { (level, pieces) -> "$level: ${pieces.joinToString(", ")}" }
-        return "pieces [$pieceList], notes $notesRead, scenes $scenesSeen, level 3 books $level3Books, checkpoint ${checkpoint ?: "none"}, played ${playTicks / 20} s, deaths $deaths"
+        return "pieces [$pieceList], notes $notesRead, scenes $scenesSeen, level 3 books $level3Books, checkpoint ${checkpoint ?: "none"}, chapter 2 level 1 $ch2l1State, played ${playTicks / 20} s, deaths $deaths"
     }
 }

@@ -52,7 +52,7 @@ KDoc comment that says more.
 | `puzzle/SafeDial.kt` | A safe's dial: ticks, clicks, fixing a number by changing direction |
 | `puzzle/darts/DartboardGeometry.kt` | Where a dart landed on the board: number and ring, in the 4 orientations |
 | `film/FilmInfo.kt` | The Cinema's film: frames, speed, which frame at what time |
-| `progress/PlayerProgress.kt` | What a player has done: pieces, notes read, scenes seen, Level 3's books, checkpoint |
+| `progress/PlayerProgress.kt` | What a player has done: pieces, notes read, scenes seen, Level 3's books, checkpoint, state in Chapter 2's Level 1 |
 | `ending/RunSummary.kt` | The congratulations window's numbers: time played and deaths of a game, the time as `H:MM:SS` |
 | `progress/Checkpoint.kt` | A checkpoint as text: a level's start, or `level/point` for a restart point inside it |
 | `detector/Detector.kt` | Level 5's detector: how full its icon is, when the triangle shows, how many Geiger counts fall a tick |
@@ -60,6 +60,10 @@ KDoc comment that says more.
 | `puzzle/NoteText.kt` | A note's text: title, paragraphs, `{A}` / `{A:word}` placeholders |
 | `hiding/LookLimit.kt` | How far the head turns inside a locker |
 | `progress/LeftBehind.kt` | What is of no use from a level on and is taken out of the inventory at its start (the keycard from Level 3, the master card from Level 5) |
+| `ch2l1/Ch2L1State.kt` | Chapter 2's Level 1 state machine: its ten states, in the order they are played |
+| `ch2l1/Ch2L1Anchors.kt` | The level's named places, points and zones, as `anchors.json` gives them |
+| `ch2l1/Ch2L1AnchorsParser.kt` | Reads `anchors.json`, reporting every problem with its JSON path |
+| `ch2l1/Ch2L1Data.kt` | The level's data files: which there are, which copy wins (the config folder's over the jar's), what a missing or broken one gives |
 | `spawn/PostLedger.kt` | Which creature owns each spawn point, so a dying or late-loading leftover never wipes the record of the one that replaced it (the Observer) |
 
 ### `systems/`
@@ -231,6 +235,9 @@ KDoc comment that says more.
 | `PrologueSceneHooks.kt` | Chapter 2's prologue: builds its room out of the way, spawns the scientist, holds the player, skipping, the end (the player back where they were, the room cleared); started by `/everytunnel prologue` |
 | `DirectorSceneHooks.kt` | The director's scene: starts when his door is opened, holds the player, the door's slam, skipping, the end (a restart point inside his door); `DirectorLoopHooks`, in the same file, sends his phrases after it |
 | `DebugCommands.kt` | `/everytunnel ...` |
+| `Ch2L1.kt` | Chapter 2's Level 1: each player's state, kept in their progress; every change goes through it and reaches the listeners |
+| `Ch2L1DataLoader.kt` | Reads the level's JSON files (the config folder's copy, else the jar's) at launch and on `/et reload`, and holds the current data |
+| `Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 anchors\|goto\|state\|skip` (development runs only) |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
 | `PlaytestLog.kt` | The `[playtest]` log |
 | `RunStatsHooks.kt` | Counts the time played into the player's progress (deaths are counted in `DeathHooks`), for the congratulations window |
@@ -369,6 +376,7 @@ See [Architecture](architecture.md#mixins) for the target and reason of each.
 | `assets/every_tunnel/geo/`, `animations/` | The Pale man's GeckoLib files |
 | `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | The menu scene (from `tools/map/map_generator.py`) |
 | `data/every_tunnel/loot_tables/` | Block loot tables |
+| `data/every_tunnel/ch2/l1/` | The defaults of Chapter 2's Level 1 data: `anchors.json`, `speakers.json`, `tasks.json`, `patrols.json`, `npcs.json`, `cutscenes/*.json` |
 
 ## Tests: `test/kotlin/daio7771/everytunnel/`
 

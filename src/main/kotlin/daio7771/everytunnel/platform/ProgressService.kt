@@ -1,5 +1,6 @@
 package daio7771.everytunnel.platform
 
+import daio7771.everytunnel.core.ch2l1.Ch2L1State
 import daio7771.everytunnel.core.ending.RunSummary
 import net.minecraft.entity.player.PlayerEntity
 
@@ -41,6 +42,11 @@ interface ProgressService {
     fun lounge(player: PlayerEntity): String?
 
     fun setLounge(player: PlayerEntity, text: String?)
+
+    /** Where the player is in Chapter 2's Level 1 ([Ch2L1State.START] before they begin it). */
+    fun ch2L1State(player: PlayerEntity): Ch2L1State
+
+    fun setCh2L1State(player: PlayerEntity, state: Ch2L1State)
 
     /** Adds [ticks] played to this game's total. Not synced to the client: it is counted every tick. */
     fun addPlayTicks(player: PlayerEntity, ticks: Long)

@@ -33,6 +33,7 @@ La primera vez, léelas en este orden:
 | [Audio](audio.md) | Cada evento de sonido, los reproductores del cliente, cómo se hacen los sonidos |
 | [Gráficos](graphics.md) | Con y sin shaders, luces, brillo, texturas, dirección de arte |
 | [Sistema de cinemáticas](cinematic-system.md) | La escena del director (cámara guiada, voz, subtítulos, saltar), la caída, los créditos finales y el prólogo del Chapter 2 |
+| [Chapter 2, Nivel 1](chapter-2-level-1.md) | El nivel de la fábrica, construido por fases en una rama privada: su máquina de estados, sus archivos de datos JSON (y cómo ajustarlos con `/et reload`) y sus comandos de depuración |
 | [Herramientas Python](tools.md) | Los generadores del mapa, sonidos, bloques, arte de entidades y GUI |
 | [Compilación y release](building-and-release.md) | Tareas de Gradle, mundos de desarrollo, el jar de release |
 | [Depuración](debugging.md) | Comandos de depuración y el registro `[playtest]` |
