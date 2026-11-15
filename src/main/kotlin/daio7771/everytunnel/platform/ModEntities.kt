@@ -91,6 +91,14 @@ object ModEntities {
         .trackRangeBlocks(128)
         .build()
 
+    /** A person of Chapter 2's Level 1: Rowan, the coworker, the workers ([FactoryNpcEntity]); the skin tells them apart. Never saved. */
+    val FACTORY_NPC: EntityType<FactoryNpcEntity> = FabricEntityTypeBuilder.create(SpawnGroup.MISC, ::FactoryNpcEntity)
+        .dimensions(EntityDimensions.fixed(0.6f, 1.8f))
+        .disableSaving()
+        .disableSummon()
+        .trackRangeBlocks(64)
+        .build()
+
     /** The guard before you, dead in Level 5's drain ([DeadGuardHooks]). Never saved. */
     val DEAD_GUARD: EntityType<DeadGuardEntity> =
         FabricEntityTypeBuilder.create<DeadGuardEntity>(SpawnGroup.MISC) { type, world -> DeadGuardEntity(type, world) }
@@ -151,10 +159,12 @@ object ModEntities {
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "distortion_cloud"), DISTORTION_CLOUD)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "distortion_junior"), DISTORTION_JUNIOR)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "lab_figure"), LAB_FIGURE)
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "factory_npc"), FACTORY_NPC)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "subject"), SUBJECT)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "dead_guard"), DEAD_GUARD)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "director"), DIRECTOR)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "scientist"), SCIENTIST)
         FabricDefaultAttributeRegistry.register(LAB_FIGURE, LabFigureEntity.createAttributes())
+        FabricDefaultAttributeRegistry.register(FACTORY_NPC, FactoryNpcEntity.createAttributes())
     }
 }

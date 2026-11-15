@@ -3,6 +3,7 @@ package daio7771.everytunnel.platform
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.SuggestionProvider
+import daio7771.everytunnel.core.ch2l1.Ch2L1Skins
 import daio7771.everytunnel.core.ch2l1.Ch2L1State
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.command.CommandSource
@@ -24,11 +25,19 @@ import net.minecraft.util.Identifier
  * - `/et ch2 l1 state [<state>]`: shows your state, or puts you in another one (every system of the level
  *   is told, as if you had got there by playing).
  * - `/et ch2 l1 skip`: moves you on to the next state, as if you had done what ends the current one.
+ * - `/et ch2 l1 npc <skin>`: puts a person of the factory in front of you (`rowan`, `coworker`, `worker_a`, `worker_b`,
+ *   `generic_1` to `generic_3`), to see its skin; `/et ch2 l1 npc clear` takes them all away ([Ch2L1Npcs]).
+ *
+ * The level's voices have no command: `/playsound every_tunnel:voice.<id> voice @s` plays any of them, with its subtitles.
  */
 object Ch2L1Commands {
 
     private val ANCHOR_NAMES = SuggestionProvider<ServerCommandSource> { _, builder ->
         CommandSource.suggestMatching(Ch2L1DataLoader.data.anchors.names(), builder)
+    }
+
+    private val SKIN_NAMES = SuggestionProvider<ServerCommandSource> { _, builder ->
+        CommandSource.suggestMatching(Ch2L1Skins.ALL, builder)
     }
 
     private val STATE_NAMES = SuggestionProvider<ServerCommandSource> { _, builder ->
@@ -60,7 +69,16 @@ object Ch2L1Commands {
                                             .executes(::setState),
                                     ),
                                 )
-                                .then(CommandManager.literal("skip").executes(::skip)),
+                                .then(CommandManager.literal("skip").executes(::skip))
+                                .then(
+                                    CommandManager.literal("npc")
+                                        .then(CommandManager.literal("clear").executes(::clearNpcs))
+                                        .then(
+                                            CommandManager.argument("skin", StringArgumentType.word())
+                                                .suggests(SKIN_NAMES)
+                                                .executes(::spawnNpc),
+                                        ),
+                                ),
                         ),
                     ),
             )
@@ -156,6 +174,26 @@ object Ch2L1Commands {
         }
         reply(context, "Skipped $from: now in $to.")
         return 1
+    }
+
+    private fun spawnNpc(context: CommandContext<ServerCommandSource>): Int {
+        val skin = StringArgumentType.getString(context, "skin")
+        if (skin !in Ch2L1Skins.ALL) {
+            reply(context, "No skin called $skin. Skins: ${Ch2L1Skins.ALL.joinToString(", ")}")
+            return 0
+        }
+        if (Ch2L1Npcs.spawnInFront(context.source.playerOrThrow, skin) == null) {
+            reply(context, "No room for a person in front of you.")
+            return 0
+        }
+        reply(context, "$skin stands in front of you (/et ch2 l1 npc clear takes them away).")
+        return 1
+    }
+
+    private fun clearNpcs(context: CommandContext<ServerCommandSource>): Int {
+        val count = Ch2L1Npcs.clear(context.source.server)
+        reply(context, if (count == 0) "There were none." else "$count gone.")
+        return count
     }
 
     private fun mark(provisional: Boolean) = if (provisional) " (provisional)" else ""

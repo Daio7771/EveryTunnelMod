@@ -60,8 +60,8 @@ draws or plays:
 | `client` | The client entrypoint, the flashlight key, the synced resources, shader detection and settings, the map world installer, the achievements earned |
 | `client.compat` | LambDynamicLights integration (the flashlight's light) |
 | `client.effects` | Everything heard (ambience, hum, heartbeat, breathing, music) and the screen fade |
-| `client.hud` | Status bars, exhaustion vignette, the no-shader flashlight spot, the locker view, the achievement toast |
-| `client.render` | The Pale man's renderer, loot on the floor, the guard uniform |
+| `client.hud` | Status bars, exhaustion vignette, the no-shader flashlight spot, the locker view, the achievement toast, the subtitles of Chapter 2's Level 1 voices |
+| `client.render` | The Pale man's renderer, loot on the floor, the guard uniform, the factory's people |
 | `client.screen` | Main menu, player guide, achievements, loading screen and tips, the final credits, the menu figure |
 
 Mixins live in Java: `src/main/java/.../mixin/` (common) and

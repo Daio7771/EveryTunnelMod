@@ -16,6 +16,7 @@ import daio7771.everytunnel.client.effects.IntroMusic
 import daio7771.everytunnel.client.effects.FluorescentHum
 import daio7771.everytunnel.client.effects.ScreenFade
 import daio7771.everytunnel.client.effects.TensionMusic
+import daio7771.everytunnel.client.hud.Ch2L1Subtitles
 import daio7771.everytunnel.client.hud.ExhaustionVignette
 import daio7771.everytunnel.client.hud.FlashlightOverlay
 import daio7771.everytunnel.client.hud.LockerView
@@ -28,6 +29,7 @@ import daio7771.everytunnel.client.render.DirectorRenderer
 import daio7771.everytunnel.client.render.ScientistRenderer
 import daio7771.everytunnel.client.render.DistortionRenderer
 import daio7771.everytunnel.client.render.HunterRenderer
+import daio7771.everytunnel.client.render.FactoryNpcRenderer
 import daio7771.everytunnel.client.render.LabFigureRenderer
 import daio7771.everytunnel.client.render.SubjectRenderer
 import daio7771.everytunnel.client.render.FilmWalkerRenderer
@@ -107,6 +109,7 @@ object EveryTunnelClient : ClientModInitializer {
         ScreenFade.register() // after the HUD, so the black covers it
         CutsceneView.register()
         DirectorVoice.register()
+        Ch2L1Subtitles.register()
         DeathScreen.register()
         TerminalScreen.register()
         FinalCreditsScreen.register()
@@ -123,6 +126,7 @@ object EveryTunnelClient : ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.DART, ::DartRenderer)
         EntityRendererRegistry.register(ModEntities.HUNTER, ::HunterRenderer)
         EntityRendererRegistry.register(ModEntities.LAB_FIGURE, ::LabFigureRenderer)
+        EntityRendererRegistry.register(ModEntities.FACTORY_NPC, ::FactoryNpcRenderer)
         EntityRendererRegistry.register(ModEntities.SUBJECT, ::SubjectRenderer)
         EntityRendererRegistry.register(ModEntities.DEAD_GUARD, ::DeadGuardRenderer)
         EntityRendererRegistry.register(ModEntities.DIRECTOR, ::DirectorRenderer)

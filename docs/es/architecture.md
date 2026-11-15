@@ -62,8 +62,8 @@ o reproduce:
 | `client` | El entrypoint del cliente, la tecla de la linterna, los recursos sincronizados, la detección y ajustes de shaders, el instalador del mundo del mapa, los logros conseguidos |
 | `client.compat` | Integración con LambDynamicLights (la luz de la linterna) |
 | `client.effects` | Todo lo que se oye (ambiente, zumbido, latido, respiración, música) y el fundido de pantalla |
-| `client.hud` | Barras de estado, viñeta de agotamiento, el foco de la linterna sin shaders, la vista desde la taquilla, el aviso de logro |
-| `client.render` | El renderizador del Pale man, el botín en el suelo, el uniforme del vigilante |
+| `client.hud` | Barras de estado, viñeta de agotamiento, el foco de la linterna sin shaders, la vista desde la taquilla, el aviso de logro, los subtítulos de las voces del Nivel 1 del Chapter 2 |
+| `client.render` | El renderizador del Pale man, el botín en el suelo, el uniforme del vigilante, las personas de la fábrica |
 | `client.screen` | Menú principal, guía del jugador, logros, pantalla de carga y consejos, los créditos finales, la figura del menú |
 
 Las mixins están en Java: `src/main/java/.../mixin/` (comunes) y

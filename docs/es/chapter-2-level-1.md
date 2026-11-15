@@ -5,9 +5,9 @@
 El Nivel 1 del Chapter 2 es la fábrica, cuatro meses después del Chapter 1: un científico normal contratado en lugar del
 que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el despacho del supervisor. Se construye por
 fases (de la 0 a la 10), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
-nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 0, el andamiaje.** Todavía
-no se puede jugar: el nivel tiene su máquina de estados, sus archivos de datos y sus comandos de depuración, y nada
-actúa sobre ellos.
+nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 1, recursos, textos y modelos.** Todavía
+no se puede jugar: el nivel tiene su máquina de estados, sus archivos de datos, sus voces, sus personas y sus comandos de
+depuración, y nada en el mundo los usa.
 
 ## La máquina de estados
 
@@ -70,6 +70,49 @@ del jar son todos provisionales: están en sitios libres del primer nivel del Ch
 lugar real. El mapa se generará con una herramienta Python, como el del Chapter 1, y esa herramienta escribirá
 `anchors.json` (el contenido generado no se edita a mano una vez existe su herramienta); hasta entonces se escribe a mano.
 
+## Voces y subtítulos
+
+El nivel tiene 32 líneas de voz (ElevenLabs, de los MP3 del usuario: la excepción con IA de [Audio](audio.md)): el
+compañero (`follow_01` a `03`, y casi todas las `meeting_*`), los trabajadores A y B de la unión (las líneas `_a` y `_b` de
+la reunión) y Rowan, por los altavoces (`rowan_loyal_a1` a `a6`) y en su despacho (`rowan_office_c1` a `c8`).
+`tools/sounds/ch2_l1_voices.py` las convierte (Ogg mono, una ganancia para cada uno de los dos grupos, el de la unión y el
+de Rowan, de modo que cada uno quede a -18 LUFS como las líneas del director), corta cada una en fragmentos de subtítulo
+por sus pausas y escribe `cutscene/ch2_l1_voices.json`; `export.py` hace de cada una un evento de
+sonido, `voice.<id>` (`/playsound every_tunnel:voice.follow_01 voice @s`). Todavía no las reproduce nada: lo harán los
+sistemas de las fases siguientes.
+
+**Los subtítulos están siempre activos.** `client.hud.Ch2L1Subtitles` escucha al gestor de sonido, así que cuando empieza
+a sonar una voz del nivel, la haya iniciado quien sea, sus fragmentos salen sobre el HUD, cada uno desde su momento: el
+nombre del hablante en gris, luego el texto en blanco, sobre una franja oscura, y el último fragmento se queda un momento
+tras acabar la voz. No dependen del ajuste de subtítulos del juego (estos sonidos no llevan `subtitle` en `sounds.json`).
+En una cinemática el HUD está oculto y la cinemática dibuja los suyos.
+
+Todas las claves de lang están bajo `every_tunnel.ch2.l1.`. **El texto de una línea de voz es una sola clave para toda la
+línea**, el inglés y el español del propio autor: `<id>` (`follow_01`, `rowan_office_c8`; las líneas `_a` y `_b` de la reunión
+llevan solo el número, `meeting_03` para `meeting_03_a`). Los **fragmentos de subtítulo son rangos de frases** de ese texto,
+no textos propios: `ch2_l1_voices.json` dice que desde los 2,04 s el fragmento muestra la frase 1 en adelante, y el cliente
+divide la línea traducida en frases y muestra ese rango, así que el tiempo es el mismo en todos los idiomas y las palabras
+de una línea se editan solo en los archivos de lang. Una frase termina en `.`, `?` o `!` seguido de un espacio
+(`Ch2L1Sentences`, que es también la regla de la herramienta), y **el inglés y el español de una línea deben tener el mismo
+número de frases**: si no, `Ch2L1VoicesTest` falla. La herramienta lee el inglés de `en_us.json` y solo reescribe el tiempo de
+los fragmentos: una línea rápida (menos de un segundo por fragmento) se muestra entera.
+Las demás claves: `speaker.<quién>` (`coworker`, `worker_a`, `worker_b`, `rowan_loudspeaker`, `rowan`), `objective.<paso>`
+(los textos del panel de objetivos, para la fase 2), `restricted_door` (definitiva) y los siete documentos (`notice`,
+`union_list`, `chamber_log`, `authorization`, `medical_file`, `contract_14`, `painting_plaque`). **Los textos de los documentos
+son provisionales hasta la fase 6**, cuando se diseñen los papeles y su pantalla de lectura.
+
+## Las personas
+
+`FactoryNpcEntity` es un solo tipo de entidad para todos: Rowan, el compañero, los trabajadores. Su `skin` (sincronizada con
+el cliente) dice quién es: `rowan`, `coworker`, `worker_a`, `worker_b` y `generic_1` a `generic_3` (`Ch2L1Skins`: seis caras
+en la unión, tres de las cuales hablan, y Rowan). `FactoryNpcRenderer` dibuja el modelo del jugador con brazos clásicos de
+4 px y la capa base de la skin (`textures/entity/npc/<skin>.png`). La skin de Rowan es del autor, copiada tal como llegó;
+las de los seis trabajadores las dibuja `tools/entity/workers.py` (bata blanca, una tarjeta de un color cada uno, una cara
+cada uno), que también escribe una hoja de previews con la de Rowan (`tools/entity/output/`, fuera de git).
+`Ch2L1SkinsTest` comprueba que cada skin sea de 64x64, tenga brazos clásicos y deje vacía su segunda capa. Una criatura
+**mantenida** (véase [Contribuir](contributing.md#criaturas)). Por ahora solo se quedan quietas donde las pone
+`/et ch2 l1 npc`; sus rutinas llegan en la fase 4.
+
 ## Comandos de depuración
 
 `platform.Ch2L1Commands`, nivel de operador 2, **solo en ejecuciones de desarrollo** (como explica
@@ -83,6 +126,8 @@ lugar real. El mapa se generará con una herramienta Python, como el del Chapter
 | `/et ch2 l1 state` | Muestra tu estado y el siguiente |
 | `/et ch2 l1 state <estado>` | Te pone en ese estado (sin importar mayúsculas, `-` por `_`), como si hubieras llegado jugando |
 | `/et ch2 l1 skip` | Te pasa al siguiente estado |
+| `/et ch2 l1 npc <skin>` | Pone delante de ti a una persona de la fábrica, para ver su skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` a `generic_3`) |
+| `/et ch2 l1 npc clear` | Las quita todas |
 
 Por ahora `state` y `skip` solo cambian el estado. Cuando una fase dé efectos a un estado (un objeto, un objetivo, un
 personaje), también se ejecutarán con el comando, que es lo que permite probar cada fase sin jugar las anteriores.
@@ -101,5 +146,6 @@ personaje), también se ejecutarán con el comando, que es lo que permite probar
 ## Tests
 
 `Ch2L1StateTest` (el orden, `next`, `parse`), `Ch2L1AnchorsParserTest` (el formato, cada tipo de problema) y `Ch2L1DataTest`
-(los archivos del jar, qué copia gana, los respaldos), todos en `core/ch2l1`; `PlayerProgressTest` cubre el estado en el
-progreso.
+(los archivos del jar, qué copia gana, los respaldos), `Ch2L1VoicesTest` (las 32 líneas, sus eventos de sonido, Ogg y
+fragmentos, los textos en los dos idiomas) y `Ch2L1SkinsTest` (el formato de las skins), todos en `core/ch2l1`;
+`PlayerProgressTest` cubre el estado en el progreso.

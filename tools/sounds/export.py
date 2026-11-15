@@ -9,7 +9,7 @@ layout as the sound ids: item.flashlight.on -> item/flashlight/on_1.ogg) and the
 sounds.json that declares every sound event and its variations. Sources:
 - every generated sound in catalog.SOUNDS (exactly what generate.py renders)
 - every recording cut in cc0_cuts.CUTS (CC0, and the credited ones in licensed/)
-- the director's voice lines in voice/ (voices.py) and the scientist's (prologue_voices.py), as they are
+- the director's voice lines in voice/ (voices.py), the scientist's (prologue_voices.py) and Chapter 2 Level 1's (ch2_l1_voices.py), as they are
 
 The Ogg encoder stamps each file with a random stream number, so re-encoding unchanged
 audio would still change the files. export_manifest.json keeps a hash of each file's
@@ -25,6 +25,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import audio_io  # noqa: E402
 import cc0_cuts  # noqa: E402
+import ch2_l1_voices  # noqa: E402
 import prologue_voices  # noqa: E402
 import voices  # noqa: E402
 from catalog import SOUNDS  # noqa: E402
@@ -101,6 +102,8 @@ def main():
     for sound_id, relative, x in voices.sounds():
         export(sound_id, relative, x, stream=False)
     for sound_id, relative, x in prologue_voices.sounds():
+        export(sound_id, relative, x, stream=False)
+    for sound_id, relative, x in ch2_l1_voices.sounds():
         export(sound_id, relative, x, stream=False)
 
     # Remove .ogg files that no sound produces any more.

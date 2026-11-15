@@ -62,6 +62,7 @@ con un comentario KDoc que cuenta más.
 | `ch2l1/Ch2L1Anchors.kt` | Los lugares con nombre del nivel, puntos y zonas, tal como los da `anchors.json` |
 | `ch2l1/Ch2L1AnchorsParser.kt` | Lee `anchors.json` y cuenta cada problema con su ruta JSON |
 | `ch2l1/Ch2L1Data.kt` | Los archivos de datos del nivel: cuáles hay, qué copia gana (la de la carpeta de config sobre la del jar), qué da uno que falta o está roto |
+| `ch2l1/Ch2L1Voices.kt` | Las líneas de voz del nivel (clave del texto, hablante, duración, fragmentos de subtítulo como rangos de frases, de `cutscene/ch2_l1_voices.json`), `Ch2L1Sentences` y `Ch2L1Skins`, el aspecto de sus personas |
 | `spawn/PostLedger.kt` | Qué criatura es dueña de cada punto de spawn, para que un sobrante que aún muere o que carga tarde no borre el registro del que lo sustituyó (el Observer) |
 | `progress/LeftBehind.kt` | Lo que no sirve de un nivel en adelante y se quita del inventario al empezarlo (la tarjeta de acceso desde el Nivel 3, la tarjeta maestra desde el Nivel 5) |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
@@ -238,6 +239,8 @@ con un comentario KDoc que cuenta más.
 | `Ch2L1.kt` | El Nivel 1 del Chapter 2: el estado de cada jugador, guardado en su progreso; todo cambio pasa por aquí y llega a los oyentes |
 | `Ch2L1DataLoader.kt` | Lee los archivos JSON del nivel (la copia de la carpeta de config, si no la del jar) al arrancar y con `/et reload`, y guarda los datos actuales |
 | `Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 anchors\|goto\|state\|skip` (solo ejecuciones de desarrollo) |
+| `FactoryNpcEntity.kt` | Una persona del Nivel 1 del Chapter 2 (Rowan, el compañero, los trabajadores): un solo tipo de entidad, su skin sincronizada las distingue; una criatura mantenida |
+| `Ch2L1Npcs.kt` | Ponerlas delante del jugador y quitarlas (`/et ch2 l1 npc`) |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
 | `PlaytestLog.kt` | El registro `[playtest]` |
 | `RunStatsHooks.kt` | Cuenta el tiempo jugado en el progreso del jugador (las muertes se cuentan en `DeathHooks`), para la ventana de felicitación |
@@ -294,6 +297,8 @@ con un comentario KDoc que cuenta más.
 | `FlashlightOverlay.kt` | El foco en pantalla sin shaders |
 | `LockerView.kt` | El interior de la puerta de la taquilla sobre la pantalla mientras te escondes |
 | `AchievementToast.kt` | El aviso "Achievement Unlocked!"; recibe los logros conseguidos |
+| `Ch2L1Subtitles.kt` | Los subtítulos de las voces del Nivel 1 del Chapter 2, mostrados cuando suena una (un oyente del gestor de sonido; siempre activos) |
+| `SubtitleStrip.kt` | El subtítulo de una voz sobre el HUD: el hablante en gris, el texto en blanco, sobre una franja oscura |
 
 ### `render/`
 
@@ -308,6 +313,7 @@ con un comentario KDoc que cuenta más.
 | `SubjectRenderer.kt` | Renderizador de GeckoLib de los sujetos, cada fase con su cuerpo y su piel |
 | `DeadGuardRenderer.kt` | Renderizador de GeckoLib del guardia anterior, sentado, con el uniforme del jugador gastado |
 | `ScientistRenderer.kt` | Renderizador de GeckoLib del científico del prólogo, girado a su orientación; `ScientistModel` lo dibuja como el hombre, con su piel enferma o, ya cambiado, como el Pale man del nivel 2 (ojos brillantes) |
+| `FactoryNpcRenderer.kt` | Las personas de la fábrica sobre el modelo del jugador con brazos clásicos, cada una con su skin (`textures/entity/npc/`) |
 | `DirectorRenderer.kt` | Renderizador de GeckoLib del director: su modelo, su textura y sus animaciones, girado a su orientación |
 | `LabFigureRenderer.kt` | La figura que se ve desde el Lobby del nivel 5, con el modelo del jugador, una silueta oscura |
 | `HunterRenderer.kt` | Renderizador de GeckoLib de los Hunters, con los ojos brillando |
@@ -372,6 +378,8 @@ Ver [Arquitectura](architecture.md#mixins) para el objetivo y el motivo de cada 
 | `assets/every_tunnel/cutscene/prologue.json` | Las líneas de voz del científico: duración y subtítulos (de `tools/sounds/prologue_voices.py`) |
 | `assets/every_tunnel/cutscene/prologue_room.json` | El laboratorio del prólogo: rellenos, bloques, luces, dónde están el científico y el jugador (de `tools/prologue/room.py`) |
 | `assets/every_tunnel/cutscene/director.json` | Las líneas de voz del director: parte, duración y subtítulos (de `tools/sounds/voices.py`) |
+| `assets/every_tunnel/cutscene/ch2_l1_voices.json` | Las líneas de voz del Nivel 1 del Chapter 2: clave del texto, hablante, duración y fragmentos de subtítulo (de `tools/sounds/ch2_l1_voices.py`) |
+| `assets/every_tunnel/textures/entity/npc/` | Las skins de las personas de la fábrica: la de Rowan (del autor) y las de los trabajadores (de `tools/entity/workers.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | De `tools/blocks`, `tools/entity`, `tools/gui` |
 | `assets/every_tunnel/geo/`, `animations/` | Los archivos de GeckoLib del Pale man |
 | `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | La escena del menú (de `tools/map/map_generator.py`) |

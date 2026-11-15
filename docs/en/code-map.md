@@ -64,6 +64,7 @@ KDoc comment that says more.
 | `ch2l1/Ch2L1Anchors.kt` | The level's named places, points and zones, as `anchors.json` gives them |
 | `ch2l1/Ch2L1AnchorsParser.kt` | Reads `anchors.json`, reporting every problem with its JSON path |
 | `ch2l1/Ch2L1Data.kt` | The level's data files: which there are, which copy wins (the config folder's over the jar's), what a missing or broken one gives |
+| `ch2l1/Ch2L1Voices.kt` | The level's voice lines (text key, speaker, length, subtitle cues as ranges of sentences, from `cutscene/ch2_l1_voices.json`), `Ch2L1Sentences` and `Ch2L1Skins`, the look of its people |
 | `spawn/PostLedger.kt` | Which creature owns each spawn point, so a dying or late-loading leftover never wipes the record of the one that replaced it (the Observer) |
 
 ### `systems/`
@@ -238,6 +239,8 @@ KDoc comment that says more.
 | `Ch2L1.kt` | Chapter 2's Level 1: each player's state, kept in their progress; every change goes through it and reaches the listeners |
 | `Ch2L1DataLoader.kt` | Reads the level's JSON files (the config folder's copy, else the jar's) at launch and on `/et reload`, and holds the current data |
 | `Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 anchors\|goto\|state\|skip` (development runs only) |
+| `FactoryNpcEntity.kt` | A person of Chapter 2's Level 1 (Rowan, the coworker, the workers): one entity type, its synced skin tells them apart; a kept creature |
+| `Ch2L1Npcs.kt` | Putting them in front of the player and taking them away (`/et ch2 l1 npc`) |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
 | `PlaytestLog.kt` | The `[playtest]` log |
 | `RunStatsHooks.kt` | Counts the time played into the player's progress (deaths are counted in `DeathHooks`), for the congratulations window |
@@ -294,6 +297,8 @@ KDoc comment that says more.
 | `FlashlightOverlay.kt` | The on-screen spot without shaders |
 | `LockerView.kt` | The inside of a locker's door over the screen while hiding |
 | `AchievementToast.kt` | The "Achievement Unlocked!" toast; receives the earned achievements |
+| `Ch2L1Subtitles.kt` | The subtitles of Chapter 2's Level 1 voices, shown whenever one plays (a listener on the sound manager; always on) |
+| `SubtitleStrip.kt` | A voice's subtitle over the HUD: the speaker in grey, the text in white, on a dark strip |
 
 ### `render/`
 
@@ -308,6 +313,7 @@ KDoc comment that says more.
 | `SubjectRenderer.kt` | GeckoLib renderer for the subjects, each stage its body and skin |
 | `DeadGuardRenderer.kt` | GeckoLib renderer for the guard before you, sitting, in the player's uniform worn out |
 | `ScientistRenderer.kt` | GeckoLib renderer for the prologue's scientist, turned to his yaw; `ScientistModel` draws him as the man, in his sick skin or, once changed, as the Level 2 Pale man (eyes glowing) |
+| `FactoryNpcRenderer.kt` | The factory's people on the player's model with classic arms, each in its skin (`textures/entity/npc/`) |
 | `DirectorRenderer.kt` | GeckoLib renderer for the director: his model, texture and animations, turned to his yaw |
 | `LabFigureRenderer.kt` | The figure seen from Level 5's Lobby, on the player's model, a dark shape |
 | `HunterRenderer.kt` | GeckoLib renderer for the Hunters, their eyes glowing |
@@ -372,6 +378,8 @@ See [Architecture](architecture.md#mixins) for the target and reason of each.
 | `assets/every_tunnel/cutscene/prologue.json` | The scientist's voice lines: length and subtitle cues (from `tools/sounds/prologue_voices.py`) |
 | `assets/every_tunnel/cutscene/prologue_room.json` | The prologue's laboratory: fills, blocks, lights, where the scientist and the player stand (from `tools/prologue/room.py`) |
 | `assets/every_tunnel/cutscene/director.json` | The director's voice lines: part, length and subtitle cues (from `tools/sounds/voices.py`) |
+| `assets/every_tunnel/cutscene/ch2_l1_voices.json` | Chapter 2 Level 1's voice lines: text key, speaker, length and subtitle cues (from `tools/sounds/ch2_l1_voices.py`) |
+| `assets/every_tunnel/textures/entity/npc/` | The factory people's skins: Rowan's (the author's) and the workers' (from `tools/entity/workers.py`) |
 | `assets/every_tunnel/textures/`, `models/`, `blockstates/` | From `tools/blocks`, `tools/entity`, `tools/gui` |
 | `assets/every_tunnel/geo/`, `animations/` | The Pale man's GeckoLib files |
 | `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | The menu scene (from `tools/map/map_generator.py`) |

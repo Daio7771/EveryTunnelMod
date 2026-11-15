@@ -57,7 +57,7 @@ de escribir sus hooks, y di cuál en el KDoc de su archivo.
 | Ciclo de vida | Criaturas | Cómo se pone y se quita |
 |---|---|---|
 | **Con puesto**: se guarda con el mundo, una por punto de spawn | Pale man, Observer | La genera su hook (`PaleManSpawner`, `ObserverHooks`) la primera vez que un jugador entra en su nivel. Los puntos de spawn ya ocupados se anotan en `data/every_tunnel_<nombre>.dat` (claves "nivel/punto"); `homeKey` y `newGamesSeen` van en su NBT |
-| **Mantenida**: nunca se guarda, se rehace cada vez que se construye su nivel | Hunter, Distortion Cloud y Junior, Subject, guardia muerto, director, figura del laboratorio | Su tipo desactiva el guardado. Solo se pone con `KeptEntities.spawn`, que la devuelve si su chunk se descarga, y se quita con `KeptEntities.forget` más `discard()` cuando el nivel se vuelve a poner |
+| **Mantenida**: nunca se guarda, se rehace cada vez que se construye su nivel | Hunter, Distortion Cloud y Junior, Subject, guardia muerto, director, figura del laboratorio, las personas de la fábrica (Nivel 1 del Chapter 2) | Su tipo desactiva el guardado. Solo se pone con `KeptEntities.spawn`, que la devuelve si su chunk se descarga, y se quita con `KeptEntities.forget` más `discard()` cuando el nivel se vuelve a poner |
 | **Pasajera**: vive un momento | Dart, asiento de taquilla, FilmWalker, el científico del prólogo | La genera y la descarta lo que la necesita. No se anota nada |
 
 - **Nunca limpies una criatura con `/kill`.** Sobre algo vivo, `/kill` es daño, no borrado: la
@@ -100,7 +100,7 @@ de escribir sus hooks, y di cuál en el KDoc de su archivo.
   solo se puede usar como referencia (`tools/entity/reference/`), nunca se distribuye. La
   única excepción son las **voces con IA**: voces de la biblioteca de ElevenLabs (no
   clonadas), generadas por el usuario y entregadas como archivos (la del director en el nivel 5,
-  la del científico en el prólogo del Chapter 2; ver [Audio](audio.md)). La música y todos los
+  la del científico en el prólogo del Chapter 2, las del compañero y Rowan en su Nivel 1; ver [Audio](audio.md)). La música y todos los
   demás sonidos siguen fuera de los servicios de IA.
 
 ## Pruebas

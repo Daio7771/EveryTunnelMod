@@ -35,6 +35,7 @@ git).
 | `tools/entity/hunter.py` | Geometría, animaciones, textura y máscara de brillo de los ojos de los Hunters | los Hunters del nivel 5 |
 | `tools/entity/subject.py` | Los cuerpos y pieles de los cuatro sujetos, una fase cada uno, de persona a Pale man, sedados y atados a una camilla vertical | los sujetos del nivel 5 |
 | `tools/entity/figure.py` | `textures/entity/lab_figure.png`: una silueta oscura con el formato del jugador | la figura que se ve desde el Lobby del nivel 5 |
+| `tools/entity/workers.py` | Las skins de los seis trabajadores en `textures/entity/npc/` (el compañero, los trabajadores A y B, tres caras genéricas: bata blanca, una tarjeta de un color cada uno; 64x64, brazos clásicos) y una hoja de previews con la de Rowan, cuya skin es del autor y no se hace aquí | el aspecto de un trabajador; véase [Chapter 2, Nivel 1](chapter-2-level-1.md) |
 | `tools/entity/distortion.py` | Geometría, animaciones, texturas y máscaras de brillo de la Distortion Cloud y el Junior (el ojo del Junior agrietándose en cuatro fases) | las Distortions del nivel 5 |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (la skin del uniforme) | el uniforme |
 | `tools/entity/dead_guard.py` | El guardia anterior: un cuerpo de jugador sentado contra una pared, la cabeza caída, con la skin del uniforme gastada (después de `guard.py`) | el Hideout del nivel 5 |
@@ -56,6 +57,7 @@ git).
 | `tools/sounds/export.py` | Los `.ogg` y `sounds.json` en el mod | un sonido, para meterlo en el juego |
 | `tools/sounds/prologue_voices.py` | Las cuatro líneas del científico como Ogg en `tools/sounds/voice/` (de los MP3 del usuario, una sola ganancia para el grupo; la tercera cortada tras su última palabra, desde "WHAT'S HAPPENING" y toda la cuarta en tres capas: original, grave y aguda; los fragmentos situados por el ajuste de las pausas a la puntuación y los de la primera línea a mano, a partir de una medición de sus siete tramos de voz), `cutscene/prologue.json` y el texto de los fragmentos en `en_us.json` (el español, a mano) | su voz o sus palabras; véase [Sistema de cinemáticas](cinematic-system.md) |
 | `tools/sounds/voices.py` | `cutscene/director.json` y los subtítulos del director en `en_us.json`, a partir de sus archivos de voz (`tools/sounds/voice/`) | una de sus voces o sus palabras; véase [Sistema de cinemáticas](cinematic-system.md) |
+| `tools/sounds/ch2_l1_voices.py` | Las 32 líneas de voz del Nivel 1 del Chapter 2 como Ogg en `tools/sounds/voice/ch2l1/` (de los MP3 del usuario en `~/Documents/Union` y `~/Documents/Rowan`, una ganancia para cada uno de los dos grupos), y `cutscene/ch2_l1_voices.json` (clave del texto, hablante, duración, fragmentos como rangos de frases del texto del autor, que lee de `en_us.json`) | una voz o las palabras de una línea; véase [Chapter 2, Nivel 1](chapter-2-level-1.md) |
 
 ## Mapa
 

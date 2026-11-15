@@ -40,8 +40,8 @@ en la pestaña Every Tunnel al desarrollar.
 | `/everytunnel rebuilt` | Lo ejecuta `garage:build` al terminar: vuelve a poner el botín. No es para usarlo a mano |
 | `/everytunnel devworld save\|forget` | Solo en desarrollo, ver [Compilación](building-and-release.md#mundos-de-desarrollo) |
 
-El Nivel 1 del Chapter 2 tiene comandos propios bajo `/et` (`reload`, `ch2 l1 anchors|goto|state|skip`), también solo en
-desarrollo: véase [Chapter 2, Nivel 1](chapter-2-level-1.md#comandos-de-depuración).
+El Nivel 1 del Chapter 2 tiene comandos propios bajo `/et` (`reload`, `ch2 l1 anchors|goto|state|skip|npc`), también solo en
+desarrollo (`/playsound every_tunnel:voice.<id> voice @s` reproduce cualquiera de sus voces, con sus subtítulos): véase [Chapter 2, Nivel 1](chapter-2-level-1.md#comandos-de-depuración).
 
 Comandos de vanilla útiles:
 

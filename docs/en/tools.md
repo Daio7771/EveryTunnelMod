@@ -32,6 +32,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/entity/hunter.py` | The Hunters' geometry, animations, texture and eye glow mask | Level 5's Hunters |
 | `tools/entity/subject.py` | The four test subjects' bodies and skins, one stage each, from a person to a Pale man, sedated and strapped to a vertical stretcher | Level 5's subjects |
 | `tools/entity/figure.py` | `textures/entity/lab_figure.png`: a dark shape in the player's layout | the figure seen from Level 5's Lobby |
+| `tools/entity/workers.py` | The six workers' skins in `textures/entity/npc/` (the coworker, workers A and B, three generic faces: a white coat, a badge of a colour each; 64x64, classic arms) and a preview sheet with Rowan's, whose skin is the author's and is not made here | a worker's look; see [Chapter 2, Level 1](chapter-2-level-1.md) |
 | `tools/entity/distortion.py` | The Distortion Cloud's and Junior's geometry, animations, textures and glow masks (the Junior's eye cracking in four stages) | Level 5's Distortions |
 | `tools/entity/guard.py` | `textures/entity/guard.png` (the uniform skin) | the uniform |
 | `tools/entity/dead_guard.py` | The guard before you: a player's body sitting against a wall, head dropped, in the uniform skin worn out (run after `guard.py`) | Level 5's Hideout |
@@ -53,6 +54,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/sounds/export.py` | `.ogg` files and `sounds.json` in the mod | a sound, to ship it |
 | `tools/sounds/prologue_voices.py` | The scientist's four lines as Ogg in `tools/sounds/voice/` (from the user's MP3s, one gain for the group; the third cut after its last word, from "WHAT'S HAPPENING" on and the whole fourth in three layers: original, deep and high; the cues placed by the pauses' fit to the punctuation, and the first line's by hand from a measurement of its seven stretches of voice), `cutscene/prologue.json` and the cues' text in `en_us.json` (the Spanish is by hand) | his voice or his words; see [Cinematic system](cinematic-system.md) |
 | `tools/sounds/voices.py` | `cutscene/director.json` and the director's subtitles in `en_us.json`, from his voice files (`tools/sounds/voice/`) | one of his voices or his words; see [Cinematic system](cinematic-system.md) |
+| `tools/sounds/ch2_l1_voices.py` | Chapter 2 Level 1's 32 voice lines as Ogg in `tools/sounds/voice/ch2l1/` (from the user's MP3s in `~/Documents/Union` and `~/Documents/Rowan`, one gain for each of the two groups), and `cutscene/ch2_l1_voices.json` (text key, speaker, length, cues as ranges of sentences of the author's text, which it reads from `en_us.json`) | a voice or a line's words; see [Chapter 2, Level 1](chapter-2-level-1.md) |
 
 ## Map
 

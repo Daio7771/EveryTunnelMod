@@ -19,7 +19,8 @@ y la respiración del Pale man, su propio latido, cuánto ruido hacen sus propio
 - **Una excepción con IA: las voces con IA.** Las voces de los personajes son de la biblioteca
   de ElevenLabs (plan de pago, no clonadas), generadas por el usuario y entregadas como
   archivos mono: hasta ahora la del director (sus líneas en la cinemática del nivel 5 y las
-  frases que repite después) y la del científico (el prólogo del Chapter 2). Ningún otro audio viene de un servicio de IA.
+  frases que repite después) la del científico (el prólogo del Chapter 2) y las del Nivel 1 del Chapter 2: el compañero y los trabajadores de la unión, y Rowan.
+  Ningún otro audio viene de un servicio de IA.
 - **Archivos secos.** Los sonidos no llevan reverberación: Sound Physics Remastered añade la
   reverberación y el sonido amortiguado tras los muros dentro del juego. Las ejecuciones de
   desarrollo siempre lo incluyen, para juzgar los sonidos con él.
@@ -54,6 +55,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 | Las Distortions del nivel 5 | `entity.distortion_cloud.whisper` (bucle), `.appear`, `.kill`, `.leave`; `entity.distortion_junior.whisper` (bucle), `.stare` (bucle, el juego le sube el tono), `.die`. Los susurros son aire a través de formantes de vocales que cambian, sin voz | síntesis |
 | El director del nivel 5 | `voice.director.boss_01` a `boss_20` (sus líneas en la cinemática, con los subtítulos de `cutscene/director.json`), `voice.director.loop_1` a `loop_6` (lo que repite después); planas, en Voz/Habla, desde `tools/sounds/voices.py` | ElevenLabs (ver arriba) |
 | El prólogo del Chapter 2 | `voice.prologue_01` a `prologue_04` (las cuatro líneas del científico, subtituladas por `cutscene/prologue.json`; planas, bajo Voz/Habla; ElevenLabs, de `tools/sounds/prologue_voices.py`), `ambient.prologue.hum` (bucle: el zumbido de las luces, una nevera, la ventilación; plano, control Ambiente) y `music.prologue.drone` (bucle: un drone grave, dos tonos a un semitono batiendo; su volumen sube hasta el cambio), `event.prologue.crack` (3 variaciones: chasquidos secos de articulaciones, un golpe sordo, un crujido; uno en cada etapa de su cambio), `music.prologue.reveal` (el golpe del stinger del nivel 2, al volverse Pale man) y `event.prologue.title` (un golpe grave bajo el título tecleado), todos los reproduce `client.cutscene.PrologueSound`, que también pone los `block.fluorescent.flicker`, `.off` y `.start` del nivel 1 en los pulsos de las luces y el `entity.pale_man.breathing` del Pale man; los clics Geiger del contador de radiación son los `item.detector.click`, `.clicks`, `.crackle` del nivel 5, desde el contador de la mesa (posicionales, cada vez más rápidos) | voces: voces con IA, el resto sintético |
+| Chapter 2, Nivel 1 | `voice.follow_01` a `follow_03` (el compañero pidiendo al jugador que le siga), `voice.meeting_01` a `meeting_15` (la reunión en las taquillas: el compañero, y los trabajadores A y B en las `_a` y `_b`), `voice.rowan_loyal_a1` a `a6` (Rowan por los altavoces) y `voice.rowan_office_c1` a `c8` (Rowan en su despacho): 32 archivos, un evento de sonido cada uno, subtitulados por `cutscene/ch2_l1_voices.json`; todavía no los reproduce nada, y `client.hud.Ch2L1Subtitles` muestra los subtítulos de cualquiera que suene, `/playsound` incluido; ElevenLabs, de `tools/sounds/ch2_l1_voices.py` | voces: voces con IA |
 
 ## Quién reproduce qué
 

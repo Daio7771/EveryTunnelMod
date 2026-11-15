@@ -1321,6 +1321,96 @@
       "every_tunnel:voice/director/loop_6"
     ]
   },
+  "voice.follow_01": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/follow_01"
+    ]
+  },
+  "voice.follow_02": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/follow_02"
+    ]
+  },
+  "voice.follow_03": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/follow_03"
+    ]
+  },
+  "voice.meeting_01": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_01"
+    ]
+  },
+  "voice.meeting_02": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_02"
+    ]
+  },
+  "voice.meeting_03_a": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_03_a"
+    ]
+  },
+  "voice.meeting_04_b": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_04_b"
+    ]
+  },
+  "voice.meeting_05": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_05"
+    ]
+  },
+  "voice.meeting_06_a": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_06_a"
+    ]
+  },
+  "voice.meeting_07": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_07"
+    ]
+  },
+  "voice.meeting_08_b": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_08_b"
+    ]
+  },
+  "voice.meeting_09": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_09"
+    ]
+  },
+  "voice.meeting_10_a": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_10_a"
+    ]
+  },
+  "voice.meeting_11": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_11"
+    ]
+  },
+  "voice.meeting_12": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_12"
+    ]
+  },
+  "voice.meeting_13": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_13"
+    ]
+  },
+  "voice.meeting_14_b": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_14_b"
+    ]
+  },
+  "voice.meeting_15": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/meeting_15"
+    ]
+  },
   "voice.prologue_01": {
     "sounds": [
       "every_tunnel:voice/prologue/prologue_01"
@@ -1339,6 +1429,76 @@
   "voice.prologue_04": {
     "sounds": [
       "every_tunnel:voice/prologue/prologue_04"
+    ]
+  },
+  "voice.rowan_loyal_a1": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_loyal_a1"
+    ]
+  },
+  "voice.rowan_loyal_a2": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_loyal_a2"
+    ]
+  },
+  "voice.rowan_loyal_a3": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_loyal_a3"
+    ]
+  },
+  "voice.rowan_loyal_a4": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_loyal_a4"
+    ]
+  },
+  "voice.rowan_loyal_a5": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_loyal_a5"
+    ]
+  },
+  "voice.rowan_loyal_a6": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_loyal_a6"
+    ]
+  },
+  "voice.rowan_office_c1": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_office_c1"
+    ]
+  },
+  "voice.rowan_office_c2": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_office_c2"
+    ]
+  },
+  "voice.rowan_office_c3": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_office_c3"
+    ]
+  },
+  "voice.rowan_office_c4": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_office_c4"
+    ]
+  },
+  "voice.rowan_office_c5": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_office_c5"
+    ]
+  },
+  "voice.rowan_office_c6": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_office_c6"
+    ]
+  },
+  "voice.rowan_office_c7": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_office_c7"
+    ]
+  },
+  "voice.rowan_office_c8": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/rowan_office_c8"
     ]
   }
 }

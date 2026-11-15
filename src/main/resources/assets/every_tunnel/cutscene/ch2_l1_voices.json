@@ -1,0 +1,498 @@
+{
+  "lines": [
+    {
+      "id": "follow_01",
+      "text": "every_tunnel.ch2.l1.follow_01",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 3709,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 1990,
+          "from": 1
+        }
+      ]
+    },
+    {
+      "id": "follow_02",
+      "text": "every_tunnel.ch2.l1.follow_02",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 757,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0
+        }
+      ]
+    },
+    {
+      "id": "follow_03",
+      "text": "every_tunnel.ch2.l1.follow_03",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 2351,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0
+        }
+      ]
+    },
+    {
+      "id": "meeting_01",
+      "text": "every_tunnel.ch2.l1.meeting_01",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 2768,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 1210,
+          "from": 1
+        }
+      ]
+    },
+    {
+      "id": "meeting_02",
+      "text": "every_tunnel.ch2.l1.meeting_02",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 1959,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 1023,
+          "from": 1
+        }
+      ]
+    },
+    {
+      "id": "meeting_03_a",
+      "text": "every_tunnel.ch2.l1.meeting_03",
+      "speaker": "every_tunnel.ch2.l1.speaker.worker_a",
+      "ms": 4832,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 2040,
+          "from": 1
+        }
+      ]
+    },
+    {
+      "id": "meeting_04_b",
+      "text": "every_tunnel.ch2.l1.meeting_04",
+      "speaker": "every_tunnel.ch2.l1.speaker.worker_b",
+      "ms": 4205,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0
+        }
+      ]
+    },
+    {
+      "id": "meeting_05",
+      "text": "every_tunnel.ch2.l1.meeting_05",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 8202,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 3
+        },
+        {
+          "at": 5960,
+          "from": 3
+        }
+      ]
+    },
+    {
+      "id": "meeting_06_a",
+      "text": "every_tunnel.ch2.l1.meeting_06",
+      "speaker": "every_tunnel.ch2.l1.speaker.worker_a",
+      "ms": 2037,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0
+        }
+      ]
+    },
+    {
+      "id": "meeting_07",
+      "text": "every_tunnel.ch2.l1.meeting_07",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 2351,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0
+        }
+      ]
+    },
+    {
+      "id": "meeting_08_b",
+      "text": "every_tunnel.ch2.l1.meeting_08",
+      "speaker": "every_tunnel.ch2.l1.speaker.worker_b",
+      "ms": 2768,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 2
+        },
+        {
+          "at": 1480,
+          "from": 2
+        }
+      ]
+    },
+    {
+      "id": "meeting_09",
+      "text": "every_tunnel.ch2.l1.meeting_09",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 2194,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 3
+        },
+        {
+          "at": 1575,
+          "from": 3
+        }
+      ]
+    },
+    {
+      "id": "meeting_10_a",
+      "text": "every_tunnel.ch2.l1.meeting_10",
+      "speaker": "every_tunnel.ch2.l1.speaker.worker_a",
+      "ms": 2194,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0
+        }
+      ]
+    },
+    {
+      "id": "meeting_11",
+      "text": "every_tunnel.ch2.l1.meeting_11",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 1567,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0
+        }
+      ]
+    },
+    {
+      "id": "meeting_12",
+      "text": "every_tunnel.ch2.l1.meeting_12",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 2690,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 1270,
+          "from": 1
+        }
+      ]
+    },
+    {
+      "id": "meeting_13",
+      "text": "every_tunnel.ch2.l1.meeting_13",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 2768,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 1612,
+          "from": 1
+        }
+      ]
+    },
+    {
+      "id": "meeting_14_b",
+      "text": "every_tunnel.ch2.l1.meeting_14",
+      "speaker": "every_tunnel.ch2.l1.speaker.worker_b",
+      "ms": 1880,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 2
+        },
+        {
+          "at": 1135,
+          "from": 2
+        }
+      ]
+    },
+    {
+      "id": "meeting_15",
+      "text": "every_tunnel.ch2.l1.meeting_15",
+      "speaker": "every_tunnel.ch2.l1.speaker.coworker",
+      "ms": 2925,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0
+        }
+      ]
+    },
+    {
+      "id": "rowan_loyal_a1",
+      "text": "every_tunnel.ch2.l1.rowan_loyal_a1",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan_loudspeaker",
+      "ms": 4832,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 2050,
+          "from": 1
+        }
+      ]
+    },
+    {
+      "id": "rowan_loyal_a2",
+      "text": "every_tunnel.ch2.l1.rowan_loyal_a2",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan_loudspeaker",
+      "ms": 6112,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 2
+        },
+        {
+          "at": 4910,
+          "from": 2
+        }
+      ]
+    },
+    {
+      "id": "rowan_loyal_a3",
+      "text": "every_tunnel.ch2.l1.rowan_loyal_a3",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan_loudspeaker",
+      "ms": 6269,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 2
+        },
+        {
+          "at": 3780,
+          "from": 2
+        }
+      ]
+    },
+    {
+      "id": "rowan_loyal_a4",
+      "text": "every_tunnel.ch2.l1.rowan_loyal_a4",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan_loudspeaker",
+      "ms": 8437,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 4437,
+          "from": 1
+        }
+      ]
+    },
+    {
+      "id": "rowan_loyal_a5",
+      "text": "every_tunnel.ch2.l1.rowan_loyal_a5",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan_loudspeaker",
+      "ms": 2690,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0
+        }
+      ]
+    },
+    {
+      "id": "rowan_loyal_a6",
+      "text": "every_tunnel.ch2.l1.rowan_loyal_a6",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan_loudspeaker",
+      "ms": 3631,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0
+        }
+      ]
+    },
+    {
+      "id": "rowan_office_c1",
+      "text": "every_tunnel.ch2.l1.rowan_office_c1",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan",
+      "ms": 5067,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 2690,
+          "from": 1
+        }
+      ]
+    },
+    {
+      "id": "rowan_office_c2",
+      "text": "every_tunnel.ch2.l1.rowan_office_c2",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan",
+      "ms": 6112,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 2
+        },
+        {
+          "at": 4360,
+          "from": 2
+        }
+      ]
+    },
+    {
+      "id": "rowan_office_c3",
+      "text": "every_tunnel.ch2.l1.rowan_office_c3",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan",
+      "ms": 5328,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 4230,
+          "from": 1
+        }
+      ]
+    },
+    {
+      "id": "rowan_office_c4",
+      "text": "every_tunnel.ch2.l1.rowan_office_c4",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan",
+      "ms": 7079,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 2
+        },
+        {
+          "at": 4340,
+          "from": 2
+        }
+      ]
+    },
+    {
+      "id": "rowan_office_c5",
+      "text": "every_tunnel.ch2.l1.rowan_office_c5",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan",
+      "ms": 2507,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0
+        }
+      ]
+    },
+    {
+      "id": "rowan_office_c6",
+      "text": "every_tunnel.ch2.l1.rowan_office_c6",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan",
+      "ms": 5955,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 3
+        },
+        {
+          "at": 4820,
+          "from": 3
+        }
+      ]
+    },
+    {
+      "id": "rowan_office_c7",
+      "text": "every_tunnel.ch2.l1.rowan_office_c7",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan",
+      "ms": 4205,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 2
+        },
+        {
+          "at": 2190,
+          "from": 2
+        }
+      ]
+    },
+    {
+      "id": "rowan_office_c8",
+      "text": "every_tunnel.ch2.l1.rowan_office_c8",
+      "speaker": "every_tunnel.ch2.l1.speaker.rowan",
+      "ms": 9325,
+      "cues": [
+        {
+          "at": 0,
+          "from": 0,
+          "to": 1
+        },
+        {
+          "at": 6080,
+          "from": 1,
+          "to": 2
+        },
+        {
+          "at": 7590,
+          "from": 2
+        }
+      ]
+    }
+  ]
+}
