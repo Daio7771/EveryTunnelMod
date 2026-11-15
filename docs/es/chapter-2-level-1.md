@@ -304,12 +304,13 @@ claves opcionales; `Ch2L1Wiring` comprueba las anclas y caminos que nombra):
   `npcs.json`) espera en las taquillas, y los dobles ambientales de worker_a y worker_b salen del LAB en cuanto nadie los ve (`until` de
   `npcs.json`, `Ch2L1Npcs.retire`).
 - **La reunión** (`ACT2_MEETING`, cuando el jugador está en `taquillas_trigger` con él dentro o justo detrás): el jugador pasa a
-  `meeting_player` y se le sujeta allí, y la escena se juega en su cliente (`ch2l1_meeting_start`: el marco y la puerta por la que entró;
+  `meeting_player` y se le sujeta allí, en un círculo cerrado de ocho en el centro de la sala (el compañero enfrente, de espaldas a la
+  taquilla del predecesor; en un círculo nadie se interpone entre el jugador y una cara), y la escena se juega en su cliente (`ch2l1_meeting_start`: el marco y la puerta por la que entró;
   `Ch2L1MeetingView`). Se construye desde los datos en los dos lados (`Ch2L1MeetingScene`, Kotlin puro, con tests): la cámara son los ojos
   del propio jugador, que giran suave (`turn_seconds`) hacia quien habla (`meeting_01` a `15` en orden, separadas `gap_seconds`; el sitio
   de un hablante es el del compañero o el del miembro del grupo con su skin), y hacia la puerta durante `door_seconds` tras `door_after`.
   Sus subtítulos van frase a frase tras el nombre de quien habla (`CutsceneView.Kind.subtitleText` y `speakerAt`). En los mismos ticks el
-  servidor dirige a la gente (`FactoryNpcEntity.direction`): todos miran a quien habla, y cada uno mira a la puerta de vez en cuando
+  servidor dirige a la gente (`FactoryNpcEntity.direction`): todos miran a quien habla (el compañero se gira hacia él con todo el cuerpo, y vuelve al jugador en sus propias líneas), y cada uno mira a la puerta de vez en cuando
   (`Ch2L1Glances`); quien habla gesticula (`TALKING`), worker_a tiembla en `tremble_lines`, worker_b se sacude de risa en `laugh_lines`; los
   de `crossed_arms` escuchan de brazos cruzados, cambiando el peso de pie; el miembro más cercano a la puerta va a `<puerta>_inside` y la
   cierra; y cuando el compañero llega a "Take this" (`card_line`, `card_sentence`) alarga el brazo (`OFFERING`) y el jugador recibe la

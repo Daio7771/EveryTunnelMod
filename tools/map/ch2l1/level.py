@@ -187,14 +187,15 @@ NPC_ROUTES = {
     "meeting_leave": ([(12.5, 31.8), (17.5, 32.0), (21.5, 32.0), (25.5, 32.0), (25.5, 14.5)], False),
 }
 
-# Act 2's meeting in the lockers (phase 5): the coworker with his back to the predecessor's scratched locker, the player facing him,
-# the six of the group in a semicircle between them (taquillas_npc_01..06, from the north end round to the south end, each facing
-# him); where he waits during the third task (leaning on the corner of the ring by the broom); and, for each of the lockers' doors,
-# a spot just outside it (its leaves are found round it) and the spot inside where someone stands to close it.
-MEETING_COWORKER = (6.6, 30.5)
-MEETING_PLAYER = (10.2, 30.5)
-MEETING_ARC = [-82, -55, -28, 28, 55, 82]       # degrees off the line from him to the player
-MEETING_RADIUS = 3.0
+# Act 2's meeting in the lockers (phase 5): eight people in a closed circle round MEETING_CENTRE, each facing its middle (in a
+# circle nobody stands between two others, so the player sees every face): the coworker on the west, his back to the predecessor's
+# scratched locker, the player across from him on the east, and the six of the group between them (taquillas_npc_01..06 at the
+# angles of MEETING_SEATS, degrees from the player's side, north negative: worker_a and worker_b face each other across the circle);
+# where he waits during the third task (leaning on the corner of the ring by the broom); and, for each of the lockers' doors, a spot
+# just outside it (its leaves are found round it) and the spot inside where someone stands to close it.
+MEETING_CENTRE = (9.2, 30.5)
+MEETING_RADIUS = 2.6
+MEETING_SEATS = [-90, 90, -45, 45, -135, 135]
 COWORKER_WAIT = (16.5, 50.5, 0)
 LOCKERS_DOORS = {"lockers_door_1": (20.5, 20.0), "lockers_door_2": (20.5, 32.0)}   # just outside, in the main corridor
 
@@ -442,15 +443,18 @@ def named_places(level):
     add("task3_broom_block", BROOM[0] + 0.5, BROOM[2] + 0.5, 0, False, y=float(BROOM[1]))
     for zone_id, (x, y, z) in SPEAKERS.items():
         add(f"{zone_id}_src", x + 0.5, z + 0.5, 0, False, y=y + 0.9)
-    # The meeting: him, the player, and the six in a semicircle between them, each facing him.
-    cx, cz = MEETING_COWORKER
-    add("meeting_coworker", cx, cz, -90, True)
-    add("meeting_player", MEETING_PLAYER[0], MEETING_PLAYER[1], 90, True)
-    for i, deg in enumerate(MEETING_ARC):
+    # The meeting: him, the player and the six in a circle, each facing its middle.
+    cx, cz = MEETING_CENTRE
+
+    def seat(deg):
         ang = math.radians(deg)
         x, z = round(cx + MEETING_RADIUS * math.cos(ang), 2), round(cz + MEETING_RADIUS * math.sin(ang), 2)
-        yaw = math.degrees(math.atan2(-(cx - x), cz - z))
-        add(f"taquillas_npc_{i + 1:02d}", x, z, round(yaw), True)
+        return x, z, round(math.degrees(math.atan2(-(cx - x), cz - z)))
+
+    add("meeting_coworker", *seat(180), True)
+    add("meeting_player", *seat(0), True)
+    for i, deg in enumerate(MEETING_SEATS):
+        add(f"taquillas_npc_{i + 1:02d}", *seat(deg), True)
     add("coworker_wait", COWORKER_WAIT[0], COWORKER_WAIT[1], COWORKER_WAIT[2], True)
     for door, (x, z) in LOCKERS_DOORS.items():
         add(door, x, z, -90, True)

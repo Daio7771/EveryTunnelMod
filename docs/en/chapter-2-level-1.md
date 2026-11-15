@@ -299,12 +299,13 @@ optional; the anchors and paths it names are checked by `Ch2L1Wiring`):
   stands waiting in the lockers, and worker_a's and worker_b's ambient doubles leave the LAB as soon as nobody sees them (`npcs.json`'s
   `until`, `Ch2L1Npcs.retire`).
 - **The meeting** (`ACT2_MEETING`, when the player is in `taquillas_trigger` with him there or close behind): the player is put at
-  `meeting_player` and held, and the scene plays on their client (`ch2l1_meeting_start`: the frame and the door they came in by;
+  `meeting_player` and held, in a closed circle of eight round the middle of the room (the coworker across from them, his back to the
+  predecessor's locker; in a circle nobody stands between the player and a face), and the scene plays on their client (`ch2l1_meeting_start`: the frame and the door they came in by;
   `Ch2L1MeetingView`). It is built from the data on both sides (`Ch2L1MeetingScene`, plain Kotlin, tested): the camera is the player's
   own eyes, turning smoothly (`turn_seconds`) to whoever speaks (`meeting_01` to `15` in order, `gap_seconds` apart; a speaker's place is
   the coworker's spot or that of the group's member with their skin), and to the door for `door_seconds` after `door_after`. Its subtitles
   go a cue at a time after the speaker's name (`CutsceneView.Kind.subtitleText` and `speakerAt`). On the same ticks the server directs the
-  people (`FactoryNpcEntity.direction`): everyone looks at the speaker, and now and then each glances at the door (`Ch2L1Glances`); the
+  people (`FactoryNpcEntity.direction`): everyone looks at the speaker (the coworker turns to them, body and all, and back to the player for his own lines), and now and then each glances at the door (`Ch2L1Glances`); the
   speaker gestures (`TALKING`), worker_a trembles in `tremble_lines`, worker_b shakes laughing in `laugh_lines`; those in `crossed_arms`
   listen with their arms crossed, shifting their weight; the member nearest the door walks to `<door>_inside` and shuts it; and as the
   coworker reaches "Take this" (`card_line`, `card_sentence`) he holds his arm out (`OFFERING`) and the player gets the **lab badge's copy**

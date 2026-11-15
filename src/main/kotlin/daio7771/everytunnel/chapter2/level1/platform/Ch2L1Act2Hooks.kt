@@ -1,6 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
 import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.chapter2.level1.core.Ch2L1Angles
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Follow
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Glances
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1MeetingScene
@@ -50,7 +51,8 @@ import java.util.UUID
  *   sight); worker_a's and worker_b's ambient doubles leave the LAB out of sight (`npcs.json`'s `until`).
  * - **The meeting** ([Ch2L1State.ACT2_MEETING], when the player is in the lockers with him there): the player is put at `meeting_player`,
  *   held there, and the scene ([Ch2L1MeetingScene]) plays on their client ([START_PACKET_ID]: the frame and the door they came in by);
- *   this side directs the people on the same ticks: who speaks and how (trembling, laughing), everyone's eyes on the speaker and now and
+ *   this side directs the people on the same ticks: who speaks and how (trembling, laughing), everyone's eyes on the speaker (the coworker
+ *   turning to them, body and all) and now and
  *   then on the door ([Ch2L1Glances]), the member nearest the door walking to it and shutting it after the first line, the coworker
  *   holding the badge's copy out and the player getting it as he says "Take this", and, when the last line ends, everyone leaving
  *   along `meeting_leave`, the coworker first, the rest one by one, each gone as soon as the player cannot see them.
@@ -454,8 +456,10 @@ object Ch2L1Act2Hooks {
                 val spot = anchors.point(spec.coworkerSpot)
                 val d = coworker.direction ?: FactoryNpcEntity.Direction().also { coworker.direction = it }
                 d.walkTo = spot?.position?.let { Vec3d(it.x, it.y, it.z) }
-                d.face = spot?.yaw
-                d.lookAt = if (speaker == null || speaker === coworker) playerEyes else eyes(speaker)
+                // He turns to whoever else speaks, body and head, and back to the player for his own lines.
+                val listening = speaker != null && speaker !== coworker
+                d.face = if (listening) Ch2L1Angles.yawOf(speaker!!.x - coworker.x, speaker.z - coworker.z) else spot?.yaw
+                d.lookAt = if (listening) eyes(speaker!!) else playerEyes
                 d.pose = when {
                     t in built.cardTick - OFFER_BEFORE..built.cardTick + OFFER_AFTER -> Ch2L1Pose.OFFERING
                     speaker === coworker -> Ch2L1Pose.TALKING
