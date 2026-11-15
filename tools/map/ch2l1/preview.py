@@ -14,7 +14,7 @@ SPACE_COLOURS = {
     "level2": (200, 160, 176),
 }
 LABELS = {  # where each name is written: (x, z) in blocks, and whether it runs along a column
-    "entrance": (41, 4), "main_corridor": (25.5, 25), "lab": (47, 25), "wc_west": (16.5, 13.5), "lockers": (15, 18.5),
+    "entrance": (41, 4), "main_corridor": (25.5, 25), "lab": (47, 25), "wc_west": (16.5, 13.5), "lockers": (11.5, 18.5),
     "ring": (39, 50), "dining": (39, 55), "aux_lab": (8, 50), "authorized": (38, 74.8), "security": (21.5, 81.5),
     "office": (35, 80.2), "wc_east": (45, 80.5), "level2": (68.5, 28),
 }

@@ -82,15 +82,16 @@ room to stand, or if a restricted space can be reached by a free door.
 | Entrance (half an ellipse, with three doors) | 42 × 9 | 9 |
 | Main corridor | 11 × 36 | 5 |
 | LAB | 30 × 36 | 6 |
-| WC (west) · Lockers (with a 2 × 2 column) | 5 × 5 · 8 × 11 | 4 |
+| WC (west) · Lockers (with a 2 × 2 column) | 5 × 5 · 14 × 18 | 4 |
 | Ring, 4 wide, round the dining room (46 × 25 with its walls) · Dining room | 4 · 36 × 15 | 4 · 6 |
 | Auxiliary lab (restricted) | 14 × 24 | 5 |
 | Authorized corridor · Security · Office · WC (restricted) | 46 × 4 · 13 × 6 · 12 × 7 · 6 × 3 | 4 |
 | "Level 2" corridor, behind the sealed door | 11 × 6 | 4 |
 
 The look is the prologue's laboratory, clean and modern: white concrete, a light grey floor, a dark grey first course of wall,
-glass (the auxiliary lab's wall towards the ring's west stretch) and the lab's ceiling lamps (152). The LAB, the corridors and
-the auxiliary lab were enlarged after the first walk through the level (the drawing's measures were relative). There are 21
+glass (the auxiliary lab's wall towards the ring's west stretch: `factory_glass`, a block of the mod with no frame drawn on each
+block and a sheen that runs on from one to the next, so the wall reads as one sheet) and the lab's ceiling lamps (160). The
+LAB, the corridors, the lockers and the auxiliary lab were enlarged after the first walk through the level (the drawing's measures were relative). There are 21
 doors, all the mod's own (none is vanilla): **free** ones, the lab door (`factory_door`: white, a tall window; a pair
 of leaves opens and shuts together by hand, `LinkedDoorBlock`, with the hinges on the outer edges); the one from the ring into the authorized corridor is free too, but it is the way into a
 forbidden zone (the drawing's red circle); **locked** ones, the grey emergency door (`emergency_door`), which hands do not open, for the auxiliary

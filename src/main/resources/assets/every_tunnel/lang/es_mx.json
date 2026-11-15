@@ -587,5 +587,6 @@
   "every_tunnel.ch2.l1.clock.done": "Fichado.",
   "every_tunnel.ch2.l1.clock.again": "Ya has fichado.",
   "block.every_tunnel.time_clock": "Reloj de fichar",
-  "block.every_tunnel.factory_door": "Puerta de fábrica"
+  "block.every_tunnel.factory_door": "Puerta de fábrica",
+  "block.every_tunnel.factory_glass": "Cristal de fábrica"
 }

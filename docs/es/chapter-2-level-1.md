@@ -85,15 +85,16 @@ por una puerta libre.
 | Entrada (media elipse, con tres puertas) | 42 × 9 | 9 |
 | Pasillo principal | 11 × 36 | 5 |
 | LAB | 30 × 36 | 6 |
-| WC (oeste) · Taquillas (con una columna de 2 × 2) | 5 × 5 · 8 × 11 | 4 |
+| WC (oeste) · Taquillas (con una columna de 2 × 2) | 5 × 5 · 14 × 18 | 4 |
 | Anillo, de 4 de ancho, alrededor del comedor (46 × 25 con sus muros) · Comedor | 4 · 36 × 15 | 4 · 6 |
 | Laboratorio auxiliar (restringido) | 14 × 24 | 5 |
 | Pasillo autorizado · Seguridad · Despacho · WC (restringidos) | 46 × 4 · 13 × 6 · 12 × 7 · 6 × 3 | 4 |
 | Pasillo "Nivel 2", tras la puerta sellada | 11 × 6 | 4 |
 
 El aspecto es el del laboratorio del prólogo, limpio y moderno: hormigón blanco, suelo gris claro, primera hilada de muro en gris
-oscuro, cristal (la pared del laboratorio auxiliar hacia el tramo oeste del anillo) y las lámparas de techo del laboratorio (152).
-El LAB, los pasillos y el laboratorio auxiliar se agrandaron tras el primer recorrido del nivel (las medidas del dibujo eran
+oscuro, cristal (la pared del laboratorio auxiliar hacia el tramo oeste del anillo: `factory_glass`, un bloque del mod sin marco
+dibujado en cada bloque y con un brillo que sigue de uno al siguiente, así que la pared se ve como una sola lámina) y las
+lámparas de techo del laboratorio (160). El LAB, los pasillos, las taquillas y el laboratorio auxiliar se agrandaron tras el primer recorrido del nivel (las medidas del dibujo eran
 relativas). Hay 21 puertas, todas propias del mod (ninguna es de vanilla): **libres**, la puerta de laboratorio
 (`factory_door`: blanca, con una ventana alta; las dos hojas de un par se abren y se cierran a la vez a mano, `LinkedDoorBlock`,
 con las bisagras en los bordes exteriores; la del anillo al pasillo autorizado también es libre, pero es

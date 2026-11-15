@@ -594,5 +594,6 @@
   "every_tunnel.ch2.l1.objective_title": "OBJECTIVE",
   "every_tunnel.ch2.l1.clock.done": "Clocked in.",
   "every_tunnel.ch2.l1.clock.again": "You already clocked in.",
-  "block.every_tunnel.factory_door": "Factory Door"
+  "block.every_tunnel.factory_door": "Factory Door",
+  "block.every_tunnel.factory_glass": "Factory Glass"
 }

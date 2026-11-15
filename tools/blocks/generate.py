@@ -1894,6 +1894,17 @@ def glove_box_tex(rng):
     return img
 
 
+def factory_glass_tex(rng):
+    """Chapter 2's window glass: almost clear with a cool tint, no frame at the edges, and a pale diagonal sheen. The sheen
+    runs along x - y = const, which wraps, so it goes on from one block to the next whichever way they are stacked."""
+    img = new((176, 206, 222), alpha=34)
+    for k in range(16):
+        px(img, k, k + 4, (240, 248, 252, 112))
+        px(img, k, k + 5, (232, 244, 250, 72))
+        px(img, k, k + 12, (226, 240, 248, 46))
+    return img
+
+
 def lab_glass_tex(rng):
     """Laboratory glass: clear, a highlight, a tinted liquid in its lower part."""
     img = new((196, 214, 220))
@@ -3430,6 +3441,12 @@ def build():
                 {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{door_id}"}})
         a.item_textures[door_id] = door_item_tex(halves["bottom"], halves["top"])
         a.loot_doors.add(door_id)
+
+    # Chapter 2's windows: a block of glass that draws no frame, so a wall of it reads as one sheet.
+    a.texture("factory_glass", factory_glass_tex(r("factory_glass")), T.Material(0.95, relief=0.0))
+    a.models["factory_glass"] = cube_all("factory_glass")
+    a.block("factory_glass", "Factory Glass", {"variants": {"": {"model": f"{NS}:block/factory_glass"}}},
+            {"parent": f"{NS}:block/factory_glass"})
 
     # Chapter 2's factory door: the lab door's models and textures, a block of its own because its leaves open in pairs.
     a.block("factory_door", "Factory Door", {"variants": door_variants(f"{NS}:block/lab_door")},

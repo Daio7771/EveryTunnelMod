@@ -150,6 +150,7 @@ object EveryTunnelClient : ClientModInitializer {
             ModBlocks.METAL_GRATING, ModBlocks.VALVE, ModBlocks.POTTED_PLANT, ModBlocks.WALL_CLOCK, ModBlocks.DRAIN_LADDER,
             ModBlocks.CHALK_ARROW,
         )
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.FACTORY_GLASS, RenderLayer.getTranslucent())
         ClientTickEvents.END_CLIENT_TICK.register { client ->
             val player = client.player ?: return@register
             WorldRulesHooks.syncAbilities(player, client.interactionManager?.currentGameMode)

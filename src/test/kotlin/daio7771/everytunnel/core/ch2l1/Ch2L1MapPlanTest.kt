@@ -46,7 +46,7 @@ class Ch2L1MapPlanTest {
 
     @Test
     fun `every block is a vanilla one the map uses or a block of the mod with its blockstate`() {
-        val vanilla = setOf("white_concrete", "light_gray_concrete", "gray_concrete", "glass")
+        val vanilla = setOf("white_concrete", "light_gray_concrete", "gray_concrete")
         for (block in plan.fills.map { it.block }.toSet()) {
             val spec = BlockSpec.parse(block)
             val (namespace, name) = spec.id.split(":")

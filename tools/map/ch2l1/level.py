@@ -28,7 +28,7 @@ BLOCKS = {
     "ceiling": "minecraft:white_concrete",
     "wall": "minecraft:white_concrete",
     "dado": "minecraft:gray_concrete",
-    "glass": "minecraft:glass",
+    "glass": MOD + "factory_glass",
     "light": MOD + "lab_ceiling_light",
 }
 # Level 5's doors: the lab's white one with a tall window (a pair of leaves opens at once), and the grey emergency one that
@@ -74,13 +74,13 @@ def arch(sid, name, x0, x1, z0, z_base, height):
 # The spaces. Heights: 4 for corridors and small rooms, 5 for the main corridor and the auxiliary lab, 6 for the LAB and the
 # dining room, 9 under the entrance's arch. After the first walk through it the LAB, the corridors and the auxiliary lab
 # grew: the LAB 30 x 36 (was 24 x 29), the main corridor 11 wide (was 9), the ring and the authorized corridor 4 (was 3)
-# and the auxiliary lab 14 x 24 (was 6 x 20). The ring's west stretch (x 16 .. 19) lies along the auxiliary lab's glass.
+# and the auxiliary lab 14 x 24 (was 6 x 20); the lockers 14 x 18 (was 8 x 11). The ring's west stretch (x 16 .. 19) lies along the auxiliary lab's glass.
 SPACES = [
     arch("entrance", "ENTRANCE", 20, 62, 1, 10, 9),
     rect("main_corridor", "MAIN CORRIDOR", 20, 11, 31, 47, 5),
     rect("lab", "LAB", 32, 11, 62, 47, 6),
     rect("wc_west", "WC", 14, 11, 19, 16, 4),
-    rect("lockers", "LOCKERS", 11, 17, 19, 28, 4),
+    rect("lockers", "LOCKERS", 5, 17, 19, 35, 4),
     ring("ring", "RING", [(16, 48, 62, 52), (16, 69, 62, 73), (16, 52, 20, 69), (58, 52, 62, 69)], 4),
     rect("dining", "DINING ROOM", 21, 53, 57, 68, 6),
     rect("aux_lab", "AUXILIARY LAB", 1, 48, 15, 72, 5, restricted=True),
@@ -104,7 +104,7 @@ DOORS = [
     ("main_lab_2", "x", 31, 42, 2, "normal"),
     ("wc_west", "x", 19, 13, 1, "normal"),
     ("lockers_1", "x", 19, 19, 2, "normal"),
-    ("lockers_2", "x", 19, 25, 2, "normal"),
+    ("lockers_2", "x", 19, 31, 2, "normal"),
     ("main_ring", "z", 47, 21, 2, "normal"),
     ("lab_ring", "z", 47, 42, 2, "normal"),
     ("dining_n1", "z", 52, 29, 2, "normal"),
@@ -124,7 +124,7 @@ DOORS = [
 GLASS_WALLS = [(15, 52, 68, 3)]
 
 # Solid columns inside a space: (x0, z0, x1, z1), the far corner excluded. The lockers' central one, 2 x 2.
-PILLARS = [(14, 21, 16, 23)]
+PILLARS = [(11, 25, 13, 27)]
 
 # What lies behind a locked door: the auxiliary lab (the coworker's badge), the office (Rowan's code) and the sealed zone.
 LOCKED_SPACES = {"aux_lab", "office", "level2"}
@@ -310,15 +310,15 @@ def named_places(level):
     add("time_clock", cl[0] + 0.5, cl[2] + 0.5, 180, False, y=cl[1])
     add("task1_terminal", 35.5, 28.5, 270, True)
     add("task2_analyzer", 52.5, 35.5, 180, True)
-    # Six people round the lockers' column (a 2 x 2 at x 14..15, z 21..22), looking at it.
-    col = (15.0, 22.0)
+    # Six people round the lockers' column (a 2 x 2 at x 11..12, z 25..26), looking at it.
+    col = (12.0, 26.0)
     for i in range(6):
         ang = math.radians(60 * i + 30)
         x, z = col[0] + 2.7 * math.cos(ang), col[1] + 2.7 * math.sin(ang)
         x, z = math.floor(x) + 0.5, math.floor(z) + 0.5
         yaw = math.degrees(math.atan2(-(col[0] - x), col[1] - z))
         add(f"taquillas_npc_{i + 1:02d}", x, z, round(yaw), True)
-    add("predecessor_locker", 11.5, 26.5, 270, True)
+    add("predecessor_locker", 5.5, 33.5, 270, True)
     add("taquillas_exit", 21.5, 22.5, -90, False)
     add("aux_lab_door", 15.0, 50.0, 90, False)
     add("chamber_02", 11.5, 60.5, -90, True)

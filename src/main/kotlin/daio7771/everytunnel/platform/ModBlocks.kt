@@ -10,6 +10,7 @@ import net.minecraft.block.Block
 import net.minecraft.block.BlockSetType
 import net.minecraft.block.DoorBlock
 import net.minecraft.block.MapColor
+import net.minecraft.block.TransparentBlock
 import net.minecraft.block.SlabBlock
 import net.minecraft.block.TrapdoorBlock
 import net.minecraft.block.entity.BlockEntityType
@@ -552,6 +553,8 @@ object ModBlocks {
     val LAB_DOOR: Block = register("lab_door", DoorBlock(door(), SERVICE_DOOR))
     /** The lab door's look (it borrows its models), for Chapter 2's factory: a pair of leaves opens and shuts at once by hand. */
     val FACTORY_DOOR: Block = register("factory_door", LinkedDoorBlock(door(), SERVICE_DOOR))
+    /** Glass with no frame drawn on each block, a faint tint and a sheen that runs on from one block to the next: Chapter 2's windows. */
+    val FACTORY_GLASS: Block = register("factory_glass", TransparentBlock(glass()))
     /** A lit green EXIT sign on the wall above an exit; it stays lit when the power goes (its own battery). */
     val EXIT_SIGN: Block = register(
         "exit_sign",
@@ -571,6 +574,11 @@ object ModBlocks {
     private fun door(): AbstractBlock.Settings =
         AbstractBlock.Settings.create().mapColor(MapColor.IRON_GRAY).strength(5f).sounds(BlockSoundGroup.METAL)
             .nonOpaque().pistonBehavior(PistonBehavior.DESTROY)
+
+    /** Settings for a pane of glass as a full block, like vanilla's: light and sight go through, nothing spawns on it. */
+    private fun glass(): AbstractBlock.Settings =
+        AbstractBlock.Settings.create().mapColor(MapColor.CLEAR).strength(0.3f).sounds(BlockSoundGroup.GLASS).nonOpaque()
+            .allowsSpawning { _, _, _, _ -> false }.solidBlock { _, _, _ -> false }.suffocates { _, _, _ -> false }.blockVision { _, _, _ -> false }
 
     /** Settings for a full, solid block. */
     private fun solid(color: MapColor, sounds: BlockSoundGroup): AbstractBlock.Settings =
