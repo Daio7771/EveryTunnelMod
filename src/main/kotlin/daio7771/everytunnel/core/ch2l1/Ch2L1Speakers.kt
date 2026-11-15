@@ -167,6 +167,13 @@ class Ch2L1SpeakerSchedule(
     private var poolOpen = false
     private var busyUntil = 0L
     private var nextPoolAt = Long.MAX_VALUE
+    private var seen: Ch2L1State? = null
+
+    /**
+     * The player's progress is behind the last state this schedule was told of: they started a new game, or went back by a command that did not
+     * tell the schedule. What it remembers of what was said is then stale, and the caller makes a new one.
+     */
+    fun regressed(state: Ch2L1State): Boolean = seen?.let { state.ordinal < it.ordinal } ?: false
 
     /** Lines said so far (what the player's progress remembers). */
     val playedLines: Set<String> get() = played
@@ -183,6 +190,7 @@ class Ch2L1SpeakerSchedule(
 
     /** The player reached [state] at tick [now]. */
     fun onState(state: Ch2L1State, now: Long) {
+        seen = state
         if (state.ordinal >= Ch2L1Speakers.CANCELLED_FROM.ordinal) {
             cancelled = true
             due.clear()

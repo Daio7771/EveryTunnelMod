@@ -233,6 +233,7 @@ class Ch2L1RoutineRunner(private val steps: List<Ch2L1Step>, private val random:
     private var wait = -1
     private var arrived = false
     private var stuck = 0
+    private var nearest = Double.MAX_VALUE
 
     fun tick(x: Double, y: Double, z: Double): Command {
         if (steps.isEmpty()) return Command.Stand(null, false)
@@ -251,6 +252,7 @@ class Ch2L1RoutineRunner(private val steps: List<Ch2L1Step>, private val random:
                 if (near(x, z, target)) {
                     point++
                     stuck = 0
+                    nearest = Double.MAX_VALUE
                     if (point >= step.points.size) {
                         advance()
                         return Command.Stand(null, false)
@@ -271,10 +273,19 @@ class Ch2L1RoutineRunner(private val steps: List<Ch2L1Step>, private val random:
         }
     }
 
-    private fun moveTo(target: daio7771.everytunnel.core.level.Position, x: Double, z: Double): Command {
-        stuck++
+    private fun moveTo(target: Position, x: Double, z: Double): Command {
+        val distance = distance(x, z, target)
+        if (distance < nearest - HEADWAY) {
+            nearest = distance
+            stuck = 0
+        } else {
+            stuck++
+        }
         val snap = stuck > STUCK_TICKS
-        if (snap) stuck = 0
+        if (snap) {
+            stuck = 0
+            nearest = Double.MAX_VALUE
+        }
         return Command.MoveTo(target.x, target.y, target.z, snap)
     }
 
@@ -284,12 +295,15 @@ class Ch2L1RoutineRunner(private val steps: List<Ch2L1Step>, private val random:
         wait = -1
         arrived = false
         stuck = 0
+        nearest = Double.MAX_VALUE
     }
 
-    private fun near(x: Double, z: Double, target: Position): Boolean {
+    private fun near(x: Double, z: Double, target: Position): Boolean = distance(x, z, target) < ARRIVE
+
+    private fun distance(x: Double, z: Double, target: Position): Double {
         val dx = target.x - x
         val dz = target.z - z
-        return sqrt(dx * dx + dz * dz) < ARRIVE
+        return sqrt(dx * dx + dz * dz)
     }
 
     private fun pick(min: Int, max: Int): Int = if (max > min) min + random.nextInt(max - min + 1) else min
@@ -298,7 +312,10 @@ class Ch2L1RoutineRunner(private val steps: List<Ch2L1Step>, private val random:
         /** Within this many blocks of a point (along the floor) they are at it. */
         const val ARRIVE = 0.35
 
-        /** Ticks without arriving before they are put at the point. */
-        const val STUCK_TICKS = 240
+        /** Ticks without getting nearer to the point (by [HEADWAY]) before they are put at it: a bump, a door, not a long walk. */
+        const val STUCK_TICKS = 100
+
+        /** Getting this much nearer to the point counts as making headway. */
+        const val HEADWAY = 0.03
     }
 }

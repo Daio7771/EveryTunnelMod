@@ -97,6 +97,7 @@ object ModEntities {
         .disableSaving()
         .disableSummon()
         .trackRangeBlocks(64)
+        .trackedUpdateRate(1)
         .build()
 
     /** The guard before you, dead in Level 5's drain ([DeadGuardHooks]). Never saved. */

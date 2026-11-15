@@ -118,6 +118,7 @@ object Ch2L1 {
             return
         }
         ProgressService.get().setCh2L1Active(player, true)
+        Ch2L1SpeakerHooks.forget(player)
         setState(player, Ch2L1State.START, "enter")
         player.inventory.clear()
         val resources = ResourceSystem.stateOf(player.uuid, ConfigManager.gameplay)

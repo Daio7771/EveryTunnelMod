@@ -69,11 +69,27 @@ object Ch2L1SpeakerHooks {
         return Entry(data, schedule).also { entries[player.uuid] = it }
     }
 
+    /**
+     * The player's entry, new if their progress went back since it was made (a new game, a reset): what an entry remembers of what was said
+     * outlives the progress it was made from, and a stale one says nothing for ever.
+     */
+    private fun freshEntry(player: ServerPlayerEntity, server: MinecraftServer): Entry {
+        val entry = entryOf(player, server)
+        val state = Ch2L1.state(player)
+        if (!entry.schedule.regressed(state)) return entry
+        EveryTunnel.LOGGER.info("Chapter 2 Level 1: {}'s progress went back to {}: the loudspeakers start over", player.gameProfile.name, state)
+        forget(player)
+        return entryOf(player, server)
+    }
+
+    /** Forgets what the loudspeakers said to [player] (they begin the level again). */
+    fun forget(player: ServerPlayerEntity) {
+        ProgressService.get().clearCh2L1Counters(player, HEARD)
+        entries.remove(player.uuid)
+    }
+
     private fun onState(player: ServerPlayerEntity, from: Ch2L1State, to: Ch2L1State) {
-        if (to.ordinal <= Ch2L1State.ACT1_CLOCKIN.ordinal) {
-            ProgressService.get().clearCh2L1Counters(player, HEARD)
-            entries.remove(player.uuid)
-        }
+        if (to.ordinal <= Ch2L1State.ACT1_CLOCKIN.ordinal) forget(player)
         val entry = entryOf(player, player.server)
         entry.schedule.onState(to, player.server.ticks.toLong())
         if (to.ordinal >= Ch2L1Speakers.CANCELLED_FROM.ordinal) {
@@ -102,7 +118,7 @@ object Ch2L1SpeakerHooks {
         for (player in live) {
             if (!Ch2L1.active(player) || player.isSpectator) continue
             if (Ch2L1IntroHooks.isRunning(player)) continue
-            val entry = entryOf(player, server)
+            val entry = freshEntry(player, server)
             entry.queued?.let { queued ->
                 if (now >= queued.at) {
                     entry.queued = null

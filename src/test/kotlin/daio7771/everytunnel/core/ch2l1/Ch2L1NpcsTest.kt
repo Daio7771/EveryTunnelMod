@@ -164,6 +164,23 @@ class Ch2L1NpcsTest {
     }
 
     @Test
+    fun `a long walk is not being stuck, someone making headway is never snapped`() {
+        val far = Ch2L1Step.Walk(listOf(Position(60.0, 64.0, 0.0)))
+        val runner = Ch2L1RoutineRunner(listOf(far), Random(1))
+        var x = 0.0
+        var snapped = false
+        repeat(1500) {                                    // 75 seconds at 0.04 a tick: far more than the stuck time
+            val c = runner.tick(x, 64.0, 0.0)
+            if (c is Ch2L1RoutineRunner.Command.MoveTo) {
+                if (c.snap) snapped = true
+                x += 0.04
+            }
+        }
+        assertTrue(!snapped, "a person who is getting there is not put there")
+        assertTrue(x > 55.0)
+    }
+
+    @Test
     fun `no steps is standing, and a single point or a single step does not loop for ever`() {
         assertEquals(Ch2L1RoutineRunner.Command.Stand(null, false), Ch2L1RoutineRunner(emptyList(), Random(1)).tick(0.0, 0.0, 0.0))
         val here = Ch2L1Step.Walk(listOf(Position(0.0, 0.0, 0.0)))

@@ -38,6 +38,58 @@ class Ch2L1SpeakersTest {
     }
 
     @Test
+    fun `with the jar's own file, a1 plays after task 1 and the terminal, then a4, and the pool follows`() {
+        val jar = Ch2L1SpeakersParser.parse(Ch2L1DataParser.parse(emptyMap(), Ch2L1Files.readAllBundled()).data.document("speakers")).speakers
+        val s = Ch2L1SpeakerSchedule(jar, { 200 }, Random(5))
+        s.onState(Ch2L1State.ACT1_CLOCKIN, 0)
+        s.onState(Ch2L1State.ACT1_TASK1, 10)
+        for (t in 10L..1000L) assertNull(s.tick(t, true), "silent during task 1, at $t")
+        s.onState(Ch2L1State.ACT1_TASK2, 1000)
+        s.holdUntil(1020)
+        assertNull(s.tick(1010, true))
+        assertEquals("rowan_loyal_a1", s.tick(1021, true))
+        s.onState(Ch2L1State.ACT1_TASK3, 3000)
+        assertNull(s.tick(3099, true))
+        assertEquals("rowan_loyal_a4", s.tick(3100, true))
+    }
+
+    @Test
+    fun `the player at the terminal and by the analyzer stands in the lab's speaker zone`() {
+        val data = Ch2L1DataParser.parse(emptyMap(), Ch2L1Files.readAllBundled()).data
+        val speakers = Ch2L1SpeakersParser.parse(data.document("speakers")).speakers
+        fun zoneAt(x: Double, y: Double, z: Double) = speakers.zones.firstOrNull { data.anchors.zone(it)?.box?.contains(x, y, z) == true }
+        assertEquals("speaker_lab", zoneAt(1058.5, 64.0, 1050.5), "at the terminal")
+        assertEquals("speaker_lab", zoneAt(1061.0, 64.0, 1055.0), "where the log put the player")
+        assertEquals("speaker_entrance", zoneAt(1053.5, 64.0, 1029.5), "at the clock")
+        assertEquals("speaker_main", zoneAt(1050.0, 64.0, 1040.0), "in the main corridor")
+    }
+
+    @Test
+    fun `a schedule knows when the player's progress has gone back`() {
+        val s = schedule()
+        assertTrue(!s.regressed(Ch2L1State.START), "it has seen nothing yet")
+        s.onState(Ch2L1State.ACT1_TASK3, 0)
+        assertTrue(!s.regressed(Ch2L1State.ACT1_TASK3))
+        assertTrue(!s.regressed(Ch2L1State.ACT2_FOLLOW))
+        assertTrue(s.regressed(Ch2L1State.START), "a new game puts the progress back at the start")
+        assertTrue(s.regressed(Ch2L1State.ACT1_TASK1))
+    }
+
+    @Test
+    fun `a stale schedule from a finished game says nothing, a new one speaks`() {
+        // the player's last game ended in Act 2: the schedule made for it has heard everything and is cancelled
+        val stale = schedule()
+        stale.restore(listOf("rowan_loyal_a1", "rowan_loyal_a4", "rowan_loyal_a2"))
+        stale.onState(Ch2L1State.ACT2_FOLLOW, 0)
+        // a new game: the progress is back at the start, the schedule says so, and one made afresh plays the opening after the first task
+        assertTrue(stale.regressed(Ch2L1State.START))
+        val fresh = schedule()
+        fresh.onState(Ch2L1State.ACT1_TASK1, 0)
+        fresh.onState(Ch2L1State.ACT1_TASK2, 10)
+        assertEquals("rowan_loyal_a1", fresh.tick(10, true))
+    }
+
+    @Test
     fun `bad entries are reported and what is usable stays`() {
         val result = parse(
             """{ "fixed": [ { "line": "x", "after": "NOPE" }, 3, { "line": "y", "after": "ACT1_TASK2", "delay_seconds": 2 } ],
