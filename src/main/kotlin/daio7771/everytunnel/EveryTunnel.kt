@@ -6,14 +6,6 @@ import daio7771.everytunnel.platform.AmbienceHooks
 import daio7771.everytunnel.platform.BookHooks
 import daio7771.everytunnel.platform.BookPhaseHooks
 import daio7771.everytunnel.platform.CarryHooks
-import daio7771.everytunnel.platform.Ch2L1
-import daio7771.everytunnel.platform.Ch2L1Build
-import daio7771.everytunnel.platform.Ch2L1Commands
-import daio7771.everytunnel.platform.Ch2L1DataLoader
-import daio7771.everytunnel.platform.Ch2L1IntroHooks
-import daio7771.everytunnel.platform.Ch2L1Npcs
-import daio7771.everytunnel.platform.Ch2L1SpeakerHooks
-import daio7771.everytunnel.platform.Ch2L1TaskHooks
 import daio7771.everytunnel.platform.CloudGameHooks
 import daio7771.everytunnel.platform.ChemicalHooks
 import daio7771.everytunnel.platform.CollapseHooks
@@ -25,7 +17,6 @@ import daio7771.everytunnel.platform.DevWorlds
 import daio7771.everytunnel.platform.DeepWaterHooks
 import daio7771.everytunnel.platform.DirectorLoopHooks
 import daio7771.everytunnel.platform.DirectorSceneHooks
-import daio7771.everytunnel.platform.PrologueSceneHooks
 import daio7771.everytunnel.platform.FalseExitHooks
 import daio7771.everytunnel.platform.DistortionHooks
 import daio7771.everytunnel.platform.DrainHooks
@@ -81,7 +72,9 @@ import org.slf4j.LoggerFactory
  * level ambience, stamina, thirst and the flashlight battery, player noise (what
  * enemies can hear), opening a world (rebuild and new game behind the loading screen), the
  * debug commands and the playtest log.
- * Later gameplay systems (`systems`, `entities`, `audio`) are registered here too.
+ * Later gameplay systems (`systems`, `entities`, `audio`) are registered here too. This is Chapter 1 and the base game every
+ * chapter shares; a later chapter has its own entrypoint, after this one in
+ * `fabric.mod.json`, and is never named here (`ChapterBoundaryTest`).
  */
 object EveryTunnel : ModInitializer {
 
@@ -105,13 +98,6 @@ object EveryTunnel : ModInitializer {
         ModEntities.register()
         ModSounds.register()
         LevelReloadListener.register()
-        Ch2L1DataLoader.register()
-        Ch2L1.register()
-        Ch2L1Build.register()
-        Ch2L1TaskHooks.register()
-        Ch2L1Npcs.register()
-        Ch2L1SpeakerHooks.register()
-        Ch2L1IntroHooks.register()
         WorldRulesHooks.register()
         LevelTrackingHooks.register()
         AmbienceHooks.register()
@@ -141,7 +127,6 @@ object EveryTunnel : ModInitializer {
         DeepWaterHooks.register()
         DirectorSceneHooks.register()
         DirectorLoopHooks.register()
-        PrologueSceneHooks.register()
         FalseExitHooks.register()
         KeptEntities.register()
         LabHallHooks.register()
@@ -161,7 +146,6 @@ object EveryTunnel : ModInitializer {
         IntroHooks.register()
         LoadingHooks.register()
         DebugCommands.register()
-        Ch2L1Commands.register()
         DevWorlds.register()
         PlaytestLog.register()
         LOGGER.info("$MOD_NAME loaded")

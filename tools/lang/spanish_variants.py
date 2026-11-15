@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Copies the Spanish (Spain) translation to the other Spanish locales Minecraft offers.
 
-`lang/es_es.json` is the one translation, written by hand. Minecraft does not fall back from
+`lang/es_es.json` is the one translation, written by hand (by chapter, see `langfiles.py`). Minecraft does not fall back from
 `es_mx` to `es_es`, so without these copies a player on another Spanish locale would see the
 game in English. The notes need nothing: `NoteScreen` reads `notes/es/` for any `es_*`.
 
-Run it after every change to `es_es.json`:
+`es_es.json` itself is merged from the sources by chapter (`tools/lang/src/<part>/es_es.json`), and `tools/lang/build.py` runs
+this right after; on its own:
 
     python3 tools/lang/spanish_variants.py
 
-The six files it writes are generated: change `es_es.json` and run this again, never edit them.
+The six files it writes are generated: change the sources and run `tools/lang/build.py`, never edit them.
 """
 
 import json

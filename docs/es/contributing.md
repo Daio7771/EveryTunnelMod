@@ -12,9 +12,14 @@ asistente necesita saber.
 - **Documentación:** inglés y español, las mismas páginas en `docs/en/` y `docs/es/`.
   Cambia las dos en el mismo commit.
 - El juego está en inglés (`en_us.json`, la referencia) y en español de España (`es_es.json`,
-  que `tools/lang/spanish_variants.py` copia también a los demás `es_*`). Los mensajes
-  pintados en las paredes (`wall.every_tunnel.*`) se quedan en inglés a propósito. La guía
-  del juego y las notas están en los dos.
+  copiado también a los demás `es_*`). Los dos se generan: los textos se escriben en las fuentes por capítulo,
+  `tools/lang/src/<parte>/<idioma>.json` (`base` para el Chapter 1 y lo compartido, `chapter2`...), y luego
+  `python3 tools/lang/build.py`. Los mensajes pintados en las paredes (`wall.every_tunnel.*`) se quedan en inglés a
+  propósito. La guía del juego y las notas están en los dos.
+- **Los capítulos van aparte.** El Chapter 1 y lo que comparten todos los capítulos son el juego base; el código de un
+  capítulo posterior está en `daio7771.everytunnel.chapterN` (una carpeta por nivel), con sus propios entrypoints,
+  registros, progreso, parte de idioma y catálogo de sonidos. El juego base nunca nombra a un capítulo
+  (`ChapterBoundaryTest`); un capítulo usa los puntos de extensión del juego base (véase [Arquitectura](architecture.md#capítulos)).
 
 ## Páginas públicas
 

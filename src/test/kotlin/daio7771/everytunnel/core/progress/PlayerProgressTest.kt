@@ -1,6 +1,5 @@
 package daio7771.everytunnel.core.progress
 
-import daio7771.everytunnel.core.ch2l1.Ch2L1State
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -78,25 +77,5 @@ class PlayerProgressTest {
         progress.clear()
         assertEquals(0, progress.playTicks)
         assertEquals(0, progress.deaths)
-    }
-
-    @Test
-    fun `a player begins Chapter 2's Level 1 at the clock and a new game takes them back there`() {
-        val progress = PlayerProgress()
-        assertEquals(Ch2L1State.ACT1_CLOCKIN, progress.ch2l1State)
-        progress.ch2l1State = Ch2L1State.ACT3_EXPLORE
-        assertTrue("ACT3_EXPLORE" in progress.describe())
-        progress.clear()
-        assertEquals(Ch2L1State.ACT1_CLOCKIN, progress.ch2l1State)
-    }
-
-    @Test
-    fun `playing Chapter 2's Level 1 is a flag that a new game clears`() {
-        val progress = PlayerProgress()
-        assertFalse(progress.ch2l1Active)
-        progress.ch2l1Active = true
-        assertTrue("active" in progress.describe())
-        progress.clear()
-        assertFalse(progress.ch2l1Active)
     }
 }

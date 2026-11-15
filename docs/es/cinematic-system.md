@@ -124,8 +124,8 @@ mientras habla. Todo lo demás también va sobre sus líneas:
 
 Cambiar un archivo de voz **reajusta toda la escena**: ejecuta `tools/sounds/voices.py` (lee las
 duraciones y busca cada subtítulo en el audio) y `tools/sounds/export.py`. `voices.py` escribe
-`cutscene/director.json` y el texto de los subtítulos en `en_us.json`; los subtítulos en español están en
-`es_es.json` y no los toca, así que tras una nueva ejecución hay que revisarlos: `LangFilesTest` falla si
+`cutscene/director.json` y el texto de los subtítulos en `tools/lang/src/base/en_us.json` (y reconstruye los archivos de idioma);
+los subtítulos en español están en `tools/lang/src/base/es_es.json` y no los toca, así que tras una nueva ejecución hay que revisarlos: `LangFilesTest` falla si
 una clave existe en un idioma y no en el otro.
 
 **Voz y subtítulos.** Cada línea es el evento de sonido `voice.director.<id>`, que suena plano (sin
@@ -186,7 +186,7 @@ Los textos de los créditos son las claves `every_tunnel.credits.*`; los dibujos
 ## El prólogo del Chapter 2
 
 El Chapter 2 abre con su propia cinemática, **el prólogo**, que vive solo en la rama privada hasta que se
-publiquen los niveles 1 y 2 del capítulo. Es la segunda escena que juega `CutsceneView` (`Kind.PROLOGUE`): la
+publiquen los niveles 1 y 2 del capítulo. Es la segunda escena que juega `CutsceneView` (un `Kind` propio del Chapter 2, `PrologueView.KIND`): la
 misma cámara, bandas, subtítulos y salto, pero no está en un nivel. Por ahora la empieza
 `/everytunnel prologue` (el inicio del capítulo todavía no existe) y el menú principal: ELEGIR CAPÍTULO lista CAPÍTULO 1 y CAPÍTULO 2, y elegir CAPÍTULO 2 convierte todo el menú en el del Capítulo 2 (con el laboratorio del prólogo detrás), cuya NUEVA PARTIDA abre el mundo solo para el prólogo (`ChapterRequest`: sin reconstruir el mapa ni nueva partida; una partida guardada del Capítulo 1 no se toca), lo reproduce y sale al menú. CAPÍTULO 2 lleva un candado hasta ganar el logro "Nothing in There", que solo muestra una alerta de spoiler que se puede saltar. Dura cerca de 1 min 15 s.
 
@@ -257,10 +257,13 @@ misma cámara, bandas, subtítulos y salto, pero no está en un nivel. Por ahora
 que lo salta, la clave de idioma del hablante (ninguna en el prólogo) y el prefijo de sus sonidos de voz. Una
 nueva necesita, por este orden:
 
-1. Un objeto de escena en `core/cutscene` que construya un `Timeline` (una `Cutscene` de `Shot`s en
-   un `SceneFrame`, más lo que vaya sobre ella), y un test de su temporización (`CutsceneTest`, `PrologueTest`).
-2. Un `CutsceneView.Kind` nuevo y sus paquetes de inicio y fin, registrados en `CutsceneView.register`: el
-   paquete de inicio lleva el marco de la escena.
+1. Un objeto de escena que construya un `Timeline` (una `Cutscene` de `Shot`s en un `SceneFrame`, más lo que vaya sobre
+   ella), en `core/cutscene` para el juego base o en el `core` propio del capítulo (el prólogo del Chapter 2:
+   `chapter2/prologue/core`), y un test de su temporización (`CutsceneTest`, `PrologueTest`).
+2. Un `CutsceneView.Kind` y sus paquetes de inicio y fin: en `CutsceneView.register` para el juego base; un capítulo posterior
+   hace su propio `Kind` en su cliente (sobrescribiendo `started`, `ticked`, `stopped`, `shake`, `flash`, `vignette` y
+   `endsOnBlack` según lo necesite: `PrologueView`, `Ch2L1IntroView`) y llama a `CutsceneView.start` y `stop` desde sus propios
+   receptores de paquetes. El paquete de inicio lleva el marco de la escena.
 3. Un hook como `DirectorSceneHooks` o `PrologueSceneHooks`: un disparador, sujetar al jugador y negarle el
    daño, un único `finish` para el final y para un salto, el estado posterior, y qué pasa si el jugador sale o
    se vuelve a construir el nivel.

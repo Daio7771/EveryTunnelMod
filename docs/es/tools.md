@@ -141,20 +141,23 @@ generador basta con abrir el mundo. `/function garage:build` reconstruye a mano.
 
 ## Idiomas
 
-`tools/lang/spanish_variants.py` copia `lang/es_es.json` (la traducción al español, escrita a
-mano) a `es_ar`, `es_cl`, `es_ec`, `es_mx`, `es_uy` y `es_ve`, porque Minecraft no pasa de un
-idioma en español a otro. Ejecútalo tras cada cambio en `es_es.json`; los seis archivos que
-escribe no se editan a mano.
+Los archivos de idioma del juego (`assets/every_tunnel/lang/*.json`) se generan, una parte por capítulo: las fuentes son
+`tools/lang/src/<parte>/<idioma>.json` (`base`: el Chapter 1 y lo compartido; `chapter2`...). `tools/lang/build.py` las une
+(`base` primero, luego los capítulos en orden; una clave en dos partes lo detiene) y después `tools/lang/spanish_variants.py`
+copia `es_es` a `es_ar`, `es_cl`, `es_ec`, `es_mx`, `es_uy` y `es_ve`, porque Minecraft no pasa de un idioma en español a otro.
+Los textos escritos a mano van en el archivo de una parte, y luego `build.py`; las herramientas que escriben nombres y
+subtítulos (`langfiles.update`) escriben en la parte de su capítulo y reconstruyen. `LangFilesTest` falla si los archivos del
+juego no son la unión.
 
 ## Bloques
 
 `tools/blocks/generate.py` hace los recursos de los 146 bloques del mod. Los bloques en sí
-(propiedades, formas, sonidos) se registran en Kotlin (`platform/ModBlocks.kt`); la
+(propiedades, formas, sonidos) se registran en Kotlin (`platform/ModBlocks.kt`, y los del Chapter 2 en `chapter2/platform/Ch2Blocks.kt`); la
 herramienta **se detiene si las dos listas de ids no coinciden**. Las rotaciones de los
 modelos deben coincidir con las formas de `platform/BlockShapes.kt`. Las texturas reutilizan
 los pintores del mapa (`garage/textures.py`), así que los props se parecen al nivel que los
-rodea. También escribe los nombres de los bloques en `lang/en_us.json` (las demás claves se
-conservan). Vista previa: `tools/blocks/output/blocks_sheet.png`.
+rodea. También escribe los nombres de los bloques en la parte de idioma del capítulo que registra cada bloque
+(`tools/lang/src/<parte>/en_us.json`; las demás claves se conservan). Vista previa: `tools/blocks/output/blocks_sheet.png`.
 
 ## Arte de entidades
 
@@ -186,7 +189,9 @@ cc0_cuts.py (cortes de cc0/ y licensed/)  ─────┼─> generate.py  ->
 dsp.py: utilidades DSP · audio_io.py: leer/escribir audio
 ```
 
-- `catalog.py`: cada generador recibe `(rng, variant)` y devuelve un array mono o estéreo.
+- `catalog.py`: cada generador recibe `(rng, variant)` y devuelve un array mono o estéreo. Los sonidos del Chapter 2 (su
+  prólogo y su Nivel 1) están en su propio archivo, `catalog_ch2.py`, escrito con las herramientas de `catalog.py`; `catalog.py`
+  los añade a su única lista, así que las demás herramientas ven un solo catálogo (un capítulo posterior tendrá un archivo así).
   Los ids siguen los eventos de sonido (`every_tunnel:<id>`). Mono para los sonidos con
   posición en el mundo, estéreo para la música y los sonidos en la cabeza. Sus funciones
   más nuevas (la segunda pasada del nivel 5 y los sonidos que comparte) suenan menos

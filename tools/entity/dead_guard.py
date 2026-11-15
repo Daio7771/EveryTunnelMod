@@ -30,6 +30,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from observer import draw_model  # noqa: E402
 from pale_man import Bone, write_json  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lang"))
+import langfiles  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel"
 UNIFORM = ASSETS / "textures" / "entity" / "guard.png"
@@ -203,10 +206,7 @@ def main():
     tex.save(ASSETS / "textures" / "entity" / "dead_guard.png")
     write_json(ASSETS / "animations" / "entity" / "dead_guard.animation.json", still())
     write_preview(tex)
-    lang_path = ASSETS / "lang" / "en_us.json"
-    lang = json.loads(lang_path.read_text(encoding="utf-8"))
-    lang["entity.every_tunnel.dead_guard"] = "Night Guard No. 13"
-    write_json(lang_path, lang)
+    langfiles.update("base", "en_us", {"entity.every_tunnel.dead_guard": "Night Guard No. 13"})
     print("The guard before you: sitting against the wall")
 
 

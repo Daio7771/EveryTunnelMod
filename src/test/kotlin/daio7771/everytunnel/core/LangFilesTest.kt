@@ -40,11 +40,35 @@ class LangFilesTest {
         assertTrue(untranslated.all { it.startsWith("wall.every_tunnel.") }, "untranslated: $untranslated")
     }
 
+    /**
+     * The game's lang files are the merge of the sources by chapter (`tools/lang/src/<part>/<locale>.json`, `base` first and then each
+     * chapter in order: `tools/lang/langfiles.py`), key for key and in that order, and no key is in two parts.
+     */
+    @Test
+    fun `the lang files are the merge of the sources by chapter`() {
+        val src = File("tools/lang/src")
+        val parts = listOf("base") + (src.listFiles { f -> f.isDirectory && f.name.startsWith("chapter") }.orEmpty()
+            .map { it.name }.sortedBy { it.removePrefix("chapter").toInt() })
+        assertTrue("chapter2" in parts)
+        for (locale in listOf("en_us", "es_es")) {
+            val merged = linkedMapOf<String, String>()
+            for (part in parts) {
+                val file = File(src, "$part/$locale.json")
+                if (!file.exists()) continue
+                for (entry in JsonParser.parseString(file.readText()).asJsonObject.entrySet()) {
+                    assertTrue(merged.put(entry.key, entry.value.asString) == null, "${entry.key} is in two parts ($locale)")
+                }
+            }
+            val game = JsonParser.parseString(File(assets, "lang/$locale.json").readText()).asJsonObject.entrySet().map { it.key to it.value.asString }
+            assertEquals(merged.toList(), game, "lang/$locale.json is not the merge of tools/lang/src: run tools/lang/build.py")
+        }
+    }
+
     @Test
     fun `the other Spanish locales are copies of es_es`() {
         val source = File(assets, "lang/es_es.json").readText()
         for (name in listOf("es_ar", "es_cl", "es_ec", "es_mx", "es_uy", "es_ve")) {
-            assertEquals(source, File(assets, "lang/$name.json").readText(), "$name differs: run tools/lang/spanish_variants.py")
+            assertEquals(source, File(assets, "lang/$name.json").readText(), "$name differs: run tools/lang/build.py")
         }
     }
 

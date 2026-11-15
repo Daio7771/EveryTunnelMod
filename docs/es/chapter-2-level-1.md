@@ -9,10 +9,14 @@ nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dón
 no se puede jugar como nivel (no tiene tareas, mobiliario ni gente), pero su mapa se construye y se puede meter a un jugador en
 él: sus reglas se le aplican y el reloj de fichar le pasa a la primera tarea.
 
+Su código está en `daio7771.everytunnel.chapter2` (el del cliente, en el mismo paquete dentro de `src/client`): `level1.core`
+(Kotlin puro, con tests), `level1.platform` (pegamento con Minecraft) y `level1.client`, aparte del juego base, que nunca lo
+nombra (véase [Arquitectura](architecture.md#capítulos)). Sus textos están en `tools/lang/src/chapter2/`.
+
 ## La máquina de estados
 
-`core.ch2l1.Ch2L1State` tiene diez estados, en el orden en que se juegan. El estado actual de cada jugador va en su
-progreso (`PlayerProgress.ch2l1State`, que `CardinalProgress` guarda como `ch2_l1_state`), así que sobrevive a salir del
+`level1.core.Ch2L1State` tiene diez estados, en el orden en que se juegan. El estado actual de cada jugador va en su
+progreso del Chapter 2 (`Ch2PlayerProgress.l1State`, que `Ch2Progress`, el componente propio del capítulo, guarda como `l1_state`), así que sobrevive a salir del
 mundo, a una muerte y a una sesión nueva. Un jugador que nunca ha empezado el nivel está en `ACT1_CLOCKIN`; una partida
 nueva (`ProgressService.reset`) devuelve a todos ahí.
 
@@ -27,7 +31,7 @@ nueva (`ProgressService.reset`) devuelve a todos ahí.
 | `ACT3_OVERTIME` | Después del despacho, con el pase de horas extra sin cobrar: el camino a la zona sellada está abierto |
 | `DONE` | El jugador ha cruzado al Nivel 2 |
 
-`platform.Ch2L1` es la única puerta al estado: `setState(player, state, reason)` lo guarda, escribe en el log `Chapter 2
+`level1.platform.Ch2L1` es la única puerta al estado: `setState(player, state, reason)` lo guarda, escribe en el log `Chapter 2
 Level 1: <jugador> goes A -> B (<motivo>)` y avisa a los oyentes; `skip(player)` pasa al siguiente. Un sistema del nivel
 se registra una vez con `Ch2L1.onStateChange` y hace lo que significa entrar en un estado (un objetivo, una escena, una
 línea del altavoz); la máquina de estados no sabe nada de eso. Por eso un paso se alcanza jugando o por comando con el
@@ -107,7 +111,7 @@ código y la tarjeta de Rowan); y una más igual en el extremo este del pasillo 
 pasillo principal y al LAB, y el reloj de fichar cuelga de la pared sur de la entrada.
 
 **Dónde y cómo.** El plan se levanta en (1024, 64, 1024) del mundo del mapa, libre de los niveles del Chapter 1 y de la sala del
-prólogo. `platform.Ch2L1Build` lo pone ahí a razón de 8.000 celdas por tick, con los chunks cargados (un segundo o dos, sin
+prólogo. `level1.platform.Ch2L1Build` lo pone ahí a razón de 8.000 celdas por tick, con los chunks cargados (un segundo o dos, sin
 tirones), vaciando antes su caja; recuerda la huella del plan que construyó (`data/every_tunnel_ch2_l1.dat`), así que
 `Ch2L1.enter` solo construye el nivel si falta o si el plan cambió. Cada bloque se busca antes de tocar el mundo; un plan con
 un bloque o un estado que el juego no conoce falla con un mensaje y deja el mundo como estaba. `/et ch2 l1 build` construye de
@@ -170,7 +174,7 @@ rutas (`route_*`) y el sitio de cada trabajador (`npc_*`) los escribe el generad
 pathfinding del juego: `Ch2L1RoutineRunner` (Kotlin puro, probado) dice qué hacer cada tick y `FactoryNpcEntity.tick` lo hace fijando la velocidad de la propia entidad (un paseo de 1,3 bloques por segundo, en línea recta al siguiente punto;
 a quien deja de acercarse durante 5 s, un tope, se le pone en el punto), así que dieciséis personas casi no cuestan nada. `walk_speed` del archivo escala su paseo, y el `pace` propio de un trabajador (opcional), el suyo.
 
-**Vivos, no robóticos** (fase 4B; `life` en `npcs.json`, `Ch2L1Life`, todas las claves opcionales; el código en `core/ch2l1/Ch2L1NpcLife.kt`, Kotlin puro, probado):
+**Vivos, no robóticos** (fase 4B; `life` en `npcs.json`, `Ch2L1Life`, todas las claves opcionales; el código en `chapter2/level1/core/Ch2L1NpcLife.kt`, Kotlin puro, probado):
 - **Andar** (`Ch2L1Gait`): cada uno anda a su ritmo (`walk_speed` por 1 ± hasta `pace_spread`, sacado de su id), acelera poco a poco (`accel_seconds`) y frena antes del sitio donde
   se para; el cuerpo gira como mucho `turn_degrees` por tick, y un giro brusco los frena antes. Siguen yendo en línea recta al punto, así que nunca se desvían hacia una pared. En los puntos
   intermedios de un camino a veces se paran un momento (`linger_chance`, `linger_seconds`).
@@ -183,7 +187,7 @@ a quien deja de acercarse durante 5 s, un tope, se le pone en el punto), así qu
   el otro asiente (`LISTENING`), y se turnan cada 1,5 a 3,5 s. Mientras, sus rutinas esperan; después ninguno vuelve a charlar en `chat_cooldown_seconds`. La pose se sincroniza y la dibuja
   `FactoryNpcRenderer` (cada persona un poco a destiempo de las demás); la fase 5 añade a la misma lista las poses de la reunión.
 
-`platform.Ch2L1Npcs` las mantiene: mientras un jugador juega el nivel, dentro de él y antes de la cinemática, `ensureAmbient` (cada 5 s, y al entrar) pone a cada trabajador que falte; los del LAB
+`level1.platform.Ch2L1Npcs` las mantiene: mientras un jugador juega el nivel, dentro de él y antes de la cinemática, `ensureAmbient` (cada 5 s, y al entrar) pone a cada trabajador que falte; los del LAB
 desaparecen cuando el jugador llega a `ACT3_CUTSCENE` (la fase 8 cuenta con ello). Los **grupos** (`groups` del archivo) son personas de pie en anclas, que pone `Ch2L1Npcs.spawnGroup`: las
 seis del **grupo de las taquillas** (`taquillas`, alrededor de la columna central) son para la reunión y las pone su fase, no el principio.
 
@@ -198,8 +202,11 @@ dibujarlas el cliente, no cuestan nada al servidor.
 
 ## Las reglas del nivel, el reloj y los objetivos
 
-**Las reglas siguen al jugador, no al lugar.** Un jugador está *activo* en el nivel (`PlayerProgress.ch2l1Active`, guardado
+**Las reglas siguen al jugador, no al lugar.** Un jugador está *activo* en el nivel (`Ch2PlayerProgress.l1Active`, guardado
 con el estado y enviado al cliente por Cardinal; `Ch2L1.active`) desde `Ch2L1.enter` hasta `Ch2L1.leave`. Mientras lo está:
+
+Los hooks del juego base nunca preguntan por este nivel: `Chapter2` registra sus reglas en `PlayerRules` (sin linterna, sin
+esconderse, a salvo, en silencio, sin barras de estado) mientras `Ch2L1.active`, y los hooks de abajo preguntan a `PlayerRules`.
 
 | Regla | Dónde está |
 |---|---|
@@ -225,7 +232,7 @@ lee el estado del progreso del jugador, así que no hay paquete propio.
 
 ## Acto 1: las tareas y los altavoces
 
-**Las tres tareas** (`platform.Ch2L1TaskHooks`; los bloques de `Ch2L1TaskBlocks.kt` solo le pasan su uso; dónde está cada cosa y cuánto dura es
+**Las tres tareas** (`level1.platform.Ch2L1TaskHooks`; los bloques de `Ch2L1TaskBlocks.kt` solo le pasan su uso; dónde está cada cosa y cuánto dura es
 `tasks.json`):
 
 1. **Muestras** (`ACT1_TASK1`): haz clic en los tres `sample_tube` del banco junto a la pared oeste del LAB (cada uno desaparece, con un pitido:
@@ -235,7 +242,7 @@ lee el estado del progreso del jugador, así que no hay paquete propio.
    último cierra el lote, la pantalla cierra sesión sola y el estado pasa a `ACT1_TASK2`. El registro es una ventana de una pantalla hecha para
    reutilizarse en los documentos de las fases siguientes.
 2. **Analizador** (`ACT1_TASK2`): un clic **mantenido** sobre el `analyzer` (un bloque nuevo, hecho por `tools/blocks/generate.py`) durante
-   `calibrate_seconds`. El juego repite un clic mantenido cada 4 ticks; `core.ch2l1.HoldTracker` cuenta los ticks mientras los usos llegan con menos
+   `calibrate_seconds`. El juego repite un clic mantenido cada 4 ticks; `level1.core.HoldTracker` cuenta los ticks mientras los usos llegan con menos
    de 8 de diferencia y sobre el mismo bloque, así que apartar la vista o soltar lo reinicia. Lo muestran una barra (`client.hud.HoldBar`, del paquete
    `ch2l1_hold`) y un pitido que sube de tono. Luego, `ACT1_TASK3`.
 3. **Barrer** (`ACT1_TASK3`): la `leaning_broom` apoyada en la pared este del tramo oeste del anillo; un clic la coge (el objeto `broom` va a la
@@ -249,14 +256,14 @@ cambio de estado (jugando, `state`, `skip`) lleva contadores y mundo a lo que el
 tubos, la escoba y la suciedad están donde el jugador aún no ha llegado y no están donde ya ha pasado, así que una tarea se puede probar por
 comando con el nivel como estaría si se hubiera jugado. Los objetos del plano se vuelven a poner desde el propio plano (`Ch2L1Build.planState`).
 
-**La flecha guía** (`client.render.TaskArrow`, destinos en `core.ch2l1.Ch2L1Guide`, ajustes en el `guide` de `tasks.json`): una V rellena que apunta hacia abajo, azul con
+**La flecha guía** (`level1.client.TaskArrow`, destinos en `level1.core.Ch2L1Guide`, ajustes en el `guide` de `tasks.json`): una V rellena que apunta hacia abajo, azul con
 bordes blancos, que gira sobre sí misma y sube y baja un poco sobre el lugar del paso actual del jugador, para que el camino quede claro cuando el LAB esté lleno de mesas
 y máquinas. Se dibuja sin prueba de profundidad (los muebles no la tapan) y crece con la distancia para leerse a través de la sala. Apunta a lo más cercano de lo que queda: el
 reloj de fichar antes de fichar; los tubos aún sin coger y luego el terminal; el analizador; la escoba y luego las manchas sin barrer. Se oculta cuando el jugador se acerca a
 menos de `hide_within` (1,5 bloques a lo largo del suelo), en una cinemática y con el HUD oculto; `height` (1,1) es cuánto flota sobre el ancla y `enabled` la apaga.
 Las fases siguientes añaden a `Ch2L1Guide.targets` los pasos de los Actos 2 y 3.
 
-**Los altavoces** (`platform.Ch2L1SpeakerHooks`, reglas en `core.ch2l1.Ch2L1SpeakerSchedule`, datos en `speakers.json`): los avisos de Rowan
+**Los altavoces** (`level1.platform.Ch2L1SpeakerHooks`, reglas en `level1.core.Ch2L1SpeakerSchedule`, datos en `speakers.json`): los avisos de Rowan
 `rowan_loyal_a1` a `a6`, desde los altavoces de techo (bloques `ceiling_speaker`) de cuatro zonas, `speaker_entrance`, `speaker_lab`, `speaker_main` y
 `speaker_west`, cada una con su ancla emisora (`speaker_<zona>_src`). Las reglas:
 
@@ -270,19 +277,19 @@ Las fases siguientes añaden a `Ch2L1Guide.targets` los pasos de los Actos 2 y 3
   llegan a toda la zona (`attenuation_distance` 48 en `sounds.json`); los subtítulos son los de siempre (`Ch2L1Subtitles`). `tools/sounds/ch2_l1_voices.py` pasa los seis
   `rowan_loyal_*` por un filtro de megafonía (banda estrecha, algo de saturación, un eco de pasillo) antes de escribirlos.
 
-**El primer aviso es una cinemática** (`a1`; `core.ch2l1.Ch2L1IntroScene`, `platform.Ch2L1IntroHooks`): cuando el jugador sale de NonameOS tras la primera tarea no puede moverse,
+**El primer aviso es una cinemática** (`a1`; `level1.core.Ch2L1IntroScene`, `level1.platform.Ch2L1IntroHooks`): cuando el jugador sale de NonameOS tras la primera tarea no puede moverse,
 las barras negras entran y la cámara se gira desde sus propios ojos, donde está, hacia un altavoz de techo fijo (`speakers.json`, `intro.shots`: `camera: "player"` mirando a
 `speaker_lab_src`, el altavoz del LAB, que cuelga cerca del terminal), el timbre suena desde él al empezar la toma, la voz le sigue y la cámara vuelve a sus ojos mientras las
-barras se van. Es la maquinaria de la escena del director y del prólogo (`Cutscene`, `Timeline`, `CutsceneView.Kind.FACTORY`); la cámara de una toma es un ancla (o `player`) y lo que
+barras se van. Es la maquinaria de la escena del director y del prólogo (`Cutscene`, `Timeline`, `CutsceneView.Kind`, here `Ch2L1IntroView.KIND`); la cámara de una toma es un ancla (o `player`) y lo que
 mira otra ancla, en coordenadas del mundo, así que mover el mapa mueve la toma, y se pueden añadir más tomas en el archivo; se salta con la tecla de saltar pulsada dos veces, como las
 demás. Los otros avisos no tienen barras: el timbre, la voz y su subtítulo, y el jugador sigue caminando.
 
 `/et ch2 l1 tasks` muestra cuánto ha avanzado el jugador y todo lo que `tasks.json` o `speakers.json` nombran y `anchors.json` no tiene
-(`core.ch2l1.Ch2L1Wiring`, que `/et reload` también informa).
+(`level1.core.Ch2L1Wiring`, que `/et reload` también informa).
 
 ## Comandos de depuración
 
-`platform.Ch2L1Commands`, nivel de operador 2, **solo en ejecuciones de desarrollo** (como explica
+`level1.platform.Ch2L1Commands`, nivel de operador 2, **solo en ejecuciones de desarrollo** (como explica
 [Depuración](debugging.md) para `/everytunnel`):
 
 | Comando | Qué hace |
@@ -313,13 +320,13 @@ personaje) llegan con la fase que se los dé, y también se ejecutarán con el c
 
 ## Añadir el sistema de una fase
 
-1. Kotlin puro en `core.ch2l1` para sus reglas y su lector de JSON, con tests unitarios (`Ch2L1DataTest` comprueba que
+1. Kotlin puro en `chapter2.level1.core` para sus reglas y su lector de JSON, con tests unitarios (`Ch2L1DataTest` comprueba que
    cada archivo del jar se lee bien).
 2. Darle forma y un lector con tipos a su archivo de `data/every_tunnel/ch2/l1/`; leer el documento con
    `Ch2L1DataLoader.data.document("<nombre>")` y no guardarlo nunca, para que `/et reload` lo alcance.
-3. Un hook en `platform` que se registre con `Ch2L1.onStateChange` y, si tiene momentos propios, escuche el tick del
+3. Un hook en `chapter2.level1.platform` (que registra `Chapter2`) que se registre con `Ch2L1.onStateChange` y, si tiene momentos propios, escuche el tick del
    servidor; solo actúa en mundos con niveles (`WorldRules`).
-4. Textos en `en_us.json` y `es_es.json` bajo `every_tunnel.ch2.l1.<id>`; esta página y el [mapa del código](code-map.md),
+4. Textos en `tools/lang/src/chapter2/en_us.json` y `es_es.json` bajo `every_tunnel.ch2.l1.<id>` (luego `tools/lang/build.py`); esta página y el [mapa del código](code-map.md),
    en los dos idiomas.
 
 ## Tests
@@ -327,4 +334,4 @@ personaje) llegan con la fase que se los dé, y también se ejecutarán con el c
 `Ch2L1StateTest` (el orden, `next`, `parse`), `Ch2L1AnchorsParserTest` (el formato, cada tipo de problema) y `Ch2L1DataTest`
 (los archivos del jar, qué copia gana, los respaldos), `Ch2L1VoicesTest` (las 32 líneas, sus eventos de sonido, Ogg y
 fragmentos, los textos en los dos idiomas) `Ch2L1SkinsTest` (el formato de las skins) y `Ch2L1ObjectivesTest` (un objetivo por paso, en los dos idiomas) y `Ch2L1MapPlanTest` (los bloques y puertas del plan, las anclas
-sobre sus suelos), todos en `core/ch2l1`; `Ch2L1NpcsTest` (el archivo de la gente, las rutinas y cada tick de quien teclea, de quien camina y de quien se atasca), `Ch2L1NpcLifeTest` (las claves de `life` y el ritmo de un trabajador, acelerar y frenar, frenar para girar, las paradas en el camino, adónde miran y la mirada al jugador con su enfriamiento, las parejas para charlar y sus turnos), `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador, y que un planificador hecho para una partida vieja se sustituye cuando el progreso retrocede: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas, que la sala de las taquillas tiene sus taquillas y ninguna cámara, que cada otro espacio tiene una y que cada trabajador y cada ruta pisan el suelo. `PlayerProgressTest` cubre el estado y la marca en el progreso.
+sobre sus suelos), todos en `chapter2/level1/core`; `Ch2L1NpcsTest` (el archivo de la gente, las rutinas y cada tick de quien teclea, de quien camina y de quien se atasca), `Ch2L1NpcLifeTest` (las claves de `life` y el ritmo de un trabajador, acelerar y frenar, frenar para girar, las paradas en el camino, adónde miran y la mirada al jugador con su enfriamiento, las parejas para charlar y sus turnos), `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador, y que un planificador hecho para una partida vieja se sustituye cuando el progreso retrocede: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas, que la sala de las taquillas tiene sus taquillas y ninguna cámara, que cada otro espacio tiene una y que cada trabajador y cada ruta pisan el suelo. `Ch2PlayerProgressTest` cubre el estado, la marca y los contadores en el progreso del capítulo, y `ChapterBoundaryTest` que ningún código fuera de `chapter2` lo nombra.

@@ -8,7 +8,7 @@ Pale man's feet and breath, to their own heartbeat, to how loud their own steps 
 ## Rules
 
 - **Synthesized or CC0.** Almost every sound is synthesized in Python
-  (`tools/sounds/catalog.py`). A few are cut from CC0 recordings (`tools/sounds/cc0/`,
+  (`tools/sounds/catalog.py`, and Chapter 2's in `catalog_ch2.py`). A few are cut from CC0 recordings (`tools/sounds/cc0/`,
   sources in `SOURCES.md`).
 - **One credited exception:** the elevator song, Kevin MacLeod's "Local Forecast –
   Elevator" (CC BY 4.0). Its credit must travel with the mod (`CREDITS.md`, the jar, the

@@ -74,8 +74,8 @@ object LoadingHooks {
         var preparedTick = -1L
         var lightSent = false
 
-        /** The menu asked only for Chapter 2's prologue ([ChapterRequest]): it plays once the loading screen is gone. */
-        var prologue = false
+        /** The menu asked only for a later chapter's opening ([ChapterRequest]): it plays once the loading screen is gone. */
+        var chapterStart = false
         /** Server tick [STATE_READY] was sent, or -1. */
         var readyTick = -1L
         var done = false
@@ -119,9 +119,9 @@ object LoadingHooks {
 
     private fun startBuilds(server: MinecraftServer) {
         building = false
-        if (ChapterRequest.prologueOnly) {
-            // The prologue has its own room: no level is needed, so none is built.
-            EveryTunnel.LOGGER.info("Only Chapter 2's prologue was asked for: the map is not rebuilt")
+        if (ChapterRequest.chapterOnly) {
+            // A chapter's opening has its own place: no level is needed, so none is built.
+            EveryTunnel.LOGGER.info("Only Chapter {}'s opening was asked for: the map is not rebuilt", ChapterRequest.chapter)
             return
         }
         val ids = LevelManager.all().sortedBy { it.order }.mapNotNull { it.build }.distinct()
@@ -176,8 +176,8 @@ object LoadingHooks {
             if (!state.prepared) {
                 state.prepared = true
                 state.preparedTick = now
-                if (ChapterRequest.prologueOnly) {
-                    state.prologue = true
+                if (ChapterRequest.chapterOnly) {
+                    state.chapterStart = true
                 } else if (WorldRules.appliesTo(player.isCreative, player.isSpectator)) {
                     val continuing = ContinueGame.requested && ContinueGame.start(player)
                     ContinueGame.requested = false
@@ -214,7 +214,7 @@ object LoadingHooks {
                 iterator.remove()
                 unfreeze(player)
                 EveryTunnel.LOGGER.info("{}: loaded", player.name.string)
-                if (state.prologue) PrologueSceneHooks.startFromMenu(player)
+                if (state.chapterStart) ChapterRequest.loaded(player)
             }
         }
     }

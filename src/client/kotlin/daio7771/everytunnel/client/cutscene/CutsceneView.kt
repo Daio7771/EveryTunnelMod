@@ -2,19 +2,14 @@ package daio7771.everytunnel.client.cutscene
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.client.effects.ScreenFade
-import daio7771.everytunnel.client.hud.Ch2L1Subtitles
 import daio7771.everytunnel.core.cutscene.CameraPose
 import daio7771.everytunnel.core.cutscene.DirectorScene
-import daio7771.everytunnel.core.cutscene.PrologueScene
 import daio7771.everytunnel.core.cutscene.SceneFrame
 import daio7771.everytunnel.core.cutscene.SkipPrompt
 import daio7771.everytunnel.core.cutscene.Timeline
 import daio7771.everytunnel.core.cutscene.TitleCue
-import daio7771.everytunnel.platform.Ch2L1IntroHooks
-import daio7771.everytunnel.platform.ChapterRequest
 import daio7771.everytunnel.platform.DirectorEntity
 import daio7771.everytunnel.platform.DirectorSceneHooks
-import daio7771.everytunnel.platform.PrologueSceneHooks
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
@@ -44,15 +39,14 @@ import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 
 /**
- * A cinematic on the client: the director's scene ([DirectorScene], started by `platform.DirectorSceneHooks`),
- * Chapter 2's prologue ([PrologueScene], by `platform.PrologueSceneHooks`) or the first loudspeaker announcement of
- * Chapter 2's Level 1 ([daio7771.everytunnel.core.ch2l1.Ch2L1IntroScene], by `platform.Ch2L1IntroHooks`), each a [Kind]. The view leaves the
+ * A cinematic on the client: the director's scene ([DirectorScene], started by `platform.DirectorSceneHooks`) or a later
+ * chapter's (Chapter 2's prologue and its Level 1's first announcement, which that chapter's client starts with [start]), each a [Kind]. The view leaves the
  * player for a camera of its own, which the scene's timeline moves tick by tick (the game blends between ticks;
  * a cut jumps), the HUD goes (`InGameHudMixin`), and a [CutsceneScreen] takes the keys and the mouse and draws
  * the bands, the subtitles and the notice to skip, and the black a scene opens out of. In the director's scene
  * the player stays where they stood, seen from outside ([drawPlayer]); the prologue never draws them. Voice
- * lines play on their ticks, flat (the same in every shot), under Voice/Speech; the director's scene makes no other
- * sound, the prologue's laboratory has its own ([PrologueSound]). The director takes his moves from it ([DirectorEntity.poseSource]).
+ * lines play on their ticks, flat (the same in every shot), under Voice/Speech; anything else a scene does (its own sounds, a
+ * shake, a flash) is its [Kind]'s. The director takes his moves from it ([DirectorEntity.poseSource]).
  *
  * Skipping (the jump key twice, [SkipPrompt]) fades to black and asks the server to end it; its answer, like
  * the scene's own end, gives the player their view back ([stop]), out of black if skipped, the voice cut.
@@ -60,19 +54,40 @@ import net.minecraft.world.World
 object CutsceneView {
 
     /**
-     * The scenes this view plays: each one's [timeline], the packet that skips it, the lang key of the speaker's
-     * name before the subtitles (null: none), the prefix of its voice sounds, and whether the player is drawn.
+     * A scene this view plays: its [timeline], the packet that skips it, the lang key of the speaker's name before the subtitles
+     * (null: none), the prefix of its voice sounds, and whether the player is drawn. What else it does is its own: a chapter's
+     * scenes override [started], [ticked] and [stopped] (their own sounds), [shake], [flash] and [vignette] (0: none), and
+     * [endsOnBlack] (it gives the view back out of black even when not skipped).
      */
-    enum class Kind(
+    open class Kind(
         val timeline: () -> Timeline,
         val skipPacket: Identifier,
         val speaker: String?,
         val voicePrefix: String,
         val drawsPlayer: Boolean,
     ) {
-        DIRECTOR({ DirectorScene.SCENE }, DirectorSceneHooks.SKIP_PACKET_ID, "subtitle.every_tunnel.speaker.director", "voice.director.", true),
-        PROLOGUE({ PrologueScene.SCENE }, PrologueSceneHooks.SKIP_PACKET_ID, null, "voice.", false),
-        FACTORY({ Ch2L1IntroHooks.clientTimeline() }, Ch2L1IntroHooks.SKIP_PACKET_ID, "every_tunnel.ch2.l1.speaker.rowan_loudspeaker", "voice.", false),
+        open val endsOnBlack: Boolean = false
+
+        open fun started(client: MinecraftClient, at: SceneFrame) {}
+
+        open fun ticked(client: MinecraftClient, tick: Int) {}
+
+        open fun stopped(client: MinecraftClient) {}
+
+        /** How hard the camera shakes at tick [n], 0 to 1. */
+        open fun shake(n: Double): Double = 0.0
+
+        /** A white flash (0..1) and a dark vignette (0..1) at tick [t]. */
+        open fun flash(t: Double): Double = 0.0
+
+        open fun vignette(t: Double): Double = 0.0
+    }
+
+    /** The director's scene of Chapter 1's Level 5. */
+    val DIRECTOR = object : Kind({ DirectorScene.SCENE }, DirectorSceneHooks.SKIP_PACKET_ID, "subtitle.every_tunnel.speaker.director", "voice.director.", true) {
+        override fun started(client: MinecraftClient, at: SceneFrame) {
+            DirectorEntity.poseSource = ::directorPose
+        }
     }
 
     /** The camera's eyes are this high over its feet: a standing player's, so handing the view over moves nothing. */
@@ -82,7 +97,7 @@ object CutsceneView {
     private const val SKIP_FADE_MS = 250L
     private const val SKIP_FADE_OUT_S = 0.6f
 
-    /** At full strength the prologue's shake moves the camera this far (blocks) and turns it this far (degrees). */
+    /** At full strength a scene's shake moves the camera this far (blocks) and turns it this far (degrees). */
     private const val SHAKE_MOVE = 0.05
     private const val SHAKE_TURN = 2.4
 
@@ -90,7 +105,7 @@ object CutsceneView {
     private const val NEAR = 1.2
 
     private var frame: SceneFrame? = null
-    private var kind = Kind.DIRECTOR
+    private var kind: Kind = DIRECTOR
     private var eyes = CameraPose(0.0, 0.0, 0.0, 0.0, 0.0)
     private var tick = 0
     private var camera: Entity? = null
@@ -107,32 +122,9 @@ object CutsceneView {
     fun register() {
         ClientPlayNetworking.registerGlobalReceiver(DirectorSceneHooks.START_PACKET_ID) { client, _, buf, _ ->
             val (x, y, z, yaw) = DirectorSceneHooks.readStart(buf)
-            client.execute { start(client, Kind.DIRECTOR, SceneFrame(x, y, z, yaw)) }
+            client.execute { start(client, DIRECTOR, SceneFrame(x, y, z, yaw)) }
         }
         ClientPlayNetworking.registerGlobalReceiver(DirectorSceneHooks.END_PACKET_ID) { client, _, buf, _ ->
-            val skipped = buf.readBoolean()
-            client.execute { stop(client, skipped) }
-        }
-        ClientPlayNetworking.registerGlobalReceiver(PrologueSceneHooks.START_PACKET_ID) { client, _, buf, _ ->
-            val (x, y, z, yaw) = PrologueSceneHooks.readStart(buf)
-            client.execute { start(client, Kind.PROLOGUE, SceneFrame(x, y, z, yaw)) }
-        }
-        ClientPlayNetworking.registerGlobalReceiver(PrologueSceneHooks.END_PACKET_ID) { client, _, buf, _ ->
-            val skipped = buf.readBoolean()
-            client.execute {
-                stop(client, skipped)
-                // The world was opened only for the prologue (the menu's Chapter 2): back to the menu.
-                if (ChapterRequest.prologueOnly) leaveForMenu(client)
-            }
-        }
-        ClientPlayNetworking.registerGlobalReceiver(Ch2L1IntroHooks.START_PACKET_ID) { client, _, buf, _ ->
-            val (x, y, z, yaw) = Ch2L1IntroHooks.readStart(buf)
-            client.execute {
-                val at = SceneFrame(x, y, z, yaw)
-                if (Ch2L1IntroHooks.clientBegin(at)) start(client, Kind.FACTORY, at)
-            }
-        }
-        ClientPlayNetworking.registerGlobalReceiver(Ch2L1IntroHooks.END_PACKET_ID) { client, _, buf, _ ->
             val skipped = buf.readBoolean()
             client.execute { stop(client, skipped) }
         }
@@ -141,7 +133,8 @@ object CutsceneView {
         ClientPlayConnectionEvents.DISCONNECT.register { _, client -> client.execute { stop(client, false) } }
     }
 
-    private fun start(client: MinecraftClient, scene: Kind, at: SceneFrame) {
+    /** Plays [scene] from [at] (a chapter's client calls this when its server says the scene begins). */
+    fun start(client: MinecraftClient, scene: Kind, at: SceneFrame) {
         val player = client.player ?: return
         val world = client.world ?: return
         if (active()) stop(client, false)
@@ -157,18 +150,11 @@ object CutsceneView {
         client.options.perspective = Perspective.FIRST_PERSON
         client.setCameraEntity(camera)
         client.setScreen(CutsceneScreen())
-        if (scene == Kind.DIRECTOR) DirectorEntity.poseSource = ::directorPose
-        if (scene == Kind.PROLOGUE) {
-            val counter = PrologueScene.COUNTER
-            val (x, y, z) = at.at(counter.forward, counter.right, counter.up)
-            val (lx, ly, lz) = at.at(0.0, 0.0, 3.2)
-            val (hx, hy, hz) = at.at(0.0, 0.0, 1.2)
-            PrologueSound.start(client, counterAt = Vec3d(x, y, z), lightsAt = Vec3d(lx, ly, lz), hisAt = Vec3d(hx, hy, hz))
-        }
+        scene.started(client, at)
     }
 
     /** Leaves the world, saving it, for the main menu (the title screen is the menu: `MinecraftClientMixin`). */
-    private fun leaveForMenu(client: MinecraftClient) {
+    fun leaveForMenu(client: MinecraftClient) {
         val singleplayer = client.isInSingleplayer
         client.world?.disconnect()
         if (singleplayer) client.disconnect(MessageScreen(Text.translatable("menu.savingLevel"))) else client.disconnect()
@@ -182,16 +168,15 @@ object CutsceneView {
         frame = null
         camera = null
         DirectorEntity.poseSource = null
-        PrologueSound.stop(client)
+        scene.stopped(client)
         voice?.let { client.soundManager.stop(it) }
         voice = null
-        Ch2L1Subtitles.clear()
         client.options.hudHidden = hudWasHidden
         client.options.perspective = perspective
         client.player?.let { client.setCameraEntity(it) }
         if (client.currentScreen is CutsceneScreen) client.setScreen(null)
-        // A skip, and the prologue's end (on its black), give the view back out of black.
-        if (skipped || scene == Kind.PROLOGUE) {
+        // A skip, and the end of a scene that ends on black, give the view back out of black.
+        if (skipped || scene.endsOnBlack) {
             ScreenFade.fadeTo(1f, 0f)
             ScreenFade.fadeTo(0f, SKIP_FADE_OUT_S)
         }
@@ -274,7 +259,7 @@ object CutsceneView {
         place(cam, tick)
         if (skippedAt == 0L) {
             timeline.lines.firstOrNull { it.start == tick }?.let { speak(client, it.line.id) }
-            if (kind == Kind.PROLOGUE) PrologueSound.tick(client, tick)
+            kind.ticked(client, tick)
         }
         // Another screen may have taken over (and gone): the keys stay the scene's.
         if (client.currentScreen == null) client.setScreen(CutsceneScreen())
@@ -307,10 +292,9 @@ object CutsceneView {
         cam.pitch = then.pitch.toFloat()
     }
 
-    /** [pose] shaken as the prologue's cues say at tick [n]: a little in place and in aim, by noise that is the same every time. */
+    /** [pose] shaken as the scene says at tick [n]: a little in place and in aim, by noise that is the same every time. */
     private fun shaken(pose: CameraPose, n: Int): CameraPose {
-        if (kind != Kind.PROLOGUE) return pose
-        val amount = PrologueScene.shake(n.toDouble(), PrologueScene.PLAN.cues)
+        val amount = kind.shake(n.toDouble())
         if (amount <= 0.0) return pose
         fun noise(axis: Int): Double {
             val v = Math.sin(n * 12.9898 + axis * 78.233) * 43758.5453
@@ -322,12 +306,10 @@ object CutsceneView {
         )
     }
 
-    /** The prologue's white flash (0..1) and dark vignette (0..1) at this frame; 0 in any other scene. */
-    fun flash(tickDelta: Float): Float =
-        if (kind != Kind.PROLOGUE) 0f else PrologueScene.flash(tick + tickDelta.toDouble(), PrologueScene.PLAN.cues).toFloat()
+    /** The scene's white flash (0..1) and dark vignette (0..1) at this frame; 0 in a scene without them. */
+    fun flash(tickDelta: Float): Float = kind.flash(tick + tickDelta.toDouble()).toFloat()
 
-    fun vignette(tickDelta: Float): Float =
-        if (kind != Kind.PROLOGUE) 0f else PrologueScene.vignette(tick + tickDelta.toDouble(), PrologueScene.PLAN.cues).toFloat()
+    fun vignette(tickDelta: Float): Float = kind.vignette(tick + tickDelta.toDouble()).toFloat()
 
     private fun speak(client: MinecraftClient, id: String) {
         voice?.let { client.soundManager.stop(it) }

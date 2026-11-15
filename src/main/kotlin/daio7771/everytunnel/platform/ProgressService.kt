@@ -1,6 +1,5 @@
 package daio7771.everytunnel.platform
 
-import daio7771.everytunnel.core.ch2l1.Ch2L1State
 import daio7771.everytunnel.core.ending.RunSummary
 import net.minecraft.entity.player.PlayerEntity
 
@@ -43,24 +42,6 @@ interface ProgressService {
 
     fun setLounge(player: PlayerEntity, text: String?)
 
-    /** Where the player is in Chapter 2's Level 1 ([Ch2L1State.START] before they begin it). */
-    fun ch2L1State(player: PlayerEntity): Ch2L1State
-
-    fun setCh2L1State(player: PlayerEntity, state: Ch2L1State)
-
-    /** The player is playing Chapter 2's Level 1, whose rules apply to them (`PlayerProgress.ch2l1Active`). */
-    fun ch2L1Active(player: PlayerEntity): Boolean
-
-    fun setCh2L1Active(player: PlayerEntity, active: Boolean)
-
-    /** A named whole number of the player's Chapter 2 Level 1 (`PlayerProgress.ch2l1Counter`); 0 if it has none. */
-    fun ch2L1Counter(player: PlayerEntity, key: String): Int
-
-    fun setCh2L1Counter(player: PlayerEntity, key: String, value: Int)
-
-    /** Forgets the counters whose names start with [prefix] (every one if it is empty). */
-    fun clearCh2L1Counters(player: PlayerEntity, prefix: String = "")
-
     /** Adds [ticks] played to this game's total. Not synced to the client: it is counted every tick. */
     fun addPlayTicks(player: PlayerEntity, ticks: Long)
 
@@ -76,7 +57,7 @@ interface ProgressService {
     /** What the player carried at the checkpoint. */
     fun restoreInventory(player: PlayerEntity)
 
-    /** A new game: the player's progress is forgotten. */
+    /** A new game: the player's progress is forgotten, and every [onReset] listener is told (a later chapter forgets its own). */
     fun reset(player: PlayerEntity)
 
     /** One line for the debug command. */
@@ -84,5 +65,14 @@ interface ProgressService {
 
     companion object {
         fun get(): ProgressService = CardinalProgress
+
+        private val resetListeners = mutableListOf<(PlayerEntity) -> Unit>()
+
+        /** [listener] is called after every [reset], on the side that reset (a later chapter's progress, kept apart, is cleared with it). */
+        fun onReset(listener: (PlayerEntity) -> Unit) {
+            resetListeners += listener
+        }
+
+        internal fun resetDone(player: PlayerEntity) = resetListeners.forEach { it(player) }
     }
 }

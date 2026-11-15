@@ -11,9 +11,14 @@ the [last section](#notes-for-ai-assistants) adds what an assistant needs to kno
 - **Docs:** English and Spanish, the same pages in `docs/en/` and `docs/es/`. Change both in
   the same commit.
 - The game is in English (`en_us.json`, the reference) and Spanish from Spain (`es_es.json`,
-  also copied to the other `es_*` locales by `tools/lang/spanish_variants.py`). The painted
-  wall messages (`wall.every_tunnel.*`) stay in English on purpose. The in-game guide and the
-  notes are in both.
+  also copied to the other `es_*` locales). Both are generated: write texts in the sources by chapter,
+  `tools/lang/src/<part>/<locale>.json` (`base` for Chapter 1 and what is shared, `chapter2`...), then run
+  `python3 tools/lang/build.py`. The painted wall messages (`wall.every_tunnel.*`) stay in English on purpose.
+  The in-game guide and the notes are in both.
+- **Chapters stay apart.** Chapter 1 and what every chapter shares are the base game; a later chapter's code is
+  under `daio7771.everytunnel.chapterN` (one folder per level), with its own entrypoints, registries, progress, lang part
+  and sound catalog. The base game never names a chapter (`ChapterBoundaryTest`); a chapter uses the base game's
+  extension points instead (see [Architecture](architecture.md#chapters)).
 
 ## Public pages
 

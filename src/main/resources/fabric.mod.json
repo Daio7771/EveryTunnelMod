@@ -14,12 +14,20 @@
       {
         "adapter": "kotlin",
         "value": "daio7771.everytunnel.EveryTunnel"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "daio7771.everytunnel.chapter2.Chapter2"
       }
     ],
     "client": [
       {
         "adapter": "kotlin",
         "value": "daio7771.everytunnel.client.EveryTunnelClient"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "daio7771.everytunnel.chapter2.Chapter2Client"
       }
     ],
     "fabric-datagen": [
@@ -38,11 +46,15 @@
       {
         "adapter": "kotlin",
         "value": "daio7771.everytunnel.platform.CardinalProgress"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "daio7771.everytunnel.chapter2.platform.Ch2Progress"
       }
     ]
   },
   "custom": {
-    "cardinal-components": ["every_tunnel:progress"]
+    "cardinal-components": ["every_tunnel:progress", "every_tunnel:ch2_progress"]
   },
   "mixins": [
     "every_tunnel.mixins.json",

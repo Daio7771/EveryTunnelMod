@@ -40,6 +40,9 @@ from film_walker import faces as skin_faces  # noqa: E402
 from observer import draw_model  # noqa: E402
 from pale_man import Bone, write_json  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lang"))
+import langfiles  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel"
 OUT = Path(__file__).resolve().parent / "output"
@@ -382,10 +385,7 @@ def main():
     texture(pale=True).save(ASSETS / "textures" / "entity" / "scientist_pale.png")
     write_json(ASSETS / "animations" / "entity" / "scientist.animation.json", animations())
     write_preview(tex)
-    lang_path = ASSETS / "lang" / "en_us.json"
-    lang = json.loads(lang_path.read_text(encoding="utf-8"))
-    lang["entity.every_tunnel.scientist"] = "The Scientist"
-    write_json(lang_path, lang)
+    langfiles.update("chapter2", "en_us", {"entity.every_tunnel.scientist": "The Scientist"})
     print("The scientist: standing, in his white coat")
 
 

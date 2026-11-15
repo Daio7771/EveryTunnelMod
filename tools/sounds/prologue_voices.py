@@ -27,8 +27,8 @@ are encoded, so the ones that did not change are left alone); the gain is always
 
 Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   cutscene/prologue.json   each line's length and cues (ms from the line's start, lang key)
-  lang/en_us.json          the cues' text, under subtitle.every_tunnel.ch2.<id>_<n>
-(the Spanish subtitles are written by hand in es_es.json, then tools/lang/spanish_variants.py) and prints every
+  tools/lang/src/chapter2/en_us.json  the cues' text, under subtitle.every_tunnel.ch2.<id>_<n> (then the lang files are rebuilt)
+(the Spanish subtitles are written by hand in tools/lang/src/chapter2/es_es.json, then tools/lang/build.py) and prints every
 cue with its time, to check them by ear.
 """
 
@@ -46,6 +46,9 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import audio_io  # noqa: E402
 import voices  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lang"))
+import langfiles  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 VOICE = voices.VOICE
@@ -234,8 +237,7 @@ def main():
         convert(source, tuple(sys.argv[2:]))
     elif not all((VOICE / f"{line_id}.ogg").exists() for line_id, _, _ in LINES):
         raise SystemExit(f"no MP3s in {source} and no prologue_0N.ogg in voice/")
-    lang = json.loads(LANG.read_text(encoding="utf-8"))
-    lang = {k: v for k, v in lang.items() if not k.startswith(KEY)}
+    lang = {}
     scene = {"lines": []}
     total = 0
     for line_id, _, text in LINES:
@@ -250,7 +252,7 @@ def main():
         scene["lines"].append(entry)
     SCENE.parent.mkdir(parents=True, exist_ok=True)
     SCENE.write_text(json.dumps(scene, indent=2) + "\n", encoding="utf-8")
-    LANG.write_text(json.dumps(lang, indent=2) + "\n", encoding="utf-8")
+    langfiles.update("chapter2", "en_us", lang, drop_prefix=KEY)
     print(f"{len(LINES)} lines, {total / 1000:.1f} s of voice")
 
 

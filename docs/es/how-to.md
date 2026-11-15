@@ -92,18 +92,19 @@ La duración sale de la grabación: la pieza aparece al acabar. La del juego es
 
 ## Añadir un consejo de la pantalla de carga
 
-Añade `loading.every_tunnel.tip.<n>` a `assets/every_tunnel/lang/en_us.json`, numerado sin
+Añade `loading.every_tunnel.tip.<n>` a `tools/lang/src/base/en_us.json` (luego `tools/lang/build.py`), numerado sin
 huecos. `{flashlight}`, `{sneak}`, `{sprint}`, `{jump}` y `{use}` se convierten en las
 teclas que tiene asignadas el jugador.
 
 ## Añadir una traducción
 
-Copia `assets/every_tunnel/lang/en_us.json` al archivo del idioma (`es_es.json`...) y
-traduce los valores. `tools/blocks/generate.py` reescribe los nombres de bloques en
-`en_us.json`; los demás idiomas no los toca. Las claves que faltan vuelven al inglés. Las
+Los archivos de idioma se generan desde fuentes por capítulo: copia el `tools/lang/src/<parte>/en_us.json` de cada parte al
+archivo del idioma en la misma carpeta (`es_es.json`...), traduce los valores, añade el idioma a `LOCALES` en
+`tools/lang/langfiles.py` y ejecuta `python3 tools/lang/build.py`. Sus herramientas reescriben los nombres de bloques, criaturas
+y subtítulos en `en_us.json`; los demás idiomas no los tocan. Las claves que faltan vuelven al inglés. Las
 notas son archivos aparte: `assets/every_tunnel/notes/<idioma>/<id>.txt` (`es` sirve a todos
-los `es_*`, `en` al resto). El español ya está hecho: escríbelo en `es_es.json`, ejecuta
-`python3 tools/lang/spanish_variants.py` para copiarlo a los demás idiomas en español y
+los `es_*`, `en` al resto). El español ya está hecho: escríbelo en el `es_es.json` de cada parte, ejecuta
+`python3 tools/lang/build.py` (que también lo copia a los demás idiomas en español) y
 mantén `notes/es/` al día con `notes/en/` (`LangFilesTest` rompe el build si una clave, una
 variable o una nota no coincide).
 

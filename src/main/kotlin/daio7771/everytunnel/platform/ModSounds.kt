@@ -94,11 +94,6 @@ object ModSounds {
     val LAB_ALARM = event("event.lab.alarm", range = 48f)
     val LAB_STING = event("event.lab.sting")
     val TERMINAL_KEY = event("block.terminal.key")
-
-    /** Chapter 2 Level 1: the loudspeakers' chime, the broom's swish and a lab instrument's pip. */
-    val CH2L1_DING = event("event.ch2l1.ding", range = 48f)
-    val CH2L1_SWEEP = event("block.ch2l1.sweep")
-    val CH2L1_BLIP = event("block.ch2l1.blip")
     val HUNTER_SHRIEK = event("entity.hunter.shriek")
     val HUNTER_ATTACK = event("entity.hunter.attack")
     val HUNTER_DEATH = event("entity.hunter.death")

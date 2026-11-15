@@ -9,10 +9,14 @@ who "fell ill", three acts of tasks, a meeting and sneaking, ending in the super
 playable yet as a level (it has no tasks, no furniture and no people), but its map is built and a player can be put in it: its
 rules apply to them and the time clock moves them to the first task.
 
+Its code is under `daio7771.everytunnel.chapter2` (the client's under the same package in `src/client`): `level1.core` (plain
+Kotlin, tested), `level1.platform` (Minecraft glue) and `level1.client`, apart from the base game, which never names it (see
+[Architecture](architecture.md#chapters)). Its texts are in `tools/lang/src/chapter2/`.
+
 ## The state machine
 
-`core.ch2l1.Ch2L1State` has ten states, in the order they are played. Each player's current one is kept in their
-progress (`PlayerProgress.ch2l1State`, saved by `CardinalProgress` as `ch2_l1_state`), so it survives leaving the world, a
+`level1.core.Ch2L1State` has ten states, in the order they are played. Each player's current one is kept in their
+Chapter 2 progress (`Ch2PlayerProgress.l1State`, saved by `Ch2Progress`, the chapter's own component, as `l1_state`), so it survives leaving the world, a
 death and a new session. A player who has never begun the level is at `ACT1_CLOCKIN`; a new game (`ProgressService.reset`)
 takes everyone back there.
 
@@ -27,7 +31,7 @@ takes everyone back there.
 | `ACT3_OVERTIME` | After the office, with the unpaid overtime pass: the way to the sealed zone is open |
 | `DONE` | The player crossed into Level 2 |
 
-`platform.Ch2L1` is the only door to the state: `setState(player, state, reason)` saves it, logs `Chapter 2 Level 1: <player>
+`level1.platform.Ch2L1` is the only door to the state: `setState(player, state, reason)` saves it, logs `Chapter 2 Level 1: <player>
 goes A -> B (<reason>)` and tells the listeners; `skip(player)` moves to the next one. A system of the level registers
 once with `Ch2L1.onStateChange` and does what entering a state means (an objective, a scene, a speaker line); the state
 machine knows none of it. That is what makes a step reachable by playing or by command with the same result.
@@ -103,7 +107,7 @@ them at the corridor's east end that opens onto nothing. The three doors of the 
 time clock hangs on the entrance's south wall.
 
 **Where and how.** The plan stands at (1024, 64, 1024) of the map world, free of Chapter 1's levels and of the prologue's room.
-`platform.Ch2L1Build` puts it there in steps of 8,000 cells a tick with the chunks kept loaded (a second or two, no stutter),
+`level1.platform.Ch2L1Build` puts it there in steps of 8,000 cells a tick with the chunks kept loaded (a second or two, no stutter),
 first emptying its box; it remembers the fingerprint of the plan it built (`data/every_tunnel_ch2_l1.dat`), so `Ch2L1.enter`
 builds the level only when it is missing or the plan changed. Every block is looked up before the world is touched; a plan
 with a block or a state the game does not know fails with a message and leaves the world as it was. `/et ch2 l1 build` builds
@@ -164,7 +168,7 @@ routes (`route_*`) and every worker's spot (`npc_*`) are written by the map gene
 by the game's pathfinding: `Ch2L1RoutineRunner` (plain Kotlin, tested) says what to do each tick and `FactoryNpcEntity.tick` does it by setting the entity's own velocity (a stroll of 1.3 blocks a second, straight to the next
 point; anyone who stops getting nearer for 5 s, a bump, is put at the point), so sixteen people cost almost nothing. `walk_speed` in the file scales their stroll, and a worker's own `pace` (optional) theirs.
 
-**Alive, not robotic** (phase 4B; `life` in `npcs.json`, `Ch2L1Life`, every key optional; the code in `core/ch2l1/Ch2L1NpcLife.kt`, plain Kotlin, tested):
+**Alive, not robotic** (phase 4B; `life` in `npcs.json`, `Ch2L1Life`, every key optional; the code in `chapter2/level1/core/Ch2L1NpcLife.kt`, plain Kotlin, tested):
 - **Walking** (`Ch2L1Gait`): everyone walks at their own pace (`walk_speed` times 1 ± up to `pace_spread`, drawn from their id), eases into it (`accel_seconds`) and brakes before the
   place they stop at; the body turns at most `turn_degrees` a tick, and a sharp turn slows them down first. They still move straight at the point, so they never stray into a wall. At a path's
   middle points they sometimes stop a moment (`linger_chance`, `linger_seconds`).
@@ -177,7 +181,7 @@ point; anyone who stops getting nearer for 5 s, a bump, is put at the point), so
   (`LISTENING`), and they swap every 1.5 to 3.5 s. Their routines wait meanwhile; afterwards neither talks again for `chat_cooldown_seconds`. The pose is synced and drawn by
   `FactoryNpcRenderer` (each person a little out of step with the rest); phase 5 adds the meeting's poses to the same list.
 
-`platform.Ch2L1Npcs` keeps them: while a player plays the level, inside it and before the cinematic, `ensureAmbient` (every 5 s, and on entering) puts in each worker that is missing; the
+`level1.platform.Ch2L1Npcs` keeps them: while a player plays the level, inside it and before the cinematic, `ensureAmbient` (every 5 s, and on entering) puts in each worker that is missing; the
 LAB's go away when the player reaches `ACT3_CUTSCENE` (phase 8 relies on it). **Groups** (`groups` in the file) are people standing at anchors, put in by `Ch2L1Npcs.spawnGroup`: the
 six of the **lockers' group** (`taquillas`, round the central column) are for the meeting and are put in by its phase, not at the start.
 
@@ -192,8 +196,11 @@ patrols of phase 7 do. Being drawn by the client, they cost the server nothing.
 
 ## The level's rules, the clock and the objectives
 
-**The rules follow the player, not the place.** A player is *active* in the level (`PlayerProgress.ch2l1Active`, saved with
+**The rules follow the player, not the place.** A player is *active* in the level (`Ch2PlayerProgress.l1Active`, saved with
 the state and sent to the client by Cardinal; `Ch2L1.active`) from `Ch2L1.enter` to `Ch2L1.leave`. While they are:
+
+The base game's hooks never ask for this level: `Chapter2` registers its rules with `PlayerRules` (no flashlight, no hiding,
+safe, silent, no status bars) while `Ch2L1.active`, and the hooks below ask `PlayerRules`.
 
 | Rule | Where it is |
 |---|---|
@@ -219,7 +226,7 @@ state from the player's progress, so there is no packet of its own.
 
 ## Act 1: the tasks and the loudspeakers
 
-**The three tasks** (`platform.Ch2L1TaskHooks`; the blocks in `Ch2L1TaskBlocks.kt` only hand their use to it; where things are and how long
+**The three tasks** (`level1.platform.Ch2L1TaskHooks`; the blocks in `Ch2L1TaskBlocks.kt` only hand their use to it; where things are and how long
 each takes is `tasks.json`):
 
 1. **Samples** (`ACT1_TASK1`): click the three `sample_tube`s on the bench along the LAB's west wall (each goes, with a pip: 1/3, 2/3, 3/3), then the
@@ -229,7 +236,7 @@ each takes is `tasks.json`):
    the batch, the screen logs off by itself and the state is `ACT1_TASK2`. The registry is one window of a screen made to be reused for the
    documents of later phases.
 2. **Analyzer** (`ACT1_TASK2`): a click **held** on the `analyzer` (a new block, made by `tools/blocks/generate.py`) for `calibrate_seconds`.
-   The game repeats a held click every 4 ticks; `core.ch2l1.HoldTracker` counts the ticks while the uses come within 8 of each other and on the
+   The game repeats a held click every 4 ticks; `level1.core.HoldTracker` counts the ticks while the uses come within 8 of each other and on the
    same block, so looking away or letting go starts it over. A bar (`client.hud.HoldBar`, from the packet `ch2l1_hold`) and a pip that rises in pitch
    show it. Then `ACT1_TASK3`.
 3. **Sweep** (`ACT1_TASK3`): the `leaning_broom` against the east wall of the ring's west stretch; a click takes it (the `broom` item goes to the
@@ -244,14 +251,14 @@ change (playing, `state`, `skip`) brings counters and world to what the state me
 the dirt stand where the player has not got yet and are gone where they have, so a task can be tried by command with the level as it would be
 had they played. The plan's props are put back from the plan itself (`Ch2L1Build.planState`).
 
-**The guide arrow** (`client.render.TaskArrow`, targets in `core.ch2l1.Ch2L1Guide`, settings in `tasks.json`'s `guide`): a filled V pointing down, blue with white
+**The guide arrow** (`level1.client.TaskArrow`, targets in `level1.core.Ch2L1Guide`, settings in `tasks.json`'s `guide`): a filled V pointing down, blue with white
 edges, that turns on itself and bobs a little over the place of the player's current step, so that the way is clear when the LAB is full of benches and machines. It is drawn
 without a depth test (furniture does not hide it) and grows with distance so that it is readable across the room. It points at the nearest of what is left: the time clock before
 clocking in; the sample tubes not taken yet and then the terminal; the analyzer; the broom and then the patches of dirt not swept. It hides when the player comes within
 `hide_within` (1.5 blocks along the floor) of it, in a cinematic and with the HUD hidden; `height` (1.1) is how high it floats over the anchor and `enabled` turns it off.
 The later phases add the steps of Acts 2 and 3 to `Ch2L1Guide.targets`.
 
-**The loudspeakers** (`platform.Ch2L1SpeakerHooks`, rules in `core.ch2l1.Ch2L1SpeakerSchedule`, data in `speakers.json`): Rowan's announcements
+**The loudspeakers** (`level1.platform.Ch2L1SpeakerHooks`, rules in `level1.core.Ch2L1SpeakerSchedule`, data in `speakers.json`): Rowan's announcements
 `rowan_loyal_a1` to `a6`, from the ceiling speakers (`ceiling_speaker` blocks) of four zones, `speaker_entrance`, `speaker_lab`, `speaker_main` and
 `speaker_west`, each with its emitter anchor (`speaker_<zone>_src`). The rules:
 
@@ -265,19 +272,19 @@ The later phases add the steps of Acts 2 and 3 to `Ch2L1Guide.targets`.
   all through the zone (`attenuation_distance` 48 in `sounds.json`); the subtitles are the usual ones (`Ch2L1Subtitles`). `tools/sounds/ch2_l1_voices.py` runs the six `rowan_loyal_*`
   files through a loudspeaker filter (band-limited, a little drive, a slap of the corridor) before it writes them.
 
-**The first announcement is a cinematic** (`a1`; `core.ch2l1.Ch2L1IntroScene`, `platform.Ch2L1IntroHooks`): when the player leaves NonameOS after the first task they cannot move,
+**The first announcement is a cinematic** (`a1`; `level1.core.Ch2L1IntroScene`, `level1.platform.Ch2L1IntroHooks`): when the player leaves NonameOS after the first task they cannot move,
 the black bands slide in and the camera turns out of their own eyes, where they stand, to a fixed ceiling speaker (`speakers.json`, `intro.shots`: `camera: "player"`
 looking at `speaker_lab_src`, the LAB's speaker, which hangs near the terminal), the chime sounds from it as the shot begins, the voice follows, and the camera flies back
-into their eyes as the bands go. It is the machinery of the director's scene and the prologue (`Cutscene`, `Timeline`, `CutsceneView.Kind.FACTORY`); a shot's camera is an anchor
+into their eyes as the bands go. It is the machinery of the director's scene and the prologue (`Cutscene`, `Timeline`, `CutsceneView.Kind`, here `Ch2L1IntroView.KIND`); a shot's camera is an anchor
 (or `player`) and what it looks at an anchor, in world coordinates, so moving the map moves the shot, and more shots can be added in the file; skippable with the jump key pressed
 twice, like the others. The other announcements have no bands: the chime, the voice and its subtitle, and the player walks on.
 
 `/et ch2 l1 tasks` shows how far the player is and anything `tasks.json` or `speakers.json` names that `anchors.json` does not have
-(`core.ch2l1.Ch2L1Wiring`, which `/et reload` also reports).
+(`level1.core.Ch2L1Wiring`, which `/et reload` also reports).
 
 ## Debug commands
 
-`platform.Ch2L1Commands`, operator level 2, **development runs only** (as [Debugging](debugging.md) explains for
+`level1.platform.Ch2L1Commands`, operator level 2, **development runs only** (as [Debugging](debugging.md) explains for
 `/everytunnel`):
 
 | Command | What it does |
@@ -308,13 +315,13 @@ character) come with the phase that gives them, and will run on the command too,
 
 ## Adding a phase's system
 
-1. Plain Kotlin in `core.ch2l1` for its rules and its JSON reader, with unit tests (`Ch2L1DataTest` checks that every
+1. Plain Kotlin in `chapter2.level1.core` for its rules and its JSON reader, with unit tests (`Ch2L1DataTest` checks that every
    file in the jar parses).
 2. Give its file in `data/every_tunnel/ch2/l1/` a shape and a typed reader; read the document with
    `Ch2L1DataLoader.data.document("<name>")` and never cache it, so that `/et reload` reaches it.
-3. A hook in `platform` that registers with `Ch2L1.onStateChange` and, if it has moments of its own, listens to the
+3. A hook in `chapter2.level1.platform` (registered by `Chapter2`) that registers with `Ch2L1.onStateChange` and, if it has moments of its own, listens to the
    server tick; it acts only in worlds with levels (`WorldRules`).
-4. Texts in `en_us.json` and `es_es.json` under `every_tunnel.ch2.l1.<id>`; this page and the [code map](code-map.md), in
+4. Texts in `tools/lang/src/chapter2/en_us.json` and `es_es.json` under `every_tunnel.ch2.l1.<id>` (then `tools/lang/build.py`); this page and the [code map](code-map.md), in
    both languages.
 
 ## Tests
@@ -322,4 +329,4 @@ character) come with the phase that gives them, and will run on the command too,
 `Ch2L1StateTest` (the order, `next`, `parse`), `Ch2L1AnchorsParserTest` (the format, every kind of problem) and
 `Ch2L1DataTest` (the jar's files, which copy wins, the fallbacks), `Ch2L1VoicesTest` (the 32 lines, their sound events, Oggs
 and cues, the texts in both languages) `Ch2L1SkinsTest` (the skins' format) and `Ch2L1ObjectivesTest` (one objective per step, in both languages) and `Ch2L1MapPlanTest` (the plan's blocks and doors, the
-anchors standing on its floors), all in `core/ch2l1`; `Ch2L1NpcsTest` (the people's file, the routines and a typist's, a walker's and a stuck one's every tick), `Ch2L1NpcLifeTest` (the `life` keys and a worker's pace, easing in and braking, slowing for a turn, lingering, where the eyes go and the player's look with its cooldown, pairing for a talk and the turns in it), `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule, and that a schedule made for an old game is replaced when the progress goes back: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say, that the lockers' room has its lockers and no camera, that every other space has one and that every worker and route stands on the floor. `PlayerProgressTest` covers the state and the flag in the progress.
+anchors standing on its floors), all in `chapter2/level1/core`; `Ch2L1NpcsTest` (the people's file, the routines and a typist's, a walker's and a stuck one's every tick), `Ch2L1NpcLifeTest` (the `life` keys and a worker's pace, easing in and braking, slowing for a turn, lingering, where the eyes go and the player's look with its cooldown, pairing for a talk and the turns in it), `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule, and that a schedule made for an old game is replaced when the progress goes back: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say, that the lockers' room has its lockers and no camera, that every other space has one and that every worker and route stands on the floor. `Ch2PlayerProgressTest` covers the state, the flag and the counters in the chapter's progress, and `ChapterBoundaryTest` that no code outside `chapter2` names it.

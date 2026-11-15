@@ -13,7 +13,7 @@ the director's lines do) and keeps its balance, the true peak kept under -1.5 dB
 `Ch2L1Subtitles` shows the subtitles of any of them that plays, `/playsound` included.
 
 The subtitles are the author's: one lang key per line (`every_tunnel.ch2.l1.follow_01`, `.meeting_03` for `meeting_03_a`,
-`.rowan_office_c8` ...), with the English and the Spanish text in en_us.json and es_es.json, which this tool only reads.
+`.rowan_office_c8` ...), with the English and the Spanish text in the lang files (written in tools/lang/src/chapter2/, merged by tools/lang/build.py), which this tool only reads.
 It cuts each line into cues the way voices.py cuts the director's (sentences gathered while short, each cue placed at
 the pause that fits) but writes the cues as **ranges of sentences** of the line's text (first sentence, and the one
 it ends before), not as texts: the client splits the translated text into sentences and shows the range, so a cue's time

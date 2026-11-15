@@ -322,10 +322,10 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
 
     private fun open(client: MinecraftClient, continuing: Boolean, prologue: Boolean = false) {
         ContinueGame.requested = continuing
-        ChapterRequest.prologueOnly = prologue
+        ChapterRequest.chapter = if (prologue) 2 else 0
         val world = client.levelStorage.savesDirectory.resolve(WORLD_FOLDER)
         if (!world.resolve("level.dat").toFile().isFile) {
-            ChapterRequest.prologueOnly = false
+            ChapterRequest.chapter = 0
             notice = Text.translatable("menu.every_tunnel.world_missing")
             noticeUntilMs = Util.getMeasuringTimeMs() + 5000L
             EveryTunnel.LOGGER.warn("No map world at {}", world)

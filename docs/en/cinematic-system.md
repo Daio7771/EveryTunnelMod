@@ -120,8 +120,8 @@ his lines too:
 
 Replacing a voice file therefore **retimes the whole scene**: run `tools/sounds/voices.py` (it
 reads the lengths and finds each cue in the audio) and `tools/sounds/export.py`. `voices.py` writes
-`cutscene/director.json` and the cues' texts into `en_us.json`; the Spanish subtitles live in `es_es.json`
-and are not touched, so after a rerun check them: `LangFilesTest` fails if a key exists in one language and not in the other.
+`cutscene/director.json` and the cues' texts into `tools/lang/src/base/en_us.json` (and rebuilds the lang files); the Spanish
+subtitles live in `tools/lang/src/base/es_es.json` and are not touched, so after a rerun check them: `LangFilesTest` fails if a key exists in one language and not in the other.
 
 **Voice and subtitles.** Each line is the sound event `voice.director.<id>`, played flat (no
 distance, no direction) under the Voice/Speech slider, so every shot hears the same. Subtitles come
@@ -179,7 +179,7 @@ The credits' texts are the lang keys `every_tunnel.credits.*`; the drawings are
 ## Chapter 2's prologue
 
 Chapter 2 opens with its own cinematic, **the prologue**, which lives only on the private branch until
-Levels 1 and 2 of the chapter are published. It is the second scene `CutsceneView` plays (`Kind.PROLOGUE`):
+Levels 1 and 2 of the chapter are published. It is the second scene `CutsceneView` plays (a `Kind` of Chapter 2's own, `PrologueView.KIND`):
 the same camera, bands, subtitles and skip, but it is not in a level. `/everytunnel prologue` starts it for now
 (the chapter's own start does not exist yet) and by the main menu: SELECT CHAPTER lists CHAPTER 1 and CHAPTER 2, and choosing CHAPTER 2 turns the whole menu into Chapter 2's (the prologue's laboratory behind it), whose NEW GAME opens the world only for the prologue (`ChapterRequest`: no map build, no new game; a saved game of Chapter 1 is not touched), plays it and leaves for the menu. CHAPTER 2 carries a padlock until the achievement "Nothing in There" is earned, which only shows a spoiler alert that can be played through. It lasts about 1 min 15 s.
 
@@ -246,10 +246,13 @@ the same camera, bands, subtitles and skip, but it is not in a level. `/everytun
 it, the speaker's lang key (none for the prologue) and its voice sounds' prefix. A new one needs, in this
 order:
 
-1. A scene object in `core/cutscene` that builds a `Timeline` (a `Cutscene` of `Shot`s in a
-   `SceneFrame`, plus whatever rides on it), and a test for its timing (`CutsceneTest`, `PrologueTest`).
-2. A new `CutsceneView.Kind` and its start and end packets, registered in `CutsceneView.register`: the start
-   packet carries the scene's frame.
+1. A scene object that builds a `Timeline` (a `Cutscene` of `Shot`s in a `SceneFrame`, plus whatever rides on it), in
+   `core/cutscene` for the base game or in the chapter's own `core` (Chapter 2's prologue: `chapter2/prologue/core`), and a
+   test for its timing (`CutsceneTest`, `PrologueTest`).
+2. A `CutsceneView.Kind` and its start and end packets: in `CutsceneView.register` for the base game; a later chapter makes its
+   own `Kind` in its client (overriding `started`, `ticked`, `stopped`, `shake`, `flash`, `vignette`, `endsOnBlack` as it needs:
+   `PrologueView`, `Ch2L1IntroView`) and calls `CutsceneView.start` and `stop` from its own packet receivers. The start packet
+   carries the scene's frame.
 3. A hook like `DirectorSceneHooks` or `PrologueSceneHooks`: a trigger, holding the player and refusing damage,
    one `finish` for the end and for a skip, the state afterwards, and what happens if the player leaves or the
    level is built again.

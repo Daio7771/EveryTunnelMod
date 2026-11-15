@@ -38,8 +38,7 @@ platform/                                           todo lo que toca Minecraft o
 | `core.level` | `LevelDefinition` y el parser del JSON de niveles |
 | `core.guide` | `GuideMarkdown`, el lector de las páginas de la guía del jugador |
 | `core.puzzle` | El código de las válvulas del nivel 3 y el texto de las notas |
-| `core.progress` | `PlayerProgress`, lo que ha hecho un jugador (piezas, notas, escenas, dónde está en el Nivel 1 del Chapter 2) |
-| `core.ch2l1` | El Nivel 1 del Chapter 2: su máquina de estados, sus anclas y sus archivos de datos (véase [Chapter 2, Nivel 1](chapter-2-level-1.md)) |
+| `core.progress` | `PlayerProgress`, lo que ha hecho un jugador (piezas, notas, escenas, checkpoint) |
 | `core.achievement` | `Achievement`, los once logros |
 | `core.hiding` | `LookLimit`, cuánto gira la cabeza en una taquilla |
 | `systems` | `ResourceSystem` (stamina, sed, batería), `NoiseSystem`, `FlashlightBeam` (matemática del haz) |
@@ -62,12 +61,40 @@ o reproduce:
 | `client` | El entrypoint del cliente, la tecla de la linterna, los recursos sincronizados, la detección y ajustes de shaders, el instalador del mundo del mapa, los logros conseguidos |
 | `client.compat` | Integración con LambDynamicLights (la luz de la linterna) |
 | `client.effects` | Todo lo que se oye (ambiente, zumbido, latido, respiración, música) y el fundido de pantalla |
-| `client.hud` | Barras de estado, viñeta de agotamiento, el foco de la linterna sin shaders, la vista desde la taquilla, el aviso de logro, los subtítulos de las voces del Nivel 1 del Chapter 2 y su panel de objetivos |
-| `client.render` | El renderizador del Pale man, el botín en el suelo, el uniforme del vigilante, las personas de la fábrica |
+| `client.hud` | Barras de estado, viñeta de agotamiento, el foco de la linterna sin shaders, la vista desde la taquilla, el aviso de logro |
+| `client.render` | El renderizador del Pale man, el botín en el suelo, el uniforme del vigilante, las cámaras de seguridad |
 | `client.screen` | Menú principal, guía del jugador, logros, pantalla de carga y consejos, los créditos finales, la figura del menú |
 
 Las mixins están en Java: `src/main/java/.../mixin/` (comunes) y
 `src/client/java/.../mixin/client/` (cliente). Ver [Mixins](#mixins).
+
+## Capítulos
+
+Todo lo anterior es **el juego base**: el Chapter 1 y lo que comparten todos los capítulos (el menú, el HUD, la vista de
+cinemáticas, el progreso, las criaturas, los bloques del Chapter 1). Un capítulo posterior vive aparte, en un paquete propio con las
+mismas capas dentro, una carpeta por nivel:
+
+```
+daio7771.everytunnel.chapter2            Chapter2 (entrypoint), core/ (su progreso), platform/ (sus registros, su componente de progreso)
+                        .prologue        core/  platform/            (cliente: chapter2.prologue.client)
+                        .level1          core/  platform/            (cliente: chapter2.level1.client)
+```
+
+La regla: **el juego base nunca nombra a un capítulo, y un capítulo nunca nombra a otro.** `ChapterBoundaryTest` revisa cada
+archivo fuente. Un capítulo tiene sus propios entrypoints en `fabric.mod.json` (tras los del juego base) y solo llega al juego base
+por sus puntos de extensión:
+
+| Punto de extensión | Qué hace un capítulo con él |
+|---|---|
+| `platform.PlayerRules` | Dice qué reglas del juego base cambian para quien lo juega (linterna, esconderse, daño, ruido, barras de estado) |
+| `platform.ChapterRequest` | Registra lo que se ejecuta cuando el menú abrió el mundo para él (`onLoaded`) |
+| `ProgressService.onReset` | Borra su propio progreso (su propio componente de Cardinal) con una partida nueva del Chapter 1 |
+| `client.cutscene.CutsceneView.Kind` | Sus escenas: un `Kind` con su línea de tiempo y lo demás que haga, que arranca con `CutsceneView.start` |
+| `ModBlocks.TAB` y los ajustes de bloque | Sus bloques van a la misma pestaña creativa y comparten los ajustes y formas del juego base |
+
+Sus textos y sonidos también van aparte: los archivos de idioma se unen desde `tools/lang/src/<parte>/` (una parte por capítulo,
+`tools/lang/build.py`), y sus sonidos generados tienen su propio catálogo (`tools/sounds/catalog_ch2.py`). Los ids siguen siendo los
+del mod (`every_tunnel:`), así que los mundos y las partidas no cambian cuando el código se mueve de paquete.
 
 ## Entrypoints
 
@@ -75,11 +102,11 @@ Declarados en `src/main/resources/fabric.mod.json`:
 
 | Entrypoint | Clase | Función |
 |---|---|---|
-| `main` | `EveryTunnel` | Carga la configuración y llama a `register()` de cada registro y hook |
-| `client` | `client.EveryTunnelClient` | Registra los efectos, HUD, pantallas, tecla y paquetes del cliente |
+| `main` | `EveryTunnel`, luego `chapter2.Chapter2` | El juego base: carga la configuración y llama a `register()` de cada registro y hook; luego cada capítulo posterior registra lo suyo |
+| `client` | `client.EveryTunnelClient`, luego `chapter2.Chapter2Client` | Registra los efectos, HUD, pantallas, tecla y paquetes del cliente; luego los de cada capítulo |
 | `fabric-datagen` | `client.EveryTunnelDataGenerator` | Vacío: los recursos los hacen las herramientas Python |
 | `lambdynlights:initializer` | `client.compat.LambDynamicLightsCompat` | Añade el haz de la linterna como luz dinámica |
-| `cardinal-components-entity` | `platform.CardinalProgress` | Da a cada jugador el componente de progreso |
+| `cardinal-components-entity` | `platform.CardinalProgress`, `chapter2.platform.Ch2Progress` | Da a cada jugador el componente de progreso, y el propio del Chapter 2 |
 
 `EveryTunnel.onInitialize()` es el índice del lado del servidor. El orden solo importa en
 que los registros (objetos, bloques, entidades, sonidos) van primero.
@@ -138,7 +165,7 @@ Todos los ids son `every_tunnel:<nombre>`. API de red de Fabric (estilo 1.20.1,
 | `director_scene_skip` | cliente → servidor | `CutsceneView` | El jugador pulsó saltar por segunda vez: acabar la escena ya (sin contenido) |
 | `prologue_scene_start` | servidor → cliente | `PrologueSceneHooks` | Empezar el prólogo del Chapter 2; lleva dónde está el científico (x, y, z como double, orientación como float) |
 | `prologue_scene_end` | servidor → cliente | `PrologueSceneHooks` | El prólogo ha terminado; lleva si se saltó (booleano) |
-| `prologue_scene_skip` | cliente → servidor | `CutsceneView` | El jugador pulsó saltar por segunda vez: acabar el prólogo ya (sin contenido) |
+| `prologue_scene_skip` | cliente → servidor | `CutsceneView` (`PrologueView.KIND`) | El jugador pulsó saltar por segunda vez: acabar el prólogo ya (sin contenido) |
 | `director_phrase` | servidor → cliente | `DirectorLoopHooks` | Poner una de sus frases tras la escena; lleva su id (cadena) |
 
 El estado del Pale man llega a los clientes como dato sincronizado de la entidad
@@ -162,8 +189,8 @@ Lo que el mod recuerda se guarda con el mundo, en `<mundo>/data/`, como archivos
 empieza limpia.
 
 El progreso del jugador va aparte, con los datos propios del jugador: `platform.ProgressService`,
-sobre Cardinal Components (`platform.CardinalProgress`, la única clase que toca la librería).
-Sobrevive a la muerte y llega al cliente de ese jugador; una partida nueva lo borra.
+sobre Cardinal Components (`platform.CardinalProgress`; el Chapter 2 guarda su propio componente, `chapter2.platform.Ch2Progress`: las
+únicas clases que tocan la librería). Sobrevive a la muerte y llega al cliente de ese jugador; una partida nueva borra los dos.
 
 Fuera del mundo, en la carpeta `config/` del juego: `every_tunnel/gameplay.json` (la
 configuración de juego) y `every_tunnel/shader_settings_applied.txt` (qué packs de shaders

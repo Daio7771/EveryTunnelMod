@@ -49,8 +49,6 @@ import net.minecraft.util.Identifier
  * - `/everytunnel labready`: the same for Level 5, by `garage:level5_go` ([LabHooks]).
  * - `/everytunnel congrats`: opens the congratulations window with this game's time and deaths so far, without the
  *   ending ([EndingHooks.previewCongrats]).
- * - `/everytunnel prologue`: plays Chapter 2's opening cinematic, building its room out of the way and putting you
- *   back where you were when it ends ([PrologueSceneHooks]).
  * - `/everytunnel profile on|off|report`: the tick profiler ([TickProfiler]): a line in the log every
  *   30 s with the server tick and the cost of each of the mod's tick hooks.
  * - `/everytunnel rebuilt`: run by the map's `garage:build` after rebuilding the levels:
@@ -108,7 +106,6 @@ object DebugCommands {
                 )
                 .then(CommandManager.literal("intro").executes(::intro))
                 .then(CommandManager.literal("director").executes(::director))
-                .then(CommandManager.literal("prologue").executes(::prologue))
                 .then(CommandManager.literal("newgame").executes(::newGame))
                 .then(
                     CommandManager.literal("setlevel")
@@ -187,16 +184,6 @@ object DebugCommands {
         return 1
     }
 
-    /** Chapter 2's opening cinematic, from wherever you stand (a world with the mod's levels). */
-    private fun prologue(context: CommandContext<ServerCommandSource>): Int {
-        val why = PrologueSceneHooks.start(context.source.playerOrThrow)
-        if (why != null) {
-            reply(context, why)
-            return 0
-        }
-        reply(context, "The prologue begins: press jump twice to skip it.")
-        return 1
-    }
 
     private fun where(context: CommandContext<ServerCommandSource>): Int {
         val player = context.source.playerOrThrow

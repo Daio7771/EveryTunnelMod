@@ -7,7 +7,7 @@ Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   geo/entity/observer.geo.json                 bones and cubes (Bedrock geometry, 16 units = 1 block)
   animations/entity/observer.animation.json    idle, walk, run, attack
   textures/entity/observer.png                 the skin, box UV, SCALE pixels per unit
-  models/item/observer_spawn_egg.json, and the names in lang/en_us.json
+  models/item/observer_spawn_egg.json, and the names in the lang files (tools/lang/src/base)
 and, in tools/entity/output/ (git-ignored): observer_preview.png (the texture enlarged, front
 and side views of the model, and the run pose from the side).
 
@@ -39,6 +39,9 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from pale_man import Bone, faces, hull, keys, swing, world_corners, write_json  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lang"))
+import langfiles  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel"
@@ -388,11 +391,7 @@ def main():
     tex.save(ASSETS / "textures" / "entity" / "observer.png")
     write_preview(bones, uv, tex)
     write_json(ASSETS / "models" / "item" / "observer_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
-    lang_path = ASSETS / "lang" / "en_us.json"
-    lang = json.loads(lang_path.read_text(encoding="utf-8"))
-    lang["entity.every_tunnel.observer"] = "Observer"
-    lang["item.every_tunnel.observer_spawn_egg"] = "Observer Spawn Egg"
-    write_json(lang_path, lang)
+    langfiles.update("base", "en_us", {"entity.every_tunnel.observer": "Observer", "item.every_tunnel.observer_spawn_egg": "Observer Spawn Egg"})
     e = extent(bones)
     print(f"Observer: {len(bones)} bones, {sum(len(b.cubes) for b in bones.values())} cubes, "
           f"{len(animations()['animations'])} animations; {e['y'][1] / 16:.2f} blocks tall")

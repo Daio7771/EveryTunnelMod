@@ -8,7 +8,7 @@ y la respiración del Pale man, su propio latido, cuánto ruido hacen sus propio
 ## Reglas
 
 - **Sintetizado o CC0.** Casi todos los sonidos se sintetizan en Python
-  (`tools/sounds/catalog.py`). Unos pocos se cortan de grabaciones CC0
+  (`tools/sounds/catalog.py`, y los del Chapter 2 en `catalog_ch2.py`). Unos pocos se cortan de grabaciones CC0
   (`tools/sounds/cc0/`, con sus fuentes en `SOURCES.md`).
 - **Una excepción con crédito:** la canción del ascensor, "Local Forecast – Elevator" de
   Kevin MacLeod (CC BY 4.0). Su crédito debe viajar con el mod (`CREDITS.md`, el jar, los

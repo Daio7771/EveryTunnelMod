@@ -8,7 +8,7 @@ Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   animations/entity/hunter.animation.json       idle, walk, run, attack
   textures/entity/hunter.png                    the skin, box UV, SCALE pixels per unit
   textures/entity/hunter_glowmask.png           the eyes, drawn at full brightness (AutoGlowingGeoLayer)
-  and the name in lang/en_us.json
+  and the name in the lang files (tools/lang/src/base)
 and, in tools/entity/output/ (git-ignored): hunter_preview.png (the texture enlarged, front and
 side views, the run pose from the side, and the front in the other coat).
 
@@ -34,6 +34,9 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from observer import draw_model, extent  # noqa: E402
 from pale_man import Bone, faces, keys, swing, write_json  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lang"))
+import langfiles  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel"
@@ -355,10 +358,7 @@ def main():
     tex.save(ASSETS / "textures" / "entity" / "hunter.png")
     glow.save(ASSETS / "textures" / "entity" / "hunter_glowmask.png")
     write_preview(bones, uv, tex, other)
-    lang_path = ASSETS / "lang" / "en_us.json"
-    lang = json.loads(lang_path.read_text(encoding="utf-8"))
-    lang["entity.every_tunnel.hunter"] = "Hunter"
-    write_json(lang_path, lang)
+    langfiles.update("base", "en_us", {"entity.every_tunnel.hunter": "Hunter"})
     e = extent(bones)
     print(f"Hunter: {len(bones)} bones, {sum(len(b.cubes) for b in bones.values())} cubes, "
           f"{len(animations()['animations'])} animations; {e['y'][1] / 16:.2f} blocks tall")

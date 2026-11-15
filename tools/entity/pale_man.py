@@ -8,7 +8,7 @@ Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   animations/entity/pale_man.animation.json    idle, listen, walk, run, attack
   textures/entity/pale_man.png                 the skin, box UV, SCALE pixels per unit
   textures/entity/pale_man_glowmask.png        what glows in the dark (his eyes)
-  models/item/pale_man_spawn_egg.json, and the names in lang/en_us.json
+  models/item/pale_man_spawn_egg.json, and the names in the lang files (tools/lang/src/base)
 and, in tools/entity/output/ (git-ignored): pale_man_preview.png (the texture enlarged, plus
 front and side views of the model, and a side view stooped under a 2-block ceiling) and a painting template, pale_man_template.png (real
 size) and pale_man_template_big.png (enlarged, labelled): every face of every cube in its
@@ -39,6 +39,9 @@ import sys
 from pathlib import Path
 
 from PIL import Image, ImageDraw
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lang"))
+import langfiles  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel"
@@ -560,11 +563,7 @@ def main():
     write_preview(bones, img)
     write_template(bones, uv)
     write_json(ASSETS / "models" / "item" / "pale_man_spawn_egg.json", {"parent": "minecraft:item/template_spawn_egg"})
-    lang_path = ASSETS / "lang" / "en_us.json"
-    lang = json.loads(lang_path.read_text(encoding="utf-8"))
-    lang["entity.every_tunnel.pale_man"] = "Pale Man"
-    lang["item.every_tunnel.pale_man_spawn_egg"] = "Pale Man Spawn Egg"
-    write_json(lang_path, lang)
+    langfiles.update("base", "en_us", {"entity.every_tunnel.pale_man": "Pale Man", "item.every_tunnel.pale_man_spawn_egg": "Pale Man Spawn Egg"})
     e = extent(bones)
     low = extent(stooped())
     cubes = sum(len(b.cubes) for b in bones.values())

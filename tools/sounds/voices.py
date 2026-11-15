@@ -15,7 +15,7 @@ Run (from the repository root):   python3 tools/sounds/voices.py
 
 Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   cutscene/director.json     each line's part, length and cues (ms from the line's start, lang key)
-  lang/en_us.json            the cues' text, under subtitle.every_tunnel.director.*, and his name before them
+  tools/lang/src/base/en_us.json   the cues' text, under subtitle.every_tunnel.director.*, and his name before them (then the lang files are rebuilt)
 and prints every cue with its time, to check them by ear.
 """
 
@@ -28,6 +28,9 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import audio_io  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lang"))
+import langfiles  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
 VOICE = HERE / "voice"
@@ -159,8 +162,7 @@ def timed_cues(line_id, text):
 def main():
     durations = {}
     scene = {"lines": [], "loop": []}
-    lang = json.loads(LANG.read_text(encoding="utf-8"))
-    lang = {k: v for k, v in lang.items() if not k.startswith(KEY)}
+    lang = {}
     lang[SPEAKER] = "DIRECTOR:"
     for group, items in (("lines", LINES), ("loop", LOOP)):
         for line_id, part, text in items:
@@ -175,7 +177,7 @@ def main():
             scene[group].append(entry)
     SCENE.parent.mkdir(parents=True, exist_ok=True)
     SCENE.write_text(json.dumps(scene, indent=2) + "\n", encoding="utf-8")
-    LANG.write_text(json.dumps(lang, indent=2) + "\n", encoding="utf-8")
+    langfiles.update("base", "en_us", lang, drop_prefix=KEY)
     print(f"{len(LINES)} lines, {len(LOOP)} loop phrases, {sum(durations.values()) / 1000:.1f} s of voice")
 
 

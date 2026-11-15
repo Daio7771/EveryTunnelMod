@@ -6,6 +6,7 @@ import daio7771.everytunnel.platform.ModSounds
 import daio7771.everytunnel.platform.SecurityCameraBlock
 import daio7771.everytunnel.platform.SecurityCameraBlockEntity
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
+import net.minecraft.block.Block
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.render.LightmapTextureManager
 import net.minecraft.client.render.VertexConsumerProvider
@@ -31,19 +32,22 @@ import kotlin.math.sin
  * (`block.camera.servo`). Its light blinks ([BLINK_MILLIS]), drawn at full brightness. Where each camera points is
  * kept here by position, until the player leaves the world.
  *
- * A [ModBlocks.FACTORY_CAMERA] (Chapter 2 Level 1's decorative ones) never looks for the player: it sweeps [SWEEP_DEGREES] either side of the way
- * its block faces, once every [SWEEP_PERIOD_MILLIS], each at its own point of the sweep, and whirrs softly now and then if the player is near.
+ * It draws the cameras of [block] only. A [sweeping] one (a later chapter's decorative cameras, registered with their own block
+ * entity type) never looks for the player: it sweeps [SWEEP_DEGREES] either side of the way its block faces, once every
+ * [SWEEP_PERIOD_MILLIS], each at its own point of the sweep, and whirrs softly now and then if the player is near.
  */
-class SecurityCameraRenderer(@Suppress("UNUSED_PARAMETER") context: BlockEntityRendererFactory.Context) :
-    BlockEntityRenderer<SecurityCameraBlockEntity> {
+class SecurityCameraRenderer(
+    @Suppress("UNUSED_PARAMETER") context: BlockEntityRendererFactory.Context,
+    private val block: Block = ModBlocks.SECURITY_CAMERA,
+    private val sweeping: Boolean = false,
+) : BlockEntityRenderer<SecurityCameraBlockEntity> {
 
     override fun render(
         entity: SecurityCameraBlockEntity, tickDelta: Float, matrices: MatrixStack,
         vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int,
     ) {
         val state = entity.cachedState
-        val sweeping = state.isOf(ModBlocks.FACTORY_CAMERA)
-        if (!sweeping && !state.isOf(ModBlocks.SECURITY_CAMERA)) return
+        if (!state.isOf(block)) return
         val client = MinecraftClient.getInstance()
         val player = client.player ?: return
         val world = client.world ?: return

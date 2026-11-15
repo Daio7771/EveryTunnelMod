@@ -88,18 +88,19 @@ The film's length comes from the recording: the piece appears when it ends. The 
 
 ## Add a loading screen tip
 
-Add `loading.every_tunnel.tip.<n>` to `assets/every_tunnel/lang/en_us.json`, numbered
+Add `loading.every_tunnel.tip.<n>` to `tools/lang/src/base/en_us.json` (then `tools/lang/build.py`), numbered
 without gaps. `{flashlight}`, `{sneak}`, `{sprint}`, `{jump}` and `{use}` become the
 player's bound keys.
 
 ## Add a translation
 
-Copy `assets/every_tunnel/lang/en_us.json` to the language's file (`es_es.json`...) and
-translate the values. The block names in `en_us.json` are rewritten by
-`tools/blocks/generate.py`; other languages are not touched by it. Missing keys fall back to
+The lang files are generated from sources by chapter: copy each part's `tools/lang/src/<part>/en_us.json` to the
+language's file in the same folder (`es_es.json`...), translate the values, add the locale to `LOCALES` in
+`tools/lang/langfiles.py` and run `python3 tools/lang/build.py`. The block, creature and subtitle names in `en_us.json` are
+rewritten by their tools; other languages are not touched by them. Missing keys fall back to
 English. Notes are separate files: `assets/every_tunnel/notes/<lang>/<id>.txt` (`es` serves
-every `es_*` locale, `en` the rest). Spanish is done: write it in `es_es.json`, run
-`python3 tools/lang/spanish_variants.py` to copy it to the other Spanish locales, and keep
+every `es_*` locale, `en` the rest). Spanish is done: write it in the parts' `es_es.json`, run
+`python3 tools/lang/build.py` (it also copies it to the other Spanish locales), and keep
 `notes/es/` in step with `notes/en/` (`LangFilesTest` fails the build if a key, a
 placeholder or a note differs).
 

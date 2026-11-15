@@ -524,9 +524,6 @@
   "screen.every_tunnel.congrats.close": "CLOSE",
   "entity.every_tunnel.scientist": "The Scientist",
   "title.every_tunnel.chapter_2": "CHAPTER 2",
-  "block.every_tunnel.radiation_counter": "Radiation Counter",
-  "block.every_tunnel.voice_recorder": "Voice Recorder",
-  "block.every_tunnel.tube_rack": "Tube Rack",
   "subtitle.every_tunnel.ch2.prologue_01_1": "Log entry. Day six.",
   "subtitle.every_tunnel.ch2.prologue_01_2": "Samples are stable, readings within range.",
   "subtitle.every_tunnel.ch2.prologue_01_3": "Same as yesterday, really.",
@@ -625,5 +622,8 @@
   "block.every_tunnel.leaning_broom": "Leaning Broom",
   "block.every_tunnel.dirt_spot": "Dirt",
   "block.every_tunnel.predecessor_locker": "Predecessor's Locker",
-  "block.every_tunnel.factory_camera": "Sweeping Security Camera"
+  "block.every_tunnel.factory_camera": "Sweeping Security Camera",
+  "block.every_tunnel.radiation_counter": "Radiation Counter",
+  "block.every_tunnel.voice_recorder": "Voice Recorder",
+  "block.every_tunnel.tube_rack": "Tube Rack"
 }

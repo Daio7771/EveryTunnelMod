@@ -20,6 +20,8 @@ import net.minecraft.item.Item
 import net.minecraft.item.ItemGroup
 import net.minecraft.item.ItemStack
 import net.minecraft.registry.Registries
+import net.minecraft.registry.RegistryKeys
+import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.Registry
 import net.minecraft.sound.BlockSoundGroup
 import net.minecraft.text.Text
@@ -39,6 +41,9 @@ import net.minecraft.util.math.Direction
 object ModBlocks {
 
     private val all = mutableListOf<Pair<String, Block>>()
+
+    /** The "Every Tunnel" creative tab; a later chapter adds its own blocks to it (`ItemGroupEvents.modifyEntriesEvent`). */
+    val TAB: RegistryKey<ItemGroup> = RegistryKey.of(RegistryKeys.ITEM_GROUP, Identifier(EveryTunnel.MOD_ID, "blocks"))
 
     val FLUORESCENT_LIGHT: Block = register(
         "fluorescent_light",
@@ -271,12 +276,6 @@ object ModBlocks {
         CardReaderBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 2 }.noCollision()),
     )
 
-    /** The time clock of Chapter 2's Level 1: a card reader that clocks the new hire in ([TimeClockBlock]); the same models. */
-    val TIME_CLOCK: Block = register(
-        "time_clock",
-        TimeClockBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 2 }.noCollision()),
-    )
-
     /** Level 3's box puzzle ([BoxHooks]): a purple archive box, drawn full bright; picked up with right-click. */
     val PURPLE_BOX: Block = register(
         "purple_box",
@@ -381,8 +380,6 @@ object ModBlocks {
     val METAL_SHELF: Block = register("metal_shelf", StackFurnitureBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 2, 16, 16, 16))))
     val ELECTRICAL_PANEL: Block = register("electrical_panel", PropBlock(props(MapColor.LIGHT_GRAY, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(2, 2, 12, 14, 15, 16))))
     val LOCKER: Block = register("locker", LockerBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(1, 0, 1, 15, 16, 16))))
-    /** The predecessor's locker of Chapter 2 Level 1: a locker with its door ajar and the plate scratched out, only to look at. */
-    val PREDECESSOR_LOCKER: Block = register("predecessor_locker", StackFurnitureBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(1, 0, 1, 15, 16, 16))))
     val BENCH: Block = register("bench", RowFurnitureBlock(props(MapColor.PALE_YELLOW, ModSoundGroups.WOOD), listOf(box(0, 0, 4, 16, 7, 12))))
     val CAFE_TABLE: Block = register("cafe_table", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC), listOf(box(1, 0, 1, 15, 12, 15))))
     val CAFE_CHAIR: Block = register("cafe_chair", PropBlock(props(MapColor.LIGHT_GRAY, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 13, 8, 13), box(3, 8, 12, 13, 15, 14))))
@@ -420,13 +417,6 @@ object ModBlocks {
     val GLOVE_BOX: Block = register("glove_box", PropBlock(props(MapColor.WHITE, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(4, 0, 5, 12, 5, 11))))
     val LAB_BEAKERS: Block = register("lab_beakers", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 14, 6, 9))))
     val LAB_MONITOR: Block = register("lab_monitor", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision(), listOf(box(2, 0, 7, 14, 12, 11))))
-    /**
-     * Chapter 2's prologue, on the scientist's bench (`tools/prologue/room.py`): a radiation counter whose amber screen
-     * keeps climbing, a voice recorder with its red light blinking, a rack of glowing test tubes. Only to look at.
-     */
-    val RADIATION_COUNTER: Block = register("radiation_counter", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision().luminance { 6 }, listOf(box(2, 0, 5, 14, 9, 11))))
-    val VOICE_RECORDER: Block = register("voice_recorder", PropBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision().luminance { 2 }, listOf(box(6, 0, 4, 10, 2, 11))))
-    val TUBE_RACK: Block = register("tube_rack", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision().luminance { 4 }, listOf(box(2, 0, 5, 14, 10, 9))))
     /** Someone's white coat on a hook, and a jacket left over a chair: they left in a hurry, or did not leave. */
     val LAB_COAT: Block = register("lab_coat", PropBlock(props(MapColor.WHITE, ModSoundGroups.CARDBOARD).noCollision(), listOf(box(4, 1, 14, 12, 16, 16))))
     val CHAIR_JACKET: Block = register("chair_jacket", PropBlock(props(MapColor.GREEN, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 13, 8, 13), box(3, 8, 12, 13, 16, 13))))
@@ -461,10 +451,7 @@ object ModBlocks {
     val MONTH_PLAQUE: Block = register("month_plaque", PropBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(4, 0, 8, 12, 11, 11))))
     val MONITOR_BANK: Block = register("monitor_bank", MonitorBankBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 6 }))
     /** The anteroom's security camera on the ceiling, following the player ([SecurityCameraBlock]). */
-    val SECURITY_CAMERA: Block = register("security_camera", SecurityCameraBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision()))
-    /** Chapter 2 Level 1's decorative security camera: the same look and block entity, but the client sweeps it slowly and never follows the player. */
-    val FACTORY_CAMERA: Block = register("factory_camera", SecurityCameraBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision()))
-    /** A chalk arrow on a drain wall, in three parts ([ChalkArrowBlock]). */
+    val SECURITY_CAMERA: Block = register("security_camera", SecurityCameraBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision()))    /** A chalk arrow on a drain wall, in three parts ([ChalkArrowBlock]). */
     val CHALK_ARROW: Block = register("chalk_arrow", ChalkArrowBlock(props(MapColor.WHITE, BlockSoundGroup.STONE).noCollision()))
     /** Steel railing on a catwalk's edges ([CatwalkRailBlock]). */
     val CATWALK_RAIL: Block = register("catwalk_rail", CatwalkRailBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL)))
@@ -537,7 +524,7 @@ object ModBlocks {
     // --- Doors and the exit sign ------------------------------------------------------
 
     /** Grey steel service doors that open by hand, with iron door sounds; the plate says which room. */
-    private val SERVICE_DOOR: BlockSetType = BlockSetTypeBuilder.copyOf(BlockSetType.IRON)
+    internal val SERVICE_DOOR: BlockSetType = BlockSetTypeBuilder.copyOf(BlockSetType.IRON)
         .openableByHand(true)
         .register(Identifier(EveryTunnel.MOD_ID, "service_door"))
     val STORAGE_DOOR: Block = register("storage_door", DoorBlock(door(), SERVICE_DOOR))
@@ -555,16 +542,6 @@ object ModBlocks {
     )
     /** White, a tall window: Level 5's layer 1 rooms' doors, in pairs, opened by hand. */
     val LAB_DOOR: Block = register("lab_door", DoorBlock(door(), SERVICE_DOOR))
-    /** Chapter 2 Level 1's tasks ([Ch2L1TaskHooks]): a tube on the bench, the terminal that registers them, the analyzer, the broom, the dirt. */
-    val SAMPLE_TUBE: Block = register("sample_tube", SampleTubeBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(6.5, 0, 6.5, 9.5, 9.5, 9.5))))
-    val NONAME_TERMINAL: Block = register("noname_terminal", NonameTerminalBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision().luminance { 3 }, listOf(box(3, 0, 1, 13, 12, 11))))
-    val ANALYZER: Block = register("analyzer", AnalyzerBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(2, 0, 3, 14, 10, 13))))
-    val LEANING_BROOM: Block = register("leaning_broom", LeaningBroomBlock(props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(6, 0, 7, 10, 16, 16))))
-    val DIRT_SPOT: Block = register("dirt_spot", DirtSpotBlock(props(MapColor.BROWN, BlockSoundGroup.GRAVEL).noCollision(), listOf(box(0, 0, 0, 16, 1, 16))))
-    /** The lab door's look (it borrows its models), for Chapter 2's factory: a pair of leaves opens and shuts at once by hand. */
-    val FACTORY_DOOR: Block = register("factory_door", LinkedDoorBlock(door(), SERVICE_DOOR))
-    /** Glass with no frame drawn on each block, a faint tint and a sheen that runs on from one block to the next: Chapter 2's windows. */
-    val FACTORY_GLASS: Block = register("factory_glass", TransparentBlock(glass()))
     /** A lit green EXIT sign on the wall above an exit; it stays lit when the power goes (its own battery). */
     val EXIT_SIGN: Block = register(
         "exit_sign",
@@ -581,21 +558,21 @@ object ModBlocks {
     val PUDDLE: Block = register("puddle", PuddleBlock(props(MapColor.WATER_BLUE, ModSoundGroups.PUDDLE).noCollision()))
 
     /** Settings for a steel door (two blocks tall, not a full block). */
-    private fun door(): AbstractBlock.Settings =
+    internal fun door(): AbstractBlock.Settings =
         AbstractBlock.Settings.create().mapColor(MapColor.IRON_GRAY).strength(5f).sounds(BlockSoundGroup.METAL)
             .nonOpaque().pistonBehavior(PistonBehavior.DESTROY)
 
     /** Settings for a pane of glass as a full block, like vanilla's: light and sight go through, nothing spawns on it. */
-    private fun glass(): AbstractBlock.Settings =
+    internal fun glass(): AbstractBlock.Settings =
         AbstractBlock.Settings.create().mapColor(MapColor.CLEAR).strength(0.3f).sounds(BlockSoundGroup.GLASS).nonOpaque()
             .allowsSpawning { _, _, _, _ -> false }.solidBlock { _, _, _ -> false }.suffocates { _, _, _ -> false }.blockVision { _, _, _ -> false }
 
     /** Settings for a full, solid block. */
-    private fun solid(color: MapColor, sounds: BlockSoundGroup): AbstractBlock.Settings =
+    internal fun solid(color: MapColor, sounds: BlockSoundGroup): AbstractBlock.Settings =
         AbstractBlock.Settings.create().mapColor(color).strength(0.3f).sounds(sounds)
 
     /** Settings for a block that does not fill its space (light and other blocks show around it). */
-    private fun props(color: MapColor, sounds: BlockSoundGroup): AbstractBlock.Settings =
+    internal fun props(color: MapColor, sounds: BlockSoundGroup): AbstractBlock.Settings =
         solid(color, sounds).nonOpaque().pistonBehavior(PistonBehavior.DESTROY)
 
     private fun register(id: String, block: Block): Block = block.also { all += id to it }
@@ -612,7 +589,7 @@ object ModBlocks {
         )
         SECURITY_CAMERA_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "security_camera"),
-            FabricBlockEntityTypeBuilder.create(::SecurityCameraBlockEntity, SECURITY_CAMERA, FACTORY_CAMERA).build(),
+            FabricBlockEntityTypeBuilder.create(::SecurityCameraBlockEntity, SECURITY_CAMERA).build(),
         )
         BOX_SHELF_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),
@@ -639,6 +616,6 @@ object ModBlocks {
                 }
             }
             .build()
-        Registry.register(Registries.ITEM_GROUP, Identifier(EveryTunnel.MOD_ID, "blocks"), tab)
+        Registry.register(Registries.ITEM_GROUP, TAB, tab)
     }
 }

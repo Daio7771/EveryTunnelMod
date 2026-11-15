@@ -36,8 +36,7 @@ platform/                                           everything that touches Mine
 | `core.level` | `LevelDefinition` and the level JSON parser |
 | `core.guide` | `GuideMarkdown`, the reader of the player guide pages |
 | `core.puzzle` | Level 3's valve code and the notes' text |
-| `core.progress` | `PlayerProgress`, what a player has done (pieces, notes, scenes, where they are in Chapter 2's Level 1) |
-| `core.ch2l1` | Chapter 2's Level 1: its state machine, its anchors and its data files (see [Chapter 2, Level 1](chapter-2-level-1.md)) |
+| `core.progress` | `PlayerProgress`, what a player has done (pieces, notes, scenes, checkpoint) |
 | `core.achievement` | `Achievement`, the eleven achievements |
 | `core.hiding` | `LookLimit`, how far the head turns in a locker |
 | `systems` | `ResourceSystem` (stamina, thirst, battery), `NoiseSystem`, `FlashlightBeam` (beam math) |
@@ -60,12 +59,40 @@ draws or plays:
 | `client` | The client entrypoint, the flashlight key, the synced resources, shader detection and settings, the map world installer, the achievements earned |
 | `client.compat` | LambDynamicLights integration (the flashlight's light) |
 | `client.effects` | Everything heard (ambience, hum, heartbeat, breathing, music) and the screen fade |
-| `client.hud` | Status bars, exhaustion vignette, the no-shader flashlight spot, the locker view, the achievement toast, the subtitles of Chapter 2's Level 1 voices and its objective panel |
-| `client.render` | The Pale man's renderer, loot on the floor, the guard uniform, the factory's people |
+| `client.hud` | Status bars, exhaustion vignette, the no-shader flashlight spot, the locker view, the achievement toast |
+| `client.render` | The Pale man's renderer, loot on the floor, the guard uniform, the security cameras |
 | `client.screen` | Main menu, player guide, achievements, loading screen and tips, the final credits, the menu figure |
 
 Mixins live in Java: `src/main/java/.../mixin/` (common) and
 `src/client/java/.../mixin/client/` (client). See [Mixins](#mixins).
+
+## Chapters
+
+Everything above is **the base game**: Chapter 1 and what every chapter shares (the menu, the HUD, the cutscene view, the
+progress, the creatures, the blocks of Chapter 1). A later chapter lives apart, in a package of its own with the same layers
+inside, one folder per level:
+
+```
+daio7771.everytunnel.chapter2            Chapter2 (entrypoint), core/ (its progress), platform/ (its registries, its progress component)
+                        .prologue        core/  platform/            (client: chapter2.prologue.client)
+                        .level1          core/  platform/            (client: chapter2.level1.client)
+```
+
+The rule: **the base game never names a chapter, and a chapter never names another.** `ChapterBoundaryTest` checks every source
+file. A chapter has its own entrypoints in `fabric.mod.json` (after the base game's) and reaches the base game only through
+its extension points:
+
+| Extension point | What a chapter does with it |
+|---|---|
+| `platform.PlayerRules` | Says which of the base game's rules change for a player who plays it (flashlight, hiding, damage, noise, status bars) |
+| `platform.ChapterRequest` | Registers what runs when the menu opened the world for it (`onLoaded`) |
+| `ProgressService.onReset` | Clears its own progress (its own Cardinal component) on a Chapter 1 new game |
+| `client.cutscene.CutsceneView.Kind` | Its scenes: a `Kind` with its timeline and whatever else it does, started with `CutsceneView.start` |
+| `ModBlocks.TAB` and the block settings | Its blocks join the same creative tab and share the base game's settings and shapes |
+
+Its texts and sounds are apart too: the lang files are merged from `tools/lang/src/<part>/` (one part per chapter,
+`tools/lang/build.py`), and its generated sounds are in their own catalog (`tools/sounds/catalog_ch2.py`). Ids stay the mod's
+(`every_tunnel:`), so worlds and saves do not change when code moves between packages.
 
 ## Entrypoints
 
@@ -73,11 +100,11 @@ Declared in `src/main/resources/fabric.mod.json`:
 
 | Entrypoint | Class | Job |
 |---|---|---|
-| `main` | `EveryTunnel` | Loads the config, then calls `register()` on every registry and hook object |
-| `client` | `client.EveryTunnelClient` | Registers the client effects, HUD, screens, key, packets |
+| `main` | `EveryTunnel`, then `chapter2.Chapter2` | The base game: loads the config, then calls `register()` on every registry and hook object; then each later chapter registers its own |
+| `client` | `client.EveryTunnelClient`, then `chapter2.Chapter2Client` | Registers the client effects, HUD, screens, key, packets; then each chapter's |
 | `fabric-datagen` | `client.EveryTunnelDataGenerator` | Empty: assets are made by the Python tools instead |
 | `lambdynlights:initializer` | `client.compat.LambDynamicLightsCompat` | Adds the flashlight beam as a dynamic light |
-| `cardinal-components-entity` | `platform.CardinalProgress` | Gives every player the progress component |
+| `cardinal-components-entity` | `platform.CardinalProgress`, `chapter2.platform.Ch2Progress` | Gives every player the progress component, and Chapter 2's own |
 
 `EveryTunnel.onInitialize()` is the table of contents of the server side. The order
 matters only in that registries (items, blocks, entities, sounds) come first.
@@ -134,7 +161,7 @@ All ids are `every_tunnel:<name>`. Fabric networking API (1.20.1 style,
 | `director_scene_skip` | client → server | `CutsceneView` | The player pressed jump a second time: end the scene now (no payload) |
 | `prologue_scene_start` | server → client | `PrologueSceneHooks` | Begin Chapter 2's prologue; carries where the scientist stands (x, y, z as doubles, yaw as a float) |
 | `prologue_scene_end` | server → client | `PrologueSceneHooks` | The prologue is over; carries whether it was skipped (boolean) |
-| `prologue_scene_skip` | client → server | `CutsceneView` | The player pressed jump a second time: end the prologue now (no payload) |
+| `prologue_scene_skip` | client → server | `CutsceneView` (`PrologueView.KIND`) | The player pressed jump a second time: end the prologue now (no payload) |
 | `director_phrase` | server → client | `DirectorLoopHooks` | Play one of his phrases after the scene; carries its id (string) |
 
 The Pale man's state reaches clients as tracked entity data (`PaleManEntity.brainState`),
@@ -157,8 +184,8 @@ What the mod remembers is saved with the world, in `<world>/data/`, as vanilla
 `packMapWorld` leaves all of these out of the release jar, so a fresh install starts clean.
 
 The player's progress is kept apart, with the player's own data: `platform.ProgressService`,
-on Cardinal Components (`platform.CardinalProgress`, the only class that touches the library).
-It survives death and reaches that player's client; a new game clears it.
+on Cardinal Components (`platform.CardinalProgress`; Chapter 2 keeps its own component, `chapter2.platform.Ch2Progress`: the only
+classes that touch the library). It survives death and reaches that player's client; a new game clears both.
 
 Outside the world, in the game's `config/` folder: `every_tunnel/gameplay.json` (the
 gameplay config) and `every_tunnel/shader_settings_applied.txt` (which shader packs

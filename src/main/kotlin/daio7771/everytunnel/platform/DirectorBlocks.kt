@@ -8,6 +8,7 @@ import net.minecraft.block.BlockWithEntity
 import net.minecraft.block.DoorBlock
 import net.minecraft.block.ShapeContext
 import net.minecraft.block.entity.BlockEntity
+import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.SoundCategory
@@ -63,8 +64,14 @@ class PairedDoorBlock(settings: Settings, type: BlockSetType) : DoorBlock(settin
  * A security camera on the ceiling (Level 5's anteroom), [FACING] the way it rests. The world draws only its
  * [Part.MOUNT]; the client turns the [Part.HEAD] to follow the player and blinks its [Part.LED]
  * (`client.render.SecurityCameraRenderer`, through its [SecurityCameraBlockEntity]). Nothing to bump into.
+ *
+ * [entityType] is the block entity type it makes ([ModBlocks.SECURITY_CAMERA_ENTITY] unless given another): a later chapter's
+ * camera registers a type of its own, so that its renderer can behave its own way.
  */
-class SecurityCameraBlock(settings: Settings) : BlockWithEntity(settings) {
+class SecurityCameraBlock(
+    settings: Settings,
+    private val entityType: () -> BlockEntityType<SecurityCameraBlockEntity> = { ModBlocks.SECURITY_CAMERA_ENTITY },
+) : BlockWithEntity(settings) {
 
     enum class Part(private val id: String) : StringIdentifiable {
         MOUNT("mount"), HEAD("head"), LED("led");
@@ -80,7 +87,7 @@ class SecurityCameraBlock(settings: Settings) : BlockWithEntity(settings) {
         builder.add(FACING, PART)
     }
 
-    override fun createBlockEntity(pos: BlockPos, state: BlockState): BlockEntity = SecurityCameraBlockEntity(pos, state)
+    override fun createBlockEntity(pos: BlockPos, state: BlockState): BlockEntity = SecurityCameraBlockEntity(entityType(), pos, state)
 
     @Deprecated("Deprecated in Java")
     override fun getRenderType(state: BlockState): BlockRenderType = BlockRenderType.MODEL
@@ -96,8 +103,10 @@ class SecurityCameraBlock(settings: Settings) : BlockWithEntity(settings) {
     }
 }
 
-/** Marks a [SecurityCameraBlock] for its client renderer; holds nothing. */
-class SecurityCameraBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlocks.SECURITY_CAMERA_ENTITY, pos, state)
+/** Marks a [SecurityCameraBlock] for its client renderer; holds nothing. Its [type] is its block's. */
+class SecurityCameraBlockEntity(type: BlockEntityType<SecurityCameraBlockEntity>, pos: BlockPos, state: BlockState) : BlockEntity(type, pos, state) {
+    constructor(pos: BlockPos, state: BlockState) : this(ModBlocks.SECURITY_CAMERA_ENTITY, pos, state)
+}
 
 /**
  * One screen of the director's wall of CCTV monitors (Level 5's office): a CRT in its casing showing only snow

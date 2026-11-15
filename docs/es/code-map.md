@@ -39,10 +39,6 @@ con un comentario KDoc que cuenta más.
 | `camera/CameraAim.kt` | Hacia dónde apunta la cabeza de una cámara de seguridad, girando hacia un objetivo no más rápido que su servo |
 | `cutscene/Cutscene.kt` | Una cinemática como datos: poses de cámara, el marco de una escena, planos, el vuelo de entrada y de salida, las bandas negras |
 | `cutscene/DirectorScene.kt` | La escena del director medida con su voz: encuadres, subtítulos, sus gestos, cuándo aparta la vista, su máscara; `SkipPrompt` (saltar pulsando dos veces) |
-| `cutscene/PrologueScene.kt` | El prólogo del Chapter 2: la línea de tiempo desde el científico (travelling, asentamiento, avance), las cuatro líneas, los subtítulos, el negro de apertura, los pulsos del parpadeo, las etapas de su cambio, el corte a negro y el título tecleado (`PrologueCues`, `PrologueStages`, `PrologueScenePlan`); las curvas del zumbido, el drone y el Geiger |
-| `cutscene/RoomPlan.kt` | El plano de la sala del prólogo (leído de `cutscene/prologue_room.json`) y `BlockSpec`, un bloque con sus estados |
-| `cutscene/PrologueLines.kt` | Las líneas de voz del científico y sus subtítulos, leídas de `cutscene/prologue.json` |
-| `cutscene/GeigerClicks.kt` | Los recuentos de un contador Geiger tick a tick: un proceso de Poisson con semilla a un ritmo que puede subir |
 | `cutscene/DirectorLines.kt` | Las líneas de voz del director y sus subtítulos, leídas de `cutscene/director.json` |
 | `cutscene/DirectorLoop.kt` | Las frases que repite tras su escena: su orden, las pausas, cuánto mira al jugador |
 | `cutscene/FinalCredits.kt` | La línea de tiempo de los créditos finales (los dibuja `FinalCreditsScreen`) |
@@ -52,26 +48,12 @@ con un comentario KDoc que cuenta más.
 | `puzzle/SafeDial.kt` | El dial de una caja: tics, clics, fijar un número cambiando de sentido |
 | `puzzle/darts/DartboardGeometry.kt` | Dónde cayó un dardo en el tablero: número y anillo, en las 4 orientaciones |
 | `film/FilmInfo.kt` | La película del Cinema: fotogramas, velocidad, qué fotograma en cada momento |
-| `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint, estado en el Nivel 1 del Chapter 2 |
+| `progress/PlayerProgress.kt` | Lo que ha hecho un jugador: piezas, notas leídas, escenas vistas, libros del nivel 3, checkpoint (un capítulo posterior guarda el suyo) |
 | `ending/RunSummary.kt` | Los números de la ventana de felicitación: tiempo jugado y muertes de una partida, el tiempo como `H:MM:SS` |
 | `progress/Checkpoint.kt` | Un checkpoint como texto: el inicio de un nivel, o `nivel/punto` para un punto de reinicio dentro de él |
 | `detector/Detector.kt` | El detector del nivel 5: cuánto se llena su icono, cuándo sale el triángulo, cuántas cuentas Geiger caen por tick |
 | `death/DeathCause.kt` | Lo que nombra la pantalla de muerte (quién te mató, la sed, la caída, el agua honda) y dónde sale |
 | `puzzle/NoteText.kt` | El texto de una nota: título, párrafos, huecos `{A}` / `{A:word}` |
-| `ch2l1/Ch2L1State.kt` | La máquina de estados del Nivel 1 del Chapter 2: sus diez estados, en el orden en que se juegan |
-| `ch2l1/Ch2L1Anchors.kt` | Los lugares con nombre del nivel, puntos y zonas, tal como los da `anchors.json` |
-| `ch2l1/Ch2L1AnchorsParser.kt` | Lee `anchors.json` y cuenta cada problema con su ruta JSON |
-| `ch2l1/Ch2L1Data.kt` | Los archivos de datos del nivel: cuáles hay, qué copia gana (la de la carpeta de config sobre la del jar), qué da uno que falta o está roto |
-| `ch2l1/Ch2L1Voices.kt` | Las líneas de voz del nivel (clave del texto, hablante, duración, fragmentos de subtítulo como rangos de frases, de `cutscene/ch2_l1_voices.json`), `Ch2L1Sentences` y `Ch2L1Skins`, el aspecto de sus personas |
-| `ch2l1/Ch2L1Tasks.kt` | El archivo de tareas (`tasks.json`), su lector, `Ch2L1Bits` (conjuntos de cosas como bits de un Int) y `HoldTracker` (un clic mantenido sobre un objetivo) |
-| `ch2l1/Ch2L1Speakers.kt` | El archivo de los altavoces (`speakers.json`), su lector y `Ch2L1SpeakerSchedule`: qué suena y cuándo, por las reglas del plan, sin reloj propio |
-| `ch2l1/Ch2L1IntroScene.kt` | La cinemática del primer aviso: tomas desde anclas, en la maquinaria de las otras escenas |
-| `ch2l1/Ch2L1Npcs.kt` | La gente de la fábrica: `npcs.json`, su lector, los pasos de una rutina con sus anclas buscadas y `Ch2L1RoutineRunner`, lo que hace una persona cada tick |
-| `ch2l1/Ch2L1NpcLife.kt` | Lo que hace que la gente de la fábrica parezca viva (`life` de `npcs.json`): `Ch2L1Gait` (andar y girar suave), `Ch2L1Gaze` (adónde mira la cabeza), `Ch2L1Chat` (charlas entre dos), `Ch2L1Pose` |
-| `ch2l1/Ch2L1Guide.kt` | Adónde apunta la flecha guía en cada paso (el reloj, los tubos, el terminal, el analizador, la escoba, la suciedad), la más cercana, cuándo se oculta |
-| `ch2l1/Ch2L1Wiring.kt` | Comprueba que lo que nombran `tasks.json` y `speakers.json` está en `anchors.json` |
-| `ch2l1/Ch2L1Objectives.kt` | El objetivo que muestra el panel en cada estado: una clave de lang por estado, ninguna en las cinemáticas ni al final |
-| `ch2l1/Ch2L1MapPlan.kt` | El mapa del nivel como plan que construir: la caja que vaciar, las cajas de un bloque, las lámparas, el origen, la huella del plan (de `map.json`) |
 | `spawn/PostLedger.kt` | Qué criatura es dueña de cada punto de spawn, para que un sobrante que aún muere o que carga tarde no borre el registro del que lo sustituyó (el Observer) |
 | `progress/LeftBehind.kt` | Lo que no sirve de un nivel en adelante y se quita del inventario al empezarlo (la tarjeta de acceso desde el Nivel 3, la tarjeta maestra desde el Nivel 5) |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
@@ -116,7 +98,7 @@ con un comentario KDoc que cuenta más.
 
 | Archivo | Qué hace |
 |---|---|
-| `ModBlocks.kt` | Cada bloque: la luz, props, puertas, carteles, piezas del ascensor, botín, lector de tarjetas |
+| `ModBlocks.kt` | Cada bloque del juego base: la luz, props, puertas, carteles, piezas del ascensor, botín, lector de tarjetas; la clave de la pestaña creativa (`TAB`) y los ajustes que comparten los bloques de un capítulo posterior |
 | `ModItems.kt` | Batería, botella de agua, tarjeta; la pestaña creativa |
 | `LabItems.kt` | La llave inglesa del nivel 5: un arma pesada que no se desgasta |
 | `ChemicalBlocks.kt` | La mezcladora del nivel 5: sus depósitos (un frasco cada uno), su cuerpo (el botón), las luces rojas de la alarma |
@@ -177,8 +159,7 @@ con un comentario KDoc que cuenta más.
 | `DirectorEntity.kt` | El director en su silla (GeckoLib): se mueve con la escena del cliente, con máscara y mirada sincronizadas; `DirectorHooks` lo pone ahí con el nivel |
 | `LabHallHooks.kt` | El golpe de cuerdas y la primera Cloud del Lab hall, una vez por partida |
 | `ChemicalHooks.kt` | El puzle químico: la pareja de la partida, la mezcladora, la alarma y sus enemigos, la rejilla disolviéndose, la trampilla |
-| `ScientistEntity.kt` | El científico del prólogo (GeckoLib, criatura pasajera): trabaja en su mesa, tiembla, enferma, se estira y luego es un Pale man (`stage`, que pone la escena) |
-| `ChapterRequest.kt` | Lo que pidió el Capítulo 2 del menú: el mundo se abre solo para el prólogo (sin reconstruir el mapa ni nueva partida) y el cliente sale al menú después |
+| `ChapterRequest.kt` | Lo que pidió el menú: el mundo se abre solo para la apertura de un capítulo posterior (sin reconstruir el mapa ni nueva partida), que arranca ese capítulo (`onLoaded`); su cliente sale al menú después |
 | `DirectorBlocks.kt` | La antesala y el despacho del nivel 5: la puerta doble del director que abre sus dos hojas a la vez, el bloque de la cámara de seguridad, el muro de monitores CCTV |
 | `DeepWaterHooks.kt` | El agua honda del nivel 5 (las piscinas del drenaje): al caer, algo arrastra al jugador al fondo y se ahoga |
 | `DrainHooks.kt` | El drenaje del nivel 5: la trampilla cerrándose de golpe cuando el jugador ha bajado su escalera, abierta otra vez si muere antes de la Junction |
@@ -205,8 +186,9 @@ con un comentario KDoc que cuenta más.
 | `DeathHooks.kt` | La muerte como fundido a negro y reinicio del nivel |
 | `LoadingHooks.kt` | Reconstruir al abrir, estado de carga, partida nueva, tiempos límite de seguridad |
 | `NewGame.kt` | Reinicia el mundo y el jugador para una partida nueva |
-| `ProgressService.kt` | El progreso del jugador tal como lo ve el resto del mod |
-| `CardinalProgress.kt` | `ProgressService` sobre Cardinal Components, la única clase que toca esa librería |
+| `ProgressService.kt` | El progreso del jugador tal como lo ve el resto del mod; `onReset`, para que un capítulo posterior olvide el suyo con una partida nueva |
+| `CardinalProgress.kt` | `ProgressService` sobre Cardinal Components (con el componente propio de un capítulo posterior, las únicas clases que tocan esa librería) |
+| `PlayerRules.kt` | Lo que un capítulo cambia de las reglas del juego base para sus jugadores (linterna, esconderse, daño, ruido, barras de estado): los capítulos registran una fuente, los hooks base preguntan |
 | `IntroHooks.kt` | La intro del ascensor: puertas, canción, indicadores de planta, título |
 | `LevelEntryHooks.kt` | Títulos de nivel y persianas que se cierran tras el jugador |
 | `LootSpawner.kt` | Coloca y repone el botín en los puntos con etiqueta |
@@ -242,20 +224,8 @@ con un comentario KDoc que cuenta más.
 | `AchievementHooks.kt` | Conseguir logros: qué da cada uno, avisar al cliente |
 | `EndingHooks.kt` | El final del juego: la partida guardada borrada, los créditos finales, los números de la partida enviados con ellos |
 | `FalseExitHooks.kt` | La falsa salida del nivel 5: el suelo sobre el pozo que cede, la caída, el negro |
-| `PrologueSceneHooks.kt` | El prólogo del Chapter 2: construye su sala aparte, genera al científico, sujeta al jugador, el salto, el final (el jugador de vuelta donde estaba, la sala borrada); lo empieza `/everytunnel prologue` |
 | `DirectorSceneHooks.kt` | La escena del director: empieza al abrir su puerta, sujeta al jugador, el portazo, el salto y el final (un punto de reinicio tras su puerta); `DirectorLoopHooks`, en el mismo archivo, manda sus frases después |
 | `DebugCommands.kt` | `/everytunnel ...` |
-| `Ch2L1.kt` | El Nivel 1 del Chapter 2: el estado de cada jugador y si lo está jugando (las reglas le siguen: `enter`, `leave`), guardados en su progreso; todo cambio pasa por aquí y llega a los oyentes |
-| `Ch2L1DataLoader.kt` | Lee los archivos JSON del nivel (la copia de la carpeta de config, si no la del jar) al arrancar y con `/et reload`, y guarda los datos actuales |
-| `Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc` (solo ejecuciones de desarrollo) |
-| `FactoryNpcEntity.kt` | Una persona del Nivel 1 del Chapter 2 (Rowan, el compañero, los trabajadores): un solo tipo de entidad, su skin sincronizada las distingue; un trabajador sigue su rutina tick a tick (andar suave, a su ritmo), su cabeza mira sola, y su pose sincronizada dice si teclea, habla o escucha; una criatura mantenida |
-| `Ch2L1Npcs.kt` | La gente de la fábrica: los trabajadores que se ponen mientras se juega el nivel y los del LAB que se quitan, las charlas entre parejas, los grupos y el `/et ch2 l1 npc` del desarrollador |
-| `Ch2L1Build.kt` | Construye el nivel desde su plan a razón de 8.000 celdas por tick (y lo vacía), recuerda qué plan construyó, comprueba antes cada bloque |
-| `TimeClockBlock.kt` | El reloj de fichar del Nivel 1 del Chapter 2: un lector de tarjetas (mismos modelos) que ficha al nuevo empleado, rojo y luego verde |
-| `Ch2L1TaskBlocks.kt` | El tubo de muestra, el terminal de NonameOS, el analizador, la escoba apoyada y la suciedad de las tareas del Capítulo 2: cada uno pasa su uso a `Ch2L1TaskHooks` |
-| `Ch2L1TaskHooks.kt` | Las tres tareas del Acto 1: los usos, los contadores en el progreso, los paquetes y los objetos del mundo siguiendo al estado |
-| `Ch2L1SpeakerHooks.kt` | Los altavoces de Rowan: un planificador por jugador, el timbre y la voz desde el altavoz de techo de la zona |
-| `Ch2L1IntroHooks.kt` | La cinemática del primer aviso en el servidor: sujeta al jugador, el timbre, el final o el salto |
 | `LinkedDoorBlock.kt` | Una hoja de un par de puertas que se abren y se cierran a la vez a mano (`factory_door`, con el aspecto de la puerta de laboratorio); sin escena, a diferencia de `PairedDoorBlock` |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
 | `PlaytestLog.kt` | El registro `[playtest]` |
@@ -274,7 +244,6 @@ con un comentario KDoc que cuenta más.
 | Archivo | Qué hace |
 |---|---|
 | `EveryTunnelClient.kt` | Entrypoint del cliente: registra todo lo de abajo |
-| `Ch2L1Client.kt` | Lo que sabe el cliente del Nivel 1 del Chapter 2: si el jugador local está en él, su estado, el objetivo que mostrar (de su progreso) |
 | `EveryTunnelDataGenerator.kt` | Entrypoint de datagen vacío |
 | `ClientResources.kt` | Los recursos del jugador según los envió el servidor por última vez |
 | `FlashlightControls.kt` | La tecla de la linterna (F) |
@@ -314,9 +283,6 @@ con un comentario KDoc que cuenta más.
 | `FlashlightOverlay.kt` | El foco en pantalla sin shaders |
 | `LockerView.kt` | El interior de la puerta de la taquilla sobre la pantalla mientras te escondes |
 | `AchievementToast.kt` | El aviso "Achievement Unlocked!"; recibe los logros conseguidos |
-| `Ch2L1Subtitles.kt` | Los subtítulos de las voces del Nivel 1 del Chapter 2, mostrados cuando suena una (un oyente del gestor de sonido; siempre activos) |
-| `ObjectivePanel.kt` | El panel de objetivos del Nivel 1 del Chapter 2: arriba a la derecha, pequeño, aparece con un fundido al cambiar el objetivo, con la cuenta de una tarea ("(1/3)") |
-| `HoldBar.kt` | La barra de una tarea que pide un clic mantenido (el analizador, la suciedad), bajo la mira |
 | `SubtitleStrip.kt` | El subtítulo de una voz sobre el HUD: el hablante en gris, el texto en blanco, sobre una franja oscura |
 
 ### `render/`
@@ -326,14 +292,11 @@ con un comentario KDoc que cuenta más.
 | `PaleManRenderer.kt` | Renderizador de GeckoLib con la máscara de brillo de los ojos |
 | `FilmWalkerRenderer.kt` | La figura de la película del Cinema, con el modelo del jugador |
 | `DartRenderer.kt` | Un dardo lanzado: la flecha de vanilla, más pequeña, con su textura |
-| `SecurityCameraRenderer.kt` | Gira la cabeza de la cámara de la antesala para seguir al jugador, parpadea su piloto rojo, suena su servo; las cámaras decorativas del Chapter 2 solo barren |
+| `SecurityCameraRenderer.kt` | Gira la cabeza de la cámara de la antesala para seguir al jugador, parpadea su piloto rojo, suena su servo; una que barre (las cámaras decorativas de un capítulo posterior, con su propio tipo de entidad de bloque) solo barre |
 | `WallMessageRenderer.kt` | Dibuja un mensaje con la fuente pintada y recuerda lo que le ha pasado |
 | `ObserverRenderer.kt` | Renderizador de GeckoLib del Observer; su cabeza gira con la de la entidad |
 | `SubjectRenderer.kt` | Renderizador de GeckoLib de los sujetos, cada fase con su cuerpo y su piel |
 | `DeadGuardRenderer.kt` | Renderizador de GeckoLib del guardia anterior, sentado, con el uniforme del jugador gastado |
-| `ScientistRenderer.kt` | Renderizador de GeckoLib del científico del prólogo, girado a su orientación; `ScientistModel` lo dibuja como el hombre, con su piel enferma o, ya cambiado, como el Pale man del nivel 2 (ojos brillantes) |
-| `TaskArrow.kt` | La flecha guía del Nivel 1 del Chapter 2: una V azul con bordes blancos que gira sobre el lugar del paso actual, vista a través de los muebles |
-| `FactoryNpcRenderer.kt` | Las personas de la fábrica sobre el modelo del jugador con brazos clásicos, cada una con su skin (`textures/entity/npc/`), brazos y cabeza según su pose (teclea, habla, escucha) |
 | `DirectorRenderer.kt` | Renderizador de GeckoLib del director: su modelo, su textura y sus animaciones, girado a su orientación |
 | `LabFigureRenderer.kt` | La figura que se ve desde el Lobby del nivel 5, con el modelo del jugador, una silueta oscura |
 | `HunterRenderer.kt` | Renderizador de GeckoLib de los Hunters, con los ojos brillando |
@@ -349,9 +312,8 @@ con un comentario KDoc que cuenta más.
 
 | Archivo | Qué hace |
 |---|---|
-| `CutsceneView.kt` | Una cinemática en el cliente (la del director o la del prólogo, un `Kind`): una cámara propia movida tick a tick, el HUD apagado, el jugador dibujado desde fuera (no en el prólogo), la pose del director, líneas de voz, saltar, el negro del que sale una escena |
+| `CutsceneView.kt` | Una cinemática en el cliente (la del director, o un `Kind` propio de un capítulo posterior, que añade sus sonidos, temblor, destello y final): una cámara propia movida tick a tick, el HUD apagado, el jugador dibujado desde fuera (si el kind lo dice), la pose del director, líneas de voz, saltar, el negro del que sale una escena |
 | `CutsceneScreen.kt` | La pantalla que se queda con las teclas y el ratón durante una cinemática: las bandas negras, los subtítulos, el aviso para saltar |
-| `PrologueSound.kt` | El sonido del prólogo: el zumbido y el drone (con el volumen siguiendo la escena), los clics Geiger posicionales del contador de radiación, el parpadeo, un crujido de huesos en cada etapa, el golpe y la respiración del Pale man, el golpe del título, todo muerto en el corte |
 | `DirectorVoice.kt` | Sus frases tras la escena: sonando planas, subtituladas sobre el HUD |
 
 ### `menu/`
@@ -379,12 +341,94 @@ con un comentario KDoc que cuenta más.
 | `CongratulationsScreen.kt` | La ventana de felicitación sobre el menú principal tras los créditos: el Observer con su café, un agradecimiento, tiempo jugado y muertes |
 | `FinalCreditsScreen.kt` | Los créditos finales, al ritmo de su canción: dibujos, títulos tecleados, herramientas, "Level 6 coming soon"; la música de la caída |
 | `TerminalScreen.kt` | La pantalla de un ordenador del nivel 5, tecleada en verde sobre negro |
-| `NonameOsScreen.kt` | NonameOS, el terminal de la fábrica (la tarea 1 del Nivel 1 del Chapter 2): el registro de muestras con sus botones REGISTER |
 | `DeathScreen.kt` | La pantalla de muerte: "Killed by", quién te mató y un consejo sobre el negro al morir, y "Try again" |
 
 ### Mixins del cliente: `client/java/daio7771/everytunnel/mixin/client/`
 
 Ver [Arquitectura](architecture.md#mixins) para el objetivo y el motivo de cada una.
+
+## Chapter 2: `main/kotlin/daio7771/everytunnel/chapter2/` y `client/kotlin/daio7771/everytunnel/chapter2/`
+
+Todo lo del Chapter 2, aparte del juego base (el Chapter 1 y lo que comparten todos los capítulos, arriba), que nunca lo nombra (`ChapterBoundaryTest`).
+Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al juego base por sus puntos de extensión: `PlayerRules`,
+`ChapterRequest`, `ProgressService.onReset` y `CutsceneView.Kind`. Un capítulo posterior tendrá un paquete como este. Sus tests están en
+`test/kotlin/daio7771/everytunnel/chapter2/`.
+
+### El capítulo: `chapter2/`, `chapter2/core/`, `chapter2/platform/`
+
+| Archivo | Qué hace |
+|---|---|
+| `Chapter2.kt` | Entrypoint común del Chapter 2 (tras el del juego base en `fabric.mod.json`): registra los registros del capítulo, su progreso, sus reglas, su arranque desde el menú, sus hooks y comandos |
+| `core/Ch2PlayerProgress.kt` | Lo que ha hecho un jugador en el Chapter 2 (el estado de su Nivel 1, si lo juega, sus contadores), aparte del Chapter 1 |
+| `platform/Ch2Progress.kt` | `Ch2PlayerProgress` sobre Cardinal Components, un componente propio (`every_tunnel:ch2_progress`), que se borra con una partida nueva del Chapter 1 |
+| `platform/Ch2Blocks.kt` | Los bloques del Chapter 2 (los de la fábrica, los del banco del prólogo), en la misma pestaña creativa; el tipo de entidad de bloque propio de las cámaras de la fábrica |
+| `platform/Ch2Items.kt` | Los objetos del Chapter 2: la escoba |
+| `platform/Ch2Sounds.kt` | Los eventos de sonido del Chapter 2 que reproduce el código |
+| `platform/Ch2Entities.kt` | Los tipos de entidad del Chapter 2: la gente de la fábrica, el científico del prólogo |
+
+### El prólogo: `chapter2/prologue/` (`core/`, `platform/`)
+
+| Archivo | Qué hace |
+|---|---|
+| `prologue/core/PrologueScene.kt` | El prólogo del Chapter 2: la línea de tiempo desde el científico (travelling, asentamiento, avance), las cuatro líneas, los subtítulos, el negro de apertura, los pulsos del parpadeo, las etapas de su cambio, el corte a negro y el título tecleado (`PrologueCues`, `PrologueStages`, `PrologueScenePlan`); las curvas del zumbido, el drone y el Geiger |
+| `prologue/core/PrologueLines.kt` | Las líneas de voz del científico y sus subtítulos, leídas de `cutscene/prologue.json` |
+| `prologue/core/RoomPlan.kt` | El plano de la sala del prólogo (leído de `cutscene/prologue_room.json`) y `BlockSpec`, un bloque con sus estados |
+| `prologue/core/GeigerClicks.kt` | Los recuentos de un contador Geiger tick a tick: un proceso de Poisson con semilla a un ritmo que puede subir |
+| `prologue/platform/PrologueSceneHooks.kt` | El prólogo del Chapter 2: construye su sala aparte, genera al científico, sujeta al jugador, el salto, el final (el jugador de vuelta donde estaba, la sala borrada); lo empieza `/everytunnel prologue` |
+| `prologue/platform/PrologueCommand.kt` | `/everytunnel prologue` (mundos de desarrollo), unido al `/everytunnel` del juego base |
+| `prologue/platform/ScientistEntity.kt` | El científico del prólogo (GeckoLib, criatura pasajera): trabaja en su mesa, tiembla, enferma, se estira y luego es un Pale man (`stage`, que pone la escena) |
+
+### Nivel 1, lógica: `chapter2/level1/core/`
+
+| Archivo | Qué hace |
+|---|---|
+| `level1/core/Ch2L1State.kt` | La máquina de estados del Nivel 1 del Chapter 2: sus diez estados, en el orden en que se juegan |
+| `level1/core/Ch2L1Anchors.kt` | Los lugares con nombre del nivel, puntos y zonas, tal como los da `anchors.json` |
+| `level1/core/Ch2L1AnchorsParser.kt` | Lee `anchors.json` y cuenta cada problema con su ruta JSON |
+| `level1/core/Ch2L1Data.kt` | Los archivos de datos del nivel: cuáles hay, qué copia gana (la de la carpeta de config sobre la del jar), qué da uno que falta o está roto |
+| `level1/core/Ch2L1Voices.kt` | Las líneas de voz del nivel (clave del texto, hablante, duración, fragmentos de subtítulo como rangos de frases, de `cutscene/ch2_l1_voices.json`), `Ch2L1Sentences` y `Ch2L1Skins`, el aspecto de sus personas |
+| `level1/core/Ch2L1Tasks.kt` | El archivo de tareas (`tasks.json`), su lector, `Ch2L1Bits` (conjuntos de cosas como bits de un Int) y `HoldTracker` (un clic mantenido sobre un objetivo) |
+| `level1/core/Ch2L1Speakers.kt` | El archivo de los altavoces (`speakers.json`), su lector y `Ch2L1SpeakerSchedule`: qué suena y cuándo, por las reglas del plan, sin reloj propio |
+| `level1/core/Ch2L1IntroScene.kt` | La cinemática del primer aviso: tomas desde anclas, en la maquinaria de las otras escenas |
+| `level1/core/Ch2L1Npcs.kt` | La gente de la fábrica: `npcs.json`, su lector, los pasos de una rutina con sus anclas buscadas y `Ch2L1RoutineRunner`, lo que hace una persona cada tick |
+| `level1/core/Ch2L1NpcLife.kt` | Lo que hace que la gente de la fábrica parezca viva (`life` de `npcs.json`): `Ch2L1Gait` (andar y girar suave), `Ch2L1Gaze` (adónde mira la cabeza), `Ch2L1Chat` (charlas entre dos), `Ch2L1Pose` |
+| `level1/core/Ch2L1Guide.kt` | Adónde apunta la flecha guía en cada paso (el reloj, los tubos, el terminal, el analizador, la escoba, la suciedad), la más cercana, cuándo se oculta |
+| `level1/core/Ch2L1Wiring.kt` | Comprueba que lo que nombran `tasks.json` y `speakers.json` está en `anchors.json` |
+| `level1/core/Ch2L1Objectives.kt` | El objetivo que muestra el panel en cada estado: una clave de lang por estado, ninguna en las cinemáticas ni al final |
+| `level1/core/Ch2L1MapPlan.kt` | El mapa del nivel como plan que construir: la caja que vaciar, las cajas de un bloque, las lámparas, el origen, la huella del plan (de `map.json`) |
+
+### Nivel 1, pegamento con Minecraft: `chapter2/level1/platform/`
+
+| Archivo | Qué hace |
+|---|---|
+| `level1/platform/Ch2L1.kt` | El Nivel 1 del Chapter 2: el estado de cada jugador y si lo está jugando (las reglas le siguen: `enter`, `leave`), guardados en su progreso; todo cambio pasa por aquí y llega a los oyentes |
+| `level1/platform/Ch2L1DataLoader.kt` | Lee los archivos JSON del nivel (la copia de la carpeta de config, si no la del jar) al arrancar y con `/et reload`, y guarda los datos actuales |
+| `level1/platform/Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc` (solo ejecuciones de desarrollo) |
+| `level1/platform/Ch2L1Build.kt` | Construye el nivel desde su plan a razón de 8.000 celdas por tick (y lo vacía), recuerda qué plan construyó, comprueba antes cada bloque |
+| `level1/platform/TimeClockBlock.kt` | El reloj de fichar del Nivel 1 del Chapter 2: un lector de tarjetas (mismos modelos) que ficha al nuevo empleado, rojo y luego verde |
+| `level1/platform/Ch2L1TaskBlocks.kt` | El tubo de muestra, el terminal de NonameOS, el analizador, la escoba apoyada y la suciedad de las tareas del Capítulo 2: cada uno pasa su uso a `Ch2L1TaskHooks` |
+| `level1/platform/Ch2L1TaskHooks.kt` | Las tres tareas del Acto 1: los usos, los contadores en el progreso, los paquetes y los objetos del mundo siguiendo al estado |
+| `level1/platform/Ch2L1SpeakerHooks.kt` | Los altavoces de Rowan: un planificador por jugador, el timbre y la voz desde el altavoz de techo de la zona |
+| `level1/platform/Ch2L1IntroHooks.kt` | La cinemática del primer aviso en el servidor: sujeta al jugador, el timbre, el final o el salto |
+| `level1/platform/FactoryNpcEntity.kt` | Una persona del Nivel 1 del Chapter 2 (Rowan, el compañero, los trabajadores): un solo tipo de entidad, su skin sincronizada las distingue; un trabajador sigue su rutina tick a tick (andar suave, a su ritmo), su cabeza mira sola, y su pose sincronizada dice si teclea, habla o escucha; una criatura mantenida |
+| `level1/platform/Ch2L1Npcs.kt` | La gente de la fábrica: los trabajadores que se ponen mientras se juega el nivel y los del LAB que se quitan, las charlas entre parejas, los grupos y el `/et ch2 l1 npc` del desarrollador |
+
+### Cliente: `client/kotlin/daio7771/everytunnel/chapter2/` (`prologue/client/`, `level1/client/`)
+
+| Archivo | Qué hace |
+|---|---|
+| `Chapter2Client.kt` | Entrypoint del cliente del Chapter 2: sus escenas, HUD, flecha, NonameOS, renderers y capas de render |
+| `prologue/client/PrologueView.kt` | El prólogo en el cliente: su `CutsceneView.Kind` (sonido, temblor, destello, final en negro) y sus paquetes |
+| `prologue/client/PrologueSound.kt` | El sonido del prólogo: el zumbido y el drone (con el volumen siguiendo la escena), los clics Geiger posicionales del contador de radiación, el parpadeo, un crujido de huesos en cada etapa, el golpe y la respiración del Pale man, el golpe del título, todo muerto en el corte |
+| `prologue/client/ScientistRenderer.kt` | Renderizador de GeckoLib del científico del prólogo, girado a su orientación; `ScientistModel` lo dibuja como el hombre, con su piel enferma o, ya cambiado, como el Pale man del nivel 2 (ojos brillantes) |
+| `level1/client/Ch2L1Client.kt` | Lo que sabe el cliente del Nivel 1 del Chapter 2: si el jugador local está en él, su estado, el objetivo que mostrar (de su progreso) |
+| `level1/client/Ch2L1IntroView.kt` | El primer anuncio del Nivel 1 en el cliente: su `CutsceneView.Kind` y sus paquetes |
+| `level1/client/Ch2L1Subtitles.kt` | Los subtítulos de las voces del Nivel 1 del Chapter 2, mostrados cuando suena una (un oyente del gestor de sonido; siempre activos) |
+| `level1/client/ObjectivePanel.kt` | El panel de objetivos del Nivel 1 del Chapter 2: arriba a la derecha, pequeño, aparece con un fundido al cambiar el objetivo, con la cuenta de una tarea ("(1/3)") |
+| `level1/client/HoldBar.kt` | La barra de una tarea que pide un clic mantenido (el analizador, la suciedad), bajo la mira |
+| `level1/client/TaskArrow.kt` | La flecha guía del Nivel 1 del Chapter 2: una V azul con bordes blancos que gira sobre el lugar del paso actual, vista a través de los muebles |
+| `level1/client/NonameOsScreen.kt` | NonameOS, el terminal de la fábrica (la tarea 1 del Nivel 1 del Chapter 2): el registro de muestras con sus botones REGISTER |
+| `level1/client/FactoryNpcRenderer.kt` | Las personas de la fábrica sobre el modelo del jugador con brazos clásicos, cada una con su skin (`textures/entity/npc/`), brazos y cabeza según su pose (teclea, habla, escucha) |
 
 ## Recursos: `main/resources/`
 
@@ -392,8 +436,8 @@ Ver [Arquitectura](architecture.md#mixins) para el objetivo y el motivo de cada 
 |---|---|
 | `fabric.mod.json` | Metadatos del mod, entrypoints, dependencias |
 | `every_tunnel.mixins.json`, `client/resources/every_tunnel.client.mixins.json` | Listas de mixins |
-| `assets/every_tunnel/lang/en_us.json` | Todos los textos del juego |
-| `assets/every_tunnel/lang/es_*.json` | La traducción al español (`es_es.json`, copiada a los demás `es_*` por `tools/lang/spanish_variants.py`) |
+| `assets/every_tunnel/lang/en_us.json` | Todos los textos del juego (los genera `tools/lang/build.py` desde `tools/lang/src/<parte>/`, una parte por capítulo) |
+| `assets/every_tunnel/lang/es_*.json` | La traducción al español (`es_es.json`, unida como el inglés y copiada a los demás `es_*` por `tools/lang/build.py`) |
 | `assets/every_tunnel/guide/` | No está en `src/`: lo copia de `docs/*/guide/` la compilación (`copyGuide`) |
 | `assets/every_tunnel/sounds.json`, `sounds/` | Eventos de sonido y archivos `.ogg` (de `tools/sounds/export.py`) |
 | `assets/every_tunnel/cutscene/prologue.json` | Las líneas de voz del científico: duración y subtítulos (de `tools/sounds/prologue_voices.py`) |

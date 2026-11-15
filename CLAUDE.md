@@ -32,6 +32,10 @@ is the core of the mod.
 - Logic in plain Kotlin (`config`, `core`, `systems`, `entities`, unit tested); Minecraft glue
   in `platform` and the client. Mixins (Java) only where Fabric API has no event.
 - Every feature only acts in worlds with levels (`WorldRules`); vanilla worlds stay vanilla.
+- **Chapters stay apart.** Chapter 1 and the shared code are the base game; a later chapter lives in
+  `daio7771.everytunnel.chapterN` (one folder per level) with its own entrypoints, registries, progress,
+  lang part (`tools/lang/src/chapterN/`) and sound catalog. The base game never names a chapter
+  (`ChapterBoundaryTest`): use its extension points (`docs/en/architecture.md`, Chapters).
 - Generated content (sounds, textures, models, the map) comes from the Python tools in
   `tools/`: change the tool and rerun it, never edit its output by hand.
 - Sounds: synthesized or CC0 only (CC0 SoundFonts too, fetched by `tools/sounds/soundfonts/fetch.py`), plus the one credited CC BY song. The one AI exception is AI

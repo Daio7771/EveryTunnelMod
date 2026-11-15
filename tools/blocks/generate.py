@@ -8,13 +8,13 @@ Writes into src/main/resources/ (committed with the mod):
   assets/every_tunnel/blockstates/<block>.json
   assets/every_tunnel/models/block/<model>.json, models/item/<block>.json
   assets/every_tunnel/textures/block/<texture>.png  (+ _n.png, _s.png)
-  assets/every_tunnel/lang/en_us.json               (the block names; other keys are kept)
+  tools/lang/src/<part>/en_us.json                 (the block names, by chapter; then the lang files are rebuilt)
   data/every_tunnel/loot_tables/blocks/<block>.json
 and a preview, tools/blocks/output/blocks_sheet.png (git-ignored): every texture as
 albedo | normal | specular | emission.
 
 The blocks themselves (properties, shapes, sounds) are registered in Kotlin
-(platform/ModBlocks.kt); the ids in BLOCKS must match, which this tool checks. Model
+(platform/ModBlocks.kt, and chapter2/platform/Ch2Blocks.kt for Chapter 2's); the ids in BLOCKS must match, which this tool checks. Model
 rotations must match the shapes there too (platform/BlockShapes.kt,
 FluorescentLightBlock.modelRotation). Textures reuse the level generator's painters and
 materials (tools/map/garage/textures.py), so the props look like the level around them.
@@ -39,6 +39,9 @@ from garage import textures as T                                        # noqa: 
 from garage.pbr import Material                                         # noqa: E402
 from garage.textures import mix, new, noise, px, rect, speckle         # noqa: E402
 from offices import textures as OT                                     # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lang"))
+import langfiles  # noqa: E402
 import briefing                                                         # noqa: E402
 
 NS = "every_tunnel"
@@ -46,7 +49,9 @@ RESOURCES = ROOT / "src" / "main" / "resources"
 ASSETS = RESOURCES / "assets" / NS
 LOOT = RESOURCES / "data" / NS / "loot_tables" / "blocks"
 OUT = Path(__file__).resolve().parent / "output"
-MOD_BLOCKS_KT = ROOT / "src" / "main" / "kotlin" / "daio7771" / "everytunnel" / "platform" / "ModBlocks.kt"
+_KT = ROOT / "src" / "main" / "kotlin" / "daio7771" / "everytunnel"
+# Every file that registers blocks: Chapter 1 and the base game's, and each later chapter's own.
+MOD_BLOCKS_KT = [_KT / "platform" / "ModBlocks.kt", _KT / "chapter2" / "platform" / "Ch2Blocks.kt"]
 
 HORIZONTAL = {"north": 0, "east": 90, "south": 180, "west": 270}
 # FloorIndicatorBlock.LABELS, top floor first.
@@ -3996,9 +4001,17 @@ def build():
 
 # =====================================================================================
 
+def block_part(block_id):
+    """The lang part of the chapter that registers [block_id]: base for ModBlocks.kt, chapter2 for Ch2Blocks.kt."""
+    for kt, part in zip(MOD_BLOCKS_KT, ("base", "chapter2")):
+        if block_id in re.findall(r'register\(\s*"([a-z0-9_]+)"', kt.read_text()):
+            return part
+    return "base"
+
+
 def registered_ids():
-    """Block ids registered in ModBlocks.kt (register("id", ...))."""
-    return set(re.findall(r'register\(\s*"([a-z0-9_]+)"', MOD_BLOCKS_KT.read_text()))
+    """Block ids registered in ModBlocks.kt and the later chapters' block files (register("id", ...))."""
+    return {i for kt in MOD_BLOCKS_KT for i in re.findall(r'register\(\s*"([a-z0-9_]+)"', kt.read_text())}
 
 
 def png(img):
@@ -4019,7 +4032,7 @@ def main():
     if kotlin != set(a.blockstates):
         missing_here = sorted(kotlin - set(a.blockstates))
         missing_there = sorted(set(a.blockstates) - kotlin)
-        raise SystemExit(f"blocks differ from ModBlocks.kt: not here {missing_here}, not registered {missing_there}")
+        raise SystemExit(f"blocks differ from ModBlocks.kt and Ch2Blocks.kt: not here {missing_here}, not registered {missing_there}")
 
     sheet = {}
     tex_dir = ASSETS / "textures" / "block"
@@ -4077,12 +4090,12 @@ def main():
     entity_dir.mkdir(parents=True, exist_ok=True)
     (entity_dir / "dart.png").write_bytes(png(dart_entity_tex(rng_for("dart_entity"))))
 
-    lang_path = ASSETS / "lang" / "en_us.json"
-    lang = json.loads(lang_path.read_text(encoding="utf-8"))
-    lang["itemGroup.every_tunnel"] = "Every Tunnel"
+    # Each block's name goes to the lang part of the chapter that registers it (tools/lang/src/<part>).
+    names = {"base": {"itemGroup.every_tunnel": "Every Tunnel"}}
     for block_id, name in a.names.items():
-        lang[f"block.{NS}.{block_id}"] = name
-    write_json(lang_path, lang)
+        names.setdefault(block_part(block_id), {})[f"block.{NS}.{block_id}"] = name
+    for part, entries in names.items():
+        langfiles.update(part, "en_us", entries)
 
     # Files of blocks or textures that no longer exist here.
     stale = [p for p in (ASSETS / "models" / "block").glob("*.json") if p.stem not in a.models]

@@ -135,19 +135,21 @@ just open the world. `/function garage:build` rebuilds by hand. See [Levels](lev
 
 ## Languages
 
-`tools/lang/spanish_variants.py` copies `lang/es_es.json` (the Spanish translation, written by
-hand) to `es_ar`, `es_cl`, `es_ec`, `es_mx`, `es_uy` and `es_ve`, because Minecraft does not
-fall back from one Spanish locale to another. Run it after every change to `es_es.json`; the
-six files it writes are never edited by hand.
+The game's lang files (`assets/every_tunnel/lang/*.json`) are generated, one part per chapter: the sources are
+`tools/lang/src/<part>/<locale>.json` (`base`: Chapter 1 and what is shared; `chapter2`...). `tools/lang/build.py` merges them
+(`base` first, then the chapters in order; a key in two parts stops it) and then `tools/lang/spanish_variants.py` copies
+`es_es` to `es_ar`, `es_cl`, `es_ec`, `es_mx`, `es_uy` and `es_ve`, because Minecraft does not fall back from one Spanish locale
+to another. Texts written by hand go in a part's file, then run `build.py`; the tools that write names and subtitles
+(`langfiles.update`) write into their chapter's part and rebuild. `LangFilesTest` fails if the game's files are not the merge.
 
 ## Blocks
 
 `tools/blocks/generate.py` makes the assets of the mod's 146 blocks. The blocks themselves
-(properties, shapes, sounds) are registered in Kotlin (`platform/ModBlocks.kt`); the tool
+(properties, shapes, sounds) are registered in Kotlin (`platform/ModBlocks.kt`, and Chapter 2's in `chapter2/platform/Ch2Blocks.kt`); the tool
 **stops if the two id lists disagree**. Model rotations must match the shapes in
 `platform/BlockShapes.kt`. Textures reuse the map's painters (`garage/textures.py`), so
-props look like the level around them. It also writes the block names into
-`lang/en_us.json` (other keys are kept). Preview: `tools/blocks/output/blocks_sheet.png`.
+props look like the level around them. It also writes the block names into the lang part of the
+chapter that registers each block (`tools/lang/src/<part>/en_us.json`; other keys are kept). Preview: `tools/blocks/output/blocks_sheet.png`.
 
 ## Entity art
 
@@ -178,7 +180,9 @@ cc0_cuts.py (cuts from cc0/ and licensed/) ─┼─> generate.py  -> WAV previe
 dsp.py: the DSP toolkit · audio_io.py: reading/writing audio
 ```
 
-- `catalog.py`: each generator takes `(rng, variant)` and returns a mono or stereo array.
+- `catalog.py`: each generator takes `(rng, variant)` and returns a mono or stereo array. Chapter 2's sounds (its prologue
+  and its Level 1) are in their own file, `catalog_ch2.py`, written with `catalog.py`'s helpers; `catalog.py` adds them to
+  its one list, so the other tools see a single catalog (a later chapter gets a file like it).
   Ids follow the sound events (`every_tunnel:<id>`). Mono for sounds positioned in the
   world, stereo for music and head sounds. Its newer helpers (Level 5's second pass and the
   sounds it shares) sound less synthetic than plain partials: `modal_hit` (a struck body's

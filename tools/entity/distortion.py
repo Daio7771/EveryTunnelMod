@@ -11,7 +11,7 @@ Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   textures/entity/distortion_cloud.png (+ _glowmask)
   textures/entity/distortion_junior_<0..3>.png (+ _glowmask): its eye cracking more at each stage,
       as it is stared at (client/render/DistortionRenderer.kt picks the stage)
-  and the names in lang/en_us.json
+  and the names in the lang files (tools/lang/src/base)
 and, in tools/entity/output/ (git-ignored): distortion_preview.png (the textures enlarged, both
 models from the front and the side, and the Junior's eye at each stage).
 
@@ -38,6 +38,9 @@ from PIL import Image, ImageDraw
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from observer import draw_model  # noqa: E402
 from pale_man import Bone, faces, keys, swing, write_json  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "lang"))
+import langfiles  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 ASSETS = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel"
@@ -355,11 +358,7 @@ def main():
             models.append(("Junior", bones, uv, tex, JUNIOR["layout"]))
     write_preview(models, eyes)
 
-    lang_path = ASSETS / "lang" / "en_us.json"
-    lang = json.loads(lang_path.read_text(encoding="utf-8"))
-    lang["entity.every_tunnel.distortion_cloud"] = "Distortion Cloud"
-    lang["entity.every_tunnel.distortion_junior"] = "Distortion Junior"
-    write_json(lang_path, lang)
+    langfiles.update("base", "en_us", {"entity.every_tunnel.distortion_cloud": "Distortion Cloud", "entity.every_tunnel.distortion_junior": "Distortion Junior"})
     print(f"Distortion Cloud: {len(CLOUD['puffs'])} puffs; Junior: {len(JUNIOR['puffs'])} puffs, {JUNIOR_STAGES} eye stages")
 
 

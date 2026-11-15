@@ -45,9 +45,9 @@ object FlashlightHooks {
         }
     }
 
-    /** True if the player can use the flashlight right now (not in Chapter 2's Level 1, where there is none). */
+    /** True if the player can use the flashlight right now (and their chapter's rules give them one: [PlayerRules]). */
     fun available(player: PlayerEntity): Boolean =
-        WorldRules.active && player.isAlive && !player.isSpectator && !Ch2L1.active(player)
+        WorldRules.active && player.isAlive && !player.isSpectator && PlayerRules.of(player).flashlight
 
     fun toggle(player: ServerPlayerEntity) {
         if (!available(player)) return
