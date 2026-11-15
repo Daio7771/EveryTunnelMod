@@ -48,6 +48,11 @@ interface ProgressService {
 
     fun setCh2L1State(player: PlayerEntity, state: Ch2L1State)
 
+    /** The player is playing Chapter 2's Level 1, whose rules apply to them (`PlayerProgress.ch2l1Active`). */
+    fun ch2L1Active(player: PlayerEntity): Boolean
+
+    fun setCh2L1Active(player: PlayerEntity, active: Boolean)
+
     /** Adds [ticks] played to this game's total. Not synced to the client: it is counted every tick. */
     fun addPlayTicks(player: PlayerEntity, ticks: Long)
 

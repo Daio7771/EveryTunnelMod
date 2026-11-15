@@ -5,9 +5,9 @@
 El Nivel 1 del Chapter 2 es la fábrica, cuatro meses después del Chapter 1: un científico normal contratado en lugar del
 que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el despacho del supervisor. Se construye por
 fases (de la 0 a la 10), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
-nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 1, recursos, textos y modelos.** Todavía
-no se puede jugar: el nivel tiene su máquina de estados, sus archivos de datos, sus voces, sus personas y sus comandos de
-depuración, y nada en el mundo los usa.
+nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 2, las reglas del nivel y su comienzo.** Todavía
+no se puede jugar como nivel (no tiene mapa ni tareas), pero se puede meter a un jugador en él: sus reglas se le aplican y el
+reloj de fichar le pasa a la primera tarea.
 
 ## La máquina de estados
 
@@ -113,6 +113,35 @@ cada uno), que también escribe una hoja de previews con la de Rowan (`tools/ent
 **mantenida** (véase [Contribuir](contributing.md#criaturas)). Por ahora solo se quedan quietas donde las pone
 `/et ch2 l1 npc`; sus rutinas llegan en la fase 4.
 
+## Las reglas del nivel, el reloj y los objetivos
+
+**Las reglas siguen al jugador, no al lugar.** Un jugador está *activo* en el nivel (`PlayerProgress.ch2l1Active`, guardado
+con el estado y enviado al cliente por Cardinal; `Ch2L1.active`) desde `Ch2L1.enter` hasta `Ch2L1.leave`. Mientras lo está:
+
+| Regla | Dónde está |
+|---|---|
+| Nada le hace daño (solo cuentan `/kill` y el vacío), la sed y la batería no bajan, **correr es gratis** (sin resistencia) | `SafeLevelHooks.isSafe`, que consultan `ResourceHooks` y el evento de daño |
+| **Sin linterna**: su tecla no hace nada | `FlashlightHooks.available` |
+| **Nada de lo que hace genera ruido** para la IA (correr incluido) | `NoiseHooks.makesNoise` |
+| **Sin barras de estado**: las de vanilla siguen ocultas y las del mod (resistencia, sed, batería) no se dibujan; la barra de objetos y la mira se quedan | `StatusHud.render` |
+
+Se aplican a jugadores en Supervivencia o Aventura de un mundo con niveles (`ResourceHooks.appliesTo`), no a Creativo. `enter`
+además vacía los bolsillos (el nuevo empleado no tiene nada del Chapter 1), apaga la linterna, pone el estado en
+`ACT1_CLOCKIN`, vuelve a poner en rojo los relojes y teletransporta al ancla `spawn_clockin`. Como nada depende de una zona,
+funciona antes de que exista el mapa; el nuevo juego del capítulo y la entrada del mapa lo llamarán más adelante. **Mientras
+no haya mapa, las anclas provisionales están dentro del primer nivel del Chapter 1**, cuyos sistemas (el ambiente, por ejemplo)
+siguen funcionando allí.
+
+**El reloj de fichar** es `TimeClockBlock`, un lector de tarjetas en una pared sin arte propio (comparte los modelos y sonidos
+del lector): rojo hasta que alguien ficha, luego verde. Con clic derecho de un jugador activo en `ACT1_CLOCKIN` pita y le pasa
+a `ACT1_TASK1`; después zumba ("Ya has fichado"); para cualquier otro no hace nada. Lo colocará el mapa; `/et ch2 l1 clock`
+pone uno donde miras. Vuelve a rojo cada vez que se pone a un jugador en `ACT1_CLOCKIN`.
+
+**El panel de objetivos** (`client.hud.ObjectivePanel`) es pequeño, arriba a la derecha: "OBJETIVO" en gris y debajo el texto
+del estado del jugador (`Ch2L1Objectives`: una clave de lang por estado, bajo `every_tunnel.ch2.l1.objective.`; ninguna en las
+cinemáticas ni al final), sobre una franja tenue. Aparece con un fundido cuando cambia el objetivo y no hace ruido. El cliente
+lee el estado del progreso del jugador, así que no hay paquete propio.
+
 ## Comandos de depuración
 
 `platform.Ch2L1Commands`, nivel de operador 2, **solo en ejecuciones de desarrollo** (como explica
@@ -121,6 +150,9 @@ cada uno), que también escribe una hoja de previews con la de Rowan (`tools/ent
 | Comando | Qué hace |
 |---|---|
 | `/et reload` | Vuelve a leer los archivos JSON del nivel y dice qué falla en ellos |
+| `/et ch2 l1 enter` | Te conviertes en nuevo empleado: se te aplican las reglas del nivel (en Supervivencia o Aventura), se vacían tus bolsillos, el estado es el inicial y estás en `spawn_clockin` |
+| `/et ch2 l1 leave` | Vuelven a aplicarte las reglas del resto del juego |
+| `/et ch2 l1 clock` | Pone un reloj de fichar en la pared que miras |
 | `/et ch2 l1 anchors` | Todas las anclas con sus coordenadas, las provisionales marcadas |
 | `/et ch2 l1 goto <ancla>` | Te lleva a un punto, o al centro de una zona, un bloque por encima de su suelo |
 | `/et ch2 l1 state` | Muestra tu estado y el siguiente |
@@ -129,8 +161,8 @@ cada uno), que también escribe una hoja de previews con la de Rowan (`tools/ent
 | `/et ch2 l1 npc <skin>` | Pone delante de ti a una persona de la fábrica, para ver su skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` a `generic_3`) |
 | `/et ch2 l1 npc clear` | Las quita todas |
 
-Por ahora `state` y `skip` solo cambian el estado. Cuando una fase dé efectos a un estado (un objeto, un objetivo, un
-personaje), también se ejecutarán con el comando, que es lo que permite probar cada fase sin jugar las anteriores.
+`state` y `skip` cambian el estado y, con él, el objetivo del panel; el resto de los efectos de un estado (un objeto, un
+personaje) llegan con la fase que se los dé, y también se ejecutarán con el comando, que es lo que permite probar cada fase sin jugar las anteriores.
 
 ## Añadir el sistema de una fase
 
@@ -147,5 +179,5 @@ personaje), también se ejecutarán con el comando, que es lo que permite probar
 
 `Ch2L1StateTest` (el orden, `next`, `parse`), `Ch2L1AnchorsParserTest` (el formato, cada tipo de problema) y `Ch2L1DataTest`
 (los archivos del jar, qué copia gana, los respaldos), `Ch2L1VoicesTest` (las 32 líneas, sus eventos de sonido, Ogg y
-fragmentos, los textos en los dos idiomas) y `Ch2L1SkinsTest` (el formato de las skins), todos en `core/ch2l1`;
-`PlayerProgressTest` cubre el estado en el progreso.
+fragmentos, los textos en los dos idiomas) `Ch2L1SkinsTest` (el formato de las skins) y `Ch2L1ObjectivesTest` (un objetivo por paso, en los dos idiomas), todos en
+`core/ch2l1`; `PlayerProgressTest` cubre el estado y la marca en el progreso.

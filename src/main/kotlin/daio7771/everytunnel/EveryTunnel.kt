@@ -6,6 +6,7 @@ import daio7771.everytunnel.platform.AmbienceHooks
 import daio7771.everytunnel.platform.BookHooks
 import daio7771.everytunnel.platform.BookPhaseHooks
 import daio7771.everytunnel.platform.CarryHooks
+import daio7771.everytunnel.platform.Ch2L1
 import daio7771.everytunnel.platform.Ch2L1Commands
 import daio7771.everytunnel.platform.Ch2L1DataLoader
 import daio7771.everytunnel.platform.CloudGameHooks
@@ -100,6 +101,7 @@ object EveryTunnel : ModInitializer {
         ModSounds.register()
         LevelReloadListener.register()
         Ch2L1DataLoader.register()
+        Ch2L1.register()
         WorldRulesHooks.register()
         LevelTrackingHooks.register()
         AmbienceHooks.register()

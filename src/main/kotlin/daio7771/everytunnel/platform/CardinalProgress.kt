@@ -70,6 +70,10 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
 
     override fun setCh2L1State(player: PlayerEntity, state: Ch2L1State) = change(player) { it.ch2l1State = state }
 
+    override fun ch2L1Active(player: PlayerEntity) = of(player).ch2l1Active
+
+    override fun setCh2L1Active(player: PlayerEntity, active: Boolean) = change(player) { it.ch2l1Active = active }
+
     override fun addPlayTicks(player: PlayerEntity, ticks: Long) {
         val progress = of(player)
         progress.playTicks += ticks
@@ -126,6 +130,7 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             progress.checkpoint = if (tag.contains(CHECKPOINT, NbtElement.STRING_TYPE.toInt())) tag.getString(CHECKPOINT) else null
             progress.lounge = if (tag.contains(LOUNGE, NbtElement.STRING_TYPE.toInt())) tag.getString(LOUNGE) else null
             progress.ch2l1State = Ch2L1State.parse(tag.getString(CH2_L1_STATE)) ?: Ch2L1State.START
+            progress.ch2l1Active = tag.getBoolean(CH2_L1_ACTIVE)
             progress.playTicks = tag.getLong(PLAY_TICKS)
             progress.deaths = tag.getInt(DEATHS)
             inventory = tag.getList(INVENTORY, NbtElement.COMPOUND_TYPE.toInt())
@@ -141,6 +146,7 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             progress.checkpoint?.let { tag.putString(CHECKPOINT, it) }
             progress.lounge?.let { tag.putString(LOUNGE, it) }
             tag.putString(CH2_L1_STATE, progress.ch2l1State.name)
+            tag.putBoolean(CH2_L1_ACTIVE, progress.ch2l1Active)
             tag.putLong(PLAY_TICKS, progress.playTicks)
             tag.putInt(DEATHS, progress.deaths)
             tag.put(INVENTORY, inventory)
@@ -165,6 +171,7 @@ object CardinalProgress : ProgressService, EntityComponentInitializer {
             const val CHECKPOINT = "checkpoint"
             const val LOUNGE = "lounge"
             const val CH2_L1_STATE = "ch2_l1_state"
+            const val CH2_L1_ACTIVE = "ch2_l1_active"
             const val PLAY_TICKS = "play_ticks"
             const val DEATHS = "deaths"
             const val INVENTORY = "checkpoint_inventory"

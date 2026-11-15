@@ -582,5 +582,9 @@
   "every_tunnel.ch2.l1.rowan_office_c5": "¿Quién te dijo que esta puerta estaría abierta?",
   "every_tunnel.ch2.l1.rowan_office_c6": "Sin respuesta. Bien. Ya lo averiguaré. Siempre lo hago.",
   "every_tunnel.ch2.l1.rowan_office_c7": "Vete. De vuelta a tu puesto. Tienes suerte de que hoy esté de buen humor.",
-  "every_tunnel.ch2.l1.rowan_office_c8": "Ah, y ya que claramente te sobra energía, te quedarás tres horas extra esta noche. Sin cobrar, naturalmente. Piensa en ello como una inversión."
+  "every_tunnel.ch2.l1.rowan_office_c8": "Ah, y ya que claramente te sobra energía, te quedarás tres horas extra esta noche. Sin cobrar, naturalmente. Piensa en ello como una inversión.",
+  "every_tunnel.ch2.l1.objective_title": "OBJETIVO",
+  "every_tunnel.ch2.l1.clock.done": "Fichado.",
+  "every_tunnel.ch2.l1.clock.again": "Ya has fichado.",
+  "block.every_tunnel.time_clock": "Reloj de fichar"
 }

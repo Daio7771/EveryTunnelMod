@@ -89,4 +89,14 @@ class PlayerProgressTest {
         progress.clear()
         assertEquals(Ch2L1State.ACT1_CLOCKIN, progress.ch2l1State)
     }
+
+    @Test
+    fun `playing Chapter 2's Level 1 is a flag that a new game clears`() {
+        val progress = PlayerProgress()
+        assertFalse(progress.ch2l1Active)
+        progress.ch2l1Active = true
+        assertTrue("active" in progress.describe())
+        progress.clear()
+        assertFalse(progress.ch2l1Active)
+    }
 }

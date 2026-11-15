@@ -13,6 +13,8 @@ import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
+import net.minecraft.util.hit.BlockHitResult
+import net.minecraft.util.hit.HitResult
 
 /**
  * Developer commands for Chapter 2's Level 1 (operator level 2), so that every step of the level can be tried
@@ -20,6 +22,10 @@ import net.minecraft.util.Identifier
  * has none of them.
  *
  * - `/et reload`: reads the level's JSON files again ([Ch2L1DataLoader]) and says what is wrong with them.
+ * - `/et ch2 l1 enter`: you become a new hire of the factory ([Ch2L1.enter]): the level's rules apply to you (no flashlight, nothing
+ *   hurts, free silent sprint, no bars; in Survival or Adventure), your pockets are emptied, the state is the start and you
+ *   are at `spawn_clockin`. `/et ch2 l1 leave` ends it: the rules of the rest of the game apply again.
+ * - `/et ch2 l1 clock`: puts a time clock ([TimeClockBlock]) on the wall you look at, until the map places its own.
  * - `/et ch2 l1 anchors`: every anchor with its coordinates, the provisional ones marked.
  * - `/et ch2 l1 goto <anchor>`: takes you to a point, or to the middle of a zone one block over its floor.
  * - `/et ch2 l1 state [<state>]`: shows your state, or puts you in another one (every system of the level
@@ -54,6 +60,9 @@ object Ch2L1Commands {
                     .then(
                         CommandManager.literal("ch2").then(
                             CommandManager.literal("l1")
+                                .then(CommandManager.literal("enter").executes(::enter))
+                                .then(CommandManager.literal("leave").executes(::leave))
+                                .then(CommandManager.literal("clock").executes(::clock))
                                 .then(CommandManager.literal("anchors").executes(::anchors))
                                 .then(
                                     CommandManager.literal("goto").then(
@@ -173,6 +182,50 @@ object Ch2L1Commands {
             return 0
         }
         reply(context, "Skipped $from: now in $to.")
+        return 1
+    }
+
+    private fun enter(context: CommandContext<ServerCommandSource>): Int {
+        val problem = Ch2L1.enter(context.source.playerOrThrow)
+        if (problem != null) {
+            reply(context, problem)
+            return 0
+        }
+        reply(context, "You are a new hire of the factory, at ${Ch2L1.SPAWN_ANCHOR}, your pockets empty. The level's rules apply in Survival or Adventure (not Creative); /et ch2 l1 leave ends it.")
+        return 1
+    }
+
+    private fun leave(context: CommandContext<ServerCommandSource>): Int {
+        val player = context.source.playerOrThrow
+        if (!Ch2L1.active(player)) {
+            reply(context, "You are not in the level.")
+            return 0
+        }
+        Ch2L1.leave(player)
+        reply(context, "You are out of the level: the rules of the rest of the game apply again.")
+        return 1
+    }
+
+    private fun clock(context: CommandContext<ServerCommandSource>): Int {
+        val player = context.source.playerOrThrow
+        val hit = player.raycast(6.0, 1f, false)
+        if (hit !is BlockHitResult || hit.type != HitResult.Type.BLOCK) {
+            reply(context, "Look at a wall, within 6 blocks.")
+            return 0
+        }
+        val side = hit.side
+        if (!side.axis.isHorizontal) {
+            reply(context, "Look at the side of a wall, not at its top or its bottom.")
+            return 0
+        }
+        val pos = hit.blockPos.offset(side)
+        val world = player.serverWorld
+        if (!world.getBlockState(pos).isAir) {
+            reply(context, "There is no room for a clock there.")
+            return 0
+        }
+        world.setBlockState(pos, ModBlocks.TIME_CLOCK.defaultState.with(CardReaderBlock.FACING, side))
+        reply(context, "A time clock hangs on the wall: right-click it to clock in (at the clock-in step).")
         return 1
     }
 

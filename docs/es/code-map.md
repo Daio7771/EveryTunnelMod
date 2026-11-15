@@ -63,6 +63,7 @@ con un comentario KDoc que cuenta más.
 | `ch2l1/Ch2L1AnchorsParser.kt` | Lee `anchors.json` y cuenta cada problema con su ruta JSON |
 | `ch2l1/Ch2L1Data.kt` | Los archivos de datos del nivel: cuáles hay, qué copia gana (la de la carpeta de config sobre la del jar), qué da uno que falta o está roto |
 | `ch2l1/Ch2L1Voices.kt` | Las líneas de voz del nivel (clave del texto, hablante, duración, fragmentos de subtítulo como rangos de frases, de `cutscene/ch2_l1_voices.json`), `Ch2L1Sentences` y `Ch2L1Skins`, el aspecto de sus personas |
+| `ch2l1/Ch2L1Objectives.kt` | El objetivo que muestra el panel en cada estado: una clave de lang por estado, ninguna en las cinemáticas ni al final |
 | `spawn/PostLedger.kt` | Qué criatura es dueña de cada punto de spawn, para que un sobrante que aún muere o que carga tarde no borre el registro del que lo sustituyó (el Observer) |
 | `progress/LeftBehind.kt` | Lo que no sirve de un nivel en adelante y se quita del inventario al empezarlo (la tarjeta de acceso desde el Nivel 3, la tarjeta maestra desde el Nivel 5) |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
@@ -236,11 +237,12 @@ con un comentario KDoc que cuenta más.
 | `PrologueSceneHooks.kt` | El prólogo del Chapter 2: construye su sala aparte, genera al científico, sujeta al jugador, el salto, el final (el jugador de vuelta donde estaba, la sala borrada); lo empieza `/everytunnel prologue` |
 | `DirectorSceneHooks.kt` | La escena del director: empieza al abrir su puerta, sujeta al jugador, el portazo, el salto y el final (un punto de reinicio tras su puerta); `DirectorLoopHooks`, en el mismo archivo, manda sus frases después |
 | `DebugCommands.kt` | `/everytunnel ...` |
-| `Ch2L1.kt` | El Nivel 1 del Chapter 2: el estado de cada jugador, guardado en su progreso; todo cambio pasa por aquí y llega a los oyentes |
+| `Ch2L1.kt` | El Nivel 1 del Chapter 2: el estado de cada jugador y si lo está jugando (las reglas le siguen: `enter`, `leave`), guardados en su progreso; todo cambio pasa por aquí y llega a los oyentes |
 | `Ch2L1DataLoader.kt` | Lee los archivos JSON del nivel (la copia de la carpeta de config, si no la del jar) al arrancar y con `/et reload`, y guarda los datos actuales |
-| `Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 anchors\|goto\|state\|skip` (solo ejecuciones de desarrollo) |
+| `Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 enter\|leave\|clock\|anchors\|goto\|state\|skip\|npc` (solo ejecuciones de desarrollo) |
 | `FactoryNpcEntity.kt` | Una persona del Nivel 1 del Chapter 2 (Rowan, el compañero, los trabajadores): un solo tipo de entidad, su skin sincronizada las distingue; una criatura mantenida |
 | `Ch2L1Npcs.kt` | Ponerlas delante del jugador y quitarlas (`/et ch2 l1 npc`) |
+| `TimeClockBlock.kt` | El reloj de fichar del Nivel 1 del Chapter 2: un lector de tarjetas (mismos modelos) que ficha al nuevo empleado, rojo y luego verde |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
 | `PlaytestLog.kt` | El registro `[playtest]` |
 | `RunStatsHooks.kt` | Cuenta el tiempo jugado en el progreso del jugador (las muertes se cuentan en `DeathHooks`), para la ventana de felicitación |
@@ -258,6 +260,7 @@ con un comentario KDoc que cuenta más.
 | Archivo | Qué hace |
 |---|---|
 | `EveryTunnelClient.kt` | Entrypoint del cliente: registra todo lo de abajo |
+| `Ch2L1Client.kt` | Lo que sabe el cliente del Nivel 1 del Chapter 2: si el jugador local está en él, su estado, el objetivo que mostrar (de su progreso) |
 | `EveryTunnelDataGenerator.kt` | Entrypoint de datagen vacío |
 | `ClientResources.kt` | Los recursos del jugador según los envió el servidor por última vez |
 | `FlashlightControls.kt` | La tecla de la linterna (F) |
@@ -298,6 +301,7 @@ con un comentario KDoc que cuenta más.
 | `LockerView.kt` | El interior de la puerta de la taquilla sobre la pantalla mientras te escondes |
 | `AchievementToast.kt` | El aviso "Achievement Unlocked!"; recibe los logros conseguidos |
 | `Ch2L1Subtitles.kt` | Los subtítulos de las voces del Nivel 1 del Chapter 2, mostrados cuando suena una (un oyente del gestor de sonido; siempre activos) |
+| `ObjectivePanel.kt` | El panel de objetivos del Nivel 1 del Chapter 2: arriba a la derecha, pequeño, aparece con un fundido al cambiar el objetivo |
 | `SubtitleStrip.kt` | El subtítulo de una voz sobre el HUD: el hablante en gris, el texto en blanco, sobre una franja oscura |
 
 ### `render/`

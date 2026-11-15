@@ -65,6 +65,7 @@ KDoc comment that says more.
 | `ch2l1/Ch2L1AnchorsParser.kt` | Reads `anchors.json`, reporting every problem with its JSON path |
 | `ch2l1/Ch2L1Data.kt` | The level's data files: which there are, which copy wins (the config folder's over the jar's), what a missing or broken one gives |
 | `ch2l1/Ch2L1Voices.kt` | The level's voice lines (text key, speaker, length, subtitle cues as ranges of sentences, from `cutscene/ch2_l1_voices.json`), `Ch2L1Sentences` and `Ch2L1Skins`, the look of its people |
+| `ch2l1/Ch2L1Objectives.kt` | The objective the panel shows in each state: one lang key per state, none in the cinematics and at the end |
 | `spawn/PostLedger.kt` | Which creature owns each spawn point, so a dying or late-loading leftover never wipes the record of the one that replaced it (the Observer) |
 
 ### `systems/`
@@ -236,11 +237,12 @@ KDoc comment that says more.
 | `PrologueSceneHooks.kt` | Chapter 2's prologue: builds its room out of the way, spawns the scientist, holds the player, skipping, the end (the player back where they were, the room cleared); started by `/everytunnel prologue` |
 | `DirectorSceneHooks.kt` | The director's scene: starts when his door is opened, holds the player, the door's slam, skipping, the end (a restart point inside his door); `DirectorLoopHooks`, in the same file, sends his phrases after it |
 | `DebugCommands.kt` | `/everytunnel ...` |
-| `Ch2L1.kt` | Chapter 2's Level 1: each player's state, kept in their progress; every change goes through it and reaches the listeners |
+| `Ch2L1.kt` | Chapter 2's Level 1: each player's state and whether they are playing it (the rules follow them: `enter`, `leave`), kept in their progress; every change goes through it and reaches the listeners |
 | `Ch2L1DataLoader.kt` | Reads the level's JSON files (the config folder's copy, else the jar's) at launch and on `/et reload`, and holds the current data |
-| `Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 anchors\|goto\|state\|skip` (development runs only) |
+| `Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 enter\|leave\|clock\|anchors\|goto\|state\|skip\|npc` (development runs only) |
 | `FactoryNpcEntity.kt` | A person of Chapter 2's Level 1 (Rowan, the coworker, the workers): one entity type, its synced skin tells them apart; a kept creature |
 | `Ch2L1Npcs.kt` | Putting them in front of the player and taking them away (`/et ch2 l1 npc`) |
+| `TimeClockBlock.kt` | The time clock of Chapter 2's Level 1: a card reader (same models) that clocks the new hire in, red and then green |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
 | `PlaytestLog.kt` | The `[playtest]` log |
 | `RunStatsHooks.kt` | Counts the time played into the player's progress (deaths are counted in `DeathHooks`), for the congratulations window |
@@ -258,6 +260,7 @@ KDoc comment that says more.
 | File | What it does |
 |---|---|
 | `EveryTunnelClient.kt` | Client entrypoint: registers everything below |
+| `Ch2L1Client.kt` | What the client knows of Chapter 2's Level 1: whether the local player is in it, their state, the objective to show (from their progress) |
 | `EveryTunnelDataGenerator.kt` | Empty datagen entrypoint |
 | `ClientResources.kt` | The player's resources as last sent by the server |
 | `FlashlightControls.kt` | The Flashlight key (F) |
@@ -298,6 +301,7 @@ KDoc comment that says more.
 | `LockerView.kt` | The inside of a locker's door over the screen while hiding |
 | `AchievementToast.kt` | The "Achievement Unlocked!" toast; receives the earned achievements |
 | `Ch2L1Subtitles.kt` | The subtitles of Chapter 2's Level 1 voices, shown whenever one plays (a listener on the sound manager; always on) |
+| `ObjectivePanel.kt` | Chapter 2's Level 1 objective panel: top right, small, fades in when the objective changes |
 | `SubtitleStrip.kt` | A voice's subtitle over the HUD: the speaker in grey, the text in white, on a dark strip |
 
 ### `render/`

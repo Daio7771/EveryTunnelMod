@@ -2777,6 +2777,8 @@ def build():
                 v["y"] = y
             variants[f"facing={facing},unlocked={unlocked}"] = v
     a.block("card_reader", "Card Reader", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
+    # The time clock of Chapter 2's Level 1 (TimeClockBlock) is the same box with the same models: red, then green once clocked in.
+    a.block("time_clock", "Time Clock", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
 
     def facing_parts(models, when=None):
         """Multipart parts turning `models` (one name, or several picked at random) to each facing."""

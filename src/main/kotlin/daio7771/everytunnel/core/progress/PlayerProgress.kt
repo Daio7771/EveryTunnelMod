@@ -29,6 +29,12 @@ class PlayerProgress {
     /** Where the player is in Chapter 2's Level 1 ([Ch2L1State]); [Ch2L1State.START] before they begin it. */
     var ch2l1State: Ch2L1State = Ch2L1State.START
 
+    /**
+     * The player is playing Chapter 2's Level 1: its rules apply to them (no flashlight, no damage, free and silent sprint,
+     * no status bars) wherever they stand. Set by `platform.Ch2L1.enter`, cleared by `leave` and by a new game.
+     */
+    var ch2l1Active: Boolean = false
+
     /** Server ticks played and deaths in this game, summed over its sessions: the congratulations window's numbers. Never negative. */
     var playTicks: Long = 0
         set(value) {
@@ -76,6 +82,7 @@ class PlayerProgress {
         checkpoint = null
         lounge = null
         ch2l1State = Ch2L1State.START
+        ch2l1Active = false
         playTicks = 0
         deaths = 0
     }
@@ -83,6 +90,6 @@ class PlayerProgress {
     /** One line for the debug command. */
     fun describe(): String {
         val pieceList = piecesByLevel.entries.joinToString("; ") { (level, pieces) -> "$level: ${pieces.joinToString(", ")}" }
-        return "pieces [$pieceList], notes $notesRead, scenes $scenesSeen, level 3 books $level3Books, checkpoint ${checkpoint ?: "none"}, chapter 2 level 1 $ch2l1State, played ${playTicks / 20} s, deaths $deaths"
+        return "pieces [$pieceList], notes $notesRead, scenes $scenesSeen, level 3 books $level3Books, checkpoint ${checkpoint ?: "none"}, chapter 2 level 1 ${if (ch2l1Active) "active, " else ""}$ch2l1State, played ${playTicks / 20} s, deaths $deaths"
     }
 }

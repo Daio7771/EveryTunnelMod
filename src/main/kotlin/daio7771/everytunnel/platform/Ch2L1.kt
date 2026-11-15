@@ -1,14 +1,25 @@
 package daio7771.everytunnel.platform
 
 import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.core.ch2l1.Ch2L1State
+import daio7771.everytunnel.systems.ResourceSystem
 import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.registry.RegistryKey
+import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.util.Identifier
 import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Chapter 2's Level 1 as the rest of the mod sees it: the state machine ([Ch2L1State]) of each player, kept in
  * their progress ([ProgressService]) so it survives leaving the world, dying and a new session.
+ *
+ * The level's rules follow the player, not the place: while a player is **active** ([active], a flag in their progress
+ * that [enter] sets and [leave] clears) they have no flashlight, nothing hurts them, their sprint is free and makes no noise
+ * for the AI, and the survival bars are gone ([SafeLevelHooks], [FlashlightHooks], [NoiseHooks] and the client's HUD ask).
+ * Nothing about it depends on where they stand, so it works before the level's map exists; the chapter's new game and the
+ * map's entrance will call [enter] later.
  *
  * Every change goes through [setState] (the level's own systems, `/et ch2 l1 state` and `skip`), which logs it and
  * tells the listeners, so a step can be reached by playing or by command and the same things happen either way. A
@@ -23,7 +34,15 @@ object Ch2L1 {
         fun changed(player: ServerPlayerEntity, from: Ch2L1State, to: Ch2L1State)
     }
 
+    /** The anchor a new hire starts at, in front of the time clock. */
+    const val SPAWN_ANCHOR = "spawn_clockin"
+
     private val listeners = CopyOnWriteArrayList<StateListener>()
+
+    fun register() {
+        // Back at the clock-in step, the clocks show it: red again.
+        onStateChange { player, _, to -> if (to == Ch2L1State.ACT1_CLOCKIN) TimeClockBlock.relockNear(player) }
+    }
 
     fun onStateChange(listener: StateListener) {
         listeners += listener
@@ -59,5 +78,38 @@ object Ch2L1 {
         val next = state(player).next() ?: return null
         setState(player, next, "skip")
         return next
+    }
+
+    /** The player is playing the level: its rules apply to them. */
+    fun active(player: PlayerEntity): Boolean = ProgressService.get().ch2L1Active(player)
+
+    /**
+     * Makes [player] a new hire of the factory: active, at the start of the level ([Ch2L1State.START]), their pockets
+     * empty (they are another person, with none of Chapter 1's things: no flashlight, no battery), the clocks red, and
+     * at the anchor [SPAWN_ANCHOR]. Null if it worked, else why not.
+     */
+    fun enter(player: ServerPlayerEntity): String? {
+        val anchors = Ch2L1DataLoader.data.anchors
+        val start = anchors.point(SPAWN_ANCHOR) ?: return "anchors.json has no anchor called $SPAWN_ANCHOR."
+        val world = Identifier.tryParse(anchors.dimension)
+            ?.let { player.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, it)) }
+            ?: return "The anchors' dimension ${anchors.dimension} does not exist in this world."
+        ProgressService.get().setCh2L1Active(player, true)
+        setState(player, Ch2L1State.START, "enter")
+        player.inventory.clear()
+        val config = ConfigManager.gameplay
+        val resources = ResourceSystem.stateOf(player.uuid, config)
+        if (resources.flashlightOn) ResourceSystem.set(player.uuid, ResourceSystem.switchOff(resources))
+        TimeClockBlock.relockNear(player)
+        player.stopRiding()
+        player.teleport(world, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
+        EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} enters at {}{}", player.gameProfile.name, SPAWN_ANCHOR, if (start.provisional) " (provisional)" else "")
+        return null
+    }
+
+    /** [player] is out of the level: the survival rules of the rest of the game apply to them again. */
+    fun leave(player: ServerPlayerEntity) {
+        ProgressService.get().setCh2L1Active(player, false)
+        EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} leaves", player.gameProfile.name)
     }
 }

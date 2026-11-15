@@ -20,6 +20,7 @@ import daio7771.everytunnel.client.hud.Ch2L1Subtitles
 import daio7771.everytunnel.client.hud.ExhaustionVignette
 import daio7771.everytunnel.client.hud.FlashlightOverlay
 import daio7771.everytunnel.client.hud.LockerView
+import daio7771.everytunnel.client.hud.ObjectivePanel
 import daio7771.everytunnel.client.hud.AchievementToast
 import daio7771.everytunnel.client.hud.DetectorHud
 import daio7771.everytunnel.client.hud.StatusHud
@@ -110,6 +111,7 @@ object EveryTunnelClient : ClientModInitializer {
         CutsceneView.register()
         DirectorVoice.register()
         Ch2L1Subtitles.register()
+        ObjectivePanel.register()
         DeathScreen.register()
         TerminalScreen.register()
         FinalCreditsScreen.register()

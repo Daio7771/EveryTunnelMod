@@ -5,9 +5,9 @@
 Level 1 of Chapter 2 is the factory, four months after Chapter 1: an ordinary scientist hired in the place of the one
 who "fell ill", three acts of tasks, a meeting and sneaking, ending in the supervisor's office. It is built in phases
 (0 to 10), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
-`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 1, assets, texts and models.** Nothing is
-playable yet: the level has its state machine, its data files, its voices, its people and its debug commands, and nothing in
-the world uses them.
+`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 2, the level's rules and its start.** Nothing is
+playable yet as a level (it has no map and no tasks), but a player can be put in it: its rules apply to them and the time clock
+moves them to the first task.
 
 ## The state machine
 
@@ -108,6 +108,34 @@ a preview sheet with Rowan's (`tools/entity/output/`, git-ignored). `Ch2L1SkinsT
 classic arms and leaves its second layer empty. A **kept** creature (see [Contributing](contributing.md#creatures)). For
 now they only stand where `/et ch2 l1 npc` puts them; their routines come in phase 4.
 
+## The level's rules, the clock and the objectives
+
+**The rules follow the player, not the place.** A player is *active* in the level (`PlayerProgress.ch2l1Active`, saved with
+the state and sent to the client by Cardinal; `Ch2L1.active`) from `Ch2L1.enter` to `Ch2L1.leave`. While they are:
+
+| Rule | Where it is |
+|---|---|
+| Nothing hurts them (only `/kill` and the void still count), thirst and the battery do not run down, **sprinting is free** (no stamina) | `SafeLevelHooks.isSafe`, which `ResourceHooks` and the damage event ask |
+| **No flashlight**: its key does nothing | `FlashlightHooks.available` |
+| **Nothing they do makes noise** for the AI (sprint included) | `NoiseHooks.makesNoise` |
+| **No status bars**: the vanilla ones stay hidden and the mod's (stamina, thirst, battery) are not drawn; the hotbar and the crosshair stay | `StatusHud.render` |
+
+They apply to Survival and Adventure players of a world with levels (`ResourceHooks.appliesTo`), not to Creative.
+`enter` also empties the pockets (the new hire has none of Chapter 1's things), switches the flashlight off, sets the state to
+`ACT1_CLOCKIN`, makes the clocks red again and teleports to the anchor `spawn_clockin`. Because nothing depends on a zone, it
+works before the map exists; the chapter's new game and the map's entrance will call it later. **Until the map exists the
+provisional anchors are inside Chapter 1's first level**, whose own systems (ambience, say) still run there.
+
+**The time clock** is `TimeClockBlock`, a card reader on a wall with no art of its own (it shares the reader's models and
+sounds): red until someone clocks in, then green. Right-clicked by an active player at `ACT1_CLOCKIN` it beeps and moves them
+to `ACT1_TASK1`; later it buzzes ("You already clocked in"); for anyone else it does nothing. The map will place it;
+`/et ch2 l1 clock` puts one where you look. It goes red again whenever a player is put back at `ACT1_CLOCKIN`.
+
+**The objective panel** (`client.hud.ObjectivePanel`) is small, in the top right corner: "OBJECTIVE" in grey and under it the
+text of the player's state (`Ch2L1Objectives`: one lang key per state, under `every_tunnel.ch2.l1.objective.`; none in the
+cinematics and at the end), on a faint strip. It fades in when the objective changes and makes no sound. The client reads the
+state from the player's progress, so there is no packet of its own.
+
 ## Debug commands
 
 `platform.Ch2L1Commands`, operator level 2, **development runs only** (as [Debugging](debugging.md) explains for
@@ -116,6 +144,9 @@ now they only stand where `/et ch2 l1 npc` puts them; their routines come in pha
 | Command | What it does |
 |---|---|
 | `/et reload` | Reads the level's JSON files again and says what is wrong with them |
+| `/et ch2 l1 enter` | You become a new hire: the level's rules apply to you (in Survival or Adventure), your pockets are emptied, the state is the start and you are at `spawn_clockin` |
+| `/et ch2 l1 leave` | The rules of the rest of the game apply to you again |
+| `/et ch2 l1 clock` | Puts a time clock on the wall you look at |
 | `/et ch2 l1 anchors` | Every anchor with its coordinates, the provisional ones marked |
 | `/et ch2 l1 goto <anchor>` | Takes you to a point, or to the middle of a zone, one block over its floor |
 | `/et ch2 l1 state` | Shows your state and the next one |
@@ -124,8 +155,8 @@ now they only stand where `/et ch2 l1 npc` puts them; their routines come in pha
 | `/et ch2 l1 npc <skin>` | Puts a person of the factory in front of you, to see its skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` to `generic_3`) |
 | `/et ch2 l1 npc clear` | Takes them all away |
 
-`state` and `skip` only change the state for now. When a phase gives a state its effects (an object, an objective, a
-character), they will run on the command too, which is what makes every phase testable without playing the ones before.
+`state` and `skip` change the state, and with it the objective on the panel; the rest of a state's effects (an object, a
+character) come with the phase that gives them, and will run on the command too, which is what makes every phase testable without playing the ones before.
 
 ## Adding a phase's system
 
@@ -142,5 +173,5 @@ character), they will run on the command too, which is what makes every phase te
 
 `Ch2L1StateTest` (the order, `next`, `parse`), `Ch2L1AnchorsParserTest` (the format, every kind of problem) and
 `Ch2L1DataTest` (the jar's files, which copy wins, the fallbacks), `Ch2L1VoicesTest` (the 32 lines, their sound events, Oggs
-and cues, the texts in both languages) and `Ch2L1SkinsTest` (the skins' format), all in `core/ch2l1`; `PlayerProgressTest`
-covers the state in the progress.
+and cues, the texts in both languages) `Ch2L1SkinsTest` (the skins' format) and `Ch2L1ObjectivesTest` (one objective per step, in both languages), all in
+`core/ch2l1`; `PlayerProgressTest` covers the state and the flag in the progress.

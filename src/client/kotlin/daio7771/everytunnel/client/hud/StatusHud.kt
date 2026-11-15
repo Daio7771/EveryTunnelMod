@@ -2,6 +2,7 @@ package daio7771.everytunnel.client.hud
 
 import com.mojang.blaze3d.systems.RenderSystem
 import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.client.Ch2L1Client
 import daio7771.everytunnel.client.ClientResources
 import daio7771.everytunnel.config.ConfigManager
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
@@ -70,6 +71,7 @@ object StatusHud {
         val player = client.player ?: return
         val resources = ClientResources.current
         if (!resources.active || player.isSpectator || client.interactionManager?.hasStatusBars() != true) return
+        if (Ch2L1Client.active()) return // Chapter 2's Level 1 has no bars (the vanilla ones stay hidden too)
 
         val left = context.scaledWindowWidth / 2 - 91
         val right = context.scaledWindowWidth / 2 + 91

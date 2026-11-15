@@ -270,6 +270,12 @@ object ModBlocks {
         CardReaderBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 2 }.noCollision()),
     )
 
+    /** The time clock of Chapter 2's Level 1: a card reader that clocks the new hire in ([TimeClockBlock]); the same models. */
+    val TIME_CLOCK: Block = register(
+        "time_clock",
+        TimeClockBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 2 }.noCollision()),
+    )
+
     /** Level 3's box puzzle ([BoxHooks]): a purple archive box, drawn full bright; picked up with right-click. */
     val PURPLE_BOX: Block = register(
         "purple_box",
