@@ -22,6 +22,7 @@ import net.minecraft.util.math.Vec3d
 import net.minecraft.util.math.random.Random
 import net.minecraft.world.RaycastContext
 import kotlin.math.hypot
+import kotlin.math.sin
 
 /**
  * A [SecurityCameraBlockEntity]'s head and red light, turned round the mount's pivot ([PIVOT_Y]) by a [CameraAim]:
@@ -29,6 +30,9 @@ import kotlin.math.hypot
  * way its block faces, a little down. It turns no faster than [SPEED]; while it turns, its servo whirrs
  * (`block.camera.servo`). Its light blinks ([BLINK_MILLIS]), drawn at full brightness. Where each camera points is
  * kept here by position, until the player leaves the world.
+ *
+ * A [ModBlocks.FACTORY_CAMERA] (Chapter 2 Level 1's decorative ones) never looks for the player: it sweeps [SWEEP_DEGREES] either side of the way
+ * its block faces, once every [SWEEP_PERIOD_MILLIS], each at its own point of the sweep, and whirrs softly now and then if the player is near.
  */
 class SecurityCameraRenderer(@Suppress("UNUSED_PARAMETER") context: BlockEntityRendererFactory.Context) :
     BlockEntityRenderer<SecurityCameraBlockEntity> {
@@ -38,7 +42,8 @@ class SecurityCameraRenderer(@Suppress("UNUSED_PARAMETER") context: BlockEntityR
         vertexConsumers: VertexConsumerProvider, light: Int, overlay: Int,
     ) {
         val state = entity.cachedState
-        if (!state.isOf(ModBlocks.SECURITY_CAMERA)) return
+        val sweeping = state.isOf(ModBlocks.FACTORY_CAMERA)
+        if (!sweeping && !state.isOf(ModBlocks.SECURITY_CAMERA)) return
         val client = MinecraftClient.getInstance()
         val player = client.player ?: return
         val world = client.world ?: return
@@ -53,16 +58,26 @@ class SecurityCameraRenderer(@Suppress("UNUSED_PARAMETER") context: BlockEntityR
         val pivot = Vec3d(pos.x + 0.5, pos.y + PIVOT_Y, pos.z + 0.5)
         val eye = player.getCameraPosVec(tickDelta)
         val to = eye.subtract(pivot)
-        val sees = to.length() < RANGE && world.raycast(
+        val sees = !sweeping && to.length() < RANGE && world.raycast(
             RaycastContext(pivot, eye, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, player),
         ).type == HitResult.Type.MISS
-        val (yaw, pitch) = if (sees) {
+        val (yaw, pitch) = if (sweeping) {
+            sweep(restYaw, pos)
+        } else if (sees) {
             CameraAim.yawTo(to.x, to.z) to CameraAim.pitchTo(to.y, hypot(to.x, to.z)).coerceIn(LOWEST_PITCH, HIGHEST_PITCH)
         } else {
             restYaw to REST_PITCH
         }
-        val turned = camera.aim.turnTowards(yaw, pitch, seconds, SPEED)
-        if (seconds > 0 && turned / seconds > MOVING && now - camera.lastServoNanos > SERVO_NANOS) {
+        val turned = camera.aim.turnTowards(yaw, pitch, seconds, if (sweeping) INSTANT else SPEED)
+        if (sweeping) {
+            if (to.length() < SWEEP_HEARD && now - camera.lastServoNanos > SWEEP_SERVO_NANOS) {
+                camera.lastServoNanos = now
+                client.soundManager.play(
+                    PositionedSoundInstance(ModSounds.CAMERA_SERVO, SoundCategory.BLOCKS, 0.3f, 0.9f + Random.create().nextFloat() * 0.1f,
+                        Random.create(), pivot.x, pivot.y, pivot.z),
+                )
+            }
+        } else if (seconds > 0 && turned / seconds > MOVING && now - camera.lastServoNanos > SERVO_NANOS) {
             camera.lastServoNanos = now
             client.soundManager.play(
                 PositionedSoundInstance(ModSounds.CAMERA_SERVO, SoundCategory.BLOCKS, 0.5f, 0.95f + Random.create().nextFloat() * 0.1f,
@@ -85,6 +100,13 @@ class SecurityCameraRenderer(@Suppress("UNUSED_PARAMETER") context: BlockEntityR
         matrices.pop()
     }
 
+    /** Where a sweeping camera at [pos] aims now: [restYaw] plus the swing, and the resting pitch. */
+    private fun sweep(restYaw: Double, pos: BlockPos): Pair<Double, Double> {
+        val phase = ((pos.x * 31 + pos.z * 17) and 0xFF) / 256.0
+        val turns = System.currentTimeMillis() / SWEEP_PERIOD_MILLIS.toDouble() + phase
+        return (restYaw + SWEEP_DEGREES * sin(2 * Math.PI * turns)) to REST_PITCH
+    }
+
     private class Remembered(val aim: CameraAim, var lastNanos: Long = System.nanoTime(), var lastServoNanos: Long = 0L)
 
     companion object {
@@ -100,6 +122,16 @@ class SecurityCameraRenderer(@Suppress("UNUSED_PARAMETER") context: BlockEntityR
         private const val REST_PITCH = -25.0
         private const val LOWEST_PITCH = -80.0
         private const val HIGHEST_PITCH = 10.0
+        /** A sweeping camera's swing either side of its rest, degrees, and how long one back and forth takes. */
+        private const val SWEEP_DEGREES = 50.0
+        private const val SWEEP_PERIOD_MILLIS = 10_000L
+
+        /** Turning so fast that a camera is where it is told to be. */
+        private const val INSTANT = 100_000.0
+
+        /** A sweeping camera whirrs this often, to a player this near (blocks). */
+        private const val SWEEP_SERVO_NANOS = 2_400_000_000L
+        private const val SWEEP_HEARD = 14.0
         private const val BLINK_MILLIS = 1200L
         private const val BLINK_ON_MILLIS = 180L
 

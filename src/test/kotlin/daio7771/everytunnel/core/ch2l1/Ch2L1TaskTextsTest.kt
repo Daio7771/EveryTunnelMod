@@ -20,6 +20,7 @@ class Ch2L1TaskTextsTest {
     ).map { "every_tunnel.ch2.l1.$it" } + listOf(
         "item.every_tunnel.broom", "block.every_tunnel.sample_tube", "block.every_tunnel.noname_terminal", "block.every_tunnel.analyzer",
         "block.every_tunnel.leaning_broom", "block.every_tunnel.dirt_spot", "block.every_tunnel.factory_glass", "block.every_tunnel.factory_door",
+        "block.every_tunnel.factory_camera", "block.every_tunnel.predecessor_locker",
     )
 
     private fun placeholders(text: String) = Regex("%(\\d+\\$)?[sd]").findAll(text).map { it.value }.toList().sorted()

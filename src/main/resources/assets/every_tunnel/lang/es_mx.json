@@ -616,5 +616,7 @@
   "block.every_tunnel.noname_terminal": "Terminal NonameOS",
   "block.every_tunnel.analyzer": "Analizador",
   "block.every_tunnel.leaning_broom": "Escoba apoyada",
-  "block.every_tunnel.dirt_spot": "Suciedad"
+  "block.every_tunnel.dirt_spot": "Suciedad",
+  "block.every_tunnel.factory_camera": "Cámara de seguridad giratoria",
+  "block.every_tunnel.predecessor_locker": "Taquilla del predecesor"
 }

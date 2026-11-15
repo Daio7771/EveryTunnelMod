@@ -125,6 +125,7 @@ object Ch2L1 {
         player.stopRiding()
         player.teleport(world, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
         TimeClockBlock.relockNear(player)
+        Ch2L1Npcs.ensureAmbient(player.server)
         EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} enters at {}{}", player.gameProfile.name, SPAWN_ANCHOR, if (start.provisional) " (provisional)" else "")
         player.sendMessage(
             Text.literal("You are a new hire of the factory, at $SPAWN_ANCHOR, your pockets empty. The level's rules apply in Survival or Adventure (not Creative); /et ch2 l1 leave ends it."),
@@ -135,6 +136,7 @@ object Ch2L1 {
     /** [player] is out of the level: the survival rules of the rest of the game apply to them again. */
     fun leave(player: ServerPlayerEntity) {
         ProgressService.get().setCh2L1Active(player, false)
+        Ch2L1Npcs.clear(player.server)
         EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} leaves", player.gameProfile.name)
     }
 }

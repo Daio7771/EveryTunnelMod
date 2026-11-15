@@ -8,7 +8,7 @@ package daio7771.everytunnel.core.ch2l1
 object Ch2L1Wiring {
 
     /** One line per thing that does not match; empty when everything the files name exists. */
-    fun problems(anchors: Ch2L1Anchors, tasks: Ch2L1Tasks, speakers: Ch2L1Speakers): List<String> {
+    fun problems(anchors: Ch2L1Anchors, tasks: Ch2L1Tasks, speakers: Ch2L1Speakers, npcs: Ch2L1NpcData = Ch2L1NpcData.EMPTY): List<String> {
         val out = mutableListOf<String>()
         fun point(file: String, id: String) {
             if (anchors.point(id) == null) out += "$file names the anchor \"$id\", which anchors.json does not have"
@@ -31,6 +31,10 @@ object Ch2L1Wiring {
             if (shot.camera != Ch2L1IntroScene.PLAYER) point("speakers.json", shot.camera)
             shot.cameraTo?.takeIf { it != Ch2L1IntroScene.PLAYER }?.let { point("speakers.json", it) }
             point("speakers.json", shot.look)
+        }
+        for (worker in npcs.workers) Ch2L1Routines.resolve(worker, anchors, out)
+        for ((group, members) in npcs.groups) {
+            for (member in members) point("npcs.json (group $group)", member.at)
         }
         return out
     }

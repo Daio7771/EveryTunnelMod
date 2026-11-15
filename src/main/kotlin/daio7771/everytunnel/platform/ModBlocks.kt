@@ -381,6 +381,8 @@ object ModBlocks {
     val METAL_SHELF: Block = register("metal_shelf", StackFurnitureBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(0, 0, 2, 16, 16, 16))))
     val ELECTRICAL_PANEL: Block = register("electrical_panel", PropBlock(props(MapColor.LIGHT_GRAY, ModSoundGroups.SHEET_METAL).noCollision(), listOf(box(2, 2, 12, 14, 15, 16))))
     val LOCKER: Block = register("locker", LockerBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(1, 0, 1, 15, 16, 16))))
+    /** The predecessor's locker of Chapter 2 Level 1: a locker with its door ajar and the plate scratched out, only to look at. */
+    val PREDECESSOR_LOCKER: Block = register("predecessor_locker", StackFurnitureBlock(props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(1, 0, 1, 15, 16, 16))))
     val BENCH: Block = register("bench", RowFurnitureBlock(props(MapColor.PALE_YELLOW, ModSoundGroups.WOOD), listOf(box(0, 0, 4, 16, 7, 12))))
     val CAFE_TABLE: Block = register("cafe_table", PropBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC), listOf(box(1, 0, 1, 15, 12, 15))))
     val CAFE_CHAIR: Block = register("cafe_chair", PropBlock(props(MapColor.LIGHT_GRAY, ModSoundGroups.PLASTIC).noCollision(), listOf(box(3, 0, 3, 13, 8, 13), box(3, 8, 12, 13, 15, 14))))
@@ -460,6 +462,8 @@ object ModBlocks {
     val MONITOR_BANK: Block = register("monitor_bank", MonitorBankBlock(props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 6 }))
     /** The anteroom's security camera on the ceiling, following the player ([SecurityCameraBlock]). */
     val SECURITY_CAMERA: Block = register("security_camera", SecurityCameraBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision()))
+    /** Chapter 2 Level 1's decorative security camera: the same look and block entity, but the client sweeps it slowly and never follows the player. */
+    val FACTORY_CAMERA: Block = register("factory_camera", SecurityCameraBlock(props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision()))
     /** A chalk arrow on a drain wall, in three parts ([ChalkArrowBlock]). */
     val CHALK_ARROW: Block = register("chalk_arrow", ChalkArrowBlock(props(MapColor.WHITE, BlockSoundGroup.STONE).noCollision()))
     /** Steel railing on a catwalk's edges ([CatwalkRailBlock]). */
@@ -608,7 +612,7 @@ object ModBlocks {
         )
         SECURITY_CAMERA_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "security_camera"),
-            FabricBlockEntityTypeBuilder.create(::SecurityCameraBlockEntity, SECURITY_CAMERA).build(),
+            FabricBlockEntityTypeBuilder.create(::SecurityCameraBlockEntity, SECURITY_CAMERA, FACTORY_CAMERA).build(),
         )
         BOX_SHELF_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "box_shelf"),

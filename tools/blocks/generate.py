@@ -1077,6 +1077,19 @@ def locker_tex(rng, part):
     return img
 
 
+def locker_scratched_tex(rng):
+    """The upper door of the predecessor's locker (Chapter 2 Level 1): the locker's own, with a name plate whose name has been scratched out."""
+    img = locker_tex(rng, "upper")
+    rect(img, 3, 9, 12, 13, (226, 226, 220))
+    for k in range(10):
+        px(img, 3 + k, 9 + (k * 3) % 5, (74, 74, 78))
+        px(img, 12 - k, 9 + (k * 2) % 5, (96, 96, 100))
+    for k in range(7):
+        px(img, 2 + k * 2, 8 + k // 2, (170, 172, 178))
+        px(img, 3 + k * 2, 8 + k // 2, (170, 172, 178))
+    return img
+
+
 def vending_tex(rng, part):
     """The drinks machine: the lit window of cans on the upper block, the slot and coin panel below."""
     img = new((150, 40, 36))
@@ -3022,6 +3035,16 @@ def build():
     # Staff rooms.
     stack("locker", "Locker", {"m": "office_metal", "l": "locker_lower", "u": "locker_upper"},
           [el((1, 0, 1), (15, 16, 16), "m", north="l")], upper=[el((1, 0, 1), (15, 16, 16), "m", north="u")])
+    # The predecessor's locker (Chapter 2 Level 1): the same locker with its door ajar (22.5 degrees from the left hinge, both blocks alike) and
+    # the plate of its upper door scratched out.
+    a.texture("locker_scratched", locker_scratched_tex(r("locker_scratched")), T.PAINTED_METAL.but(smoothness=0.4))
+    a.texture("locker_inside", powder_metal_tex(r("locker_inside"), (44, 48, 56)), T.PAINTED_METAL.but(smoothness=0.2))
+    door_low, door_up = el((1, 0, 1), (15, 16, 2), "m", north="l"), el((1, 0, 1), (15, 16, 2), "m", north="u")
+    for door in (door_low, door_up):
+        door["rotation"] = {"angle": 22.5, "axis": "y", "origin": [1, 8, 1]}
+    sides = [el((1, 0, 14), (15, 16, 15), "i"), el((1, 0, 2), (2, 16, 15), "m"), el((14, 0, 2), (15, 16, 15), "m")]
+    stack("predecessor_locker", "Predecessor's Locker", {"m": "office_metal", "i": "locker_inside", "l": "locker_lower", "u": "locker_scratched"},
+          sides + [el((2, 0, 2), (14, 1, 14), "i"), door_low], upper=sides + [el((2, 15, 2), (14, 16, 14), "i"), door_up])
     row("bench", "Bench", {"l": "laminate", "m": "office_metal"},
         [el((0, 6, 4), (16, 7.5, 12), "l")],
         left=[el((13, 0, 5), (15, 6, 11), "m")], right=[el((1, 0, 5), (3, 6, 11), "m")])
@@ -3686,6 +3709,8 @@ def build():
     a.models["security_camera_inventory"] = model({"b": "camera_body", "d": "camera_dark", "l": "camera_led"},
                                                   camera_parts["mount"] + camera_parts["head"], ao=False)
     a.block("security_camera", "Security Camera", {"variants": variants}, {"parent": f"{NS}:block/security_camera_inventory"})
+    # Chapter 2 Level 1's decorative cameras: the same models, a block of its own because the client sweeps these slowly instead of following the player.
+    a.block("factory_camera", "Sweeping Security Camera", {"variants": variants}, {"parent": f"{NS}:block/security_camera_inventory"})
     # Layer 3: a chalk arrow on the tunnel's wall at the foot of the ladder, pointing the way to the Hideout. The
     # picture cut in CHALK_COLS parts, each flat on the wall, only its face drawn (the chalk's gaps show the wall).
     chalk_img = chalk_arrow_image(r("chalk_arrow"))

@@ -623,5 +623,7 @@
   "block.every_tunnel.noname_terminal": "NonameOS Terminal",
   "block.every_tunnel.analyzer": "Analyzer",
   "block.every_tunnel.leaning_broom": "Leaning Broom",
-  "block.every_tunnel.dirt_spot": "Dirt"
+  "block.every_tunnel.dirt_spot": "Dirt",
+  "block.every_tunnel.predecessor_locker": "Predecessor's Locker",
+  "block.every_tunnel.factory_camera": "Sweeping Security Camera"
 }

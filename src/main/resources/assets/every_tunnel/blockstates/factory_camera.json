@@ -1,0 +1,49 @@
+{
+  "variants": {
+    "facing=north,part=mount": {
+      "model": "every_tunnel:block/security_camera_mount"
+    },
+    "facing=east,part=mount": {
+      "model": "every_tunnel:block/security_camera_mount",
+      "y": 90
+    },
+    "facing=south,part=mount": {
+      "model": "every_tunnel:block/security_camera_mount",
+      "y": 180
+    },
+    "facing=west,part=mount": {
+      "model": "every_tunnel:block/security_camera_mount",
+      "y": 270
+    },
+    "facing=north,part=head": {
+      "model": "every_tunnel:block/security_camera_head"
+    },
+    "facing=east,part=head": {
+      "model": "every_tunnel:block/security_camera_head",
+      "y": 90
+    },
+    "facing=south,part=head": {
+      "model": "every_tunnel:block/security_camera_head",
+      "y": 180
+    },
+    "facing=west,part=head": {
+      "model": "every_tunnel:block/security_camera_head",
+      "y": 270
+    },
+    "facing=north,part=led": {
+      "model": "every_tunnel:block/security_camera_led"
+    },
+    "facing=east,part=led": {
+      "model": "every_tunnel:block/security_camera_led",
+      "y": 90
+    },
+    "facing=south,part=led": {
+      "model": "every_tunnel:block/security_camera_led",
+      "y": 180
+    },
+    "facing=west,part=led": {
+      "model": "every_tunnel:block/security_camera_led",
+      "y": 270
+    }
+  }
+}

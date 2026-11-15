@@ -154,6 +154,56 @@ class Ch2L1MapPlanTest {
         }
     }
 
+    /** The cells of the plan whose block is [name] (without its states) inside the zone [zoneId]'s box. */
+    private fun blocksIn(zoneId: String, name: String): Int {
+        val box = anchors.zone(zoneId)!!.box
+        var count = 0
+        for ((c, block) in cells) {
+            if (!block.startsWith("every_tunnel:$name[")) continue
+            val x = c.x + plan.origin.x
+            val z = c.z + plan.origin.z
+            if (x in box.minX..box.maxX && z in box.minZ..box.maxZ) count++
+        }
+        return count
+    }
+
+    @Test
+    fun `the lockers' room has its lockers, the predecessor's among them, and no camera`() {
+        assertTrue(blocksIn("taquillas_trigger", "locker") >= 40, "lockers: ${blocksIn("taquillas_trigger", "locker")}")
+        assertEquals(2, blocksIn("taquillas_trigger", "predecessor_locker"), "a stack of two blocks")
+        assertTrue(blockOf("predecessor_locker_block")!!.startsWith("every_tunnel:predecessor_locker"))
+        assertEquals(0, blocksIn("taquillas_trigger", "factory_camera"))
+        val standing = anchors.point("predecessor_locker")!!.position
+        assertStandsOnTheFloor("the spot in front of the predecessor's locker", standing.x, standing.y, standing.z)
+    }
+
+    @Test
+    fun `every other space has a decorative camera`() {
+        val spaces = listOf(
+            "entrance", "main_corridor", "lab", "wc_west", "ring_north", "ring_south", "ring_west", "ring_east", "dining", "aux_lab",
+            "authorized_corridor", "security_room", "office", "wc_east", "level2_corridor",
+        )
+        for (zone in spaces) assertTrue(blocksIn(zone, "factory_camera") >= 1, "no camera in $zone")
+        assertTrue(cells.values.count { it.startsWith("every_tunnel:factory_camera[") } in 15..30)
+    }
+
+    @Test
+    fun `the work stations are benches with a monitor, and the workers stand and walk on the floor`() {
+        assertTrue(cells.values.count { it.startsWith("every_tunnel:lab_monitor[") } >= 6)
+        val npcs = Ch2L1NpcsParser.parse(Ch2L1DataParser.parse(emptyMap(), Ch2L1Files.readAllBundled()).data.document("npcs")).data
+        for (worker in npcs.workers) {
+            val p = anchors.point(worker.spawn)!!.position
+            assertStandsOnTheFloor("${worker.id} at ${worker.spawn}", p.x, p.y, p.z)
+        }
+        for (path in anchors.paths.filter { it.id.startsWith("route_") }) {
+            for ((i, p) in path.points.withIndex()) assertStandsOnTheFloor("${path.id}[$i]", p.x, p.y, p.z)
+        }
+        for (member in npcs.groups.getValue("taquillas")) {
+            val p = anchors.point(member.at)!!.position
+            assertStandsOnTheFloor(member.at, p.x, p.y, p.z)
+        }
+    }
+
     /** The anchors a player or a person stands on: feet on a floor of the plan, room over the head, nothing solid in the way. */
     private val standing = listOf(
         "spawn_clockin", "taquillas_exit", "task1_terminal", "task2_analyzer", "predecessor_locker", "chamber_02", "chamber_log",

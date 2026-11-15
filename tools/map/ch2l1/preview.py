@@ -72,10 +72,25 @@ def draw(level, path):
     cx, cy, cz = L.CLOCK["at"]
     a, b = px(cx, cz)
     d.rectangle([a + 3, b + 3, a + SCALE - 4, b + SCALE - 4], fill=(20, 20, 20), outline=(60, 220, 90))
-    # the patrols
+    # furniture and props from above: benches, lockers, the speakers and the cameras
+    for (x, y, z), block in L.props().items():
+        name = block.split(":")[1].split("[")[0]
+        a, b = px(x, z)
+        if name in ("lab_bench", "locker", "predecessor_locker") and y == 0:
+            colour = {"lab_bench": (160, 160, 166), "locker": (96, 116, 156), "predecessor_locker": (200, 90, 90)}[name]
+            d.rectangle([a + 1, b + 1, a + SCALE - 2, b + SCALE - 2], fill=colour)
+        elif name == "factory_camera":
+            d.ellipse([a + 3, b + 3, a + SCALE - 4, b + SCALE - 4], fill=(220, 40, 40), outline=(255, 255, 255))
+        elif name == "ceiling_speaker":
+            d.rectangle([a + 4, b + 4, a + SCALE - 5, b + SCALE - 5], outline=(40, 40, 46), fill=(250, 220, 90))
+        elif name == "dirt_spot":
+            d.ellipse([a + 3, b + 3, a + SCALE - 4, b + SCALE - 4], fill=(110, 90, 66))
+    # the patrols, and the people's routes
     for pid, points, closed, _ in paths:
+        if pid == "task3_dirt_spots":
+            continue
         pts = [px(x, z) for x, _, z in points]
-        colour = (40, 90, 210) if pid.startswith("patrol_a") else (230, 130, 30)
+        colour = (40, 90, 210) if pid.startswith("patrol_a") else (40, 150, 80) if pid.startswith("route_") else (230, 130, 30)
         loop = pts + [pts[0]] if closed else pts
         d.line(loop, fill=colour, width=3)
         for (x0, z0), (x1, z1) in zip(loop, loop[1:]):
@@ -93,7 +108,7 @@ def draw(level, path):
         d.text((a - d.textlength(label, font=f_small) / 2, b - 5), label, fill=(0, 0, 0) if provisional else (255, 255, 255), font=f_small)
     # north, the scale and the key
     d.text((12, 6), "N ↑   west ← → east   (14 px = 1 block)", fill=(220, 220, 224), font=f_label)
-    d.text((w - 640, 6), "brown door = free   red = locked   (circle = into a forbidden zone)   blue = patrol A   orange = patrol B", fill=(220, 220, 224), font=f_label)
+    d.text((w - 640, 6), "brown door = free   red = locked   (circle = into a forbidden zone)   blue = patrol A   orange = patrol B   green = people   red dot = camera", fill=(220, 220, 224), font=f_label)
     ky = h_plan + 6
     for n, (aid, _, _, provisional) in enumerate(anchors, start=1):
         col, row = (n - 1) // key_rows, (n - 1) % key_rows

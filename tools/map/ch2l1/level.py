@@ -91,6 +91,8 @@ SPACES = [
     rect("level2", "LEVEL 2 CORRIDOR", 63, 25, 74, 31, 4, restricted=True),
 ]
 
+SPACE_HEIGHTS = {s.id: s.height for s in SPACES}
+
 # The doors: (id, the wall's axis, the wall's line, first cell along it, width, kind). Axis "z": the wall runs along x at
 # z = line, and the passage goes north to south; axis "x": the wall runs along z at x = line. Kinds: "normal" (a door of
 # white steel with a window, opened by hand), "restricted" (the same, but the way into a forbidden zone: the drawing's red circle),
@@ -141,11 +143,60 @@ BROOM = (19, 0, 54)
 DIRT_SPOTS = [(18, 55), (16, 57), (19, 58), (17, 60), (18, 62), (16, 63), (19, 65), (17, 66), (18, 68), (16, 54)]
 FACINGS = ["north", "east", "south", "west"]
 
+# The factory's life (phase 4). The LAB's work stations: benches with a monitor, where people stand and type (two rows against the north
+# wall, one against the south); the lockers along three walls of the lockers' room (the Level 3 lockers: a stack of two blocks facing into the
+# room) with the predecessor's among them; and the decorative security cameras, one hanging from the ceiling in every space but the lockers
+# (cell, the way it rests). The people's places and routes are NPC_SPOTS and NPC_ROUTES; what they do is npcs.json.
+STATION_BENCHES = [(x, 13, "south") for x in (37, 38, 39, 52, 53, 54)] + [(x, 46, "north") for x in (38, 39, 40)]
+STATION_MONITORS = [(37, 13, "south"), (39, 13, "south"), (52, 13, "south"), (54, 13, "south"), (38, 46, "north"), (40, 46, "north")]
+PREDECESSOR_LOCKER = (5, 0, 30)
+CAMERAS = {
+    "entrance": [(24, 5, "east")],
+    "main_corridor": [(30, 13, "south"), (20, 44, "north")],
+    "lab": [(61, 12, "west")],
+    "wc_west": [(14, 11, "south")],
+    "ring": [(24, 48, "east"), (53, 51, "west"), (24, 72, "east"), (53, 69, "west"), (19, 60, "north"), (58, 60, "south")],
+    "dining": [(21, 53, "east")],
+    "aux_lab": [(1, 48, "south")],
+    "authorized": [(22, 74, "east"), (53, 77, "west")],
+    "security": [(27, 79, "south")],
+    "office": [(29, 79, "south")],
+    "wc_east": [(47, 81, "west")],
+    "level2": [(73, 25, "west")],
+}
+
+# People's places: name -> (x, z, the way they face, degrees), for typing at a station or standing, and their routes: name -> (points, closed).
+NPC_SPOTS = {
+    "npc_lab_01": (37.5, 14.5, 180), "npc_lab_02": (39.5, 14.5, 180), "npc_lab_03": (52.5, 14.5, 180), "npc_lab_04": (54.5, 14.5, 180),
+    "npc_lab_05": (38.5, 45.5, 0), "npc_lab_06": (40.5, 45.5, 0),
+    "npc_lab_07": (36.5, 17.5, 180), "npc_lab_08": (35.5, 36.5, 90), "npc_lab_09": (57.5, 18.5, 0), "npc_lab_10": (47.5, 27.5, 270),
+    "npc_main_01": (27.5, 14.5, 0), "npc_main_02": (23.5, 44.5, 180), "npc_main_03": (29.5, 30.5, 90),
+    "npc_dining_01": (30.5, 56.5, 270), "npc_dining_02": (38.5, 60.5, 0), "npc_dining_03": (24.5, 58.5, 0),
+}
+NPC_ROUTES = {
+    "route_lab_a": ([(36.5, 17.5), (36.5, 30.5), (44.5, 30.5), (44.5, 17.5)], True),
+    "route_lab_b": ([(35.5, 36.5), (58.5, 36.5)], False),
+    "route_lab_c": ([(57.5, 18.5), (57.5, 40.5), (48.5, 40.5)], False),
+    "route_main_a": ([(27.5, 14.5), (27.5, 44.5)], False),
+    "route_main_b": ([(23.5, 44.5), (23.5, 15.5)], False),
+    "route_dining_a": ([(30.5, 56.5), (46.5, 56.5), (46.5, 64.5), (30.5, 64.5)], True),
+    "route_dining_b": ([(24.5, 58.5), (24.5, 64.5)], False),
+}
+
+
+class Cells(dict):
+    """A dict of cells that refuses to set one twice: two props on the same cell is a mistake of the layout."""
+
+    def __setitem__(self, cell, block):
+        if cell in self:
+            raise SystemExit(f"two props on the cell {cell}: {self[cell]} and {block}")
+        super().__setitem__(cell, block)
+
 
 def props():
     """{(x, y, z): block} of everything that is furniture or a prop: see the constants above."""
     bench = MOD + "lab_bench[facing={},left=false,right=false]"
-    out = {}
+    out = Cells()
     for z in range(21, 29):
         out[(32, 0, z)] = bench.format("east")
     for cell in TUBES:
@@ -159,6 +210,31 @@ def props():
         out[(x, 0, z)] = MOD + f"dirt_spot[facing={FACINGS[i % 4]}]"
     for cell in SPEAKERS.values():
         out[cell] = MOD + "ceiling_speaker[facing=north]"
+    for x, z, facing in STATION_BENCHES:
+        out[(x, 0, z)] = bench.format(facing)
+    for x, z, facing in STATION_MONITORS:
+        out[(x, 1, z)] = MOD + f"lab_monitor[facing={facing}]"
+    for cell, block in lockers().items():
+        out[cell] = block
+    for space, cameras in CAMERAS.items():
+        for x, z, facing in cameras:
+            out[(x, SPACE_HEIGHTS[space] - 1, z)] = MOD + f"factory_camera[facing={facing},part=mount]"
+    return out
+
+
+def lockers():
+    """The lockers' room's: a stack of two for each cell along the west, north and south walls, the predecessor's among them."""
+    out = {}
+
+    def stack(x, z, facing, block):
+        out[(x, 0, z)] = MOD + f"{block}[facing={facing},up=true,down=false]"
+        out[(x, 1, z)] = MOD + f"{block}[facing={facing},up=false,down=true]"
+
+    for z in range(18, 34):
+        stack(5, z, "east", "predecessor_locker" if (5, 0, z) == PREDECESSOR_LOCKER else "locker")
+    for x in range(6, 18):
+        stack(x, 17, "south", "locker")
+        stack(x, 34, "north", "locker")
     return out
 
 
@@ -359,7 +435,10 @@ def named_places(level):
         x, z = math.floor(x) + 0.5, math.floor(z) + 0.5
         yaw = math.degrees(math.atan2(-(col[0] - x), col[1] - z))
         add(f"taquillas_npc_{i + 1:02d}", x, z, round(yaw), True)
-    add("predecessor_locker", 5.5, 33.5, 270, True)
+    add("predecessor_locker", PREDECESSOR_LOCKER[0] + 1.5, PREDECESSOR_LOCKER[2] + 0.5, 90, False)
+    add("predecessor_locker_block", PREDECESSOR_LOCKER[0] + 0.5, PREDECESSOR_LOCKER[2] + 0.5, 90, False, y=0.0)
+    for name, (x, z, yaw) in NPC_SPOTS.items():
+        add(name, x, z, yaw, True)
     add("taquillas_exit", 21.5, 22.5, -90, False)
     add("aux_lab_door", 15.0, 50.0, 90, False)
     add("chamber_02", 11.5, 60.5, -90, True)
@@ -413,6 +492,8 @@ def named_places(level):
     ring_pts = [(18.0, 50.0), (39.0, 50.0), (60.0, 50.0), (60.0, 60.0), (60.0, 71.0), (48.0, 71.0), (36.0, 71.0), (18.0, 71.0), (18.0, 60.0)]
     paths.append(("patrol_a_waypoints", [(x, 0.0, z) for x, z in ring_pts], True, True))
     paths.append(("task3_dirt_spots", [(x + 0.5, 0.0, z + 0.5) for x, z in DIRT_SPOTS], False, False))
+    for name, (points, closed) in NPC_ROUTES.items():
+        paths.append((name, [(x, 0.0, z) for x, z in points], closed, True))
     paths.append(("patrol_b_waypoints", [(21.0, 0.0, 76.0), (38.0, 0.0, 76.0), (58.0, 0.0, 76.0)], False, True))
     return a, zones, paths
 
@@ -435,6 +516,20 @@ def check(level):
                     raise SystemExit(f"door {door[0]} opens onto no air")
             elif (a[0], 0, a[1]) not in air or (b[0], 0, b[1]) not in air:
                 raise SystemExit(f"door {door[0]} does not join two spaces at {a} and {b}")
+    # Every prop stands in air; the cameras hang in the last layer of their own space, and none in the lockers.
+    solid_props = props()
+    for (x, y, z), block in solid_props.items():
+        if (x, y, z) not in air:
+            raise SystemExit(f"{block} at {(x, y, z)} is not in a space")
+    for space, cameras in CAMERAS.items():
+        if space in CAMERA_FREE:
+            raise SystemExit(f"cameras in {space}, which has none")
+        for x, z, _ in cameras:
+            if air.get((x, SPACE_HEIGHTS[space] - 1, z)) != space:
+                raise SystemExit(f"a camera at {(x, z)} is not in {space}'s top layer of air")
+    for space in SPACE_HEIGHTS:
+        if space not in CAMERA_FREE and not CAMERAS.get(space):
+            raise SystemExit(f"{space} has no camera")
     # Everyone stands on air with room over their head, except what is fixed to a wall.
     for anchor_id, (x, y, z), _, _ in anchors:
         if anchor_id.endswith("_block") or anchor_id.endswith("_src") or anchor_id.startswith("task1_tube_"):
@@ -444,6 +539,13 @@ def check(level):
         cell = (int(x), int(y), int(z))
         if cell not in air or (cell[0], cell[1] + 1, cell[2]) not in air:
             raise SystemExit(f"{anchor_id} at {(x, y, z)} has no room to stand")
+    for name, (x, z, _) in NPC_SPOTS.items():
+        if (int(x), 0, int(z)) in solid_props or (int(x), 1, int(z)) in solid_props:
+            raise SystemExit(f"{name} stands in a prop")
+    for route, (points, _) in NPC_ROUTES.items():
+        for x, z in points:
+            if (int(x), 0, int(z)) in solid_props:
+                raise SystemExit(f"{route} goes through a prop at {(x, z)}")
     for zone_id, (x0, z0, x1, z1, h), _ in zones:
         if not any((x, 0, z) in air for x in range(x0, x1) for z in range(z0, z1)):
             raise SystemExit(f"zone {zone_id} has no air in it")

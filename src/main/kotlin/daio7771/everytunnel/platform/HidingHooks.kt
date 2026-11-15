@@ -85,9 +85,12 @@ object HidingHooks {
         player.stopRiding()
     }
 
-    /** In a world with levels, alive, not a spectator, on their feet and not riding anything. */
+    /**
+     * In a world with levels, alive, not a spectator, on their feet and not riding anything; and not in Chapter 2's Level 1, whose lockers are only
+     * furniture ([Ch2L1.active]).
+     */
     private fun canHide(player: ServerPlayerEntity): Boolean =
-        WorldRules.active && player.isAlive && !player.isSpectator && !player.hasVehicle() && !player.isSneaking &&
+        WorldRules.active && !Ch2L1.active(player) && player.isAlive && !player.isSpectator && !player.hasVehicle() && !player.isSneaking &&
             !LoadingHooks.isLoading(player) && !DeathHooks.isDying(player)
 
     /** A new game: everyone out of the lockers, without the door's sound. */

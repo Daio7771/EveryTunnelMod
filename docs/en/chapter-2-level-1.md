@@ -41,7 +41,8 @@ Everything adjustable is JSON, not code: changing a rhythm, a route or a text is
 | `anchors.json` | The named places: points (a position and a facing) and zones (a box) | `Ch2L1AnchorsParser`, typed |
 | `tasks.json` | The three tasks of Act 1: which anchors hold the tubes, the terminal, the analyzer, the broom and the dirt, and how long each takes | `Ch2L1TasksParser`, typed |
 | `speakers.json` | Rowan's loudspeakers: the zones and their ceiling speakers, the fixed lines and the pool, the cooldown, the first announcement's cinematic | `Ch2L1SpeakersParser`, typed |
-| `patrols.json`, `npcs.json` | The patrols, the characters | Empty (`{}`) until the phase that builds them gives each its reader |
+| `npcs.json` | The factory's people: sixteen workers with their routines, and the groups (the lockers' one) | `Ch2L1NpcsParser`, typed |
+| `patrols.json` | The patrols | Empty (`{}`) until the phase that builds them gives it its reader |
 | `cutscenes/meeting.json`, `cutscenes/office.json` | The two cinematics | The same |
 
 The jar holds the defaults, in `data/every_tunnel/ch2/l1/`. **To tune without rebuilding**, put a file of the same name in
@@ -110,7 +111,7 @@ again over what is there, and **`/et ch2 l1 unbuild` empties the area: do it bef
 (`packMapWorld` zips the region files too, and the map belongs to Chapter 2, not to Chapter 1's world).
 
 **Not there yet:** furniture (it comes with the phase that needs it: the bench with the tubes, the terminal and the analyzer, the broom, the dirt
-and the ceiling speakers came with phase 3; the lockers are for 4 and 5, the desk and the papers for 6), the text signs ("LEVEL 2", "Restricted access", the room names: the plan cannot carry
+and the ceiling speakers came with phase 3; the lockers, the LAB's six work stations and the cameras with phase 4; the rest of the LAB's furniture is still to come, the desk and the papers are for 6), the text signs ("LEVEL 2", "Restricted access", the room names: the plan cannot carry
 a text block's data) and the office's keypad (a block of phase 6, with its anchor `office_keypad`). The hand-over from the
 prologue to the level is not there either: `enter` is called by hand.
 
@@ -153,8 +154,28 @@ union, three of whom speak, and Rowan). `FactoryNpcRenderer` draws the player's 
 skin's base layer (`textures/entity/npc/<skin>.png`). Rowan's skin is the author's own, copied as it came; the six
 workers' are drawn by `tools/entity/workers.py` (a white lab coat, a badge of a colour each, a face each), which also writes
 a preview sheet with Rowan's (`tools/entity/output/`, git-ignored). `Ch2L1SkinsTest` checks that every skin is 64x64, has
-classic arms and leaves its second layer empty. A **kept** creature (see [Contributing](contributing.md#creatures)). For
-now they only stand where `/et ch2 l1 npc` puts them; their routines come in phase 4.
+classic arms and leaves its second layer empty. A **kept** creature (see [Contributing](contributing.md#creatures)).
+
+**The factory's life** (phase 4). **Sixteen ordinary people** work in the factory, from `npcs.json` (`Ch2L1NpcsParser`): ten in the LAB, three in the main corridor and
+three in the dining room (`group`: `lab`, `main`, `dining`). Each has a `skin`, a place to start (`spawn`, a point anchor) and a **routine**, a list of steps done in order and
+then over again: `stand` (seconds, a number or `[min, max]`), `walk` (a path anchor, optionally `reverse`) and `type` (a point anchor: they go to it, face the way it faces and
+type, arms out in front, for `seconds`). Positions are anchors, so moving the map moves the people; the LAB's six work stations (a bench with a monitor, in `level.py`), the
+routes (`route_*`) and every worker's spot (`npc_*`) are written by the map generator and marked provisional until the LAB is furnished. Routes are written by hand, not found
+by the game's pathfinding: `Ch2L1RoutineRunner` (plain Kotlin, tested) says what to do each tick and `FactoryNpcEntity.tick` does it with the move control alone (straight to the next
+point; anyone who does not get nearer for 12 s is put at the point), so sixteen people cost almost nothing. They ignore the player. `walk_speed` in the file scales their stroll.
+
+`platform.Ch2L1Npcs` keeps them: while a player plays the level, inside it and before the cinematic, `ensureAmbient` (every 5 s, and on entering) puts in each worker that is missing; the
+LAB's go away when the player reaches `ACT3_CUTSCENE` (phase 8 relies on it). **Groups** (`groups` in the file) are people standing at anchors, put in by `Ch2L1Npcs.spawnGroup`: the
+six of the **lockers' group** (`taquillas`, round the central column) are for the meeting and are put in by its phase, not at the start.
+
+**The lockers.** The lockers' room (14 x 18, the only space with no cameras) has Level 3's `locker`s along three walls, two blocks tall, facing into the room. They are only furniture here: hiding in
+one is off while the level is played (`HidingHooks`). The **predecessor's locker** (`predecessor_locker`, a block of its own: the same locker with its door ajar and the name on its plate scratched out;
+anchors `predecessor_locker` and `predecessor_locker_block`) is the one on the west wall by the corner.
+
+**The security cameras** are decorative: a `factory_camera` hangs in the top layer of air of every space but the lockers (19 in all: one in each room, one every 15 blocks or so in the corridors).
+It is the Level 5 camera's block and block entity with a different behaviour in `SecurityCameraRenderer`: it never looks for the player, it sweeps 50 degrees either side of the way it faces once
+every 10 s (each at its own point of the sweep), its red light blinks, and it whirrs softly (`block.camera.servo`) every few seconds when the player is within 14 blocks. They detect nothing; the
+patrols of phase 7 do. Being drawn by the client, they cost the server nothing.
 
 ## The level's rules, the clock and the objectives
 
@@ -261,6 +282,9 @@ twice, like the others. The other announcements have no bands: the chime, the vo
 | `/et ch2 l1 skip` | Moves you on to the next state |
 | `/et ch2 l1 npc <skin>` | Puts a person of the factory in front of you, to see its skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` to `generic_3`) |
 | `/et ch2 l1 npc clear` | Takes them all away |
+| `/et ch2 l1 npc ambient` | Puts in the factory's workers that are missing (you must be playing the level and be in it) |
+| `/et ch2 l1 npc group <name>` | Puts in a group of `npcs.json` at its anchors (`taquillas`) |
+| `/et ch2 l1 npc remove <group>` | Takes a group away (`lab`, `main`, `dining`, `taquillas`) |
 | `/et ch2 l1 tasks` | How far you are in the three tasks, and what the data names that is missing |
 | `/et ch2 l1 tasks reset` | The three tasks start over: the tubes, the broom and the dirt are back where the state says |
 | `/et ch2 l1 intro` | The first announcement's cinematic, now |
@@ -285,4 +309,4 @@ character) come with the phase that gives them, and will run on the command too,
 `Ch2L1StateTest` (the order, `next`, `parse`), `Ch2L1AnchorsParserTest` (the format, every kind of problem) and
 `Ch2L1DataTest` (the jar's files, which copy wins, the fallbacks), `Ch2L1VoicesTest` (the 32 lines, their sound events, Oggs
 and cues, the texts in both languages) `Ch2L1SkinsTest` (the skins' format) and `Ch2L1ObjectivesTest` (one objective per step, in both languages) and `Ch2L1MapPlanTest` (the plan's blocks and doors, the
-anchors standing on its floors), all in `core/ch2l1`; `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say. `PlayerProgressTest` covers the state and the flag in the progress.
+anchors standing on its floors), all in `core/ch2l1`; `Ch2L1NpcsTest` (the people's file, the routines and a typist's, a walker's and a stuck one's every tick), `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say, that the lockers' room has its lockers and no camera, that every other space has one and that every worker and route stands on the floor. `PlayerProgressTest` covers the state and the flag in the progress.

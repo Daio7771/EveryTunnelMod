@@ -56,6 +56,10 @@ object Ch2L1Commands {
         CommandSource.suggestMatching((1..6).map { "rowan_loyal_a$it" }, builder)
     }
 
+    private val GROUP_NAMES = SuggestionProvider<ServerCommandSource> { _, builder ->
+        CommandSource.suggestMatching(Ch2L1DataLoader.npcs.groups.keys + Ch2L1DataLoader.npcs.workers.map { it.group }.toSet(), builder)
+    }
+
     private val STATE_NAMES = SuggestionProvider<ServerCommandSource> { _, builder ->
         CommandSource.suggestMatching(Ch2L1State.entries.map { it.name }, builder)
     }
@@ -106,6 +110,17 @@ object Ch2L1Commands {
                                 .then(
                                     CommandManager.literal("npc")
                                         .then(CommandManager.literal("clear").executes(::clearNpcs))
+                                        .then(CommandManager.literal("ambient").executes(::ambientNpcs))
+                                        .then(
+                                            CommandManager.literal("group").then(
+                                                CommandManager.argument("name", StringArgumentType.word()).suggests(GROUP_NAMES).executes(::spawnGroup),
+                                            ),
+                                        )
+                                        .then(
+                                            CommandManager.literal("remove").then(
+                                                CommandManager.argument("name", StringArgumentType.word()).suggests(GROUP_NAMES).executes(::removeGroup),
+                                            ),
+                                        )
                                         .then(
                                             CommandManager.argument("skin", StringArgumentType.word())
                                                 .suggests(SKIN_NAMES)
@@ -204,6 +219,32 @@ object Ch2L1Commands {
             return 0
         }
         reply(context, "Chapter 2 Level 1: now in $state.")
+        return 1
+    }
+
+    /** `/et ch2 l1 npc ambient`: the factory's ordinary people are put in now, the ones that are missing. */
+    private fun ambientNpcs(context: CommandContext<ServerCommandSource>): Int {
+        val count = Ch2L1Npcs.ensureAmbient(context.source.server)
+        reply(context, "$count of the ${Ch2L1DataLoader.npcs.workers.size} workers put in (the level must be built, you must be playing it and be in it).")
+        return 1
+    }
+
+    /** `/et ch2 l1 npc group <name>`: a group of `npcs.json` standing at its anchors. */
+    private fun spawnGroup(context: CommandContext<ServerCommandSource>): Int {
+        val name = StringArgumentType.getString(context, "name")
+        val count = Ch2L1Npcs.spawnGroup(context.source.server, name)
+        if (count == null) {
+            reply(context, "npcs.json has no group called $name.")
+            return 0
+        }
+        reply(context, "$count of the group $name put in.")
+        return 1
+    }
+
+    /** `/et ch2 l1 npc remove <group>`: every person of a group (the workers' groups too: lab, main, dining) gone. */
+    private fun removeGroup(context: CommandContext<ServerCommandSource>): Int {
+        val name = StringArgumentType.getString(context, "name")
+        reply(context, "${Ch2L1Npcs.despawnGroup(context.source.server, name)} of $name taken away.")
         return 1
     }
 

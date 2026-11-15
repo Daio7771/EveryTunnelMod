@@ -68,6 +68,7 @@ KDoc comment that says more.
 | `ch2l1/Ch2L1Tasks.kt` | The tasks' file (`tasks.json`), its parser, `Ch2L1Bits` (sets of things as the bits of an Int) and `HoldTracker` (a click held on one target) |
 | `ch2l1/Ch2L1Speakers.kt` | The loudspeakers' file (`speakers.json`), its parser and `Ch2L1SpeakerSchedule`: what plays when, by the plan's rules, with no clock of its own |
 | `ch2l1/Ch2L1IntroScene.kt` | The first announcement's cinematic: shots from anchors, in the machinery of the other scenes |
+| `ch2l1/Ch2L1Npcs.kt` | The factory's people: `npcs.json`, its parser, a routine's steps with their anchors looked up, and `Ch2L1RoutineRunner`, what a person does each tick |
 | `ch2l1/Ch2L1Guide.kt` | Where the guide arrow points in each step (the clock, the tubes, the terminal, the analyzer, the broom, the dirt), the nearest of them, when it hides |
 | `ch2l1/Ch2L1Wiring.kt` | Checks that what `tasks.json` and `speakers.json` name is in `anchors.json` |
 | `ch2l1/Ch2L1Objectives.kt` | The objective the panel shows in each state: one lang key per state, none in the cinematics and at the end |
@@ -246,8 +247,8 @@ KDoc comment that says more.
 | `Ch2L1.kt` | Chapter 2's Level 1: each player's state and whether they are playing it (the rules follow them: `enter`, `leave`), kept in their progress; every change goes through it and reaches the listeners |
 | `Ch2L1DataLoader.kt` | Reads the level's JSON files (the config folder's copy, else the jar's) at launch and on `/et reload`, and holds the current data |
 | `Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc` (development runs only) |
-| `FactoryNpcEntity.kt` | A person of Chapter 2's Level 1 (Rowan, the coworker, the workers): one entity type, its synced skin tells them apart; a kept creature |
-| `Ch2L1Npcs.kt` | Putting them in front of the player and taking them away (`/et ch2 l1 npc`) |
+| `FactoryNpcEntity.kt` | A person of Chapter 2's Level 1 (Rowan, the coworker, the workers): one entity type, its synced skin tells them apart; a worker follows its routine tick by tick and may be typing; a kept creature |
+| `Ch2L1Npcs.kt` | The factory's people: the workers put in while the level is played and the LAB's taken out, the groups, and the developer's `/et ch2 l1 npc` |
 | `Ch2L1Build.kt` | Builds the level from its plan in steps of 8,000 cells a tick (and empties it), remembers which plan it built, checks every block first |
 | `TimeClockBlock.kt` | The time clock of Chapter 2's Level 1: a card reader (same models) that clocks the new hire in, red and then green |
 | `Ch2L1TaskBlocks.kt` | The sample tube, NonameOS's terminal, the analyzer, the leaning broom and the dirt of Chapter 2's tasks: each hands its use to `Ch2L1TaskHooks` |
@@ -324,7 +325,7 @@ KDoc comment that says more.
 | `PaleManRenderer.kt` | GeckoLib renderer with the eye glow mask |
 | `FilmWalkerRenderer.kt` | The figure in the Cinema's film, on the player's model |
 | `DartRenderer.kt` | A thrown dart: vanilla's arrow, smaller, with its own texture |
-| `SecurityCameraRenderer.kt` | Turns the anteroom camera's head to follow the player, blinks its red light, plays its servo |
+| `SecurityCameraRenderer.kt` | Turns the anteroom camera's head to follow the player, blinks its red light, plays its servo; Chapter 2's decorative cameras only sweep |
 | `WallMessageRenderer.kt` | Draws a wall message in the painted font; remembers what happened to it |
 | `ObserverRenderer.kt` | GeckoLib renderer for the Observer, his head turning with the entity's |
 | `SubjectRenderer.kt` | GeckoLib renderer for the subjects, each stage its body and skin |

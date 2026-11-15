@@ -4,6 +4,8 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.ch2l1.Ch2L1Data
 import daio7771.everytunnel.core.ch2l1.Ch2L1DataParser
 import daio7771.everytunnel.core.ch2l1.Ch2L1Files
+import daio7771.everytunnel.core.ch2l1.Ch2L1NpcData
+import daio7771.everytunnel.core.ch2l1.Ch2L1NpcsParser
 import daio7771.everytunnel.core.ch2l1.Ch2L1Speakers
 import daio7771.everytunnel.core.ch2l1.Ch2L1SpeakersParser
 import daio7771.everytunnel.core.ch2l1.Ch2L1Tasks
@@ -40,6 +42,11 @@ object Ch2L1DataLoader {
     /** The loudspeakers' file ([Ch2L1Speakers]) as last read. */
     @Volatile
     var speakers: Ch2L1Speakers = Ch2L1SpeakersParser.parse(JsonObject()).speakers
+        private set
+
+    /** The factory's people ([Ch2L1NpcData], `npcs.json`) as last read. */
+    @Volatile
+    var npcs: Ch2L1NpcData = Ch2L1NpcData.EMPTY
         private set
 
     /** What a read found, for the log and for `/et reload`. */
@@ -85,14 +92,16 @@ object Ch2L1DataLoader {
         data = result.data
         val tasksResult = Ch2L1TasksParser.parse(result.data.document("tasks"))
         val speakersResult = Ch2L1SpeakersParser.parse(result.data.document("speakers"))
+        val npcsResult = Ch2L1NpcsParser.parse(result.data.document("npcs"))
         tasks = tasksResult.tasks
         speakers = speakersResult.speakers
-        val wiring = Ch2L1Wiring.problems(result.data.anchors, tasks, speakers)
+        npcs = npcsResult.data
+        val wiring = Ch2L1Wiring.problems(result.data.anchors, tasks, speakers, npcs)
 
         val report = Report(
             result.data,
             readProblems + result.problems + tasksResult.problems.map { "tasks.json: $it" } +
-                speakersResult.problems.map { "speakers.json: $it" } + wiring,
+                speakersResult.problems.map { "speakers.json: $it" } + npcsResult.problems.map { "npcs.json: $it" } + wiring,
             folder,
         )
         val log = EveryTunnel.LOGGER

@@ -42,7 +42,8 @@ Todo lo ajustable es JSON, no código: cambiar un ritmo, una ruta o un texto es 
 | `anchors.json` | Los lugares con nombre: puntos (una posición y hacia dónde mira) y zonas (una caja) | `Ch2L1AnchorsParser`, con tipos |
 | `tasks.json` | Las tres tareas del Acto 1: qué anclas tienen los tubos, el terminal, el analizador, la escoba y la suciedad, y cuánto dura cada una | `Ch2L1TasksParser`, con tipos |
 | `speakers.json` | Los altavoces de Rowan: las zonas y sus altavoces de techo, las líneas fijas y el grupo, el enfriamiento, la cinemática del primer aviso | `Ch2L1SpeakersParser`, con tipos |
-| `patrols.json`, `npcs.json` | Las patrullas, los personajes | Vacíos (`{}`) hasta que la fase que los construye les dé su lector |
+| `npcs.json` | La gente de la fábrica: dieciséis trabajadores con sus rutinas y los grupos (el de las taquillas) | `Ch2L1NpcsParser`, con tipos |
+| `patrols.json` | Las patrullas | Vacío (`{}`) hasta que la fase que lo construye le dé su lector |
 | `cutscenes/meeting.json`, `cutscenes/office.json` | Las dos cinemáticas | Lo mismo |
 
 El jar lleva los valores por defecto, en `data/every_tunnel/ch2/l1/`. **Para ajustar sin reconstruir**, pon un archivo del
@@ -114,7 +115,7 @@ nuevo sobre lo que hay, y **`/et ch2 l1 unbuild` vacía la zona: hazlo antes de 
 comprime también los archivos de región, y el mapa es del Chapter 2, no del mundo del Chapter 1).
 
 **Todavía no hay:** mobiliario (llega con la fase que lo necesita: el banco con los tubos, el terminal, el analizador, la escoba, la suciedad y los
-altavoces de techo llegaron con la 3; las taquillas son de la 4 y la 5, el escritorio y los papeles en la 6), los carteles de texto ("NIVEL 2", "Acceso restringido", los nombres de las salas: el
+altavoces de techo llegaron con la 3; las taquillas, las seis estaciones de trabajo del LAB y las cámaras con la 4; el resto del mobiliario del LAB está por llegar, el escritorio y los papeles son de la 6), los carteles de texto ("NIVEL 2", "Acceso restringido", los nombres de las salas: el
 plan no puede llevar los datos de un bloque de texto) y el teclado del despacho (un bloque de la fase 6, con su ancla
 `office_keypad`). Tampoco está el paso del prólogo al nivel: `enter` se llama a mano.
 
@@ -159,8 +160,28 @@ en la unión, tres de las cuales hablan, y Rowan). `FactoryNpcRenderer` dibuja e
 las de los seis trabajadores las dibuja `tools/entity/workers.py` (bata blanca, una tarjeta de un color cada uno, una cara
 cada uno), que también escribe una hoja de previews con la de Rowan (`tools/entity/output/`, fuera de git).
 `Ch2L1SkinsTest` comprueba que cada skin sea de 64x64, tenga brazos clásicos y deje vacía su segunda capa. Una criatura
-**mantenida** (véase [Contribuir](contributing.md#criaturas)). Por ahora solo se quedan quietas donde las pone
-`/et ch2 l1 npc`; sus rutinas llegan en la fase 4.
+**mantenida** (véase [Contribuir](contributing.md#criaturas)).
+
+**La vida de la fábrica** (fase 4). **Dieciséis personas corrientes** trabajan en la fábrica, desde `npcs.json` (`Ch2L1NpcsParser`): diez en el LAB, tres en el pasillo principal y
+tres en el comedor (`group`: `lab`, `main`, `dining`). Cada una tiene una `skin`, un sitio donde empieza (`spawn`, un ancla de punto) y una **rutina**, una lista de pasos que se hacen en orden y
+luego otra vez: `stand` (segundos, un número o `[min, max]`), `walk` (un ancla de camino, con `reverse` opcional) y `type` (un ancla de punto: van allí, miran hacia donde mira y teclean, con los
+brazos al frente, durante `seconds`). Las posiciones son anclas, así que mover el mapa mueve a la gente; las seis estaciones de trabajo del LAB (un banco con un monitor, en `level.py`), las
+rutas (`route_*`) y el sitio de cada trabajador (`npc_*`) los escribe el generador del mapa y quedan como provisionales hasta que se amueble el LAB. Las rutas se escriben a mano, no las busca el
+pathfinding del juego: `Ch2L1RoutineRunner` (Kotlin puro, probado) dice qué hacer cada tick y `FactoryNpcEntity.tick` lo hace solo con el control de movimiento (en línea recta al siguiente punto;
+a quien no se acerca en 12 s se le pone en el punto), así que dieciséis personas casi no cuestan nada. Ignoran al jugador. `walk_speed` del archivo escala su paseo.
+
+`platform.Ch2L1Npcs` las mantiene: mientras un jugador juega el nivel, dentro de él y antes de la cinemática, `ensureAmbient` (cada 5 s, y al entrar) pone a cada trabajador que falte; los del LAB
+desaparecen cuando el jugador llega a `ACT3_CUTSCENE` (la fase 8 cuenta con ello). Los **grupos** (`groups` del archivo) son personas de pie en anclas, que pone `Ch2L1Npcs.spawnGroup`: las
+seis del **grupo de las taquillas** (`taquillas`, alrededor de la columna central) son para la reunión y las pone su fase, no el principio.
+
+**Las taquillas.** La sala de las taquillas (14 × 18, el único espacio sin cámaras) tiene las `locker` del Nivel 3 en tres paredes, de dos bloques de alto, mirando hacia dentro. Aquí son solo mobiliario:
+esconderse en una está desactivado mientras se juega el nivel (`HidingHooks`). La **taquilla del predecesor** (`predecessor_locker`, un bloque propio: la misma taquilla con la puerta entreabierta y el
+nombre de su placa rascado; anclas `predecessor_locker` y `predecessor_locker_block`) es la de la pared oeste junto a la esquina.
+
+**Las cámaras de seguridad** son decorativas: una `factory_camera` cuelga de la capa de aire más alta de cada espacio salvo las taquillas (19 en total: una por sala, una cada 15 bloques más o menos en los pasillos).
+Es el bloque y la entidad de bloque de la cámara del Nivel 5 con otro comportamiento en `SecurityCameraRenderer`: nunca busca al jugador, barre 50 grados a cada lado de adonde mira una vez cada 10 s (cada
+una en su punto del barrido), su luz roja parpadea y zumba suave (`block.camera.servo`) cada pocos segundos si el jugador está a menos de 14 bloques. No detectan nada; las patrullas de la fase 7 sí. Al
+dibujarlas el cliente, no cuestan nada al servidor.
 
 ## Las reglas del nivel, el reloj y los objetivos
 
@@ -266,6 +287,9 @@ demás. Los otros avisos no tienen barras: el timbre, la voz y su subtítulo, y 
 | `/et ch2 l1 skip` | Te pasa al siguiente estado |
 | `/et ch2 l1 npc <skin>` | Pone delante de ti a una persona de la fábrica, para ver su skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` a `generic_3`) |
 | `/et ch2 l1 npc clear` | Las quita todas |
+| `/et ch2 l1 npc ambient` | Pone a los trabajadores de la fábrica que falten (debes estar jugando el nivel y dentro de él) |
+| `/et ch2 l1 npc group <nombre>` | Pone un grupo de `npcs.json` en sus anclas (`taquillas`) |
+| `/et ch2 l1 npc remove <grupo>` | Quita un grupo (`lab`, `main`, `dining`, `taquillas`) |
 | `/et ch2 l1 tasks` | Cuánto has avanzado en las tres tareas, y lo que los datos nombran y falta |
 | `/et ch2 l1 tasks reset` | Las tres tareas empiezan de nuevo: los tubos, la escoba y la suciedad vuelven adonde dice el estado |
 | `/et ch2 l1 intro` | La cinemática del primer aviso, ahora |
@@ -290,4 +314,4 @@ personaje) llegan con la fase que se los dé, y también se ejecutarán con el c
 `Ch2L1StateTest` (el orden, `next`, `parse`), `Ch2L1AnchorsParserTest` (el formato, cada tipo de problema) y `Ch2L1DataTest`
 (los archivos del jar, qué copia gana, los respaldos), `Ch2L1VoicesTest` (las 32 líneas, sus eventos de sonido, Ogg y
 fragmentos, los textos en los dos idiomas) `Ch2L1SkinsTest` (el formato de las skins) y `Ch2L1ObjectivesTest` (un objetivo por paso, en los dos idiomas) y `Ch2L1MapPlanTest` (los bloques y puertas del plan, las anclas
-sobre sus suelos), todos en `core/ch2l1`; `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas. `PlayerProgressTest` cubre el estado y la marca en el progreso.
+sobre sus suelos), todos en `core/ch2l1`; `Ch2L1NpcsTest` (el archivo de la gente, las rutinas y cada tick de quien teclea, de quien camina y de quien se atasca), `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas, que la sala de las taquillas tiene sus taquillas y ninguna cámara, que cada otro espacio tiene una y que cada trabajador y cada ruta pisan el suelo. `PlayerProgressTest` cubre el estado y la marca en el progreso.
