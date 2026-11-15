@@ -21,6 +21,8 @@ data class Ch2L1FollowSpec(
     val remindCooldownTicks: Int = 400,
     /** The guide arrow shows over him only beyond this, or when the player cannot see him. */
     val arrowBeyond: Double = 10.0,
+    /** How fast he walks, a multiple of the workers' stroll (1.3 blocks a second): a brisk walk, he is in a hurry. */
+    val pace: Double = 2.2,
 )
 
 /** The meeting in the lockers (`cutscenes/meeting.json`'s `meeting`). */
@@ -57,6 +59,8 @@ data class Ch2L1MeetingSpec(
     /** The way everyone leaves the lockers after it, one by one, the coworker first; and where a skip puts the player. */
     val leavePath: String = "meeting_leave",
     val leaveGapTicks: Ch2L1Span = Ch2L1Span.seconds(1.5, 3.0),
+    /** How fast they walk out, a multiple of the workers' stroll. */
+    val leavePace: Double = 1.8,
     val exitAnchor: String = "taquillas_exit",
 ) {
     companion object {
@@ -80,13 +84,13 @@ data class Ch2L1Act2(val follow: Ch2L1FollowSpec = Ch2L1FollowSpec(), val meetin
  * ```json
  * {
  *   "follow": { "wait": "coworker_wait", "route": "coworker_route", "opening_line": "follow_01", "reminders": ["follow_02", "follow_03"],
- *               "lag_blocks": 6, "remind_after_seconds": 12, "remind_cooldown_seconds": 20, "arrow_beyond_blocks": 10 },
+ *               "lag_blocks": 6, "remind_after_seconds": 12, "remind_cooldown_seconds": 20, "arrow_beyond_blocks": 10, "pace": 2.2 },
  *   "meeting": { "zone": "taquillas_trigger", "group": "taquillas", "coworker": "meeting_coworker", "player": "meeting_player",
  *                "doors": ["lockers_door_1", "lockers_door_2"], "lines": ["meeting_01", "..."], "gap_seconds": 0.5, "turn_seconds": 0.6,
  *                "fly_in_seconds": 1, "fly_out_seconds": 1, "door_after": "meeting_01", "door_seconds": 3.5,
  *                "card_line": "meeting_12", "card_sentence": 1, "tremble_lines": ["meeting_03_a"], "laugh_lines": ["meeting_04_b"],
  *                "glance_every_seconds": [6, 12], "glance_seconds": [1, 1.8], "crossed_arms": [2, 5],
- *                "leave_path": "meeting_leave", "leave_gap_seconds": [1.5, 3], "exit": "taquillas_exit" }
+ *                "leave_path": "meeting_leave", "leave_gap_seconds": [1.5, 3], "leave_pace": 1.8, "exit": "taquillas_exit" }
  * }
  * ```
  */
@@ -107,6 +111,7 @@ object Ch2L1Act2Parser {
             remindAfterTicks = ticks(f.double("remind_after_seconds", fd.remindAfterTicks / 20.0, min = 0.0, max = 600.0)),
             remindCooldownTicks = ticks(f.double("remind_cooldown_seconds", fd.remindCooldownTicks / 20.0, min = 0.0, max = 600.0)),
             arrowBeyond = f.double("arrow_beyond_blocks", fd.arrowBeyond, min = 0.0, max = 128.0),
+            pace = f.double("pace", fd.pace, min = 0.3, max = 4.0),
         )
         f.reportUnknownKeys()
         val m = fields.child("meeting")
@@ -133,6 +138,7 @@ object Ch2L1Act2Parser {
             crossedArms = if (m.has("crossed_arms")) ints(m, "crossed_arms") else md.crossedArms,
             leavePath = m.string("leave_path", md.leavePath),
             leaveGapTicks = span(m, "leave_gap_seconds", md.leaveGapTicks),
+            leavePace = m.double("leave_pace", md.leavePace, min = 0.3, max = 4.0),
             exitAnchor = m.string("exit", md.exitAnchor),
         )
         m.reportUnknownKeys()

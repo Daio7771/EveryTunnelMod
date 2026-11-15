@@ -295,7 +295,8 @@ claves opcionales; `Ch2L1Wiring` comprueba las anclas y caminos que nombra):
 - **La espera** (`ACT1_TASK3`): el compañero (skin `coworker`) aparece en `coworker_wait`, la esquina del anillo junto a la escoba, mientras
   el jugador sigue en el LAB, y espera allí de brazos cruzados, con la mirada puesta en el jugador mientras barre.
 - **Seguirle** (`ACT2_FOLLOW`, al barrer la última mancha): dice `follow_01` desde donde está (una voz del nivel como cualquier otra: salen
-  sus subtítulos) y, al acabar, recorre `coworker_route` (el anillo, el pasillo principal, la segunda puerta de las taquillas) hasta
+  sus subtítulos; nada más se escribe encima, así que barrer las manchas no da mensaje, el panel las cuenta) y, al acabar, recorre a
+  paso ligero (`pace`, por el paseo de los trabajadores) `coworker_route` (el anillo, el pasillo principal, la segunda puerta de las taquillas) hasta
   `meeting_coworker`, abriendo las puertas que encuentra (`Ch2L1Doors`). `Ch2L1Follow` (Kotlin puro, con tests) decide cada tick: un jugador
   a más de `lag_blocks` y que no va por delante se queda atrás, así que se para, se gira y le espera; tras `remind_after_seconds` así dice
   `follow_02` o `follow_03`, por turnos, y no otra vez hasta pasados `remind_cooldown_seconds`. La flecha guía flota sobre su cabeza solo si
@@ -315,7 +316,7 @@ claves opcionales; `Ch2L1Wiring` comprueba las anclas y caminos que nombra):
   **copia de tarjeta del laboratorio** (`lab_badge_copy`, la tarjeta del Chapter 1 recoloreada por `tools/blocks/generate.py`; solo abre la
   puerta del laboratorio auxiliar, fase 6).
 - **El final**: cuando acaba la última línea todos se van por `meeting_leave`, el compañero primero y los demás de uno en uno
-  (`leave_gap_seconds`), abriéndose la puerta ante ellos, y cada uno desaparece en cuanto el jugador no le ve; las barras se van y el
+  (`leave_gap_seconds`, a `leave_pace`), abriéndose la puerta ante ellos, y cada uno desaparece en cuanto el jugador no le ve; las barras se van y el
   estado es `ACT3_EXPLORE`. **Saltarla** (`ch2l1_meeting_skip`) la acaba en el acto con el mismo estado: la tarjeta dada, el jugador en
   `taquillas_exit`, el compañero y el grupo fuera, la puerta abierta.
 

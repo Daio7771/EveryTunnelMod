@@ -76,8 +76,6 @@
   "every_tunnel.ch2.l1.analyzer.done": "Analizador calibrado.",
   "every_tunnel.ch2.l1.broom.taken": "Coges la escoba.",
   "every_tunnel.ch2.l1.broom.need": "Necesitas la escoba.",
-  "every_tunnel.ch2.l1.dirt.swept": "Barrido (%1$d/%2$d)",
-  "every_tunnel.ch2.l1.sweep.done": "El pasillo está limpio.",
   "every_tunnel.ch2.l1.hold.calibrating": "Calibrando...",
   "every_tunnel.ch2.l1.hold.sweeping": "Barriendo...",
   "every_tunnel.ch2.l1.os.title": "NONAME OS",

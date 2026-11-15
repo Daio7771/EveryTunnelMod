@@ -14,7 +14,7 @@ class Ch2L1TaskTextsTest {
     private fun load(name: String) = JsonParser.parseString(File(lang, "$name.json").readText()).asJsonObject.entrySet().associate { it.key to it.value.asString }
 
     private val keys = listOf(
-        "objective.count", "task.not_now", "tube.taken", "analyzer.done", "broom.taken", "broom.need", "dirt.swept", "sweep.done",
+        "objective.count", "task.not_now", "tube.taken", "analyzer.done", "broom.taken", "broom.need",
         "hold.calibrating", "hold.sweeping", "os.title", "os.version", "os.registry", "os.expected", "os.row.not_scanned", "os.row.scanned",
         "os.row.registering", "os.row.registered", "os.button.register", "os.progress", "os.done", "os.hint",
     ).map { "every_tunnel.ch2.l1.$it" } + listOf(

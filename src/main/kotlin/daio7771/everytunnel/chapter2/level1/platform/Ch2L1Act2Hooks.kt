@@ -285,6 +285,7 @@ object Ch2L1Act2Hooks {
         val openingTicks = if (opening && line != null) line.ms / 50 + 10 else 0
         val f = Following(player.uuid, Ch2L1Follow(spec.follow, route, openingTicks))
         following = f
+        coworker.pace = spec.follow.pace
         coworker.direction = FactoryNpcEntity.Direction()
         if (opening && line != null) {
             say(player, coworker, line.id)
@@ -563,6 +564,7 @@ object Ch2L1Act2Hooks {
                 return@removeAll true
             }
             if (server.ticks < leaver.startTick) return@removeAll false
+            npc.pace = spec.meeting.leavePace
             val d = npc.direction ?: FactoryNpcEntity.Direction().also { npc.direction = it }
             d.lookAt = null
             d.face = null

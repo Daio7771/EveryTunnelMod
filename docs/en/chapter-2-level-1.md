@@ -290,7 +290,8 @@ optional; the anchors and paths it names are checked by `Ch2L1Wiring`):
 - **Waiting** (`ACT1_TASK3`): the coworker (skin `coworker`) is put at `coworker_wait`, the corner of the ring by the broom, while the
   player is still in the LAB, and stands there arms crossed, his eyes on the player while they sweep.
 - **Following** (`ACT2_FOLLOW`, when the last spot is swept): he says `follow_01` from where he stands (a voice of the level like any
-  other: its subtitles show) and, when it ends, walks `coworker_route` (the ring, the main corridor, the lockers' second door) to
+  other: its subtitles show; nothing else is written over them, so sweeping the spots gives no message, the panel counts them) and,
+  when it ends, walks briskly (`pace`, times the workers' stroll) `coworker_route` (the ring, the main corridor, the lockers' second door) to
   `meeting_coworker`, opening the doors in his way (`Ch2L1Doors`). `Ch2L1Follow` (plain Kotlin, tested) decides each tick: a player farther than
   `lag_blocks` and not ahead of him lags, so he stops, turns and waits; after `remind_after_seconds` of it he says `follow_02` or
   `follow_03`, in turns, then not again for `remind_cooldown_seconds`. The guide arrow floats over his head only when the player is
@@ -309,7 +310,7 @@ optional; the anchors and paths it names are checked by `Ch2L1Wiring`):
   coworker reaches "Take this" (`card_line`, `card_sentence`) he holds his arm out (`OFFERING`) and the player gets the **lab badge's copy**
   (`lab_badge_copy`, Chapter 1's keycard recoloured by `tools/blocks/generate.py`; it opens only the auxiliary lab's door, phase 6).
 - **The end**: when the last line ends everyone leaves along `meeting_leave`, the coworker first, the rest one by one
-  (`leave_gap_seconds`), the door opening before them, each gone as soon as the player cannot see them; the bands go and the state is
+  (`leave_gap_seconds`, at `leave_pace`), the door opening before them, each gone as soon as the player cannot see them; the bands go and the state is
   `ACT3_EXPLORE`. **Skipping** (`ch2l1_meeting_skip`) ends it at once with the same state: the badge given, the player at
   `taquillas_exit`, the coworker and the group gone, the door open.
 

@@ -77,8 +77,6 @@
   "every_tunnel.ch2.l1.analyzer.done": "Analyzer calibrated.",
   "every_tunnel.ch2.l1.broom.taken": "You take the broom.",
   "every_tunnel.ch2.l1.broom.need": "You need the broom.",
-  "every_tunnel.ch2.l1.dirt.swept": "Swept (%1$d/%2$d)",
-  "every_tunnel.ch2.l1.sweep.done": "The corridor is clean.",
   "every_tunnel.ch2.l1.hold.calibrating": "Calibrating...",
   "every_tunnel.ch2.l1.hold.sweeping": "Sweeping...",
   "every_tunnel.ch2.l1.os.title": "NONAME OS",

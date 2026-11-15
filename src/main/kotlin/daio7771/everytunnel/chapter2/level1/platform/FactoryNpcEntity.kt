@@ -66,6 +66,10 @@ class FactoryNpcEntity(type: EntityType<out MobEntity>, world: World) : MobEntit
     /** What they do, over and over; null: nothing. [pace] is how fast they walk, a multiple of a stroll's [WALK]. */
     var routine: Ch2L1RoutineRunner? = null
     var pace: Double = 1.0
+        set(value) {
+            if (field != value) gait = null
+            field = value
+        }
 
     /** How alive they look, and the seed of their own little randomness (where they look). */
     var life: Ch2L1Life = Ch2L1Life.DEFAULT

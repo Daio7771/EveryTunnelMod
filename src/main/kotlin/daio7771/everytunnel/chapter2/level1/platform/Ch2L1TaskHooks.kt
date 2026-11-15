@@ -218,12 +218,9 @@ object Ch2L1TaskHooks {
         world.spawnParticles(ParticleTypes.POOF, pos.x + 0.5, pos.y + 0.15, pos.z + 0.5, 4, 0.25, 0.05, 0.25, 0.01)
         val total = dirtCells().size
         val count = Ch2L1Bits.count(now)
-        if (count < total) {
-            player.sendMessage(Text.translatable(KEY + "dirt.swept", count, total), true)
-            return ActionResult.CONSUME
-        }
+        // No message: the objective panel counts the spots, and the coworker speaks as the last one goes (nothing over his subtitles).
+        if (count < total) return ActionResult.CONSUME
         removeBroom(player)
-        player.sendMessage(Text.translatable(KEY + "sweep.done"), true)
         Ch2L1.setState(player, Ch2L1State.ACT2_FOLLOW, "task 3 done")
         return ActionResult.CONSUME
     }
