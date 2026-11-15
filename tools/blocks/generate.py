@@ -3500,10 +3500,12 @@ def build():
          [el((2, 0, 3), (14, 9, 13), "w", north=("f", (2, 2, 14, 11))), el((5, 9, 6), (11, 10, 10), "d")])
     a.texture("broom_wood", plastic_tex(r("broom_wood"), (126, 90, 56)), T.Material(0.4, relief=0.3))
     a.texture("broom_straw", plastic_tex(r("broom_straw"), (204, 176, 98)), T.Material(0.3, relief=0.4))
-    handle = el((7.5, 0, 11), (8.5, 15, 12), "w")
-    handle["rotation"] = {"angle": 13, "axis": "x", "origin": [8, 0, 11.5]}      # its top leans back, to the wall behind it
+    handle = el((7.5, 0, 8.5), (8.5, 15, 9.5), "w")
+    # Its top leans back, to the wall behind it. The game takes only 0, 22.5 and 45 degrees (+ or -) for an element: any other
+    # angle makes the whole model fail to load and the block shows as the purple and black of a missing one.
+    handle["rotation"] = {"angle": 22.5, "axis": "x", "origin": [8, 0, 9]}
     prop("leaning_broom", "Leaning Broom", {"w": "broom_wood", "s": "broom_straw"},
-         [handle, el((6, 0, 9.5), (10, 3.5, 13), "s")])
+         [handle, el((6, 0, 7), (10, 3.5, 11), "s")])
     a.texture("dirt_spot", dirt_spot_tex(r("dirt_spot")), T.Material(0.1, relief=0.2), tiles=False)
     prop("dirt_spot", "Dirt", {"d": "dirt_spot"},
          [el((0, 0, 0), (16, 0.5, 16), "d", north=None, south=None, east=None, west=None, down=None)])

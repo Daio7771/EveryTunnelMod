@@ -9,8 +9,8 @@ import net.minecraft.client.resource.language.I18n
 import net.minecraft.util.Util
 
 /**
- * The bar of a task that takes a held click (Chapter 2 Level 1's analyzer and dirt, [Ch2L1TaskHooks]): above the hotbar, a label and a
- * thin bar filling as the server counts the hold. The server sends the fraction every few ticks while the click is held; when they
+ * The bar of a task that takes a held click (Chapter 2 Level 1's analyzer and dirt, [Ch2L1TaskHooks]): under the crosshair, a label and a
+ * thin bar filling as the server counts the hold (not above the hotbar, where the game's own action bar messages are written). The server sends the fraction every few ticks while the click is held; when they
  * stop (the player let go or looked away) the bar fades out and the next hold starts from nothing.
  */
 object HoldBar {
@@ -19,6 +19,9 @@ object HoldBar {
     private const val FADE_MS = 150L
     private const val WIDTH = 120
     private const val HEIGHT = 5
+
+    /** The bar's top edge is this far under the middle of the screen; its label is over it, clear of the crosshair. */
+    private const val BELOW_CROSSHAIR = 26
 
     private var fraction = 0f
     private var label = ""
@@ -45,7 +48,7 @@ object HoldBar {
         if (a < 8) return
         val font = MinecraftClient.getInstance().textRenderer
         val x = (context.scaledWindowWidth - WIDTH) / 2
-        val y = context.scaledWindowHeight - 62
+        val y = context.scaledWindowHeight / 2 + BELOW_CROSSHAIR
         val text = I18n.translate(label)
         context.drawText(font, text, (context.scaledWindowWidth - font.getWidth(text)) / 2, y - 12, (a shl 24) or 0xFFFFFF, true)
         context.fill(x - 1, y - 1, x + WIDTH + 1, y + HEIGHT + 1, (a * 3 / 4 shl 24))
