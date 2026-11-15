@@ -156,6 +156,7 @@ Lo que el mod recuerda se guarda con el mundo, en `<mundo>/data/`, como archivos
 | `every_tunnel_loot.dat` | `LootSpawner` | Qué puntos de botín se llenaron |
 | `every_tunnel_pale_men.dat` | `PaleManSpawner` | Qué puntos de aparición del Pale man ya lo generaron |
 | `every_tunnel_lights.dat` | `KeycardHooks` | Las luces que apagó la tarjeta, para restaurarlas |
+| `every_tunnel_ch2_l1.dat` | `Ch2L1Build` | De qué plan de mapa se construyó el Nivel 1 del Chapter 2 (su huella), para reconstruirlo si el plan cambia |
 
 `packMapWorld` deja todos estos fuera del jar de release, así que una instalación nueva
 empieza limpia.

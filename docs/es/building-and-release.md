@@ -62,7 +62,7 @@ con todo menos Fabric Loader, LambDynamicLights y Cardinal Components:
 (`data/every_tunnel_*`), `data/chunks.dat` (chunks forzados), los mobs y objetos guardados
 (`entities/`: sin el registro del mod de que ya lo generó, un Observer empaquetado sería un
 segundo) y los archivos sueltos en `datapacks/`. Empaqueta el mundo tal como
-está **en ese momento**, así que construye el mapa antes. Sin ese mundo (un clon nuevo del
+está **en ese momento**, así que construye el mapa antes (y vacía el del Chapter 2 con `/et ch2 l1 unbuild`: sus archivos de región viajarían en el zip). Sin ese mundo (un clon nuevo del
 repositorio), el jar simplemente no lleva mapa.
 
 No van dentro, por licencias:

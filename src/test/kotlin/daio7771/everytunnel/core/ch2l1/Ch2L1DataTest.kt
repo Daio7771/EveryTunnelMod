@@ -24,15 +24,23 @@ class Ch2L1DataTest {
     }
 
     @Test
-    fun `the jar's anchors have the places the plan names, all still provisional`() {
+    fun `the jar's anchors have every place the plan and the map's drawing name`() {
         val anchors = Ch2L1DataParser.parse(emptyMap(), Ch2L1Files.readAllBundled()).data.anchors
-        for (id in listOf("spawn_clockin", "taquillas_exit", "door_anchor", "desk_anchor", "card_slide_start", "card_slide_end")) {
-            assertTrue(anchors.point(id) != null, "no anchor $id")
-        }
-        for (id in listOf("speaker_lab", "speaker_main", "speaker_west")) {
-            assertTrue(anchors.zone(id) != null, "no zone $id")
-        }
-        assertEquals(anchors.names().size, anchors.provisionalCount(), "an anchor lost its provisional mark before the map was measured")
+        val points = listOf(
+            "spawn_clockin", "time_clock", "task1_terminal", "task2_analyzer", "predecessor_locker", "taquillas_exit",
+            "aux_lab_door", "chamber_02", "chamber_log", "authorization_desk", "door_anchor", "desk_anchor", "office_keypad",
+            "paper_medical", "paper_contract_14", "painting", "card_slide_start", "card_slide_end", "rowan_spawn",
+            "restricted_door_east", "sealed_door",
+        ) + (1..6).map { "taquillas_npc_%02d".format(it) }
+        for (id in points) assertTrue(anchors.point(id) != null, "no anchor $id")
+        val zones = listOf(
+            "task3_sweep_area", "taquillas_trigger", "aux_lab_glass", "prologue_set", "authorized_corridor", "security_room",
+            "level2_corridor", "speaker_lab", "speaker_main", "speaker_west",
+        )
+        for (id in zones) assertTrue(anchors.zone(id) != null, "no zone $id")
+        for (id in listOf("patrol_a_waypoints", "patrol_b_waypoints")) assertTrue(anchors.path(id) != null, "no path $id")
+        assertTrue(anchors.point("spawn_clockin")?.provisional == false, "the spawn is measured on the map: it is not provisional")
+        assertTrue(anchors.provisionalCount() > 0, "what depends on furniture is still provisional")
     }
 
     @Test

@@ -149,4 +149,57 @@ class Ch2L1AnchorsParserTest {
         assertNotNull(parse("[1, 2]").problems.singleOrNull())
         assertNotNull(parse("{ not json").problems.singleOrNull())
     }
+
+    @Test
+    fun `a path has its points, whether it closes and the provisional mark`() {
+        val result = parse(
+            """
+            {
+              "paths": [
+                { "id": "patrol_a_waypoints", "closed": true, "provisional": true, "points": [[1.5, 64, 2.5], [9.5, 64, 2.5], [9.5, 64, 8.5]] },
+                { "id": "patrol_b_waypoints", "points": [[0, 0, 0], [5, 0, 0]] }
+              ]
+            }
+            """,
+        )
+        assertEquals(emptyList(), result.problems)
+        val anchors = result.anchors!!
+        val a = anchors.path("patrol_a_waypoints")!!
+        assertEquals(listOf(Position(1.5, 64.0, 2.5), Position(9.5, 64.0, 2.5), Position(9.5, 64.0, 8.5)), a.points)
+        assertTrue(a.closed)
+        assertTrue(a.provisional)
+        assertFalse(anchors.path("patrol_b_waypoints")!!.closed)
+        assertEquals(listOf("patrol_a_waypoints", "patrol_b_waypoints"), anchors.names())
+        assertEquals(1, anchors.provisionalCount())
+    }
+
+    @Test
+    fun `a broken point is skipped and a path with fewer than two points is rejected`() {
+        val result = parse(
+            """
+            {
+              "paths": [
+                { "id": "ok", "points": [[0, 0, 0], [1, 2], [3, 0, 0], "x"] },
+                { "id": "one_point", "points": [[0, 0, 0]] },
+                { "id": "none" }
+              ]
+            }
+            """,
+        )
+        val anchors = result.anchors!!
+        assertEquals(listOf("ok"), anchors.paths.map { it.id })
+        assertEquals(2, anchors.paths.single().points.size)
+        assertEquals(2, result.problems.count { it.startsWith("paths[0].points[") }, result.problems.toString())
+        assertTrue(result.problems.any { it.startsWith("paths[1].id") && "at least two points" in it })
+        assertTrue(result.problems.any { it.startsWith("paths[2].id") && "at least two points" in it })
+    }
+
+    @Test
+    fun `a path id is unique across points, zones and paths`() {
+        val result = parse(
+            """{ "anchors": [ { "id": "a", "pos": [0, 0, 0] } ], "paths": [ { "id": "a", "points": [[0, 0, 0], [1, 0, 0]] } ] }""",
+        )
+        assertEquals(emptyList(), result.anchors!!.paths)
+        assertTrue(result.problems.any { "duplicate anchor id" in it })
+    }
 }

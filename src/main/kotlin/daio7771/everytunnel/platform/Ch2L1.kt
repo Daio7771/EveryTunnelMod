@@ -8,6 +8,7 @@ import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -86,25 +87,49 @@ object Ch2L1 {
     /**
      * Makes [player] a new hire of the factory: active, at the start of the level ([Ch2L1State.START]), their pockets
      * empty (they are another person, with none of Chapter 1's things: no flashlight, no battery), the clocks red, and
-     * at the anchor [SPAWN_ANCHOR]. Null if it worked, else why not.
+     * at the anchor [SPAWN_ANCHOR]. The level must stand in the world: if it does not (or was built from another plan)
+     * it is built first ([Ch2L1Build], a second or two) and the player goes in when it is done. Null if it works or has
+     * begun to, else why not; the player is told in chat either way.
      */
     fun enter(player: ServerPlayerEntity): String? {
+        if (Ch2L1DataLoader.data.anchors.point(SPAWN_ANCHOR) == null) return "anchors.json has no anchor called $SPAWN_ANCHOR."
+        val server = player.server
+        val id = player.uuid
+        val asked = Ch2L1Build.ask(server, rebuild = false) {
+            server.playerManager.getPlayer(id)?.let(::enterNow)
+        }
+        when (asked) {
+            Ch2L1Build.Asked.BUSY -> return "The level is being cleared: try again in a moment."
+            Ch2L1Build.Asked.FAILED -> return "The level cannot be built: ${Ch2L1Build.lastProblem}"
+            Ch2L1Build.Asked.STARTED, Ch2L1Build.Asked.JOINED ->
+                player.sendMessage(Text.literal("Building the factory: you go in when it is done."), false)
+            Ch2L1Build.Asked.BUILT -> {}
+        }
+        return null
+    }
+
+    /** The level stands: [player] becomes a new hire (see [enter]). */
+    private fun enterNow(player: ServerPlayerEntity) {
         val anchors = Ch2L1DataLoader.data.anchors
-        val start = anchors.point(SPAWN_ANCHOR) ?: return "anchors.json has no anchor called $SPAWN_ANCHOR."
-        val world = Identifier.tryParse(anchors.dimension)
-            ?.let { player.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, it)) }
-            ?: return "The anchors' dimension ${anchors.dimension} does not exist in this world."
+        val start = anchors.point(SPAWN_ANCHOR)
+        val world = Identifier.tryParse(anchors.dimension)?.let { player.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, it)) }
+        if (start == null || world == null) {
+            player.sendMessage(Text.literal("The level has no $SPAWN_ANCHOR in ${anchors.dimension}."), false)
+            return
+        }
         ProgressService.get().setCh2L1Active(player, true)
         setState(player, Ch2L1State.START, "enter")
         player.inventory.clear()
-        val config = ConfigManager.gameplay
-        val resources = ResourceSystem.stateOf(player.uuid, config)
+        val resources = ResourceSystem.stateOf(player.uuid, ConfigManager.gameplay)
         if (resources.flashlightOn) ResourceSystem.set(player.uuid, ResourceSystem.switchOff(resources))
-        TimeClockBlock.relockNear(player)
         player.stopRiding()
         player.teleport(world, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
+        TimeClockBlock.relockNear(player)
         EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} enters at {}{}", player.gameProfile.name, SPAWN_ANCHOR, if (start.provisional) " (provisional)" else "")
-        return null
+        player.sendMessage(
+            Text.literal("You are a new hire of the factory, at $SPAWN_ANCHOR, your pockets empty. The level's rules apply in Survival or Adventure (not Creative); /et ch2 l1 leave ends it."),
+            false,
+        )
     }
 
     /** [player] is out of the level: the survival rules of the rest of the game apply to them again. */

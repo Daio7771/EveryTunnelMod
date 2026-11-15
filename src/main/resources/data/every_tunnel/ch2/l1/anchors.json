@@ -1,16 +1,61 @@
 {
-  "dimension": "minecraft:overworld",
-  "anchors": [
-    { "id": "spawn_clockin", "pos": [-48.5, 65, -135.5], "yaw": -90, "provisional": true },
-    { "id": "taquillas_exit", "pos": [-38.5, 65, -116.5], "yaw": 90, "provisional": true },
-    { "id": "door_anchor", "pos": [-13.5, 65, -82.5], "yaw": 270, "provisional": true },
-    { "id": "desk_anchor", "pos": [-10.5, 62, -29.5], "yaw": 90, "provisional": true },
-    { "id": "card_slide_start", "pos": [-38.5, 62, 9.5], "yaw": 270, "provisional": true },
-    { "id": "card_slide_end", "pos": [-38.5, 62, 8.5], "yaw": 270, "provisional": true }
-  ],
-  "zones": [
-    { "id": "speaker_lab", "from": [-40, 64, -146], "to": [3, 69, -127], "provisional": true },
-    { "id": "speaker_main", "from": [-46, 64, -116], "to": [1, 69, -95], "provisional": true },
-    { "id": "speaker_west", "from": [-46, 64, -82], "to": [-7, 69, -63], "provisional": true }
-  ]
+ "dimension": "minecraft:overworld",
+ "anchors": [
+  {"id":"spawn_clockin","pos":[1044.5,64.0,1030.5],"yaw":0},
+  {"id":"time_clock","pos":[1044.5,65,1033.5],"yaw":180},
+  {"id":"task1_terminal","pos":[1049.5,64.0,1048.5],"yaw":270,"provisional":true},
+  {"id":"task2_analyzer","pos":[1062.5,64.0,1054.5],"yaw":180,"provisional":true},
+  {"id":"taquillas_npc_01","pos":[1033.5,64.0,1047.5],"yaw":121,"provisional":true},
+  {"id":"taquillas_npc_02","pos":[1031.5,64.0,1048.5],"yaw":169,"provisional":true},
+  {"id":"taquillas_npc_03","pos":[1028.5,64.0,1047.5],"yaw":-121,"provisional":true},
+  {"id":"taquillas_npc_04","pos":[1028.5,64.0,1044.5],"yaw":-59,"provisional":true},
+  {"id":"taquillas_npc_05","pos":[1030.5,64.0,1043.5],"yaw":-11,"provisional":true},
+  {"id":"taquillas_npc_06","pos":[1033.5,64.0,1044.5],"yaw":59,"provisional":true},
+  {"id":"predecessor_locker","pos":[1027.5,64.0,1050.5],"yaw":270,"provisional":true},
+  {"id":"taquillas_exit","pos":[1037.5,64.0,1046.5],"yaw":-90},
+  {"id":"aux_lab_door","pos":[1032.0,64.0,1067.0],"yaw":90},
+  {"id":"chamber_02","pos":[1029.5,64.0,1076.5],"yaw":-90,"provisional":true},
+  {"id":"chamber_log","pos":[1026.5,64.0,1071.5],"yaw":90,"provisional":true},
+  {"id":"authorization_desk","pos":[1026.5,64.0,1069.5],"yaw":90,"provisional":true},
+  {"id":"door_anchor","pos":[1048.0,64.0,1092.0],"yaw":0},
+  {"id":"desk_anchor","pos":[1051.0,64.0,1096.5],"yaw":180,"provisional":true},
+  {"id":"office_keypad","pos":[1046.5,65.0,1091.5],"yaw":0,"provisional":true},
+  {"id":"paper_medical","pos":[1050.5,65.0,1096.5],"yaw":180,"provisional":true},
+  {"id":"paper_contract_14","pos":[1051.5,65.0,1096.5],"yaw":180,"provisional":true},
+  {"id":"painting","pos":[1056.5,66.0,1096.5],"yaw":90,"provisional":true},
+  {"id":"card_slide_start","pos":[1051.0,65.0,1095.0],"yaw":0,"provisional":true},
+  {"id":"card_slide_end","pos":[1051.0,65.0,1097.2],"yaw":0,"provisional":true},
+  {"id":"rowan_spawn","pos":[1048.5,64.0,1090.5],"yaw":0,"provisional":true},
+  {"id":"restricted_door_east","pos":[1074.0,64.0,1090.5],"yaw":-90},
+  {"id":"sealed_door","pos":[1070.0,64.0,1048.0],"yaw":-90},
+  {"id":"patrol_a_pause","pos":[1050.5,64.0,1086.5],"yaw":0,"provisional":true}
+ ],
+ "zones": [
+  {"id":"entrance","from":[1036,63,1025],"to":[1069,72,1033]},
+  {"id":"main_corridor","from":[1036,63,1035],"to":[1044,68,1063]},
+  {"id":"lab","from":[1046,63,1035],"to":[1069,69,1063]},
+  {"id":"wc_west","from":[1030,63,1035],"to":[1034,67,1039]},
+  {"id":"taquillas_trigger","from":[1027,63,1041],"to":[1034,67,1051]},
+  {"id":"dining","from":[1036,63,1069],"to":[1071,69,1083]},
+  {"id":"ring_north","from":[1032,63,1065],"to":[1075,67,1067]},
+  {"id":"ring_south","from":[1032,63,1085],"to":[1075,67,1087]},
+  {"id":"ring_west","from":[1032,63,1068],"to":[1034,67,1084]},
+  {"id":"ring_east","from":[1073,63,1068],"to":[1075,67,1084]},
+  {"id":"task3_sweep_area","from":[1032,63,1068],"to":[1034,67,1084],"provisional":true},
+  {"id":"aux_lab","from":[1025,63,1065],"to":[1030,68,1084]},
+  {"id":"aux_lab_glass","from":[1032,63,1068],"to":[1032,67,1084],"provisional":true},
+  {"id":"prologue_set","from":[1025,63,1080],"to":[1030,68,1084],"provisional":true},
+  {"id":"authorized_corridor","from":[1031,63,1089],"to":[1073,67,1091]},
+  {"id":"security_room","from":[1031,63,1093],"to":[1043,67,1098]},
+  {"id":"office","from":[1045,63,1093],"to":[1056,67,1099]},
+  {"id":"wc_east","from":[1058,63,1093],"to":[1063,67,1095]},
+  {"id":"level2_corridor","from":[1071,63,1045],"to":[1081,67,1050]},
+  {"id":"speaker_lab","from":[1046,63,1035],"to":[1069,69,1063],"provisional":true},
+  {"id":"speaker_main","from":[1036,63,1035],"to":[1044,68,1063],"provisional":true},
+  {"id":"speaker_west","from":[1032,63,1068],"to":[1034,67,1084],"provisional":true}
+ ],
+ "paths": [
+  {"id":"patrol_a_waypoints","closed":true,"points":[[1033.5,64.0,1066.5],[1054.5,64.0,1066.5],[1074.5,64.0,1066.5],[1074.5,64.0,1076.5],[1074.5,64.0,1086.5],[1062.5,64.0,1086.5],[1050.5,64.0,1086.5],[1033.5,64.0,1086.5],[1033.5,64.0,1076.5]],"provisional":true},
+  {"id":"patrol_b_waypoints","points":[[1037.5,64.0,1090.5],[1055.5,64.0,1090.5],[1072.5,64.0,1090.5]],"provisional":true}
+ ]
 }

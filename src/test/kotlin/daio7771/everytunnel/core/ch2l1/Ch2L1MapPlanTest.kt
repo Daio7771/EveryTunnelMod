@@ -1,0 +1,139 @@
+package daio7771.everytunnel.core.ch2l1
+
+import daio7771.everytunnel.core.cutscene.BlockSpec
+import daio7771.everytunnel.core.cutscene.Cell
+import java.io.File
+import kotlin.math.floor
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
+
+/** The map plan in the jar, as `tools/map/ch2l1/generate.py` wrote it, and how it fits the anchors beside it. */
+class Ch2L1MapPlanTest {
+
+    private val plan = Ch2L1MapPlan.load()
+    private val assets = File("src/main/resources/assets/every_tunnel")
+    private val anchors = Ch2L1DataParser.parse(emptyMap(), Ch2L1Files.readAllBundled()).data.anchors
+
+    /** The block of every cell the fills set (a cell set twice would be a mistake of the generator). */
+    private val cells: Map<Cell, String> by lazy {
+        val out = HashMap<Cell, String>()
+        for (f in plan.fills) for (x in f.from.x..f.to.x) for (y in f.from.y..f.to.y) for (z in f.from.z..f.to.z) {
+            val previous = out.put(Cell(x, y, z), f.block)
+            assertEquals(null, previous, "cell ${Cell(x, y, z)} is set twice")
+        }
+        out
+    }
+
+    private fun solid(x: Int, y: Int, z: Int) = Cell(x, y, z) in cells
+
+    @Test
+    fun `the plan stands at the origin the generator says and has a body`() {
+        assertEquals(Cell(1024, 64, 1024), plan.origin)
+        assertTrue(plan.fills.size > 100, "${plan.fills.size} fills")
+        assertEquals(plan.filledCells(), cells.size.toLong())
+        assertTrue(plan.clearedCells() > plan.filledCells())
+    }
+
+    @Test
+    fun `every fill lies inside the box that is cleared first`() {
+        val (a, b) = plan.clear
+        for (f in plan.fills) {
+            assertTrue(f.from.x >= a.x && f.to.x <= b.x && f.from.y >= a.y && f.to.y <= b.y && f.from.z >= a.z && f.to.z <= b.z, "fill $f is outside ${plan.clear}")
+        }
+    }
+
+    @Test
+    fun `every block is a vanilla one the map uses or a block of the mod with its blockstate`() {
+        val vanilla = setOf("white_concrete", "light_gray_concrete", "gray_concrete", "glass", "birch_door", "iron_door")
+        for (block in plan.fills.map { it.block }.toSet()) {
+            val spec = BlockSpec.parse(block)
+            val (namespace, name) = spec.id.split(":")
+            when (namespace) {
+                "minecraft" -> assertTrue(name in vanilla, "$block: not one of the vanilla blocks the map uses")
+                "every_tunnel" -> assertTrue(File(assets, "blockstates/$name.json").isFile, "$block: no blockstate (run tools/blocks/generate.py)")
+                else -> error("$block: unknown namespace")
+            }
+        }
+    }
+
+    @Test
+    fun `the lamps are all ceiling lamps and the lamp fills are all in the list`() {
+        assertTrue(plan.lights.isNotEmpty())
+        for (c in plan.lights) assertEquals("every_tunnel:lab_ceiling_light", cells[c], "no lamp at $c")
+        assertEquals(plan.lights.size, cells.values.count { it == "every_tunnel:lab_ceiling_light" })
+    }
+
+    @Test
+    fun `every door is two halves, one over the other`() {
+        val doors = cells.filterValues { "_door[" in it }
+        assertTrue(doors.isNotEmpty())
+        for ((c, block) in doors) {
+            val half = if ("half=lower" in block) "lower" else "upper"
+            val other = if (half == "lower") Cell(c.x, c.y + 1, c.z) else Cell(c.x, c.y - 1, c.z)
+            assertEquals(block.replace("half=$half", "half=${if (half == "lower") "upper" else "lower"}"), cells[other], "the other half of the door at $c")
+        }
+    }
+
+    @Test
+    fun `the time clock is in the plan where its anchor says, facing into the entrance`() {
+        val clocks = cells.filterValues { it.startsWith("every_tunnel:time_clock") }
+        assertEquals(1, clocks.size)
+        val (c, block) = clocks.entries.single()
+        assertTrue("facing=north" in block)
+        val anchor = anchors.point("time_clock")!!.position
+        assertEquals(plan.worldX(c.x) + 0.5, anchor.x)
+        assertEquals(plan.worldY(c.y).toDouble(), anchor.y)
+        assertEquals(plan.worldZ(c.z) + 0.5, anchor.z)
+    }
+
+    /** The anchors a player or a person stands on: feet on a floor of the plan, room over the head, nothing solid in the way. */
+    private val standing = listOf(
+        "spawn_clockin", "taquillas_exit", "task1_terminal", "task2_analyzer", "predecessor_locker", "chamber_02", "chamber_log",
+        "authorization_desk", "desk_anchor", "rowan_spawn", "patrol_a_pause",
+    ) + (1..6).map { "taquillas_npc_%02d".format(it) }
+
+    private fun assertStandsOnTheFloor(what: String, x: Double, y: Double, z: Double) {
+        val px = floor(x).toInt() - plan.origin.x
+        val py = floor(y).toInt() - plan.origin.y
+        val pz = floor(z).toInt() - plan.origin.z
+        assertTrue(solid(px, py - 1, pz), "$what at $x, $y, $z has no floor under it")
+        assertTrue(!solid(px, py, pz) && !solid(px, py + 1, pz), "$what at $x, $y, $z is inside a block")
+    }
+
+    @Test
+    fun `everyone's anchor stands on the floor with room over their head`() {
+        for (id in standing) {
+            val p = anchors.point(id)!!.position
+            assertStandsOnTheFloor(id, p.x, p.y, p.z)
+        }
+    }
+
+    @Test
+    fun `the patrols' points stand on the floor too`() {
+        for (path in anchors.paths) for ((i, p) in path.points.withIndex()) assertStandsOnTheFloor("${path.id}[$i]", p.x, p.y, p.z)
+    }
+
+    @Test
+    fun `every zone has air in it and lies inside the plan`() {
+        val (a, b) = plan.clear
+        for (zone in anchors.zones) {
+            val box = zone.box
+            val x0 = box.minX - plan.origin.x
+            val z0 = box.minZ - plan.origin.z
+            assertTrue(x0 >= a.x && box.maxX - plan.origin.x <= b.x && z0 >= a.z && box.maxZ - plan.origin.z <= b.z, "zone ${zone.id} is outside the plan")
+            val air = (box.minX..box.maxX).any { x ->
+                (box.minZ..box.maxZ).any { z -> !solid(x - plan.origin.x, 0, z - plan.origin.z) && solid(x - plan.origin.x, -1, z - plan.origin.z) }
+            }
+            assertTrue(air, "zone ${zone.id} has no floor with air over it")
+        }
+    }
+
+    @Test
+    fun `a plan with another content has another fingerprint`() {
+        val text = File("src/main/resources/${Ch2L1MapPlan.RESOURCE}").readText()
+        assertEquals(plan.fingerprint, Ch2L1MapPlan.parse(text).fingerprint)
+        assertNotEquals(plan.fingerprint, Ch2L1MapPlan.parse(text.replace("white_concrete", "gray_concrete")).fingerprint)
+    }
+}

@@ -22,12 +22,15 @@ import net.minecraft.util.hit.HitResult
  * has none of them.
  *
  * - `/et reload`: reads the level's JSON files again ([Ch2L1DataLoader]) and says what is wrong with them.
- * - `/et ch2 l1 enter`: you become a new hire of the factory ([Ch2L1.enter]): the level's rules apply to you (no flashlight, nothing
- *   hurts, free silent sprint, no bars; in Survival or Adventure), your pockets are emptied, the state is the start and you
- *   are at `spawn_clockin`. `/et ch2 l1 leave` ends it: the rules of the rest of the game apply again.
+ * - `/et ch2 l1 enter`: you become a new hire of the factory ([Ch2L1.enter]): the level is built if it is not ([Ch2L1Build]), the
+ *   level's rules apply to you (no flashlight, nothing hurts, free silent sprint, no bars; in Survival or Adventure), your
+ *   pockets are emptied, the state is the start and you are at `spawn_clockin`. `/et ch2 l1 leave` ends it: the rules of the
+ *   rest of the game apply again.
+ * - `/et ch2 l1 build`: builds the level again over what stands (a new plan is built by itself the next time someone enters);
+ *   `/et ch2 l1 unbuild` empties the whole area (do it before packing the world into a jar: it is Chapter 2's, not Chapter 1's).
  * - `/et ch2 l1 clock`: puts a time clock ([TimeClockBlock]) on the wall you look at, until the map places its own.
  * - `/et ch2 l1 anchors`: every anchor with its coordinates, the provisional ones marked.
- * - `/et ch2 l1 goto <anchor>`: takes you to a point, or to the middle of a zone one block over its floor.
+ * - `/et ch2 l1 goto <anchor>`: takes you to a point, to the middle of a zone one block over its floor or to the first point of a path.
  * - `/et ch2 l1 state [<state>]`: shows your state, or puts you in another one (every system of the level
  *   is told, as if you had got there by playing).
  * - `/et ch2 l1 skip`: moves you on to the next state, as if you had done what ends the current one.
@@ -63,6 +66,8 @@ object Ch2L1Commands {
                                 .then(CommandManager.literal("enter").executes(::enter))
                                 .then(CommandManager.literal("leave").executes(::leave))
                                 .then(CommandManager.literal("clock").executes(::clock))
+                                .then(CommandManager.literal("build").executes(::build))
+                                .then(CommandManager.literal("unbuild").executes(::unbuild))
                                 .then(CommandManager.literal("anchors").executes(::anchors))
                                 .then(
                                     CommandManager.literal("goto").then(
@@ -115,6 +120,9 @@ object Ch2L1Commands {
             val b = zone.box
             reply(context, "  zone ${zone.id} [${b.minX}, ${b.minY}, ${b.minZ}] to [${b.maxX}, ${b.maxY}, ${b.maxZ}]${mark(zone.provisional)}")
         }
+        for (path in anchors.paths) {
+            reply(context, "  path ${path.id}: ${path.points.size} points, ${if (path.closed) "closed" else "there and back"}${mark(path.provisional)}")
+        }
         return anchors.names().size
     }
 
@@ -130,6 +138,7 @@ object Ch2L1Commands {
         }
         val point = anchors.point(id)
         val zone = anchors.zone(id)
+        val path = anchors.path(id)
         when {
             point != null -> {
                 player.stopRiding()
@@ -141,6 +150,12 @@ object Ch2L1Commands {
                 player.stopRiding()
                 player.teleport(world, spot.x, spot.y, spot.z, player.yaw, player.pitch)
                 reply(context, "In the middle of zone $id${mark(zone.provisional)}.")
+            }
+            path != null -> {
+                val first = path.points.first()
+                player.stopRiding()
+                player.teleport(world, first.x, first.y, first.z, player.yaw, player.pitch)
+                reply(context, "At the first point of path $id${mark(path.provisional)}.")
             }
             else -> {
                 reply(context, "No anchor called $id. Anchors: ${anchors.names().joinToString(", ").ifEmpty { "none" }}")
@@ -191,7 +206,28 @@ object Ch2L1Commands {
             reply(context, problem)
             return 0
         }
-        reply(context, "You are a new hire of the factory, at ${Ch2L1.SPAWN_ANCHOR}, your pockets empty. The level's rules apply in Survival or Adventure (not Creative); /et ch2 l1 leave ends it.")
+        return 1
+    }
+
+    private fun build(context: CommandContext<ServerCommandSource>): Int {
+        val source = context.source
+        val asked = Ch2L1Build.ask(source.server, rebuild = true) { reply(context, "The factory is built.") }
+        return when (asked) {
+            Ch2L1Build.Asked.STARTED -> { reply(context, "Building the factory (a second or two)..."); 1 }
+            Ch2L1Build.Asked.JOINED -> { reply(context, "It is being built already."); 1 }
+            Ch2L1Build.Asked.BUSY -> { reply(context, "The area is being cleared: try again in a moment."); 0 }
+            Ch2L1Build.Asked.FAILED -> { reply(context, "The plan cannot be built: ${Ch2L1Build.lastProblem}"); 0 }
+            Ch2L1Build.Asked.BUILT -> 1
+        }
+    }
+
+    private fun unbuild(context: CommandContext<ServerCommandSource>): Int {
+        val asked = Ch2L1Build.clear(context.source.server) { reply(context, "The area is empty.") }
+        if (asked == Ch2L1Build.Asked.BUSY) {
+            reply(context, "The factory is being built or cleared: try again in a moment.")
+            return 0
+        }
+        reply(context, "Emptying the area (whoever stands in it will fall)...")
         return 1
     }
 

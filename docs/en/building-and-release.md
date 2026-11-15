@@ -62,7 +62,7 @@ with everything except Fabric Loader, LambDynamicLights and Cardinal Components:
 (`data/every_tunnel_*`), `data/chunks.dat` (force-loaded chunks), the saved mobs and items
 (`entities/`: without the mod's record of having spawned him, a packed Observer would come
 as a second one) and stray archives in `datapacks/`. It packs the world as
-it is **at that moment**, so build the map first. Without that world (a fresh clone), the
+it is **at that moment**, so build the map first (and empty Chapter 2's with `/et ch2 l1 unbuild`: its region files would travel in the zip). Without that world (a fresh clone), the
 jar simply has no map.
 
 Not bundled, for licence reasons:

@@ -19,6 +19,9 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  *   ],
  *   "zones": [
  *     { "id": "speaker_lab", "from": [-40, 64, -146], "to": [3, 69, -127], "provisional": true }
+ *   ],
+ *   "paths": [
+ *     { "id": "patrol_a_waypoints", "closed": true, "points": [[1.5, 65, 2.5], [9.5, 65, 2.5], [9.5, 65, 8.5]], "provisional": true }
  *   ]
  * }
  * ```
@@ -26,8 +29,9 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  * The shapes are those of a level's file ([daio7771.everytunnel.core.level.LevelParser]): `pos` has three numbers,
  * `from` and `to` three whole numbers, the corners in any order (both included, as in `/fill`). `dimension` defaults
  * to the overworld; `yaw` (-360 to 360), `pitch` (-90 to 90) and `provisional` (marks a place not yet measured on
- * the final map) to 0, 0 and false. Both lists are optional. An anchor id (a-z, 0-9, `_`) is unique across points
- * and zones, since `goto` takes either; a broken or repeated entry is skipped with a problem. The file is rejected
+ * the final map) to 0, 0 and false. The three lists are optional. A path has `points` (at least two, each `[x, y, z]`) and
+ * `closed` (default false). An anchor id (a-z, 0-9, `_`) is unique across points, zones and paths, since `goto` takes any;
+ * a broken or repeated entry is skipped with a problem. The file is rejected
  * only when it is not a JSON object.
  */
 object Ch2L1AnchorsParser {
@@ -61,8 +65,9 @@ object Ch2L1AnchorsParser {
         val taken = mutableSetOf<String>()
         val points = parsePoints(fields, taken, problems)
         val zones = parseZones(fields, taken, problems)
+        val paths = parsePaths(fields, taken, problems)
         fields.reportUnknownKeys()
-        return Result(Ch2L1Anchors(dimension, points, zones), problems.toList())
+        return Result(Ch2L1Anchors(dimension, points, zones, paths), problems.toList())
     }
 
     private fun parsePoints(fields: JsonFields, taken: MutableSet<String>, problems: MutableList<String>): List<Anchor> {
@@ -102,6 +107,34 @@ object Ch2L1AnchorsParser {
             }
         }
         return zones
+    }
+
+    private fun parsePaths(fields: JsonFields, taken: MutableSet<String>, problems: MutableList<String>): List<AnchorPath> {
+        val array = fields.array("paths") ?: return emptyList()
+        val paths = mutableListOf<AnchorPath>()
+        forEachObject(array, fields.pathOf("paths"), problems) { entry ->
+            val id = validId(entry, taken, problems) ?: return@forEachObject
+            val closed = entry.boolean("closed", false)
+            val provisional = entry.boolean("provisional", false)
+            val points = mutableListOf<Position>()
+            val list = entry.array("points")
+            list?.forEachIndexed { index, element ->
+                val values = (element as? JsonArray)?.mapNotNull { it.numberOrNull()?.takeIf(Double::isFinite) }
+                if (element !is JsonArray || element.size() != 3 || values?.size != 3) {
+                    problems += "${entry.pathOf("points")}[$index]: expected [x, y, z] with 3 numbers but got $element, skipped"
+                } else {
+                    points += Position(values[0], values[1], values[2])
+                }
+            }
+            entry.reportUnknownKeys()
+            if (points.size < 2) {
+                problems += "${entry.pathOf("id")} \"$id\": a path needs at least two points, skipped"
+                taken -= id
+            } else {
+                paths += AnchorPath(id, points, closed, provisional)
+            }
+        }
+        return paths
     }
 
     private inline fun forEachObject(

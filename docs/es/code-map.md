@@ -64,6 +64,7 @@ con un comentario KDoc que cuenta más.
 | `ch2l1/Ch2L1Data.kt` | Los archivos de datos del nivel: cuáles hay, qué copia gana (la de la carpeta de config sobre la del jar), qué da uno que falta o está roto |
 | `ch2l1/Ch2L1Voices.kt` | Las líneas de voz del nivel (clave del texto, hablante, duración, fragmentos de subtítulo como rangos de frases, de `cutscene/ch2_l1_voices.json`), `Ch2L1Sentences` y `Ch2L1Skins`, el aspecto de sus personas |
 | `ch2l1/Ch2L1Objectives.kt` | El objetivo que muestra el panel en cada estado: una clave de lang por estado, ninguna en las cinemáticas ni al final |
+| `ch2l1/Ch2L1MapPlan.kt` | El mapa del nivel como plan que construir: la caja que vaciar, las cajas de un bloque, las lámparas, el origen, la huella del plan (de `map.json`) |
 | `spawn/PostLedger.kt` | Qué criatura es dueña de cada punto de spawn, para que un sobrante que aún muere o que carga tarde no borre el registro del que lo sustituyó (el Observer) |
 | `progress/LeftBehind.kt` | Lo que no sirve de un nivel en adelante y se quita del inventario al empezarlo (la tarjeta de acceso desde el Nivel 3, la tarjeta maestra desde el Nivel 5) |
 | `hiding/LookLimit.kt` | Cuánto gira la cabeza dentro de una taquilla |
@@ -239,9 +240,10 @@ con un comentario KDoc que cuenta más.
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `Ch2L1.kt` | El Nivel 1 del Chapter 2: el estado de cada jugador y si lo está jugando (las reglas le siguen: `enter`, `leave`), guardados en su progreso; todo cambio pasa por aquí y llega a los oyentes |
 | `Ch2L1DataLoader.kt` | Lee los archivos JSON del nivel (la copia de la carpeta de config, si no la del jar) al arrancar y con `/et reload`, y guarda los datos actuales |
-| `Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 enter\|leave\|clock\|anchors\|goto\|state\|skip\|npc` (solo ejecuciones de desarrollo) |
+| `Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc` (solo ejecuciones de desarrollo) |
 | `FactoryNpcEntity.kt` | Una persona del Nivel 1 del Chapter 2 (Rowan, el compañero, los trabajadores): un solo tipo de entidad, su skin sincronizada las distingue; una criatura mantenida |
 | `Ch2L1Npcs.kt` | Ponerlas delante del jugador y quitarlas (`/et ch2 l1 npc`) |
+| `Ch2L1Build.kt` | Construye el nivel desde su plan a razón de 8.000 celdas por tick (y lo vacía), recuerda qué plan construyó, comprueba antes cada bloque |
 | `TimeClockBlock.kt` | El reloj de fichar del Nivel 1 del Chapter 2: un lector de tarjetas (mismos modelos) que ficha al nuevo empleado, rojo y luego verde |
 | `DevWorlds.kt` | Plantillas de mundo solo de desarrollo, restauradas en cada arranque |
 | `PlaytestLog.kt` | El registro `[playtest]` |
@@ -388,7 +390,7 @@ Ver [Arquitectura](architecture.md#mixins) para el objetivo y el motivo de cada 
 | `assets/every_tunnel/geo/`, `animations/` | Los archivos de GeckoLib del Pale man |
 | `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | La escena del menú (de `tools/map/map_generator.py`) |
 | `data/every_tunnel/loot_tables/` | Loot tables de los bloques |
-| `data/every_tunnel/ch2/l1/` | Los valores por defecto de los datos del Nivel 1 del Chapter 2: `anchors.json`, `speakers.json`, `tasks.json`, `patrols.json`, `npcs.json`, `cutscenes/*.json` |
+| `data/every_tunnel/ch2/l1/` | Los valores por defecto de los datos del Nivel 1 del Chapter 2: `anchors.json` y `map.json` (los escribe `tools/map/ch2l1/generate.py`), `speakers.json`, `tasks.json`, `patrols.json`, `npcs.json`, `cutscenes/*.json` |
 
 ## Tests: `test/kotlin/daio7771/everytunnel/`
 

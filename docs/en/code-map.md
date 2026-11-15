@@ -66,6 +66,7 @@ KDoc comment that says more.
 | `ch2l1/Ch2L1Data.kt` | The level's data files: which there are, which copy wins (the config folder's over the jar's), what a missing or broken one gives |
 | `ch2l1/Ch2L1Voices.kt` | The level's voice lines (text key, speaker, length, subtitle cues as ranges of sentences, from `cutscene/ch2_l1_voices.json`), `Ch2L1Sentences` and `Ch2L1Skins`, the look of its people |
 | `ch2l1/Ch2L1Objectives.kt` | The objective the panel shows in each state: one lang key per state, none in the cinematics and at the end |
+| `ch2l1/Ch2L1MapPlan.kt` | The level's map as a plan to build: the box to empty, the boxes of one block, the lamps, the origin, the plan's fingerprint (from `map.json`) |
 | `spawn/PostLedger.kt` | Which creature owns each spawn point, so a dying or late-loading leftover never wipes the record of the one that replaced it (the Observer) |
 
 ### `systems/`
@@ -239,9 +240,10 @@ KDoc comment that says more.
 | `DebugCommands.kt` | `/everytunnel ...` |
 | `Ch2L1.kt` | Chapter 2's Level 1: each player's state and whether they are playing it (the rules follow them: `enter`, `leave`), kept in their progress; every change goes through it and reaches the listeners |
 | `Ch2L1DataLoader.kt` | Reads the level's JSON files (the config folder's copy, else the jar's) at launch and on `/et reload`, and holds the current data |
-| `Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 enter\|leave\|clock\|anchors\|goto\|state\|skip\|npc` (development runs only) |
+| `Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc` (development runs only) |
 | `FactoryNpcEntity.kt` | A person of Chapter 2's Level 1 (Rowan, the coworker, the workers): one entity type, its synced skin tells them apart; a kept creature |
 | `Ch2L1Npcs.kt` | Putting them in front of the player and taking them away (`/et ch2 l1 npc`) |
+| `Ch2L1Build.kt` | Builds the level from its plan in steps of 8,000 cells a tick (and empties it), remembers which plan it built, checks every block first |
 | `TimeClockBlock.kt` | The time clock of Chapter 2's Level 1: a card reader (same models) that clocks the new hire in, red and then green |
 | `DevWorlds.kt` | Dev-only world templates restored on every launch |
 | `PlaytestLog.kt` | The `[playtest]` log |
@@ -388,7 +390,7 @@ See [Architecture](architecture.md#mixins) for the target and reason of each.
 | `assets/every_tunnel/geo/`, `animations/` | The Pale man's GeckoLib files |
 | `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | The menu scene (from `tools/map/map_generator.py`) |
 | `data/every_tunnel/loot_tables/` | Block loot tables |
-| `data/every_tunnel/ch2/l1/` | The defaults of Chapter 2's Level 1 data: `anchors.json`, `speakers.json`, `tasks.json`, `patrols.json`, `npcs.json`, `cutscenes/*.json` |
+| `data/every_tunnel/ch2/l1/` | The defaults of Chapter 2's Level 1 data: `anchors.json` and `map.json` (written by `tools/map/ch2l1/generate.py`), `speakers.json`, `tasks.json`, `patrols.json`, `npcs.json`, `cutscenes/*.json` |
 
 ## Tests: `test/kotlin/daio7771/everytunnel/`
 

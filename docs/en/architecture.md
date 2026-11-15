@@ -152,6 +152,7 @@ What the mod remembers is saved with the world, in `<world>/data/`, as vanilla
 | `every_tunnel_loot.dat` | `LootSpawner` | Which loot spots were filled |
 | `every_tunnel_pale_men.dat` | `PaleManSpawner` | Which Pale man spawn points have spawned |
 | `every_tunnel_lights.dat` | `KeycardHooks` | The lights the keycard put out, to restore them |
+| `every_tunnel_ch2_l1.dat` | `Ch2L1Build` | Which map plan Chapter 2's Level 1 was built from (its fingerprint), so it is rebuilt when the plan changes |
 
 `packMapWorld` leaves all of these out of the release jar, so a fresh install starts clean.
 

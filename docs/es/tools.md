@@ -26,6 +26,7 @@ git).
 | Herramienta | Escribe | Ejecútala tras cambiar... |
 |---|---|---|
 | `tools/map/map_generator.py` | Datapacks de los niveles, resource pack del mundo, lo instala en `run/saves/noname_complex`; la escena del menú en el mod | el mapa o la escena del menú |
+| `tools/map/ch2l1/generate.py` | El mapa del Nivel 1 del Chapter 2 a partir del dibujo del autor: `map.json` (el plan que construye el mod) y `anchors.json` (se instalan con `--install` en `data/every_tunnel/ch2/l1/`) y un dibujo desde arriba | la distribución, puertas, lámparas o lugares con nombre del nivel; véase [Chapter 2, Nivel 1](chapter-2-level-1.md#el-mapa) |
 | `tools/blocks/generate.py` | Modelos de bloque y objeto, blockstates, texturas + mapas LabPBR, nombres, loot tables | un bloque del mod |
 | `tools/blocks/briefing.py` | La pizarra de seguridad del nivel 5 (la llama `generate.py`, que la corta en las texturas de los bloques): el corcho con dibujos a lápiz renderizados desde los modelos de las entidades y las fichas mecanografiadas, la placa SAFETY BRIEFING; sola, una vista previa | la pizarra |
 | `tools/film/film.py` | La película del Cinema: una grabación convertida en fotogramas de cine viejo | la película |
