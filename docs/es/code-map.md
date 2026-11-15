@@ -390,6 +390,8 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `level1/core/Ch2L1Tasks.kt` | El archivo de tareas (`tasks.json`), su lector, `Ch2L1Bits` (conjuntos de cosas como bits de un Int) y `HoldTracker` (un clic mantenido sobre un objetivo) |
 | `level1/core/Ch2L1Speakers.kt` | El archivo de los altavoces (`speakers.json`), su lector y `Ch2L1SpeakerSchedule`: qué suena y cuándo, por las reglas del plan, sin reloj propio |
 | `level1/core/Ch2L1IntroScene.kt` | La cinemática del primer aviso: tomas desde anclas, en la maquinaria de las otras escenas |
+| `level1/core/Ch2L1Act2.kt` | El archivo del Acto 2 (`cutscenes/meeting.json`), su lector y `Ch2L1Follow`: el compañero guiando, esperando a un jugador que se queda atrás y recordándoselo |
+| `level1/core/Ch2L1Meeting.kt` | La reunión como escena (`Ch2L1MeetingScene`: los ojos girando hacia cada hablante, la puerta, el tick de la tarjeta) y `Ch2L1Glances` (las miradas de los oyentes a la puerta) |
 | `level1/core/Ch2L1Npcs.kt` | La gente de la fábrica: `npcs.json`, su lector, los pasos de una rutina con sus anclas buscadas y `Ch2L1RoutineRunner`, lo que hace una persona cada tick |
 | `level1/core/Ch2L1NpcLife.kt` | Lo que hace que la gente de la fábrica parezca viva (`life` de `npcs.json`): `Ch2L1Gait` (andar y girar suave), `Ch2L1Gaze` (adónde mira la cabeza), `Ch2L1Chat` (charlas entre dos), `Ch2L1Pose` |
 | `level1/core/Ch2L1Guide.kt` | Adónde apunta la flecha guía en cada paso (el reloj, los tubos, el terminal, el analizador, la escoba, la suciedad), la más cercana, cuándo se oculta |
@@ -410,6 +412,8 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `level1/platform/Ch2L1TaskHooks.kt` | Las tres tareas del Acto 1: los usos, los contadores en el progreso, los paquetes y los objetos del mundo siguiendo al estado |
 | `level1/platform/Ch2L1SpeakerHooks.kt` | Los altavoces de Rowan: un planificador por jugador, el timbre y la voz desde el altavoz de techo de la zona |
 | `level1/platform/Ch2L1IntroHooks.kt` | La cinemática del primer aviso en el servidor: sujeta al jugador, el timbre, el final o el salto |
+| `level1/platform/Ch2L1Act2Hooks.kt` | El Acto 2 en el servidor: el compañero esperando y guiando, el grupo, la reunión dirigida tick a tick, la tarjeta, la salida de todos, el salto |
+| `level1/platform/Ch2L1Doors.kt` | Las puertas de la fábrica como las usa su gente: abiertas a su paso, un vano cerrado o abierto alrededor de un sitio |
 | `level1/platform/FactoryNpcEntity.kt` | Una persona del Nivel 1 del Chapter 2 (Rowan, el compañero, los trabajadores): un solo tipo de entidad, su skin sincronizada las distingue; un trabajador sigue su rutina tick a tick (andar suave, a su ritmo), su cabeza mira sola, y su pose sincronizada dice si teclea, habla o escucha; una criatura mantenida |
 | `level1/platform/Ch2L1Npcs.kt` | La gente de la fábrica: los trabajadores que se ponen mientras se juega el nivel y los del LAB que se quitan, las charlas entre parejas, los grupos y el `/et ch2 l1 npc` del desarrollador |
 
@@ -423,6 +427,7 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `prologue/client/ScientistRenderer.kt` | Renderizador de GeckoLib del científico del prólogo, girado a su orientación; `ScientistModel` lo dibuja como el hombre, con su piel enferma o, ya cambiado, como el Pale man del nivel 2 (ojos brillantes) |
 | `level1/client/Ch2L1Client.kt` | Lo que sabe el cliente del Nivel 1 del Chapter 2: si el jugador local está en él, su estado, el objetivo que mostrar (de su progreso) |
 | `level1/client/Ch2L1IntroView.kt` | El primer anuncio del Nivel 1 en el cliente: su `CutsceneView.Kind` y sus paquetes |
+| `level1/client/Ch2L1MeetingView.kt` | La reunión en el cliente: su `CutsceneView.Kind` (subtítulos frase a frase tras el nombre de cada hablante) y sus paquetes |
 | `level1/client/Ch2L1Subtitles.kt` | Los subtítulos de las voces del Nivel 1 del Chapter 2, mostrados cuando suena una (un oyente del gestor de sonido; siempre activos) |
 | `level1/client/ObjectivePanel.kt` | El panel de objetivos del Nivel 1 del Chapter 2: arriba a la derecha, pequeño, aparece con un fundido al cambiar el objetivo, con la cuenta de una tarea ("(1/3)") |
 | `level1/client/HoldBar.kt` | La barra de una tarea que pide un clic mantenido (el analizador, la suciedad), bajo la mira |

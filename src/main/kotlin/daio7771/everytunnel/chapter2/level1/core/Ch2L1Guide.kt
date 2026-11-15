@@ -9,7 +9,8 @@ import daio7771.everytunnel.core.level.Position
  * [targets] are the places the step can be done at, each lifted by the spec's height over its anchor: the time clock before the player
  * has clocked in; in the first task the sample tubes not taken yet and, once all are, the terminal; in the second the analyzer; in the third
  * the broom until it is taken and then the patches of dirt not swept yet. [nearest] is the one the arrow shows: the one closest to
- * the player. Later phases add the steps of Acts 2 and 3 here.
+ * the player. In Act 2 it floats over the coworker's head, but only when the player has lost him ([follow]). Later phases add the steps of
+ * Act 3 here.
  */
 object Ch2L1Guide {
 
@@ -34,6 +35,21 @@ object Ch2L1Guide {
             else -> emptyList()
         }
         return places.map { Position(it.x, it.y + tasks.guide.height, it.z) }
+    }
+
+    /** Over a person's head the arrow floats this high over their feet. */
+    const val OVER_HEAD = 2.4
+
+    /**
+     * Following the coworker (Act 2): over his head ([coworker], his feet) when the player is farther than [spec]'s `arrow_beyond_blocks`
+     * from him or cannot see him ([sees]); null otherwise (they are with him: he is the guide) and when he is not there.
+     */
+    fun follow(coworker: Position?, from: Position, sees: Boolean, spec: Ch2L1FollowSpec): Position? {
+        if (coworker == null) return null
+        val dx = coworker.x - from.x
+        val dz = coworker.z - from.z
+        if (sees && dx * dx + dz * dz <= spec.arrowBeyond * spec.arrowBeyond) return null
+        return Position(coworker.x, coworker.y + OVER_HEAD, coworker.z)
     }
 
     /** The place in [targets] nearest to [from], or null if there is none. */

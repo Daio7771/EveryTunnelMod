@@ -5,9 +5,8 @@
 El Nivel 1 del Chapter 2 es la fábrica, cuatro meses después del Chapter 1: un científico normal contratado en lugar del
 que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el despacho del supervisor. Se construye por
 fases (de la 0 a la 10), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
-nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 2B, el mapa.** Todavía
-no se puede jugar como nivel (no tiene tareas, mobiliario ni gente), pero su mapa se construye y se puede meter a un jugador en
-él: sus reglas se le aplican y el reloj de fichar le pasa a la primera tarea.
+nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 5, el Acto 2.** Se
+juega desde el reloj hasta el final de la reunión (Actos 1 y 2); el LAB aún no está amueblado y el Acto 3 es lo siguiente.
 
 Su código está en `daio7771.everytunnel.chapter2` (el del cliente, en el mismo paquete dentro de `src/client`): `level1.core`
 (Kotlin puro, con tests), `level1.platform` (pegamento con Minecraft) y `level1.client`, aparte del juego base, que nunca lo
@@ -48,7 +47,8 @@ Todo lo ajustable es JSON, no código: cambiar un ritmo, una ruta o un texto es 
 | `speakers.json` | Los altavoces de Rowan: las zonas y sus altavoces de techo, las líneas fijas y el grupo, el enfriamiento, la cinemática del primer aviso | `Ch2L1SpeakersParser`, con tipos |
 | `npcs.json` | La gente de la fábrica: dieciséis trabajadores con sus rutinas, los grupos (el de las taquillas) y cuán vivos parecen (`life`) | `Ch2L1NpcsParser`, con tipos |
 | `patrols.json` | Las patrullas | Vacío (`{}`) hasta que la fase que lo construye le dé su lector |
-| `cutscenes/meeting.json`, `cutscenes/office.json` | Las dos cinemáticas | Lo mismo |
+| `cutscenes/meeting.json` | El Acto 2: seguir al compañero y la reunión | `Ch2L1Act2Parser`, con tipos |
+| `cutscenes/office.json` | La cinemática del despacho (fase 8) | Lo mismo |
 
 El jar lleva los valores por defecto, en `data/every_tunnel/ch2/l1/`. **Para ajustar sin reconstruir**, pon un archivo del
 mismo nombre en la carpeta de configuración del juego, `config/every_tunnel/ch2/l1/` (en una ejecución de desarrollo,
@@ -287,6 +287,42 @@ demás. Los otros avisos no tienen barras: el timbre, la voz y su subtítulo, y 
 `/et ch2 l1 tasks` muestra cuánto ha avanzado el jugador y todo lo que `tasks.json` o `speakers.json` nombran y `anchors.json` no tiene
 (`level1.core.Ch2L1Wiring`, que `/et reload` también informa).
 
+## Acto 2: el compañero y la reunión
+
+Lo lleva `chapter2.level1.platform.Ch2L1Act2Hooks`, desde `cutscenes/meeting.json` (`Ch2L1Act2`, que lee `Ch2L1Act2Parser`; todas las
+claves opcionales; `Ch2L1Wiring` comprueba las anclas y caminos que nombra):
+
+- **La espera** (`ACT1_TASK3`): el compañero (skin `coworker`) aparece en `coworker_wait`, la esquina del anillo junto a la escoba, mientras
+  el jugador sigue en el LAB, y espera allí de brazos cruzados, con la mirada puesta en el jugador mientras barre.
+- **Seguirle** (`ACT2_FOLLOW`, al barrer la última mancha): dice `follow_01` desde donde está (una voz del nivel como cualquier otra: salen
+  sus subtítulos) y, al acabar, recorre `coworker_route` (el anillo, el pasillo principal, la segunda puerta de las taquillas) hasta
+  `meeting_coworker`, abriendo las puertas que encuentra (`Ch2L1Doors`). `Ch2L1Follow` (Kotlin puro, con tests) decide cada tick: un jugador
+  a más de `lag_blocks` y que no va por delante se queda atrás, así que se para, se gira y le espera; tras `remind_after_seconds` así dice
+  `follow_02` o `follow_03`, por turnos, y no otra vez hasta pasados `remind_cooldown_seconds`. La flecha guía flota sobre su cabeza solo si
+  el jugador está a más de `arrow_beyond_blocks` o no le ve (`Ch2L1Guide.follow`). Mientras, el grupo de la reunión (`taquillas` de
+  `npcs.json`) espera en las taquillas, y los dobles ambientales de worker_a y worker_b salen del LAB en cuanto nadie los ve (`until` de
+  `npcs.json`, `Ch2L1Npcs.retire`).
+- **La reunión** (`ACT2_MEETING`, cuando el jugador está en `taquillas_trigger` con él dentro o justo detrás): el jugador pasa a
+  `meeting_player` y se le sujeta allí, y la escena se juega en su cliente (`ch2l1_meeting_start`: el marco y la puerta por la que entró;
+  `Ch2L1MeetingView`). Se construye desde los datos en los dos lados (`Ch2L1MeetingScene`, Kotlin puro, con tests): la cámara son los ojos
+  del propio jugador, que giran suave (`turn_seconds`) hacia quien habla (`meeting_01` a `15` en orden, separadas `gap_seconds`; el sitio
+  de un hablante es el del compañero o el del miembro del grupo con su skin), y hacia la puerta durante `door_seconds` tras `door_after`.
+  Sus subtítulos van frase a frase tras el nombre de quien habla (`CutsceneView.Kind.subtitleText` y `speakerAt`). En los mismos ticks el
+  servidor dirige a la gente (`FactoryNpcEntity.direction`): todos miran a quien habla, y cada uno mira a la puerta de vez en cuando
+  (`Ch2L1Glances`); quien habla gesticula (`TALKING`), worker_a tiembla en `tremble_lines`, worker_b se sacude de risa en `laugh_lines`; los
+  de `crossed_arms` escuchan de brazos cruzados, cambiando el peso de pie; el miembro más cercano a la puerta va a `<puerta>_inside` y la
+  cierra; y cuando el compañero llega a "Take this" (`card_line`, `card_sentence`) alarga el brazo (`OFFERING`) y el jugador recibe la
+  **copia de tarjeta del laboratorio** (`lab_badge_copy`, la tarjeta del Chapter 1 recoloreada por `tools/blocks/generate.py`; solo abre la
+  puerta del laboratorio auxiliar, fase 6).
+- **El final**: cuando acaba la última línea todos se van por `meeting_leave`, el compañero primero y los demás de uno en uno
+  (`leave_gap_seconds`), abriéndose la puerta ante ellos, y cada uno desaparece en cuanto el jugador no le ve; las barras se van y el
+  estado es `ACT3_EXPLORE`. **Saltarla** (`ch2l1_meeting_skip`) la acaba en el acto con el mismo estado: la tarjeta dada, el jugador en
+  `taquillas_exit`, el compañero y el grupo fuera, la puerta abierta.
+
+Llegar a un estado por comando hace lo que significa: `ACT1_TASK3` le pone junto a la escoba, `ACT2_FOLLOW` empieza el camino desde allí,
+`ACT2_MEETING` empieza la reunión al momento, un estado posterior da la tarjeta y se lleva a todos, uno anterior se le lleva a él y la
+tarjeta. El camino y la reunión se guardan en memoria y se retoman desde el estado tras salir del mundo.
+
 ## Comandos de depuración
 
 `level1.platform.Ch2L1Commands`, nivel de operador 2, **solo en ejecuciones de desarrollo** (como explica
@@ -334,4 +370,4 @@ personaje) llegan con la fase que se los dé, y también se ejecutarán con el c
 `Ch2L1StateTest` (el orden, `next`, `parse`), `Ch2L1AnchorsParserTest` (el formato, cada tipo de problema) y `Ch2L1DataTest`
 (los archivos del jar, qué copia gana, los respaldos), `Ch2L1VoicesTest` (las 32 líneas, sus eventos de sonido, Ogg y
 fragmentos, los textos en los dos idiomas) `Ch2L1SkinsTest` (el formato de las skins) y `Ch2L1ObjectivesTest` (un objetivo por paso, en los dos idiomas) y `Ch2L1MapPlanTest` (los bloques y puertas del plan, las anclas
-sobre sus suelos), todos en `chapter2/level1/core`; `Ch2L1NpcsTest` (el archivo de la gente, las rutinas y cada tick de quien teclea, de quien camina y de quien se atasca), `Ch2L1NpcLifeTest` (las claves de `life` y el ritmo de un trabajador, acelerar y frenar, frenar para girar, las paradas en el camino, adónde miran y la mirada al jugador con su enfriamiento, las parejas para charlar y sus turnos), `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador, y que un planificador hecho para una partida vieja se sustituye cuando el progreso retrocede: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas, que la sala de las taquillas tiene sus taquillas y ninguna cámara, que cada otro espacio tiene una y que cada trabajador y cada ruta pisan el suelo. `Ch2PlayerProgressTest` cubre el estado, la marca y los contadores en el progreso del capítulo, y `ChapterBoundaryTest` que ningún código fuera de `chapter2` lo nombra.
+sobre sus suelos), todos en `chapter2/level1/core`; `Ch2L1NpcsTest` (el archivo de la gente, las rutinas y cada tick de quien teclea, de quien camina y de quien se atasca), `Ch2L1Act2Test` (el archivo de la reunión y sus anclas, el compañero guiando y esperando y sus recordatorios, las líneas de la reunión, la puerta y la tarjeta, las miradas, la flecha sobre él), `Ch2L1NpcLifeTest` (las claves de `life` y el ritmo de un trabajador, acelerar y frenar, frenar para girar, las paradas en el camino, adónde miran y la mirada al jugador con su enfriamiento, las parejas para charlar y sus turnos), `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador, y que un planificador hecho para una partida vieja se sustituye cuando el progreso retrocede: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas, que la sala de las taquillas tiene sus taquillas y ninguna cámara, que cada otro espacio tiene una y que cada trabajador y cada ruta pisan el suelo. `Ch2PlayerProgressTest` cubre el estado, la marca y los contadores en el progreso del capítulo, y `ChapterBoundaryTest` que ningún código fuera de `chapter2` lo nombra.

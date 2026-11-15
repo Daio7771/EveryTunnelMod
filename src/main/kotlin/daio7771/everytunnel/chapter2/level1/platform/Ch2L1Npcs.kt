@@ -59,16 +59,48 @@ object Ch2L1Npcs {
 
     private fun tick(server: MinecraftServer) {
         if (server.ticks % CHECK_TICKS == 0) ensureAmbient(server)
+        if (server.ticks % RETIRE_TICKS == 0) retire(server)
         tickTalks(server)
     }
 
-    private fun world(server: MinecraftServer): ServerWorld? {
+    /** How often the workers whose time in the factory is over ([Ch2L1WorkerSpec.until]) are looked for. */
+    private const val RETIRE_TICKS = 20
+
+    /**
+     * Takes out the workers whose time in the factory is over for the players playing it ([Ch2L1WorkerSpec.until]): each as soon as no
+     * player sees them, so nobody vanishes before someone's eyes.
+     */
+    private fun retire(server: MinecraftServer) {
+        val world = world(server) ?: return
+        val playing = server.playerManager.playerList.filter { it.serverWorld == world && Ch2L1.active(it) }
+        if (playing.isEmpty()) return
+        val lastState = playing.maxOf { Ch2L1.state(it).ordinal }
+        val leaving = Ch2L1DataLoader.npcs.workers.filter { it.until != null && lastState >= it.until.ordinal }.map { it.id }.toSet()
+        if (leaving.isEmpty()) return
+        for (npc in world.getEntitiesByType(Ch2Entities.FACTORY_NPC, levelBox()) { it.workerId in leaving }) {
+            if (playing.none { seen(it, npc) }) {
+                KeptEntities.forget { e -> e === npc }
+                npc.discard()
+            }
+        }
+    }
+
+    /** True if [player] could see [npc] now: in front of them (within 75 degrees of where they look) and nothing solid between. */
+    fun seen(player: ServerPlayerEntity, npc: FactoryNpcEntity): Boolean {
+        val to = Vec3d(npc.x - player.x, npc.eyeY - player.eyeY, npc.z - player.z)
+        val length = to.length()
+        if (length < 1.0e-3) return true
+        if (to.multiply(1.0 / length).dotProduct(player.rotationVector) < Math.cos(Math.toRadians(75.0))) return false
+        return player.canSee(npc)
+    }
+
+    fun world(server: MinecraftServer): ServerWorld? {
         val dimension = Ch2L1DataLoader.data.anchors.dimension
         return Identifier.tryParse(dimension)?.let { server.getWorld(RegistryKey.of(RegistryKeys.WORLD, it)) }
     }
 
     /** The level's box in the world, grown by [NEAR] blocks. */
-    private fun levelBox(): Box {
+    fun levelBox(): Box {
         val plan = Ch2L1Build.plan
         val (a, b) = plan.clear
         return Box(
@@ -95,6 +127,7 @@ object Ch2L1Npcs {
         for (worker in data.workers) {
             if (worker.id in present) continue
             if (worker.group == LAB && lastState >= Ch2L1State.ACT3_CUTSCENE.ordinal) continue
+            if (worker.until != null && lastState >= worker.until.ordinal) continue
             if (spawnWorker(world, worker, data.walkSpeed, data.life)) count++
         }
         return count

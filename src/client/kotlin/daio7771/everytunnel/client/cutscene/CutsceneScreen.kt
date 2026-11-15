@@ -92,8 +92,8 @@ class CutsceneScreen : Screen(Text.empty()) {
 
     override fun renderBackground(context: DrawContext) = Unit
 
-    private fun drawSubtitle(context: DrawContext, key: String, band: Int) {
-        val speech = Text.translatable(key).styled { it.withColor(WHITE) }
+    private fun drawSubtitle(context: DrawContext, said: String, band: Int) {
+        val speech = Text.literal(said).styled { it.withColor(WHITE) }
         val text = CutsceneView.speaker()?.let {
             Text.translatable(it).styled { name -> name.withColor(SPEAKER_GREY) }.append(Text.literal(" ")).append(speech)
         } ?: speech

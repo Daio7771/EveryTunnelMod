@@ -21,10 +21,12 @@ sealed interface Ch2L1StepSpec {
 
 /**
  * A person of the factory's ordinary life: [skin], the [group] they belong to (the LAB's go in phase 8), where they start and what they do, over
- * and over; [pace]: their own walking pace (a multiple of `walk_speed`), null to draw one ([Ch2L1Life.pace]).
+ * and over; [pace]: their own walking pace (a multiple of `walk_speed`), null to draw one ([Ch2L1Life.pace]); [until]: from this state on
+ * they are no longer in the factory (they leave out of sight; worker_a's and worker_b's ambient doubles, at the meeting from Act 2), null: always.
  */
 data class Ch2L1WorkerSpec(
     val id: String, val skin: String, val group: String, val spawn: String, val steps: List<Ch2L1StepSpec>, val pace: Double? = null,
+    val until: Ch2L1State? = null,
 )
 
 /** One of a group's people, standing at the point anchor [at] facing the way it faces (the lockers' group of the meeting). */
@@ -81,12 +83,18 @@ object Ch2L1NpcsParser {
             val spawn = entry.requiredString("spawn")
             val steps = parseSteps(entry, fields.problems)
             val pace = if (entry.has("pace")) entry.double("pace", 1.0, min = 0.3, max = 3.0) else null
+            val until = if (entry.has("until")) {
+                val name = entry.string("until", "")
+                Ch2L1State.parse(name).also { if (it == null) fields.problems += "workers[$i].until: \"$name\" is not a state, ignored" }
+            } else {
+                null
+            }
             entry.reportUnknownKeys()
             when {
                 id == null || spawn == null -> fields.problems += "workers[$i]: needs an id and a spawn anchor, skipped"
                 !ID.matches(id) -> fields.problems += "workers[$i]: the id \"$id\" is not a-z, 0-9 and _, skipped"
                 !seen.add(id) -> fields.problems += "workers[$i]: the id \"$id\" is repeated, skipped"
-                else -> workers += Ch2L1WorkerSpec(id, skin, group, spawn, steps, pace)
+                else -> workers += Ch2L1WorkerSpec(id, skin, group, spawn, steps, pace, until)
             }
         }
         val life = life(fields.child("life"))

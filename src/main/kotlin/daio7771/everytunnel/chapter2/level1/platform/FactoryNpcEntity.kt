@@ -39,6 +39,9 @@ import java.util.Random
  * While talking to someone ([talkingTo], paired by [Ch2L1Npcs]) the routine waits: they face each other and their [npcPose] says who talks
  * and who listens (synced: the client moves their arms and head).
  *
+ * A scene can take them over ([direction], set by `Ch2L1Act2Hooks`: the coworker leading the player, the meeting): then the routine
+ * waits and they walk where it says (opening the doors in their way), face and look where it says, in the pose it says.
+ *
  * Life cycle: **kept** (see Contributing, Creatures): the type disables saving, the level puts them in through
  * [KeptEntities.spawn] ([Ch2L1Npcs]) and takes them out with [KeptEntities.forget] and `discard()`.
  */
@@ -72,6 +75,26 @@ class FactoryNpcEntity(type: EntityType<out MobEntity>, world: World) : MobEntit
     var talkingTo: FactoryNpcEntity? = null
     var talkCooldown = 0
 
+    /** What a scene has them do instead of their own life; null: their own life. Server only. */
+    var direction: Direction? = null
+
+    /** What a scene asks of someone (see [direction]); it changes it as the scene goes on. */
+    class Direction {
+        /** Where they walk to (null: they stand), and whether they stop there (they brake on the way). */
+        var walkTo: Vec3d? = null
+        var stopThere = true
+
+        /** The way the body faces while they stand; null: towards [lookAt] when that is far off to a side. */
+        var face: Float? = null
+
+        /** Where they look (someone's eyes); null: about, on their own. */
+        var lookAt: Vec3d? = null
+        var pose: Ch2L1Pose = Ch2L1Pose.NONE
+
+        /** True once they have got to [walkTo]. */
+        var arrived = false
+    }
+
     /** What they did on the last tick, for [Ch2L1Npcs] to tell who is free to talk. */
     var mode: Ch2L1Gaze.Mode = Ch2L1Gaze.Mode.STANDING
         private set
@@ -102,6 +125,11 @@ class FactoryNpcEntity(type: EntityType<out MobEntity>, world: World) : MobEntit
         if (world.isClient) return
         if (talkCooldown > 0) talkCooldown--
         val gait = gait ?: Ch2L1Gait(WALK * pace, life.accelTicks, life.turnDegrees).also { gait = it }
+        direction?.let {
+            mode = directed(it, gait)
+            look(it.lookAt?.let { at -> Ch2L1Point(at.x, at.y, at.z) })
+            return
+        }
         val partner = talkingTo?.takeIf { !it.isRemoved }
         mode = when {
             partner != null -> {
@@ -114,7 +142,34 @@ class FactoryNpcEntity(type: EntityType<out MobEntity>, world: World) : MobEntit
                 Ch2L1Gaze.Mode.STANDING
             }
         }
-        look(partner)
+        look(partner?.let { Ch2L1Point(it.x, it.eyeY, it.z) })
+    }
+
+    /** A tick of what a scene asks ([Direction]). */
+    private fun directed(d: Direction, gait: Ch2L1Gait): Ch2L1Gaze.Mode {
+        val to = d.walkTo
+        if (to != null) {
+            val dx = to.x - x
+            val dz = to.z - z
+            val distance = Math.sqrt(dx * dx + dz * dz)
+            if (distance > ARRIVE) {
+                d.arrived = false
+                val step = gait.walk(yaw, dx, dz, if (d.stopThere) distance else null)
+                velocity = Vec3d(step.vx, velocity.y, step.vz)
+                yaw = step.yaw
+                npcPose = Ch2L1Pose.NONE
+                if (age % 5 == 0) Ch2L1Doors.openNear(this)
+                return Ch2L1Gaze.Mode.WALKING
+            }
+            d.arrived = true
+        }
+        val face = d.face ?: d.lookAt?.let { at ->
+            val toward = Ch2L1Angles.yawOf(at.x - x, at.z - z)
+            if (Math.abs(Ch2L1Angles.wrap(toward - yaw)) > TURN_TO_LOOK) toward else null
+        }
+        stand(gait, face)
+        npcPose = d.pose
+        return if (d.lookAt != null) Ch2L1Gaze.Mode.TALKING else Ch2L1Gaze.Mode.STANDING
     }
 
     private fun follow(runner: Ch2L1RoutineRunner, gait: Ch2L1Gait): Ch2L1Gaze.Mode =
@@ -147,15 +202,15 @@ class FactoryNpcEntity(type: EntityType<out MobEntity>, world: World) : MobEntit
         yaw = gait.stand(yaw, face)
     }
 
-    /** The head: where [Ch2L1Gaze] says, given the nearest player and the people around. */
-    private fun look(partner: FactoryNpcEntity?) {
+    /** The head: where [Ch2L1Gaze] says, given the nearest player, the people around and whom they talk to or look at ([partner]'s eyes). */
+    private fun look(partner: Ch2L1Point?) {
         val gaze = gaze ?: Ch2L1Gaze(life, Random(seed xor uuid.leastSignificantBits)).also { gaze = it }
         val eyes = Ch2L1Point(x, eyeY, z)
         val player = world.getClosestPlayer(x, eyeY, z, life.playerRange + 1.0, EntityPredicates.EXCEPT_SPECTATOR)
         gaze.tick(
             yaw, eyes, mode,
             player?.let { Ch2L1Point(it.x, it.eyeY, it.z) },
-            partner?.let { Ch2L1Point(it.x, it.eyeY, it.z) },
+            partner,
         ) {
             world.getEntitiesByClass(FactoryNpcEntity::class.java, boundingBox.expand(AROUND)) { it !== this }
                 .map { Ch2L1Point(it.x, it.eyeY, it.z) }
@@ -176,6 +231,12 @@ class FactoryNpcEntity(type: EntityType<out MobEntity>, world: World) : MobEntit
 
         /** Blocks a tick at `walk_speed` 1 and a pace of 1: a stroll of 1.3 blocks a second (a player walks 4.3). */
         const val WALK = 0.065
+
+        /** Within this of where a scene sends them (along the floor) they are there. */
+        private const val ARRIVE = 0.3
+
+        /** Standing, they turn their body to what they look at when it is more than this far off to a side, degrees. */
+        private const val TURN_TO_LOOK = 50f
 
         /** How far around them they look for colleagues to glance at. */
         private const val AROUND = 8.0

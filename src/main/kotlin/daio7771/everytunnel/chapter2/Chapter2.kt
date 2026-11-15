@@ -2,6 +2,7 @@ package daio7771.everytunnel.chapter2
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1
+import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Act2Hooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Build
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Commands
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1DataLoader
@@ -47,6 +48,7 @@ object Chapter2 : ModInitializer {
         Ch2L1Npcs.register()
         Ch2L1SpeakerHooks.register()
         Ch2L1IntroHooks.register()
+        Ch2L1Act2Hooks.register()
         PrologueSceneHooks.register()
         PrologueCommand.register()
         Ch2L1Commands.register()

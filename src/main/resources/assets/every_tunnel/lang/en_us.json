@@ -625,5 +625,6 @@
   "block.every_tunnel.factory_camera": "Sweeping Security Camera",
   "block.every_tunnel.radiation_counter": "Radiation Counter",
   "block.every_tunnel.voice_recorder": "Voice Recorder",
-  "block.every_tunnel.tube_rack": "Tube Rack"
+  "block.every_tunnel.tube_rack": "Tube Rack",
+  "item.every_tunnel.lab_badge_copy": "Lab Badge (Copy)"
 }

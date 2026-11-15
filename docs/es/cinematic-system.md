@@ -261,8 +261,8 @@ nueva necesita, por este orden:
    ella), en `core/cutscene` para el juego base o en el `core` propio del capítulo (el prólogo del Chapter 2:
    `chapter2/prologue/core`), y un test de su temporización (`CutsceneTest`, `PrologueTest`).
 2. Un `CutsceneView.Kind` y sus paquetes de inicio y fin: en `CutsceneView.register` para el juego base; un capítulo posterior
-   hace su propio `Kind` en su cliente (sobrescribiendo `started`, `ticked`, `stopped`, `shake`, `flash`, `vignette` y
-   `endsOnBlack` según lo necesite: `PrologueView`, `Ch2L1IntroView`) y llama a `CutsceneView.start` y `stop` desde sus propios
+   hace su propio `Kind` en su cliente (sobrescribiendo `started`, `ticked`, `stopped`, `shake`, `flash`, `vignette`,
+   `endsOnBlack`, `subtitleText` y `speakerAt` según lo necesite: `PrologueView`, `Ch2L1IntroView`, `Ch2L1MeetingView`) y llama a `CutsceneView.start` y `stop` desde sus propios
    receptores de paquetes. El paquete de inicio lleva el marco de la escena.
 3. Un hook como `DirectorSceneHooks` o `PrologueSceneHooks`: un disparador, sujetar al jugador y negarle el
    daño, un único `finish` para el final y para un salto, el estado posterior, y qué pasa si el jugador sale o

@@ -5,9 +5,8 @@
 Level 1 of Chapter 2 is the factory, four months after Chapter 1: an ordinary scientist hired in the place of the one
 who "fell ill", three acts of tasks, a meeting and sneaking, ending in the supervisor's office. It is built in phases
 (0 to 10), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
-`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 2B, the map.** Nothing is
-playable yet as a level (it has no tasks, no furniture and no people), but its map is built and a player can be put in it: its
-rules apply to them and the time clock moves them to the first task.
+`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 5, Act 2.** It is
+playable from the clock to the end of the meeting (Acts 1 and 2); the LAB is not furnished yet and Act 3 comes next.
 
 Its code is under `daio7771.everytunnel.chapter2` (the client's under the same package in `src/client`): `level1.core` (plain
 Kotlin, tested), `level1.platform` (Minecraft glue) and `level1.client`, apart from the base game, which never names it (see
@@ -47,7 +46,8 @@ Everything adjustable is JSON, not code: changing a rhythm, a route or a text is
 | `speakers.json` | Rowan's loudspeakers: the zones and their ceiling speakers, the fixed lines and the pool, the cooldown, the first announcement's cinematic | `Ch2L1SpeakersParser`, typed |
 | `npcs.json` | The factory's people: sixteen workers with their routines, the groups (the lockers' one) and how alive they look (`life`) | `Ch2L1NpcsParser`, typed |
 | `patrols.json` | The patrols | Empty (`{}`) until the phase that builds them gives it its reader |
-| `cutscenes/meeting.json`, `cutscenes/office.json` | The two cinematics | The same |
+| `cutscenes/meeting.json` | Act 2: following the coworker and the meeting | `Ch2L1Act2Parser`, typed |
+| `cutscenes/office.json` | The office's cinematic (phase 8) | The same |
 
 The jar holds the defaults, in `data/every_tunnel/ch2/l1/`. **To tune without rebuilding**, put a file of the same name in
 the game's config folder, `config/every_tunnel/ch2/l1/` (in a development run, `run/config/...`), and run `/et reload`.
@@ -282,6 +282,41 @@ twice, like the others. The other announcements have no bands: the chime, the vo
 `/et ch2 l1 tasks` shows how far the player is and anything `tasks.json` or `speakers.json` names that `anchors.json` does not have
 (`level1.core.Ch2L1Wiring`, which `/et reload` also reports).
 
+## Act 2: the coworker and the meeting
+
+`chapter2.level1.platform.Ch2L1Act2Hooks` runs it, from `cutscenes/meeting.json` (`Ch2L1Act2`, read by `Ch2L1Act2Parser`; every key
+optional; the anchors and paths it names are checked by `Ch2L1Wiring`):
+
+- **Waiting** (`ACT1_TASK3`): the coworker (skin `coworker`) is put at `coworker_wait`, the corner of the ring by the broom, while the
+  player is still in the LAB, and stands there arms crossed, his eyes on the player while they sweep.
+- **Following** (`ACT2_FOLLOW`, when the last spot is swept): he says `follow_01` from where he stands (a voice of the level like any
+  other: its subtitles show) and, when it ends, walks `coworker_route` (the ring, the main corridor, the lockers' second door) to
+  `meeting_coworker`, opening the doors in his way (`Ch2L1Doors`). `Ch2L1Follow` (plain Kotlin, tested) decides each tick: a player farther than
+  `lag_blocks` and not ahead of him lags, so he stops, turns and waits; after `remind_after_seconds` of it he says `follow_02` or
+  `follow_03`, in turns, then not again for `remind_cooldown_seconds`. The guide arrow floats over his head only when the player is
+  farther than `arrow_beyond_blocks` or cannot see him (`Ch2L1Guide.follow`). Meanwhile the meeting's group (`npcs.json`'s `taquillas`)
+  stands waiting in the lockers, and worker_a's and worker_b's ambient doubles leave the LAB as soon as nobody sees them (`npcs.json`'s
+  `until`, `Ch2L1Npcs.retire`).
+- **The meeting** (`ACT2_MEETING`, when the player is in `taquillas_trigger` with him there or close behind): the player is put at
+  `meeting_player` and held, and the scene plays on their client (`ch2l1_meeting_start`: the frame and the door they came in by;
+  `Ch2L1MeetingView`). It is built from the data on both sides (`Ch2L1MeetingScene`, plain Kotlin, tested): the camera is the player's
+  own eyes, turning smoothly (`turn_seconds`) to whoever speaks (`meeting_01` to `15` in order, `gap_seconds` apart; a speaker's place is
+  the coworker's spot or that of the group's member with their skin), and to the door for `door_seconds` after `door_after`. Its subtitles
+  go a cue at a time after the speaker's name (`CutsceneView.Kind.subtitleText` and `speakerAt`). On the same ticks the server directs the
+  people (`FactoryNpcEntity.direction`): everyone looks at the speaker, and now and then each glances at the door (`Ch2L1Glances`); the
+  speaker gestures (`TALKING`), worker_a trembles in `tremble_lines`, worker_b shakes laughing in `laugh_lines`; those in `crossed_arms`
+  listen with their arms crossed, shifting their weight; the member nearest the door walks to `<door>_inside` and shuts it; and as the
+  coworker reaches "Take this" (`card_line`, `card_sentence`) he holds his arm out (`OFFERING`) and the player gets the **lab badge's copy**
+  (`lab_badge_copy`, Chapter 1's keycard recoloured by `tools/blocks/generate.py`; it opens only the auxiliary lab's door, phase 6).
+- **The end**: when the last line ends everyone leaves along `meeting_leave`, the coworker first, the rest one by one
+  (`leave_gap_seconds`), the door opening before them, each gone as soon as the player cannot see them; the bands go and the state is
+  `ACT3_EXPLORE`. **Skipping** (`ch2l1_meeting_skip`) ends it at once with the same state: the badge given, the player at
+  `taquillas_exit`, the coworker and the group gone, the door open.
+
+Reaching a state by command does what it means: `ACT1_TASK3` puts him by the broom, `ACT2_FOLLOW` starts the walk from there, `ACT2_MEETING`
+starts the meeting at once, a later state gives the badge and takes everyone away, an earlier one takes him and the badge away. The walk
+and the meeting are kept in memory and picked up again from the state after leaving the world.
+
 ## Debug commands
 
 `level1.platform.Ch2L1Commands`, operator level 2, **development runs only** (as [Debugging](debugging.md) explains for
@@ -329,4 +364,4 @@ character) come with the phase that gives them, and will run on the command too,
 `Ch2L1StateTest` (the order, `next`, `parse`), `Ch2L1AnchorsParserTest` (the format, every kind of problem) and
 `Ch2L1DataTest` (the jar's files, which copy wins, the fallbacks), `Ch2L1VoicesTest` (the 32 lines, their sound events, Oggs
 and cues, the texts in both languages) `Ch2L1SkinsTest` (the skins' format) and `Ch2L1ObjectivesTest` (one objective per step, in both languages) and `Ch2L1MapPlanTest` (the plan's blocks and doors, the
-anchors standing on its floors), all in `chapter2/level1/core`; `Ch2L1NpcsTest` (the people's file, the routines and a typist's, a walker's and a stuck one's every tick), `Ch2L1NpcLifeTest` (the `life` keys and a worker's pace, easing in and braking, slowing for a turn, lingering, where the eyes go and the player's look with its cooldown, pairing for a talk and the turns in it), `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule, and that a schedule made for an old game is replaced when the progress goes back: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say, that the lockers' room has its lockers and no camera, that every other space has one and that every worker and route stands on the floor. `Ch2PlayerProgressTest` covers the state, the flag and the counters in the chapter's progress, and `ChapterBoundaryTest` that no code outside `chapter2` names it.
+anchors standing on its floors), all in `chapter2/level1/core`; `Ch2L1NpcsTest` (the people's file, the routines and a typist's, a walker's and a stuck one's every tick), `Ch2L1Act2Test` (the meeting file and its wiring, the coworker leading and waiting and his reminders, the meeting's lines, door and badge, the glances, the arrow over him), `Ch2L1NpcLifeTest` (the `life` keys and a worker's pace, easing in and braking, slowing for a turn, lingering, where the eyes go and the player's look with its cooldown, pairing for a talk and the turns in it), `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule, and that a schedule made for an old game is replaced when the progress goes back: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say, that the lockers' room has its lockers and no camera, that every other space has one and that every worker and route stands on the floor. `Ch2PlayerProgressTest` covers the state, the flag and the counters in the chapter's progress, and `ChapterBoundaryTest` that no code outside `chapter2` names it.

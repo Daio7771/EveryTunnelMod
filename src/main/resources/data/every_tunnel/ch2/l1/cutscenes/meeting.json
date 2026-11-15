@@ -1,1 +1,20 @@
-{}
+{
+  "follow": {
+    "wait": "coworker_wait", "route": "coworker_route",
+    "opening_line": "follow_01", "reminders": ["follow_02", "follow_03"],
+    "lag_blocks": 6, "remind_after_seconds": 12, "remind_cooldown_seconds": 20,
+    "arrow_beyond_blocks": 10
+  },
+  "meeting": {
+    "zone": "taquillas_trigger", "group": "taquillas", "coworker": "meeting_coworker", "player": "meeting_player",
+    "doors": ["lockers_door_1", "lockers_door_2"],
+    "lines": ["meeting_01", "meeting_02", "meeting_03_a", "meeting_04_b", "meeting_05", "meeting_06_a", "meeting_07", "meeting_08_b",
+              "meeting_09", "meeting_10_a", "meeting_11", "meeting_12", "meeting_13", "meeting_14_b", "meeting_15"],
+    "gap_seconds": 0.5, "turn_seconds": 0.6, "fly_in_seconds": 1, "fly_out_seconds": 1,
+    "door_after": "meeting_01", "door_seconds": 3.5,
+    "card_line": "meeting_12", "card_sentence": 1,
+    "tremble_lines": ["meeting_03_a"], "laugh_lines": ["meeting_04_b"],
+    "glance_every_seconds": [6, 12], "glance_seconds": [1, 1.8], "crossed_arms": [2, 5],
+    "leave_path": "meeting_leave", "leave_gap_seconds": [1.5, 3], "exit": "taquillas_exit"
+  }
+}

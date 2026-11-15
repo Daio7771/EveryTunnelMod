@@ -793,6 +793,25 @@ def water_bottle_tex(rng):
     return img
 
 
+def lab_badge_copy_tex(rng):
+    """Item (Chapter 2): the copy of a lab badge the coworker hands over: Chapter 1's keycard recoloured, its band lab green, the
+    card a little yellowed (a copy), the chip a dull silver."""
+    img = keycard_tex(rng)
+    swap = {
+        (66, 96, 140, 255): (58, 132, 104, 255),      # band
+        (44, 66, 100, 255): (38, 96, 74, 255),        # band edge
+        (230, 233, 236, 255): (226, 224, 210, 255),   # card
+        (204, 166, 72, 255): (168, 172, 176, 255),    # chip
+        (168, 132, 52, 255): (128, 132, 138, 255),
+    }
+    for y in range(16):
+        for x in range(16):
+            c = img.getpixel((x, y))
+            if c in swap:
+                img.putpixel((x, y), swap[c])
+    return img
+
+
 def keycard_tex(rng):
     """Item: the guard's keycard on a black lanyard clip: a white plastic card with a
     blue-grey band, a photo, name lines and a gold chip."""
@@ -4075,7 +4094,7 @@ def main():
                           ("record_still_water", lambda g: record_tex(g, (70, 110, 190))), ("record_chefs_plate", lambda g: record_tex(g, (150, 50, 60))),
                           ("reel_87", reel_tex), ("reel_94", reel_tex), ("reel_102", reel_tex), ("reel_120", reel_tex),
                           ("dart", dart_tex), ("master_card", master_card_tex), ("master_key", master_key_tex),
-                          ("wrench", wrench_tex), ("detector", detector_tex), ("broom", broom_tex),
+                          ("wrench", wrench_tex), ("detector", detector_tex), ("broom", broom_tex), ("lab_badge_copy", lab_badge_copy_tex),
                           *((f"fuse_{amps}a", lambda g, i=i: fuse_item_tex(g, i)) for i, amps in enumerate(FUSE_AMPS)),
                           *((f"reagent_{i + 1}", lambda g, i=i: reagent_item_tex(g, i)) for i in range(4)),
                           ("master_card_nw", lambda g: card_tex(g, 0, 0)), ("master_card_ne", lambda g: card_tex(g, 1, 0)),

@@ -390,6 +390,8 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `level1/core/Ch2L1Tasks.kt` | The tasks' file (`tasks.json`), its parser, `Ch2L1Bits` (sets of things as the bits of an Int) and `HoldTracker` (a click held on one target) |
 | `level1/core/Ch2L1Speakers.kt` | The loudspeakers' file (`speakers.json`), its parser and `Ch2L1SpeakerSchedule`: what plays when, by the plan's rules, with no clock of its own |
 | `level1/core/Ch2L1IntroScene.kt` | The first announcement's cinematic: shots from anchors, in the machinery of the other scenes |
+| `level1/core/Ch2L1Act2.kt` | Act 2's file (`cutscenes/meeting.json`), its parser, and `Ch2L1Follow`: the coworker leading the way, waiting for a player who lags and reminding them |
+| `level1/core/Ch2L1Meeting.kt` | The meeting as a scene (`Ch2L1MeetingScene`: the eyes turning to each speaker, the door, the badge's tick) and `Ch2L1Glances` (the listeners' glances at the door) |
 | `level1/core/Ch2L1Npcs.kt` | The factory's people: `npcs.json`, its parser, a routine's steps with their anchors looked up, and `Ch2L1RoutineRunner`, what a person does each tick |
 | `level1/core/Ch2L1NpcLife.kt` | What makes the factory's people look alive (`npcs.json`'s `life`): `Ch2L1Gait` (eased walking and turning), `Ch2L1Gaze` (where the head looks), `Ch2L1Chat` (talks between two), `Ch2L1Pose` |
 | `level1/core/Ch2L1Guide.kt` | Where the guide arrow points in each step (the clock, the tubes, the terminal, the analyzer, the broom, the dirt), the nearest of them, when it hides |
@@ -410,6 +412,8 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `level1/platform/Ch2L1TaskHooks.kt` | The three tasks of Act 1: the uses, the counters in the progress, the packets, and the world's props following the state |
 | `level1/platform/Ch2L1SpeakerHooks.kt` | Rowan's loudspeakers: one schedule for each player, the chime and the voice from the zone's ceiling speaker |
 | `level1/platform/Ch2L1IntroHooks.kt` | The first announcement's cinematic on the server: holds the player, the chime, the end or the skip |
+| `level1/platform/Ch2L1Act2Hooks.kt` | Act 2 on the server: the coworker waiting and leading, the group, the meeting directed tick by tick, the badge, everyone leaving, the skip |
+| `level1/platform/Ch2L1Doors.kt` | The factory's doors as its people use them: opened in their way, a doorway shut or opened round a place |
 | `level1/platform/FactoryNpcEntity.kt` | A person of Chapter 2's Level 1 (Rowan, the coworker, the workers): one entity type, its synced skin tells them apart; a worker follows its routine tick by tick (eased walking, its own pace), its head looks about on its own, and its synced pose says if it types, talks or listens; a kept creature |
 | `level1/platform/Ch2L1Npcs.kt` | The factory's people: the workers put in while the level is played and the LAB's taken out, the talks between pairs, the groups, and the developer's `/et ch2 l1 npc` |
 
@@ -423,6 +427,7 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `prologue/client/ScientistRenderer.kt` | GeckoLib renderer for the prologue's scientist, turned to his yaw; `ScientistModel` draws him as the man, in his sick skin or, once changed, as the Level 2 Pale man (eyes glowing) |
 | `level1/client/Ch2L1Client.kt` | What the client knows of Chapter 2's Level 1: whether the local player is in it, their state, the objective to show (from their progress) |
 | `level1/client/Ch2L1IntroView.kt` | The Level 1 first announcement on the client: its `CutsceneView.Kind` and its packets |
+| `level1/client/Ch2L1MeetingView.kt` | The meeting on the client: its `CutsceneView.Kind` (subtitles a cue at a time after each speaker's name) and its packets |
 | `level1/client/Ch2L1Subtitles.kt` | The subtitles of Chapter 2's Level 1 voices, shown whenever one plays (a listener on the sound manager; always on) |
 | `level1/client/ObjectivePanel.kt` | Chapter 2's Level 1 objective panel: top right, small, fades in when the objective changes, with the count of a task ("(1/3)") |
 | `level1/client/HoldBar.kt` | The bar of a task that takes a held click (the analyzer, the dirt), under the crosshair |

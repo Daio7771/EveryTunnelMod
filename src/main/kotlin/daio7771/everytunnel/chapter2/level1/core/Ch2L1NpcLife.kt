@@ -26,7 +26,19 @@ enum class Ch2L1Pose {
     TALKING,
 
     /** Listening to someone: a nod now and then. */
-    LISTENING;
+    LISTENING,
+
+    /** Talking and shaking with fear (the meeting's stammering worker). */
+    TREMBLING,
+
+    /** Shaking with laughter, hands on the belly. */
+    LAUGHING,
+
+    /** Arms crossed, shifting from one foot to the other: waiting, uneasy. */
+    ARMS_CROSSED,
+
+    /** One arm held out, handing something over. */
+    OFFERING;
 
     companion object {
         fun of(ordinal: Int): Ch2L1Pose = values().getOrElse(ordinal) { NONE }

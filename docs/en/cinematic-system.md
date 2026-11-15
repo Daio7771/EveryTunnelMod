@@ -250,8 +250,8 @@ order:
    `core/cutscene` for the base game or in the chapter's own `core` (Chapter 2's prologue: `chapter2/prologue/core`), and a
    test for its timing (`CutsceneTest`, `PrologueTest`).
 2. A `CutsceneView.Kind` and its start and end packets: in `CutsceneView.register` for the base game; a later chapter makes its
-   own `Kind` in its client (overriding `started`, `ticked`, `stopped`, `shake`, `flash`, `vignette`, `endsOnBlack` as it needs:
-   `PrologueView`, `Ch2L1IntroView`) and calls `CutsceneView.start` and `stop` from its own packet receivers. The start packet
+   own `Kind` in its client (overriding `started`, `ticked`, `stopped`, `shake`, `flash`, `vignette`, `endsOnBlack`, `subtitleText`, `speakerAt` as it needs:
+   `PrologueView`, `Ch2L1IntroView`, `Ch2L1MeetingView`) and calls `CutsceneView.start` and `stop` from its own packet receivers. The start packet
    carries the scene's frame.
 3. A hook like `DirectorSceneHooks` or `PrologueSceneHooks`: a trigger, holding the player and refusing damage,
    one `finish` for the end and for a skip, the state afterwards, and what happens if the player leaves or the

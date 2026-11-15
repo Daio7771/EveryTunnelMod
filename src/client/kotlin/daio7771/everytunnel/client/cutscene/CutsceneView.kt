@@ -19,6 +19,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.gui.screen.MessageScreen
 import net.minecraft.client.gui.screen.TitleScreen
+import net.minecraft.client.resource.language.I18n
 import net.minecraft.client.option.Perspective
 import net.minecraft.client.sound.PositionedSoundInstance
 import net.minecraft.client.sound.SoundInstance
@@ -81,6 +82,12 @@ object CutsceneView {
         open fun flash(t: Double): Double = 0.0
 
         open fun vignette(t: Double): Double = 0.0
+
+        /** The subtitle's text at tick [t], already translated, instead of the timeline's (null: the timeline's, if any). */
+        open fun subtitleText(t: Double): String? = null
+
+        /** The lang key of the speaker's name before the subtitle at tick [t] (a scene with several speakers changes it). */
+        open fun speakerAt(t: Double): String? = speaker
     }
 
     /** The director's scene of Chapter 1's Level 5. */
@@ -192,12 +199,15 @@ object CutsceneView {
     /** How far the bands are in, at this frame. */
     fun bands(tickDelta: Float): Double = kind.timeline().cutscene.bands(tick + tickDelta.toDouble())
 
-    /** The lang key of the subtitle on screen at this frame, or null. */
-    fun subtitle(tickDelta: Float): String? =
-        if (skippedAt != 0L) null else kind.timeline().subtitleAt(tick + tickDelta.toDouble())?.key
+    /** The subtitle on screen at this frame (translated), or null. */
+    fun subtitle(tickDelta: Float): String? {
+        if (skippedAt != 0L) return null
+        val t = tick + tickDelta.toDouble()
+        return kind.subtitleText(t) ?: kind.timeline().subtitleAt(t)?.key?.let { I18n.translate(it) }
+    }
 
     /** The lang key of the speaker's name to show before the subtitles, or null for none. */
-    fun speaker(): String? = kind.speaker
+    fun speaker(): String? = kind.speakerAt(tick.toDouble())
 
     /** The title the scene types on its black, if it has one, and this frame's tick (fractional). */
     fun title(): TitleCue? = kind.timeline().title

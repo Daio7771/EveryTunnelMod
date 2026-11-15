@@ -138,6 +138,7 @@ object Ch2L1 {
     /** [player] is out of the level: the survival rules of the rest of the game apply to them again. */
     fun leave(player: ServerPlayerEntity) {
         Ch2Progress.setCh2L1Active(player, false)
+        Ch2L1Act2Hooks.forget()
         Ch2L1Npcs.clear(player.server)
         EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} leaves", player.gameProfile.name)
     }

@@ -2,6 +2,7 @@ package daio7771.everytunnel.chapter2
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1IntroView
+import daio7771.everytunnel.chapter2.level1.client.Ch2L1MeetingView
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1Subtitles
 import daio7771.everytunnel.chapter2.level1.client.FactoryNpcRenderer
 import daio7771.everytunnel.chapter2.level1.client.HoldBar
@@ -21,7 +22,7 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactories
 
 /**
  * Chapter 2's client entrypoint, declared in `fabric.mod.json` after the base game's (`client.EveryTunnelClient`): its scenes for the
- * cutscene view ([PrologueView], [Ch2L1IntroView]), its Level 1's HUD (subtitles, objective panel, hold bar), the guide arrow and
+ * cutscene view ([PrologueView], [Ch2L1IntroView], [Ch2L1MeetingView]), its Level 1's HUD (subtitles, objective panel, hold bar), the guide arrow and
  * NonameOS, its people's and cameras' renderers and its blocks' render layers.
  */
 object Chapter2Client : ClientModInitializer {
@@ -29,6 +30,7 @@ object Chapter2Client : ClientModInitializer {
     override fun onInitializeClient() {
         PrologueView.register()
         Ch2L1IntroView.register()
+        Ch2L1MeetingView.register()
         Ch2L1Subtitles.register()
         ObjectivePanel.register()
         HoldBar.register()

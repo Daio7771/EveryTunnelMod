@@ -618,5 +618,6 @@
   "block.every_tunnel.predecessor_locker": "Taquilla del predecesor",
   "block.every_tunnel.radiation_counter": "Contador de radiación",
   "block.every_tunnel.voice_recorder": "Grabadora de voz",
-  "block.every_tunnel.tube_rack": "Gradilla de tubos"
+  "block.every_tunnel.tube_rack": "Gradilla de tubos",
+  "item.every_tunnel.lab_badge_copy": "Copia de tarjeta del laboratorio"
 }
