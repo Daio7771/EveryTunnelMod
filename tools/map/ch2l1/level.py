@@ -316,12 +316,10 @@ WALL_TEXTS = [
     ((69, 2, 30), "north", "every_tunnel.ch2.l1.sign.basement", "lab"),
 ]
 
-# Scrawls on the basement's walls (wall_message blocks, in chalk: cell, the way the text faces, its lang key, a line's height in blocks,
-# degrees off level). Always there, always in English; the chalk is black on a white wall and white on a dark one (Level.chalk).
+# Scrawls on the basement's walls (wall_message blocks, in chalk; for now only the "???" over the terminal: cell, the way the text faces, its lang key, a line's height in blocks,
+# degrees off level). Always there, always in English; the chalk is black on a wall that looks white and white on one that looks dark,
+# as the basement's do (Level.chalk).
 WALL_MESSAGES = [
-    ((68, BASEMENT_Y + 2, 62), "north", "every_tunnel.ch2.l1.scrawl.1", 0.6, -3.0),
-    ((63, BASEMENT_Y + 2, 45), "east", "every_tunnel.ch2.l1.scrawl.2", 0.55, 2.0),
-    ((88, BASEMENT_Y + 2, 53), "west", "every_tunnel.ch2.l1.scrawl.3", 0.55, -1.5),
     ((78, BASEMENT_Y + 3, 62), "north", "every_tunnel.ch2.l1.scrawl.terminal", 0.7, 4.0),
 ]
 
@@ -562,10 +560,11 @@ class Level:
         return shell
 
     def chalk(self, cell, facing):
-        """The chalk a scrawl at `cell`, its text facing `facing`, is written in: black on a white wall, white on a darker one."""
+        """The chalk a scrawl at `cell`, its text facing `facing`, is written in: black on a wall that looks white, white on one that looks
+        dark. Underground the white concrete reads as a strong grey in the game's light (the basement's), so there it is white too."""
         dx, dz = {"north": (0, 1), "south": (0, -1), "east": (-1, 0), "west": (1, 0)}[facing]
         wall = self.shell.get((cell[0] + dx, cell[1], cell[2] + dz))
-        return "black" if wall == "wall" else "white"
+        return "black" if wall == "wall" and cell[1] >= 0 else "white"
 
     # --- lights -----------------------------------------------------------------------
 

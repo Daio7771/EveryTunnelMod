@@ -125,8 +125,9 @@ again over what is there, and **`/et ch2 l1 unbuild` empties the area: do it bef
 **Text on walls.** The plan's `texts` say what each of its `wall_text` blocks (Level 3's nameplates) says, a lang key in a style;
 `Ch2L1Build` writes them on the blocks' entities once the build is done (chamber 02's label, the portrait's plaque, the landing's two
 signs). Its `messages` do the same for its `wall_message` blocks (scrawls in chalk: a lang key, a line's height, an angle, the chalk's
-colour), the four on the basement's walls. They are always in English (their Spanish texts are the English ones), and the generator
-picks the chalk from the wall behind: black on a white wall, white on a dark one (`Level.chalk`; `wall_chalk`, the painted font's chalk
+colour): the "???" over the basement's terminal. Scrawls are always in English (their Spanish texts are the English ones), and the generator
+picks the chalk from the wall behind: black on a wall that looks white, white on one that looks dark, as the basement's white concrete does
+in its light (`Level.chalk`; `wall_chalk`, the painted font's chalk
 version from `tools/gui/wall_font.py`, with no drips).
 
 **Not there yet:** furniture (it comes with the phase that needs it: the bench with the tubes, the terminal and the analyzer, the broom, the dirt
@@ -447,7 +448,7 @@ The LAB will have two more tasks once Level 1 is decorated.
 - **The basement**, where everything is stored, is a store kept in order and well lit (a lamp every 4 blocks; the stairs have one every
   other step): two blocks of metal shelves three high, four rows of six each, a wide aisle between them from the stairs to the south wall,
   things brought from Chapter 1's Noname complex on the shelves' tops and the walls (the director's mask, a trophy, a lounge painting, a
-  diploma...), the wet floor sign, three chalk scrawls, and, at the end of the middle aisle, standing free against the south wall, a NonameOS
+  diploma...), the wet floor sign, and, at the end of the middle aisle, standing free against the south wall, a NonameOS
   terminal under a chalk "???" (see Act 3's computers: the strange recording and a ciphered note). The broom leans by
   the foot of the stairs; its eight patches of dirt are swept as task 3's are (`basement_broom_block`, `basement_dirt_spots`, the counters
   `basement_broom` and `basement_swept`, the guide arrow over the next one).

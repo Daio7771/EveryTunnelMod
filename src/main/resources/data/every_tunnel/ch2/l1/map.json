@@ -63,15 +63,12 @@
   {"from":[70,-6,36],"to":[72,-6,36],"block":"minecraft:polished_andesite_stairs[facing=north,half=bottom,shape=straight,waterlogged=false]"},
   {"from":[65,-6,43],"to":[70,-6,43],"block":"every_tunnel:metal_shelf[facing=south,down=true,up=false]"},
   {"from":[81,-6,43],"to":[86,-6,43],"block":"every_tunnel:metal_shelf[facing=south,down=true,up=false]"},
-  {"from":[63,-6,45],"to":[63,-6,45],"block":"every_tunnel:wall_message[facing=east]"},
   {"from":[65,-6,47],"to":[70,-6,47],"block":"every_tunnel:metal_shelf[facing=south,down=true,up=false]"},
   {"from":[81,-6,47],"to":[86,-6,47],"block":"every_tunnel:metal_shelf[facing=south,down=true,up=false]"},
   {"from":[65,-6,51],"to":[70,-6,51],"block":"every_tunnel:metal_shelf[facing=south,down=true,up=false]"},
   {"from":[81,-6,51],"to":[86,-6,51],"block":"every_tunnel:metal_shelf[facing=south,down=true,up=false]"},
-  {"from":[88,-6,53],"to":[88,-6,53],"block":"every_tunnel:wall_message[facing=west]"},
   {"from":[65,-6,55],"to":[70,-6,55],"block":"every_tunnel:metal_shelf[facing=south,down=true,up=false]"},
   {"from":[81,-6,55],"to":[86,-6,55],"block":"every_tunnel:metal_shelf[facing=south,down=true,up=false]"},
-  {"from":[68,-6,62],"to":[68,-6,62],"block":"every_tunnel:wall_message[facing=north]"},
   {"from":[69,-5,33],"to":[73,-5,33],"block":"minecraft:white_concrete"},
   {"from":[69,-5,34],"to":[69,-5,37],"block":"minecraft:white_concrete"},
   {"from":[70,-5,34],"to":[72,-5,34],"block":"minecraft:light_gray_concrete"},
@@ -1374,9 +1371,6 @@
   {"at":[69,2,30],"text":"every_tunnel.ch2.l1.sign.basement","style":"lab"}
  ],
  "messages": [
-  {"at":[68,-6,62],"text":"every_tunnel.ch2.l1.scrawl.1","size":0.6,"rotation":-3.0,"chalk":"black"},
-  {"at":[63,-6,45],"text":"every_tunnel.ch2.l1.scrawl.2","size":0.55,"rotation":2.0,"chalk":"black"},
-  {"at":[88,-6,53],"text":"every_tunnel.ch2.l1.scrawl.3","size":0.55,"rotation":-1.5,"chalk":"black"},
-  {"at":[78,-5,62],"text":"every_tunnel.ch2.l1.scrawl.terminal","size":0.7,"rotation":4.0,"chalk":"black"}
+  {"at":[78,-5,62],"text":"every_tunnel.ch2.l1.scrawl.terminal","size":0.7,"rotation":4.0,"chalk":"white"}
  ]
 }

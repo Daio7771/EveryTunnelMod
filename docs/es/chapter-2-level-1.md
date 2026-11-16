@@ -129,9 +129,9 @@ comprime también los archivos de región, y el mapa es del Chapter 2, no del mu
 **Texto en las paredes.** Los `texts` del plan dicen qué pone cada uno de sus bloques `wall_text` (las placas del Nivel 3), una clave de
 idioma con un estilo; `Ch2L1Build` los escribe en las entidades de los bloques al acabar de construir (el rótulo de la cámara 02, la placa
 del retrato, los dos carteles del rellano). Sus `messages` hacen lo mismo con sus bloques `wall_message` (garabatos de tiza:
-una clave de idioma, la altura de una línea, un ángulo, el color de la tiza), los cuatro de las paredes del sótano. Siempre están en inglés
-(sus textos en español son los ingleses), y el generador elige la tiza según la pared de detrás: negra en una pared blanca, blanca en una
-oscura (`Level.chalk`; `wall_chalk`, la versión en tiza de la fuente pintada de `tools/gui/wall_font.py`, sin chorretones).
+una clave de idioma, la altura de una línea, un ángulo, el color de la tiza): el "???" sobre el terminal del sótano. Los garabatos siempre están en inglés
+(sus textos en español son los ingleses), y el generador elige la tiza según la pared de detrás: negra en una pared que se ve blanca, blanca en una
+que se ve oscura, como el hormigón blanco del sótano con su luz (`Level.chalk`; `wall_chalk`, la versión en tiza de la fuente pintada de `tools/gui/wall_font.py`, sin chorretones).
 
 **Todavía no hay:** mobiliario (llega con la fase que lo necesita: el banco con los tubos, el terminal, el analizador, la escoba, la suciedad y los
 altavoces de techo llegaron con la 3; las taquillas, las seis estaciones de trabajo del LAB y las cámaras con la 4; el del Acto 3 con la 6; el resto
@@ -461,7 +461,7 @@ El `overtime` de `act3.json` (`level1.core.Ch2L1Overtime`), la tarea de las hora
 - **El sótano**, donde se guarda todo, es un almacén ordenado y bien iluminado (una lámpara cada 4 bloques; la escalera, una cada dos
   escalones): dos bloques de estanterías metálicas de tres alturas, cuatro filas de seis cada uno, un pasillo ancho entre ellos desde la
   escalera hasta la pared sur, cosas traídas del complejo Noname del Chapter 1 encima de las estanterías y en las paredes (la máscara del
-  director, un trofeo, un cuadro del lounge, un diploma...), el cartel de suelo mojado, tres garabatos de tiza y, al fondo del pasillo del
+  director, un trofeo, un cuadro del lounge, un diploma...), el cartel de suelo mojado y, al fondo del pasillo del
   medio, exento contra la pared sur, un terminal de NonameOS bajo un "???" de tiza (ver los ordenadores del Acto 3: la grabación rara y una
   nota cifrada). La escoba está apoyada al pie de las escaleras; sus ocho manchas se barren como las de la tarea 3 (`basement_broom_block`,
   `basement_dirt_spots`, los contadores `basement_broom` y `basement_swept`, la flecha sobre la siguiente).
