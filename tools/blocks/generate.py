@@ -3938,13 +3938,17 @@ def build():
     for block_id, name in (("lab_ceiling_light", "Ceiling Light"), ("lab_ceiling_vent", "Ceiling Vent")):
         a.models[block_id] = model({"w": "lab_white", "f": block_id}, [el((0, 0, 0), (16, 16, 16), "w", down="f")])
         a.block(block_id, name, {"variants": {"": {"model": f"{NS}:block/{block_id}"}}}, {"parent": f"{NS}:block/{block_id}"})
-    # Chapter 2's factory after Rowan's office: the LAB's ceiling lights turned down (FACTORY_LIGHT_DIM), the diffuser a dull grey.
-    dim = ceiling_light_tex(r("factory_light_dim"))
-    dim = Image.eval(dim, lambda v: int(v * 0.42))
-    a.texture("factory_light_dim", dim, T.PLASTIC.but(smoothness=0.6, relief=0.0), tiles=False)
-    a.models["factory_light_dim"] = model({"w": "lab_white", "f": "factory_light_dim"}, [el((0, 0, 0), (16, 16, 16), "w", down="f")])
-    a.block("factory_light_dim", "Ceiling Light (Dimmed)", {"variants": {"": {"model": f"{NS}:block/factory_light_dim"}}},
-            {"parent": f"{NS}:block/factory_light_dim"})
+    # Chapter 2's factory after Rowan's office: the LAB's ceiling lights switched off (FACTORY_LIGHT_OFF, the diffuser a dead grey), and
+    # here and there a faint red emergency light (FACTORY_LIGHT_EMERGENCY).
+    off = Image.eval(ceiling_light_tex(r("factory_light_off")), lambda v: int(v * 0.32))
+    a.texture("factory_light_off", off, T.PLASTIC.but(smoothness=0.6, relief=0.0), tiles=False)
+    red = ceiling_light_tex(r("factory_light_emergency"))
+    red = Image.merge("RGB", (red.getchannel("R").point(lambda v: int(v * 0.85)), red.getchannel("G").point(lambda v: int(v * 0.18)),
+                              red.getchannel("B").point(lambda v: int(v * 0.16))))
+    a.texture("factory_light_emergency", red, ceiling_light_material, tiles=False)
+    for block_id, name in (("factory_light_off", "Ceiling Light (Off)"), ("factory_light_emergency", "Emergency Ceiling Light")):
+        a.models[block_id] = model({"w": "lab_white", "f": block_id}, [el((0, 0, 0), (16, 16, 16), "w", down="f")])
+        a.block(block_id, name, {"variants": {"": {"model": f"{NS}:block/{block_id}"}}}, {"parent": f"{NS}:block/{block_id}"})
     # By each door, a card reader, its light green.
     a.texture("lab_reader", lab_reader_tex(r("lab_reader")), T.PLASTIC.but(smoothness=0.5), tiles=False)
     prop("lab_reader", "Card Reader", {"d": "lab_steel_dark", "f": "lab_reader"},

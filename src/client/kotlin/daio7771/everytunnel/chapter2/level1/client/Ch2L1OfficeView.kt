@@ -14,8 +14,8 @@ import net.minecraft.util.math.random.Random
 
 /**
  * The office's cinematic on the client: the scene ([KIND], built by `Ch2L1OfficeHooks` from the level's data and the frame the server
- * sends) that [CutsceneView] plays: the player's own eyes, held behind the desk, following Rowan. Its subtitles go a cue at a time after
- * his name; the camera shakes a little while he walks round the player; a very low hum ([Hum], `ambient.ch2l1.office_hum`) fades in
+ * sends) that [CutsceneView] plays: the player's own eyes, held behind the desk, fixed on Rowan. Its subtitles go a cue at a time after
+ * his name; a very low hum ([Hum], `ambient.ch2l1.office_hum`) fades in
  * as his lines turn cold and out as he hands the pass over. Its end clears the level's own subtitles.
  */
 object Ch2L1OfficeView {
@@ -36,14 +36,6 @@ object Ch2L1OfficeView {
             hum = null
         }
 
-        override fun shake(n: Double): Double {
-            val built = scene() ?: return 0.0
-            val range = built.shake
-            if (range.isEmpty() || n < range.first || n > range.last) return 0.0
-            val edge = minOf(n - range.first, range.last - n).coerceAtMost(EDGE) / EDGE
-            return built.shakeAmount * edge
-        }
-
         override fun subtitleText(t: Double): String? {
             val beat = scene()?.subtitleBeatAt(t) ?: return null
             return beat.line.textAt(((t - beat.start) * 50).toLong(), I18n.translate(beat.line.textKey))
@@ -53,9 +45,6 @@ object Ch2L1OfficeView {
     }
 
     private fun scene(): Ch2L1OfficeScene.Built? = Ch2L1OfficeHooks.clientScene()
-
-    /** The shake fades in and out over this many ticks at each end. */
-    private const val EDGE = 10.0
 
     fun register() {
         ClientPlayNetworking.registerGlobalReceiver(Ch2L1OfficeHooks.START_PACKET_ID) { client, _, buf, _ ->

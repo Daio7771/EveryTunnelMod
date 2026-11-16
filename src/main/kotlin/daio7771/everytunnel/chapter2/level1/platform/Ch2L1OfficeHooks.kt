@@ -16,7 +16,9 @@ import daio7771.everytunnel.core.cutscene.Look
 import daio7771.everytunnel.core.cutscene.SceneFrame
 import daio7771.everytunnel.core.cutscene.Shot
 import daio7771.everytunnel.core.cutscene.Timeline
+import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.platform.KeptEntities
+import daio7771.everytunnel.systems.ResourceSystem
 import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.TickProfiler
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -47,13 +49,16 @@ import java.util.UUID
  *
  * - **Before the bands**: a player elsewhere in the office glides to the mark behind the desk (`glide_seconds`), facing the door; a
  *   player farther away (a command) is put there.
- * - **The scene** ([START_PACKET_ID]: the frame) plays on the client (`Ch2L1OfficeView`: the player's own eyes following Rowan). Here, on
- *   the same ticks, Rowan ([FactoryNpcEntity], skin `rowan`, put in for the scene and taken out after it) is moved along the scene's track,
- *   facing where he walks, or the door, or the player, in its poses; the door opens for him, shuts behind him and opens again as he leaves;
- *   the pass slides across the desk (an item display) and is the player's.
- * - **The end**, played or skipped ([SKIP_PACKET_ID]), is [Ch2L1State.ACT3_OVERTIME]; reaching it any way ([onState]) gives the pass, turns
- *   the LAB's lights down (its workers and the patrols are already gone: [Ch2L1Npcs], [Ch2L1PatrolHooks]) and, 3 to 5 seconds after the
- *   player has control back in a loudspeaker's zone, `rowan_loyal_a6` once. Going back before it takes the pass back and the lights up.
+ * - **The scene** ([START_PACKET_ID]: the frame) plays on the client (`Ch2L1OfficeView`: the player's own eyes fixed on Rowan). Here, on
+ *   the same ticks, Rowan ([FactoryNpcEntity], skin `rowan`, put in for the scene) is moved along the scene's track, facing where he walks,
+ *   or the door, or the player, in its poses; the door opens for him and shuts behind him; the pass slides across the desk (an item display)
+ *   and is the player's, and so is the flashlight (the level's rules give it from the overtime on: `Chapter2`).
+ * - **The end**, played or skipped ([SKIP_PACKET_ID]), is [Ch2L1State.ACT3_OVERTIME]: Rowan beside the door, which he has opened, waits
+ *   for the player to leave the office, watching them; once they are out he shuts it behind them and is gone ([Waiting]). Reaching the
+ *   overtime any way ([onState]) gives the pass and fills the flashlight's battery, leaves the LAB almost dark (its lamps off, a faint red
+ *   emergency light here and there; its workers and the patrols are already gone: [Ch2L1Npcs], [Ch2L1PatrolHooks]) and, 3 to 5 seconds
+ *   after the player has control back in a loudspeaker's zone, plays `rowan_loyal_a6` once. Going back before it takes the pass back and
+ *   the lights up.
  *
  * Server thread only.
  */
@@ -81,8 +86,18 @@ object Ch2L1OfficeHooks {
 
     private class Pending(var countdown: Int)
 
+    /** Rowan by the office's door after the scene, waiting for [player] to go. */
+    private class Waiting(val player: UUID, val rowan: FactoryNpcEntity)
+
+    /** Out of the office and this far from its door, the player has gone: Rowan shuts it. */
+    private const val GONE_FROM_DOOR = 2.5
+
+    /** One lamp in this many of the LAB stays as a faint red emergency light. */
+    private const val EMERGENCY_EVERY = 4
+
     private var glide: Glide? = null
     private var running: Running? = null
+    private var waiting: Waiting? = null
     private val a6 = HashMap<UUID, Pending>()
 
     @Volatile
@@ -109,6 +124,7 @@ object Ch2L1OfficeHooks {
         glide = null
         running?.let { cleanUp(it) }
         running = null
+        waiting = null
         a6.clear()
     }
 
@@ -133,9 +149,11 @@ object Ch2L1OfficeHooks {
         }
     }
 
-    /** What the office leaves, however it was reached: the pass, the LAB dim, a6 to come. */
+    /** What the office leaves, however it was reached: the pass, the flashlight's battery full, the LAB almost dark, a6 to come. */
     private fun after(player: ServerPlayerEntity) {
         if (!player.inventory.containsAny { it.isOf(Ch2Items.OVERTIME_PASS) }) player.giveItemStack(ItemStack(Ch2Items.OVERTIME_PASS))
+        val config = ConfigManager.gameplay
+        ResourceSystem.set(player.uuid, ResourceSystem.stateOf(player.uuid, config).copy(battery = config.flashlight.batteryMaxSeconds))
         labLights(player.serverWorld, dim = true)
         if (!Ch2L1SpeakerHooks.heard(player, A6)) a6[player.uuid] = Pending(60 + player.random.nextInt(41))
     }
@@ -145,17 +163,29 @@ object Ch2L1OfficeHooks {
         for (slot in 0 until inventory.size()) if (inventory.getStack(slot).isOf(Ch2Items.OVERTIME_PASS)) inventory.setStack(slot, ItemStack.EMPTY)
         labLights(player.serverWorld, dim = false)
         a6.remove(player.uuid)
+        if (waiting?.player == player.uuid) waiting?.let { gone(it.rowan) }
+        waiting = null
+        val resources = ResourceSystem.stateOf(player.uuid, ConfigManager.gameplay)
+        if (resources.flashlightOn) ResourceSystem.set(player.uuid, ResourceSystem.switchOff(resources))
     }
 
-    /** The LAB's ceiling lights (the plan's lamps in the zone `lab`) down to [Ch2Blocks.FACTORY_LIGHT_DIM], or back up. */
+    /**
+     * The LAB's ceiling lights (the plan's lamps in the zone `lab`) off ([Ch2Blocks.FACTORY_LIGHT_OFF]), one in [EMERGENCY_EVERY] a faint red
+     * emergency light ([Ch2Blocks.FACTORY_LIGHT_EMERGENCY]); or all back on.
+     */
     private fun labLights(world: ServerWorld, dim: Boolean) {
         val box = Ch2L1DataLoader.data.anchors.zone("lab")?.box ?: return
         val plan = Ch2L1Build.plan
-        val (from, to) = if (dim) ModBlocks.LAB_CEILING_LIGHT to Ch2Blocks.FACTORY_LIGHT_DIM else Ch2Blocks.FACTORY_LIGHT_DIM to ModBlocks.LAB_CEILING_LIGHT
-        for (cell in plan.lights) {
-            val pos = BlockPos(plan.worldX(cell.x), plan.worldY(cell.y), plan.worldZ(cell.z))
-            if (!box.contains(pos.x + 0.5, pos.y - 0.5, pos.z + 0.5) && !box.contains(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)) continue
-            if (world.getBlockState(pos).isOf(from)) world.setBlockState(pos, to.defaultState)
+        val lamps = plan.lights.map { BlockPos(plan.worldX(it.x), plan.worldY(it.y), plan.worldZ(it.z)) }
+            .filter { box.contains(it.x + 0.5, it.y - 0.5, it.z + 0.5) || box.contains(it.x + 0.5, it.y + 0.5, it.z + 0.5) }
+        for ((i, pos) in lamps.withIndex()) {
+            val state = world.getBlockState(pos)
+            val lit = state.isOf(ModBlocks.LAB_CEILING_LIGHT)
+            val dark = state.isOf(Ch2Blocks.FACTORY_LIGHT_OFF) || state.isOf(Ch2Blocks.FACTORY_LIGHT_EMERGENCY)
+            when {
+                dim && lit -> world.setBlockState(pos, (if (i % EMERGENCY_EVERY == 0) Ch2Blocks.FACTORY_LIGHT_EMERGENCY else Ch2Blocks.FACTORY_LIGHT_OFF).defaultState)
+                !dim && dark -> world.setBlockState(pos, ModBlocks.LAB_CEILING_LIGHT.defaultState)
+            }
         }
     }
 
@@ -239,6 +269,7 @@ object Ch2L1OfficeHooks {
     private fun tick(server: MinecraftServer) {
         tickGlide(server)
         tickScene(server)
+        tickWaiting(server)
         tickA6(server)
     }
 
@@ -364,10 +395,18 @@ object Ch2L1OfficeHooks {
         val r = running ?: return
         running = null
         cleanUp(r)
-        val player = server.playerManager.getPlayer(r.player) ?: return
+        val player = server.playerManager.getPlayer(r.player)
+        if (player == null) {
+            gone(r.rowan)
+            return
+        }
         if (!r.cardGiven) givePass(player)
-        // He has gone, leaving the door open.
-        Ch2L1DataLoader.data.anchors.point(spec.door)?.position?.let { Ch2L1Doors.set(player.serverWorld, Vec3d(it.x, it.y, it.z), DOOR_RADIUS, true, locked = true) }
+        // Beside the door, which he has opened, he waits for the player to go.
+        val anchors = Ch2L1DataLoader.data.anchors
+        anchors.point(spec.door)?.position?.let { Ch2L1Doors.set(player.serverWorld, Vec3d(it.x, it.y, it.z), DOOR_RADIUS, true, locked = true) }
+        anchors.point(spec.threshold)?.let { r.rowan.refreshPositionAndAngles(it.position.x, it.position.y, it.position.z, it.yaw, 0f) }
+        r.rowan.npcPose = Ch2L1Pose.NONE
+        waiting = Waiting(r.player, r.rowan)
         if (ServerPlayNetworking.canSend(player, END_PACKET_ID)) {
             val buf = PacketByteBufs.create()
             buf.writeBoolean(skipped)
@@ -380,7 +419,33 @@ object Ch2L1OfficeHooks {
     private fun cleanUp(r: Running) {
         r.card?.discard()
         r.card = null
-        gone(r.rowan)
+    }
+
+    /** Rowan by the door, watching the player until they are out; then he shuts the door behind them and is gone. */
+    private fun tickWaiting(server: MinecraftServer) {
+        val w = waiting ?: return
+        val player = server.playerManager.getPlayer(w.player)
+        if (player == null || w.rowan.isRemoved || !Ch2L1.active(player) || Ch2L1.state(player) < Ch2L1State.ACT3_OVERTIME) {
+            gone(w.rowan)
+            waiting = null
+            return
+        }
+        val anchors = Ch2L1DataLoader.data.anchors
+        val spot = anchors.point(spec.threshold)
+        val door = anchors.point(spec.door)?.position
+        val d = w.rowan.direction ?: FactoryNpcEntity.Direction().also { w.rowan.direction = it }
+        d.walkTo = spot?.position?.let { Vec3d(it.x, it.y, it.z) }
+        d.lookAt = Vec3d(player.x, player.eyeY, player.z)
+        d.face = Ch2L1Angles.yawOf(player.x - w.rowan.x, player.z - w.rowan.z)
+        d.pose = Ch2L1Pose.NONE
+        val inside = anchors.zone("office")?.box?.contains(player.x, player.y, player.z) == true
+        val far = door == null || player.squaredDistanceTo(door.x, door.y, door.z) > GONE_FROM_DOOR * GONE_FROM_DOOR
+        if (!inside && far) {
+            door?.let { Ch2L1Doors.set(player.serverWorld, Vec3d(it.x, it.y, it.z), DOOR_RADIUS, false, w.rowan, locked = true) }
+            gone(w.rowan)
+            waiting = null
+            EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} has left the office; Rowan shuts the door", player.gameProfile.name)
+        }
     }
 
     private fun gone(npc: FactoryNpcEntity) {

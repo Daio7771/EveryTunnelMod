@@ -78,8 +78,9 @@ object Ch2Blocks {
     val FILM_CAMERA: Block = register("film_camera", PropBlock(ModBlocks.props(MapColor.BLACK, ModSoundGroups.METAL_PIPE), listOf(box(5, 0, 5, 11, 16, 11))))
     val ROWAN_PORTRAIT: Block = register("rowan_portrait", PortraitBlock(ModBlocks.props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(0, 0, 15, 16, 16, 16))))
 
-    /** The LAB's ceiling lights after Rowan's office (`Ch2L1OfficeHooks`): the same lamp turned down, a dull grey glow. */
-    val FACTORY_LIGHT_DIM: Block = register("factory_light_dim", Block(ModBlocks.props(MapColor.WHITE, ModSoundGroups.PLASTIC).luminance { 4 }))
+    /** The LAB's ceiling lights after Rowan's office (`Ch2L1OfficeHooks`): the lamp switched off, and a faint red emergency one here and there. */
+    val FACTORY_LIGHT_OFF: Block = register("factory_light_off", Block(ModBlocks.props(MapColor.GRAY, ModSoundGroups.PLASTIC)))
+    val FACTORY_LIGHT_EMERGENCY: Block = register("factory_light_emergency", Block(ModBlocks.props(MapColor.RED, ModSoundGroups.PLASTIC).luminance { 4 }))
 
     /** The lab door's look (it borrows its models), for the factory: a pair of leaves opens and shuts at once by hand. */
     val FACTORY_DOOR: Block = register("factory_door", LinkedDoorBlock(ModBlocks.door(), ModBlocks.SERVICE_DOOR))

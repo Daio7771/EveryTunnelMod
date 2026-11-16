@@ -133,5 +133,6 @@
   "every_tunnel.ch2.l1.guard_caught": "Se acabó. Vuelve al trabajo y quédate donde te toca.",
   "every_tunnel.ch2.l1.caught": "Te han pillado.",
   "item.every_tunnel.overtime_pass": "Pase de horas extra sin pagar",
-  "block.every_tunnel.factory_light_dim": "Luz de techo (atenuada)"
+  "block.every_tunnel.factory_light_off": "Luz de techo (apagada)",
+  "block.every_tunnel.factory_light_emergency": "Luz de emergencia de techo"
 }

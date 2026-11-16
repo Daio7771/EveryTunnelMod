@@ -2,6 +2,7 @@ package daio7771.everytunnel.chapter2
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1
+import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Act2Hooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Act3Hooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1OfficeHooks
@@ -36,13 +37,22 @@ object Chapter2 : ModInitializer {
     /** While playing Chapter 2's Level 1: no flashlight, no hiding, nothing hurts, silent steps, no status bars. */
     private val LEVEL1_RULES = PlayerRules.Rules(flashlight = false, hiding = false, safe = true, noise = false, statusBars = false)
 
+    /** After Rowan's office the LAB is dark, and he has handed the flashlight over with the pass: the same, but with the flashlight. */
+    private val LEVEL1_OVERTIME_RULES = LEVEL1_RULES.copy(flashlight = true)
+
     override fun onInitialize() {
         Ch2Items.register()
         Ch2Blocks.register()
         Ch2Entities.register()
         Ch2Sounds.register()
         Ch2Progress.register()
-        PlayerRules.register { player -> if (Ch2L1.active(player)) LEVEL1_RULES else null }
+        PlayerRules.register { player ->
+            when {
+                !Ch2L1.active(player) -> null
+                Ch2L1.state(player) >= Ch2L1State.ACT3_OVERTIME -> LEVEL1_OVERTIME_RULES
+                else -> LEVEL1_RULES
+            }
+        }
         ChapterRequest.onLoaded(2, PrologueSceneHooks::startFromMenu)
         Ch2L1DataLoader.register()
         Ch2L1.register()

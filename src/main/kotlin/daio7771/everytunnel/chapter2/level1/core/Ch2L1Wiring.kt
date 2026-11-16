@@ -66,7 +66,7 @@ object Ch2L1Wiring {
         }
         if (office != null) {
             val file = "cutscenes/office.json"
-            for (id in listOf(office.playerMark, office.door, office.spawn, office.doorway, office.threshold, office.lean, office.exit, office.cardFrom, office.cardTo) + office.round) {
+            for (id in listOf(office.playerMark, office.door, office.spawn, office.doorway, office.threshold, office.deskFront, office.cardFrom, office.cardTo)) {
                 point(file, id)
             }
         }

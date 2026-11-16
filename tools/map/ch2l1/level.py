@@ -607,18 +607,15 @@ def named_places(level):
     add("paper_contract_14", 35.5, 82.5, 180, True, y=1.0)
     add("painting", PORTRAIT[0][0] + 0.5, PORTRAIT[0][2] + 0.5, 90, False, y=float(PORTRAIT[0][1]))
     # The office's cinematic (phase 8): the player held behind the desk at Rowan's computer, facing the door; Rowan's way in (from the
-    # corridor through the doorway to just inside), round the desk to the player's side, to the desk's east corner where he leans, and
-    # out to the corridor's east; the pass he slides across the desk to the player.
+    # corridor through the doorway to his place just inside, beside the door, where he talks and then waits for the player to go), the
+    # front of the desk where he slides the pass across it to the player.
     add("office_player_mark", 35.0, 83.6, 180, False)
-    add("card_slide_start", 35.9, 82.5, 0, False, y=1.02)
-    add("card_slide_end", 35.3, 82.9, 0, False, y=1.02)
+    add("card_slide_start", 35.0, 82.15, 0, False, y=1.02)
+    add("card_slide_end", 35.1, 82.85, 0, False, y=1.02)
     add("rowan_spawn", 32.5, 76.5, 0, False)
     add("rowan_doorway", 32.0, 78.5, 0, False)
-    add("rowan_threshold", 32.0, 79.8, 0, False)
-    add("rowan_round_1", 37.6, 80.4, 0, False)
-    add("rowan_round_2", 37.4, 83.4, 90, False)
-    add("rowan_lean", 36.4, 82.5, 90, False)
-    add("rowan_exit", 38.5, 76.0, -90, False)
+    add("rowan_threshold", 30.4, 79.7, -90, False)
+    add("rowan_desk_front", 35.0, 81.2, 0, False)
     add("restricted_door_east", 61.0, 75.5, -90, False)
     add("sealed_door", 62.0, 28.0, -90, False)
     add("patrol_a_pause", 36.0, 71.0, 180, False)              # by the door down into the authorized corridor, facing it

@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "every_tunnel:factory_light_dim"
+          "name": "every_tunnel:factory_light_off"
         }
       ],
       "conditions": [

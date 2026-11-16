@@ -2,7 +2,7 @@
   "parent": "minecraft:block/block",
   "textures": {
     "w": "every_tunnel:block/lab_white",
-    "f": "every_tunnel:block/factory_light_dim",
+    "f": "every_tunnel:block/factory_light_emergency",
     "particle": "every_tunnel:block/lab_white"
   },
   "elements": [

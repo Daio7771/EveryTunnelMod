@@ -17,9 +17,10 @@ import kotlin.math.sqrt
 
 /**
  * The office's cinematic (Act 3, phase 8), from `cutscenes/office.json` (every key optional; seconds where the spec has ticks). The
- * player is held behind Rowan's desk ([playerMark], facing the door); Rowan comes in from [spawn] through [doorway] to [threshold], shuts
- * the door, says his lines ([lines], in order) walking round the desk ([round]) to its corner ([lean]), slides the pass across the desk
- * ([cardFrom] to [cardTo]) as [cardLine] reaches [cardSentence], claps, and leaves by the doorway to [exit], the door left open.
+ * player is held behind Rowan's desk ([playerMark], facing the door); Rowan comes in from [spawn] through [doorway] to [threshold], just
+ * inside beside the door, shuts it and says his lines ([lines], in order) from there; at [cardLine] he steps to the front of the desk
+ * ([deskFront]), slides the pass across it ([cardFrom] to [cardTo]) as the line reaches [cardSentence] (the flashlight is his too from
+ * then on), claps from [clapSentence], goes back beside the door and opens it: he waits there for the player to leave.
  */
 data class Ch2L1OfficeSpec(
     val playerMark: String = "office_player_mark",
@@ -27,9 +28,7 @@ data class Ch2L1OfficeSpec(
     val spawn: String = "rowan_spawn",
     val doorway: String = "rowan_doorway",
     val threshold: String = "rowan_threshold",
-    val round: List<String> = listOf("rowan_round_1", "rowan_round_2"),
-    val lean: String = "rowan_lean",
-    val exit: String = "rowan_exit",
+    val deskFront: String = "rowan_desk_front",
     val cardFrom: String = "card_slide_start",
     val cardTo: String = "card_slide_end",
     val lines: List<String> = (1..8).map { "rowan_office_c$it" },
@@ -45,7 +44,7 @@ data class Ch2L1OfficeSpec(
     val gapTicks: Int = 10,
     /** Silences after a line (line id to ticks): he stops smiling after c3, waits for an answer after c5. */
     val pauses: Map<String, Int> = mapOf("rowan_office_c3" to 20, "rowan_office_c5" to 50),
-    val walkLine: String = "rowan_office_c2",
+    val cuffsLine: String = "rowan_office_c2",
     val palmsLine: String = "rowan_office_c3",
     val palmsSentence: Int = 1,
     val leanLine: String = "rowan_office_c4",
@@ -58,9 +57,6 @@ data class Ch2L1OfficeSpec(
     val slideTicks: Int = 16,
     val clapSentence: Int = 2,
     val clapTicks: Int = 40,
-    /** The camera shakes a little through [walkLine]; it pushes [push] of the way to his face through [leanLine] and back through the next. */
-    val shake: Double = 0.3,
-    val push: Double = 0.3,
     /** The low hum: in from the start of this line, out at the start of that one. */
     val humFrom: String = "rowan_office_c3",
     val humUntil: String = "rowan_office_c8",
@@ -90,9 +86,7 @@ object Ch2L1OfficeParser {
             spawn = f.string("spawn", d.spawn),
             doorway = f.string("doorway", d.doorway),
             threshold = f.string("threshold", d.threshold),
-            round = if (f.has("round")) f.stringList("round") else d.round,
-            lean = f.string("lean", d.lean),
-            exit = f.string("exit", d.exit),
+            deskFront = f.string("desk_front", d.deskFront),
             cardFrom = f.string("card_from", d.cardFrom),
             cardTo = f.string("card_to", d.cardTo),
             lines = if (f.has("lines")) f.stringList("lines") else d.lines,
@@ -104,7 +98,7 @@ object Ch2L1OfficeParser {
             closeTicks = maxOf(1, ticks("close_seconds", d.closeTicks, 10.0)),
             gapTicks = ticks("gap_seconds", d.gapTicks, 10.0),
             pauses = pauses,
-            walkLine = f.string("walk_line", d.walkLine),
+            cuffsLine = f.string("cuffs_line", d.cuffsLine),
             palmsLine = f.string("palms_line", d.palmsLine),
             palmsSentence = f.int("palms_sentence", d.palmsSentence, min = 0, max = 20),
             leanLine = f.string("lean_line", d.leanLine),
@@ -117,8 +111,6 @@ object Ch2L1OfficeParser {
             slideTicks = maxOf(1, ticks("slide_seconds", d.slideTicks, 5.0)),
             clapSentence = f.int("clap_sentence", d.clapSentence, min = 0, max = 20),
             clapTicks = ticks("clap_seconds", d.clapTicks, 10.0),
-            shake = f.double("shake", d.shake, min = 0.0, max = 1.0),
-            push = f.double("push", d.push, min = 0.0, max = 0.8),
             humFrom = f.string("hum_from", d.humFrom),
             humUntil = f.string("hum_until", d.humUntil),
         )
@@ -132,11 +124,11 @@ object Ch2L1OfficeParser {
 }
 
 /**
- * The office's cinematic as a scene: the camera is the player's own eyes, held behind the desk, following Rowan as he comes in, goes
- * round, leans on the desk and leaves; it shakes a little while he walks round them and pushes in to his face as he leans forward. Rowan's
- * every move is laid out here tick by tick ([Segment]: from a place to another, or still, in a pose, looking at the player or at the
- * door), so that the server moves him on the same ticks the client's camera follows him. The cutscene machinery of the other scenes
- * ([Cutscene], [Timeline]); plain Kotlin, unit tested.
+ * The office's cinematic as a scene: the camera is the player's own eyes, held behind the desk, fixed on Rowan as he comes in and shuts the
+ * door, talks from beside it, comes to the desk to slide the pass over and goes back to wait by the door, which he opens. Rowan's every
+ * move is laid out here tick by tick ([Segment]: from a place to another, or still, in a pose, looking at the player or at the door), so
+ * that the server moves him on the same ticks the client's camera follows him. The cutscene machinery of the other scenes ([Cutscene],
+ * [Timeline]); plain Kotlin, unit tested.
  */
 object Ch2L1OfficeScene {
 
@@ -159,18 +151,16 @@ object Ch2L1OfficeScene {
         val timeline: Timeline,
         val beats: List<Beat>,
         val track: List<Segment>,
-        /** Ticks: the door opens for him, shuts behind him, opens again as he leaves. */
+        /** Ticks: the door opens for him, shuts behind him, and he opens it again at the end to wait for the player to go. */
         val doorOpens: Int,
         val doorCloses: Int,
         val doorReopens: Int,
-        /** The pass slides across the desk from [slideStart] to [slideEnd] (then it is the player's). */
+        /** The pass slides across the desk from [slideStart] to [slideEnd] (then it is the player's, and so is the flashlight). */
         val slideStart: Int,
         val slideEnd: Int,
         val humStart: Int,
         val humEnd: Int,
-        val shake: IntRange,
-        val shakeAmount: Double,
-        /** Rowan is through the door on his way out: the camera flies back. */
+        /** His lines are over and he is back by the door: the camera flies back. */
         val linesEnd: Int,
         private val poses: List<Pair<IntRange, Ch2L1Pose>>,
     ) {
@@ -181,7 +171,7 @@ object Ch2L1OfficeScene {
         /** Where Rowan's feet are at [tick]. */
         fun rowanAt(tick: Double): Position = segmentAt(tick).at(tick)
 
-        /** His pose at [tick]: a moment's (open palms, clapping) over his segment's. */
+        /** His pose at [tick]: a moment's (open palms, the pass, clapping) over his segment's. */
         fun poseAt(tick: Double): Ch2L1Pose = poses.lastOrNull { tick.toInt() in it.first }?.second ?: segmentAt(tick).pose
 
         fun beatAt(tick: Double): Beat? = beats.firstOrNull { tick >= it.start && tick < it.end }
@@ -196,9 +186,7 @@ object Ch2L1OfficeScene {
         val spawn = place(spec.spawn) ?: return Result(null, "no anchor ${spec.spawn}")
         val doorway = place(spec.doorway) ?: return Result(null, "no anchor ${spec.doorway}")
         val threshold = place(spec.threshold) ?: return Result(null, "no anchor ${spec.threshold}")
-        val round = spec.round.map { place(it) ?: return Result(null, "no anchor $it") }
-        val lean = place(spec.lean) ?: return Result(null, "no anchor ${spec.lean}")
-        val exit = place(spec.exit) ?: return Result(null, "no anchor ${spec.exit}")
+        val deskFront = place(spec.deskFront) ?: return Result(null, "no anchor ${spec.deskFront}")
         val lines = spec.lines.map { voices.line(it) ?: return Result(null, "no voice line $it") }
 
         val eyes = Local(0.0, 0.0, EYE)
@@ -215,26 +203,21 @@ object Ch2L1OfficeScene {
         val poses = mutableListOf<Pair<IntRange, Ch2L1Pose>>()
         var tick = spec.flyInTicks
         var at = spawn
-        var camera = eyes
 
-        /** Rowan stands (or walks to [to]) for [ticks]; the eyes follow his head, the camera going to [cameraTo]. */
-        fun segment(ticks: Int, to: Position, pose: Ch2L1Pose, lookDoor: Boolean = false, cameraTo: Local = camera, look: Local? = null) {
+        /** Rowan stands (or walks to [to]) for [ticks]; the eyes follow his head (or look at [look]). */
+        fun segment(ticks: Int, to: Position, pose: Ch2L1Pose, lookDoor: Boolean = false, look: Local? = null) {
             if (ticks <= 0) return
             track += Segment(tick, tick + ticks, at, to, pose, lookDoor)
-            val lookFrom = look ?: head(at)
-            val lookTo = look ?: head(to)
-            shots += Shot(ticks, camera, cameraTo, Look.At(lookFrom), Look.At(lookTo))
+            shots += Shot(ticks, eyes, eyes, Look.At(look ?: head(at)), Look.At(look ?: head(to)))
             tick += ticks
             at = to
-            camera = cameraTo
         }
 
         fun walk(to: Position, pose: Ch2L1Pose = Ch2L1Pose.NONE) = segment(walkTicks(at, to), to, pose)
 
         // Before: the eyes on the door; it opens, he comes in, turns and shuts it behind him.
         track += Segment(0, tick, spawn, spawn, Ch2L1Pose.NONE)
-        val doorLook = head(doorway)
-        segment(spec.doorWaitTicks, spawn, Ch2L1Pose.NONE, look = doorLook)
+        segment(spec.doorWaitTicks, spawn, Ch2L1Pose.NONE, look = head(doorway))
         val doorOpens = tick - spec.doorWaitTicks / 3
         walk(doorway)
         walk(threshold)
@@ -244,7 +227,6 @@ object Ch2L1OfficeScene {
         var slideStart = -1
         var humStart = -1
         var humEnd = -1
-        var shake = IntRange.EMPTY
         for (line in lines) {
             val ticks = ceil(line.ms / 50.0).toInt()
             val start = tick
@@ -253,59 +235,46 @@ object Ch2L1OfficeScene {
             fun cueTick(sentence: Int) = start + ((line.cues.firstOrNull { it.firstSentence == sentence } ?: line.cues.last()).atMs / 50)
             if (line.id == spec.humFrom) humStart = start
             if (line.id == spec.humUntil) humEnd = start
-            val pushed = Local(
-                eyes.forward + (head(lean).forward - eyes.forward) * spec.push, eyes.right + (head(lean).right - eyes.right) * spec.push,
-                eyes.up + (head(lean).up - eyes.up) * spec.push,
-            )
             when (line.id) {
-                spec.walkLine -> {
-                    // Round the desk to the player's side, then to the desk's corner, along the line; the camera shakes a little.
-                    val legs = round + lean
-                    val lengths = legs.runningFold(at) { a, b -> b }.zipWithNext { a, b -> walkTicks(a, b) }
-                    val total = lengths.sum()
-                    shake = start until start + ticks
-                    for ((i, to) in legs.withIndex()) {
-                        val share = if (i == legs.lastIndex) start + ticks - tick else (ticks.toDouble() * lengths[i] / total).toInt()
-                        segment(maxOf(1, share), to, Ch2L1Pose.CUFFS)
-                    }
-                }
+                spec.cuffsLine -> segment(ticks, at, Ch2L1Pose.CUFFS)
                 spec.palmsLine -> {
                     poses += (cueTick(spec.palmsSentence) until start + ticks) to Ch2L1Pose.PALMS
-                    segment(ticks, at, Ch2L1Pose.LEANING)
+                    segment(ticks, at, Ch2L1Pose.NONE)
                 }
-                spec.leanLine -> segment(ticks, at, Ch2L1Pose.LEAN_FORWARD, cameraTo = pushed)
+                spec.leanLine -> segment(ticks, at, Ch2L1Pose.LEAN_FORWARD)
                 spec.glanceLine -> {
-                    segment(minOf(spec.glanceTicks, ticks), at, Ch2L1Pose.NONE, lookDoor = true, cameraTo = eyes)
+                    segment(minOf(spec.glanceTicks, ticks), at, Ch2L1Pose.NONE, lookDoor = true)
                     segment(ticks - minOf(spec.glanceTicks, ticks), at, Ch2L1Pose.NONE)
                 }
                 spec.tieLine -> segment(ticks, at, Ch2L1Pose.TIE)
-                spec.pointLine -> segment(ticks, at, Ch2L1Pose.POINTING, lookDoor = false)
+                spec.pointLine -> segment(ticks, at, Ch2L1Pose.POINTING)
                 spec.cardLine -> {
-                    slideStart = cueTick(spec.cardSentence)
+                    // To the front of the desk while he talks, the pass slid across it, the clap, then back beside the door.
+                    walk(deskFront)
+                    slideStart = maxOf(tick, cueTick(spec.cardSentence))
                     poses += (slideStart until slideStart + spec.slideTicks) to Ch2L1Pose.OFFERING
-                    val clap = cueTick(spec.clapSentence)
-                    poses += (clap until start + ticks + spec.clapTicks) to Ch2L1Pose.CLAPPING
-                    segment(ticks + spec.clapTicks, at, Ch2L1Pose.NONE)
+                    val clap = maxOf(slideStart + spec.slideTicks, cueTick(spec.clapSentence))
+                    val clapEnd = start + ticks + spec.clapTicks
+                    poses += (clap until clapEnd) to Ch2L1Pose.CLAPPING
+                    segment(clapEnd - tick, at, Ch2L1Pose.NONE)
+                    walk(threshold)
                 }
                 else -> segment(ticks, at, Ch2L1Pose.NONE)
             }
             val pause = spec.pauses[line.id] ?: 0
-            segment(spec.gapTicks + pause, at, if (line.id == spec.palmsLine) Ch2L1Pose.LEANING else Ch2L1Pose.NONE)
+            if (line.id != spec.cardLine) segment(spec.gapTicks + pause, at, Ch2L1Pose.NONE)
         }
         if (slideStart < 0) return Result(null, "the card line ${spec.cardLine} is not in the scene")
-        // He leaves the way he came, the door opening before him, and on down the corridor.
-        walk(threshold)
-        val doorReopens = tick - 6
-        walk(doorway)
-        walk(spawn)
+        // He opens the door and stands aside, waiting for the player to go.
+        segment(spec.closeTicks, threshold, Ch2L1Pose.NONE, lookDoor = true)
+        val doorReopens = tick - spec.closeTicks / 2
         val linesEnd = tick
-        val outside = Position(exit.x, exit.y, exit.z)
-        track += Segment(tick, tick + walkTicks(spawn, outside) + spec.flyOutTicks + Cutscene.BANDS_TICKS, spawn, outside, Ch2L1Pose.NONE)
+        track += Segment(tick, Int.MAX_VALUE, threshold, threshold, Ch2L1Pose.NONE)
         val timeline = Timeline(Cutscene(shots, spec.flyInTicks, spec.flyOutTicks), timed, emptyList())
         return Result(
             Built(
                 timeline, beats, track, doorOpens, doorCloses, doorReopens, slideStart, slideStart + spec.slideTicks,
-                if (humStart < 0) Int.MAX_VALUE else humStart, if (humEnd < 0) Int.MAX_VALUE else humEnd, shake, spec.shake, linesEnd, poses,
+                if (humStart < 0) Int.MAX_VALUE else humStart, if (humEnd < 0) Int.MAX_VALUE else humEnd, linesEnd, poses,
             ),
             null,
         )

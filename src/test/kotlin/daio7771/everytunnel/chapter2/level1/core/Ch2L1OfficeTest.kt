@@ -1,7 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 import daio7771.everytunnel.core.cutscene.SceneFrame
-import kotlin.math.ceil
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -29,7 +28,7 @@ class Ch2L1OfficeTest {
     }
 
     @Test
-    fun `he comes in and shuts the door before he speaks, and opens it again after`() {
+    fun `he comes in and shuts the door before he speaks, and opens it again at the end`() {
         val first = built.beats.first()
         assertTrue(built.doorOpens < built.doorCloses)
         assertTrue(built.doorCloses < first.start)
@@ -39,7 +38,7 @@ class Ch2L1OfficeTest {
     }
 
     @Test
-    fun `the eight lines in order, the pauses between them, the timing of the pass, the hum and the shake`() {
+    fun `the eight lines in order, the pauses between them, the timing of the pass and the hum`() {
         assertEquals(spec.lines, built.beats.map { it.line.id })
         for ((a, b) in built.beats.zipWithNext()) {
             val pause = spec.gapTicks + (spec.pauses[a.line.id] ?: 0)
@@ -50,25 +49,29 @@ class Ch2L1OfficeTest {
         assertEquals(c8.start + cue.atMs / 50, built.slideStart)
         assertEquals(built.beats.first { it.line.id == spec.humFrom }.start, built.humStart)
         assertEquals(c8.start, built.humEnd)
-        val c2 = built.beats.first { it.line.id == spec.walkLine }
-        assertEquals(c2.start, built.shake.first)
-        assertEquals(c2.start + ceil(c2.line.ms / 50.0).toInt() - 1, built.shake.last)
     }
 
     @Test
-    fun `he walks round in his cuffs, leans, opens his palms, bends, points, claps, and leaves`() {
-        val c2 = built.beats.first { it.line.id == spec.walkLine }
-        assertEquals(Ch2L1Pose.CUFFS, built.poseAt(c2.start + 5.0))
-        assertEquals(data.anchors.point(spec.lean)!!.position, built.rowanAt(c2.end + 1.0))
+    fun `he talks from beside the door, comes to the desk for the pass, and goes back to wait`() {
+        val threshold = data.anchors.point(spec.threshold)!!.position
+        for (beat in built.beats.dropLast(1)) assertEquals(threshold, built.rowanAt(beat.start + 3.0), beat.line.id)
+        assertEquals(data.anchors.point(spec.deskFront)!!.position, built.rowanAt(built.slideStart.toDouble()))
+        assertEquals(threshold, built.rowanAt(built.linesEnd.toDouble()))
+        assertEquals(threshold, built.rowanAt(built.totalTicks.toDouble()))
+    }
+
+    @Test
+    fun `his gestures come on their lines`() {
+        fun at(line: String, offset: Double = 5.0) = built.beats.first { it.line.id == line }.start + offset
+        assertEquals(Ch2L1Pose.CUFFS, built.poseAt(at(spec.cuffsLine)))
         val c3 = built.beats.first { it.line.id == spec.palmsLine }
-        assertEquals(Ch2L1Pose.LEANING, built.poseAt(c3.start + 2.0))
+        assertEquals(Ch2L1Pose.NONE, built.poseAt(c3.start + 2.0))
         assertEquals(Ch2L1Pose.PALMS, built.poseAt(c3.end - 2.0))
-        assertEquals(Ch2L1Pose.LEAN_FORWARD, built.poseAt(built.beats.first { it.line.id == spec.leanLine }.start + 5.0))
-        assertTrue(built.segmentAt(built.beats.first { it.line.id == spec.glanceLine }.start + 2.0).lookDoor)
-        assertEquals(Ch2L1Pose.POINTING, built.poseAt(built.beats.first { it.line.id == spec.pointLine }.start + 5.0))
+        assertEquals(Ch2L1Pose.LEAN_FORWARD, built.poseAt(at(spec.leanLine)))
+        assertTrue(built.segmentAt(at(spec.glanceLine, 2.0)).lookDoor)
+        assertEquals(Ch2L1Pose.TIE, built.poseAt(at(spec.tieLine)))
+        assertEquals(Ch2L1Pose.POINTING, built.poseAt(at(spec.pointLine)))
         assertEquals(Ch2L1Pose.OFFERING, built.poseAt(built.slideStart + 1.0))
         assertEquals(Ch2L1Pose.CLAPPING, built.poseAt(built.beats.last().end - 2.0))
-        assertEquals(data.anchors.point(spec.spawn)!!.position, built.rowanAt(built.linesEnd.toDouble()))
-        assertTrue(built.linesEnd < built.totalTicks)
     }
 }
