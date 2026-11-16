@@ -392,6 +392,7 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `level1/core/Ch2L1IntroScene.kt` | The first announcement's cinematic: shots from anchors, in the machinery of the other scenes |
 | `level1/core/Ch2L1Act2.kt` | Act 2's file (`cutscenes/meeting.json`), its parser, and `Ch2L1Follow`: the coworker leading the way, waiting for a player who lags and reminding them |
 | `level1/core/Ch2L1Act3.kt` | Act 3's file (`act3.json`) and its parser: the locks, Rowan's code, the computers and their files, the objective and the arrow's target from the player's counters |
+| `level1/core/Ch2L1Patrols.kt` | The patrols' file (`patrols.json`) and its parser, `Ch2L1PatrolRunner` (a guard's round with its stops), `Ch2L1Watch` (what a guard sees and thinks: the "?", the warning, the chase, the catch) and `Ch2L1Stare` |
 | `level1/core/Ch2L1Meeting.kt` | The meeting as a scene (`Ch2L1MeetingScene`: the eyes turning to each speaker, the door, the badge's tick) and `Ch2L1Glances` (the listeners' glances at the door) |
 | `level1/core/Ch2L1Npcs.kt` | The factory's people: `npcs.json`, its parser, a routine's steps with their anchors looked up, and `Ch2L1RoutineRunner`, what a person does each tick |
 | `level1/core/Ch2L1NpcLife.kt` | What makes the factory's people look alive (`npcs.json`'s `life`): `Ch2L1Gait` (eased walking and turning), `Ch2L1Gaze` (where the head looks), `Ch2L1Chat` (talks between two), `Ch2L1Pose` |
@@ -406,7 +407,7 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 |---|---|
 | `level1/platform/Ch2L1.kt` | Chapter 2's Level 1: each player's state and whether they are playing it (the rules follow them: `enter`, `leave`), kept in their progress; every change goes through it and reaches the listeners |
 | `level1/platform/Ch2L1DataLoader.kt` | Reads the level's JSON files (the config folder's copy, else the jar's) at launch and on `/et reload`, and holds the current data |
-| `level1/platform/Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc\|tasks\|act3\|intro\|say` (development runs only) |
+| `level1/platform/Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc\|tasks\|act3\|patrols\|intro\|say` (development runs only) |
 | `level1/platform/Ch2L1Build.kt` | Builds the level from its plan in steps of 8,000 cells a tick (and empties it), remembers which plan it built, checks every block first |
 | `level1/platform/TimeClockBlock.kt` | The time clock of Chapter 2's Level 1: a card reader (same models) that clocks the new hire in, red and then green |
 | `level1/platform/Ch2L1TaskBlocks.kt` | The sample tube, NonameOS's terminal, the analyzer, the leaning broom and the dirt of Chapter 2's tasks: each hands its use to `Ch2L1TaskHooks` |
@@ -416,6 +417,7 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `level1/platform/Ch2L1Act2Hooks.kt` | Act 2 on the server: the coworker waiting and leading, the group, the meeting directed tick by tick, the badge, everyone leaving, the skip |
 | `level1/platform/Ch2L1Act3Hooks.kt` | Act 3 on the server: the badge reader and the auxiliary lab's door, the computers' files and the office's trigger, the keypad and the office's door, the office entered, the doors that say no, chamber 02's Pale man, the relock going back |
 | `level1/platform/Ch2L1Act3Blocks.kt` | The badge reader and the keypad (a lock by a locked door, red then green) and Rowan's portrait: each hands its use to `Ch2L1Act3Hooks` |
+| `level1/platform/Ch2L1PatrolHooks.kt` | The patrols on the server: the guards put in and directed on their rounds, what makes a player suspicious, the warning, the chase, the catch and the player put back |
 | `level1/platform/Ch2L1Doors.kt` | The factory's doors as its people use them: opened in their way, a doorway shut or opened round a place |
 | `level1/platform/FactoryNpcEntity.kt` | A person of Chapter 2's Level 1 (Rowan, the coworker, the workers): one entity type, its synced skin tells them apart; a worker follows its routine tick by tick (eased walking, its own pace), its head looks about on its own, and its synced pose says if it types, talks or listens; a kept creature |
 | `level1/platform/Ch2L1Npcs.kt` | The factory's people: the workers put in while the level is played and the LAB's taken out, the talks between pairs, the groups, and the developer's `/et ch2 l1 npc` |
@@ -439,6 +441,7 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `level1/client/NonameOsFilesScreen.kt` | NonameOS on Act 3's computers: the files, NEW or READ, each opened, typed out and scrolled; closing one tells the server |
 | `level1/client/NonameOsLook.kt` | How NonameOS looks (the colours, the monitor's frame, the title bar, a button), shared by its windows |
 | `level1/client/KeypadScreen.kt` | The office's keypad close up: the display, twelve keys clicked or typed, DENIED or OPEN from the server |
+| `level1/client/CaughtOverlay.kt` | Caught by a guard: the fade to black with its text; a guard's line as a subtitle |
 | `level1/client/FactoryNpcRenderer.kt` | The factory's people on the player's model with classic arms, each in its skin (`textures/entity/npc/`), arms and head by their pose (typing, talking, listening) |
 
 ## Resources: `main/resources/`

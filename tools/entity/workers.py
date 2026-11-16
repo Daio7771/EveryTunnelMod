@@ -11,6 +11,12 @@ base layer used, as Rowan's, which the renderer draws on the player's model (`cl
     generic_2   a bald man with glasses, a teal badge
     generic_3   a man with black curly hair and a beard, a purple badge
 
+and the two guards who patrol the factory (Act 3's patrols), in Chapter 1's night guard's uniform (guard.png, by guard.py: the
+player was not the first to wear it), each with a face of their own painted over it:
+
+    guard_1     short black hair, a shadow of beard
+    guard_2     a darker man, bald, with a beard
+
 `rowan.png` is NOT made here: it is the author's own skin (a beige suit and a green tie), copied as it came.
 
 Run after changing anything here (from the repository root):   python3 tools/entity/workers.py
@@ -32,6 +38,7 @@ from film_walker import BODY, HEAD, LEFT_ARM, LEFT_LEG, RIGHT_ARM, RIGHT_LEG, fa
 
 ROOT = Path(__file__).resolve().parents[2]
 TEXTURES = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel" / "textures" / "entity" / "npc"
+GUARD_UNIFORM = TEXTURES.parent / "guard.png"
 OUT = Path(__file__).resolve().parent / "output"
 
 COAT, COAT_SHADE, COAT_FOLD = (236, 238, 240), (205, 209, 216), (220, 223, 228)
@@ -126,6 +133,12 @@ def paint_leg(img, leg, p):
     block(img, f["front"], 1, 5, 1, 5, shade(p["trousers"], 12))      # the crease
     block(img, f["top"], 0, 0, f["top"][2], f["top"][3], p["trousers"])
     block(img, f["bottom"], 0, 0, f["bottom"][2], f["bottom"][3], shade(p["shoes"], 14))
+
+# The guards: Chapter 1's uniform (body, arms, legs of guard.png) under a head painted like the workers'.
+GUARDS = {
+    "guard_1": dict(skin=(224, 180, 150), hair=(30, 28, 28), style="parted", brows=(30, 28, 28), stubble=True),
+    "guard_2": dict(skin=(150, 104, 78), hair=(26, 22, 20), style="bald", brows=(26, 22, 20), beard=True),
+}
 
 
 def paint_head(img, p):
@@ -309,11 +322,17 @@ def main():
         img = paint(person)
         img.save(TEXTURES / f"{name}.png")
         skins.append((name, img))
+    uniform = Image.open(GUARD_UNIFORM).convert("RGBA")
+    for name, person in GUARDS.items():
+        img = uniform.copy()
+        paint_head(img, person)
+        img.save(TEXTURES / f"{name}.png")
+        skins.append((name, img))
     rowan = TEXTURES / "rowan.png"
     if rowan.exists():
         skins.append(("rowan", Image.open(rowan).convert("RGBA")))
     preview(skins).save(OUT / "workers_preview.png")
-    print(f"{len(PEOPLE)} skins in {TEXTURES.relative_to(ROOT)}, preview in {OUT.relative_to(ROOT)}/workers_preview.png")
+    print(f"{len(PEOPLE) + len(GUARDS)} skins in {TEXTURES.relative_to(ROOT)}, preview in {OUT.relative_to(ROOT)}/workers_preview.png")
 
 
 if __name__ == "__main__":

@@ -93,7 +93,8 @@ data class Ch2L1Voices(val lines: List<Ch2L1VoiceLine>) {
 /**
  * The look of the factory's people ([daio7771.everytunnel.chapter2.level1.platform.FactoryNpcEntity]): one skin each, a PNG in
  * `textures/entity/npc/` named by its id. `rowan` is the author's own; the rest are made by `tools/entity/workers.py`:
- * the three who speak in the level (`coworker`, `worker_a`, `worker_b`) and three faces for the rest (`generic_*`).
+ * the three who speak in the level (`coworker`, `worker_a`, `worker_b`), three faces for the rest (`generic_*`) and the two patrolling
+ * guards (`guard_1`, `guard_2`, in Chapter 1's guard uniform).
  */
 object Ch2L1Skins {
     const val ROWAN = "rowan"
@@ -101,7 +102,7 @@ object Ch2L1Skins {
     const val WORKER_A = "worker_a"
     const val WORKER_B = "worker_b"
 
-    val ALL: List<String> = listOf(ROWAN, COWORKER, WORKER_A, WORKER_B, "generic_1", "generic_2", "generic_3")
+    val ALL: List<String> = listOf(ROWAN, COWORKER, WORKER_A, WORKER_B, "generic_1", "generic_2", "generic_3", "guard_1", "guard_2")
 
     /** What an unknown id draws as. */
     const val DEFAULT = "generic_1"

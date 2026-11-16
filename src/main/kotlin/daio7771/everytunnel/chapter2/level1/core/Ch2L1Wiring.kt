@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 /**
- * Checks that what `tasks.json`, `speakers.json`, `npcs.json`, `cutscenes/meeting.json` and `act3.json` name is in `anchors.json`: a task whose block or place is missing, a speaker
+ * Checks that what `tasks.json`, `speakers.json`, `npcs.json`, `cutscenes/meeting.json`, `act3.json` and `patrols.json` name is in `anchors.json`: a task whose block or place is missing, a speaker
  * zone with no box or no emitter, a camera of the first announcement's cinematic that has no anchor. Plain Kotlin; the data
  * loader reports what it finds on every load and `/et reload`, and `Ch2L1WiringTest` holds the jar's files to it.
  */
@@ -10,7 +10,7 @@ object Ch2L1Wiring {
     /** One line per thing that does not match; empty when everything the files name exists. */
     fun problems(
         anchors: Ch2L1Anchors, tasks: Ch2L1Tasks, speakers: Ch2L1Speakers, npcs: Ch2L1NpcData = Ch2L1NpcData.EMPTY, act2: Ch2L1Act2? = null,
-        act3: Ch2L1Act3? = null,
+        act3: Ch2L1Act3? = null, patrols: Ch2L1Patrols? = null,
     ): List<String> {
         val out = mutableListOf<String>()
         fun point(file: String, id: String) {
@@ -63,6 +63,23 @@ object Ch2L1Wiring {
             act3.restrictedDoors.forEach { point(file, it) }
             act3.computers.forEach { point(file, it.anchor) }
             if (anchors.zone(act3.officeZone) == null) out += "$file names the zone \"${act3.officeZone}\", which anchors.json does not have"
+        }
+        if (patrols != null) {
+            val file = "patrols.json"
+            fun zone(id: String) {
+                if (anchors.zone(id) == null) out += "$file names the zone \"$id\", which anchors.json does not have"
+            }
+            zone(patrols.watch.stareZone)
+            for (f in patrols.watch.forbidden) {
+                zone(f.zone)
+                point(file, f.back)
+            }
+            point(file, patrols.watch.backElsewhere)
+            for (patrol in patrols.patrols) {
+                if (anchors.path(patrol.path) == null) out += "$file names the path \"${patrol.path}\", which anchors.json does not have"
+                patrol.spawn?.let { point(file, it) }
+                patrol.pauses.forEach { point(file, it.at) }
+            }
         }
         return out
     }

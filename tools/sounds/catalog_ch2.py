@@ -135,6 +135,33 @@ def ch2l1_keypad_accept(rng, variant):
     return 0.6 * y
 
 
+def ch2l1_guard_suspect(rng, variant):
+    """A guard has noticed something (Act 3's patrols): a soft questioning two-note rise, as a "?" over his head."""
+    n = samples(0.5)
+    y = damped_partials(n, [660.0, 1320.0], [1.0, 0.2], [0.12, 0.06], rng, 0.0)
+    y += damped_partials(n, [880.0, 1760.0], [1.0, 0.2], [0.16, 0.08], rng, 0.16)
+    return 0.5 * lowpass(y, 5000.0)
+
+
+def ch2l1_guard_alert(rng, variant):
+    """A guard breaks into a run at the player: a sharp low stab with a short rising sweep."""
+    n = samples(0.7)
+    t = np.arange(n) / SR
+    sweep = np.sin(2 * np.pi * (220.0 * t + 400.0 * t * t)) * envelope(n, [(0.0, 0.0), (0.02, 1.0), (0.4, 0.5), (0.7, 0.0)])
+    hit = _noise(n, rng, 60.0, 900.0) * envelope(n, [(0.0, 0.0), (0.005, 1.0), (0.12, 0.2), (0.4, 0.0)])
+    y = 0.5 * lowpass(0.6 * sweep + 0.8 * hit, 4000.0)
+    return stereo(y, y)
+
+
+def ch2l1_guard_caught(rng, variant):
+    """Caught: a dull low thud with a long dark tail, under the fade to black."""
+    n = samples(1.6)
+    y = damped_partials(n, [55.0, 110.0, 165.0], [1.0, 0.5, 0.2], [0.9, 0.5, 0.3], rng, 0.0)
+    y += _noise(n, rng, 40.0, 400.0) * envelope(n, [(0.0, 0.0), (0.01, 1.0), (0.3, 0.1), (1.6, 0.0)])
+    y = 0.7 * lowpass(y, 1200.0)
+    return stereo(y, y)
+
+
 CHAPTER2_SOUNDS = [
     Sound("event.prologue.crack", "Chapter 2 prologue", "A stage of the scientist's change: dry cracks of joints, a dull thump, the creak of something stretched too far (3 variations)",
           "mono", False, 3, prologue_crack, -3.0, attenuation=24),
@@ -152,5 +179,9 @@ CHAPTER2_SOUNDS = [
     Sound("block.ch2l1.blip", "Chapter 2 Level 1", "Tasks 1 and 2: a small pip of a lab instrument, pitched up by the game as a task goes on", "mono", False, 1, ch2l1_blip, -8.0),
     Sound("block.ch2l1.keypad_key", "Chapter 2 Level 1", "Act 3: a key of the office's keypad pressed, a short beep", "mono", False, 1, ch2l1_keypad_key, -10.0),
     Sound("block.ch2l1.keypad_error", "Chapter 2 Level 1", "Act 3: a wrong code at the office's keypad, a low double buzz", "mono", False, 1, ch2l1_keypad_error, -9.0),
+    Sound("event.ch2l1.guard_suspect", "Chapter 2 Level 1", "A patrolling guard notices something suspicious: a soft questioning rise", "mono", False, 1,
+          ch2l1_guard_suspect, -8.0, attenuation=24),
+    Sound("event.ch2l1.guard_alert", "Chapter 2 Level 1", "A guard runs at the player: a sharp low stab", "stereo", False, 1, ch2l1_guard_alert, -4.0),
+    Sound("event.ch2l1.guard_caught", "Chapter 2 Level 1", "Caught by a guard: a dull thud under the fade to black", "stereo", False, 1, ch2l1_guard_caught, -3.0),
     Sound("block.ch2l1.keypad_accept", "Chapter 2 Level 1", "Act 3: Rowan's code accepted, two rising beeps and the lock's clack", "mono", False, 1, ch2l1_keypad_accept, -8.0),
 ]

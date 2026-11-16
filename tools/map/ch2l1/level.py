@@ -611,7 +611,13 @@ def named_places(level):
     add("rowan_spawn", 32.5, 76.5, 0, True)
     add("restricted_door_east", 61.0, 75.5, -90, False)
     add("sealed_door", 62.0, 28.0, -90, False)
-    add("patrol_a_pause", 36.5, 70.5, 0, True)
+    add("patrol_a_pause", 36.0, 71.0, 180, False)              # by the door down into the authorized corridor, facing it
+    add("patrol_b_spawn", 21.5, 82.5, 180, False)               # in Security, where patrol B rests at each end of its round
+    # Where a player caught by a guard is put back (Act 3's patrols): before the auxiliary lab's door, before the way down into the
+    # authorized corridor, and in the ring by the main corridor's door (caught anywhere else).
+    add("return_aux_lab", 18.5, 50.5, 90, False)
+    add("return_authorized", 36.5, 70.0, 0, False)
+    add("return_ring", 22.0, 50.5, 180, False)
 
     zones = []
 
@@ -647,11 +653,12 @@ def named_places(level):
     paths = []
     # The middle of the ring (its stretches are 4 wide: the middle is where two blocks meet) and of the authorized corridor.
     ring_pts = [(18.0, 50.0), (39.0, 50.0), (60.0, 50.0), (60.0, 60.0), (60.0, 71.0), (48.0, 71.0), (36.0, 71.0), (18.0, 71.0), (18.0, 60.0)]
-    paths.append(("patrol_a_waypoints", [(x, 0.0, z) for x, z in ring_pts], True, True))
+    paths.append(("patrol_a_waypoints", [(x, 0.0, z) for x, z in ring_pts], True, False))
     paths.append(("task3_dirt_spots", [(x + 0.5, 0.0, z + 0.5) for x, z in DIRT_SPOTS], False, False))
     for name, (points, closed) in NPC_ROUTES.items():
         paths.append((name, [(x, 0.0, z) for x, z in points], closed, True))
-    paths.append(("patrol_b_waypoints", [(21.0, 0.0, 76.0), (38.0, 0.0, 76.0), (58.0, 0.0, 76.0)], False, True))
+    # Patrol B comes out of Security (through its door at x 21), goes along the authorized corridor to its east end and back.
+    paths.append(("patrol_b_waypoints", [(21.5, 0.0, 82.5), (21.5, 0.0, 76.0), (38.0, 0.0, 76.0), (58.0, 0.0, 76.0)], False, False))
     return a, zones, paths
 
 

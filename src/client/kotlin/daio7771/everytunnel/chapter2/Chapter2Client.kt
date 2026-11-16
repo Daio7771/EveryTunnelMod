@@ -6,6 +6,7 @@ import daio7771.everytunnel.chapter2.level1.client.Ch2L1MeetingView
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1Subtitles
 import daio7771.everytunnel.chapter2.level1.client.FactoryNpcRenderer
 import daio7771.everytunnel.chapter2.level1.client.HoldBar
+import daio7771.everytunnel.chapter2.level1.client.CaughtOverlay
 import daio7771.everytunnel.chapter2.level1.client.KeypadScreen
 import daio7771.everytunnel.chapter2.level1.client.NonameOsFilesScreen
 import daio7771.everytunnel.chapter2.level1.client.NonameOsScreen
@@ -40,6 +41,7 @@ object Chapter2Client : ClientModInitializer {
         NonameOsScreen.register()
         NonameOsFilesScreen.register()
         KeypadScreen.register()
+        CaughtOverlay.register()
         EntityRendererRegistry.register(Ch2Entities.FACTORY_NPC, ::FactoryNpcRenderer)
         EntityRendererRegistry.register(Ch2Entities.SCIENTIST, ::ScientistRenderer)
         BlockEntityRendererFactories.register(Ch2Blocks.FACTORY_CAMERA_ENTITY) { SecurityCameraRenderer(it, Ch2Blocks.FACTORY_CAMERA, sweeping = true) }

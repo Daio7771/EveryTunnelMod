@@ -5,8 +5,8 @@
 Level 1 of Chapter 2 is the factory, four months after Chapter 1: an ordinary scientist hired in the place of the one
 who "fell ill", three acts of tasks, a meeting and sneaking, ending in the supervisor's office. It is built in phases
 (0 to 10), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
-`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 6, Act 3 without patrols.** It is
-playable from the clock to Rowan's files in his office (the office's cinematic, phase 8, is next after the patrols, phase 7); the LAB is not furnished yet.
+`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 7, the patrols.** It is
+playable from the clock to Rowan's files in his office, with two guards on their rounds (the office's cinematic, phase 8, is next); the LAB is not furnished yet.
 
 Its code is under `daio7771.everytunnel.chapter2` (the client's under the same package in `src/client`): `level1.core` (plain
 Kotlin, tested), `level1.platform` (Minecraft glue) and `level1.client`, apart from the base game, which never names it (see
@@ -45,7 +45,7 @@ Everything adjustable is JSON, not code: changing a rhythm, a route or a text is
 | `tasks.json` | The three tasks of Act 1: which anchors hold the tubes, the terminal, the analyzer, the broom and the dirt, and how long each takes | `Ch2L1TasksParser`, typed |
 | `speakers.json` | Rowan's loudspeakers: the zones and their ceiling speakers, the fixed lines and the pool, the cooldown, the first announcement's cinematic | `Ch2L1SpeakersParser`, typed |
 | `npcs.json` | The factory's people: sixteen workers with their routines, the groups (the lockers' one) and how alive they look (`life`) | `Ch2L1NpcsParser`, typed |
-| `patrols.json` | The patrols | Empty (`{}`) until the phase that builds them gives it its reader |
+| `patrols.json` | The patrols: how the guards watch (sight, what is suspicious, the warning, the chase, where a caught player goes back) and each guard's round | `Ch2L1PatrolsParser`, typed |
 | `cutscenes/meeting.json` | Act 2: following the coworker and the meeting | `Ch2L1Act2Parser`, typed |
 | `act3.json` | Act 3's exploring: the badge reader, the keypad and Rowan's code, the computers and their files, the doors that say no, chamber 02, the arrow's wait | `Ch2L1Act3Parser`, typed |
 | `cutscenes/office.json` | The office's cinematic (phase 8) | The same |
@@ -161,8 +161,9 @@ placeholders, used by nothing yet.
 ## The people
 
 `FactoryNpcEntity` is one entity type for everyone: Rowan, the coworker, the workers. Its `skin` (synced to the client)
-says who: `rowan`, `coworker`, `worker_a`, `worker_b` and `generic_1` to `generic_3` (`Ch2L1Skins`: six faces in the
-union, three of whom speak, and Rowan). `FactoryNpcRenderer` draws the player's model with classic 4 px arms and the
+says who: `rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` to `generic_3` and the guards `guard_1` and `guard_2` (`Ch2L1Skins`: six
+faces in the union, three of whom speak, Rowan, and two guards in Chapter 1's uniform: `workers.py` paints a face of their own over
+`guard.png`, the player's skin of Chapter 1). `FactoryNpcRenderer` draws the player's model with classic 4 px arms and the
 skin's base layer (`textures/entity/npc/<skin>.png`). Rowan's skin is the author's own, copied as it came; the six
 workers' are drawn by `tools/entity/workers.py` (a white lab coat, a badge of a colour each, a face each), which also writes
 a preview sheet with Rowan's (`tools/entity/output/`, git-ignored). `Ch2L1SkinsTest` checks that every skin is 64x64, has
@@ -365,6 +366,30 @@ and the arrow are from the player's counters (`a3_lab_open`, `a3_read`, `a3_offi
 Going back before Act 3 (a new hire, `/et ch2 l1 state`) shuts both doors again, turns the reader and the keypad red and forgets the act's
 counters; reaching it by command gives the badge (Act 2's hook).
 
+## Act 3: the patrols
+
+Phase 7 (`patrols.json`, `level1.core.Ch2L1Patrols`, `level1.platform.Ch2L1PatrolHooks`): two guards (`guard_1`, `guard_2`) walk their
+rounds **from the start of the level until the office's cinematic**: patrol A round the ring, clockwise, stopping 5 s by the door down into
+the authorized corridor (`patrol_a_pause`); patrol B out of Security (`patrol_b_spawn`, where it rests 6 s), along the authorized corridor
+to its east end and back. They are factory people directed tick by tick (`FactoryNpcEntity.direction`, `Ch2L1PatrolRunner`); nobody else's
+routine moves them.
+
+They do nothing to a player who behaves. A guard **sees** within 8 blocks (4 while the player crouches) and 70° of where his head looks,
+with a clear line, or within 2 blocks whatever the way he looks (`Ch2L1Watch.inView`). A player he sees is **suspicious**:
+- inside a forbidden zone (`forbidden`: the auxiliary lab and chamber 02's room, the authorized corridor, the office, Security, the east WC);
+- crouching within 3 blocks of him;
+- after staring at the auxiliary lab for more than 10 s (`stare_seconds`): the crosshair on it, a ray from the eyes that reaches into its zone
+  through the glass (`Ch2L1Stare`); the corner of the eye does not count.
+
+Then he stops and turns to them while a yellow "?" over his head fills (a bar under it, `notice_seconds` 1.5; `FactoryNpcEntity.alert`,
+drawn by `FactoryNpcRenderer`) with a questioning sound (`event.ch2l1.guard_suspect`). Full, a red "!" and he tells them off (`guard_warn`,
+a subtitle with no voice yet: `Ch2L1Subtitles.showText`); they have `grace_seconds` (3) to stop. If they do not, he runs at them
+(`run_pace`, `event.ch2l1.guard_alert`) and catches them when he reaches them or after `chase_seconds` (2.5) in sight: the screen fades to
+black with "You've been caught." (`CaughtOverlay`, `event.ch2l1.guard_caught`), they are put back at the entrance of the zone
+(`return_aux_lab`, `return_authorized`; caught elsewhere `return_ring`) with what they opened still open, his line `guard_caught` follows, and
+he is back on his round. Out of sight for `give_up_seconds` he gives up. Nobody watches during a cinematic, in Act 2, in Creative or
+Spectator, or for 5 s after a catch. **The guards' lines are placeholders** (text only) until the author gives theirs, with a voice.
+
 ## Debug commands
 
 `level1.platform.Ch2L1Commands`, operator level 2, **development runs only** (as [Debugging](debugging.md) explains for
@@ -383,13 +408,14 @@ counters; reaching it by command gives the badge (Act 2's hook).
 | `/et ch2 l1 state` | Shows your state and the next one |
 | `/et ch2 l1 state <state>` | Puts you in that state (any case, `-` for `_`), as if you had got there by playing |
 | `/et ch2 l1 skip` | Moves you on to the next state |
-| `/et ch2 l1 npc <skin>` | Puts a person of the factory in front of you, to see its skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` to `generic_3`) |
+| `/et ch2 l1 npc <skin>` | Puts a person of the factory in front of you, to see its skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` to `generic_3`, `guard_1`, `guard_2`) |
 | `/et ch2 l1 npc clear` | Takes them all away |
 | `/et ch2 l1 npc ambient` | Puts in the factory's workers that are missing (you must be playing the level and be in it) |
 | `/et ch2 l1 npc group <name>` | Puts in a group of `npcs.json` at its anchors (`taquillas`) |
 | `/et ch2 l1 npc remove <group>` | Takes a group away (`lab`, `main`, `dining`, `taquillas`) |
 | `/et ch2 l1 tasks` | How far you are in the three tasks, and what the data names that is missing |
 | `/et ch2 l1 tasks reset` | The three tasks start over: the tubes, the broom and the dirt are back where the state says |
+| `/et ch2 l1 patrols` | Where each guard is, where he is heading and what he thinks of you (calm, noticing with how full, warned, chasing) |
 | `/et ch2 l1 act3` | What you have done in Act 3: the objective, the lab and the office open or shut, the files read |
 | `/et ch2 l1 act3 reset` | Shuts the auxiliary lab and the office again, turns the reader and the keypad red and forgets Act 3 (the state stays) |
 | `/et ch2 l1 intro` | The first announcement's cinematic, now |
@@ -414,4 +440,4 @@ character) come with the phase that gives them, and will run on the command too,
 `Ch2L1StateTest` (the order, `next`, `parse`), `Ch2L1AnchorsParserTest` (the format, every kind of problem) and
 `Ch2L1DataTest` (the jar's files, which copy wins, the fallbacks), `Ch2L1VoicesTest` (the 32 lines, their sound events, Oggs
 and cues, the texts in both languages) `Ch2L1SkinsTest` (the skins' format) and `Ch2L1ObjectivesTest` (one objective per step, in both languages) and `Ch2L1MapPlanTest` (the plan's blocks and doors, the
-anchors standing on its floors), all in `chapter2/level1/core`; `Ch2L1NpcsTest` (the people's file, the routines and a typist's, a walker's and a stuck one's every tick), `Ch2L1Act2Test` (the meeting file and its wiring, the coworker leading and waiting and his reminders, the meeting's lines, door and badge, the glances, the arrow over him), `Ch2L1NpcLifeTest` (the `life` keys and a worker's pace, easing in and braking, slowing for a turn, lingering, where the eyes go and the player's look with its cooldown, pairing for a talk and the turns in it), `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step, Act 3's included, and its wait), `Ch2L1Act3Test` (the act3 file, the code, the objective moving on, Rowan's files read), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule, and that a schedule made for an old game is replaced when the progress goes back: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`, `act3.json`'s too) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say, that the lockers' room has its lockers and no camera, that every other space has one and that every worker and route stands on the floor. `Ch2PlayerProgressTest` covers the state, the flag and the counters in the chapter's progress, and `ChapterBoundaryTest` that no code outside `chapter2` names it.
+anchors standing on its floors), all in `chapter2/level1/core`; `Ch2L1NpcsTest` (the people's file, the routines and a typist's, a walker's and a stuck one's every tick), `Ch2L1Act2Test` (the meeting file and its wiring, the coworker leading and waiting and his reminders, the meeting's lines, door and badge, the glances, the arrow over him), `Ch2L1NpcLifeTest` (the `life` keys and a worker's pace, easing in and braking, slowing for a turn, lingering, where the eyes go and the player's look with its cooldown, pairing for a talk and the turns in it), `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step, Act 3's included, and its wait), `Ch2L1Act3Test` (the act3 file, the code, the objective moving on, Rowan's files read), `Ch2L1PatrolsTest` (the patrols' file and its wiring, a round with its stops and one there and back, what a guard sees, the "?" filling, the warning, the chase, the catch and giving up, a stare), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule, and that a schedule made for an old game is replaced when the progress goes back: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`, `act3.json`'s too) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say, that the lockers' room has its lockers and no camera, that every other space has one and that every worker and route stands on the floor. `Ch2PlayerProgressTest` covers the state, the flag and the counters in the chapter's progress, and `ChapterBoundaryTest` that no code outside `chapter2` names it.

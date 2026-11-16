@@ -45,7 +45,8 @@ import daio7771.everytunnel.platform.DevWorlds
  * `/et ch2 l1 tasks` shows how far the player is in the three tasks (and what the data names that is missing), `tasks reset` starts them over
  * ([Ch2L1TaskHooks]); `intro` plays the first announcement's cinematic and `say <rowan_loyal_a1..a6>` an announcement, from the speaker of
  * the zone the player stands in ([Ch2L1IntroHooks], [Ch2L1SpeakerHooks]). `act3` shows what the player has done in Act 3 (the lab opened, the
- * files read, the office opened and entered), `act3 reset` shuts the auxiliary lab and the office again and forgets it ([Ch2L1Act3Hooks]).
+ * files read, the office opened and entered), `act3 reset` shuts the auxiliary lab and the office again and forgets it ([Ch2L1Act3Hooks]);
+ * `patrols` says where each guard is and what he thinks of the player ([Ch2L1PatrolHooks]).
  * The other voices have no command:
  * `/playsound every_tunnel:voice.<id> voice @s` plays any of them, with its subtitles.
  */
@@ -106,6 +107,7 @@ object Ch2L1Commands {
                                     CommandManager.literal("tasks").executes(::tasks)
                                         .then(CommandManager.literal("reset").executes(::resetTasks)),
                                 )
+                                .then(CommandManager.literal("patrols").executes(::patrols))
                                 .then(
                                     CommandManager.literal("act3").executes(::act3)
                                         .then(CommandManager.literal("reset").executes(::resetAct3)),
@@ -272,6 +274,12 @@ object Ch2L1Commands {
     private fun resetTasks(context: CommandContext<ServerCommandSource>): Int {
         Ch2L1TaskHooks.reset(context.source.playerOrThrow)
         reply(context, "The three tasks start over (the tubes, the broom and the dirt are back where the state says).")
+        return 1
+    }
+
+    /** `/et ch2 l1 patrols`: where each guard is and what he thinks. */
+    private fun patrols(context: CommandContext<ServerCommandSource>): Int {
+        Ch2L1PatrolHooks.status().forEach { reply(context, it) }
         return 1
     }
 

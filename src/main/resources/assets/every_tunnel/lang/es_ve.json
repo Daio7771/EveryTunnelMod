@@ -643,5 +643,9 @@
   "block.every_tunnel.keypad": "Teclado numérico",
   "block.every_tunnel.film_light": "Foco de rodaje",
   "block.every_tunnel.film_camera": "Cámara de cine",
-  "block.every_tunnel.rowan_portrait": "Retrato"
+  "block.every_tunnel.rowan_portrait": "Retrato",
+  "every_tunnel.ch2.l1.speaker.guard": "Guardia",
+  "every_tunnel.ch2.l1.guard_warn": "Eh. Aléjate de ahí.",
+  "every_tunnel.ch2.l1.guard_caught": "Se acabó. Vuelve al trabajo y quédate donde te toca.",
+  "every_tunnel.ch2.l1.caught": "Te han pillado."
 }

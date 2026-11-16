@@ -4,11 +4,15 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Pose
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Skins
 import daio7771.everytunnel.chapter2.level1.platform.FactoryNpcEntity
+import net.minecraft.client.font.TextRenderer
+import net.minecraft.client.render.LightmapTextureManager
+import net.minecraft.client.render.VertexConsumerProvider
 import net.minecraft.client.render.entity.BipedEntityRenderer
 import net.minecraft.client.render.entity.EntityRendererFactory
 import net.minecraft.client.render.entity.model.BipedEntityModel
 import net.minecraft.client.render.entity.model.EntityModelLayers
 import net.minecraft.client.model.ModelPart
+import net.minecraft.client.util.math.MatrixStack
 import net.minecraft.util.Identifier
 import kotlin.math.cos
 import kotlin.math.max
@@ -22,6 +26,8 @@ import kotlin.math.sin
  * them (a nod now and then and the weight shifting when listening); in the meeting, trembling, laughing, or held out handing
  * something over.
  * Where the head looks is the entity's own (the server's gaze); each person's movements are a little out of step with the rest's.
+ * A patrolling guard who has noticed the player ([FactoryNpcEntity.alert]) has a yellow "?" over his head with a bar under it that
+ * fills; once he has told them off, or runs at them, a red "!".
  */
 class FactoryNpcRenderer(context: EntityRendererFactory.Context) :
     BipedEntityRenderer<FactoryNpcEntity, BipedEntityModel<FactoryNpcEntity>>(
@@ -29,6 +35,34 @@ class FactoryNpcRenderer(context: EntityRendererFactory.Context) :
     ) {
 
     override fun getTexture(entity: FactoryNpcEntity): Identifier = TEXTURES.getValue(Ch2L1Skins.orDefault(entity.skin))
+
+    override fun render(entity: FactoryNpcEntity, yaw: Float, tickDelta: Float, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, light: Int) {
+        super.render(entity, yaw, tickDelta, matrices, vertexConsumers, light)
+        val alert = entity.alert
+        if (alert == FactoryNpcEntity.ALERT_NONE) return
+        matrices.push()
+        matrices.translate(0.0, entity.height + 0.55, 0.0)
+        matrices.multiply(dispatcher.rotation)
+        matrices.scale(-0.04f, -0.04f, 0.04f)
+        val matrix = matrices.peek().positionMatrix
+        val font = textRenderer
+        val full = LightmapTextureManager.MAX_LIGHT_COORDINATE
+        if (alert > 100) {
+            val mark = "!"
+            font.draw(mark, -font.getWidth(mark) / 2f, -4f, RED, false, matrix, vertexConsumers, TextRenderer.TextLayerType.SEE_THROUGH, 0, full)
+        } else {
+            val mark = "?"
+            font.draw(mark, -font.getWidth(mark) / 2f, -6f, YELLOW, false, matrix, vertexConsumers, TextRenderer.TextLayerType.SEE_THROUGH, 0, full)
+            // The bar: a row of spaces drawn with a background, grey, and over it the filled part in yellow.
+            val width = font.getWidth(BAR)
+            font.draw(BAR, -width / 2f, 5f, 0, false, matrix, vertexConsumers, TextRenderer.TextLayerType.SEE_THROUGH, BAR_EMPTY, full)
+            val filled = BAR.take((BAR.length * alert / 100).coerceIn(0, BAR.length))
+            if (filled.isNotEmpty()) {
+                font.draw(filled, -width / 2f, 5f, 0, false, matrix, vertexConsumers, TextRenderer.TextLayerType.SEE_THROUGH, BAR_FULL, full)
+            }
+        }
+        matrices.pop()
+    }
 
     /** The player's model, with the arms and head of what the entity is doing. */
     private class FactoryNpcModel(root: ModelPart) : BipedEntityModel<FactoryNpcEntity>(root) {
@@ -107,6 +141,12 @@ class FactoryNpcRenderer(context: EntityRendererFactory.Context) :
     }
 
     private companion object {
+        const val YELLOW = 0xFFFFD040.toInt()
+        const val RED = 0xFFFF4A3A.toInt()
+        const val BAR = "        "
+        const val BAR_EMPTY = 0x90202020.toInt()
+        const val BAR_FULL = 0xFFFFD040.toInt()
+
         val TEXTURES: Map<String, Identifier> = Ch2L1Skins.ALL.associateWith { Identifier(EveryTunnel.MOD_ID, Ch2L1Skins.texturePath(it)) }
     }
 }

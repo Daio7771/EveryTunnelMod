@@ -392,6 +392,7 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `level1/core/Ch2L1IntroScene.kt` | La cinemática del primer aviso: tomas desde anclas, en la maquinaria de las otras escenas |
 | `level1/core/Ch2L1Act2.kt` | El archivo del Acto 2 (`cutscenes/meeting.json`), su lector y `Ch2L1Follow`: el compañero guiando, esperando a un jugador que se queda atrás y recordándoselo |
 | `level1/core/Ch2L1Act3.kt` | El archivo del Acto 3 (`act3.json`) y su lector: las cerraduras, el código de Rowan, los ordenadores y sus archivos, el objetivo y el destino de la flecha según los contadores del jugador |
+| `level1/core/Ch2L1Patrols.kt` | El archivo de las patrullas (`patrols.json`) y su lector, `Ch2L1PatrolRunner` (la ronda de un guardia con sus paradas), `Ch2L1Watch` (qué ve y piensa un guardia: el «?», el aviso, la carrera, la captura) y `Ch2L1Stare` |
 | `level1/core/Ch2L1Meeting.kt` | La reunión como escena (`Ch2L1MeetingScene`: los ojos girando hacia cada hablante, la puerta, el tick de la tarjeta) y `Ch2L1Glances` (las miradas de los oyentes a la puerta) |
 | `level1/core/Ch2L1Npcs.kt` | La gente de la fábrica: `npcs.json`, su lector, los pasos de una rutina con sus anclas buscadas y `Ch2L1RoutineRunner`, lo que hace una persona cada tick |
 | `level1/core/Ch2L1NpcLife.kt` | Lo que hace que la gente de la fábrica parezca viva (`life` de `npcs.json`): `Ch2L1Gait` (andar y girar suave), `Ch2L1Gaze` (adónde mira la cabeza), `Ch2L1Chat` (charlas entre dos), `Ch2L1Pose` |
@@ -406,7 +407,7 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 |---|---|
 | `level1/platform/Ch2L1.kt` | El Nivel 1 del Chapter 2: el estado de cada jugador y si lo está jugando (las reglas le siguen: `enter`, `leave`), guardados en su progreso; todo cambio pasa por aquí y llega a los oyentes |
 | `level1/platform/Ch2L1DataLoader.kt` | Lee los archivos JSON del nivel (la copia de la carpeta de config, si no la del jar) al arrancar y con `/et reload`, y guarda los datos actuales |
-| `level1/platform/Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc\|tasks\|act3\|intro\|say` (solo ejecuciones de desarrollo) |
+| `level1/platform/Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc\|tasks\|act3\|patrols\|intro\|say` (solo ejecuciones de desarrollo) |
 | `level1/platform/Ch2L1Build.kt` | Construye el nivel desde su plan a razón de 8.000 celdas por tick (y lo vacía), recuerda qué plan construyó, comprueba antes cada bloque |
 | `level1/platform/TimeClockBlock.kt` | El reloj de fichar del Nivel 1 del Chapter 2: un lector de tarjetas (mismos modelos) que ficha al nuevo empleado, rojo y luego verde |
 | `level1/platform/Ch2L1TaskBlocks.kt` | El tubo de muestra, el terminal de NonameOS, el analizador, la escoba apoyada y la suciedad de las tareas del Capítulo 2: cada uno pasa su uso a `Ch2L1TaskHooks` |
@@ -416,6 +417,7 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `level1/platform/Ch2L1Act2Hooks.kt` | El Acto 2 en el servidor: el compañero esperando y guiando, el grupo, la reunión dirigida tick a tick, la tarjeta, la salida de todos, el salto |
 | `level1/platform/Ch2L1Act3Hooks.kt` | El Acto 3 en el servidor: el lector de tarjetas y la puerta del laboratorio auxiliar, los archivos de los ordenadores y el disparo del despacho, el teclado y la puerta del despacho, la entrada al despacho, las puertas que dicen que no, el Pale man de la cámara 02, el cierre al volver atrás |
 | `level1/platform/Ch2L1Act3Blocks.kt` | El lector de tarjetas y el teclado (una cerradura junto a una puerta cerrada, roja y luego verde) y el retrato de Rowan: cada uno pasa su uso a `Ch2L1Act3Hooks` |
+| `level1/platform/Ch2L1PatrolHooks.kt` | Las patrullas en el servidor: los guardias puestos y dirigidos en su ronda, qué hace sospechoso a un jugador, el aviso, la carrera, la captura y el jugador devuelto |
 | `level1/platform/Ch2L1Doors.kt` | Las puertas de la fábrica como las usa su gente: abiertas a su paso, un vano cerrado o abierto alrededor de un sitio |
 | `level1/platform/FactoryNpcEntity.kt` | Una persona del Nivel 1 del Chapter 2 (Rowan, el compañero, los trabajadores): un solo tipo de entidad, su skin sincronizada las distingue; un trabajador sigue su rutina tick a tick (andar suave, a su ritmo), su cabeza mira sola, y su pose sincronizada dice si teclea, habla o escucha; una criatura mantenida |
 | `level1/platform/Ch2L1Npcs.kt` | La gente de la fábrica: los trabajadores que se ponen mientras se juega el nivel y los del LAB que se quitan, las charlas entre parejas, los grupos y el `/et ch2 l1 npc` del desarrollador |
@@ -439,6 +441,7 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `level1/client/NonameOsFilesScreen.kt` | NonameOS en los ordenadores del Acto 3: los archivos, NUEVO o LEÍDO, cada uno abierto, escrito y desplazable; cerrar uno avisa al servidor |
 | `level1/client/NonameOsLook.kt` | El aspecto de NonameOS (los colores, el marco del monitor, la barra de título, un botón), compartido por sus ventanas |
 | `level1/client/KeypadScreen.kt` | El teclado del despacho de cerca: el visor, doce teclas con clic o tecleando, DENEGADO o ABIERTO según el servidor |
+| `level1/client/CaughtOverlay.kt` | Pillado por un guardia: el fundido a negro con su texto; la línea de un guardia como subtítulo |
 | `level1/client/FactoryNpcRenderer.kt` | Las personas de la fábrica sobre el modelo del jugador con brazos clásicos, cada una con su skin (`textures/entity/npc/`), brazos y cabeza según su pose (teclea, habla, escucha) |
 
 ## Recursos: `main/resources/`

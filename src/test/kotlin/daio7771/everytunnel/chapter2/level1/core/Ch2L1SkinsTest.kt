@@ -11,8 +11,8 @@ class Ch2L1SkinsTest {
     private val assets = File("src/main/resources/assets/every_tunnel")
 
     @Test
-    fun `the skins are the six workers and Rowan, each once`() {
-        assertEquals(7, Ch2L1Skins.ALL.size)
+    fun `the skins are the six workers, the two guards and Rowan, each once`() {
+        assertEquals(9, Ch2L1Skins.ALL.size)
         assertEquals(Ch2L1Skins.ALL.size, Ch2L1Skins.ALL.toSet().size)
         assertTrue(Ch2L1Skins.ROWAN in Ch2L1Skins.ALL)
         assertTrue(listOf(Ch2L1Skins.COWORKER, Ch2L1Skins.WORKER_A, Ch2L1Skins.WORKER_B).all { it in Ch2L1Skins.ALL })

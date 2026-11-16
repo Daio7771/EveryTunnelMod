@@ -52,6 +52,16 @@ class FactoryNpcEntity(type: EntityType<out MobEntity>, world: World) : MobEntit
         get() = dataTracker.get(SKIN)
         set(value) = dataTracker.set(SKIN, Ch2L1Skins.orDefault(value))
 
+    /**
+     * A patrolling guard's mind, for the "?" over his head (synced; `Ch2L1PatrolHooks` sets it): [ALERT_NONE], or how full his "?" is
+     * (0 to 100), [ALERT_WARNED] ("!": he has told the player off) or [ALERT_CHASING] (he runs at them).
+     */
+    var alert: Int
+        get() = dataTracker.get(ALERT)
+        set(value) {
+            if (dataTracker.get(ALERT) != value) dataTracker.set(ALERT, value)
+        }
+
     /** What the arms and head are doing (client). */
     var npcPose: Ch2L1Pose
         get() = Ch2L1Pose.of(dataTracker.get(POSE))
@@ -122,6 +132,7 @@ class FactoryNpcEntity(type: EntityType<out MobEntity>, world: World) : MobEntit
         super.initDataTracker()
         dataTracker.startTracking(SKIN, Ch2L1Skins.DEFAULT)
         dataTracker.startTracking(POSE, Ch2L1Pose.NONE.ordinal)
+        dataTracker.startTracking(ALERT, ALERT_NONE)
     }
 
     override fun tick() {
@@ -232,6 +243,11 @@ class FactoryNpcEntity(type: EntityType<out MobEntity>, world: World) : MobEntit
     companion object {
         private val SKIN: TrackedData<String> = DataTracker.registerData(FactoryNpcEntity::class.java, TrackedDataHandlerRegistry.STRING)
         private val POSE: TrackedData<Int> = DataTracker.registerData(FactoryNpcEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
+        private val ALERT: TrackedData<Int> = DataTracker.registerData(FactoryNpcEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
+
+        const val ALERT_NONE = -1
+        const val ALERT_WARNED = 101
+        const val ALERT_CHASING = 102
 
         /** Blocks a tick at `walk_speed` 1 and a pace of 1: a stroll of 1.3 blocks a second (a player walks 4.3). */
         const val WALK = 0.065

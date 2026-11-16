@@ -5,8 +5,8 @@
 El Nivel 1 del Chapter 2 es la fábrica, cuatro meses después del Chapter 1: un científico normal contratado en lugar del
 que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el despacho del supervisor. Se construye por
 fases (de la 0 a la 10), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
-nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 6, el Acto 3 sin patrullas.** Se
-juega desde el reloj hasta los archivos de Rowan en su despacho (la cinemática del despacho, fase 8, va después de las patrullas, fase 7); el LAB aún no está amueblado.
+nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 7, las patrullas.** Se
+juega desde el reloj hasta los archivos de Rowan en su despacho, con dos guardias haciendo su ronda (la cinemática del despacho, fase 8, es lo siguiente); el LAB aún no está amueblado.
 
 Su código está en `daio7771.everytunnel.chapter2` (el del cliente, en el mismo paquete dentro de `src/client`): `level1.core`
 (Kotlin puro, con tests), `level1.platform` (pegamento con Minecraft) y `level1.client`, aparte del juego base, que nunca lo
@@ -46,7 +46,7 @@ Todo lo ajustable es JSON, no código: cambiar un ritmo, una ruta o un texto es 
 | `tasks.json` | Las tres tareas del Acto 1: qué anclas tienen los tubos, el terminal, el analizador, la escoba y la suciedad, y cuánto dura cada una | `Ch2L1TasksParser`, con tipos |
 | `speakers.json` | Los altavoces de Rowan: las zonas y sus altavoces de techo, las líneas fijas y el grupo, el enfriamiento, la cinemática del primer aviso | `Ch2L1SpeakersParser`, con tipos |
 | `npcs.json` | La gente de la fábrica: dieciséis trabajadores con sus rutinas, los grupos (el de las taquillas) y cuán vivos parecen (`life`) | `Ch2L1NpcsParser`, con tipos |
-| `patrols.json` | Las patrullas | Vacío (`{}`) hasta que la fase que lo construye le dé su lector |
+| `patrols.json` | Las patrullas: cómo vigilan los guardias (la vista, qué es sospechoso, el aviso, la carrera, adónde vuelve un jugador pillado) y la ronda de cada guardia | `Ch2L1PatrolsParser`, con tipos |
 | `cutscenes/meeting.json` | El Acto 2: seguir al compañero y la reunión | `Ch2L1Act2Parser`, con tipos |
 | `act3.json` | La exploración del Acto 3: el lector de tarjetas, el teclado y el código de Rowan, los ordenadores y sus archivos, las puertas que dicen que no, la cámara 02, la espera de la flecha | `Ch2L1Act3Parser`, con tipos |
 | `cutscenes/office.json` | La cinemática del despacho (fase 8) | Lo mismo |
@@ -167,8 +167,9 @@ siguen siendo provisionales y nada los usa todavía.
 ## Las personas
 
 `FactoryNpcEntity` es un solo tipo de entidad para todos: Rowan, el compañero, los trabajadores. Su `skin` (sincronizada con
-el cliente) dice quién es: `rowan`, `coworker`, `worker_a`, `worker_b` y `generic_1` a `generic_3` (`Ch2L1Skins`: seis caras
-en la unión, tres de las cuales hablan, y Rowan). `FactoryNpcRenderer` dibuja el modelo del jugador con brazos clásicos de
+el cliente) dice quién es: `rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` a `generic_3` y los guardias `guard_1` y `guard_2`
+(`Ch2L1Skins`: seis caras en la unión, tres de las cuales hablan, Rowan y dos guardias con el uniforme del Chapter 1: `workers.py` pinta
+una cara propia sobre `guard.png`, la skin del jugador del Chapter 1). `FactoryNpcRenderer` dibuja el modelo del jugador con brazos clásicos de
 4 px y la capa base de la skin (`textures/entity/npc/<skin>.png`). La skin de Rowan es del autor, copiada tal como llegó;
 las de los seis trabajadores las dibuja `tools/entity/workers.py` (bata blanca, una tarjeta de un color cada uno, una cara
 cada uno), que también escribe una hoja de previews con la de Rowan (`tools/entity/output/`, fuera de git).
@@ -376,6 +377,31 @@ apunta la flecha según los contadores del jugador (`a3_lab_open`, `a3_read`, `a
 Volver a antes del Acto 3 (un nuevo empleado, `/et ch2 l1 state`) cierra otra vez las dos puertas, pone en rojo el lector y el teclado y
 olvida los contadores del acto; llegar a él por comando da la tarjeta (el hook del Acto 2).
 
+## Acto 3: las patrullas
+
+Fase 7 (`patrols.json`, `level1.core.Ch2L1Patrols`, `level1.platform.Ch2L1PatrolHooks`): dos guardias (`guard_1`, `guard_2`) hacen su ronda
+**desde el inicio del nivel hasta la cinemática del despacho**: la patrulla A recorre el anillo en sentido horario y se para 5 s junto a la
+puerta que baja al pasillo autorizado (`patrol_a_pause`); la B sale de Seguridad (`patrol_b_spawn`, donde descansa 6 s), recorre el pasillo
+autorizado hasta su extremo este y vuelve. Son gente de la fábrica dirigida tick a tick (`FactoryNpcEntity.direction`, `Ch2L1PatrolRunner`);
+la rutina de nadie más los mueve.
+
+No le hacen nada a un jugador que se porta bien. Un guardia **ve** a 8 bloques (4 si el jugador va agachado) y 70° de donde mira su cabeza,
+sin nada en medio, o a 2 bloques mire adonde mire (`Ch2L1Watch.inView`). Un jugador al que ve es **sospechoso**:
+- dentro de una zona prohibida (`forbidden`: el laboratorio auxiliar y la sala de la cámara 02, el pasillo autorizado, el despacho,
+  Seguridad, el WC del este);
+- agachado a 3 bloques o menos de él;
+- tras mirar el laboratorio auxiliar más de 10 s (`stare_seconds`): con el punto de mira en él, un rayo desde los ojos que llega a su
+  zona a través del cristal (`Ch2L1Stare`); de reojo no cuenta.
+
+Entonces se para y se gira hacia él mientras se llena un «?» amarillo sobre su cabeza (con una barra debajo, `notice_seconds` 1,5;
+`FactoryNpcEntity.alert`, que dibuja `FactoryNpcRenderer`) con un sonido de pregunta (`event.ch2l1.guard_suspect`). Lleno, un «!» rojo y le
+llama la atención (`guard_warn`, un subtítulo aún sin voz: `Ch2L1Subtitles.showText`); tiene `grace_seconds` (3) para parar. Si no para, corre
+hacia él (`run_pace`, `event.ch2l1.guard_alert`) y lo pilla al alcanzarlo o tras `chase_seconds` (2,5) a la vista: la pantalla funde a negro
+con "Te han pillado." (`CaughtOverlay`, `event.ch2l1.guard_caught`), el jugador vuelve a la entrada de la zona (`return_aux_lab`,
+`return_authorized`; si le pillan en otro sitio, `return_ring`) con lo que abrió aún abierto, sigue su línea `guard_caught` y el guardia vuelve a
+su ronda. Si lo pierde de vista `give_up_seconds`, se rinde. Nadie vigila durante una cinemática, en el Acto 2, en Creativo o Espectador, ni
+5 s después de pillar a alguien. **Las líneas de los guardias son provisionales** (solo texto) hasta que el autor dé las suyas, con voz.
+
 ## Comandos de depuración
 
 `level1.platform.Ch2L1Commands`, nivel de operador 2, **solo en ejecuciones de desarrollo** (como explica
@@ -394,13 +420,14 @@ olvida los contadores del acto; llegar a él por comando da la tarjeta (el hook 
 | `/et ch2 l1 state` | Muestra tu estado y el siguiente |
 | `/et ch2 l1 state <estado>` | Te pone en ese estado (sin importar mayúsculas, `-` por `_`), como si hubieras llegado jugando |
 | `/et ch2 l1 skip` | Te pasa al siguiente estado |
-| `/et ch2 l1 npc <skin>` | Pone delante de ti a una persona de la fábrica, para ver su skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` a `generic_3`) |
+| `/et ch2 l1 npc <skin>` | Pone delante de ti a una persona de la fábrica, para ver su skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` a `generic_3`, `guard_1`, `guard_2`) |
 | `/et ch2 l1 npc clear` | Las quita todas |
 | `/et ch2 l1 npc ambient` | Pone a los trabajadores de la fábrica que falten (debes estar jugando el nivel y dentro de él) |
 | `/et ch2 l1 npc group <nombre>` | Pone un grupo de `npcs.json` en sus anclas (`taquillas`) |
 | `/et ch2 l1 npc remove <grupo>` | Quita un grupo (`lab`, `main`, `dining`, `taquillas`) |
 | `/et ch2 l1 tasks` | Cuánto has avanzado en las tres tareas, y lo que los datos nombran y falta |
 | `/et ch2 l1 tasks reset` | Las tres tareas empiezan de nuevo: los tubos, la escoba y la suciedad vuelven adonde dice el estado |
+| `/et ch2 l1 patrols` | Dónde está cada guardia, adónde va y qué piensa de ti (tranquilo, sospechando y cuánto, avisando, corriendo) |
 | `/et ch2 l1 act3` | Lo que has hecho en el Acto 3: el objetivo, el laboratorio y el despacho abiertos o cerrados, los archivos leídos |
 | `/et ch2 l1 act3 reset` | Cierra otra vez el laboratorio auxiliar y el despacho, pone en rojo el lector y el teclado y olvida el Acto 3 (el estado se queda) |
 | `/et ch2 l1 intro` | La cinemática del primer aviso, ahora |
@@ -425,4 +452,4 @@ personaje) llegan con la fase que se los dé, y también se ejecutarán con el c
 `Ch2L1StateTest` (el orden, `next`, `parse`), `Ch2L1AnchorsParserTest` (el formato, cada tipo de problema) y `Ch2L1DataTest`
 (los archivos del jar, qué copia gana, los respaldos), `Ch2L1VoicesTest` (las 32 líneas, sus eventos de sonido, Ogg y
 fragmentos, los textos en los dos idiomas) `Ch2L1SkinsTest` (el formato de las skins) y `Ch2L1ObjectivesTest` (un objetivo por paso, en los dos idiomas) y `Ch2L1MapPlanTest` (los bloques y puertas del plan, las anclas
-sobre sus suelos), todos en `chapter2/level1/core`; `Ch2L1NpcsTest` (el archivo de la gente, las rutinas y cada tick de quien teclea, de quien camina y de quien se atasca), `Ch2L1Act2Test` (el archivo de la reunión y sus anclas, el compañero guiando y esperando y sus recordatorios, las líneas de la reunión, la puerta y la tarjeta, las miradas, la flecha sobre él), `Ch2L1NpcLifeTest` (las claves de `life` y el ritmo de un trabajador, acelerar y frenar, frenar para girar, las paradas en el camino, adónde miran y la mirada al jugador con su enfriamiento, las parejas para charlar y sus turnos), `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso, también en el Acto 3, y su espera), `Ch2L1Act3Test` (el archivo act3, el código, el objetivo que avanza, los archivos de Rowan leídos), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador, y que un planificador hecho para una partida vieja se sustituye cuando el progreso retrocede: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`, también lo de `act3.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas, que la sala de las taquillas tiene sus taquillas y ninguna cámara, que cada otro espacio tiene una y que cada trabajador y cada ruta pisan el suelo. `Ch2PlayerProgressTest` cubre el estado, la marca y los contadores en el progreso del capítulo, y `ChapterBoundaryTest` que ningún código fuera de `chapter2` lo nombra.
+sobre sus suelos), todos en `chapter2/level1/core`; `Ch2L1NpcsTest` (el archivo de la gente, las rutinas y cada tick de quien teclea, de quien camina y de quien se atasca), `Ch2L1Act2Test` (el archivo de la reunión y sus anclas, el compañero guiando y esperando y sus recordatorios, las líneas de la reunión, la puerta y la tarjeta, las miradas, la flecha sobre él), `Ch2L1NpcLifeTest` (las claves de `life` y el ritmo de un trabajador, acelerar y frenar, frenar para girar, las paradas en el camino, adónde miran y la mirada al jugador con su enfriamiento, las parejas para charlar y sus turnos), `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso, también en el Acto 3, y su espera), `Ch2L1Act3Test` (el archivo act3, el código, el objetivo que avanza, los archivos de Rowan leídos), `Ch2L1PatrolsTest` (el archivo de las patrullas y sus anclas, una ronda con sus paradas y otra de ida y vuelta, qué ve un guardia, el «?» que se llena, el aviso, la carrera, la captura y la rendición, una mirada fija), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador, y que un planificador hecho para una partida vieja se sustituye cuando el progreso retrocede: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`, también lo de `act3.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas, que la sala de las taquillas tiene sus taquillas y ninguna cámara, que cada otro espacio tiene una y que cada trabajador y cada ruta pisan el suelo. `Ch2PlayerProgressTest` cubre el estado, la marca y los contadores en el progreso del capítulo, y `ChapterBoundaryTest` que ningún código fuera de `chapter2` lo nombra.

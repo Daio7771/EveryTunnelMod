@@ -9,7 +9,7 @@
   "subtitle.every_tunnel.ch2.prologue_03_1": "Something's wrong... my hands...",
   "subtitle.every_tunnel.ch2.prologue_03_2": "WHAT'S HAPPENING?! IT'S SO LOUD!",
   "subtitle.every_tunnel.ch2.prologue_03_3": "EVERYTHING IS SO LOUD!",
-  "subtitle.every_tunnel.ch2.prologue_04_1": "MY EYES! I CAN'T\u2014 AAAAAHHH!",
+  "subtitle.every_tunnel.ch2.prologue_04_1": "MY EYES! I CAN'T— AAAAAHHH!",
   "every_tunnel.ch2.l1.speaker.coworker": "COWORKER:",
   "every_tunnel.ch2.l1.speaker.worker_a": "WORKER A:",
   "every_tunnel.ch2.l1.speaker.worker_b": "WORKER B:",
@@ -110,9 +110,9 @@
   "every_tunnel.ch2.l1.keypad.title": "Keypad",
   "every_tunnel.ch2.l1.keypad.open": "OPEN",
   "every_tunnel.ch2.l1.keypad.denied": "DENIED",
-  "every_tunnel.ch2.l1.keypad.hint": "Type the code \u00b7 Enter: OK \u00b7 Esc: step back",
-  "every_tunnel.ch2.l1.os.files.aux_lab": "FILES \u00b7 AUXILIARY LAB \u00b7 WORKSTATION 2",
-  "every_tunnel.ch2.l1.os.files.rowan": "FILES \u00b7 ROWAN \u00b7 SUPERVISOR \u00b7 PRIVATE",
+  "every_tunnel.ch2.l1.keypad.hint": "Type the code · Enter: OK · Esc: step back",
+  "every_tunnel.ch2.l1.os.files.aux_lab": "FILES · AUXILIARY LAB · WORKSTATION 2",
+  "every_tunnel.ch2.l1.os.files.rowan": "FILES · ROWAN · SUPERVISOR · PRIVATE",
   "every_tunnel.ch2.l1.os.file.new": "NEW",
   "every_tunnel.ch2.l1.os.file.read": "READ",
   "every_tunnel.ch2.l1.os.button.open": "OPEN",
@@ -127,5 +127,9 @@
   "block.every_tunnel.keypad": "Keypad",
   "block.every_tunnel.film_light": "Studio Light",
   "block.every_tunnel.film_camera": "Cine Camera",
-  "block.every_tunnel.rowan_portrait": "Portrait"
+  "block.every_tunnel.rowan_portrait": "Portrait",
+  "every_tunnel.ch2.l1.speaker.guard": "Guard",
+  "every_tunnel.ch2.l1.guard_warn": "Hey. Walk away.",
+  "every_tunnel.ch2.l1.guard_caught": "That's it. Back to work, and stay where you belong.",
+  "every_tunnel.ch2.l1.caught": "You've been caught."
 }

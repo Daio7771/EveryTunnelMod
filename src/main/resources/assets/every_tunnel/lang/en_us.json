@@ -650,5 +650,9 @@
   "block.every_tunnel.keypad": "Keypad",
   "block.every_tunnel.film_light": "Studio Light",
   "block.every_tunnel.film_camera": "Cine Camera",
-  "block.every_tunnel.rowan_portrait": "Portrait"
+  "block.every_tunnel.rowan_portrait": "Portrait",
+  "every_tunnel.ch2.l1.speaker.guard": "Guard",
+  "every_tunnel.ch2.l1.guard_warn": "Hey. Walk away.",
+  "every_tunnel.ch2.l1.guard_caught": "That's it. Back to work, and stay where you belong.",
+  "every_tunnel.ch2.l1.caught": "You've been caught."
 }

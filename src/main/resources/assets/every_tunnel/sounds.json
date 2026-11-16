@@ -867,6 +867,24 @@
       }
     ]
   },
+  "event.ch2l1.guard_alert": {
+    "sounds": [
+      "every_tunnel:event/ch2l1/guard_alert_1"
+    ]
+  },
+  "event.ch2l1.guard_caught": {
+    "sounds": [
+      "every_tunnel:event/ch2l1/guard_caught_1"
+    ]
+  },
+  "event.ch2l1.guard_suspect": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l1/guard_suspect_1",
+        "attenuation_distance": 24
+      }
+    ]
+  },
   "event.collapse": {
     "sounds": [
       "every_tunnel:event/collapse_1"

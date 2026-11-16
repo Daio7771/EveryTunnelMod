@@ -24,6 +24,11 @@ object Ch2Sounds {
     val CH2L1_KEYPAD_ERROR = event("block.ch2l1.keypad_error")
     val CH2L1_KEYPAD_ACCEPT = event("block.ch2l1.keypad_accept")
 
+    /** Chapter 2 Level 1, Act 3's patrols: a guard notices something, runs at the player, catches them. */
+    val CH2L1_GUARD_SUSPECT = event("event.ch2l1.guard_suspect")
+    val CH2L1_GUARD_ALERT = event("event.ch2l1.guard_alert")
+    val CH2L1_GUARD_CAUGHT = event("event.ch2l1.guard_caught")
+
     private fun event(path: String, range: Float? = null): SoundEvent {
         val id = Identifier(EveryTunnel.MOD_ID, path)
         return (if (range == null) SoundEvent.of(id) else SoundEvent.of(id, range)).also { all += it }
