@@ -51,8 +51,9 @@ class WallMessageBlock(settings: Settings) : BlockWithEntity(settings) {
 
 /**
  * A wall message's data. NBT: `{Text: "<lang key>", Changed: "<lang key>", Size: 0.5f, Rotation: -2f, Trigger:
- * "fixed" | "on_approach" | "on_look_away_change", Once: 1b, Patch: 1b}`: [size] is a line's height in blocks,
- * [rotation] degrees off level, [patch] a pale patch behind it on a dark wall. A line break in the lang text
+ * "fixed" | "on_approach" | "on_look_away_change", Once: 1b, Patch: 1b, Chalk: "white" | "black"}`: [size] is a line's
+ * height in blocks, [rotation] degrees off level, [patch] a pale patch behind it on a dark wall, [chalk] written in chalk of
+ * that colour instead of painted (Chapter 2's basement: white on a dark wall, black on a white one). A line break in the lang text
  * makes two lines. What has happened to it is the client's ([WallMessageState]).
  */
 class WallMessageBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlocks.WALL_MESSAGE_ENTITY, pos, state) {
@@ -71,6 +72,8 @@ class WallMessageBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Mod
         private set
     var patch = false
         private set
+    var chalk = ""
+        private set
     private var triggerName = "fixed"
 
     override fun readNbt(nbt: NbtCompound) {
@@ -83,6 +86,7 @@ class WallMessageBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Mod
         trigger = WallMessageState.Trigger.parse(triggerName)
         once = !nbt.contains("Once") || nbt.getBoolean("Once")
         patch = nbt.getBoolean("Patch")
+        chalk = nbt.getString("Chalk")
     }
 
     override fun writeNbt(nbt: NbtCompound) {
@@ -94,6 +98,7 @@ class WallMessageBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(Mod
         nbt.putString("Trigger", triggerName)
         nbt.putBoolean("Once", once)
         nbt.putBoolean("Patch", patch)
+        if (chalk.isNotEmpty()) nbt.putString("Chalk", chalk)
     }
 
     override fun toUpdatePacket(): Packet<ClientPlayPacketListener> = BlockEntityUpdateS2CPacket.create(this)

@@ -173,21 +173,7 @@ object Ch2L1OfficeHooks {
      * The LAB's ceiling lights (the plan's lamps in the zone `lab`) off ([Ch2Blocks.FACTORY_LIGHT_OFF]), one in [EMERGENCY_EVERY] a faint red
      * emergency light ([Ch2Blocks.FACTORY_LIGHT_EMERGENCY]); or all back on.
      */
-    private fun labLights(world: ServerWorld, dim: Boolean) {
-        val box = Ch2L1DataLoader.data.anchors.zone("lab")?.box ?: return
-        val plan = Ch2L1Build.plan
-        val lamps = plan.lights.map { BlockPos(plan.worldX(it.x), plan.worldY(it.y), plan.worldZ(it.z)) }
-            .filter { box.contains(it.x + 0.5, it.y - 0.5, it.z + 0.5) || box.contains(it.x + 0.5, it.y + 0.5, it.z + 0.5) }
-        for ((i, pos) in lamps.withIndex()) {
-            val state = world.getBlockState(pos)
-            val lit = state.isOf(ModBlocks.LAB_CEILING_LIGHT)
-            val dark = state.isOf(Ch2Blocks.FACTORY_LIGHT_OFF) || state.isOf(Ch2Blocks.FACTORY_LIGHT_EMERGENCY)
-            when {
-                dim && lit -> world.setBlockState(pos, (if (i % EMERGENCY_EVERY == 0) Ch2Blocks.FACTORY_LIGHT_EMERGENCY else Ch2Blocks.FACTORY_LIGHT_OFF).defaultState)
-                !dim && dark -> world.setBlockState(pos, ModBlocks.LAB_CEILING_LIGHT.defaultState)
-            }
-        }
-    }
+    private fun labLights(world: ServerWorld, dim: Boolean) = Ch2L1Build.zoneLights(world, "lab", dim, EMERGENCY_EVERY)
 
     // --- the scene -------------------------------------------------------------------------------
 

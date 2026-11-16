@@ -25,7 +25,7 @@ import kotlin.math.acos
 
 /**
  * A [WallMessageBlockEntity] on the wall behind its block, in the painted font (`tools/gui/wall_font.py`),
- * black, lit like the wall. It is not asked when nobody can see it: what has happened to each message is kept
+ * black, lit like the wall; or, a chalk one, in the chalk font, white or black. It is not asked when nobody can see it: what has happened to each message is kept
  * here by position ([states]), so that it survives its chunk being reloaded, until the player leaves the world.
  */
 class WallMessageRenderer(context: BlockEntityRendererFactory.Context) : BlockEntityRenderer<WallMessageBlockEntity> {
@@ -56,7 +56,7 @@ class WallMessageRenderer(context: BlockEntityRendererFactory.Context) : BlockEn
         val key = if (state.message.changed && entity.changedText.isNotEmpty()) entity.changedText else entity.text
         val seed = pos.hashCode()
         val lines = I18n.translate(key).split('\n').map { line ->
-            Text.literal(WallFont.paint(line, seed)).setStyle(Style.EMPTY.withFont(FONT))
+            Text.literal(WallFont.paint(line, seed)).setStyle(Style.EMPTY.withFont(if (entity.chalk.isEmpty()) FONT else CHALK_FONT))
         }
         val width = lines.maxOf { font.getWidth(it) }.toFloat()
         val height = lines.size * LINE_UNITS
@@ -81,7 +81,11 @@ class WallMessageRenderer(context: BlockEntityRendererFactory.Context) : BlockEn
             buffer.vertex(matrix, x1, y0, 0f).color(PATCH_R, PATCH_G, PATCH_B, alpha).light(light).next()
             matrices.translate(0.0, 0.0, TEXT_OVER_PATCH)
         }
-        val colour = (alpha shl 24) or PAINT
+        val colour = (alpha shl 24) or when (entity.chalk) {
+            "white" -> WHITE_CHALK
+            "black" -> BLACK_CHALK
+            else -> PAINT
+        }
         lines.forEachIndexed { i, line ->
             val x = -font.getWidth(line) / 2f
             val y = -height / 2f + i * LINE_UNITS
@@ -96,6 +100,7 @@ class WallMessageRenderer(context: BlockEntityRendererFactory.Context) : BlockEn
 
     companion object {
         private val FONT = Identifier(EveryTunnel.MOD_ID, "wall_paint")
+        private val CHALK_FONT = Identifier(EveryTunnel.MOD_ID, "wall_chalk")
         private val states = HashMap<BlockPos, Remembered>()
 
         /** Font units a line takes: the font's height (`wall_font.py`). */
@@ -107,6 +112,8 @@ class WallMessageRenderer(context: BlockEntityRendererFactory.Context) : BlockEn
         private const val PATCH_G = 188
         private const val PATCH_B = 168
         private const val PAINT = 0x0E0C0C
+        private const val WHITE_CHALK = 0xE6E3DA
+        private const val BLACK_CHALK = 0x1C1B1A
         /** The font renderer takes an alpha this low for opaque. */
         private const val MIN_ALPHA = 5
 

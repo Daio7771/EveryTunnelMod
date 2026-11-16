@@ -17,6 +17,10 @@
     "dirt": "task3_dirt_spots",
     "sweep_seconds": 1.5
   },
+  "overtime": {
+    "broom": "basement_broom_block",
+    "dirt": "basement_dirt_spots"
+  },
   "guide": {
     "enabled": true,
     "height": 1.1,

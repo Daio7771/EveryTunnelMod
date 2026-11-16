@@ -25,7 +25,7 @@ them (Ch2L1VoicesTest checks it). Every line has a speaker, the lang key of the 
 Run (from the repository root):   python3 tools/sounds/ch2_l1_voices.py
 Without the MP3 folders it uses the Ogg files already in voice/ch2l1/, so the cues can be redone anywhere.
 
-One more file is no line: the recording on the auxiliary lab's computer (`voice.aux_lab_recording`), an easter egg. Its
+One more file is no line: the recording on the basement's terminal (`voice.basement_recording`, `?????????.mp3`), an easter egg. Its
 MP3 (by default ~/Downloads/raro.mp3, the same voice rules) is played **backwards**: an old tape's echo is put on the
 voice the right way round, then the whole is reversed and grain laid over it, so a player who reverses it again hears
 the voice clean, the echo trailing as it should. It has no text and no subtitles (it is not in ch2_l1_voices.json), on
@@ -109,7 +109,7 @@ ROWAN = [
 
 GROUPS = {"union": UNION, "rowan": ROWAN}
 
-RECORDING = "aux_lab_recording"
+RECORDING = "basement_recording"
 RECORDING_SOURCE = Path.home() / "Downloads" / "raro.mp3"
 LINES = UNION + ROWAN
 
@@ -133,7 +133,7 @@ def pa_filter(x, sr=44100):
 
 
 def recording(x, sr=44100):
-    """The aux lab's recording from the voice the right way round: a small speaker's band, the slap and the long
+    """The basement's recording from the voice the right way round: a small speaker's band, the slap and the long
     repeats of an old tape, reversed; then the tape's hiss, crackle and mains hum over it. Same loudness as before."""
     from scipy import signal
     rng = np.random.default_rng(4719)
@@ -166,7 +166,7 @@ def recording(x, sr=44100):
 
 
 def convert_recording():
-    """The aux lab's recording from its MP3, at the voices' loudness."""
+    """The basement's recording from its MP3, at the voices' loudness."""
     factor = 10 ** (prologue_voices.group_gain_db([RECORDING_SOURCE]) / 20.0)
     x = recording(prologue_voices.decode(RECORDING_SOURCE) * factor)
     VOICE.mkdir(parents=True, exist_ok=True)

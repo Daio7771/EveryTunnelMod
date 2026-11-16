@@ -24,6 +24,7 @@ object Ch2L1Objectives {
         Ch2L1State.ACT3_EXPLORE -> PREFIX + "explore_lab"
         Ch2L1State.ACT3_CUTSCENE -> null
         Ch2L1State.ACT3_OVERTIME -> PREFIX + "overtime"
+        Ch2L1State.ACT3_BASEMENT -> PREFIX + "basement"
         Ch2L1State.DONE -> null
     }
 }

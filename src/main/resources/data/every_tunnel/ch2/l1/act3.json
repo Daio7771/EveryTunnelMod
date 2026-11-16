@@ -5,11 +5,12 @@
   "office_door": "door_anchor",
   "code": "4719",
   "computers": [
+    { "id": "aux_lab", "anchor": "aux_lab_computer", "files": ["chamber_log", "authorization"] },
+    { "id": "rowan", "anchor": "rowan_computer", "files": ["medical_file", "contract_14"] },
     {
-      "id": "aux_lab", "anchor": "aux_lab_computer", "files": ["chamber_log", "authorization"],
-      "recordings": [ { "name": "rec_7f3a__0x4719.mp3", "sound": "voice.aux_lab_recording" } ]
-    },
-    { "id": "rowan", "anchor": "rowan_computer", "files": ["medical_file", "contract_14"] }
+      "id": "basement", "anchor": "basement_computer", "files": ["basement_note"], "cipher": true,
+      "recordings": [ { "name": "?????????.mp3", "sound": "voice.basement_recording" } ]
+    }
   ],
   "code_file": "authorization",
   "office_zone": "office",
@@ -18,5 +19,15 @@
   "sealed_door": "sealed_door",
   "portrait": "painting",
   "chamber": "chamber_02",
-  "guide_after_seconds": 60
+  "guide_after_seconds": 60,
+  "overtime": {
+    "reader": "sealed_reader",
+    "zone": "sealed_corridor",
+    "slam_after": 2.5,
+    "basement_zone": "basement",
+    "dark_seconds": 3.0,
+    "fade_seconds": 2.5,
+    "text_seconds": 6.0,
+    "text": "every_tunnel.ch2.l1.ending.text"
+  }
 }

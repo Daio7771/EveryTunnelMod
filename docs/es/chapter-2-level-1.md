@@ -5,8 +5,8 @@
 El Nivel 1 del Chapter 2 es la fábrica, cuatro meses después del Chapter 1: un científico normal contratado en lugar del
 que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el despacho del supervisor. Se construye por
 fases (de la 0 a la 10), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
-nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 8, la cinemática del despacho.** Se
-juega desde el reloj hasta las horas extra tras el despacho de Rowan (la zona sellada y el paso al Nivel 2, fase 9, son lo siguiente); el LAB aún no está amueblado.
+nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 9, la zona sellada y el final.** Se
+juega desde el reloj hasta su final, el sótano barrido y la vuelta al menú (lo siguiente es la fase 10, la pasada de QA); el LAB aún no está amueblado.
 
 Su código está en `daio7771.everytunnel.chapter2` (el del cliente, en el mismo paquete dentro de `src/client`): `level1.core`
 (Kotlin puro, con tests), `level1.platform` (pegamento con Minecraft) y `level1.client`, aparte del juego base, que nunca lo
@@ -28,7 +28,8 @@ nueva (`ProgressService.reset`) devuelve a todos ahí.
 | `ACT3_EXPLORE` | Sigilo por el laboratorio auxiliar, el pasillo del personal y el despacho |
 | `ACT3_CUTSCENE` | La cinemática del despacho, desde que se cierra el segundo papel |
 | `ACT3_OVERTIME` | Después del despacho, con el pase de horas extra sin cobrar: el camino a la zona sellada está abierto |
-| `DONE` | El jugador ha cruzado al Nivel 2 |
+| `ACT3_BASEMENT` | Tras la puerta sellada, que se cerró de golpe detrás: las horas extra, barriendo el sótano |
+| `DONE` | El sótano barrido: se apagaron sus luces y el juego volvió al menú |
 
 `level1.platform.Ch2L1` es la única puerta al estado: `setState(player, state, reason)` lo guarda, escribe en el log `Chapter 2
 Level 1: <jugador> goes A -> B (<motivo>)` y avisa a los oyentes; `skip(player)` pasa al siguiente. Un sistema del nivel
@@ -97,7 +98,8 @@ por una puerta libre.
 | Anillo, de 4 de ancho, alrededor del comedor (46 × 25 con sus muros) · Comedor | 4 · 36 × 15 | 4 · 6 |
 | Laboratorio auxiliar (restringido) | 14 × 24 | 5 |
 | Pasillo autorizado · Seguridad · Despacho · WC (restringidos) | 46 × 4 · 13 × 6 · 12 × 7 · 6 × 3 | 4 |
-| Pasillo "Nivel 2", tras la puerta sellada | 11 × 6 | 4 |
+| Zona sellada, el rellano tras la puerta sellada · el paso enrejado al este ("En obras") | 11 × 6 · 5 × 6 | 4 · 3 |
+| Escaleras de bajada, al sur del rellano (8 escalones) · Sótano, 8 bloques bajo la fábrica | 3 × 8 · 26 × 24 | de 5 a 6 (el techo baja con ellas) · 6 |
 
 El aspecto es el del laboratorio del prólogo, limpio y moderno: hormigón blanco, suelo gris claro, primera hilada de muro en gris
 oscuro, cristal (la pared del laboratorio auxiliar hacia el tramo oeste del anillo: `factory_glass`, un bloque del mod sin marco
@@ -106,7 +108,9 @@ lámparas de techo del laboratorio (160). El LAB, los pasillos, las taquillas y 
 relativas), y la fase 6 ensanchó el laboratorio auxiliar hacia el oeste: una sala propia tras un tabique (`aux_chamber`, 9 × 24), a la
 que se llega por un hueco en el extremo norte del tabique (un tipo de puerta del plan sin puerta, `opening`), guarda la cámara sellada 02,
 y el generador comprueba que ninguna línea desde un ojo en el anillo a través del cristal llega a su interior (`check_chamber_hidden`).
-Hay 21 puertas, todas propias del mod (ninguna es de vanilla): **libres**, la puerta de laboratorio
+La fase 9 enseñó al generador salas con el suelo más bajo (el `y0` de una sala: el del sótano es -8) y tramos de escalera (una sala cuyas
+celdas tienen cada una su propio suelo, uno más bajo en cada fila, con un bloque de escalera encima); las salas unidas sin puerta (el
+rellano, las escaleras, el sótano) son sus `LINKS`. Hay 21 puertas, todas propias del mod (ninguna es de vanilla): **libres**, la puerta de laboratorio
 (`factory_door`: blanca, con una ventana alta; las dos hojas de un par se abren y se cierran a la vez a mano, `LinkedDoorBlock`,
 con las bisagras en los bordes exteriores; la del anillo al pasillo autorizado también es libre, pero es
 la entrada a una zona prohibida: el círculo rojo del dibujo); **cerradas con llave**, la puerta de emergencia gris (`emergency_door`), que las manos no
@@ -124,11 +128,14 @@ comprime también los archivos de región, y el mapa es del Chapter 2, no del mu
 
 **Texto en las paredes.** Los `texts` del plan dicen qué pone cada uno de sus bloques `wall_text` (las placas del Nivel 3), una clave de
 idioma con un estilo; `Ch2L1Build` los escribe en las entidades de los bloques al acabar de construir (el rótulo de la cámara 02, la placa
-del retrato).
+del retrato, los dos carteles del rellano). Sus `messages` hacen lo mismo con sus bloques `wall_message` (garabatos de tiza:
+una clave de idioma, la altura de una línea, un ángulo, el color de la tiza), los cuatro de las paredes del sótano. Siempre están en inglés
+(sus textos en español son los ingleses), y el generador elige la tiza según la pared de detrás: negra en una pared blanca, blanca en una
+oscura (`Level.chalk`; `wall_chalk`, la versión en tiza de la fuente pintada de `tools/gui/wall_font.py`, sin chorretones).
 
 **Todavía no hay:** mobiliario (llega con la fase que lo necesita: el banco con los tubos, el terminal, el analizador, la escoba, la suciedad y los
 altavoces de techo llegaron con la 3; las taquillas, las seis estaciones de trabajo del LAB y las cámaras con la 4; el del Acto 3 con la 6; el resto
-del mobiliario del LAB está por llegar) ni los demás carteles de texto ("NIVEL 2", "Acceso restringido", los nombres de las salas). Tampoco está el
+del mobiliario del LAB está por llegar; el del sótano llegó con la 9) ni los demás carteles de texto ("Acceso restringido", los nombres de las salas). Tampoco está el
 paso del prólogo al nivel: `enter` se llama a mano.
 
 
@@ -164,11 +171,12 @@ Las demás claves: `speaker.<quién>` (`coworker`, `worker_a`, `worker_b`, `rowa
 del Acto 3 y la placa del retrato se escribieron en la fase 6 (con sus nombres en NonameOS, `doc.<archivo>.name`); `notice` y `union_list`
 siguen siendo provisionales y nada los usa todavía.
 
-El ordenador del laboratorio auxiliar guarda también una grabación, `rec_7f3a__0x4719.mp3` (`recordings` en `act3.json`: su nombre,
-el mismo en todos los idiomas, y su evento de sonido). Su botón REPRODUCIR abre un reproductor en NonameOS (una onda que se mueve
-mientras suena, `[??]`, REPRODUCIR o DETENER) y hace sonar `voice.aux_lab_recording` desde el ordenador. Es un easter egg: una voz al
-revés (`ch2_l1_voices.py` la invierte, con el eco puesto del derecho), sin texto ni subtítulos a propósito, para que los jugadores la
-inviertan y la descifren. Nada la cuenta y nada la espera.
+El terminal del sótano (fase 9) es un easter egg propio: `cipher` en `act3.json` muestra las palabras de su ventana como símbolos de
+cifrado que parpadean (`NonameOsLook.scramble`). Guarda `?????????.mp3` (`recordings`: un nombre, el mismo en todos los idiomas, y un evento
+de sonido), cuyo REPRODUCIR abre un reproductor (una onda que se mueve mientras suena, `[??]`, REPRODUCIR o DETENER) y hace sonar
+`voice.basement_recording` desde el terminal: una voz al revés (`ch2_l1_voices.py` la invierte, con el eco puesto del derecho), sin texto
+ni subtítulos a propósito, para que los jugadores la inviertan y la descifren. Y `basement_note`, un `.txt` cuyo mensaje oculto está en
+Base64 en cada idioma. Nada los cuenta y nada los espera.
 
 ## Las personas
 
@@ -375,7 +383,7 @@ apunta la flecha según los contadores del jugador (`a3_lab_open`, `a3_read`, `a
   el chat). El retrato (`rowan_portrait`, pixel art en Python a partir de su skin) muestra al hacer clic el texto de su placa en la barra
   de acción; la placa de debajo es un `wall_text`.
 - **Puertas que dicen que no.** Un clic en la puerta restringida del extremo este del pasillo dice "Acceso restringido"; en la puerta
-  sellada, antes de las horas extra, "Sellada. Se necesita la tarjeta del supervisor."; en la del laboratorio o la del despacho mientras
+  sellada, antes de las horas extra, "Sellada. Se necesita la tarjeta del supervisor." (en las horas extra, cerrada, "Cerrada."); en la del laboratorio o la del despacho mientras
   sigan cerradas, "Cerrada."
 - **La flecha** (`Ch2L1Guide`): en el Acto 3 solo aparece cuando el jugador lleva `guide_after_seconds` (60) con el mismo objetivo: el
   lector, el ordenador del laboratorio, el teclado, la puerta del despacho, el ordenador de Rowan.
@@ -439,6 +447,29 @@ cerrar el segundo archivo de Rowan (`Ch2L1Act3Hooks.onOfficeTrigger`) lleva al j
   el pase y la linterna y vuelve a encender las luces.
 
 El LAB tendrá dos tareas más cuando el Nivel 1 esté decorado.
+
+## La zona sellada y el final (fase 9)
+
+El `overtime` de `act3.json` (`level1.core.Ch2L1Overtime`), la tarea de las horas extra en `tasks.json`, `level1.platform.Ch2L1Act3Hooks`
+(la puerta), `Ch2L1TaskHooks` (el barrido), `Ch2L1EndingHooks` y el `Ch2L1EndingOverlay` del cliente (el final).
+
+- **La puerta sellada** se abre en su lector de tarjetas del lado del LAB (`sealed_reader`) con el pase de Rowan, solo en `ACT3_OVERTIME`.
+  Aún no es el Nivel 2: detrás hay un rellano (`sealed_corridor`) con dos salidas. Al este, el paso a la otra parte de la fábrica,
+  enrejado y en obras ("EN OBRAS": barrotes, ladrillos); al sur, las escaleras que bajan al sótano ("SÓTANO · ALMACÉN").
+- **Se cierra de golpe detrás** (`block.big_door.slam`) en cuanto el jugador está a `slam_after` (2,5) bloques de ella en el rellano, y ya
+  no se abre: el estado pasa a `ACT3_BASEMENT` y el objetivo a "Horas extra: barre el sótano (0/8)". Desde aquí los guardias ya no vigilan.
+- **El sótano**, donde se guarda todo, es un almacén ordenado y bien iluminado (una lámpara cada 4 bloques; la escalera, una cada dos
+  escalones): dos bloques de estanterías metálicas de tres alturas, cuatro filas de seis cada uno, un pasillo ancho entre ellos desde la
+  escalera hasta la pared sur, cosas traídas del complejo Noname del Chapter 1 encima de las estanterías y en las paredes (la máscara del
+  director, un trofeo, un cuadro del lounge, un diploma...), el cartel de suelo mojado, tres garabatos de tiza y, al fondo del pasillo del
+  medio, exento contra la pared sur, un terminal de NonameOS bajo un "???" de tiza (ver los ordenadores del Acto 3: la grabación rara y una
+  nota cifrada). La escoba está apoyada al pie de las escaleras; sus ocho manchas se barren como las de la tarea 3 (`basement_broom_block`,
+  `basement_dirt_spots`, los contadores `basement_broom` y `basement_swept`, la flecha sobre la siguiente).
+- **La última mancha acaba el nivel** (`DONE`): se pone el contador `completed` (el `ch2.l1.completed` del plan), las luces del sótano
+  se apagan con un golpe sordo (`Ch2L1Build.zoneLights`, como las del LAB tras el despacho), y `dark_seconds` (3) después la pantalla
+  funde a negro en `fade_seconds` (2,5), el texto de cierre (`ending.text`) se queda `text_seconds` (6) y se sale del mundo, guardado, al
+  menú principal. El Nivel 1 no se publica solo, así que de momento nada le sigue. Volver a antes de `DONE` (un comando) vuelve a encender
+  el sótano; volver a las horas extra o a antes cierra la puerta sellada y pone su lector en rojo.
 
 ## Comandos de depuración
 

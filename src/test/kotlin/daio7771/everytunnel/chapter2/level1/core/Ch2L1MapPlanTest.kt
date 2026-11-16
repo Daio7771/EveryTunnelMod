@@ -46,7 +46,7 @@ class Ch2L1MapPlanTest {
 
     @Test
     fun `every block is a vanilla one the map uses or a block of the mod with its blockstate`() {
-        val vanilla = setOf("white_concrete", "light_gray_concrete", "gray_concrete")
+        val vanilla = setOf("white_concrete", "light_gray_concrete", "gray_concrete", "polished_andesite_stairs", "iron_bars", "bricks")
         for (block in plan.fills.map { it.block }.toSet()) {
             val spec = BlockSpec.parse(block)
             val (namespace, name) = spec.id.split(":")
@@ -181,7 +181,7 @@ class Ch2L1MapPlanTest {
     fun `every other space has a decorative camera`() {
         val spaces = listOf(
             "entrance", "main_corridor", "lab", "wc_west", "ring_north", "ring_south", "ring_west", "ring_east", "dining", "aux_lab",
-            "authorized_corridor", "security_room", "office", "wc_east", "level2_corridor",
+            "authorized_corridor", "security_room", "office", "wc_east", "sealed_corridor", "basement",
         )
         for (zone in spaces) assertTrue(blocksIn(zone, "factory_camera") >= 1, "no camera in $zone")
         assertTrue(cells.values.count { it.startsWith("every_tunnel:factory_camera[") } in 15..30)
@@ -239,8 +239,9 @@ class Ch2L1MapPlanTest {
             val x0 = box.minX - plan.origin.x
             val z0 = box.minZ - plan.origin.z
             assertTrue(x0 >= a.x && box.maxX - plan.origin.x <= b.x && z0 >= a.z && box.maxZ - plan.origin.z <= b.z, "zone ${zone.id} is outside the plan")
+            val y = box.minY.toInt() + 1 - plan.origin.y     // the zone's box starts at its floor's blocks
             val air = (box.minX..box.maxX).any { x ->
-                (box.minZ..box.maxZ).any { z -> !solid(x - plan.origin.x, 0, z - plan.origin.z) && solid(x - plan.origin.x, -1, z - plan.origin.z) }
+                (box.minZ..box.maxZ).any { z -> !solid(x - plan.origin.x, y, z - plan.origin.z) && solid(x - plan.origin.x, y - 1, z - plan.origin.z) }
             }
             assertTrue(air, "zone ${zone.id} has no floor with air over it")
         }

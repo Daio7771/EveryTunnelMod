@@ -31,7 +31,8 @@ import org.lwjgl.glfw.GLFW
  *
  * Below the files, the computer's recordings (the aux lab's easter egg): a row with the file's name, AUDIO and a PLAY button, which opens a
  * player: the name, a waveform that moves while it plays, `[??]` where its details would be, PLAY or STOP and CLOSE. It plays from the
- * computer ([pos]), heard like any sound there, and goes on if the window closes; no subtitles, and the server never hears of it.
+ * computer ([pos]), heard like any sound there, and goes on if the window closes; no subtitles, and the server never hears of it. On a
+ * [cipher] computer (the basement's) the window's own words are cipher symbols ([NonameOsLook.scramble]); the files' names and texts are not.
  */
 class NonameOsFilesScreen(
     private val computer: String,
@@ -39,6 +40,7 @@ class NonameOsFilesScreen(
     private val read: MutableList<Boolean>,
     private val recordings: List<Pair<String, String>>,
     private val pos: BlockPos,
+    private val cipher: Boolean,
 ) : Screen(Text.translatable(KEY + "os.title")) {
 
     private var open = -1
@@ -73,7 +75,7 @@ class NonameOsFilesScreen(
         val y0 = top()
         val w = w()
         val h = h()
-        NonameOsLook.window(context, textRenderer, width, height, x0, y0, w, h)
+        NonameOsLook.window(context, textRenderer, width, height, x0, y0, w, h, cipher)
         when {
             player >= 0 -> renderPlayer(context, x0, y0, w, h, mouseX, mouseY)
             open >= 0 -> renderFile(context, x0, y0, w, h, mouseX, mouseY)
@@ -82,23 +84,23 @@ class NonameOsFilesScreen(
     }
 
     private fun renderList(context: DrawContext, x0: Int, y0: Int, w: Int, h: Int, mouseX: Int, mouseY: Int) {
-        text(context, I18n.translate(KEY + "os.files.$computer"), x0 + 12, y0 + 32, GREEN)
+        text(context, ui("os.files.$computer"), x0 + 12, y0 + 32, GREEN)
         for ((i, file) in files.withIndex()) {
             val y = rowY(i)
             text(context, I18n.translate(KEY + "doc.$file.name"), x0 + 16, y + 4, GREEN)
-            text(context, I18n.translate(KEY + if (read[i]) "os.file.read" else "os.file.new"), x0 + w - BUTTON_W - 80, y + 4, if (read[i]) DIM_GREEN else GREEN)
+            text(context, ui(if (read[i]) "os.file.read" else "os.file.new"), x0 + w - BUTTON_W - 80, y + 4, if (read[i]) DIM_GREEN else GREEN)
             val bx = buttonX()
-            NonameOsLook.button(context, textRenderer, I18n.translate(KEY + "os.button.open"), bx, y, BUTTON_W, BUTTON_H, true, inside(mouseX, mouseY, bx, y, BUTTON_W, BUTTON_H))
+            NonameOsLook.button(context, textRenderer, ui("os.button.open"), bx, y, BUTTON_W, BUTTON_H, true, inside(mouseX, mouseY, bx, y, BUTTON_W, BUTTON_H))
         }
         for ((i, recording) in recordings.withIndex()) {
             val y = rowY(files.size + i)
             text(context, recording.first, x0 + 16, y + 4, GREEN)
-            text(context, I18n.translate(KEY + "os.file.audio"), x0 + w - BUTTON_W - 80, y + 4, DIM_GREEN)
+            text(context, ui("os.file.audio"), x0 + w - BUTTON_W - 80, y + 4, DIM_GREEN)
             val bx = buttonX()
-            NonameOsLook.button(context, textRenderer, I18n.translate(KEY + "os.button.play"), bx, y, BUTTON_W, BUTTON_H, true, inside(mouseX, mouseY, bx, y, BUTTON_W, BUTTON_H))
+            NonameOsLook.button(context, textRenderer, ui("os.button.play"), bx, y, BUTTON_W, BUTTON_H, true, inside(mouseX, mouseY, bx, y, BUTTON_W, BUTTON_H))
         }
         context.fill(x0 + 12, y0 + h - 22, x0 + w - 12, y0 + h - 21, DIM_GREEN)
-        text(context, I18n.translate(KEY + "os.hint"), x0 + 12, y0 + h - 14, DIM_GREEN)
+        text(context, ui("os.hint"), x0 + 12, y0 + h - 14, DIM_GREEN)
     }
 
     private fun renderFile(context: DrawContext, x0: Int, y0: Int, w: Int, h: Int, mouseX: Int, mouseY: Int) {
@@ -122,7 +124,7 @@ class NonameOsFilesScreen(
             text(context, "${scroll + 1}-${minOf(lines.size, scroll + shown)} / ${lines.size}", x0 + 14, closeY() + 4, DIM_GREEN)
         }
         val bx = x0 + w - BUTTON_W - 16
-        NonameOsLook.button(context, textRenderer, I18n.translate(KEY + "os.button.close"), bx, closeY(), BUTTON_W, BUTTON_H, true, inside(mouseX, mouseY, bx, closeY(), BUTTON_W, BUTTON_H))
+        NonameOsLook.button(context, textRenderer, ui("os.button.close"), bx, closeY(), BUTTON_W, BUTTON_H, true, inside(mouseX, mouseY, bx, closeY(), BUTTON_W, BUTTON_H))
         if (!shownAll && (Util.getMeasuringTimeMs() / 400) % 2 == 0L) context.fill(x0 + 14, y0 + h - 34, x0 + 20, y0 + h - 32, GREEN)
     }
 
@@ -148,9 +150,9 @@ class NonameOsFilesScreen(
         }
         val bx = x0 + w - BUTTON_W - 16
         val px = bx - BUTTON_W - 8
-        val label = I18n.translate(KEY + if (playing) "os.button.stop" else "os.button.play")
+        val label = ui(if (playing) "os.button.stop" else "os.button.play")
         NonameOsLook.button(context, textRenderer, label, px, closeY(), BUTTON_W, BUTTON_H, true, inside(mouseX, mouseY, px, closeY(), BUTTON_W, BUTTON_H))
-        NonameOsLook.button(context, textRenderer, I18n.translate(KEY + "os.button.close"), bx, closeY(), BUTTON_W, BUTTON_H, true, inside(mouseX, mouseY, bx, closeY(), BUTTON_W, BUTTON_H))
+        NonameOsLook.button(context, textRenderer, ui("os.button.close"), bx, closeY(), BUTTON_W, BUTTON_H, true, inside(mouseX, mouseY, bx, closeY(), BUTTON_W, BUTTON_H))
     }
 
     private fun isPlaying(sound: String): Boolean {
@@ -176,6 +178,9 @@ class NonameOsFilesScreen(
         }
         beep()
     }
+
+    /** The window's own words (not a file's): the lang key's text, scrambled on a [cipher] computer. */
+    private fun ui(key: String): String = I18n.translate(KEY + key).let { if (cipher) NonameOsLook.scramble(it) else it }
 
     private fun lengthOf(line: OrderedText): Int = stringOf(line).length
 
@@ -307,7 +312,8 @@ class NonameOsFilesScreen(
                 }
                 val recordings = List(buf.readVarInt()) { buf.readString() to buf.readString() }
                 val pos = buf.readBlockPos()
-                client.execute { MinecraftClient.getInstance().setScreen(NonameOsFilesScreen(computer, files, read, recordings, pos)) }
+                val cipher = buf.readBoolean()
+                client.execute { MinecraftClient.getInstance().setScreen(NonameOsFilesScreen(computer, files, read, recordings, pos, cipher)) }
             }
         }
     }

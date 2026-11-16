@@ -44,7 +44,7 @@ object Ch2L1Client {
 
     /**
      * The objective as the panel writes it: its text, and where the player is in it where it has a count ("(1/3)": the tubes taken, then the
-     * samples registered, in the first task; the dirt swept in the third). The player's counters come with their progress.
+     * samples registered, in the first task; the dirt swept in the third and in the basement). The player's counters come with their progress.
      */
     fun objectiveText(key: String): Text {
         val player = MinecraftClient.getInstance().player ?: return Text.translatable(key)
@@ -59,6 +59,9 @@ object Ch2L1Client {
             Ch2L1State.ACT1_TASK3 ->
                 Ch2L1Bits.count(service.ch2L1Counter(player, Ch2L1Tasks.SWEPT)) to
                     (Ch2L1DataLoader.data.anchors.path(tasks.dirtPath)?.points?.size ?: 0)
+            Ch2L1State.ACT3_BASEMENT ->
+                Ch2L1Bits.count(service.ch2L1Counter(player, Ch2L1Tasks.BASEMENT_SWEPT)) to
+                    (Ch2L1DataLoader.data.anchors.path(tasks.basementDirtPath)?.points?.size ?: 0)
             else -> 0 to 0
         }
         return if (total > 0) Text.translatable("every_tunnel.ch2.l1.objective.count", Text.translatable(key), done, total) else Text.translatable(key)

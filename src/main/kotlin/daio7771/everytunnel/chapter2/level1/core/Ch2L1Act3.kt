@@ -8,9 +8,38 @@ data class Ch2L1Recording(val name: String, val sound: String)
 
 /**
  * A NonameOS computer of Act 3 ([Ch2L1Act3]): its block's anchor and the files it holds, each a document's id (`every_tunnel.ch2.l1.<id>`),
- * and its recordings, which only play: nothing counts them, and nothing waits on them.
+ * and its recordings, which only play: nothing counts them, and nothing waits on them. A [cipher] one (the basement's) shows its window's
+ * own words (title, header, labels, buttons) as scrambled symbols; its files' names and texts are as their lang keys write them.
  */
-data class Ch2L1Computer(val id: String, val anchor: String, val files: List<String>, val recordings: List<Ch2L1Recording> = emptyList())
+data class Ch2L1Computer(
+    val id: String,
+    val anchor: String,
+    val files: List<String>,
+    val recordings: List<Ch2L1Recording> = emptyList(),
+    val cipher: Boolean = false,
+)
+
+/**
+ * The overtime, after Rowan's office (`act3.json`'s `overtime`): the sealed door opens at its reader ([reader]) with the unpaid overtime
+ * pass, and slams shut once the player is [slamAfter] blocks past it in [zone] (the landing behind it), which starts the basement's task.
+ * When the last dirt there is swept the lights of [basementZone] go out; [darkTicks] later the screen fades to black over [fadeTicks],
+ * the lang key [text] stays on it for [textTicks], and the game goes back to the menu.
+ */
+data class Ch2L1Overtime(
+    val reader: String = "sealed_reader",
+    val zone: String = "sealed_corridor",
+    val slamAfter: Double = 2.5,
+    val basementZone: String = "basement",
+    val darkTicks: Int = 60,
+    val fadeTicks: Int = 50,
+    val textTicks: Int = 120,
+    val text: String = "every_tunnel.ch2.l1.ending.text",
+) {
+    companion object {
+        /** The player's counter set when the level is finished (`ch2.l1.completed` in the plan): 1. */
+        const val COMPLETED = "completed"
+    }
+}
 
 /**
  * Act 3 of Chapter 2's Level 1, its first part: exploring the auxiliary lab, the authorized corridor and Rowan's office, from `act3.json`.
@@ -43,6 +72,7 @@ data class Ch2L1Act3(
     val portraitAnchor: String = "painting",
     val chamberAnchor: String = "chamber_02",
     val stuckTicks: Int = 1200,
+    val overtime: Ch2L1Overtime = Ch2L1Overtime(),
 ) {
     /** Every file of every computer, in order: a file's place here is its bit in [READ]. */
     val allFiles: List<String> get() = computers.flatMap { it.files }
@@ -84,6 +114,8 @@ data class Ch2L1Act3(
         const val OFFICE_OPEN = PREFIX + "office_open"
         const val IN_OFFICE = PREFIX + "in_office"
         const val TRIGGERED = PREFIX + "triggered"
+        /** The overtime: the sealed door opened at its reader (it slams shut behind the player, [Ch2L1Overtime]). */
+        const val SEALED_OPEN = PREFIX + "sealed_open"
 
         const val EXPLORE_LAB = "explore_lab"
         const val EXPLORE_OFFICE = "explore_office"
@@ -93,11 +125,12 @@ data class Ch2L1Act3(
         const val MAX_CODE = 8
 
         val DEFAULT_COMPUTERS = listOf(
-            Ch2L1Computer(
-                "aux_lab", "aux_lab_computer", listOf("chamber_log", "authorization"),
-                listOf(Ch2L1Recording("rec_7f3a__0x4719.mp3", "voice.aux_lab_recording")),
-            ),
+            Ch2L1Computer("aux_lab", "aux_lab_computer", listOf("chamber_log", "authorization")),
             Ch2L1Computer("rowan", "rowan_computer", listOf("medical_file", "contract_14")),
+            Ch2L1Computer(
+                "basement", "basement_computer", listOf("basement_note"),
+                listOf(Ch2L1Recording("?????????.mp3", "voice.basement_recording")), cipher = true,
+            ),
         )
         val DEFAULT = Ch2L1Act3()
     }
@@ -108,17 +141,36 @@ data class Ch2L1Act3(
  *
  * ```json
  * { "reader": "aux_lab_reader", "lab_door": "aux_lab_door", "keypad": "office_keypad", "office_door": "door_anchor", "code": "4719",
- *   "computers": [ { "id": "aux_lab", "anchor": "aux_lab_computer", "files": ["chamber_log", "authorization"],
- *                    "recordings": [ { "name": "rec_7f3a__0x4719.mp3", "sound": "voice.aux_lab_recording" } ] },
- *                  { "id": "rowan", "anchor": "rowan_computer", "files": ["medical_file", "contract_14"] } ],
+ *   "computers": [ { "id": "aux_lab", "anchor": "aux_lab_computer", "files": ["chamber_log", "authorization"] },
+ *                  { "id": "rowan", "anchor": "rowan_computer", "files": ["medical_file", "contract_14"] },
+ *                  { "id": "basement", "anchor": "basement_computer", "files": ["basement_note"], "cipher": true,
+ *                    "recordings": [ { "name": "?????????.mp3", "sound": "voice.basement_recording" } ] } ],
  *   "code_file": "authorization", "office_zone": "office", "trigger_computer": "rowan",
  *   "restricted_doors": ["restricted_door_east"], "sealed_door": "sealed_door", "portrait": "painting", "chamber": "chamber_02",
- *   "guide_after_seconds": 60 }
+ *   "guide_after_seconds": 60,
+ *   "overtime": { "reader": "sealed_reader", "zone": "sealed_corridor", "slam_after": 2.5, "basement_zone": "basement",
+ *                 "dark_seconds": 3.0, "fade_seconds": 2.5, "text_seconds": 6.0, "text": "every_tunnel.ch2.l1.ending.text" } }
  * ```
  */
 object Ch2L1Act3Parser {
 
     data class Result(val act3: Ch2L1Act3, val problems: List<String>)
+
+    private fun parseOvertime(o: JsonFields, d: Ch2L1Overtime): Ch2L1Overtime {
+        fun ticks(key: String, default: Int) = (o.double(key, default / 20.0, min = 0.0, max = 120.0) * 20).toInt()
+        val overtime = Ch2L1Overtime(
+            reader = o.string("reader", d.reader),
+            zone = o.string("zone", d.zone),
+            slamAfter = o.double("slam_after", d.slamAfter, min = 0.5, max = 20.0),
+            basementZone = o.string("basement_zone", d.basementZone),
+            darkTicks = ticks("dark_seconds", d.darkTicks),
+            fadeTicks = ticks("fade_seconds", d.fadeTicks).coerceAtLeast(1),
+            textTicks = ticks("text_seconds", d.textTicks),
+            text = o.string("text", d.text),
+        )
+        o.reportUnknownKeys()
+        return overtime
+    }
 
     fun parse(root: JsonObject): Result {
         val f = JsonFields(root, "")
@@ -143,8 +195,9 @@ object Ch2L1Act3Parser {
                 rf.reportUnknownKeys()
                 if (name == null || sound == null) null else Ch2L1Recording(name, sound)
             }
+            val cipher = c.boolean("cipher", false)
             c.reportUnknownKeys()
-            if (id == null || anchor == null) null else Ch2L1Computer(id, anchor, files, recordings)
+            if (id == null || anchor == null) null else Ch2L1Computer(id, anchor, files, recordings, cipher)
         }
         val act3 = Ch2L1Act3(
             readerAnchor = f.string("reader", d.readerAnchor),
@@ -161,6 +214,7 @@ object Ch2L1Act3Parser {
             portraitAnchor = f.string("portrait", d.portraitAnchor),
             chamberAnchor = f.string("chamber", d.chamberAnchor),
             stuckTicks = (f.double("guide_after_seconds", d.stuckTicks / 20.0, min = 0.0, max = 3600.0) * 20).toInt(),
+            overtime = parseOvertime(f.child("overtime"), d.overtime),
         )
         f.reportUnknownKeys()
         val problems = f.problems.toMutableList()

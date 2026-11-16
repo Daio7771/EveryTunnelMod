@@ -296,10 +296,13 @@ object Ch2L1PatrolHooks {
         guard.chaseFrom = null
     }
 
-    /** Whether the guards watch [player] now: playing, not in Act 2, a cinematic or Creative, the level not over, not just caught. */
+    /**
+     * Whether the guards watch [player] now: playing, not in Act 2, a cinematic or Creative, not past the sealed door (the basement's
+     * overtime, and the level's end), not just caught.
+     */
     private fun watches(player: ServerPlayerEntity): Boolean {
         val state = Ch2L1.state(player)
-        if (state == Ch2L1State.ACT2_FOLLOW || state == Ch2L1State.ACT2_MEETING || state == Ch2L1State.ACT3_CUTSCENE || state == Ch2L1State.DONE) return false
+        if (state == Ch2L1State.ACT2_FOLLOW || state == Ch2L1State.ACT2_MEETING || state == Ch2L1State.ACT3_CUTSCENE || state >= Ch2L1State.ACT3_BASEMENT) return false
         if (player.interactionManager.gameMode == GameMode.CREATIVE || player.isSpectator) return false
         if (Ch2L1IntroHooks.isRunning(player) || Ch2L1OfficeHooks.isRunning(player) || player.uuid in spared || player.uuid in moving) return false
         return true

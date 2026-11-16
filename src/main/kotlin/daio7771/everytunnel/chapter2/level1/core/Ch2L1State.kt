@@ -29,7 +29,9 @@ enum class Ch2L1State {
     ACT3_CUTSCENE,
     /** Act 3: after the office, with the unpaid overtime pass; the way to the sealed zone is open. */
     ACT3_OVERTIME,
-    /** The level is finished (the player crossed into Level 2). */
+    /** Act 3: through the sealed door (it slammed shut behind): the overtime itself, sweeping the basement. */
+    ACT3_BASEMENT,
+    /** The level is finished: the basement swept, its lights went out, and the game goes back to the menu. */
     DONE;
 
     /** The state after this one, or null at [DONE]. */

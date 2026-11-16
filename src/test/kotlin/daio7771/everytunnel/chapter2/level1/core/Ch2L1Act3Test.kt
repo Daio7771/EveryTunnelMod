@@ -18,7 +18,7 @@ class Ch2L1Act3Test {
     fun `the jar's act3 file reads without a problem and says what the plan says`() {
         assertEquals(emptyList(), result.problems)
         assertEquals("4719", act3.code)
-        assertEquals(listOf("chamber_log", "authorization", "medical_file", "contract_14"), act3.allFiles)
+        assertEquals(listOf("chamber_log", "authorization", "medical_file", "contract_14", "basement_note"), act3.allFiles)
         assertEquals("rowan", act3.triggerComputer)
         assertEquals(listOf("medical_file", "contract_14"), act3.computer("rowan")!!.files)
         assertEquals(1200, act3.stuckTicks)

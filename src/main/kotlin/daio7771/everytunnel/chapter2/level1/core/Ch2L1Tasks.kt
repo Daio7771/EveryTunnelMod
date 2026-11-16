@@ -38,6 +38,9 @@ data class Ch2L1Tasks(
     val dirtPath: String,
     val sweepSeconds: Double,
     val guide: Ch2L1GuideSpec,
+    /** The overtime's task (Rowan's three hours, after the sealed door): its broom and its dirt, in the basement; swept as task 3's is. */
+    val basementBroomAnchor: String = "basement_broom_block",
+    val basementDirtPath: String = "basement_dirt_spots",
 ) {
     /** Ticks the registry's bar takes for one sample. */
     val registerTicks: Int get() = (registerSeconds * TICKS_PER_SECOND).toInt().coerceAtLeast(1)
@@ -58,6 +61,8 @@ data class Ch2L1Tasks(
         const val REGISTERED = "registered"
         const val SWEPT = "swept"
         const val BROOM = "broom"
+        const val BASEMENT_SWEPT = "basement_swept"
+        const val BASEMENT_BROOM = "basement_broom"
     }
 }
 
@@ -70,6 +75,7 @@ object Ch2L1TasksParser {
         val one = fields.child("task1")
         val two = fields.child("task2")
         val three = fields.child("task3")
+        val overtime = fields.child("overtime")
         val guide = fields.child("guide")
 
         val tubes = parseTubes(one, fields.problems)
@@ -87,7 +93,10 @@ object Ch2L1TasksParser {
                 height = guide.double("height", 1.1, min = 0.0, max = 10.0),
                 hideWithin = guide.double("hide_within", 1.5, min = 0.0, max = 50.0),
             ),
+            basementBroomAnchor = overtime.string("broom", "basement_broom_block"),
+            basementDirtPath = overtime.string("dirt", "basement_dirt_spots"),
         )
+        overtime.reportUnknownKeys()
         guide.reportUnknownKeys()
         one.reportUnknownKeys()
         two.reportUnknownKeys()

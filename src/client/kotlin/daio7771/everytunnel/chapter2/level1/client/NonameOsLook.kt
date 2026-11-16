@@ -3,6 +3,7 @@ package daio7771.everytunnel.chapter2.level1.client
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.resource.language.I18n
+import net.minecraft.util.Util
 
 /**
  * How NonameOS looks, shared by its windows ([NonameOsScreen]'s sample registry, [NonameOsFilesScreen]'s files): green phosphor on black
@@ -20,15 +21,39 @@ object NonameOsLook {
 
     private const val KEY = "every_tunnel.ch2.l1."
 
-    /** The game dimmed, the monitor's frame and screen at ([x0], [y0]) of [w] by [h], and the title bar: "NONAME OS", its version, a rule. */
-    fun window(context: DrawContext, font: TextRenderer, width: Int, height: Int, x0: Int, y0: Int, w: Int, h: Int) {
+    /**
+     * The game dimmed, the monitor's frame and screen at ([x0], [y0]) of [w] by [h], and the title bar: "NONAME OS", its version, a rule;
+     * [scrambled], both as cipher symbols ([scramble]).
+     */
+    fun window(context: DrawContext, font: TextRenderer, width: Int, height: Int, x0: Int, y0: Int, w: Int, h: Int, scrambled: Boolean = false) {
         context.fill(0, 0, width, height, DIM)
         context.fill(x0 - 6, y0 - 6, x0 + w + 6, y0 + h + 6, FRAME)
         context.fill(x0, y0, x0 + w, y0 + h, SCREEN)
-        val version = I18n.translate(KEY + "os.version")
-        context.drawText(font, I18n.translate(KEY + "os.title"), x0 + 12, y0 + 10, GREEN, false)
+        fun words(key: String) = I18n.translate(key).let { if (scrambled) scramble(it) else it }
+        val version = words(KEY + "os.version")
+        context.drawText(font, words(KEY + "os.title"), x0 + 12, y0 + 10, GREEN, false)
         context.drawText(font, version, x0 + w - 12 - font.getWidth(version), y0 + 10, DIM_GREEN, false)
         context.fill(x0 + 12, y0 + 22, x0 + w - 12, y0 + 23, DIM_GREEN)
+    }
+
+    private const val GLYPHS = "░▒▓█¤¥Ø∆Ω#@%&£€¶ΞΨ¿Ж"
+
+    /**
+     * [text] as a cipher would show it (the basement's terminal): each letter or digit a symbol of [GLYPHS], the same one each frame but for
+     * a few that flicker to another now and then; spaces and punctuation stay, so the words keep their shape.
+     */
+    fun scramble(text: String): String {
+        val bucket = Util.getMeasuringTimeMs() / 160
+        val out = StringBuilder(text.length)
+        for ((i, c) in text.withIndex()) {
+            if (!c.isLetterOrDigit()) {
+                out.append(c)
+                continue
+            }
+            val flicker = ((i * 131 + bucket * 17) % 29).toInt() == 0
+            out.append(GLYPHS[((c.code * 7 + i * 13 + if (flicker) bucket.toInt() else 0) % GLYPHS.length + GLYPHS.length) % GLYPHS.length])
+        }
+        return out.toString()
     }
 
     /** A button: a green outline, filled darker under the mouse, its [label] centred. */

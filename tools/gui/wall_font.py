@@ -2,11 +2,13 @@
 The painted font of the wall messages (client/render/WallMessageRenderer.kt): capitals written with a
 brush in a hurry, uneven, with a drip now and then. Three drawings of each character, so the same letter is
 not quite the same twice, in a private range of Unicode (core/wall/WallFont.kt). Drawn white: the game tints it.
+And the same letters in chalk (Chapter 2's basement): the same skeleton and hand, but a thin dry stroke that the
+wall's grain breaks up, never a drip; the same characters, in a font of its own.
 
 Run after changing anything here (from the repository root):   python3 tools/gui/wall_font.py
 
 Writes (committed) under src/main/resources/assets/every_tunnel/: textures/font/wall_paint.png and
-font/wall_paint.json. Our own drawing: no licence to carry.
+font/wall_paint.json, textures/font/wall_chalk.png and font/wall_chalk.json. Our own drawing: no licence to carry.
 """
 
 import json
@@ -51,7 +53,7 @@ GLYPHS = {
 }
 
 
-def draw(img, ox, oy, char, rng):
+def draw(img, ox, oy, char, rng, chalk=False):
     rows = GLYPHS[char].split()
     # The hand: the letter leans, and every dot lands a little off.
     lean = rng.choice((-1, 0, 0, 1))
@@ -65,13 +67,14 @@ def draw(img, ox, oy, char, rng):
             x = 2 + c * STEP + shift + (rng.randint(-1, 1) if rng.random() < 0.18 else 0)
             y = top + r * STEP + (1 if rng.random() < 0.12 else 0)
             for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1)):
-                if rng.random() < 0.93:
+                # Chalk: a dry stroke, some of its grain missing; what is left is as solid as paint (a faint pixel is lost in the game).
+                if rng.random() < (0.78 if chalk else 0.93):
                     px, py = ox + x + dx, oy + y + dy
                     if ox <= px < ox + CELL_W and oy <= py < oy + CELL_H:
-                        img.putpixel((px, py), (255, 255, 255, rng.randint(205, 255)))
+                        img.putpixel((px, py), (255, 255, 255, rng.randint(215, 255) if chalk else rng.randint(205, 255)))
             lowest[x] = max(lowest.get(x, 0), y + 1)
-    # A drip from the bottom of a stroke, thinning as it runs.
-    if lowest and char not in "'-" and rng.random() < 0.28:
+    # A drip from the bottom of a stroke, thinning as it runs (paint only).
+    if not chalk and lowest and char not in "'-" and rng.random() < 0.28:
         x = rng.choice(list(lowest))
         start = lowest[x] + 1
         for k in range(rng.randint(2, 5)):
@@ -80,8 +83,8 @@ def draw(img, ox, oy, char, rng):
                 img.putpixel((ox + x, oy + y), (255, 255, 255, 235 - k * 28))
 
 
-def main():
-    rng = random.Random("wall-paint")
+def write(name, seed, chalk):
+    rng = random.Random(seed)
     columns = VARIANTS * 6
     rows = (len(ALPHABET) * VARIANTS + columns - 1) // columns
     img = Image.new("RGBA", (columns * CELL_W, rows * CELL_H), (0, 0, 0, 0))
@@ -89,20 +92,25 @@ def main():
     for k in range(len(ALPHABET) * VARIANTS):
         char = ALPHABET[k // VARIANTS]
         r, c = k // columns, k % columns
-        draw(img, c * CELL_W, r * CELL_H, char, rng)
+        draw(img, c * CELL_W, r * CELL_H, char, rng, chalk)
         chars[r].append(chr(FIRST + k))
     # Every row of the grid the same length: the rest of the last one is blank.
     for row in chars:
         row.extend("\0" for _ in range(columns - len(row)))
     (ASSETS / "textures" / "font").mkdir(parents=True, exist_ok=True)
     (ASSETS / "font").mkdir(parents=True, exist_ok=True)
-    img.save(ASSETS / "textures" / "font" / "wall_paint.png")
+    img.save(ASSETS / "textures" / "font" / f"{name}.png")
     font = {"providers": [
         {"type": "space", "advances": {" ": 5}},
-        {"type": "bitmap", "file": "every_tunnel:font/wall_paint.png", "height": HEIGHT_UNITS, "ascent": ASCENT,
+        {"type": "bitmap", "file": f"every_tunnel:font/{name}.png", "height": HEIGHT_UNITS, "ascent": ASCENT,
          "chars": ["".join(row) for row in chars]},
     ]}
-    (ASSETS / "font" / "wall_paint.json").write_text(json.dumps(font, indent=1) + "\n")
+    (ASSETS / "font" / f"{name}.json").write_text(json.dumps(font, indent=1) + "\n")
+
+
+def main():
+    write("wall_paint", "wall-paint", chalk=False)
+    write("wall_chalk", "wall-chalk", chalk=True)
 
 
 if __name__ == "__main__":

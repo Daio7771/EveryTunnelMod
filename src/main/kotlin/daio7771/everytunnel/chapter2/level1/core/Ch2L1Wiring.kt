@@ -19,11 +19,13 @@ object Ch2L1Wiring {
         for (tube in tasks.tubes) point("tasks.json", tube.anchor)
         point("tasks.json", tasks.terminalAnchor)
         point("tasks.json", tasks.analyzerAnchor)
-        point("tasks.json", tasks.broomAnchor)
-        val dirt = anchors.path(tasks.dirtPath)
-        when {
-            dirt == null -> out += "tasks.json names the path \"${tasks.dirtPath}\", which anchors.json does not have"
-            dirt.points.size > Ch2L1Tasks.MAX_DIRT -> out += "the path \"${tasks.dirtPath}\" has ${dirt.points.size} points: at most ${Ch2L1Tasks.MAX_DIRT} spots of dirt"
+        for ((broom, dirtPath) in listOf(tasks.broomAnchor to tasks.dirtPath, tasks.basementBroomAnchor to tasks.basementDirtPath)) {
+            point("tasks.json", broom)
+            val dirt = anchors.path(dirtPath)
+            when {
+                dirt == null -> out += "tasks.json names the path \"$dirtPath\", which anchors.json does not have"
+                dirt.points.size > Ch2L1Tasks.MAX_DIRT -> out += "the path \"$dirtPath\" has ${dirt.points.size} points: at most ${Ch2L1Tasks.MAX_DIRT} spots of dirt"
+            }
         }
         for (zone in speakers.zones) {
             if (anchors.zone(zone) == null) out += "speakers.json names the zone \"$zone\", which anchors.json does not have"
@@ -62,7 +64,10 @@ object Ch2L1Wiring {
             for (id in listOf(act3.readerAnchor, act3.labDoor, act3.keypadAnchor, act3.officeDoor, act3.sealedDoor, act3.portraitAnchor, act3.chamberAnchor)) point(file, id)
             act3.restrictedDoors.forEach { point(file, it) }
             act3.computers.forEach { point(file, it.anchor) }
-            if (anchors.zone(act3.officeZone) == null) out += "$file names the zone \"${act3.officeZone}\", which anchors.json does not have"
+            point(file, act3.overtime.reader)
+            for (zone in listOf(act3.officeZone, act3.overtime.zone, act3.overtime.basementZone)) {
+                if (anchors.zone(zone) == null) out += "$file names the zone \"$zone\", which anchors.json does not have"
+            }
         }
         if (office != null) {
             val file = "cutscenes/office.json"

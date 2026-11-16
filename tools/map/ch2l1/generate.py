@@ -41,6 +41,8 @@ def write_plan(level):
         "fills": [{"from": list(a), "to": list(b), "block": block} for a, b, block in fills],
         "lights": [list(c) for c in level.lights()],
         "texts": [{"at": list(cell), "text": key, "style": style} for cell, _, key, style in L.WALL_TEXTS],
+        "messages": [{"at": list(cell), "text": key, "size": size, "rotation": rotation, "chalk": level.chalk(cell, facing)}
+                     for cell, facing, key, size, rotation in L.WALL_MESSAGES],
     }
     text = "{\n" + ",\n".join(
         f' "{key}": ' + (compact(value) if isinstance(value, list) else json.dumps(value, separators=(",", ":")))
@@ -62,8 +64,9 @@ def write_anchors(level):
     doc = {
         "dimension": L.DIMENSION,
         "anchors": [entry(id=i, pos=pos(*p), yaw=yaw, provisional=True if prov else None) for i, p, yaw, prov in anchors],
-        "zones": [entry(id=i, **{"from": [ox + x0, oy - 1, oz + z0], "to": [ox + x1 - 1, oy + h - 1, oz + z1 - 1]}, provisional=True if prov else None)
-                  for i, (x0, z0, x1, z1, h), prov in zones],
+        "zones": [entry(id=i, **{"from": [ox + x0, oy + y0 - 1, oz + z0], "to": [ox + x1 - 1, oy + y0 + h - 1, oz + z1 - 1]},
+                        provisional=True if prov else None)
+                  for i, (x0, z0, x1, z1, h, y0), prov in zones],
         "paths": [entry(id=i, closed=True if closed else None, points=[pos(*p) for p in pts], provisional=True if prov else None)
                   for i, pts, closed, prov in paths],
     }

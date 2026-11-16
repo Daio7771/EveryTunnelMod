@@ -7,7 +7,8 @@ after a first walk through the level (see SPACES).
 Plan coordinates, as in the other levels: x east, z south (the entrance is at the north), y up from the floor of the air
 (the floor's blocks are at y = -1). A space is a set of cells, each with the air above it up to its height; every cell next
 to the air that is not air is the shell: a floor under it, a ceiling over it, a wall beside it with a darker first course.
-Two spaces are told apart by a wall of one block. The look is the prologue's laboratory, all clean and modern: white
+Two spaces are told apart by a wall of one block. A space may lie lower (its y0: the basement, 8 blocks under the factory),
+and a flight of stairs is a space whose cells each have a floor of their own (`floors`), one lower at each row. The look is the prologue's laboratory, all clean and modern: white
 concrete, a light grey floor, a dark grey dado, glass and the ceiling lamps of the lab.
 
 This file writes nothing: `generate.py` turns it into the plan the mod builds (`map.json`), the named places
@@ -47,10 +48,25 @@ AROUND = [(dx, dy, dz) for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 
 
 
 class Space:
-    """A space: its cells (x, z), its height in blocks of air, and the boxes the lights are laid out over."""
+    """A space: its cells (x, z), its height in blocks of air over its floor (y0), and the boxes the lights are laid out over, a lamp
+    every `spacing` blocks. A cell of `floors` and `tops` has its air from that floor up to under that top instead (a flight of stairs,
+    whose ceiling steps down with it)."""
 
-    def __init__(self, sid, name, cells, height, boxes, restricted=False):
+    def __init__(self, sid, name, cells, height, boxes, restricted=False, y0=0, floors=None, tops=None, spacing=None):
         self.id, self.name, self.cells, self.height, self.boxes, self.restricted = sid, name, set(cells), height, boxes, restricted
+        self.y0, self.floors, self.tops = y0, floors or {}, tops or {}
+        self.spacing = spacing or LIGHT_SPACING
+
+    @property
+    def top(self):
+        """The first y over the air: where the ceiling and its lamps are."""
+        return self.y0 + self.height
+
+    def floor(self, x, z):
+        return self.floors.get((x, z), self.y0)
+
+    def top_at(self, x, z):
+        return self.tops.get((x, z), self.top)
 
     @property
     def bounds(self):
@@ -59,9 +75,20 @@ class Space:
         return min(xs), min(zs), max(xs) + 1, max(zs) + 1
 
 
-def rect(sid, name, x0, z0, x1, z1, height, restricted=False):
+def rect(sid, name, x0, z0, x1, z1, height, restricted=False, y0=0, spacing=None):
     """A rectangle of cells, x0 .. x1 - 1 and z0 .. z1 - 1."""
-    return Space(sid, name, [(x, z) for x in range(x0, x1) for z in range(z0, z1)], height, [(x0, z0, x1, z1)], restricted)
+    return Space(sid, name, [(x, z) for x in range(x0, x1) for z in range(z0, z1)], height, [(x0, z0, x1, z1)], restricted, y0,
+                 spacing=spacing)
+
+
+def stairs(sid, name, x0, x1, z0, steps, top, headroom, restricted=False):
+    """A flight of stairs going down southwards: x0 .. x1 - 1 wide, one row of cells a step from z0 on, row k's floor at -(k + 1)
+    (its stair block), its ceiling `headroom` over it (never over `top`), a lamp every other row. The last row's floor is the space it
+    leads down to (y0 = -steps)."""
+    cells = [(x, z0 + k) for x in range(x0, x1) for k in range(steps)]
+    floors = {(x, z0 + k): -(k + 1) for x in range(x0, x1) for k in range(steps)}
+    tops = {c: min(top, y + headroom) for c, y in floors.items()}
+    return Space(sid, name, cells, top + steps, [(x0, z0, x1, z0 + steps)], restricted, -steps, floors, tops, spacing=2)
 
 
 def ring(sid, name, boxes, height):
@@ -83,6 +110,7 @@ def arch(sid, name, x0, x1, z0, z_base, height):
 # and the auxiliary lab 14 x 24 (was 6 x 20); the lockers 14 x 18 (was 8 x 11). The ring's west stretch (x 16 .. 19) lies along the auxiliary lab's glass.
 # Phase 6 made the auxiliary lab wider to the west: a room of its own behind a partition (aux_chamber, 9 x 24), reached by an opening at
 # the partition's north end, holds sealed chamber 02, out of every line of sight from the ring through the glass (check_chamber_hidden).
+BASEMENT_DEPTH = 8
 SPACES = [
     arch("entrance", "ENTRANCE", 20, 62, 1, 10, 9),
     rect("main_corridor", "MAIN CORRIDOR", 20, 11, 31, 47, 5),
@@ -97,10 +125,19 @@ SPACES = [
     rect("security", "SECURITY", 15, 79, 28, 85, 4, restricted=True),
     rect("office", "OFFICE", 29, 79, 41, 86, 4, restricted=True),
     rect("wc_east", "WC", 42, 79, 48, 82, 4, restricted=True),
-    rect("level2", "LEVEL 2 CORRIDOR", 63, 25, 74, 31, 4, restricted=True),
+    rect("sealed_zone", "SEALED ZONE", 63, 25, 74, 31, 4, restricted=True),
+    # Phase 9: behind the sealed door, a landing with two ways on. East, the way to the factory's other part, closed for works (a short
+    # stub behind bars); south, the stairs down to the basement, where everything is stored, 8 blocks under the factory.
+    rect("construction", "UNDER CONSTRUCTION", 75, 26, 80, 32, 3, restricted=True),
+    stairs("stairs", "STAIRS", 70, 73, 31, BASEMENT_DEPTH, 4, 6, restricted=True),
+    rect("basement", "BASEMENT", 63, 39, 89, 63, 6, restricted=True, y0=-BASEMENT_DEPTH, spacing=4),
 ]
 
 SPACE_HEIGHTS = {s.id: s.height for s in SPACES}
+SPACE_TOPS = {s.id: s.top for s in SPACES}
+
+# Spaces joined with no door: the landing and the stairs, the stairs and the basement (their air simply meets).
+LINKS = [("sealed_zone", "stairs"), ("stairs", "basement")]
 
 # The doors: (id, the wall's axis, the wall's line, first cell along it, width, kind). Axis "z": the wall runs along x at
 # z = line, and the passage goes north to south; axis "x": the wall runs along z at x = line. Kinds: "normal" (a door of
@@ -129,6 +166,7 @@ DOORS = [
     ("office", "z", 78, 31, 2, "locked"),
     ("wc_east", "z", 78, 44, 1, "normal"),
     ("sealed", "x", 62, 26, 4, "locked"),
+    ("construction", "x", 74, 27, 3, "opening"),
     ("restricted_east", "x", 61, 75, 1, "decor"),
 ]
 
@@ -139,7 +177,7 @@ GLASS_WALLS = [(15, 52, 68, 3)]
 PILLARS = [(11, 25, 13, 27)]
 
 # What lies behind a locked door: the auxiliary lab (the coworker's badge), the office (Rowan's code) and the sealed zone.
-LOCKED_SPACES = {"aux_lab", "aux_chamber", "office", "level2"}
+LOCKED_SPACES = {"aux_lab", "aux_chamber", "office", "sealed_zone", "construction", "stairs", "basement"}
 
 CLOCK = {"at": (29, 1, 9), "facing": "north"}      # on the entrance's south wall, between its first two doors
 # Furniture and props, by cell: task 1's bench along the LAB's west wall with its three tubes and the terminal, task 2's analyzer on a
@@ -173,7 +211,8 @@ CAMERAS = {
     "security": [(27, 79, "south")],
     "office": [(29, 79, "south")],
     "wc_east": [(47, 81, "west")],
-    "level2": [(73, 25, "west")],
+    "sealed_zone": [(73, 25, "west")],
+    "basement": [(88, 39, "west")],
 }
 
 # People's places: name -> (x, z, the way they face, degrees), for typing at a station or standing, and their routes: name -> (points, closed).
@@ -237,10 +276,53 @@ SET_FROM, SET_TO = 5, 18                        # the prologue's x range copied
 SET_X0, SET_Z = 1, 71                           # where its west end lands, and the row against the wall (the bench is z 70 .. 71)
 FILM_LIGHTS = [(2, 0, 66), (13, 0, 66)]
 FILM_CAMERA = (8, 0, 65)
-# Text on walls (wall_text blocks: cell, the way the text faces, its lang key, its style): chamber 02's label and the portrait's plaque.
+# Phase 9. The sealed door's reader on the LAB's side (cell, the way its front looks). Behind the door: bars across the way to the factory's
+# other part, and bricks left there; the stairs down (stair blocks, one a row); the basement, lit, rows of metal shelves three high
+# (west and east of a middle aisle that comes from the stairs), what was brought here from the Noname complex of Chapter 1 (on the
+# shelves' tops, on the floor and on the walls: cell -> block), the broom by the foot of the stairs and the dirt of the overtime's task
+# (the overtime: Rowan's three hours, sweeping the basement) on the floor of the aisles.
+SEALED_READER = ((61, 1, 30), "west")
+CONSTRUCTION_BARS = [(75, y, z) for y in range(3) for z in range(26, 32)]
+CONSTRUCTION_RUBBLE = [(78, 0, 27), (78, 1, 27), (79, 0, 27), (79, 0, 30), (77, 0, 30)]
+STAIR_BLOCK = "minecraft:polished_andesite_stairs"
+BASEMENT_Y = -BASEMENT_DEPTH
+# The basement is a store kept in order: two blocks of shelves, six long, four rows each, a wide aisle between them from the stairs to the
+# south wall, nothing on the floor but the dirt.
+SHELF_ROWS = [(x, z) for z in (43, 47, 51, 55) for x in list(range(65, 71)) + list(range(81, 87))]
+BASEMENT_BROOM = (69, BASEMENT_Y, 39)
+BASEMENT_DIRT = [(73, 42), (77, 45), (68, 45), (84, 49), (74, 50), (67, 53), (79, 54), (72, 58)]
+# Its NonameOS terminal, visible but out of the way: on a bench standing free against the south wall at the end of the middle aisle, away
+# from the shelves, a chalk "???" over it. The aux lab's strange recording is on it (act3.json's `basement` computer).
+BASEMENT_DESK = [(77, 62), (78, 62)]
+BASEMENT_COMPUTER = (78, BASEMENT_Y + 1, 62)
+BASEMENT_THINGS = {
+    (75, BASEMENT_Y, 41): "wet_floor_sign[facing=north]",
+    (66, BASEMENT_Y + 3, 43): "director_mask[facing=south]",
+    (84, BASEMENT_Y + 3, 47): "trophy_cup[facing=south]",
+    (82, BASEMENT_Y + 3, 51): "security_monitor[facing=south]",
+    (68, BASEMENT_Y + 3, 55): "tin_cans[facing=south]",
+    (85, BASEMENT_Y + 3, 55): "dead_flashlight[facing=south]",
+    (88, BASEMENT_Y + 1, 42): "lounge_painting[facing=west]",
+    (63, BASEMENT_Y + 1, 49): "diploma[facing=east]",
+    (63, BASEMENT_Y + 1, 53): "month_plaque[facing=east]",
+}
+
+# Text on walls (wall_text blocks: cell, the way the text faces, its lang key, its style): chamber 02's label, the portrait's plaque, and,
+# on the landing behind the sealed door, the sign over the barred way and the one by the stairs down.
 WALL_TEXTS = [
     (CHAMBER_LABEL[0], CHAMBER_LABEL[1], "every_tunnel.ch2.l1.sign.chamber_02", "lab"),
     ((40, 1, 82), "west", "every_tunnel.ch2.l1.sign.portrait", "plaque"),
+    ((73, 2, 28), "west", "every_tunnel.ch2.l1.sign.under_construction", "plate"),
+    ((69, 2, 30), "north", "every_tunnel.ch2.l1.sign.basement", "lab"),
+]
+
+# Scrawls on the basement's walls (wall_message blocks, in chalk: cell, the way the text faces, its lang key, a line's height in blocks,
+# degrees off level). Always there, always in English; the chalk is black on a white wall and white on a dark one (Level.chalk).
+WALL_MESSAGES = [
+    ((68, BASEMENT_Y + 2, 62), "north", "every_tunnel.ch2.l1.scrawl.1", 0.6, -3.0),
+    ((63, BASEMENT_Y + 2, 45), "east", "every_tunnel.ch2.l1.scrawl.2", 0.55, 2.0),
+    ((88, BASEMENT_Y + 2, 53), "west", "every_tunnel.ch2.l1.scrawl.3", 0.55, -1.5),
+    ((78, BASEMENT_Y + 3, 62), "north", "every_tunnel.ch2.l1.scrawl.terminal", 0.7, 4.0),
 ]
 
 OPPOSITE = {"north": "south", "south": "north", "east": "west", "west": "east"}
@@ -315,7 +397,7 @@ def props():
         out[cell] = block
     for space, cameras in CAMERAS.items():
         for x, z, facing in cameras:
-            out[(x, SPACE_HEIGHTS[space] - 1, z)] = MOD + f"factory_camera[facing={facing},part=mount]"
+            out[(x, SPACE_TOPS[space] - 1, z)] = MOD + f"factory_camera[facing={facing},part=mount]"
     for cell, block in act3_props().items():
         out[cell] = block
     return out
@@ -363,6 +445,37 @@ def act3_props():
         out[(x, 0, z)] = MOD + "office_rug[facing=north]"
     for cell, facing, _, _ in WALL_TEXTS:
         out[cell] = MOD + f"wall_text[facing={facing}]"
+    out.update(phase9_props())
+    return out
+
+
+def phase9_props():
+    """Phase 9's: the sealed door's reader, the barred way and its rubble, the stairs, the basement's shelves and things, the broom and the
+    dirt, the scrawls."""
+    out = {}
+    (cell, facing) = SEALED_READER
+    out[cell] = MOD + f"badge_reader[facing={facing},unlocked=false]"
+    for cell in CONSTRUCTION_BARS:
+        out[cell] = "minecraft:iron_bars[east=false,north=true,south=true,waterlogged=false,west=false]"
+    for cell in CONSTRUCTION_RUBBLE:
+        out[cell] = "minecraft:bricks"
+    flight = next(sp for sp in SPACES if sp.id == "stairs")
+    for (x, z), y in flight.floors.items():
+        out[(x, y, z)] = f"{STAIR_BLOCK}[facing=north,half=bottom,shape=straight,waterlogged=false]"
+    for x, z in SHELF_ROWS:
+        for k in range(3):
+            out[(x, BASEMENT_Y + k, z)] = MOD + f"metal_shelf[facing=south,down={str(k > 0).lower()},up={str(k < 2).lower()}]"
+    for cell, block in BASEMENT_THINGS.items():
+        out[cell] = MOD + block
+    out[BASEMENT_BROOM] = MOD + "leaning_broom[facing=south]"
+    states = row_states(BASEMENT_DESK, "north")
+    for x, z in BASEMENT_DESK:
+        out[(x, BASEMENT_Y, z)] = MOD + f"lab_bench[facing=north,{states[(x, z)]}]"
+    out[BASEMENT_COMPUTER] = MOD + "noname_terminal[facing=north]"
+    for i, (x, z) in enumerate(BASEMENT_DIRT):
+        out[(x, BASEMENT_Y, z)] = MOD + f"dirt_spot[facing={FACINGS[i % 4]}]"
+    for cell, facing, *_ in WALL_MESSAGES:
+        out[cell] = MOD + f"wall_message[facing={facing}]"
     return out
 
 
@@ -382,7 +495,7 @@ def lockers():
     return out
 
 
-CAMERA_FREE = {"lockers"}                          # the one space with no (decorative) security cameras
+CAMERA_FREE = {"lockers", "construction", "stairs"}   # the spaces with no (decorative) security cameras
 
 
 def world(x, y, z):
@@ -406,7 +519,7 @@ class Level:
         self.air = {}                  # (x, y, z) -> the space's id
         for s in SPACES:
             for x, z in s.cells:
-                for y in range(s.height):
+                for y in range(s.floor(x, z), s.top_at(x, z)):
                     if (x, y, z) in self.air:
                         raise SystemExit(f"{s.id} overlaps {self.air[(x, y, z)]} at {(x, y, z)}")
                     self.air[(x, y, z)] = s.id
@@ -448,6 +561,12 @@ class Level:
             shell[behind] = "wall"
         return shell
 
+    def chalk(self, cell, facing):
+        """The chalk a scrawl at `cell`, its text facing `facing`, is written in: black on a white wall, white on a darker one."""
+        dx, dz = {"north": (0, 1), "south": (0, -1), "east": (-1, 0), "west": (1, 0)}[facing]
+        wall = self.shell.get((cell[0] + dx, cell[1], cell[2] + dz))
+        return "black" if wall == "wall" else "white"
+
     # --- lights -----------------------------------------------------------------------
 
     def lights(self):
@@ -455,10 +574,11 @@ class Level:
         out = set()
         for s in SPACES:
             for x0, z0, x1, z1 in s.boxes:
-                for x in grid(x0, x1 - 1, LIGHT_SPACING):
-                    for z in grid(z0, z1 - 1, LIGHT_SPACING):
-                        if (x, z) in s.cells and self.shell.get((x, s.height, z)) == "ceiling":
-                            out.add((x, s.height, z))
+                for x in grid(x0, x1 - 1, s.spacing):
+                    for z in grid(z0, z1 - 1, s.spacing):
+                        top = s.top_at(x, z)
+                        if (x, z) in s.cells and self.shell.get((x, top, z)) == "ceiling":
+                            out.add((x, top, z))
         return sorted(out)
 
     # --- the plan ---------------------------------------------------------------------
@@ -627,12 +747,17 @@ def named_places(level):
     add("return_ring", 22.0, 50.5, 180, False)
     add("return_lab", 28.5, 17.0, -90, False)                  # in the main corridor, by the LAB's first door (caught in the dark LAB)
     add("patrol_c_pause", 58.5, 28.0, 90, False)                # patrol C stops by the sealed door, looking at it
+    # Phase 9: the sealed door's reader; the broom at the foot of the stairs; where one stands on arriving in the basement.
+    add("sealed_reader", SEALED_READER[0][0] + 0.5, SEALED_READER[0][2] + 0.5, 90, False, y=float(SEALED_READER[0][1]))
+    add("basement_broom_block", BASEMENT_BROOM[0] + 0.5, BASEMENT_BROOM[2] + 0.5, 0, False, y=float(BASEMENT_BROOM[1]))
+    add("basement_landing", 71.5, 40.5, 0, False, y=float(BASEMENT_Y))
+    add("basement_computer", BASEMENT_COMPUTER[0] + 0.5, BASEMENT_COMPUTER[2] + 0.5, 0, False, y=float(BASEMENT_COMPUTER[1]))
 
     zones = []
 
     def zone(zone_id, space, provisional=False, box=None):
         x0, z0, x1, z1 = box or sp[space].bounds
-        zones.append((zone_id, (x0, z0, x1, z1, sp[space].height if space else 4), provisional))
+        zones.append((zone_id, (x0, z0, x1, z1, sp[space].height if space else 4, sp[space].y0 if space else 0), provisional))
 
     zone("entrance", "entrance")
     zone("main_corridor", "main_corridor")
@@ -653,7 +778,8 @@ def named_places(level):
     zone("security_room", "security")
     zone("office", "office")
     zone("wc_east", "wc_east")
-    zone("level2_corridor", "level2")
+    zone("sealed_corridor", "sealed_zone")
+    zone("basement", "basement")
     zone("speaker_entrance", "entrance")
     zone("speaker_lab", "lab")
     zone("speaker_main", "main_corridor")
@@ -667,6 +793,7 @@ def named_places(level):
     lab_pts = [(35.5, 20.5), (35.5, 40.5), (58.5, 40.5), (58.5, 28.0), (58.5, 20.5)]
     paths.append(("patrol_c_waypoints", [(x, 0.0, z) for x, z in lab_pts], True, False))
     paths.append(("task3_dirt_spots", [(x + 0.5, 0.0, z + 0.5) for x, z in DIRT_SPOTS], False, False))
+    paths.append(("basement_dirt_spots", [(x + 0.5, float(BASEMENT_Y), z + 0.5) for x, z in BASEMENT_DIRT], False, False))
     for name, (points, closed) in NPC_ROUTES.items():
         paths.append((name, [(x, 0.0, z) for x, z in points], closed, True))
     # Patrol B comes out of Security (through its door at x 21), goes along the authorized corridor to its east end and back.
@@ -701,7 +828,7 @@ def check(level):
         if space in CAMERA_FREE:
             raise SystemExit(f"cameras in {space}, which has none")
         for x, z, _ in cameras:
-            if air.get((x, SPACE_HEIGHTS[space] - 1, z)) != space:
+            if air.get((x, SPACE_TOPS[space] - 1, z)) != space:
                 raise SystemExit(f"a camera at {(x, z)} is not in {space}'s top layer of air")
     for space in SPACE_HEIGHTS:
         if space not in CAMERA_FREE and not CAMERAS.get(space):
@@ -712,7 +839,7 @@ def check(level):
             continue
         if anchor_id in ("time_clock", "office_keypad", "paper_medical", "paper_contract_14", "painting", "card_slide_start", "card_slide_end", "sealed_door",
                          "restricted_door_east", "aux_lab_door", "door_anchor", "aux_lab_reader", "aux_lab_computer", "rowan_computer",
-                         "rowan_doorway"):
+                         "rowan_doorway", "sealed_reader", "basement_computer"):
             continue
         cell = (math.floor(x), math.floor(y), math.floor(z))
         if cell not in air or (cell[0], cell[1] + 1, cell[2]) not in air:
@@ -724,12 +851,12 @@ def check(level):
         for x, z in points:
             if (int(x), 0, int(z)) in solid_props:
                 raise SystemExit(f"{route} goes through a prop at {(x, z)}")
-    for zone_id, (x0, z0, x1, z1, h), _ in zones:
-        if not any((x, 0, z) in air for x in range(x0, x1) for z in range(z0, z1)):
+    for zone_id, (x0, z0, x1, z1, h, y0), _ in zones:
+        if not any((x, y0, z) in air for x in range(x0, x1) for z in range(z0, z1)):
             raise SystemExit(f"zone {zone_id} has no air in it")
     for path_id, points, _, _ in paths:
         for x, y, z in points:
-            if (math.floor(x), 0, math.floor(z)) not in air:
+            if (math.floor(x), math.floor(y), math.floor(z)) not in air:
                 raise SystemExit(f"path {path_id} goes through a wall at {(x, y, z)}")
     # The doors' graph: every space is reachable from the entrance; by free doors only (normal ones) just the unrestricted
     # spaces are; and without passing a locked door everything but what lies behind one.
@@ -742,6 +869,9 @@ def check(level):
         sa, sb = air[(a[0], 0, a[1])], air[(b[0], 0, b[1])]
         graph[sa].add((sb, door[5]))
         graph[sb].add((sa, door[5]))
+    for sa, sb in LINKS:
+        graph[sa].add((sb, "opening"))
+        graph[sb].add((sa, "opening"))
 
     def reach(allowed):
         seen, queue = {"entrance"}, deque(["entrance"])
@@ -761,7 +891,7 @@ def check(level):
     if everything - reach({"normal", "opening", "restricted"}) != LOCKED_SPACES:
         raise SystemExit(f"behind locked doors there is {sorted(everything - reach({'normal', 'opening', 'restricted'}))}, not {sorted(LOCKED_SPACES)}")
     check_chamber_hidden(level)
-    for cell, _, key, _ in WALL_TEXTS:
+    for cell, _, key, *_ in WALL_TEXTS + WALL_MESSAGES:
         if cell not in air:
             raise SystemExit(f"the wall text {key} at {cell} is not in a space")
     return graph

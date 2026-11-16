@@ -45,6 +45,9 @@ import java.util.concurrent.CopyOnWriteArrayList
  *   overtime, or on a locked door that is still shut, says so in the action bar. The portrait's plaque is read the same way.
  * - **Chamber 02**: while someone plays the level, the scientist stands in it as the Pale man he became ([ScientistEntity.CONTAINED]), his
  *   back to the chamber's front; never saved, put back if lost.
+ * - **The sealed door** (phase 9, [Ch2L1State.ACT3_OVERTIME], `act3.json`'s `overtime`): its reader takes Rowan's overtime pass and opens it;
+ *   it slams shut behind the player on the landing past it, and the basement's task begins ([Ch2L1State.ACT3_BASEMENT]). Any other change
+ *   of state, or coming back to the overtime, shuts it and turns its reader red.
  *
  * Going back before Act 3 (a new hire, `/et ch2 l1 state`) locks the doors again, turns the reader and the keypad red and forgets the
  * act's counters ([Ch2L1Act3.PREFIX]). Server thread only.
@@ -53,7 +56,7 @@ object Ch2L1Act3Hooks {
 
     /**
      * To the client: a computer's files (its id, then each file's id and whether it has been read), its recordings (each one's name and
-     * sound event) and where it stands, which is where they play from.
+     * sound event), where it stands, which is where they play from, and whether its window's words are scrambled.
      */
     val FILES_PACKET = Identifier(EveryTunnel.MOD_ID, "ch2l1_files")
 
@@ -130,8 +133,9 @@ object Ch2L1Act3Hooks {
 
     // --- the badge reader -------------------------------------------------------------------------
 
-    /** The badge reader clicked: with the coworker's badge, in Act 3, it opens the auxiliary lab. */
+    /** A badge reader clicked: with the coworker's badge, in Act 3, the auxiliary lab's opens it; the sealed door's is [useSealedReader]. */
     fun useReader(player: ServerPlayerEntity, pos: BlockPos): ActionResult {
+        if (pos == cell(act3.overtime.reader)) return useSealedReader(player, pos)
         if (pos != cell(act3.readerAnchor)) return ActionResult.PASS
         val world = player.serverWorld
         val state = world.getBlockState(pos)
@@ -147,6 +151,51 @@ object Ch2L1Act3Hooks {
         set(player, Ch2L1Act3.LAB_OPEN, 1)
         say(player, "reader.granted")
         return ActionResult.CONSUME
+    }
+
+    /** The sealed door's reader: with Rowan's unpaid overtime pass, in the overtime, it opens the door (until it slams behind the player). */
+    private fun useSealedReader(player: ServerPlayerEntity, pos: BlockPos): ActionResult {
+        val world = player.serverWorld
+        val state = world.getBlockState(pos)
+        if (state.get(CardReaderBlock.UNLOCKED)) return ActionResult.CONSUME
+        if (Ch2L1.state(player) != Ch2L1State.ACT3_OVERTIME || !player.inventory.containsAny { it.isOf(Ch2Items.OVERTIME_PASS) }) {
+            world.playSound(null, pos, ModSounds.CARD_READER_DENY, SoundCategory.BLOCKS, 1f, 1f)
+            say(player, "reader.denied")
+            return ActionResult.CONSUME
+        }
+        world.setBlockState(pos, state.with(CardReaderBlock.UNLOCKED, true))
+        world.playSound(null, pos, ModSounds.CARD_READER_ACCEPT, SoundCategory.BLOCKS, 1f, 1f)
+        point(act3.sealedDoor)?.let { Ch2L1Doors.set(world, it, DOOR_NEAR, true, player, locked = true) }
+        set(player, Ch2L1Act3.SEALED_OPEN, 1)
+        say(player, "reader.granted")
+        EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} opens the sealed door with the overtime pass", player.gameProfile.name)
+        return ActionResult.CONSUME
+    }
+
+    /** The player is [Ch2L1Overtime.slamAfter] past the open sealed door, on the landing: it slams shut behind them, and the basement's task begins. */
+    private fun checkSlam(player: ServerPlayerEntity) {
+        if (Ch2L1.state(player) != Ch2L1State.ACT3_OVERTIME || counter(player, Ch2L1Act3.SEALED_OPEN) == 0) return
+        val zone = Ch2L1DataLoader.data.anchors.zone(act3.overtime.zone) ?: return
+        val door = point(act3.sealedDoor) ?: return
+        if (!zone.box.contains(player.x, player.y, player.z)) return
+        val dx = player.x - door.x
+        val dz = player.z - door.z
+        if (dx * dx + dz * dz < act3.overtime.slamAfter * act3.overtime.slamAfter) return
+        val world = player.serverWorld
+        Ch2L1Doors.set(world, door, DOOR_NEAR, false, locked = true)
+        world.playSound(null, BlockPos.ofFloored(door), ModSounds.BIG_DOOR_SLAM, SoundCategory.BLOCKS, 1.2f, 0.9f)
+        Ch2L1.setState(player, Ch2L1State.ACT3_BASEMENT, "through the sealed door")
+    }
+
+    /** The sealed door shut and its reader red, as before the overtime pass was used. */
+    private fun shutSealed(player: ServerPlayerEntity) {
+        val world = player.serverWorld
+        point(act3.sealedDoor)?.let { Ch2L1Doors.set(world, it, DOOR_NEAR, false, locked = true) }
+        cell(act3.overtime.reader)?.let { pos ->
+            val state = world.getBlockState(pos)
+            if (state.contains(CardReaderBlock.UNLOCKED) && state.get(CardReaderBlock.UNLOCKED)) world.setBlockState(pos, state.with(CardReaderBlock.UNLOCKED, false))
+        }
+        set(player, Ch2L1Act3.SEALED_OPEN, 0)
     }
 
     // --- the keypad ------------------------------------------------------------------------------
@@ -209,6 +258,7 @@ object Ch2L1Act3Hooks {
             buf.writeString(recording.sound)
         }
         buf.writeBlockPos(pos)
+        buf.writeBoolean(computer.cipher)
         ServerPlayNetworking.send(player, FILES_PACKET, buf)
         return ActionResult.CONSUME
     }
@@ -252,7 +302,11 @@ object Ch2L1Act3Hooks {
         }
         val key = when {
             act3.restrictedDoors.any(::at) -> "restricted_door"
-            at(act3.sealedDoor) -> if (Ch2L1.state(player) < Ch2L1State.ACT3_OVERTIME) "sealed_door" else return ActionResult.PASS
+            at(act3.sealedDoor) -> when {
+                Ch2L1.state(player) < Ch2L1State.ACT3_OVERTIME -> "sealed_door"
+                player.serverWorld.getBlockState(pos).get(DoorBlock.OPEN) -> return ActionResult.PASS
+                else -> "door_locked"
+            }
             at(act3.labDoor) || at(act3.officeDoor) -> if (player.serverWorld.getBlockState(pos).get(DoorBlock.OPEN)) return ActionResult.PASS else "door_locked"
             else -> return ActionResult.PASS
         }
@@ -266,6 +320,7 @@ object Ch2L1Act3Hooks {
         if (server.ticks % CHECK_TICKS == 0) {
             val zone = Ch2L1DataLoader.data.anchors.zone(act3.officeZone)
             for (player in server.playerManager.playerList) {
+                if (Ch2L1.active(player)) checkSlam(player)
                 if (zone == null || !Ch2L1.active(player) || Ch2L1.state(player) != Ch2L1State.ACT3_EXPLORE) continue
                 if (counter(player, Ch2L1Act3.IN_OFFICE) == 0 && zone.box.contains(player.x, player.y, player.z)) {
                     set(player, Ch2L1Act3.IN_OFFICE, 1)
@@ -313,6 +368,8 @@ object Ch2L1Act3Hooks {
     // --- going back --------------------------------------------------------------------------------
 
     private fun onState(player: ServerPlayerEntity, from: Ch2L1State, to: Ch2L1State) {
+        // The sealed door stands open only in the overtime, from its reader on; anything else, or coming back to the overtime, shuts it.
+        if (to != Ch2L1State.ACT3_OVERTIME || from > to) shutSealed(player)
         if (to >= Ch2L1State.ACT3_EXPLORE || (from < Ch2L1State.ACT3_EXPLORE && to != Ch2L1State.START)) return
         relock(player)
     }

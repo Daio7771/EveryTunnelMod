@@ -8,6 +8,9 @@ import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.nbt.NbtCompound
+import daio7771.everytunnel.chapter2.platform.Ch2Blocks
+import daio7771.everytunnel.platform.ModBlocks
+import daio7771.everytunnel.platform.WallMessageBlockEntity
 import daio7771.everytunnel.platform.WallTextBlockEntity
 import net.minecraft.registry.Registries
 import net.minecraft.registry.RegistryKey
@@ -93,6 +96,26 @@ object Ch2L1Build {
 
     /** The level stands in the world, built from the current plan. */
     fun isBuilt(server: MinecraftServer): Boolean = saved(server).fingerprint == plan.fingerprint
+
+    /**
+     * The plan's ceiling lamps in the zone [zoneId] off ([Ch2Blocks.FACTORY_LIGHT_OFF]), one in [emergencyEvery] (0: none) a faint red
+     * emergency light ([Ch2Blocks.FACTORY_LIGHT_EMERGENCY]); or, not [dim], all back on. The dark LAB of the overtime, the basement at the end.
+     */
+    fun zoneLights(world: ServerWorld, zoneId: String, dim: Boolean, emergencyEvery: Int = 0) {
+        val box = Ch2L1DataLoader.data.anchors.zone(zoneId)?.box ?: return
+        val lamps = plan.lights.map { BlockPos(plan.worldX(it.x), plan.worldY(it.y), plan.worldZ(it.z)) }
+            .filter { box.contains(it.x + 0.5, it.y - 0.5, it.z + 0.5) || box.contains(it.x + 0.5, it.y + 0.5, it.z + 0.5) }
+        for ((i, pos) in lamps.withIndex()) {
+            val state = world.getBlockState(pos)
+            val lit = state.isOf(ModBlocks.LAB_CEILING_LIGHT)
+            val dark = state.isOf(Ch2Blocks.FACTORY_LIGHT_OFF) || state.isOf(Ch2Blocks.FACTORY_LIGHT_EMERGENCY)
+            val emergency = emergencyEvery > 0 && i % emergencyEvery == 0
+            when {
+                dim && lit -> world.setBlockState(pos, (if (emergency) Ch2Blocks.FACTORY_LIGHT_EMERGENCY else Ch2Blocks.FACTORY_LIGHT_OFF).defaultState)
+                !dim && dark -> world.setBlockState(pos, ModBlocks.LAB_CEILING_LIGHT.defaultState)
+            }
+        }
+    }
 
     /** The block the plan puts at the world cell [pos], or null where no fill of the plan reaches (or its block is unknown). */
     fun planState(pos: BlockPos): BlockState? {
@@ -214,7 +237,7 @@ object Ch2L1Build {
         }
     }
 
-    /** What each of the plan's `wall_text` blocks says ([Ch2L1MapPlan.texts]). */
+    /** What each of the plan's `wall_text` and `wall_message` blocks says ([Ch2L1MapPlan.texts], [Ch2L1MapPlan.messages]). */
     private fun writeTexts(world: ServerWorld, plan: Ch2L1MapPlan) {
         for (text in plan.texts) {
             val pos = BlockPos(plan.worldX(text.at.x), plan.worldY(text.at.y), plan.worldZ(text.at.z))
@@ -222,6 +245,19 @@ object Ch2L1Build {
             val nbt = NbtCompound()
             nbt.putString("Text", text.text)
             nbt.putString("Style", text.style)
+            entity.readNbt(nbt)
+            entity.markDirty()
+            world.updateListeners(pos, entity.cachedState, entity.cachedState, Block.NOTIFY_ALL)
+        }
+        for (message in plan.messages) {
+            val pos = BlockPos(plan.worldX(message.at.x), plan.worldY(message.at.y), plan.worldZ(message.at.z))
+            val entity = world.getBlockEntity(pos) as? WallMessageBlockEntity ?: continue
+            val nbt = NbtCompound()
+            nbt.putString("Text", message.text)
+            nbt.putFloat("Size", message.size)
+            nbt.putFloat("Rotation", message.rotation)
+            nbt.putString("Trigger", "fixed")
+            nbt.putString("Chalk", message.chalk)
             entity.readNbt(nbt)
             entity.markDirty()
             world.updateListeners(pos, entity.cachedState, entity.cachedState, Block.NOTIFY_ALL)

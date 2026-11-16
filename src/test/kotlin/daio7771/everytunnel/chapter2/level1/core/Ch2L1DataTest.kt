@@ -37,7 +37,7 @@ class Ch2L1DataTest {
         for (id in points) assertTrue(anchors.point(id) != null, "no anchor $id")
         val zones = listOf(
             "task3_sweep_area", "taquillas_trigger", "aux_lab_glass", "aux_chamber", "prologue_set", "authorized_corridor", "security_room", "office",
-            "level2_corridor", "speaker_entrance", "speaker_lab", "speaker_main", "speaker_west",
+            "sealed_corridor", "basement", "speaker_entrance", "speaker_lab", "speaker_main", "speaker_west",
         )
         for (id in zones) assertTrue(anchors.zone(id) != null, "no zone $id")
         for (id in listOf("patrol_a_waypoints", "patrol_b_waypoints", "task3_dirt_spots")) assertTrue(anchors.path(id) != null, "no path $id")

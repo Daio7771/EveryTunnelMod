@@ -5,8 +5,8 @@
 Level 1 of Chapter 2 is the factory, four months after Chapter 1: an ordinary scientist hired in the place of the one
 who "fell ill", three acts of tasks, a meeting and sneaking, ending in the supervisor's office. It is built in phases
 (0 to 10), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
-`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 8, the office's cinematic.** It is
-playable from the clock to the overtime after Rowan's office (the sealed zone and the way to Level 2, phase 9, are next); the LAB is not furnished yet.
+`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 9, the sealed zone and the end.** It is
+playable from the clock to its end, the basement swept and back to the menu (phase 10, the QA pass, is next); the LAB is not furnished yet.
 
 Its code is under `daio7771.everytunnel.chapter2` (the client's under the same package in `src/client`): `level1.core` (plain
 Kotlin, tested), `level1.platform` (Minecraft glue) and `level1.client`, apart from the base game, which never names it (see
@@ -28,7 +28,8 @@ takes everyone back there.
 | `ACT3_EXPLORE` | Sneaking about the auxiliary laboratory, the staff corridor and the office |
 | `ACT3_CUTSCENE` | The office cinematic, from the second paper closed |
 | `ACT3_OVERTIME` | After the office, with the unpaid overtime pass: the way to the sealed zone is open |
-| `DONE` | The player crossed into Level 2 |
+| `ACT3_BASEMENT` | Through the sealed door, which slammed behind: the overtime, sweeping the basement |
+| `DONE` | The basement swept: its lights went out, and the game went back to the menu |
 
 `level1.platform.Ch2L1` is the only door to the state: `setState(player, state, reason)` saves it, logs `Chapter 2 Level 1: <player>
 goes A -> B (<reason>)` and tells the listeners; `skip(player)` moves to the next one. A system of the level registers
@@ -94,7 +95,8 @@ room to stand, or if a restricted space can be reached by a free door.
 | Ring, 4 wide, round the dining room (46 × 25 with its walls) · Dining room | 4 · 36 × 15 | 4 · 6 |
 | Auxiliary lab (restricted) | 14 × 24 | 5 |
 | Authorized corridor · Security · Office · WC (restricted) | 46 × 4 · 13 × 6 · 12 × 7 · 6 × 3 | 4 |
-| "Level 2" corridor, behind the sealed door | 11 × 6 | 4 |
+| Sealed zone, the landing behind the sealed door · the barred way east ("Under construction") | 11 × 6 · 5 × 6 | 4 · 3 |
+| Stairs down, south of the landing (8 steps) · Basement, 8 blocks under the factory | 3 × 8 · 26 × 24 | 5 to 6 (the ceiling steps down with them) · 6 |
 
 The look is the prologue's laboratory, clean and modern: white concrete, a light grey floor, a dark grey first course of wall,
 glass (the auxiliary lab's wall towards the ring's west stretch: `factory_glass`, a block of the mod with no frame drawn on each
@@ -102,7 +104,9 @@ block and a sheen that runs on from one to the next, so the wall reads as one sh
 LAB, the corridors, the lockers and the auxiliary lab were enlarged after the first walk through the level (the drawing's measures were relative), and phase 6
 widened the auxiliary lab to the west: a room of its own behind a partition (`aux_chamber`, 9 × 24), reached by an opening at the
 partition's north end (a door kind of the plan with no door, `opening`), holds sealed chamber 02, and the generator checks that no
-line from an eye in the ring through the glass reaches inside it (`check_chamber_hidden`). There are 21
+line from an eye in the ring through the glass reaches inside it (`check_chamber_hidden`). Phase 9 taught the generator spaces whose
+floor lies lower (a space's `y0`: the basement's is -8) and flights of stairs (a space whose cells each have their own floor, one lower a
+row, with a stair block on it); the spaces joined with no door (the landing, the stairs, the basement) are its `LINKS`. There are 21
 doors, all the mod's own (none is vanilla): **free** ones, the lab door (`factory_door`: white, a tall window; a pair
 of leaves opens and shuts together by hand, `LinkedDoorBlock`, with the hinges on the outer edges); the one from the ring into the authorized corridor is free too, but it is the way into a
 forbidden zone (the drawing's red circle); **locked** ones, the grey emergency door (`emergency_door`), which hands do not open, for the auxiliary
@@ -119,11 +123,15 @@ again over what is there, and **`/et ch2 l1 unbuild` empties the area: do it bef
 (`packMapWorld` zips the region files too, and the map belongs to Chapter 2, not to Chapter 1's world).
 
 **Text on walls.** The plan's `texts` say what each of its `wall_text` blocks (Level 3's nameplates) says, a lang key in a style;
-`Ch2L1Build` writes them on the blocks' entities once the build is done (chamber 02's label, the portrait's plaque).
+`Ch2L1Build` writes them on the blocks' entities once the build is done (chamber 02's label, the portrait's plaque, the landing's two
+signs). Its `messages` do the same for its `wall_message` blocks (scrawls in chalk: a lang key, a line's height, an angle, the chalk's
+colour), the four on the basement's walls. They are always in English (their Spanish texts are the English ones), and the generator
+picks the chalk from the wall behind: black on a white wall, white on a dark one (`Level.chalk`; `wall_chalk`, the painted font's chalk
+version from `tools/gui/wall_font.py`, with no drips).
 
 **Not there yet:** furniture (it comes with the phase that needs it: the bench with the tubes, the terminal and the analyzer, the broom, the dirt
 and the ceiling speakers came with phase 3; the lockers, the LAB's six work stations and the cameras with phase 4; Act 3's with phase 6; the rest of the
-LAB's furniture is still to come) and the other text signs ("LEVEL 2", "Restricted access", the room names). The hand-over from the
+LAB's furniture is still to come; the basement's came with phase 9) and the other text signs ("Restricted access", the room names). The hand-over from the
 prologue to the level is not there either: `enter` is called by hand.
 
 
@@ -158,11 +166,12 @@ The other keys: `speaker.<who>` (`coworker`, `worker_a`, `worker_b`, `rowan_loud
 portrait's plaque were written in phase 6 (with their names in NonameOS, `doc.<file>.name`); `notice` and `union_list` are still
 placeholders, used by nothing yet.
 
-The aux lab's computer also holds a recording, `rec_7f3a__0x4719.mp3` (`recordings` in `act3.json`: its name, the same in every
-language, and its sound event). Its PLAY opens a player in NonameOS (a waveform that moves while it plays, `[??]`, PLAY or STOP) and
-plays `voice.aux_lab_recording` from the computer. It is an easter egg: a voice played backwards (`ch2_l1_voices.py` reverses it,
-the echo put on the right way round), with no text and no subtitles on purpose, for players to reverse and make out. Nothing counts
-it and nothing waits on it.
+The basement's terminal (phase 9) is an easter egg of its own: `cipher` in `act3.json` shows its window's words as flickering cipher
+symbols (`NonameOsLook.scramble`). It holds `?????????.mp3` (`recordings`: a name, the same in every language, and a sound event), whose
+PLAY opens a player (a waveform that moves while it plays, `[??]`, PLAY or STOP) and plays `voice.basement_recording` from the terminal:
+a voice played backwards (`ch2_l1_voices.py` reverses it, the echo put on the right way round), with no text and no subtitles on purpose,
+for players to reverse and make out. And `basement_note`, a `.txt` whose hidden message is in Base64 in each language. Nothing counts
+them and nothing waits on them.
 
 ## The people
 
@@ -365,7 +374,7 @@ and the arrow are from the player's counters (`a3_lab_open`, `a3_read`, `a3_offi
   for phase 8; until then a line in the log, and in a development run one in chat). The portrait (`rowan_portrait`, Python pixel art
   of his skin) shows its plaque's text in the action bar when clicked; the plaque under it is a `wall_text`.
 - **Doors that say no.** A click on the restricted door at the corridor's east end says "Restricted access"; on the sealed door, before
-  the overtime, "Sealed. Supervisor's card required."; on the lab's or the office's while still shut, "Locked."
+  the overtime, "Sealed. Supervisor's card required." (in the overtime, shut, "Locked."); on the lab's or the office's while still shut, "Locked."
 - **The arrow** (`Ch2L1Guide`): in Act 3 it shows only once the player has had the same target for `guide_after_seconds` (60): the
   reader, the lab's computer, the keypad, the office's door, Rowan's computer.
 
@@ -424,6 +433,29 @@ second of Rowan's files (`Ch2L1Act3Hooks.onOfficeTrigger`) moves the player to `
   the player is back in control in a loudspeaker's zone. Going back before it takes the pass and the flashlight back and turns the lights on.
 
 The LAB will have two more tasks once Level 1 is decorated.
+
+## The sealed zone and the end (phase 9)
+
+`act3.json`'s `overtime` (`level1.core.Ch2L1Overtime`), the overtime's task in `tasks.json`, `level1.platform.Ch2L1Act3Hooks` (the door),
+`Ch2L1TaskHooks` (the sweeping), `Ch2L1EndingHooks` and the client's `Ch2L1EndingOverlay` (the end).
+
+- **The sealed door** opens at its badge reader on the LAB's side (`sealed_reader`) with Rowan's pass, in `ACT3_OVERTIME` only. It is not
+  Level 2 yet: behind it is a landing (`sealed_corridor`) with two ways on. East, the way to the factory's other part, barred and closed for
+  works ("UNDER CONSTRUCTION": bars, bricks); south, the stairs down to the basement ("BASEMENT · STORAGE").
+- **It slams shut behind** (`block.big_door.slam`) once the player is `slam_after` (2.5) blocks past it on the landing, and stays shut: the
+  state goes on to `ACT3_BASEMENT`, the objective to "Overtime: sweep the basement (0/8)". The guards no longer watch from here on.
+- **The basement**, where everything is stored, is a store kept in order and well lit (a lamp every 4 blocks; the stairs have one every
+  other step): two blocks of metal shelves three high, four rows of six each, a wide aisle between them from the stairs to the south wall,
+  things brought from Chapter 1's Noname complex on the shelves' tops and the walls (the director's mask, a trophy, a lounge painting, a
+  diploma...), the wet floor sign, three chalk scrawls, and, at the end of the middle aisle, standing free against the south wall, a NonameOS
+  terminal under a chalk "???" (see Act 3's computers: the strange recording and a ciphered note). The broom leans by
+  the foot of the stairs; its eight patches of dirt are swept as task 3's are (`basement_broom_block`, `basement_dirt_spots`, the counters
+  `basement_broom` and `basement_swept`, the guide arrow over the next one).
+- **The last patch ends the level** (`DONE`): the counter `completed` is set (the plan's `ch2.l1.completed`), the basement's lights go out
+  with a thud (`Ch2L1Build.zoneLights`, as the LAB's after the office), and `dark_seconds` (3) later the screen fades to black over
+  `fade_seconds` (2.5), the closing text (`ending.text`) stays `text_seconds` (6), and the world is left, saved, for the main menu. Level 1
+  is not published alone, so nothing follows it yet. Going back before `DONE` (a command) lights the basement again; going back to the
+  overtime or before it shuts the sealed door and turns its reader red.
 
 ## Debug commands
 

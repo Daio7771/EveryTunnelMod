@@ -14,7 +14,8 @@ import daio7771.everytunnel.chapter2.prologue.core.Fill
  * [fills] are boxes of one block each, in the order they are placed (a block is a name with its states,
  * `every_tunnel:time_clock[facing=north,unlocked=false]`, as in [daio7771.everytunnel.chapter2.prologue.core.BlockSpec]), and
  * [lights] the cells of the ceiling lamps, for turning them down and up, and [texts] what the plan's `wall_text` blocks say (Level 3's
- * nameplates: a lang key in a style, set on the block's entity once it is built). [fingerprint] changes whenever the file does:
+ * nameplates: a lang key in a style, set on the block's entity once it is built), and [messages] what its `wall_message` blocks say
+ * (the basement's chalk scrawls: a lang key, a line's height in blocks, degrees off level, the chalk's colour). [fingerprint] changes whenever the file does:
  * a world that was built from another plan is built again.
  */
 class Ch2L1MapPlan(
@@ -24,10 +25,17 @@ class Ch2L1MapPlan(
     val lights: List<Cell>,
     val fingerprint: Int,
     val texts: List<WallText> = emptyList(),
+    val messages: List<WallMessage> = emptyList(),
 ) {
 
     /** A `wall_text` block's words: the lang key [text] in [style] (`lab`, `plaque`, `brass`... as the block entity's NBT names them). */
     data class WallText(val at: Cell, val text: String, val style: String)
+
+    /**
+     * A `wall_message` block's scrawl: the lang key [text], a line [size] blocks high, [rotation] degrees off level, in [chalk] (`white` on a
+     * dark wall, `black` on a white one); always there.
+     */
+    data class WallMessage(val at: Cell, val text: String, val size: Float, val rotation: Float, val chalk: String)
 
     /** The world's cell for plan cell [x], [y], [z]. */
     fun worldX(x: Int) = origin.x + x
@@ -61,6 +69,10 @@ class Ch2L1MapPlan(
                 root.getAsJsonArray("texts")?.map {
                     val o = it.asJsonObject
                     WallText(cell(o["at"]), o["text"].asString, o["style"].asString)
+                } ?: emptyList(),
+                root.getAsJsonArray("messages")?.map {
+                    val o = it.asJsonObject
+                    WallMessage(cell(o["at"]), o["text"].asString, o["size"].asFloat, o["rotation"].asFloat, o["chalk"]?.asString ?: "")
                 } ?: emptyList(),
             )
         }

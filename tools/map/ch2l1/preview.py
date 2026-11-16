@@ -1,5 +1,6 @@
 """The top-down picture of Chapter 2, Level 1, drawn from the plan's own blocks: the spaces, their doors (a red one is
-restricted), the glass, the named places numbered with a key under the plan, and the two patrols' paths."""
+restricted), the glass, the named places numbered with a key under the plan, and the two patrols' paths. Each space is drawn at
+its own floor, so the basement (8 blocks down, south of the sealed zone) shows beside the rest."""
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -11,12 +12,13 @@ SPACE_COLOURS = {
     "entrance": (206, 214, 226), "main_corridor": (196, 204, 214), "lab": (176, 204, 228), "wc_west": (200, 214, 200),
     "lockers": (222, 206, 176), "ring": (230, 224, 190), "dining": (232, 212, 190), "aux_lab": (170, 190, 232), "aux_chamber": (150, 166, 214),
     "authorized": (232, 190, 190), "security": (206, 196, 214), "office": (222, 176, 160), "wc_east": (226, 196, 196),
-    "level2": (200, 160, 176),
+    "sealed_zone": (200, 160, 176), "construction": (214, 200, 150), "stairs": (190, 180, 200), "basement": (180, 170, 200),
 }
 LABELS = {  # where each name is written: (x, z) in blocks, and whether it runs along a column
     "entrance": (41, 4), "main_corridor": (25.5, 25), "lab": (47, 25), "wc_west": (16.5, 13.5), "lockers": (11.5, 18.5),
     "ring": (39, 50), "dining": (39, 55), "aux_lab": (8, 50), "aux_chamber": (-4.5, 50), "authorized": (38, 74.8), "security": (21.5, 81.5),
-    "office": (35, 80.2), "wc_east": (45, 80.5), "level2": (68.5, 28),
+    "office": (35, 80.2), "wc_east": (45, 80.5), "sealed_zone": (68.5, 28), "construction": (77.5, 28.5),
+    "stairs": (71.5, 34.5), "basement": (75.5, 49.5),
 }
 
 
@@ -41,14 +43,15 @@ def draw(level, path):
     def px(x, z):
         return MARGIN + (x - lo[0]) * SCALE, MARGIN + (z - lo[2]) * SCALE
 
+    floors = (0, L.BASEMENT_Y)
     for (x, y, z), role in level.shell.items():
-        if y == 0:
+        if y in floors:
             colour = {"glass": (110, 200, 220), "dado": (74, 76, 84), "wall": (74, 76, 84)}.get(role)
             if colour:
                 a, b = px(x, z)
                 d.rectangle([a, b, a + SCALE - 1, b + SCALE - 1], fill=colour)
     for (x, y, z), sid in level.air.items():
-        if y == 0:
+        if y == level.spaces[sid].floor(x, z):
             a, b = px(x, z)
             d.rectangle([a, b, a + SCALE - 1, b + SCALE - 1], fill=SPACE_COLOURS[sid])
     f_small, f_label, f_key = font(10), font(12), font(11)
@@ -80,8 +83,9 @@ def draw(level, path):
         a, b = px(x, z)
         furniture = {"lab_bench": (160, 160, 166), "locker": (96, 116, 156), "predecessor_locker": (200, 90, 90), "exec_desk": (60, 56, 52),
                      "bookshelf": (120, 84, 56), "leather_sofa": (70, 50, 40), "factory_glass": (110, 200, 220), "film_light": (30, 30, 34),
-                     "film_camera": (30, 30, 34)}
-        if name in furniture and y == 0:
+                     "film_camera": (30, 30, 34), "metal_shelf": (120, 124, 132), "polished_andesite_stairs": (150, 150, 156),
+                     "iron_bars": (60, 62, 68), "bricks": (150, 80, 60)}
+        if name in furniture and (y in floors or name == "polished_andesite_stairs"):
             d.rectangle([a + 1, b + 1, a + SCALE - 2, b + SCALE - 2], fill=furniture[name])
         elif name in ("badge_reader", "keypad", "noname_terminal", "rowan_portrait"):
             d.rectangle([a + 3, b + 3, a + SCALE - 4, b + SCALE - 4], fill=(30, 30, 34), outline=(60, 220, 90))
@@ -93,7 +97,7 @@ def draw(level, path):
             d.ellipse([a + 3, b + 3, a + SCALE - 4, b + SCALE - 4], fill=(110, 90, 66))
     # the patrols, and the people's routes
     for pid, points, closed, _ in paths:
-        if pid == "task3_dirt_spots":
+        if pid.endswith("_dirt_spots"):
             continue
         pts = [px(x, z) for x, _, z in points]
         colour = (40, 90, 210) if pid.startswith("patrol_a") else (40, 150, 80) if pid.startswith("route_") else (230, 130, 30)

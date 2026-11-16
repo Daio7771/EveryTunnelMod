@@ -8,7 +8,7 @@ import daio7771.everytunnel.core.level.Position
  *
  * [targets] are the places the step can be done at, each lifted by the spec's height over its anchor: the time clock before the player
  * has clocked in; in the first task the sample tubes not taken yet and, once all are, the terminal; in the second the analyzer; in the third
- * the broom until it is taken and then the patches of dirt not swept yet. [nearest] is the one the arrow shows: the one closest to
+ * the broom until it is taken and then the patches of dirt not swept yet, and the same in the basement's (the overtime). [nearest] is the one the arrow shows: the one closest to
  * the player. In Act 2 it floats over the coworker's head, but only when the player has lost him ([follow]). In Act 3 it points at the
  * next thing to do ([Ch2L1Act3.guide]: the badge reader, the lab's computer, the keypad, the office's door, Rowan's computer), but the
  * client shows it only once the player has been [stuck] on it a while.
@@ -34,6 +34,13 @@ object Ch2L1Guide {
                 } else {
                     val swept = counter(Ch2L1Tasks.SWEPT)
                     anchors.path(tasks.dirtPath)?.points?.filterIndexed { i, _ -> !Ch2L1Bits.has(swept, i) } ?: emptyList()
+                }
+            Ch2L1State.ACT3_BASEMENT ->
+                if (counter(Ch2L1Tasks.BASEMENT_BROOM) == 0) {
+                    at(tasks.basementBroomAnchor)
+                } else {
+                    val swept = counter(Ch2L1Tasks.BASEMENT_SWEPT)
+                    anchors.path(tasks.basementDirtPath)?.points?.filterIndexed { i, _ -> !Ch2L1Bits.has(swept, i) } ?: emptyList()
                 }
             Ch2L1State.ACT3_EXPLORE -> act3.guide(counter)?.let(::at) ?: emptyList()
             else -> emptyList()
