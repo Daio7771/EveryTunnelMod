@@ -28,7 +28,7 @@ class Ch2L1DataTest {
         val anchors = Ch2L1DataParser.parse(emptyMap(), Ch2L1Files.readAllBundled()).data.anchors
         val points = listOf(
             "spawn_clockin", "time_clock", "task1_terminal", "task2_analyzer", "predecessor_locker", "taquillas_exit",
-            "aux_lab_door", "chamber_02", "chamber_log", "authorization_desk", "door_anchor", "desk_anchor", "office_keypad",
+            "aux_lab_door", "aux_lab_reader", "aux_lab_computer", "chamber_02", "door_anchor", "desk_anchor", "office_keypad", "rowan_computer",
             "paper_medical", "paper_contract_14", "painting", "card_slide_start", "card_slide_end", "rowan_spawn",
             "restricted_door_east", "sealed_door",
             "task1_terminal_block", "task2_analyzer_block", "task3_broom_block", "speaker_entrance_src", "speaker_lab_src", "speaker_main_src",
@@ -36,7 +36,7 @@ class Ch2L1DataTest {
         ) + (1..6).map { "taquillas_npc_%02d".format(it) } + (1..3).map { "task1_tube_$it" }
         for (id in points) assertTrue(anchors.point(id) != null, "no anchor $id")
         val zones = listOf(
-            "task3_sweep_area", "taquillas_trigger", "aux_lab_glass", "prologue_set", "authorized_corridor", "security_room",
+            "task3_sweep_area", "taquillas_trigger", "aux_lab_glass", "aux_chamber", "prologue_set", "authorized_corridor", "security_room", "office",
             "level2_corridor", "speaker_entrance", "speaker_lab", "speaker_main", "speaker_west",
         )
         for (id in zones) assertTrue(anchors.zone(id) != null, "no zone $id")

@@ -14,8 +14,14 @@ This file writes nothing: `generate.py` turns it into the plan the mod builds (`
 (`anchors.json`) and a top-down picture. The mod puts the plan in the world at ORIGIN when Chapter 2 starts.
 """
 
+import json
 import math
+import sys
 from collections import deque
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "prologue"))
+import room as PROLOGUE  # noqa: E402  (the prologue's room: its bench and what stands on it, for the film set)
 
 # The world position of the plan's cell (0, 0, 0): a free corner of the map world, far from Chapter 1's levels and from
 # the prologue's room. The floor's blocks are one under (y = 63).
@@ -75,6 +81,8 @@ def arch(sid, name, x0, x1, z0, z_base, height):
 # dining room, 9 under the entrance's arch. After the first walk through it the LAB, the corridors and the auxiliary lab
 # grew: the LAB 30 x 36 (was 24 x 29), the main corridor 11 wide (was 9), the ring and the authorized corridor 4 (was 3)
 # and the auxiliary lab 14 x 24 (was 6 x 20); the lockers 14 x 18 (was 8 x 11). The ring's west stretch (x 16 .. 19) lies along the auxiliary lab's glass.
+# Phase 6 made the auxiliary lab wider to the west: a room of its own behind a partition (aux_chamber, 9 x 24), reached by an opening at
+# the partition's north end, holds sealed chamber 02, out of every line of sight from the ring through the glass (check_chamber_hidden).
 SPACES = [
     arch("entrance", "ENTRANCE", 20, 62, 1, 10, 9),
     rect("main_corridor", "MAIN CORRIDOR", 20, 11, 31, 47, 5),
@@ -84,6 +92,7 @@ SPACES = [
     ring("ring", "RING", [(16, 48, 62, 52), (16, 69, 62, 73), (16, 52, 20, 69), (58, 52, 62, 69)], 4),
     rect("dining", "DINING ROOM", 21, 53, 57, 68, 6),
     rect("aux_lab", "AUXILIARY LAB", 1, 48, 15, 72, 5, restricted=True),
+    rect("aux_chamber", "CHAMBER 02", -9, 48, 0, 72, 5, restricted=True),
     rect("authorized", "AUTHORIZED CORRIDOR", 15, 74, 61, 78, 4, restricted=True),
     rect("security", "SECURITY", 15, 79, 28, 85, 4, restricted=True),
     rect("office", "OFFICE", 29, 79, 41, 86, 4, restricted=True),
@@ -97,7 +106,7 @@ SPACE_HEIGHTS = {s.id: s.height for s in SPACES}
 # z = line, and the passage goes north to south; axis "x": the wall runs along z at x = line. Kinds: "normal" (a door of
 # white steel with a window, opened by hand), "restricted" (the same, but the way into a forbidden zone: the drawing's red circle),
 # "locked" (a grey emergency door that hands do not open: a later phase opens it, with a badge, a code or Rowan's card) and
-# "decor" (the same grey door, opening onto nothing).
+# "decor" (the same grey door, opening onto nothing), and "opening": no door at all, a passage two blocks high through a partition.
 DOORS = [
     ("entrance_main", "z", 10, 24, 2, "normal"),
     ("entrance_lab_1", "z", 10, 34, 2, "normal"),
@@ -114,6 +123,7 @@ DOORS = [
     ("dining_s1", "z", 68, 25, 2, "normal"),
     ("dining_s2", "z", 68, 44, 2, "normal"),
     ("aux_lab", "x", 15, 49, 2, "locked"),
+    ("aux_chamber", "x", 0, 48, 3, "opening"),
     ("ring_authorized", "z", 73, 34, 2, "restricted"),
     ("security", "z", 78, 21, 1, "normal"),
     ("office", "z", 78, 31, 2, "locked"),
@@ -129,7 +139,7 @@ GLASS_WALLS = [(15, 52, 68, 3)]
 PILLARS = [(11, 25, 13, 27)]
 
 # What lies behind a locked door: the auxiliary lab (the coworker's badge), the office (Rowan's code) and the sealed zone.
-LOCKED_SPACES = {"aux_lab", "office", "level2"}
+LOCKED_SPACES = {"aux_lab", "aux_chamber", "office", "level2"}
 
 CLOCK = {"at": (29, 1, 9), "facing": "north"}      # on the entrance's south wall, between its first two doors
 # Furniture and props, by cell: task 1's bench along the LAB's west wall with its three tubes and the terminal, task 2's analyzer on a
@@ -158,6 +168,7 @@ CAMERAS = {
     "ring": [(24, 48, "east"), (53, 51, "west"), (24, 72, "east"), (53, 69, "west"), (19, 60, "north"), (58, 60, "south")],
     "dining": [(21, 53, "east")],
     "aux_lab": [(1, 48, "south")],
+    "aux_chamber": [(-1, 49, "west")],
     "authorized": [(22, 74, "east"), (53, 77, "west")],
     "security": [(27, 79, "south")],
     "office": [(29, 79, "south")],
@@ -200,6 +211,76 @@ COWORKER_WAIT = (16.5, 50.5, 0)
 LOCKERS_DOORS = {"lockers_door_1": (20.5, 20.0), "lockers_door_2": (20.5, 32.0)}   # just outside, in the main corridor
 
 
+# Act 3 (phase 6). The locks by the two locked doors, on the wall outside each (cell, the way its front looks): the badge reader by the
+# auxiliary lab's door (on the ring's side) and the keypad by the office's (in the authorized corridor). The auxiliary lab's computer on a
+# desk against the partition; Rowan's office: his desk in the middle with his chair and computer, his portrait on the east wall with its
+# plaque under it, a bookshelf behind him, a sofa, plants and a runner. Sealed chamber 02: a cell of glass up to the ceiling in the
+# middle of its room, the scientist (the Pale man) standing in it with his back to its front, and a label over it.
+READER = ((16, 1, 51), "east")
+KEYPAD = ((30, 1, 77), "north")
+AUX_DESK = [(1, 54), (1, 55)]                   # benches against the partition, facing east
+AUX_COMPUTER = (1, 1, 54)
+OFFICE_DESK = [(34, 82), (35, 82)]              # the executive desk, facing north (the visitor's side)
+OFFICE_CHAIR = (34, 0, 83)
+ROWAN_COMPUTER = (35, 1, 82)
+PORTRAIT = ((40, 2, 82), "west")
+OFFICE_SHELVES = [(x, 85) for x in range(33, 38)]
+OFFICE_SOFA = [(29, 81), (29, 82)]              # against the west wall, facing east
+OFFICE_PLANTS = [(29, 0, 79), (40, 0, 85), (29, 0, 85)]
+OFFICE_RUG = [(34, 80), (35, 80)]
+CHAMBER = (-7, 63, -3, 67)                      # the cell's glass: x0, z0, x1, z1 (both included), up to the ceiling
+CHAMBER_LABEL = ((-5, 3, 62), "north")
+# The film set: the prologue's bench (tools/prologue/room.py) against the auxiliary lab's south wall, turned to face north, the part of it
+# the cinematic's camera saw (its x 5 .. 18) with the same things on it and on the wall over it; behind it, looking at it, two studio
+# lights and the cine camera on their tripods.
+SET_FROM, SET_TO = 5, 18                        # the prologue's x range copied
+SET_X0, SET_Z = 1, 71                           # where its west end lands, and the row against the wall (the bench is z 70 .. 71)
+FILM_LIGHTS = [(2, 0, 66), (13, 0, 66)]
+FILM_CAMERA = (8, 0, 65)
+# Text on walls (wall_text blocks: cell, the way the text faces, its lang key, its style): chamber 02's label and the portrait's plaque.
+WALL_TEXTS = [
+    (CHAMBER_LABEL[0], CHAMBER_LABEL[1], "every_tunnel.ch2.l1.sign.chamber_02", "lab"),
+    ((40, 1, 82), "west", "every_tunnel.ch2.l1.sign.portrait", "plaque"),
+]
+
+OPPOSITE = {"north": "south", "south": "north", "east": "west", "west": "east"}
+
+
+def row_states(cells, facing):
+    """{(x, z): "left=..,right=.."} for a row of furniture: joined where the neighbour is in the row. Left and right are as seen from
+    in front of it (a row facing north has its left to the east)."""
+    step = {"north": (1, 0), "south": (-1, 0), "east": (0, 1), "west": (0, -1)}[facing]
+    out = {}
+    for x, z in cells:
+        left = (x + step[0], z + step[1]) in cells
+        right = (x - step[0], z - step[1]) in cells
+        out[(x, z)] = f"left={str(left).lower()},right={str(right).lower()}"
+    return out
+
+
+def film_set():
+    """{(x, y, z): block} of the film set: the prologue's bench and props, turned round onto the south wall."""
+    out = {}
+    width = SET_TO - SET_FROM
+    cells = [(SET_X0 + i, z) for i in range(width + 1) for z in (SET_Z - 1, SET_Z)]
+    states = row_states(cells, "north")
+    for x, z in cells:
+        out[(x, 0, z)] = MOD + f"lab_bench[facing=north,{states[(x, z)]}]"
+
+    def place(px_, pz):
+        return SET_X0 + (SET_TO - px_), SET_Z - pz
+
+    for px_, pz, block in PROLOGUE.PROPS:
+        if SET_FROM <= px_ <= SET_TO:
+            x, z = place(px_, pz)
+            out[(x, 1, z)] = MOD + f"{block}[facing=north]"
+    for px_, y, block in PROLOGUE.WALL_DECOR:
+        if SET_FROM <= px_ <= SET_TO:
+            x, z = place(px_, 0)
+            out[(x, y, z)] = MOD + f"{block}[facing=north]"
+    return out
+
+
 class Cells(dict):
     """A dict of cells that refuses to set one twice: two props on the same cell is a mistake of the layout."""
 
@@ -235,6 +316,53 @@ def props():
     for space, cameras in CAMERAS.items():
         for x, z, facing in cameras:
             out[(x, SPACE_HEIGHTS[space] - 1, z)] = MOD + f"factory_camera[facing={facing},part=mount]"
+    for cell, block in act3_props().items():
+        out[cell] = block
+    return out
+
+
+def act3_props():
+    """Act 3's: the locks, the auxiliary lab's desk and computer, the film set, chamber 02's cell, Rowan's office, the wall texts."""
+    out = {}
+    (cell, facing) = READER
+    out[cell] = MOD + f"badge_reader[facing={facing},unlocked=false]"
+    (cell, facing) = KEYPAD
+    out[cell] = MOD + f"keypad[facing={facing},unlocked=false]"
+    states = row_states(AUX_DESK, "east")
+    for x, z in AUX_DESK:
+        out[(x, 0, z)] = MOD + f"lab_bench[facing=east,{states[(x, z)]}]"
+    out[AUX_COMPUTER] = MOD + "noname_terminal[facing=east]"
+    out[(AUX_DESK[1][0], 1, AUX_DESK[1][1])] = MOD + "paper_stack[facing=east]"
+    out.update(film_set())
+    for x, y, z in FILM_LIGHTS:
+        out[(x, y, z)] = MOD + "film_light[facing=south]"
+    out[FILM_CAMERA] = MOD + "film_camera[facing=south]"
+    x0, z0, x1, z1 = CHAMBER
+    for x in range(x0, x1 + 1):
+        for z in range(z0, z1 + 1):
+            if x in (x0, x1) or z in (z0, z1):
+                for y in range(SPACE_HEIGHTS["aux_chamber"]):
+                    out[(x, y, z)] = MOD + "factory_glass"
+    states = row_states(OFFICE_DESK, "north")
+    for x, z in OFFICE_DESK:
+        out[(x, 0, z)] = MOD + f"exec_desk[facing=north,{states[(x, z)]}]"
+    out[OFFICE_CHAIR] = MOD + "exec_chair[facing=north]"
+    out[ROWAN_COMPUTER] = MOD + "noname_terminal[facing=south]"
+    out[(OFFICE_DESK[0][0], 1, OFFICE_DESK[0][1])] = MOD + "paper_stack[facing=south]"
+    (cell, facing) = PORTRAIT
+    out[cell] = MOD + f"rowan_portrait[facing={facing}]"
+    for x, z in OFFICE_SHELVES:
+        out[(x, 0, z)] = MOD + "bookshelf[facing=north,up=true,down=false]"
+        out[(x, 1, z)] = MOD + "bookshelf[facing=north,up=false,down=true]"
+    states = row_states(OFFICE_SOFA, "east")
+    for x, z in OFFICE_SOFA:
+        out[(x, 0, z)] = MOD + f"leather_sofa[facing=east,{states[(x, z)]}]"
+    for cell in OFFICE_PLANTS:
+        out[cell] = MOD + "potted_plant[facing=north]"
+    for x, z in OFFICE_RUG:
+        out[(x, 0, z)] = MOD + "office_rug[facing=north]"
+    for cell, facing, _, _ in WALL_TEXTS:
+        out[cell] = MOD + f"wall_text[facing={facing}]"
     return out
 
 
@@ -342,6 +470,8 @@ class Level:
             out[c] = BLOCKS["light"]
         for door in DOORS:
             _, axis, line, first, width, kind = door
+            if kind == "opening":
+                continue
             block = DOOR_BLOCKS["locked" if kind in ("locked", "decor") else "normal"]
             facing = "south" if axis == "z" else "east"
             # A door's hinge side is seen looking the way it faces: a door facing south has its left hinge on the east edge
@@ -465,15 +595,17 @@ def named_places(level):
         add(name, x, z, yaw, True)
     add("taquillas_exit", 21.5, 22.5, -90, False)
     add("aux_lab_door", 15.0, 50.0, 90, False)
-    add("chamber_02", 11.5, 60.5, -90, True)
-    add("chamber_log", 2.5, 56.5, 90, True)
-    add("authorization_desk", 2.5, 51.5, 90, True)
+    add("aux_lab_reader", READER[0][0] + 0.5, READER[0][2] + 0.5, 90, False, y=float(READER[0][1]))
+    add("aux_lab_computer", AUX_COMPUTER[0] + 0.5, AUX_COMPUTER[2] + 0.5, 90, False, y=float(AUX_COMPUTER[1]))
+    cx0, cz0, cx1, cz1 = CHAMBER
+    add("chamber_02", (cx0 + cx1 + 1) / 2, (cz0 + cz1 + 1) / 2, 0, False)        # facing south: his back to the cell's front
     add("door_anchor", 32.0, 78.0, 0, False)
     add("desk_anchor", 35.0, 82.5, 180, True)
-    add("office_keypad", 30.5, 77.5, 0, True, y=1.0)
+    add("office_keypad", KEYPAD[0][0] + 0.5, KEYPAD[0][2] + 0.5, 0, False, y=float(KEYPAD[0][1]))
+    add("rowan_computer", ROWAN_COMPUTER[0] + 0.5, ROWAN_COMPUTER[2] + 0.5, 180, False, y=float(ROWAN_COMPUTER[1]))
     add("paper_medical", 34.5, 82.5, 180, True, y=1.0)
     add("paper_contract_14", 35.5, 82.5, 180, True, y=1.0)
-    add("painting", 40.5, 82.5, 90, True, y=2.0)
+    add("painting", PORTRAIT[0][0] + 0.5, PORTRAIT[0][2] + 0.5, 90, False, y=float(PORTRAIT[0][1]))
     add("card_slide_start", 35.0, 81.0, 0, True, y=1.0)
     add("card_slide_end", 35.0, 83.2, 0, True, y=1.0)
     add("rowan_spawn", 32.5, 76.5, 0, True)
@@ -499,8 +631,9 @@ def named_places(level):
     zone("ring_east", "ring", box=(58, 52, 62, 69))
     zone("task3_sweep_area", "ring", box=(16, 52, 20, 69))
     zone("aux_lab", "aux_lab")
+    zone("aux_chamber", "aux_chamber")
     zone("aux_lab_glass", "ring", True, box=(16, 52, 17, 69))
-    zone("prologue_set", "aux_lab", True, box=(1, 64, 15, 72))
+    zone("prologue_set", "aux_lab", False, box=(1, 64, 15, 72))
     zone("authorized_corridor", "authorized")
     zone("security_room", "security")
     zone("office", "office")
@@ -558,9 +691,10 @@ def check(level):
     for anchor_id, (x, y, z), _, _ in anchors:
         if anchor_id.endswith("_block") or anchor_id.endswith("_src") or anchor_id.startswith("task1_tube_"):
             continue
-        if anchor_id in ("time_clock", "office_keypad", "paper_medical", "paper_contract_14", "painting", "card_slide_start", "card_slide_end", "sealed_door", "restricted_door_east", "aux_lab_door", "door_anchor"):
+        if anchor_id in ("time_clock", "office_keypad", "paper_medical", "paper_contract_14", "painting", "card_slide_start", "card_slide_end", "sealed_door",
+                         "restricted_door_east", "aux_lab_door", "door_anchor", "aux_lab_reader", "aux_lab_computer", "rowan_computer"):
             continue
-        cell = (int(x), int(y), int(z))
+        cell = (math.floor(x), math.floor(y), math.floor(z))
         if cell not in air or (cell[0], cell[1] + 1, cell[2]) not in air:
             raise SystemExit(f"{anchor_id} at {(x, y, z)} has no room to stand")
     for name, (x, z, _) in NPC_SPOTS.items():
@@ -575,7 +709,7 @@ def check(level):
             raise SystemExit(f"zone {zone_id} has no air in it")
     for path_id, points, _, _ in paths:
         for x, y, z in points:
-            if (int(x), 0, int(z)) not in air:
+            if (math.floor(x), 0, math.floor(z)) not in air:
                 raise SystemExit(f"path {path_id} goes through a wall at {(x, y, z)}")
     # The doors' graph: every space is reachable from the entrance; by free doors only (normal ones) just the unrestricted
     # spaces are; and without passing a locked door everything but what lies behind one.
@@ -599,11 +733,31 @@ def check(level):
         return seen
 
     everything = {s.id for s in SPACES}
-    if reach({"normal", "restricted", "locked"}) != everything:
-        raise SystemExit(f"no way to {sorted(everything - reach({'normal', 'restricted', 'locked'}))} from the entrance")
-    free = reach({"normal"})
+    if reach({"normal", "opening", "restricted", "locked"}) != everything:
+        raise SystemExit(f"no way to {sorted(everything - reach({'normal', 'opening', 'restricted', 'locked'}))} from the entrance")
+    free = reach({"normal", "opening"})
     if free != {s.id for s in SPACES if not s.restricted}:
         raise SystemExit(f"by free doors one reaches {sorted(free)}, not the unrestricted spaces")
-    if everything - reach({"normal", "restricted"}) != LOCKED_SPACES:
-        raise SystemExit(f"behind locked doors there is {sorted(everything - reach({'normal', 'restricted'}))}, not {sorted(LOCKED_SPACES)}")
+    if everything - reach({"normal", "opening", "restricted"}) != LOCKED_SPACES:
+        raise SystemExit(f"behind locked doors there is {sorted(everything - reach({'normal', 'opening', 'restricted'}))}, not {sorted(LOCKED_SPACES)}")
+    check_chamber_hidden(level)
+    for cell, _, key, _ in WALL_TEXTS:
+        if cell not in air:
+            raise SystemExit(f"the wall text {key} at {cell} is not in a space")
     return graph
+
+
+def check_chamber_hidden(level):
+    """Nobody in the ring can see into chamber 02 through the auxiliary lab's glass (Act 1 walks past it): every line from an eye in the
+    ring's west stretch to a point of the cell's inside meets a wall (the partition), the doors being shut."""
+    solid = {c for c, role in level.shell.items() if role != "glass"}
+    solid |= {c for door in DOORS if door[5] != "opening" for c in door_cells(door)[0]}
+    x0, z0, x1, z1 = CHAMBER
+    targets = [(x + 0.5, y + 0.5, z + 0.5) for x in range(x0 + 1, x1) for z in range(z0 + 1, z1) for y in range(3)]
+    eyes = [(x + 0.5, 1.6, z + 0.5) for x in range(16, 20) for z in range(48, 73)]
+    for ex, ey, ez in eyes:
+        for tx, ty, tz in targets:
+            steps = int(math.dist((ex, ey, ez), (tx, ty, tz)) * 4) + 1
+            if not any((math.floor(ex + (tx - ex) * k / steps), math.floor(ey + (ty - ey) * k / steps),
+                        math.floor(ez + (tz - ez) * k / steps)) in solid for k in range(1, steps)):
+                raise SystemExit(f"chamber 02 can be seen from the ring at {(ex, ez)} (towards {(tx, tz)})")

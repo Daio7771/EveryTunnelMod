@@ -29,7 +29,8 @@ import software.bernie.geckolib.util.GeckoLibUtil
  * [PrologueStages]: [WORKING] (`animation.scientist.work`), [TREMBLING] (his hands, `animation.scientist.tremble`),
  * [SICK] (his skin pale, bent over his hands: `scientist_pale.png`, `animation.scientist.sick`), [STRETCHED] (his
  * limbs longer: `animation.scientist.stretch`) and [PALE]: he has become a Pale man, drawn with the Level 2 Pale
- * man's own model, texture and animations (`client.render.ScientistModel`), listening.
+ * man's own model, texture and animations (`client.render.ScientistModel`), listening. Chapter 2 Level 1 puts him in its sealed
+ * chamber 02 as [CONTAINED]: the Pale man again, not moving at all.
  */
 class ScientistEntity(type: EntityType<*>, world: World) : Entity(type, world), GeoEntity {
 
@@ -80,6 +81,10 @@ class ScientistEntity(type: EntityType<*>, world: World) : Entity(type, world), 
     override fun registerControllers(controllers: AnimatableManager.ControllerRegistrar) {
         controllers.add(AnimationController(this, "main", 10) { state ->
             val now = stage
+            if (now == CONTAINED) {
+                shown = now
+                return@AnimationController PlayState.STOP
+            }
             if (now != shown) {
                 shown = now
                 if (now == PALE && world.isClient) paleSince = world.time
@@ -100,6 +105,7 @@ class ScientistEntity(type: EntityType<*>, world: World) : Entity(type, world), 
         const val SICK = PrologueStages.SICK
         const val STRETCHED = PrologueStages.STRETCHED
         const val PALE = PrologueStages.PALE
+        const val CONTAINED = PrologueStages.CONTAINED
 
         /** How long he takes to rise to his full height as a Pale man. */
         const val UNFOLD_TICKS = 36

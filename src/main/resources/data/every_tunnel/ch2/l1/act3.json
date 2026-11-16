@@ -1,0 +1,19 @@
+{
+  "reader": "aux_lab_reader",
+  "lab_door": "aux_lab_door",
+  "keypad": "office_keypad",
+  "office_door": "door_anchor",
+  "code": "4719",
+  "computers": [
+    { "id": "aux_lab", "anchor": "aux_lab_computer", "files": ["chamber_log", "authorization"] },
+    { "id": "rowan", "anchor": "rowan_computer", "files": ["medical_file", "contract_14"] }
+  ],
+  "code_file": "authorization",
+  "office_zone": "office",
+  "trigger_computer": "rowan",
+  "restricted_doors": ["restricted_door_east"],
+  "sealed_door": "sealed_door",
+  "portrait": "painting",
+  "chamber": "chamber_02",
+  "guide_after_seconds": 60
+}

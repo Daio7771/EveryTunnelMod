@@ -1,6 +1,8 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
+import daio7771.everytunnel.chapter2.level1.core.Ch2L1Act3
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
+import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.SuggestionProvider
@@ -42,7 +44,9 @@ import daio7771.everytunnel.platform.DevWorlds
  *
  * `/et ch2 l1 tasks` shows how far the player is in the three tasks (and what the data names that is missing), `tasks reset` starts them over
  * ([Ch2L1TaskHooks]); `intro` plays the first announcement's cinematic and `say <rowan_loyal_a1..a6>` an announcement, from the speaker of
- * the zone the player stands in ([Ch2L1IntroHooks], [Ch2L1SpeakerHooks]). The other voices have no command:
+ * the zone the player stands in ([Ch2L1IntroHooks], [Ch2L1SpeakerHooks]). `act3` shows what the player has done in Act 3 (the lab opened, the
+ * files read, the office opened and entered), `act3 reset` shuts the auxiliary lab and the office again and forgets it ([Ch2L1Act3Hooks]).
+ * The other voices have no command:
  * `/playsound every_tunnel:voice.<id> voice @s` plays any of them, with its subtitles.
  */
 object Ch2L1Commands {
@@ -101,6 +105,10 @@ object Ch2L1Commands {
                                 .then(
                                     CommandManager.literal("tasks").executes(::tasks)
                                         .then(CommandManager.literal("reset").executes(::resetTasks)),
+                                )
+                                .then(
+                                    CommandManager.literal("act3").executes(::act3)
+                                        .then(CommandManager.literal("reset").executes(::resetAct3)),
                                 )
                                 .then(CommandManager.literal("intro").executes(::intro))
                                 .then(
@@ -264,6 +272,24 @@ object Ch2L1Commands {
     private fun resetTasks(context: CommandContext<ServerCommandSource>): Int {
         Ch2L1TaskHooks.reset(context.source.playerOrThrow)
         reply(context, "The three tasks start over (the tubes, the broom and the dirt are back where the state says).")
+        return 1
+    }
+
+    /** `/et ch2 l1 act3`: what the player has done in Act 3. */
+    private fun act3(context: CommandContext<ServerCommandSource>): Int {
+        val player = context.source.playerOrThrow
+        val act3 = Ch2L1DataLoader.act3
+        val counter = { key: String -> Ch2Progress.ch2L1Counter(player, key) }
+        reply(context, "Act 3: objective ${act3.objective(counter)}; lab ${if (counter(Ch2L1Act3.LAB_OPEN) > 0) "open" else "shut"}, " +
+            "office ${if (counter(Ch2L1Act3.OFFICE_OPEN) > 0) "open" else "shut"}${if (counter(Ch2L1Act3.IN_OFFICE) > 0) " (entered)" else ""}.")
+        reply(context, "Files read: " + act3.allFiles.joinToString(", ") { "$it ${if (act3.isRead(it, counter)) "yes" else "no"}" } +
+            if (counter(Ch2L1Act3.TRIGGERED) > 0) "; the office cinematic's moment is reached." else ".")
+        return 1
+    }
+
+    private fun resetAct3(context: CommandContext<ServerCommandSource>): Int {
+        Ch2L1Act3Hooks.relock(context.source.playerOrThrow)
+        reply(context, "The auxiliary lab and the office are shut again, the reader and the keypad red, Act 3 forgotten (the state is unchanged).")
         return 1
     }
 

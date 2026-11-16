@@ -284,6 +284,21 @@
       "every_tunnel:block/ch2l1/blip_1"
     ]
   },
+  "block.ch2l1.keypad_accept": {
+    "sounds": [
+      "every_tunnel:block/ch2l1/keypad_accept_1"
+    ]
+  },
+  "block.ch2l1.keypad_error": {
+    "sounds": [
+      "every_tunnel:block/ch2l1/keypad_error_1"
+    ]
+  },
+  "block.ch2l1.keypad_key": {
+    "sounds": [
+      "every_tunnel:block/ch2l1/keypad_key_1"
+    ]
+  },
   "block.ch2l1.sweep": {
     "sounds": [
       "every_tunnel:block/ch2l1/sweep_1",

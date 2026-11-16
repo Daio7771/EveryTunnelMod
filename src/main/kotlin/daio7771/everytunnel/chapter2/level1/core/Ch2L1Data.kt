@@ -53,7 +53,7 @@ object Ch2L1Files {
 
     /** In reading order: the anchors first, the rest in the order of the phases that use them. */
     val ALL: List<String> = listOf(
-        ANCHORS, "speakers", "tasks", "patrols", "npcs", "cutscenes/meeting", "cutscenes/office",
+        ANCHORS, "speakers", "tasks", "patrols", "npcs", "cutscenes/meeting", "act3", "cutscenes/office",
     )
 
     /** Inside the jar. */

@@ -5,8 +5,8 @@
 El Nivel 1 del Chapter 2 es la fábrica, cuatro meses después del Chapter 1: un científico normal contratado en lugar del
 que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el despacho del supervisor. Se construye por
 fases (de la 0 a la 10), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
-nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 5, el Acto 2.** Se
-juega desde el reloj hasta el final de la reunión (Actos 1 y 2); el LAB aún no está amueblado y el Acto 3 es lo siguiente.
+nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 6, el Acto 3 sin patrullas.** Se
+juega desde el reloj hasta los archivos de Rowan en su despacho (la cinemática del despacho, fase 8, va después de las patrullas, fase 7); el LAB aún no está amueblado.
 
 Su código está en `daio7771.everytunnel.chapter2` (el del cliente, en el mismo paquete dentro de `src/client`): `level1.core`
 (Kotlin puro, con tests), `level1.platform` (pegamento con Minecraft) y `level1.client`, aparte del juego base, que nunca lo
@@ -48,6 +48,7 @@ Todo lo ajustable es JSON, no código: cambiar un ritmo, una ruta o un texto es 
 | `npcs.json` | La gente de la fábrica: dieciséis trabajadores con sus rutinas, los grupos (el de las taquillas) y cuán vivos parecen (`life`) | `Ch2L1NpcsParser`, con tipos |
 | `patrols.json` | Las patrullas | Vacío (`{}`) hasta que la fase que lo construye le dé su lector |
 | `cutscenes/meeting.json` | El Acto 2: seguir al compañero y la reunión | `Ch2L1Act2Parser`, con tipos |
+| `act3.json` | La exploración del Acto 3: el lector de tarjetas, el teclado y el código de Rowan, los ordenadores y sus archivos, las puertas que dicen que no, la cámara 02, la espera de la flecha | `Ch2L1Act3Parser`, con tipos |
 | `cutscenes/office.json` | La cinemática del despacho (fase 8) | Lo mismo |
 
 El jar lleva los valores por defecto, en `data/every_tunnel/ch2/l1/`. **Para ajustar sin reconstruir**, pon un archivo del
@@ -102,7 +103,10 @@ El aspecto es el del laboratorio del prólogo, limpio y moderno: hormigón blanc
 oscuro, cristal (la pared del laboratorio auxiliar hacia el tramo oeste del anillo: `factory_glass`, un bloque del mod sin marco
 dibujado en cada bloque y con un brillo que sigue de uno al siguiente, así que la pared se ve como una sola lámina) y las
 lámparas de techo del laboratorio (160). El LAB, los pasillos, las taquillas y el laboratorio auxiliar se agrandaron tras el primer recorrido del nivel (las medidas del dibujo eran
-relativas). Hay 21 puertas, todas propias del mod (ninguna es de vanilla): **libres**, la puerta de laboratorio
+relativas), y la fase 6 ensanchó el laboratorio auxiliar hacia el oeste: una sala propia tras un tabique (`aux_chamber`, 9 × 24), a la
+que se llega por un hueco en el extremo norte del tabique (un tipo de puerta del plan sin puerta, `opening`), guarda la cámara sellada 02,
+y el generador comprueba que ninguna línea desde un ojo en el anillo a través del cristal llega a su interior (`check_chamber_hidden`).
+Hay 21 puertas, todas propias del mod (ninguna es de vanilla): **libres**, la puerta de laboratorio
 (`factory_door`: blanca, con una ventana alta; las dos hojas de un par se abren y se cierran a la vez a mano, `LinkedDoorBlock`,
 con las bisagras en los bordes exteriores; la del anillo al pasillo autorizado también es libre, pero es
 la entrada a una zona prohibida: el círculo rojo del dibujo); **cerradas con llave**, la puerta de emergencia gris (`emergency_door`), que las manos no
@@ -118,10 +122,14 @@ un bloque o un estado que el juego no conoce falla con un mensaje y deja el mund
 nuevo sobre lo que hay, y **`/et ch2 l1 unbuild` vacía la zona: hazlo antes de empaquetar el mundo en un jar** (`packMapWorld`
 comprime también los archivos de región, y el mapa es del Chapter 2, no del mundo del Chapter 1).
 
+**Texto en las paredes.** Los `texts` del plan dicen qué pone cada uno de sus bloques `wall_text` (las placas del Nivel 3), una clave de
+idioma con un estilo; `Ch2L1Build` los escribe en las entidades de los bloques al acabar de construir (el rótulo de la cámara 02, la placa
+del retrato).
+
 **Todavía no hay:** mobiliario (llega con la fase que lo necesita: el banco con los tubos, el terminal, el analizador, la escoba, la suciedad y los
-altavoces de techo llegaron con la 3; las taquillas, las seis estaciones de trabajo del LAB y las cámaras con la 4; el resto del mobiliario del LAB está por llegar, el escritorio y los papeles son de la 6), los carteles de texto ("NIVEL 2", "Acceso restringido", los nombres de las salas: el
-plan no puede llevar los datos de un bloque de texto) y el teclado del despacho (un bloque de la fase 6, con su ancla
-`office_keypad`). Tampoco está el paso del prólogo al nivel: `enter` se llama a mano.
+altavoces de techo llegaron con la 3; las taquillas, las seis estaciones de trabajo del LAB y las cámaras con la 4; el del Acto 3 con la 6; el resto
+del mobiliario del LAB está por llegar) ni los demás carteles de texto ("NIVEL 2", "Acceso restringido", los nombres de las salas). Tampoco está el
+paso del prólogo al nivel: `enter` se llama a mano.
 
 
 ## Voces y subtítulos
@@ -152,8 +160,9 @@ número de frases**: si no, `Ch2L1VoicesTest` falla. La herramienta lee el ingl�
 los fragmentos: una línea rápida (menos de un segundo por fragmento) se muestra entera.
 Las demás claves: `speaker.<quién>` (`coworker`, `worker_a`, `worker_b`, `rowan_loudspeaker`, `rowan`), `objective.<paso>`
 (los textos del panel de objetivos, para la fase 2), `restricted_door` (definitiva) y los siete documentos (`notice`,
-`union_list`, `chamber_log`, `authorization`, `medical_file`, `contract_14`, `painting_plaque`). **Los textos de los documentos
-son provisionales hasta la fase 6**, cuando se diseñen los papeles y su pantalla de lectura.
+`union_list`, `chamber_log`, `authorization`, `medical_file`, `contract_14`, `painting_plaque`). Los cuatro archivos de los ordenadores
+del Acto 3 y la placa del retrato se escribieron en la fase 6 (con sus nombres en NonameOS, `doc.<archivo>.name`); `notice` y `union_list`
+siguen siendo provisionales y nada los usa todavía.
 
 ## Las personas
 
@@ -325,6 +334,48 @@ Llegar a un estado por comando hace lo que significa: `ACT1_TASK3` le pone junto
 `ACT2_MEETING` empieza la reunión al momento, un estado posterior da la tarjeta y se lleva a todos, uno anterior se le lleva a él y la
 tarjeta. El camino y la reunión se guardan en memoria y se retoman desde el estado tras salir del mundo.
 
+## Acto 3: el laboratorio auxiliar, el teclado y el despacho
+
+Fase 6 (`ACT3_EXPLORE`, sin las patrullas de la fase 7): `level1.core.Ch2L1Act3` lee `act3.json` y dice cuál es el objetivo y adónde
+apunta la flecha según los contadores del jugador (`a3_lab_open`, `a3_read`, `a3_office_open`, `a3_in_office`, `a3_triggered`);
+`level1.platform.Ch2L1Act3Hooks` hace el resto en el servidor.
+
+- **El laboratorio auxiliar.** El lector de tarjetas (`badge_reader`, los modelos del lector de tarjetas) en el lado del anillo de su
+  puerta: con la tarjeta del compañero en el Acto 3 se pone verde, suena el aceptado del lector y las puertas grises se abren y se quedan
+  abiertas (`Ch2L1Doors.set` con `locked`); sin la tarjeta zumba, "Acceso denegado: se necesita una tarjeta del laboratorio." Su
+  ordenador (un `noname_terminal` en una mesa contra el tabique) guarda `chamber_log` y `authorization`; la autorización lleva el código
+  de Rowan, **4719** (`code`).
+- **La cámara 02.** En la sala tras el tabique, una celda de cristal hasta el techo con un rótulo sobre su frente ("CÁMARA SELLADA 02"), y
+  dentro el científico del prólogo convertido en el Pale man, de pie, de espaldas al frente, totalmente quieto: el `ScientistEntity` del
+  prólogo en un estado propio, `CONTAINED` (sin animación, sin alzarse desde agachado). Aparece mientras alguien juega el nivel, nunca se
+  guarda y se repone si se pierde (`ensureContained`); desde el anillo no se ve nada de él.
+- **El plató.** Una cuarta parte del laboratorio auxiliar es donde se rodó el prólogo: su mesa (la de `tools/prologue/room.py`, el tramo
+  que veía la cámara, con lo mismo encima y en la pared) contra la pared sur, y mirándola dos focos y una cámara de cine con trípode
+  (`film_light`, `film_camera`).
+- **Los ordenadores.** NonameOS muestra los archivos de un ordenador (`NonameOsFilesScreen`, con el aspecto del registro, `NonameOsLook`):
+  una fila por archivo con NUEVO o LEÍDO y ABRIR; un archivo abierto llena la ventana, escrito rápido (un clic o una tecla muestran el
+  resto), y la rueda lo desplaza. Al cerrarlo (Escape o CERRAR) se avisa al servidor (`ch2l1_file_closed`), que solo entonces lo cuenta
+  como leído. Leer la autorización pasa el objetivo de "Laboratorio auxiliar" a "Encontrar la forma de entrar al despacho".
+- **El teclado.** En el lado del pasillo autorizado de la puerta del despacho (`keypad`, un modelo de `tools/blocks/generate.py`): su
+  pantalla (`KeypadScreen`) tiene un visor pequeño y doce teclas (1-9, C, 0, OK), con clic o tecleando (cifras, Retroceso, Intro); cada
+  una pita (`block.ch2l1.keypad_key`). El servidor comprueba el código (`ch2l1_keypad_try`): uno erróneo zumba y muestra DENEGADO, sin
+  límite de intentos; el de Rowan muestra ABIERTO, pone el teclado en verde y abre para siempre las puertas grises del despacho (Rowan
+  las cierra en la fase 8).
+- **El despacho.** Amueblado (un escritorio en el centro con la silla y el ordenador de Rowan, su retrato en la pared este, una
+  estantería tras él, un sofá, plantas, una alfombra). Al entrar, el objetivo pasa a "Registrar el despacho". Su ordenador guarda
+  `medical_file` y `contract_14`; **cerrar el segundo es el momento de la cinemática del despacho** (`a3_triggered`,
+  `Ch2L1Act3Hooks.onOfficeTrigger`, para la fase 8; hasta entonces, una línea en el registro y, en una ejecución de desarrollo, otra en
+  el chat). El retrato (`rowan_portrait`, pixel art en Python a partir de su skin) muestra al hacer clic el texto de su placa en la barra
+  de acción; la placa de debajo es un `wall_text`.
+- **Puertas que dicen que no.** Un clic en la puerta restringida del extremo este del pasillo dice "Acceso restringido"; en la puerta
+  sellada, antes de las horas extra, "Sellada. Se necesita la tarjeta del supervisor."; en la del laboratorio o la del despacho mientras
+  sigan cerradas, "Cerrada."
+- **La flecha** (`Ch2L1Guide`): en el Acto 3 solo aparece cuando el jugador lleva `guide_after_seconds` (60) con el mismo objetivo: el
+  lector, el ordenador del laboratorio, el teclado, la puerta del despacho, el ordenador de Rowan.
+
+Volver a antes del Acto 3 (un nuevo empleado, `/et ch2 l1 state`) cierra otra vez las dos puertas, pone en rojo el lector y el teclado y
+olvida los contadores del acto; llegar a él por comando da la tarjeta (el hook del Acto 2).
+
 ## Comandos de depuración
 
 `level1.platform.Ch2L1Commands`, nivel de operador 2, **solo en ejecuciones de desarrollo** (como explica
@@ -350,6 +401,8 @@ tarjeta. El camino y la reunión se guardan en memoria y se retoman desde el est
 | `/et ch2 l1 npc remove <grupo>` | Quita un grupo (`lab`, `main`, `dining`, `taquillas`) |
 | `/et ch2 l1 tasks` | Cuánto has avanzado en las tres tareas, y lo que los datos nombran y falta |
 | `/et ch2 l1 tasks reset` | Las tres tareas empiezan de nuevo: los tubos, la escoba y la suciedad vuelven adonde dice el estado |
+| `/et ch2 l1 act3` | Lo que has hecho en el Acto 3: el objetivo, el laboratorio y el despacho abiertos o cerrados, los archivos leídos |
+| `/et ch2 l1 act3 reset` | Cierra otra vez el laboratorio auxiliar y el despacho, pone en rojo el lector y el teclado y olvida el Acto 3 (el estado se queda) |
 | `/et ch2 l1 intro` | La cinemática del primer aviso, ahora |
 | `/et ch2 l1 say <rowan_loyal_a1..a6>` | Un aviso ahora (el timbre y luego la voz), desde el altavoz de la zona donde estás |
 
@@ -372,4 +425,4 @@ personaje) llegan con la fase que se los dé, y también se ejecutarán con el c
 `Ch2L1StateTest` (el orden, `next`, `parse`), `Ch2L1AnchorsParserTest` (el formato, cada tipo de problema) y `Ch2L1DataTest`
 (los archivos del jar, qué copia gana, los respaldos), `Ch2L1VoicesTest` (las 32 líneas, sus eventos de sonido, Ogg y
 fragmentos, los textos en los dos idiomas) `Ch2L1SkinsTest` (el formato de las skins) y `Ch2L1ObjectivesTest` (un objetivo por paso, en los dos idiomas) y `Ch2L1MapPlanTest` (los bloques y puertas del plan, las anclas
-sobre sus suelos), todos en `chapter2/level1/core`; `Ch2L1NpcsTest` (el archivo de la gente, las rutinas y cada tick de quien teclea, de quien camina y de quien se atasca), `Ch2L1Act2Test` (el archivo de la reunión y sus anclas, el compañero guiando y esperando y sus recordatorios, las líneas de la reunión, la puerta y la tarjeta, las miradas, la flecha sobre él), `Ch2L1NpcLifeTest` (las claves de `life` y el ritmo de un trabajador, acelerar y frenar, frenar para girar, las paradas en el camino, adónde miran y la mirada al jugador con su enfriamiento, las parejas para charlar y sus turnos), `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador, y que un planificador hecho para una partida vieja se sustituye cuando el progreso retrocede: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas, que la sala de las taquillas tiene sus taquillas y ninguna cámara, que cada otro espacio tiene una y que cada trabajador y cada ruta pisan el suelo. `Ch2PlayerProgressTest` cubre el estado, la marca y los contadores en el progreso del capítulo, y `ChapterBoundaryTest` que ningún código fuera de `chapter2` lo nombra.
+sobre sus suelos), todos en `chapter2/level1/core`; `Ch2L1NpcsTest` (el archivo de la gente, las rutinas y cada tick de quien teclea, de quien camina y de quien se atasca), `Ch2L1Act2Test` (el archivo de la reunión y sus anclas, el compañero guiando y esperando y sus recordatorios, las líneas de la reunión, la puerta y la tarjeta, las miradas, la flecha sobre él), `Ch2L1NpcLifeTest` (las claves de `life` y el ritmo de un trabajador, acelerar y frenar, frenar para girar, las paradas en el camino, adónde miran y la mirada al jugador con su enfriamiento, las parejas para charlar y sus turnos), `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso, también en el Acto 3, y su espera), `Ch2L1Act3Test` (el archivo act3, el código, el objetivo que avanza, los archivos de Rowan leídos), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador, y que un planificador hecho para una partida vieja se sustituye cuando el progreso retrocede: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`, también lo de `act3.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas, que la sala de las taquillas tiene sus taquillas y ninguna cámara, que cada otro espacio tiene una y que cada trabajador y cada ruta pisan el suelo. `Ch2PlayerProgressTest` cubre el estado, la marca y los contadores en el progreso del capítulo, y `ChapterBoundaryTest` que ningún código fuera de `chapter2` lo nombra.

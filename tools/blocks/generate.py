@@ -1931,6 +1931,126 @@ def glove_box_tex(rng):
     return img
 
 
+def keypad_tex(rng, part):
+    """The keypad by the office's door (Chapter 2): dark steel (side), or its face in the pixels the model's front shows (x 4-11,
+    y 2-13): a small green display, an LED (red locked, green open) and twelve keys in four rows of three."""
+    img = new((58, 60, 64))
+    speckle(img, rng, 30, (70, 72, 78), 0.5)
+    if part == "side":
+        return img
+    rect(img, 4, 2, 11, 13, (36, 37, 41))
+    rect(img, 5, 3, 10, 4, (22, 52, 32))                                          # the display
+    px(img, 6, 3, (76, 200, 110), 0.7)
+    px(img, 10, 6, (226, 52, 44) if part == "locked" else (64, 220, 96))          # the LED
+    for x in (5, 7, 9):
+        for y in (6, 8, 10, 12):
+            px(img, x, y, (168, 172, 178), 0.95)
+    return img
+
+
+def film_light_lens_tex(rng):
+    """The front of a studio light: a warm white lens in a black rim, behind a wire grid."""
+    img = new((24, 24, 26))
+    for y in range(3, 13):
+        for x in range(3, 13):
+            if (x - 7.5) ** 2 + (y - 7.5) ** 2 <= 22:
+                img.putpixel((x, y), (250, 240, 214))
+    for i in range(3, 13, 3):
+        rect(img, i, 2, i, 13, (90, 90, 92))
+    return img
+
+
+def rowan_portrait_tex(rng):
+    """Rowan's portrait in his office (Chapter 2), 64 x 64: an oil painting of head and shoulders in a bevelled gilt frame, in the
+    blocky look of his skin (its face grid, 4 pixels a cell; his parted dark hair, the beige suit, the green tie and the gold badge),
+    lit from the left on a dark ground. Painted by Codex GPT in code (Pillow shapes, no generative AI), brought in here as it was."""
+    size = 64
+    hair, part, skin, skin_shade = "#2e2120", "#543e38", "#e9ba96", "#d4a07c"
+    suit, suit_shade, shirt, tie, badge = "#e4d6b4", "#c6b28a", "#f6f6f2", "#1c6034", "#d8ac34"
+    image = Image.new("RGB", (size, size))
+    pixels = image.load()
+    # The ground: a warm glow towards the upper left, grain and short brush strokes.
+    for y in range(7, size - 7):
+        for x in range(7, size - 7):
+            glow = max(0.0, 1 - ((x - 17) / 37) ** 2 - ((y - 24) / 37) ** 2)
+            grain = rng.randrange(-3, 4)
+            pixels[x, y] = (24 + int(40 * glow) + grain, 25 + int(24 * glow) + grain, 22 + int(12 * glow) + grain)
+    draw = ImageDraw.Draw(image)
+    for _ in range(145):
+        x, y = rng.randrange(7, 56), rng.randrange(7, 57)
+        end_x = min(56, x + rng.randrange(1, 4))
+        grain = rng.choice((-6, -4, 4, 7))
+        draw.line((x, y, end_x, max(7, y - 1)), fill=tuple(max(0, c + grain) for c in pixels[x, y]))
+    polygon, rectangle, line = draw.polygon, draw.rectangle, draw.line
+    # The suit's shoulders and the sleeves' shadows.
+    polygon([(7, 57), (7, 51), (11, 51), (11, 48), (17, 48), (17, 46), (25, 46), (25, 45), (40, 45), (40, 46), (48, 46), (48, 48),
+             (53, 48), (53, 51), (56, 51), (56, 57)], "#d4c19c")
+    polygon([(7, 57), (7, 51), (11, 51), (11, 48), (17, 48), (17, 46), (25, 46), (25, 45), (31, 45), (28, 57)], suit)
+    line([(8, 51), (12, 51), (12, 49), (17, 49), (17, 47), (23, 47)], "#efe1bf")
+    line([(17, 56), (18, 56), (18, 54), (19, 53)], suit_shade)
+    line([(49, 51), (50, 52), (50, 55), (51, 56)], "#b39c77")
+    # A short neck, the beige placket and a straight tie.
+    rectangle((26, 42, 39, 46), "#af795b")
+    rectangle((26, 44, 34, 46), skin_shade)
+    polygon([(25, 46), (40, 46), (42, 49), (39, 51), (39, 57), (27, 57), (27, 51), (24, 49)], suit_shade)
+    line([(25, 48), (28, 51), (28, 55)], "#daccaa")
+    line([(40, 48), (38, 51), (38, 56)], "#ad9671")
+    rectangle((28, 46, 37, 48), shirt)
+    rectangle((29, 48, 35, 51), shirt)
+    rectangle((35, 48, 37, 51), "#e7e4d7")
+    rectangle((30, 48, 34, 54), tie)
+    rectangle((30, 54, 34, 55), "#144626")
+    rectangle((30, 56, 32, 57), badge)
+    # The square badge, with its light inset as on the skin.
+    rectangle((42, 51, 47, 55), "#a48138")
+    rectangle((42, 51, 46, 54), badge)
+    rectangle((42, 53, 44, 54), "#f4eed6")
+    # The head's side: the sideburn running back to the nape.
+    polygon([(14, 8), (45, 8), (49, 12), (18, 12)], "#44312b")
+    polygon([(14, 8), (18, 12), (18, 43), (14, 39)], "#ca9574")
+    polygon([(14, 8), (18, 12), (18, 23), (17, 23), (17, 28), (16, 28), (16, 32), (15, 32), (15, 35), (14, 35)], hair)
+    line([(15, 8), (33, 8)], "#60463c")
+    line([(14, 12), (14, 25)], "#543c32")
+    line([(14, 39), (17, 42)], "#b27e61")
+    # The face: his skin's front grid, each cell 4 x 4 pixels, the skin lighter on the left.
+    face = ("hhhhhhhh", "hhhhhrhh", "hssssssh", "seessees", "swissiws", "sssnnsms", "sssmmmss", "ssssssss")
+    palette = {"h": hair, "r": part, "e": "#42302a", "w": shirt, "i": "#261c22", "n": skin_shade, "m": "#966050"}
+    shades = ("#efc5a4", skin, skin, skin, "#e3b18d", "#e3b18d", "#dfaa85", skin_shade)
+    for row, cells in enumerate(face):
+        for column, cell in enumerate(cells):
+            x, y = 18 + column * 4, 12 + row * 4
+            rectangle((x, y, x + 3, y + 3), shades[column] if cell == "s" else palette[cell])
+    # Broad highlights on the left, a shadow by the right eye.
+    line([(18, 12), (32, 12), (33, 13), (36, 13)], "#5b4136")
+    rectangle((21, 16, 30, 17), "#49332c")
+    rectangle((22, 20, 29, 21), "#f4caaa")
+    rectangle((21, 33, 25, 34), "#e7ad8d")
+    rectangle((42, 28, 45, 31), "#eae1d2")
+    line([(18, 43), (33, 43)], "#cd9a79")
+    line([(34, 43), (49, 43)], "#ba8566")
+    # The bevelled frame, its top and left faces catching the light; broken glints and chased corners.
+    bevel = [("#634124", "#38291d"), ("#b68240", "#835427"), ("#e0b568", "#b17a37"), ("#ab7535", "#79502c"),
+             ("#744823", "#51331d"), ("#ddb16a", "#a7723a"), ("#49331e", "#35291d")]
+    for inset, (light, dark) in enumerate(bevel):
+        far = size - 1 - inset
+        line([(inset, far), (inset, inset), (far, inset)], fill=light)
+        line([(far, inset + 1), (far, far), (inset + 1, far)], fill=dark)
+    for _ in range(21):
+        start = rng.randrange(9, 52)
+        end = min(54, start + rng.randrange(1, 4))
+        colour = rng.choice(("#ebc77f", "#c89c50", "#f2cf89"))
+        if rng.randrange(2):
+            line((start, 2, end, 2), fill=colour)
+        else:
+            line((2, start, 2, end), fill=colour)
+    for corner_x, dx in ((0, 1), (size - 1, -1)):
+        for corner_y, dy in ((0, 1), (size - 1, -1)):
+            colour = "#f1cf85" if dx == dy == 1 else "#d5a65a"
+            for stroke in ([(2, 6), (3, 5), (3, 3), (5, 3), (6, 2)], [(4, 7), (5, 5), (7, 4)]):
+                line([(corner_x + x * dx, corner_y + y * dy) for x, y in stroke], fill=colour)
+    return image
+
+
 def analyzer_front_tex(rng):
     """The front of Chapter 2's bench analyzer (a 12 x 9 face, drawn in x 2..13, y 2..10 of the picture): pale casing, a dark
     screen with a green trace, three lights and the slot the samples go in."""
@@ -2869,6 +2989,24 @@ def build():
     a.block("card_reader", "Card Reader", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
     # The time clock of Chapter 2's Level 1 (TimeClockBlock) is the same box with the same models: red, then green once clocked in.
     a.block("time_clock", "Time Clock", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
+    # So is the badge reader by the auxiliary lab's door (BadgeReaderBlock): red, then green once the coworker's badge opened it.
+    a.block("badge_reader", "Badge Reader", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
+    # The keypad by the office's door (KeypadBlock): a taller box on the wall, red until Rowan's code opened it, then green.
+    a.texture("keypad_side", keypad_tex(r("keypad_side"), "side"), T.STEEL.but(smoothness=0.5, metal=200, relief=0.3))
+    keypad_variants = {}
+    for unlocked, part in (("false", "locked"), ("true", "open")):
+        a.texture(f"keypad_{part}", keypad_tex(r("keypad"), part), led_glow)
+        a.models[f"keypad_{part}"] = model(
+            {"front": f"keypad_{part}", "side": "keypad_side"},
+            [{"from": [4, 2, 14.5], "to": [12, 14, 16], "faces": {
+                "north": {"texture": "#front"}, "south": {"texture": "#side"}, "east": {"texture": "#side"},
+                "west": {"texture": "#side"}, "up": {"texture": "#side"}, "down": {"texture": "#side"}}}])
+        for facing, y in HORIZONTAL.items():
+            v = {"model": f"{NS}:block/keypad_{part}"}
+            if y:
+                v["y"] = y
+            keypad_variants[f"facing={facing},unlocked={unlocked}"] = v
+    a.block("keypad", "Keypad", {"variants": keypad_variants}, {"parent": f"{NS}:block/keypad_locked"})
 
     def facing_parts(models, when=None):
         """Multipart parts turning `models` (one name, or several picked at random) to each facing."""
@@ -3556,6 +3694,34 @@ def build():
     a.texture("dirt_spot", dirt_spot_tex(r("dirt_spot")), T.Material(0.1, relief=0.2), tiles=False)
     prop("dirt_spot", "Dirt", {"d": "dirt_spot"},
          [el((0, 0, 0), (16, 0.5, 16), "d", north=None, south=None, east=None, west=None, down=None)])
+
+    # Chapter 2 Level 1's Act 3: the film set in the auxiliary lab (where the prologue was shot), a studio light and a cine camera on
+    # tripods, both looking the way they face (north in the model), taller than a block; and Rowan's portrait in his office, two
+    # blocks by two over the wall behind it (its block is the lower middle), the plaque under it being a wall_text.
+    def tripod(top):
+        """Three legs splayed from `top` (the game takes only 22.5 degree steps) and a pole up to it."""
+        legs = []
+        for axis, angle in (("z", 22.5), ("z", -22.5), ("x", 22.5)):
+            leg = el((7.5, 0, 7.5), (8.5, top, 8.5), "d")
+            leg["rotation"] = {"angle": angle, "axis": axis, "origin": [8, top, 8]}
+            legs.append(leg)
+        return legs + [el((7.5, top, 7.5), (8.5, top + 4, 8.5), "d")]
+
+    a.texture("film_light_lens", film_light_lens_tex(r("film_light_lens")), led_glow, tiles=False)
+    a.texture("film_black", plastic_tex(r("film_black"), (30, 30, 34)), T.PLASTIC.but(smoothness=0.5, relief=0.2))
+    head = el((4, 22, 5), (12, 30, 12), "b", north=("l", (0, 0, 16, 16)))
+    head["rotation"] = {"angle": -22.5, "axis": "x", "origin": [8, 26, 8]}
+    flap = el((4, 30, 3), (12, 30.5, 6), "b")
+    flap["rotation"] = {"angle": -22.5, "axis": "x", "origin": [8, 26, 8]}
+    prop("film_light", "Studio Light", {"d": "lab_steel_dark", "b": "film_black", "l": "film_light_lens"},
+         tripod(18) + [head, flap], ao=False)
+    prop("film_camera", "Cine Camera", {"d": "lab_steel_dark", "b": "film_black"},
+         tripod(14) + [el((5, 18, 4), (11, 24, 14), "b"), el((6.5, 19.5, 0.5), (9.5, 22.5, 4), "d"),
+                       el((7.5, 24, 3), (8.5, 30, 9), "b"), el((7.5, 24, 9), (8.5, 29, 14), "b"), el((11, 19, 8), (13, 21, 12), "d")],
+         ao=False)
+    a.texture("rowan_portrait", rowan_portrait_tex(r("rowan_portrait")), T.Material(0.35, relief=0.25), tiles=False)
+    prop("rowan_portrait", "Portrait", {"p": "rowan_portrait", "w": "suite_bed_frame"},
+         [el((-8, -4, 15.4), (24, 28, 16), "w", north=("p", (0, 0, 16, 16)))], ao=False)
 
     # Chapter 2's factory door: the lab door's models and textures, a block of its own because its leaves open in pairs.
     a.block("factory_door", "Factory Door", {"variants": door_variants(f"{NS}:block/lab_door")},

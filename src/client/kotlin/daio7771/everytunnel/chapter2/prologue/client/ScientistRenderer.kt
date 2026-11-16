@@ -20,7 +20,7 @@ import daio7771.everytunnel.client.render.EyesGlowLayer
 /**
  * Draws the prologue's scientist with GeckoLib through [ScientistModel]: as the man (`geo/entity/scientist.geo.json`,
  * `textures/entity/scientist.png`, `animations/entity/scientist.animation.json`; from `tools/entity/scientist.py`),
- * and, once he has changed ([ScientistEntity.PALE]), as the Level 2 Pale man, eyes glowing. Not a living thing, so it
+ * and, once he has changed ([ScientistEntity.PALE], and in the factory's chamber [ScientistEntity.CONTAINED]), as the Level 2 Pale man, eyes glowing. Not a living thing, so it
  * is turned to its yaw here.
  */
 class ScientistRenderer(context: EntityRendererFactory.Context) : GeoEntityRenderer<ScientistEntity>(context, ScientistModel()) {
@@ -56,7 +56,7 @@ class ScientistRenderer(context: EntityRendererFactory.Context) : GeoEntityRende
             poseStack: MatrixStack, animatable: ScientistEntity, bakedModel: BakedGeoModel, renderType: RenderLayer?,
             bufferSource: VertexConsumerProvider, buffer: VertexConsumer?, partialTick: Float, packedLight: Int, packedOverlay: Int,
         ) {
-            if (animatable.stage == ScientistEntity.PALE) {
+            if (animatable.stage == ScientistEntity.PALE || animatable.stage == ScientistEntity.CONTAINED) {
                 eyes.render(poseStack, animatable, bakedModel, renderType, bufferSource, buffer, partialTick, packedLight, packedOverlay)
             }
         }
@@ -69,7 +69,8 @@ class ScientistRenderer(context: EntityRendererFactory.Context) : GeoEntityRende
  */
 class ScientistModel : GeoModel<ScientistEntity>() {
 
-    private fun name(animatable: ScientistEntity) = if (animatable.stage == ScientistEntity.PALE) "pale_man" else "scientist"
+    private fun name(animatable: ScientistEntity) =
+        if (animatable.stage == ScientistEntity.PALE || animatable.stage == ScientistEntity.CONTAINED) "pale_man" else "scientist"
 
     override fun getModelResource(animatable: ScientistEntity): Identifier =
         Identifier(EveryTunnel.MOD_ID, "geo/entity/${name(animatable)}.geo.json")

@@ -28,8 +28,19 @@ object Ch2L1Client {
         return Ch2Progress.ch2L1State(player)
     }
 
-    /** The lang key of the objective to show now, or null: not in the level, or the state has none. */
-    fun objectiveKey(): String? = if (active()) Ch2L1Objectives.keyFor(state()) else null
+    /**
+     * The lang key of the objective to show now, or null: not in the level, or the state has none. In Act 3's exploring it moves on with
+     * what the player has done ([Ch2L1Act3.objective]: the auxiliary lab, the way into the office, searching it).
+     */
+    fun objectiveKey(): String? {
+        if (!active()) return null
+        val state = state()
+        val player = MinecraftClient.getInstance().player
+        if (state == Ch2L1State.ACT3_EXPLORE && player != null) {
+            return Ch2L1Objectives.PREFIX + Ch2L1DataLoader.act3.objective { Ch2Progress.ch2L1Counter(player, it) }
+        }
+        return Ch2L1Objectives.keyFor(state)
+    }
 
     /**
      * The objective as the panel writes it: its text, and where the player is in it where it has a count ("(1/3)": the tubes taken, then the

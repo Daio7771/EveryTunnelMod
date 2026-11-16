@@ -2,6 +2,9 @@ package daio7771.everytunnel.chapter2.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.AnalyzerBlock
+import daio7771.everytunnel.chapter2.level1.platform.BadgeReaderBlock
+import daio7771.everytunnel.chapter2.level1.platform.KeypadBlock
+import daio7771.everytunnel.chapter2.level1.platform.PortraitBlock
 import daio7771.everytunnel.chapter2.level1.platform.DirtSpotBlock
 import daio7771.everytunnel.chapter2.level1.platform.LeaningBroomBlock
 import daio7771.everytunnel.chapter2.level1.platform.NonameTerminalBlock
@@ -64,6 +67,16 @@ object Ch2Blocks {
     val ANALYZER: Block = register("analyzer", AnalyzerBlock(ModBlocks.props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(2, 0, 3, 14, 10, 13))))
     val LEANING_BROOM: Block = register("leaning_broom", LeaningBroomBlock(ModBlocks.props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(6, 0, 7, 10, 16, 16))))
     val DIRT_SPOT: Block = register("dirt_spot", DirtSpotBlock(ModBlocks.props(MapColor.BROWN, BlockSoundGroup.GRAVEL).noCollision(), listOf(box(0, 0, 0, 16, 1, 16))))
+
+    /**
+     * Chapter 2 Level 1's Act 3 (`Ch2L1Act3Hooks`): the badge reader by the auxiliary lab's door (the card reader's models), the keypad by
+     * the office's, the film set's studio light and cine camera in the auxiliary lab (only to look at), and Rowan's portrait in his office.
+     */
+    val BADGE_READER: Block = register("badge_reader", BadgeReaderBlock(ModBlocks.props(MapColor.BLACK, ModSoundGroups.PLASTIC).luminance { 2 }.noCollision()))
+    val KEYPAD: Block = register("keypad", KeypadBlock(ModBlocks.props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL).luminance { 2 }.noCollision()))
+    val FILM_LIGHT: Block = register("film_light", PropBlock(ModBlocks.props(MapColor.BLACK, ModSoundGroups.METAL_PIPE).luminance { 12 }, listOf(box(5, 0, 5, 11, 16, 11))))
+    val FILM_CAMERA: Block = register("film_camera", PropBlock(ModBlocks.props(MapColor.BLACK, ModSoundGroups.METAL_PIPE), listOf(box(5, 0, 5, 11, 16, 11))))
+    val ROWAN_PORTRAIT: Block = register("rowan_portrait", PortraitBlock(ModBlocks.props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(0, 0, 15, 16, 16, 16))))
 
     /** The lab door's look (it borrows its models), for the factory: a pair of leaves opens and shuts at once by hand. */
     val FACTORY_DOOR: Block = register("factory_door", LinkedDoorBlock(ModBlocks.door(), ModBlocks.SERVICE_DOOR))

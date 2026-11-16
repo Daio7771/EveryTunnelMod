@@ -6,6 +6,8 @@ import daio7771.everytunnel.chapter2.level1.core.Ch2L1DataParser
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Files
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Act2
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Act2Parser
+import daio7771.everytunnel.chapter2.level1.core.Ch2L1Act3
+import daio7771.everytunnel.chapter2.level1.core.Ch2L1Act3Parser
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1NpcData
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1NpcsParser
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Speakers
@@ -54,6 +56,11 @@ object Ch2L1DataLoader {
     var act2: Ch2L1Act2 = Ch2L1Act2.DEFAULT
         private set
 
+    /** Act 3 (`act3.json`: the auxiliary lab, the keypad, the computers, the office) as last read. */
+    @Volatile
+    var act3: Ch2L1Act3 = Ch2L1Act3.DEFAULT
+        private set
+
     /** What a read found, for the log and for `/et reload`. */
     class Report(val data: Ch2L1Data, val problems: List<String>, val overrideFolder: Path) {
         /** The text of the report, one line each. */
@@ -99,17 +106,19 @@ object Ch2L1DataLoader {
         val speakersResult = Ch2L1SpeakersParser.parse(result.data.document("speakers"))
         val npcsResult = Ch2L1NpcsParser.parse(result.data.document("npcs"))
         val act2Result = Ch2L1Act2Parser.parse(result.data.document("cutscenes/meeting"))
+        val act3Result = Ch2L1Act3Parser.parse(result.data.document("act3"))
         tasks = tasksResult.tasks
         speakers = speakersResult.speakers
         npcs = npcsResult.data
         act2 = act2Result.act2
-        val wiring = Ch2L1Wiring.problems(result.data.anchors, tasks, speakers, npcs, act2)
+        act3 = act3Result.act3
+        val wiring = Ch2L1Wiring.problems(result.data.anchors, tasks, speakers, npcs, act2, act3)
 
         val report = Report(
             result.data,
             readProblems + result.problems + tasksResult.problems.map { "tasks.json: $it" } +
                 speakersResult.problems.map { "speakers.json: $it" } + npcsResult.problems.map { "npcs.json: $it" } +
-                act2Result.problems.map { "cutscenes/meeting.json: $it" } + wiring,
+                act2Result.problems.map { "cutscenes/meeting.json: $it" } + act3Result.problems.map { "act3.json: $it" } + wiring,
             folder,
         )
         val log = EveryTunnel.LOGGER

@@ -16,6 +16,15 @@ class Ch2L1WiringTest {
     }
 
     @Test
+    fun `everything the jar's act3 file names is in its anchors`() {
+        val act3 = Ch2L1Act3Parser.parse(data.document("act3")).act3
+        assertEquals(emptyList(), Ch2L1Wiring.problems(data.anchors, tasks, speakers, act3 = act3))
+        val bare = Ch2L1Anchors("minecraft:overworld", emptyList(), emptyList())
+        val problems = Ch2L1Wiring.problems(bare, tasks, speakers, act3 = act3)
+        for (id in listOf("aux_lab_reader", "office_keypad", "rowan_computer", "chamber_02", "\"office\"")) assertTrue(problems.any { id in it }, "nothing about $id")
+    }
+
+    @Test
     fun `what is missing is told`() {
         val bare = Ch2L1Anchors("minecraft:overworld", emptyList(), emptyList())
         val problems = Ch2L1Wiring.problems(bare, tasks, speakers)

@@ -9,13 +9,16 @@ import daio7771.everytunnel.core.level.Position
  * [targets] are the places the step can be done at, each lifted by the spec's height over its anchor: the time clock before the player
  * has clocked in; in the first task the sample tubes not taken yet and, once all are, the terminal; in the second the analyzer; in the third
  * the broom until it is taken and then the patches of dirt not swept yet. [nearest] is the one the arrow shows: the one closest to
- * the player. In Act 2 it floats over the coworker's head, but only when the player has lost him ([follow]). Later phases add the steps of
- * Act 3 here.
+ * the player. In Act 2 it floats over the coworker's head, but only when the player has lost him ([follow]). In Act 3 it points at the
+ * next thing to do ([Ch2L1Act3.guide]: the badge reader, the lab's computer, the keypad, the office's door, Rowan's computer), but the
+ * client shows it only once the player has been [stuck] on it a while.
  */
 object Ch2L1Guide {
 
     /** The places [state] points at, given the player's [counter]s (`Ch2L1Tasks.TUBES` and the rest), already lifted. */
-    fun targets(state: Ch2L1State, tasks: Ch2L1Tasks, anchors: Ch2L1Anchors, counter: (String) -> Int): List<Position> {
+    fun targets(
+        state: Ch2L1State, tasks: Ch2L1Tasks, anchors: Ch2L1Anchors, act3: Ch2L1Act3 = Ch2L1Act3.DEFAULT, counter: (String) -> Int,
+    ): List<Position> {
         fun at(id: String): List<Position> = listOfNotNull(anchors.point(id)?.position)
         val places: List<Position> = when (state) {
             Ch2L1State.ACT1_CLOCKIN -> at("time_clock")
@@ -32,6 +35,7 @@ object Ch2L1Guide {
                     val swept = counter(Ch2L1Tasks.SWEPT)
                     anchors.path(tasks.dirtPath)?.points?.filterIndexed { i, _ -> !Ch2L1Bits.has(swept, i) } ?: emptyList()
                 }
+            Ch2L1State.ACT3_EXPLORE -> act3.guide(counter)?.let(::at) ?: emptyList()
             else -> emptyList()
         }
         return places.map { Position(it.x, it.y + tasks.guide.height, it.z) }
@@ -51,6 +55,9 @@ object Ch2L1Guide {
         if (sees && dx * dx + dz * dz <= spec.arrowBeyond * spec.arrowBeyond) return null
         return Position(coworker.x, coworker.y + OVER_HEAD, coworker.z)
     }
+
+    /** In Act 3 the arrow waits: true once the player has had the same target for [act3]'s `guide_after_seconds` ([sinceTicks]). */
+    fun stuck(sinceTicks: Long, act3: Ch2L1Act3): Boolean = sinceTicks >= act3.stuckTicks
 
     /** The place in [targets] nearest to [from], or null if there is none. */
     fun nearest(targets: List<Position>, from: Position): Position? =

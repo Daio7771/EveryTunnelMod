@@ -31,12 +31,15 @@ class SampleTubeBlock(settings: Settings, boxes: List<BlockShapes.Box>) : PropBl
         use(world, player) { Ch2L1TaskHooks.useTube(it, pos) }
 }
 
-/** The terminal of task 1: NonameOS, where the samples are registered ([Ch2L1TaskHooks.useTerminal]). */
+/**
+ * A NonameOS terminal: task 1's, where the samples are registered ([Ch2L1TaskHooks.useTerminal]), or one of Act 3's computers, with its
+ * files ([Ch2L1Act3Hooks.useTerminal]).
+ */
 class NonameTerminalBlock(settings: Settings, boxes: List<BlockShapes.Box>) : PropBlock(settings, boxes) {
 
     @Deprecated("Deprecated in Java")
     override fun onUse(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult): ActionResult =
-        use(world, player) { Ch2L1TaskHooks.useTerminal(it, pos) }
+        use(world, player) { p -> Ch2L1TaskHooks.useTerminal(p, pos).takeIf { it != ActionResult.PASS } ?: Ch2L1Act3Hooks.useTerminal(p, pos) }
 }
 
 /** The analyzer of task 2: held down on, it calibrates ([Ch2L1TaskHooks.useAnalyzer]). */

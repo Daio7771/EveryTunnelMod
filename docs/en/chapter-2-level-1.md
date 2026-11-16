@@ -5,8 +5,8 @@
 Level 1 of Chapter 2 is the factory, four months after Chapter 1: an ordinary scientist hired in the place of the one
 who "fell ill", three acts of tasks, a meeting and sneaking, ending in the supervisor's office. It is built in phases
 (0 to 10), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
-`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 5, Act 2.** It is
-playable from the clock to the end of the meeting (Acts 1 and 2); the LAB is not furnished yet and Act 3 comes next.
+`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 6, Act 3 without patrols.** It is
+playable from the clock to Rowan's files in his office (the office's cinematic, phase 8, is next after the patrols, phase 7); the LAB is not furnished yet.
 
 Its code is under `daio7771.everytunnel.chapter2` (the client's under the same package in `src/client`): `level1.core` (plain
 Kotlin, tested), `level1.platform` (Minecraft glue) and `level1.client`, apart from the base game, which never names it (see
@@ -47,6 +47,7 @@ Everything adjustable is JSON, not code: changing a rhythm, a route or a text is
 | `npcs.json` | The factory's people: sixteen workers with their routines, the groups (the lockers' one) and how alive they look (`life`) | `Ch2L1NpcsParser`, typed |
 | `patrols.json` | The patrols | Empty (`{}`) until the phase that builds them gives it its reader |
 | `cutscenes/meeting.json` | Act 2: following the coworker and the meeting | `Ch2L1Act2Parser`, typed |
+| `act3.json` | Act 3's exploring: the badge reader, the keypad and Rowan's code, the computers and their files, the doors that say no, chamber 02, the arrow's wait | `Ch2L1Act3Parser`, typed |
 | `cutscenes/office.json` | The office's cinematic (phase 8) | The same |
 
 The jar holds the defaults, in `data/every_tunnel/ch2/l1/`. **To tune without rebuilding**, put a file of the same name in
@@ -98,7 +99,10 @@ room to stand, or if a restricted space can be reached by a free door.
 The look is the prologue's laboratory, clean and modern: white concrete, a light grey floor, a dark grey first course of wall,
 glass (the auxiliary lab's wall towards the ring's west stretch: `factory_glass`, a block of the mod with no frame drawn on each
 block and a sheen that runs on from one to the next, so the wall reads as one sheet) and the lab's ceiling lamps (160). The
-LAB, the corridors, the lockers and the auxiliary lab were enlarged after the first walk through the level (the drawing's measures were relative). There are 21
+LAB, the corridors, the lockers and the auxiliary lab were enlarged after the first walk through the level (the drawing's measures were relative), and phase 6
+widened the auxiliary lab to the west: a room of its own behind a partition (`aux_chamber`, 9 × 24), reached by an opening at the
+partition's north end (a door kind of the plan with no door, `opening`), holds sealed chamber 02, and the generator checks that no
+line from an eye in the ring through the glass reaches inside it (`check_chamber_hidden`). There are 21
 doors, all the mod's own (none is vanilla): **free** ones, the lab door (`factory_door`: white, a tall window; a pair
 of leaves opens and shuts together by hand, `LinkedDoorBlock`, with the hinges on the outer edges); the one from the ring into the authorized corridor is free too, but it is the way into a
 forbidden zone (the drawing's red circle); **locked** ones, the grey emergency door (`emergency_door`), which hands do not open, for the auxiliary
@@ -114,9 +118,12 @@ with a block or a state the game does not know fails with a message and leaves t
 again over what is there, and **`/et ch2 l1 unbuild` empties the area: do it before packing the world into a jar**
 (`packMapWorld` zips the region files too, and the map belongs to Chapter 2, not to Chapter 1's world).
 
+**Text on walls.** The plan's `texts` say what each of its `wall_text` blocks (Level 3's nameplates) says, a lang key in a style;
+`Ch2L1Build` writes them on the blocks' entities once the build is done (chamber 02's label, the portrait's plaque).
+
 **Not there yet:** furniture (it comes with the phase that needs it: the bench with the tubes, the terminal and the analyzer, the broom, the dirt
-and the ceiling speakers came with phase 3; the lockers, the LAB's six work stations and the cameras with phase 4; the rest of the LAB's furniture is still to come, the desk and the papers are for 6), the text signs ("LEVEL 2", "Restricted access", the room names: the plan cannot carry
-a text block's data) and the office's keypad (a block of phase 6, with its anchor `office_keypad`). The hand-over from the
+and the ceiling speakers came with phase 3; the lockers, the LAB's six work stations and the cameras with phase 4; Act 3's with phase 6; the rest of the
+LAB's furniture is still to come) and the other text signs ("LEVEL 2", "Restricted access", the room names). The hand-over from the
 prologue to the level is not there either: `enter` is called by hand.
 
 
@@ -147,8 +154,9 @@ and the Spanish of a line must have the same number of them**: `Ch2L1VoicesTest`
 English from `en_us.json` and only rewrites the cues' timing: a quick line (under a second a cue) is shown whole.
 The other keys: `speaker.<who>` (`coworker`, `worker_a`, `worker_b`, `rowan_loudspeaker`, `rowan`), `objective.<step>`
 (the objective panel's texts, for phase 2), `restricted_door` (final) and the seven documents (`notice`, `union_list`,
-`chamber_log`, `authorization`, `medical_file`, `contract_14`, `painting_plaque`). **The documents' texts are
-placeholders until phase 6**, when the papers and their reading screen are designed.
+`chamber_log`, `authorization`, `medical_file`, `contract_14`, `painting_plaque`). The four files of Act 3's computers and the
+portrait's plaque were written in phase 6 (with their names in NonameOS, `doc.<file>.name`); `notice` and `union_list` are still
+placeholders, used by nothing yet.
 
 ## The people
 
@@ -319,6 +327,44 @@ Reaching a state by command does what it means: `ACT1_TASK3` puts him by the bro
 starts the meeting at once, a later state gives the badge and takes everyone away, an earlier one takes him and the badge away. The walk
 and the meeting are kept in memory and picked up again from the state after leaving the world.
 
+## Act 3: the auxiliary lab, the keypad and the office
+
+Phase 6 (`ACT3_EXPLORE`, without the patrols of phase 7): `level1.core.Ch2L1Act3` reads `act3.json` and says what the objective
+and the arrow are from the player's counters (`a3_lab_open`, `a3_read`, `a3_office_open`, `a3_in_office`, `a3_triggered`);
+`level1.platform.Ch2L1Act3Hooks` does the rest on the server.
+
+- **The auxiliary lab.** The badge reader (`badge_reader`, the card reader's models) on the ring's side of its door: clicked with the
+  coworker's badge in Act 3 it turns green, sounds the reader's accept and the grey doors open and stay open (`Ch2L1Doors.set` with
+  `locked`); without the badge it buzzes, "Access denied: lab badge required." Its computer (a `noname_terminal` on a desk against the
+  partition) holds `chamber_log` and `authorization`; the authorization carries Rowan's code, **4719** (`code`).
+- **Chamber 02.** In the room past the partition, a cell of glass up to the ceiling with a label over its front ("SEALED CHAMBER 02"),
+  and in it the scientist of the prologue as the Pale man he became, standing with his back to the front, utterly still: the prologue's
+  `ScientistEntity` in a stage of its own, `CONTAINED` (no animation, no rising from a crouch). Put in while someone plays the level,
+  never saved, put back if lost (`ensureContained`); nothing of it can be seen from the ring.
+- **The film set.** A quarter of the auxiliary lab is where the prologue was shot: its bench (`tools/prologue/room.py`'s, the stretch
+  the camera saw, with the same things on it and on the wall) against the south wall, and looking at it two studio lights and a cine
+  camera on tripods (`film_light`, `film_camera`).
+- **The computers.** NonameOS shows a computer's files (`NonameOsFilesScreen`, the registry's look, `NonameOsLook`): a row each with
+  NEW or READ and OPEN; an opened file fills the window, typed out quickly (a click or a key shows the rest), the wheel scrolling it.
+  Closing it (Escape or CLOSE) tells the server (`ch2l1_file_closed`), which only then counts it as read. Reading the authorization
+  moves the objective on from "Auxiliary lab" to "Find a way into the office".
+- **The keypad.** On the authorized corridor's side of the office's door (`keypad`, a model of `tools/blocks/generate.py`): its screen
+  (`KeypadScreen`) has a small display and twelve keys (1-9, C, 0, OK), clicked or typed (digits, Backspace, Enter); each beeps
+  (`block.ch2l1.keypad_key`). The server checks the code (`ch2l1_keypad_try`): a wrong one buzzes and shows DENIED, with no limit
+  of tries; Rowan's shows OPEN, turns the keypad green and opens the office's grey doors for good (Rowan shuts them in phase 8).
+- **The office.** Furnished (a desk in the middle with Rowan's chair and computer, his portrait on the east wall, a bookshelf behind
+  him, a sofa, plants, a runner). Stepping in moves the objective on to "Search the office". His computer holds `medical_file` and
+  `contract_14`; **closing the second of them is the office cinematic's moment** (`a3_triggered`, `Ch2L1Act3Hooks.onOfficeTrigger`,
+  for phase 8; until then a line in the log, and in a development run one in chat). The portrait (`rowan_portrait`, Python pixel art
+  of his skin) shows its plaque's text in the action bar when clicked; the plaque under it is a `wall_text`.
+- **Doors that say no.** A click on the restricted door at the corridor's east end says "Restricted access"; on the sealed door, before
+  the overtime, "Sealed. Supervisor's card required."; on the lab's or the office's while still shut, "Locked."
+- **The arrow** (`Ch2L1Guide`): in Act 3 it shows only once the player has had the same target for `guide_after_seconds` (60): the
+  reader, the lab's computer, the keypad, the office's door, Rowan's computer.
+
+Going back before Act 3 (a new hire, `/et ch2 l1 state`) shuts both doors again, turns the reader and the keypad red and forgets the act's
+counters; reaching it by command gives the badge (Act 2's hook).
+
 ## Debug commands
 
 `level1.platform.Ch2L1Commands`, operator level 2, **development runs only** (as [Debugging](debugging.md) explains for
@@ -344,6 +390,8 @@ and the meeting are kept in memory and picked up again from the state after leav
 | `/et ch2 l1 npc remove <group>` | Takes a group away (`lab`, `main`, `dining`, `taquillas`) |
 | `/et ch2 l1 tasks` | How far you are in the three tasks, and what the data names that is missing |
 | `/et ch2 l1 tasks reset` | The three tasks start over: the tubes, the broom and the dirt are back where the state says |
+| `/et ch2 l1 act3` | What you have done in Act 3: the objective, the lab and the office open or shut, the files read |
+| `/et ch2 l1 act3 reset` | Shuts the auxiliary lab and the office again, turns the reader and the keypad red and forgets Act 3 (the state stays) |
 | `/et ch2 l1 intro` | The first announcement's cinematic, now |
 | `/et ch2 l1 say <rowan_loyal_a1..a6>` | An announcement now (the chime, then the voice), from the speaker of the zone you stand in |
 
@@ -366,4 +414,4 @@ character) come with the phase that gives them, and will run on the command too,
 `Ch2L1StateTest` (the order, `next`, `parse`), `Ch2L1AnchorsParserTest` (the format, every kind of problem) and
 `Ch2L1DataTest` (the jar's files, which copy wins, the fallbacks), `Ch2L1VoicesTest` (the 32 lines, their sound events, Oggs
 and cues, the texts in both languages) `Ch2L1SkinsTest` (the skins' format) and `Ch2L1ObjectivesTest` (one objective per step, in both languages) and `Ch2L1MapPlanTest` (the plan's blocks and doors, the
-anchors standing on its floors), all in `chapter2/level1/core`; `Ch2L1NpcsTest` (the people's file, the routines and a typist's, a walker's and a stuck one's every tick), `Ch2L1Act2Test` (the meeting file and its wiring, the coworker leading and waiting and his reminders, the meeting's lines, door and badge, the glances, the arrow over him), `Ch2L1NpcLifeTest` (the `life` keys and a worker's pace, easing in and braking, slowing for a turn, lingering, where the eyes go and the player's look with its cooldown, pairing for a talk and the turns in it), `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule, and that a schedule made for an old game is replaced when the progress goes back: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say, that the lockers' room has its lockers and no camera, that every other space has one and that every worker and route stands on the floor. `Ch2PlayerProgressTest` covers the state, the flag and the counters in the chapter's progress, and `ChapterBoundaryTest` that no code outside `chapter2` names it.
+anchors standing on its floors), all in `chapter2/level1/core`; `Ch2L1NpcsTest` (the people's file, the routines and a typist's, a walker's and a stuck one's every tick), `Ch2L1Act2Test` (the meeting file and its wiring, the coworker leading and waiting and his reminders, the meeting's lines, door and badge, the glances, the arrow over him), `Ch2L1NpcLifeTest` (the `life` keys and a worker's pace, easing in and braking, slowing for a turn, lingering, where the eyes go and the player's look with its cooldown, pairing for a talk and the turns in it), `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step, Act 3's included, and its wait), `Ch2L1Act3Test` (the act3 file, the code, the objective moving on, Rowan's files read), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule, and that a schedule made for an old game is replaced when the progress goes back: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`, `act3.json`'s too) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say, that the lockers' room has its lockers and no camera, that every other space has one and that every worker and route stands on the floor. `Ch2PlayerProgressTest` covers the state, the flag and the counters in the chapter's progress, and `ChapterBoundaryTest` that no code outside `chapter2` names it.

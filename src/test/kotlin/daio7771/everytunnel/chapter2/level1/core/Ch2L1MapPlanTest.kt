@@ -206,8 +206,8 @@ class Ch2L1MapPlanTest {
 
     /** The anchors a player or a person stands on: feet on a floor of the plan, room over the head, nothing solid in the way. */
     private val standing = listOf(
-        "spawn_clockin", "taquillas_exit", "task1_terminal", "task2_analyzer", "predecessor_locker", "chamber_02", "chamber_log",
-        "authorization_desk", "desk_anchor", "rowan_spawn", "patrol_a_pause",
+        "spawn_clockin", "taquillas_exit", "task1_terminal", "task2_analyzer", "predecessor_locker", "chamber_02",
+        "rowan_spawn", "patrol_a_pause",
     ) + (1..6).map { "taquillas_npc_%02d".format(it) }
 
     private fun assertStandsOnTheFloor(what: String, x: Double, y: Double, z: Double, ignoreOwnBlock: Boolean = false) {

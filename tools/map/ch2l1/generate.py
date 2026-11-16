@@ -9,7 +9,8 @@ anchors.json into src/main/resources/data/every_tunnel/ch2/l1/ (committed with t
 
 map.json: "origin" (the world position of plan cell 0, 0, 0), "clear" (the box to empty before building, both corners
 included, in plan coordinates), "fills" (boxes of one block, both corners included, in plan coordinates: shell, doors,
-lamps, the time clock) and "lights" (the lamps' cells, for turning them down and up). anchors.json is read by
+lamps, the time clock), "lights" (the lamps' cells, for turning them down and up) and "texts" (what each wall_text block says: its
+cell, a lang key and a style). anchors.json is read by
 core.ch2l1.Ch2L1AnchorsParser; a zone's box starts at the floor's blocks (y = origin y - 1), as a level's zones do.
 """
 
@@ -39,6 +40,7 @@ def write_plan(level):
         "clear": {"from": list(lo), "to": list(hi)},
         "fills": [{"from": list(a), "to": list(b), "block": block} for a, b, block in fills],
         "lights": [list(c) for c in level.lights()],
+        "texts": [{"at": list(cell), "text": key, "style": style} for cell, _, key, style in L.WALL_TEXTS],
     }
     text = "{\n" + ",\n".join(
         f' "{key}": ' + (compact(value) if isinstance(value, list) else json.dumps(value, separators=(",", ":")))

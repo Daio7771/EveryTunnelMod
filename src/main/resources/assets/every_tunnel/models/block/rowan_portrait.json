@@ -1,0 +1,49 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "p": "every_tunnel:block/rowan_portrait",
+    "w": "every_tunnel:block/suite_bed_frame",
+    "particle": "every_tunnel:block/rowan_portrait"
+  },
+  "elements": [
+    {
+      "from": [
+        -8,
+        -4,
+        15.4
+      ],
+      "to": [
+        24,
+        28,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#p",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#w"
+        },
+        "south": {
+          "texture": "#w"
+        },
+        "west": {
+          "texture": "#w"
+        },
+        "up": {
+          "texture": "#w"
+        },
+        "down": {
+          "texture": "#w"
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

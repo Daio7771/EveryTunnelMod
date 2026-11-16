@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "every_tunnel:block/film_camera"
+    },
+    "facing=east": {
+      "model": "every_tunnel:block/film_camera",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "every_tunnel:block/film_camera",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "every_tunnel:block/film_camera",
+      "y": 270
+    }
+  }
+}

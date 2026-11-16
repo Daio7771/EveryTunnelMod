@@ -1,5 +1,10 @@
 package daio7771.everytunnel.chapter2.level1.client
 
+import daio7771.everytunnel.chapter2.level1.client.NonameOsLook.BAR
+import daio7771.everytunnel.chapter2.level1.client.NonameOsLook.DIM_GREEN
+import daio7771.everytunnel.chapter2.level1.client.NonameOsLook.GREEN
+import daio7771.everytunnel.chapter2.level1.client.NonameOsLook.HOVER
+import daio7771.everytunnel.chapter2.level1.client.NonameOsLook.SCREEN
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Bits
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1TaskHooks
 import daio7771.everytunnel.platform.ModSounds
@@ -15,12 +20,11 @@ import net.minecraft.util.Util
 
 /**
  * NonameOS, the factory's terminal (Chapter 2 Level 1's task 1, [Ch2L1TaskHooks]): green phosphor on black in the monitor's frame
- * of Level 5's computers ([TerminalScreen]), with the SAMPLE REGISTRY window: one row for each sample tube, its code, what became
+ * of Level 5's computers ([NonameOsLook]), with the SAMPLE REGISTRY window: one row for each sample tube, its code, what became
  * of it (not scanned, scanned, registering, registered) and a REGISTER button for the ones taken. A click on the button fills a bar over
  * `register_seconds`; when it is full the screen asks the server to register that tube ([Ch2L1TaskHooks.OS_REGISTER_PACKET]), which answers
  * with the registry as it stands ([update]). When the last one is registered the batch is closed and the screen logs off by itself.
- * Escape logs off at any time. The game does not pause. Built to be reused: the registry is one window, and what later phases show in
- * NonameOS (the documents) can be others.
+ * Escape logs off at any time. The game does not pause. Act 3's computers show their documents in another window ([NonameOsFilesScreen]).
  */
 class NonameOsScreen(
     private var codes: List<String>,
@@ -67,16 +71,11 @@ class NonameOsScreen(
             close()
             return
         }
-        context.fill(0, 0, width, height, DIM)
         val w = minOf(WIDTH, width - 20)
         val h = minOf(HEIGHT, height - 20)
         val x0 = left()
         val y0 = top()
-        context.fill(x0 - 6, y0 - 6, x0 + w + 6, y0 + h + 6, FRAME)
-        context.fill(x0, y0, x0 + w, y0 + h, SCREEN)
-        text(context, I18n.translate(KEY + "os.title"), x0 + 12, y0 + 10, GREEN)
-        text(context, I18n.translate(KEY + "os.version"), x0 + w - 12 - textRenderer.getWidth(I18n.translate(KEY + "os.version")), y0 + 10, DIM_GREEN)
-        context.fill(x0 + 12, y0 + 22, x0 + w - 12, y0 + 23, DIM_GREEN)
+        NonameOsLook.window(context, textRenderer, width, height, x0, y0, w, h)
         text(context, I18n.translate(KEY + "os.registry"), x0 + 12, y0 + 34, GREEN)
         text(context, I18n.translate(KEY + "os.expected", codes.size), x0 + 12, y0 + 46, DIM_GREEN)
 
@@ -153,13 +152,6 @@ class NonameOsScreen(
         private const val BUTTON_H = 16
         private const val LOG_OFF_MS = 3000L
         private const val TIMEOUT_MS = 3000L
-        private const val DIM = 0xA0000000.toInt()
-        private const val FRAME = 0xFFD8DAD6.toInt()
-        private const val SCREEN = 0xFF060E08.toInt()
-        private const val GREEN = 0xFF5CE07A.toInt()
-        private const val DIM_GREEN = 0xFF2F7A42.toInt()
-        private const val HOVER = 0xFF12301A.toInt()
-        private const val BAR = 0xFF1E5A2E.toInt()
 
         fun register() {
             ClientPlayNetworking.registerGlobalReceiver(Ch2L1TaskHooks.OS_OPEN_PACKET) { client, _, buf, _ ->

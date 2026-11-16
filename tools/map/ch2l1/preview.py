@@ -9,13 +9,13 @@ SCALE = 14
 MARGIN = 28
 SPACE_COLOURS = {
     "entrance": (206, 214, 226), "main_corridor": (196, 204, 214), "lab": (176, 204, 228), "wc_west": (200, 214, 200),
-    "lockers": (222, 206, 176), "ring": (230, 224, 190), "dining": (232, 212, 190), "aux_lab": (170, 190, 232),
+    "lockers": (222, 206, 176), "ring": (230, 224, 190), "dining": (232, 212, 190), "aux_lab": (170, 190, 232), "aux_chamber": (150, 166, 214),
     "authorized": (232, 190, 190), "security": (206, 196, 214), "office": (222, 176, 160), "wc_east": (226, 196, 196),
     "level2": (200, 160, 176),
 }
 LABELS = {  # where each name is written: (x, z) in blocks, and whether it runs along a column
     "entrance": (41, 4), "main_corridor": (25.5, 25), "lab": (47, 25), "wc_west": (16.5, 13.5), "lockers": (11.5, 18.5),
-    "ring": (39, 50), "dining": (39, 55), "aux_lab": (8, 50), "authorized": (38, 74.8), "security": (21.5, 81.5),
+    "ring": (39, 50), "dining": (39, 55), "aux_lab": (8, 50), "aux_chamber": (-4.5, 50), "authorized": (38, 74.8), "security": (21.5, 81.5),
     "office": (35, 80.2), "wc_east": (45, 80.5), "level2": (68.5, 28),
 }
 
@@ -58,6 +58,8 @@ def draw(level, path):
         tw = d.textlength(name, font=f_label)
         d.text((a - tw / 2, b - 6), name, fill=(40, 40, 46), font=f_label)
     for door in L.DOORS:
+        if door[5] == "opening":
+            continue
         cells, _ = L.door_cells(door)
         colour = {"normal": (160, 110, 60), "restricted": (200, 130, 60)}.get(door[5], (205, 60, 60))
         for x, y, z in cells:
@@ -76,9 +78,13 @@ def draw(level, path):
     for (x, y, z), block in L.props().items():
         name = block.split(":")[1].split("[")[0]
         a, b = px(x, z)
-        if name in ("lab_bench", "locker", "predecessor_locker") and y == 0:
-            colour = {"lab_bench": (160, 160, 166), "locker": (96, 116, 156), "predecessor_locker": (200, 90, 90)}[name]
-            d.rectangle([a + 1, b + 1, a + SCALE - 2, b + SCALE - 2], fill=colour)
+        furniture = {"lab_bench": (160, 160, 166), "locker": (96, 116, 156), "predecessor_locker": (200, 90, 90), "exec_desk": (60, 56, 52),
+                     "bookshelf": (120, 84, 56), "leather_sofa": (70, 50, 40), "factory_glass": (110, 200, 220), "film_light": (30, 30, 34),
+                     "film_camera": (30, 30, 34)}
+        if name in furniture and y == 0:
+            d.rectangle([a + 1, b + 1, a + SCALE - 2, b + SCALE - 2], fill=furniture[name])
+        elif name in ("badge_reader", "keypad", "noname_terminal", "rowan_portrait"):
+            d.rectangle([a + 3, b + 3, a + SCALE - 4, b + SCALE - 4], fill=(30, 30, 34), outline=(60, 220, 90))
         elif name == "factory_camera":
             d.ellipse([a + 3, b + 3, a + SCALE - 4, b + SCALE - 4], fill=(220, 40, 40), outline=(255, 255, 255))
         elif name == "ceiling_speaker":

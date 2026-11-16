@@ -32,6 +32,12 @@ object PrologueStages {
 
     /** A Pale man, listening. */
     const val PALE = 4
+
+    /**
+     * Not in the prologue: what became of him, months later, in sealed chamber 02 of the factory (Chapter 2 Level 1): the Pale man,
+     * standing, his back turned, utterly still (no animation, no rising from a crouch).
+     */
+    const val CONTAINED = 5
 }
 
 /**

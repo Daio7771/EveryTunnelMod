@@ -8,6 +8,7 @@ import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.Blocks
 import net.minecraft.nbt.NbtCompound
+import daio7771.everytunnel.platform.WallTextBlockEntity
 import net.minecraft.registry.Registries
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
@@ -194,6 +195,7 @@ object Ch2L1Build {
     }
 
     private fun finish(finished: Job) {
+        if (finished.building) writeTexts(finished.world, finished.plan)
         release(finished)
         job = null
         val saved = saved(finished.server)
@@ -209,6 +211,20 @@ object Ch2L1Build {
             } catch (e: Exception) {
                 EveryTunnel.LOGGER.error("Chapter 2 Level 1: a callback after the build failed", e)
             }
+        }
+    }
+
+    /** What each of the plan's `wall_text` blocks says ([Ch2L1MapPlan.texts]). */
+    private fun writeTexts(world: ServerWorld, plan: Ch2L1MapPlan) {
+        for (text in plan.texts) {
+            val pos = BlockPos(plan.worldX(text.at.x), plan.worldY(text.at.y), plan.worldZ(text.at.z))
+            val entity = world.getBlockEntity(pos) as? WallTextBlockEntity ?: continue
+            val nbt = NbtCompound()
+            nbt.putString("Text", text.text)
+            nbt.putString("Style", text.style)
+            entity.readNbt(nbt)
+            entity.markDirty()
+            world.updateListeners(pos, entity.cachedState, entity.cachedState, Block.NOTIFY_ALL)
         }
     }
 

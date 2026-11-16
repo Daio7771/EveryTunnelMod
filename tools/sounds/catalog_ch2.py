@@ -110,6 +110,31 @@ def ch2l1_blip(rng, variant):
     return damped_partials(n, [880.0, 1760.0], [1.0, 0.2], [0.05, 0.03], rng, 0.0)
 
 
+def ch2l1_keypad_key(rng, variant):
+    """A key of the office's keypad pressed: a short square-ish beep over the plastic's tick."""
+    n = samples(0.09)
+    y = damped_partials(n, [1320.0, 2640.0, 3960.0], [1.0, 0.3, 0.15], [0.04, 0.03, 0.02], rng, 0.0)
+    return y + 0.3 * _noise(n, rng, 2500.0, 8000.0) * envelope(n, [(0.0, 1.0), (0.012, 0.0)])
+
+
+def ch2l1_keypad_error(rng, variant):
+    """A wrong code: a low double buzz."""
+    n = samples(0.5)
+    t = np.arange(n) / SR
+    tone = np.sign(np.sin(2 * np.pi * 180.0 * t)) * 0.5 + 0.5 * np.sin(2 * np.pi * 360.0 * t)
+    gate = envelope(n, [(0.0, 0.0), (0.01, 1.0), (0.18, 1.0), (0.2, 0.0), (0.26, 0.0), (0.27, 1.0), (0.46, 1.0), (0.5, 0.0)])
+    return lowpass(0.4 * tone * gate, 3000.0)
+
+
+def ch2l1_keypad_accept(rng, variant):
+    """The right code: two rising clean beeps and the lock's soft clack."""
+    n = samples(0.6)
+    y = damped_partials(n, [1046.5, 2093.0], [1.0, 0.25], [0.12, 0.08], rng, 0.0)
+    y += damped_partials(n, [1568.0, 3136.0], [1.0, 0.25], [0.18, 0.1], rng, 0.13)
+    y += 0.6 * _noise(n, rng, 200.0, 1800.0) * envelope(n, [(0.0, 0.0), (0.34, 0.0), (0.345, 1.0), (0.4, 0.0)])
+    return 0.6 * y
+
+
 CHAPTER2_SOUNDS = [
     Sound("event.prologue.crack", "Chapter 2 prologue", "A stage of the scientist's change: dry cracks of joints, a dull thump, the creak of something stretched too far (3 variations)",
           "mono", False, 3, prologue_crack, -3.0, attenuation=24),
@@ -125,4 +150,7 @@ CHAPTER2_SOUNDS = [
           "mono", False, 1, ch2l1_ding, -6.0, attenuation=48),
     Sound("block.ch2l1.sweep", "Chapter 2 Level 1", "Task 3: the broom over the floor, a soft swish (3 variations)", "mono", False, 3, ch2l1_sweep, -10.0),
     Sound("block.ch2l1.blip", "Chapter 2 Level 1", "Tasks 1 and 2: a small pip of a lab instrument, pitched up by the game as a task goes on", "mono", False, 1, ch2l1_blip, -8.0),
+    Sound("block.ch2l1.keypad_key", "Chapter 2 Level 1", "Act 3: a key of the office's keypad pressed, a short beep", "mono", False, 1, ch2l1_keypad_key, -10.0),
+    Sound("block.ch2l1.keypad_error", "Chapter 2 Level 1", "Act 3: a wrong code at the office's keypad, a low double buzz", "mono", False, 1, ch2l1_keypad_error, -9.0),
+    Sound("block.ch2l1.keypad_accept", "Chapter 2 Level 1", "Act 3: Rowan's code accepted, two rising beeps and the lock's clack", "mono", False, 1, ch2l1_keypad_accept, -8.0),
 ]

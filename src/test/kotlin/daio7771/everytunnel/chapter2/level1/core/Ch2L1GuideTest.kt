@@ -62,9 +62,23 @@ class Ch2L1GuideTest {
 
     @Test
     fun `later states have no target yet`() {
-        for (state in listOf(Ch2L1State.ACT2_FOLLOW, Ch2L1State.ACT2_MEETING, Ch2L1State.ACT3_EXPLORE, Ch2L1State.ACT3_CUTSCENE, Ch2L1State.DONE)) {
+        for (state in listOf(Ch2L1State.ACT2_FOLLOW, Ch2L1State.ACT2_MEETING, Ch2L1State.ACT3_CUTSCENE, Ch2L1State.DONE)) {
             assertEquals(emptyList(), targets(state), state.name)
         }
+    }
+
+    @Test
+    fun `in Act 3 it points at the next thing to do`() {
+        val act3 = Ch2L1Act3.DEFAULT
+        fun at(counters: Map<String, Int>) = Ch2L1Guide.targets(Ch2L1State.ACT3_EXPLORE, tasks, anchors, act3) { counters[it] ?: 0 }
+        assertEquals(listOf(over("aux_lab_reader")), at(emptyMap()))
+        assertEquals(listOf(over("aux_lab_computer")), at(mapOf(Ch2L1Act3.LAB_OPEN to 1)))
+        val authorization = 1 shl act3.fileBit("authorization")
+        assertEquals(listOf(over("office_keypad")), at(mapOf(Ch2L1Act3.LAB_OPEN to 1, Ch2L1Act3.READ to authorization)))
+        assertEquals(listOf(over("door_anchor")), at(mapOf(Ch2L1Act3.READ to authorization, Ch2L1Act3.OFFICE_OPEN to 1)))
+        assertEquals(listOf(over("rowan_computer")), at(mapOf(Ch2L1Act3.READ to authorization, Ch2L1Act3.IN_OFFICE to 1)))
+        assertFalse(Ch2L1Guide.stuck(act3.stuckTicks - 1L, act3))
+        assertTrue(Ch2L1Guide.stuck(act3.stuckTicks.toLong(), act3))
     }
 
     @Test

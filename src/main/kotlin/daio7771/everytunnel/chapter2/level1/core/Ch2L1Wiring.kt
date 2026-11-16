@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 /**
- * Checks that what `tasks.json`, `speakers.json`, `npcs.json` and `cutscenes/meeting.json` name is in `anchors.json`: a task whose block or place is missing, a speaker
+ * Checks that what `tasks.json`, `speakers.json`, `npcs.json`, `cutscenes/meeting.json` and `act3.json` name is in `anchors.json`: a task whose block or place is missing, a speaker
  * zone with no box or no emitter, a camera of the first announcement's cinematic that has no anchor. Plain Kotlin; the data
  * loader reports what it finds on every load and `/et reload`, and `Ch2L1WiringTest` holds the jar's files to it.
  */
@@ -10,6 +10,7 @@ object Ch2L1Wiring {
     /** One line per thing that does not match; empty when everything the files name exists. */
     fun problems(
         anchors: Ch2L1Anchors, tasks: Ch2L1Tasks, speakers: Ch2L1Speakers, npcs: Ch2L1NpcData = Ch2L1NpcData.EMPTY, act2: Ch2L1Act2? = null,
+        act3: Ch2L1Act3? = null,
     ): List<String> {
         val out = mutableListOf<String>()
         fun point(file: String, id: String) {
@@ -55,6 +56,13 @@ object Ch2L1Wiring {
                 point(file, "${door}_inside")
             }
             if (npcs.groups[act2.meeting.group] == null) out += "$file names the group \"${act2.meeting.group}\", which npcs.json does not have"
+        }
+        if (act3 != null) {
+            val file = "act3.json"
+            for (id in listOf(act3.readerAnchor, act3.labDoor, act3.keypadAnchor, act3.officeDoor, act3.sealedDoor, act3.portraitAnchor, act3.chamberAnchor)) point(file, id)
+            act3.restrictedDoors.forEach { point(file, it) }
+            act3.computers.forEach { point(file, it.anchor) }
+            if (anchors.zone(act3.officeZone) == null) out += "$file names the zone \"${act3.officeZone}\", which anchors.json does not have"
         }
         return out
     }

@@ -19,6 +19,11 @@ object Ch2Sounds {
     val CH2L1_SWEEP = event("block.ch2l1.sweep")
     val CH2L1_BLIP = event("block.ch2l1.blip")
 
+    /** Chapter 2 Level 1, Act 3: the office's keypad (a key, a wrong code, Rowan's code). */
+    val CH2L1_KEYPAD_KEY = event("block.ch2l1.keypad_key")
+    val CH2L1_KEYPAD_ERROR = event("block.ch2l1.keypad_error")
+    val CH2L1_KEYPAD_ACCEPT = event("block.ch2l1.keypad_accept")
+
     private fun event(path: String, range: Float? = null): SoundEvent {
         val id = Identifier(EveryTunnel.MOD_ID, path)
         return (if (range == null) SoundEvent.of(id) else SoundEvent.of(id, range)).also { all += it }

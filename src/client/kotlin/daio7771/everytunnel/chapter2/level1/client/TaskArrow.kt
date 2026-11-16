@@ -13,6 +13,7 @@ import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents
 import net.minecraft.client.MinecraftClient
+import net.minecraft.util.Util
 import net.minecraft.client.render.BufferBuilder
 import net.minecraft.client.render.BufferRenderer
 import net.minecraft.client.render.GameRenderer
@@ -29,7 +30,8 @@ import kotlin.math.sqrt
 /**
  * The guide arrow of Chapter 2's Level 1 ([Ch2L1Guide]): a filled V pointing down, blue with white edges, that turns slowly on itself
  * and bobs a little over the place of the player's current step (the nearest sample tube, the terminal, the analyzer, the broom, the
- * nearest patch of dirt; in Act 2 over the coworker's head, only when the player has lost him). It is drawn without a depth test, so benches and machines do not hide it, and it grows with distance so that
+ * nearest patch of dirt; in Act 2 over the coworker's head, only when the player has lost him; in Act 3 over the next thing to do, but only
+ * once the player has been on it for `act3.json`'s `guide_after_seconds`). It is drawn without a depth test, so benches and machines do not hide it, and it grows with distance so that
  * it can be seen across the LAB; it hides when the player is within `hide_within` of it, in a cinematic and with the HUD hidden (F1).
  * What it points at, how high and how near it hides are `tasks.json`'s `guide`.
  */
@@ -54,6 +56,19 @@ object TaskArrow {
         WorldRenderEvents.AFTER_TRANSLUCENT.register(::render)
     }
 
+    /** Act 3's target as last seen, and since when (client time): the arrow waits until the player has been on it a while. */
+    private var act3Target: Position? = null
+    private var act3SinceMs = 0L
+
+    private fun stuck(target: Position): Boolean {
+        val now = Util.getMeasuringTimeMs()
+        if (target != act3Target) {
+            act3Target = target
+            act3SinceMs = now
+        }
+        return Ch2L1Guide.stuck((now - act3SinceMs) / 50, Ch2L1DataLoader.act3)
+    }
+
     private fun render(context: WorldRenderContext) {
         val client = MinecraftClient.getInstance()
         val player = client.player ?: return
@@ -68,8 +83,9 @@ object TaskArrow {
             val coworker = world.entities.filterIsInstance<FactoryNpcEntity>().filter { it.skin == Ch2L1Skins.COWORKER }.minByOrNull { it.squaredDistanceTo(player) }
             Ch2L1Guide.follow(coworker?.let { Position(it.x, it.y, it.z) }, from, coworker != null && player.canSee(coworker), Ch2L1DataLoader.act2.follow) ?: return
         } else {
-            val targets = Ch2L1Guide.targets(state, tasks, Ch2L1DataLoader.data.anchors) { service.ch2L1Counter(player, it) }
+            val targets = Ch2L1Guide.targets(state, tasks, Ch2L1DataLoader.data.anchors, Ch2L1DataLoader.act3) { service.ch2L1Counter(player, it) }
             val nearest = Ch2L1Guide.nearest(targets, from) ?: return
+            if (state == Ch2L1State.ACT3_EXPLORE && !stuck(nearest)) return
             if (Ch2L1Guide.hidden(nearest, from, tasks.guide)) return
             nearest
         }
