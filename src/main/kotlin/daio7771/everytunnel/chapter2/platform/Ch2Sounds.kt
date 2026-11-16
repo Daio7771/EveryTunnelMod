@@ -29,6 +29,9 @@ object Ch2Sounds {
     val CH2L1_GUARD_ALERT = event("event.ch2l1.guard_alert")
     val CH2L1_GUARD_CAUGHT = event("event.ch2l1.guard_caught")
 
+    /** Chapter 2 Level 1, the office's cinematic: the low hum under Rowan's colder lines (a loop, played by the client's scene). */
+    val CH2L1_OFFICE_HUM = event("ambient.ch2l1.office_hum")
+
     private fun event(path: String, range: Float? = null): SoundEvent {
         val id = Identifier(EveryTunnel.MOD_ID, path)
         return (if (range == null) SoundEvent.of(id) else SoundEvent.of(id, range)).also { all += it }

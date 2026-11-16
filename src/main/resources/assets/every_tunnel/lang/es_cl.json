@@ -647,5 +647,7 @@
   "every_tunnel.ch2.l1.speaker.guard": "Guardia",
   "every_tunnel.ch2.l1.guard_warn": "Eh. Aléjate de ahí.",
   "every_tunnel.ch2.l1.guard_caught": "Se acabó. Vuelve al trabajo y quédate donde te toca.",
-  "every_tunnel.ch2.l1.caught": "Te han pillado."
+  "every_tunnel.ch2.l1.caught": "Te han pillado.",
+  "item.every_tunnel.overtime_pass": "Pase de horas extra sin pagar",
+  "block.every_tunnel.factory_light_dim": "Luz de techo (atenuada)"
 }

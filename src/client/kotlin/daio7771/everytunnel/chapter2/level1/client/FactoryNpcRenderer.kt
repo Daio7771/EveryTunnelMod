@@ -24,7 +24,7 @@ import kotlin.math.sin
  * `tools/entity/workers.py`). Only the skins' base layer is used. The arms follow the entity's [FactoryNpcEntity.npcPose]
  * ([FactoryNpcModel]): out in front at a keyboard, moving with the words when talking, hanging still when they do nothing with
  * them (a nod now and then and the weight shifting when listening); in the meeting, trembling, laughing, or held out handing
- * something over.
+ * something over; Rowan in his office fixing his cuffs, leaning on the desk, palms open, bending forward, at his tie, pointing, clapping.
  * Where the head looks is the entity's own (the server's gaze); each person's movements are a little out of step with the rest's.
  * A patrolling guard who has noticed the player ([FactoryNpcEntity.alert]) has a yellow "?" over his head with a bar under it that
  * fills; once he has told them off, or runs at them, a red "!".
@@ -113,6 +113,60 @@ class FactoryNpcRenderer(context: EntityRendererFactory.Context) :
                     rightArm.pitch = -1.3f
                     rightArm.yaw = -0.1f
                     head.pitch += 0.1f
+                }
+                Ch2L1Pose.CUFFS -> {
+                    // Fixing a cuff: the left hand at the right wrist in front of him, a small tug now and then.
+                    val tug = sin(t * 0.4f + phase) * 0.06f
+                    rightArm.pitch = -0.75f + tug
+                    rightArm.yaw = 0.35f
+                    leftArm.pitch = -0.95f - tug
+                    leftArm.yaw = 0.55f
+                }
+                Ch2L1Pose.LEANING -> {
+                    // Leaning back on the desk's edge, the hands on it behind him.
+                    body.pitch = -0.1f
+                    rightArm.pitch = 0.45f
+                    leftArm.pitch = 0.45f
+                    rightArm.roll = 0.18f
+                    leftArm.roll = -0.18f
+                }
+                Ch2L1Pose.PALMS -> {
+                    rightArm.pitch = -0.55f
+                    leftArm.pitch = -0.55f
+                    rightArm.yaw = -0.45f
+                    leftArm.yaw = 0.45f
+                    rightArm.roll = 0.35f
+                    leftArm.roll = -0.35f
+                }
+                Ch2L1Pose.LEAN_FORWARD -> {
+                    // Bent over the player, as a crouch does it.
+                    body.pitch = 0.42f
+                    body.pivotY = 3.0f
+                    head.pivotY = 3.8f
+                    rightArm.pivotY = 5.0f
+                    leftArm.pivotY = 5.0f
+                    rightArm.pitch = 0.25f
+                    leftArm.pitch = 0.25f
+                    rightLeg.pivotZ = 3.6f
+                    leftLeg.pivotZ = 3.6f
+                    rightLeg.pivotY = 12.2f
+                    leftLeg.pivotY = 12.2f
+                }
+                Ch2L1Pose.TIE -> {
+                    rightArm.pitch = -1.35f + sin(t * 0.25f + phase) * 0.12f
+                    rightArm.yaw = 0.55f
+                }
+                Ch2L1Pose.POINTING -> {
+                    rightArm.pitch = -1.5f
+                    rightArm.yaw = -0.05f
+                }
+                Ch2L1Pose.CLAPPING -> {
+                    // A slow clap: the hands meet in front of him every second or so.
+                    val apart = (0.5f + 0.5f * cos(t * 0.35f + phase)) * 0.45f
+                    rightArm.pitch = -1.05f
+                    leftArm.pitch = -1.05f
+                    rightArm.yaw = -0.05f - apart
+                    leftArm.yaw = 0.05f + apart
                 }
                 Ch2L1Pose.NONE -> {}
             }

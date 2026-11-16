@@ -4,6 +4,7 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Act2Hooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Act3Hooks
+import daio7771.everytunnel.chapter2.level1.platform.Ch2L1OfficeHooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1PatrolHooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Build
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Commands
@@ -53,6 +54,7 @@ object Chapter2 : ModInitializer {
         Ch2L1Act2Hooks.register()
         Ch2L1Act3Hooks.register()
         Ch2L1PatrolHooks.register()
+        Ch2L1OfficeHooks.register()
         PrologueSceneHooks.register()
         PrologueCommand.register()
         Ch2L1Commands.register()

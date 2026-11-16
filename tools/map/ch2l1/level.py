@@ -606,9 +606,19 @@ def named_places(level):
     add("paper_medical", 34.5, 82.5, 180, True, y=1.0)
     add("paper_contract_14", 35.5, 82.5, 180, True, y=1.0)
     add("painting", PORTRAIT[0][0] + 0.5, PORTRAIT[0][2] + 0.5, 90, False, y=float(PORTRAIT[0][1]))
-    add("card_slide_start", 35.0, 81.0, 0, True, y=1.0)
-    add("card_slide_end", 35.0, 83.2, 0, True, y=1.0)
-    add("rowan_spawn", 32.5, 76.5, 0, True)
+    # The office's cinematic (phase 8): the player held behind the desk at Rowan's computer, facing the door; Rowan's way in (from the
+    # corridor through the doorway to just inside), round the desk to the player's side, to the desk's east corner where he leans, and
+    # out to the corridor's east; the pass he slides across the desk to the player.
+    add("office_player_mark", 35.0, 83.6, 180, False)
+    add("card_slide_start", 35.9, 82.5, 0, False, y=1.02)
+    add("card_slide_end", 35.3, 82.9, 0, False, y=1.02)
+    add("rowan_spawn", 32.5, 76.5, 0, False)
+    add("rowan_doorway", 32.0, 78.5, 0, False)
+    add("rowan_threshold", 32.0, 79.8, 0, False)
+    add("rowan_round_1", 37.6, 80.4, 0, False)
+    add("rowan_round_2", 37.4, 83.4, 90, False)
+    add("rowan_lean", 36.4, 82.5, 90, False)
+    add("rowan_exit", 38.5, 76.0, -90, False)
     add("restricted_door_east", 61.0, 75.5, -90, False)
     add("sealed_door", 62.0, 28.0, -90, False)
     add("patrol_a_pause", 36.0, 71.0, 180, False)              # by the door down into the authorized corridor, facing it
@@ -699,7 +709,8 @@ def check(level):
         if anchor_id.endswith("_block") or anchor_id.endswith("_src") or anchor_id.startswith("task1_tube_"):
             continue
         if anchor_id in ("time_clock", "office_keypad", "paper_medical", "paper_contract_14", "painting", "card_slide_start", "card_slide_end", "sealed_door",
-                         "restricted_door_east", "aux_lab_door", "door_anchor", "aux_lab_reader", "aux_lab_computer", "rowan_computer"):
+                         "restricted_door_east", "aux_lab_door", "door_anchor", "aux_lab_reader", "aux_lab_computer", "rowan_computer",
+                         "rowan_doorway"):
             continue
         cell = (math.floor(x), math.floor(y), math.floor(z))
         if cell not in air or (cell[0], cell[1] + 1, cell[2]) not in air:

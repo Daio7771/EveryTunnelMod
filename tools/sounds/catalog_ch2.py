@@ -162,6 +162,17 @@ def ch2l1_guard_caught(rng, variant):
     return stereo(y, y)
 
 
+def ch2l1_office_hum(rng, variant):
+    """Rowan's office, as the scene turns cold: a very low hum, two tones a hair apart beating slowly, a faint airy hiss (loops)."""
+    n = samples(8.0)
+    t = np.arange(n) / SR
+    y = 0.6 * np.sin(2 * np.pi * 46.0 * t) + 0.45 * np.sin(2 * np.pi * 46.5 * t) + 0.12 * np.sin(2 * np.pi * 92.0 * t)
+    hiss = 0.05 * _noise(n, rng, 200.0, 900.0)
+    left = lowpass(y + hiss, 600.0)
+    right = lowpass(y + np.roll(hiss, 3000), 600.0)
+    return stereo(0.5 * left, 0.5 * right)
+
+
 CHAPTER2_SOUNDS = [
     Sound("event.prologue.crack", "Chapter 2 prologue", "A stage of the scientist's change: dry cracks of joints, a dull thump, the creak of something stretched too far (3 variations)",
           "mono", False, 3, prologue_crack, -3.0, attenuation=24),
@@ -183,5 +194,7 @@ CHAPTER2_SOUNDS = [
           ch2l1_guard_suspect, -8.0, attenuation=24),
     Sound("event.ch2l1.guard_alert", "Chapter 2 Level 1", "A guard runs at the player: a sharp low stab", "stereo", False, 1, ch2l1_guard_alert, -4.0),
     Sound("event.ch2l1.guard_caught", "Chapter 2 Level 1", "Caught by a guard: a dull thud under the fade to black", "stereo", False, 1, ch2l1_guard_caught, -3.0),
+    Sound("ambient.ch2l1.office_hum", "Chapter 2 Level 1", "The office's cinematic: a very low beating hum under Rowan's colder lines (loops)", "stereo", True, 1,
+          ch2l1_office_hum, -10.0, stream=True),
     Sound("block.ch2l1.keypad_accept", "Chapter 2 Level 1", "Act 3: Rowan's code accepted, two rising beeps and the lock's clack", "mono", False, 1, ch2l1_keypad_accept, -8.0),
 ]

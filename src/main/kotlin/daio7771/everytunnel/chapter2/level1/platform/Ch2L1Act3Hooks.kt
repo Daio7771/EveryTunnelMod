@@ -16,7 +16,6 @@ import daio7771.everytunnel.platform.TickProfiler
 import net.fabricmc.fabric.api.event.player.UseBlockCallback
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
-import net.fabricmc.loader.api.FabricLoader
 import net.minecraft.block.DoorBlock
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
@@ -38,7 +37,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  * - **The computers** ([NonameTerminalBlock], the ones `act3.json` names; task 1's is [Ch2L1TaskHooks]'): NonameOS opens on their files
  *   ([FILES_PACKET]); the client says when the player closes one ([FILE_CLOSED_PACKET]), and only then it counts as read. The authorization
  *   (`code_file`) moves the objective on to the way into the office; closing the second of Rowan's files ([Ch2L1Act3.triggerComputer]) is the
- *   office cinematic's moment ([onOfficeTrigger]: phase 8 begins it; until then a line in the log, and in a development run one in chat).
+ *   office cinematic's moment ([onOfficeTrigger]: `Ch2L1OfficeHooks` begins it).
  * - **The keypad** ([KeypadBlock]): its screen sends the code typed ([KEYPAD_TRY_PACKET]); Rowan's opens the office's grey doors for good,
  *   anything else buzzes ([KEYPAD_RESULT_PACKET] tells the screen which).
  * - **The office**: stepping in moves the objective on to searching it ([Ch2L1Act3.IN_OFFICE]).
@@ -217,9 +216,6 @@ object Ch2L1Act3Hooks {
         if (computer.id != act3.triggerComputer || !act3.allRead(computer, read) || counter(player, Ch2L1Act3.TRIGGERED) > 0) return
         set(player, Ch2L1Act3.TRIGGERED, 1)
         EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} has read Rowan's files: the office cinematic's moment", player.gameProfile.name)
-        if (FabricLoader.getInstance().isDevelopmentEnvironment) {
-            player.sendMessage(Text.literal("[dev] Both of Rowan's files read: the office cinematic begins here (phase 8)."), false)
-        }
         for (trigger in triggers) {
             try {
                 trigger.reached(player)

@@ -654,5 +654,7 @@
   "every_tunnel.ch2.l1.speaker.guard": "Guard",
   "every_tunnel.ch2.l1.guard_warn": "Hey. Walk away.",
   "every_tunnel.ch2.l1.guard_caught": "That's it. Back to work, and stay where you belong.",
-  "every_tunnel.ch2.l1.caught": "You've been caught."
+  "every_tunnel.ch2.l1.caught": "You've been caught.",
+  "block.every_tunnel.factory_light_dim": "Ceiling Light (Dimmed)",
+  "item.every_tunnel.overtime_pass": "Unpaid Overtime Pass"
 }

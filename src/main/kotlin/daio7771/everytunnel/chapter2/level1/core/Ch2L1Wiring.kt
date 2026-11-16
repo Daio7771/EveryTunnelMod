@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 /**
- * Checks that what `tasks.json`, `speakers.json`, `npcs.json`, `cutscenes/meeting.json`, `act3.json` and `patrols.json` name is in `anchors.json`: a task whose block or place is missing, a speaker
+ * Checks that what `tasks.json`, `speakers.json`, `npcs.json`, `cutscenes/meeting.json`, `act3.json`, `patrols.json` and `cutscenes/office.json` name is in `anchors.json`: a task whose block or place is missing, a speaker
  * zone with no box or no emitter, a camera of the first announcement's cinematic that has no anchor. Plain Kotlin; the data
  * loader reports what it finds on every load and `/et reload`, and `Ch2L1WiringTest` holds the jar's files to it.
  */
@@ -10,7 +10,7 @@ object Ch2L1Wiring {
     /** One line per thing that does not match; empty when everything the files name exists. */
     fun problems(
         anchors: Ch2L1Anchors, tasks: Ch2L1Tasks, speakers: Ch2L1Speakers, npcs: Ch2L1NpcData = Ch2L1NpcData.EMPTY, act2: Ch2L1Act2? = null,
-        act3: Ch2L1Act3? = null, patrols: Ch2L1Patrols? = null,
+        act3: Ch2L1Act3? = null, patrols: Ch2L1Patrols? = null, office: Ch2L1OfficeSpec? = null,
     ): List<String> {
         val out = mutableListOf<String>()
         fun point(file: String, id: String) {
@@ -63,6 +63,12 @@ object Ch2L1Wiring {
             act3.restrictedDoors.forEach { point(file, it) }
             act3.computers.forEach { point(file, it.anchor) }
             if (anchors.zone(act3.officeZone) == null) out += "$file names the zone \"${act3.officeZone}\", which anchors.json does not have"
+        }
+        if (office != null) {
+            val file = "cutscenes/office.json"
+            for (id in listOf(office.playerMark, office.door, office.spawn, office.doorway, office.threshold, office.lean, office.exit, office.cardFrom, office.cardTo) + office.round) {
+                point(file, id)
+            }
         }
         if (patrols != null) {
             val file = "patrols.json"

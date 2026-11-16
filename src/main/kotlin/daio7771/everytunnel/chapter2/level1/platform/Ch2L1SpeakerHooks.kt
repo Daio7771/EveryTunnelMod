@@ -135,7 +135,7 @@ object Ch2L1SpeakerHooks {
     }
 
     /** The speaker zone the player stands in, or null. */
-    private fun zoneOf(player: ServerPlayerEntity): String? {
+    fun zoneOf(player: ServerPlayerEntity): String? {
         val anchors = Ch2L1DataLoader.data.anchors
         val there = player.pos
         return speakers.zones.firstOrNull { anchors.zone(it)?.box?.contains(there.x, there.y, there.z) == true }
@@ -160,6 +160,16 @@ object Ch2L1SpeakerHooks {
             PlaySoundS2CPacket(RegistryEntry.of(event), SoundCategory.VOICE, at.x, at.y, at.z, speakers.volume, 1f, player.world.random.nextLong()),
         )
     }
+
+    /** [line] once, from the speaker of the zone the player is in (the office's after-scene `rowan_loyal_a6`): heard from now on. */
+    fun announceOnce(player: ServerPlayerEntity, line: String): Boolean {
+        if (Ch2Progress.ch2L1Counter(player, HEARD + line) > 0) return false
+        Ch2Progress.setCh2L1Counter(player, HEARD + line, 1)
+        return say(player, line)
+    }
+
+    /** True once [player] has heard [line]. */
+    fun heard(player: ServerPlayerEntity, line: String): Boolean = Ch2Progress.ch2L1Counter(player, HEARD + line) > 0
 
     /** `/et ch2 l1 say <line>`: the announcement now, from the speaker of the zone the player is in (or above them). */
     fun say(player: ServerPlayerEntity, line: String): Boolean {

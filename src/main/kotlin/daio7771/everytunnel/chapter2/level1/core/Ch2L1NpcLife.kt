@@ -35,7 +35,28 @@ enum class Ch2L1Pose {
     LAUGHING,
 
     /** One arm held out, handing something over. */
-    OFFERING;
+    OFFERING,
+
+    /** Rowan in his office (the office's cinematic): fixing his cuffs as he walks round the player. */
+    CUFFS,
+
+    /** Leaning back on the edge of the desk, his hands on it behind him. */
+    LEANING,
+
+    /** Both hands open, palms up ("Or am I special?"). */
+    PALMS,
+
+    /** Bending forward over the player. */
+    LEAN_FORWARD,
+
+    /** Straightening up, smoothing his tie. */
+    TIE,
+
+    /** Pointing at the door. */
+    POINTING,
+
+    /** A slow clap. */
+    CLAPPING;
 
     companion object {
         fun of(ordinal: Int): Ch2L1Pose = values().getOrElse(ordinal) { NONE }

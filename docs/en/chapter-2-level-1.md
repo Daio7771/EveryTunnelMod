@@ -5,8 +5,8 @@
 Level 1 of Chapter 2 is the factory, four months after Chapter 1: an ordinary scientist hired in the place of the one
 who "fell ill", three acts of tasks, a meeting and sneaking, ending in the supervisor's office. It is built in phases
 (0 to 10), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
-`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 7, the patrols.** It is
-playable from the clock to Rowan's files in his office, with two guards on their rounds (the office's cinematic, phase 8, is next); the LAB is not furnished yet.
+`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 8, the office's cinematic.** It is
+playable from the clock to the overtime after Rowan's office (the sealed zone and the way to Level 2, phase 9, are next); the LAB is not furnished yet.
 
 Its code is under `daio7771.everytunnel.chapter2` (the client's under the same package in `src/client`): `level1.core` (plain
 Kotlin, tested), `level1.platform` (Minecraft glue) and `level1.client`, apart from the base game, which never names it (see
@@ -48,7 +48,7 @@ Everything adjustable is JSON, not code: changing a rhythm, a route or a text is
 | `patrols.json` | The patrols: how the guards watch (sight, what is suspicious, the warning, the chase, where a caught player goes back) and each guard's round | `Ch2L1PatrolsParser`, typed |
 | `cutscenes/meeting.json` | Act 2: following the coworker and the meeting | `Ch2L1Act2Parser`, typed |
 | `act3.json` | Act 3's exploring: the badge reader, the keypad and Rowan's code, the computers and their files, the doors that say no, chamber 02, the arrow's wait | `Ch2L1Act3Parser`, typed |
-| `cutscenes/office.json` | The office's cinematic (phase 8) | The same |
+| `cutscenes/office.json` | The office's cinematic: Rowan's way in, round and out (anchors), his lines, the pauses, which line does what (palms, leaning, the glance, the tie, pointing, the pass, the clap), the shake, the push, the hum | `Ch2L1OfficeParser`, typed |
 
 The jar holds the defaults, in `data/every_tunnel/ch2/l1/`. **To tune without rebuilding**, put a file of the same name in
 the game's config folder, `config/every_tunnel/ch2/l1/` (in a development run, `run/config/...`), and run `/et reload`.
@@ -390,6 +390,27 @@ black with "You've been caught." (`CaughtOverlay`, `event.ch2l1.guard_caught`), 
 he is back on his round. Out of sight for `give_up_seconds` he gives up. Nobody watches during a cinematic, in Act 2, in Creative or
 Spectator, or for 5 s after a catch. **The guards' lines are placeholders** (text only) until the author gives theirs, with a voice.
 
+## Act 3: the office's cinematic
+
+Phase 8 (`cutscenes/office.json`, `level1.core.Ch2L1OfficeScene`, `level1.platform.Ch2L1OfficeHooks`, client `Ch2L1OfficeView`): closing the
+second of Rowan's files (`Ch2L1Act3Hooks.onOfficeTrigger`) moves the player to `ACT3_CUTSCENE`, and Rowan catches them at his desk.
+
+- **Before the bands**, a player elsewhere in the office glides to `office_player_mark` behind the desk, facing the door (`glide_seconds`);
+  one farther away (a command) is put there.
+- **The camera is the player's own eyes**, held there, following Rowan's head: first the door, which opens; he comes in by
+  `rowan_doorway` to `rowan_threshold`, turns and shuts it; c1 at the threshold, arms loose; c2 walking round the desk (`round`) to its
+  corner (`rowan_lean`) fixing his cuffs (`CUFFS`) while the camera shakes a little; c3 leaning back on the desk (`LEANING`), his palms
+  open from "Or am I special?" (`PALMS`), the low hum coming in (`ambient.ch2l1.office_hum`); a pause; c4 bending forward
+  (`LEAN_FORWARD`) as the eyes push towards his face; c5 a glance at the door; a long pause; c6 the tie (`TIE`); c7 pointing at the door
+  (`POINTING`); c8: at "Unpaid, naturally" he slides the **Unpaid Overtime Pass** across the desk (`OFFERING`; an item display gliding from
+  `card_slide_start` to `card_slide_end`, then in the player's pockets) as the hum goes, claps slowly (`CLAPPING`) and leaves by the door,
+  which stays open. Everything Rowan does is laid out tick by tick in the scene (its `track` of segments), so the server moves him on the
+  very ticks the client's camera follows him. Skippable like the others.
+- **After it, however it ends** (played, skipped, or `ACT3_OVERTIME` reached by command): the pass (`overtime_pass`, Chapter 1's keycard
+  in Rowan's colours), the objective "Overtime: sealed zone", Rowan gone, the LAB's lamps turned down (`factory_light_dim`) and empty of
+  workers, the patrols gone, and `rowan_loyal_a6` once, 3 to 5 s after the player is back in control in a loudspeaker's zone. Going back
+  before it takes the pass back and turns the lights up.
+
 ## Debug commands
 
 `level1.platform.Ch2L1Commands`, operator level 2, **development runs only** (as [Debugging](debugging.md) explains for
@@ -440,4 +461,4 @@ character) come with the phase that gives them, and will run on the command too,
 `Ch2L1StateTest` (the order, `next`, `parse`), `Ch2L1AnchorsParserTest` (the format, every kind of problem) and
 `Ch2L1DataTest` (the jar's files, which copy wins, the fallbacks), `Ch2L1VoicesTest` (the 32 lines, their sound events, Oggs
 and cues, the texts in both languages) `Ch2L1SkinsTest` (the skins' format) and `Ch2L1ObjectivesTest` (one objective per step, in both languages) and `Ch2L1MapPlanTest` (the plan's blocks and doors, the
-anchors standing on its floors), all in `chapter2/level1/core`; `Ch2L1NpcsTest` (the people's file, the routines and a typist's, a walker's and a stuck one's every tick), `Ch2L1Act2Test` (the meeting file and its wiring, the coworker leading and waiting and his reminders, the meeting's lines, door and badge, the glances, the arrow over him), `Ch2L1NpcLifeTest` (the `life` keys and a worker's pace, easing in and braking, slowing for a turn, lingering, where the eyes go and the player's look with its cooldown, pairing for a talk and the turns in it), `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step, Act 3's included, and its wait), `Ch2L1Act3Test` (the act3 file, the code, the objective moving on, Rowan's files read), `Ch2L1PatrolsTest` (the patrols' file and its wiring, a round with its stops and one there and back, what a guard sees, the "?" filling, the warning, the chase, the catch and giving up, a stare), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule, and that a schedule made for an old game is replaced when the progress goes back: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`, `act3.json`'s too) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say, that the lockers' room has its lockers and no camera, that every other space has one and that every worker and route stands on the floor. `Ch2PlayerProgressTest` covers the state, the flag and the counters in the chapter's progress, and `ChapterBoundaryTest` that no code outside `chapter2` names it.
+anchors standing on its floors), all in `chapter2/level1/core`; `Ch2L1NpcsTest` (the people's file, the routines and a typist's, a walker's and a stuck one's every tick), `Ch2L1Act2Test` (the meeting file and its wiring, the coworker leading and waiting and his reminders, the meeting's lines, door and badge, the glances, the arrow over him), `Ch2L1NpcLifeTest` (the `life` keys and a worker's pace, easing in and braking, slowing for a turn, lingering, where the eyes go and the player's look with its cooldown, pairing for a talk and the turns in it), `Ch2L1TasksTest` (the tasks' file, the bits, the held click), `Ch2L1GuideTest` (what the arrow points at in each step, Act 3's included, and its wait), `Ch2L1Act3Test` (the act3 file, the code, the objective moving on, Rowan's files read), `Ch2L1OfficeTest` (the office's file and its wiring, the door before and after the lines, the lines and pauses in order, the pass, the hum and the shake on their ticks, Rowan's poses and way), `Ch2L1PatrolsTest` (the patrols' file and its wiring, a round with its stops and one there and back, what a guard sees, the "?" filling, the warning, the chase, the catch and giving up, a stare), `ModelRotationTest` (every model's rotation angles are ones the game accepts), `Ch2L1SpeakersTest` (the file and every rule of the schedule, and that a schedule made for an old game is replaced when the progress goes back: silent before the first task, the beat after the terminal, the zone, never two at once, the cooldown, the pool once each, act two cancels), `Ch2L1IntroSceneTest` (the cinematic's shots, timing and missing anchors), `Ch2L1WiringTest` (everything the files name is in `anchors.json`, `act3.json`'s too) and `Ch2L1TaskTextsTest` (the texts in both languages); `Ch2L1MapPlanTest` also checks the props of the tasks and the speakers stand where their anchors say, that the lockers' room has its lockers and no camera, that every other space has one and that every worker and route stands on the floor. `Ch2PlayerProgressTest` covers the state, the flag and the counters in the chapter's progress, and `ChapterBoundaryTest` that no code outside `chapter2` names it.

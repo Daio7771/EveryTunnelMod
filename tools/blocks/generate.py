@@ -812,6 +812,24 @@ def lab_badge_copy_tex(rng):
     return img
 
 
+def overtime_pass_tex(rng):
+    """Item (Chapter 2): Rowan's "Unpaid Overtime Pass": Chapter 1's keycard recoloured in his colours, the card beige gold, the band
+    the green of his tie, the chip gold."""
+    img = keycard_tex(rng)
+    swap = {
+        (66, 96, 140, 255): (28, 96, 52, 255),        # band
+        (44, 66, 100, 255): (20, 70, 38, 255),        # band edge
+        (230, 233, 236, 255): (230, 212, 160, 255),   # card
+        (150, 156, 164, 255): (186, 160, 96, 255),    # card edge
+    }
+    for y in range(16):
+        for x in range(16):
+            c = img.getpixel((x, y))
+            if c in swap:
+                img.putpixel((x, y), swap[c])
+    return img
+
+
 def keycard_tex(rng):
     """Item: the guard's keycard on a black lanyard clip: a white plastic card with a
     blue-grey band, a photo, name lines and a gold chip."""
@@ -3920,6 +3938,13 @@ def build():
     for block_id, name in (("lab_ceiling_light", "Ceiling Light"), ("lab_ceiling_vent", "Ceiling Vent")):
         a.models[block_id] = model({"w": "lab_white", "f": block_id}, [el((0, 0, 0), (16, 16, 16), "w", down="f")])
         a.block(block_id, name, {"variants": {"": {"model": f"{NS}:block/{block_id}"}}}, {"parent": f"{NS}:block/{block_id}"})
+    # Chapter 2's factory after Rowan's office: the LAB's ceiling lights turned down (FACTORY_LIGHT_DIM), the diffuser a dull grey.
+    dim = ceiling_light_tex(r("factory_light_dim"))
+    dim = Image.eval(dim, lambda v: int(v * 0.42))
+    a.texture("factory_light_dim", dim, T.PLASTIC.but(smoothness=0.6, relief=0.0), tiles=False)
+    a.models["factory_light_dim"] = model({"w": "lab_white", "f": "factory_light_dim"}, [el((0, 0, 0), (16, 16, 16), "w", down="f")])
+    a.block("factory_light_dim", "Ceiling Light (Dimmed)", {"variants": {"": {"model": f"{NS}:block/factory_light_dim"}}},
+            {"parent": f"{NS}:block/factory_light_dim"})
     # By each door, a card reader, its light green.
     a.texture("lab_reader", lab_reader_tex(r("lab_reader")), T.PLASTIC.but(smoothness=0.5), tiles=False)
     prop("lab_reader", "Card Reader", {"d": "lab_steel_dark", "f": "lab_reader"},
@@ -4260,7 +4285,7 @@ def main():
                           ("record_still_water", lambda g: record_tex(g, (70, 110, 190))), ("record_chefs_plate", lambda g: record_tex(g, (150, 50, 60))),
                           ("reel_87", reel_tex), ("reel_94", reel_tex), ("reel_102", reel_tex), ("reel_120", reel_tex),
                           ("dart", dart_tex), ("master_card", master_card_tex), ("master_key", master_key_tex),
-                          ("wrench", wrench_tex), ("detector", detector_tex), ("broom", broom_tex), ("lab_badge_copy", lab_badge_copy_tex),
+                          ("wrench", wrench_tex), ("detector", detector_tex), ("broom", broom_tex), ("lab_badge_copy", lab_badge_copy_tex), ("overtime_pass", overtime_pass_tex),
                           *((f"fuse_{amps}a", lambda g, i=i: fuse_item_tex(g, i)) for i, amps in enumerate(FUSE_AMPS)),
                           *((f"reagent_{i + 1}", lambda g, i=i: reagent_item_tex(g, i)) for i in range(4)),
                           ("master_card_nw", lambda g: card_tex(g, 0, 0)), ("master_card_ne", lambda g: card_tex(g, 1, 0)),

@@ -1,4 +1,12 @@
 {
+  "ambient.ch2l1.office_hum": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/ch2l1/office_hum_1",
+        "stream": true
+      }
+    ]
+  },
   "ambient.cloud_game.static": {
     "sounds": [
       {
