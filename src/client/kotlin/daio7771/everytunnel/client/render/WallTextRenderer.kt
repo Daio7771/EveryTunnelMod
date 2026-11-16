@@ -42,7 +42,7 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         val state = entity.cachedState
         if (!state.isOf(ModBlocks.WALL_TEXT)) return
         val facing = state.get(WallTextBlock.FACING)
-        if (entity.style == WallTextBlockEntity.Style.DIPLOMA || entity.style == WallTextBlockEntity.Style.PLAQUE) {
+        if (entity.style in MULTILINE) {
             multiline(entity, facing.asRotation(), matrices, vertexConsumers, light)
             return
         }
@@ -73,6 +73,16 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
             matrices.translate(0.0, 0.0, 2.0 * LAYER)
             font.draw(text, x, y + 1f, if (brass) BRASS_INK else if (lab) LAB_INK else PLATE_INK, false, matrices.peek().positionMatrix, vertexConsumers,
                 TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light)
+        } else if (entity.style == WallTextBlockEntity.Style.LOGO) {
+            // The company's logo: its blue letters on a white panel with a pale rim.
+            val matrix = matrices.peek().positionMatrix
+            val buffer = vertexConsumers.getBuffer(RenderLayer.getTextBackground())
+            quad(buffer, matrix, x - LOGO_PAD_X - LOGO_RIM, y - LOGO_PAD_Y - LOGO_RIM, x + width + LOGO_PAD_X + LOGO_RIM,
+                y + GLYPH_HEIGHT + LOGO_PAD_Y + LOGO_RIM, 0f, LOGO_RIM_COLOR, light)
+            quad(buffer, matrix, x - LOGO_PAD_X, y - LOGO_PAD_Y, x + width + LOGO_PAD_X, y + GLYPH_HEIGHT + LOGO_PAD_Y, LAYER, LOGO_PANEL, light)
+            matrices.translate(0.0, 0.0, 2.0 * LAYER)
+            font.draw(text, x, y + 1f, LOGO_INK, false, matrices.peek().positionMatrix, vertexConsumers,
+                TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light)
         } else {
             font.draw(text, x, y, LETTERS_INK, true, matrices.peek().positionMatrix, vertexConsumers,
                 TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light)
@@ -80,19 +90,30 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         matrices.pop()
     }
 
-    /** A certificate or a plaque: its lines, in blocks, centred on the block (and [WallTextBlockEntity.offset]). */
-    private fun multiline(entity: WallTextBlockEntity, rotation: Float, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, light: Int) {
+    /**
+     * How a panel of several lines looks: its first line's height and the others', in blocks, the gap between them, the margin, the frame,
+     * the narrowest half width, its colours, and whether it glows (drawn at full light, as a lit screen is).
+     */
+    private class Panel(
+        val heading: Float, val line: Float, val gap: Float, val margin: Float, val frame: Float, val minHalfWidth: Float,
+        val frameColor: Int, val paper: Int, val ink: Int, val headingInk: Int, val glows: Boolean = false,
+    )
+
+    /** A certificate, a plaque, a poster or a screen: its lines, in blocks, centred on the block (and [WallTextBlockEntity.offset]). */
+    private fun multiline(entity: WallTextBlockEntity, rotation: Float, matrices: MatrixStack, vertexConsumers: VertexConsumerProvider, blockLight: Int) {
         val diploma = entity.style == WallTextBlockEntity.Style.DIPLOMA
+        val panel = PANELS.getValue(entity.style)
+        val light = if (panel.glows) FULL_BRIGHT else blockLight
         val lines = Text.translatable(entity.text).string.split("\n")
-        val heights = lines.indices.map { if (diploma && it == 0) DIPLOMA_HEADING else if (diploma) DIPLOMA_LINE else PLAQUE_LINE }
+        val heights = lines.indices.map { if (it == 0) panel.heading else panel.line }
         val widths = lines.mapIndexed { i, line -> font.getWidth(line) * heights[i] / GLYPH_HEIGHT }
-        val gap = if (diploma) DIPLOMA_GAP else PLAQUE_GAP
-        val margin = if (diploma) DIPLOMA_MARGIN else PLAQUE_MARGIN
+        val gap = panel.gap
+        val margin = panel.margin
         val seal = if (diploma) DIPLOMA_SEAL + gap else 0f
-        val halfWidth = maxOf(widths.max() / 2f + margin, if (diploma) DIPLOMA_MIN_HALF_WIDTH else 0f)
+        val halfWidth = maxOf(widths.max() / 2f + margin, panel.minHalfWidth)
         val textHeight = heights.sum() + gap * (lines.size - 1)
         val halfHeight = (textHeight + seal) / 2f + margin
-        val frame = if (diploma) DIPLOMA_FRAME else PLAQUE_RIM
+        val frame = panel.frame
 
         matrices.push()
         matrices.translate(0.5, 0.5, 0.5)
@@ -101,9 +122,8 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         matrices.scale(1f, -1f, 1f)                                                     // y down, like the font's
         val buffer = vertexConsumers.getBuffer(RenderLayer.getTextBackground())
         val m = matrices.peek().positionMatrix
-        quad(buffer, m, -halfWidth - frame, -halfHeight - frame, halfWidth + frame, halfHeight + frame, 0f,
-            if (diploma) DIPLOMA_FRAME_COLOR else BRASS_RIM, light)
-        quad(buffer, m, -halfWidth, -halfHeight, halfWidth, halfHeight, BLOCK_LAYER, if (diploma) DIPLOMA_PAPER else BRASS_COLOR, light)
+        quad(buffer, m, -halfWidth - frame, -halfHeight - frame, halfWidth + frame, halfHeight + frame, 0f, panel.frameColor, light)
+        quad(buffer, m, -halfWidth, -halfHeight, halfWidth, halfHeight, BLOCK_LAYER, panel.paper, light)
         if (diploma) {
             val sx = halfWidth - margin - DIPLOMA_SEAL
             val sy = halfHeight - margin - DIPLOMA_SEAL
@@ -115,7 +135,7 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
             matrices.translate((-widths[i] / 2f).toDouble(), y.toDouble(), (3f * BLOCK_LAYER).toDouble())
             val s = heights[i] / GLYPH_HEIGHT
             matrices.scale(s, s, s)
-            font.draw(line, 0f, 1f, if (diploma) DIPLOMA_INK else BRASS_INK, false, matrices.peek().positionMatrix, vertexConsumers,
+            font.draw(line, 0f, 1f, if (i == 0) panel.headingInk else panel.ink, false, matrices.peek().positionMatrix, vertexConsumers,
                 TextRenderer.TextLayerType.POLYGON_OFFSET, 0, light)
             matrices.pop()
             y += heights[i] + gap
@@ -185,5 +205,36 @@ class WallTextRenderer(context: BlockEntityRendererFactory.Context) : BlockEntit
         const val DIPLOMA_PAPER = 0xFFE8DEC4.toInt()
         const val DIPLOMA_INK = 0xFF2C2018.toInt()
         const val DIPLOMA_SEAL_COLOR = 0xFFC2963E.toInt()
+        /** Chapter 2's factory: the company's blue (its logo, its posters) and its screens' glass and light. */
+        const val LOGO_INK = 0xFF1F5A9E.toInt()
+        const val LOGO_PANEL = 0xFFF6F7F8.toInt()
+        const val LOGO_RIM_COLOR = 0xFFC8CDD2.toInt()
+        /** The logo's panel round its letters, in font units. */
+        const val LOGO_PAD_X = 4f
+        const val LOGO_PAD_Y = 3f
+        const val LOGO_RIM = 0.6f
+        const val POSTER_BLUE = 0xFF1F5A9E.toInt()
+        const val POSTER_RIM = 0xFFE8ECF0.toInt()
+        const val POSTER_INK = 0xFFF4F6F8.toInt()
+        const val POSTER_ACCENT = 0xFFFFD25A.toInt()
+        const val SCREEN_GLASS = 0xFF0C1418.toInt()
+        const val SCREEN_FRAME = 0xFF202428.toInt()
+        const val SCREEN_INK = 0xFF9EE8F0.toInt()
+        const val FULL_BRIGHT = 0xF000F0
+
+        val MULTILINE = setOf(
+            WallTextBlockEntity.Style.DIPLOMA, WallTextBlockEntity.Style.PLAQUE, WallTextBlockEntity.Style.POSTER, WallTextBlockEntity.Style.SCREEN,
+        )
+        val PANELS = mapOf(
+            WallTextBlockEntity.Style.DIPLOMA to Panel(
+                DIPLOMA_HEADING, DIPLOMA_LINE, DIPLOMA_GAP, DIPLOMA_MARGIN, DIPLOMA_FRAME, DIPLOMA_MIN_HALF_WIDTH,
+                DIPLOMA_FRAME_COLOR, DIPLOMA_PAPER, DIPLOMA_INK, DIPLOMA_INK,
+            ),
+            WallTextBlockEntity.Style.PLAQUE to Panel(
+                PLAQUE_LINE, PLAQUE_LINE, PLAQUE_GAP, PLAQUE_MARGIN, PLAQUE_RIM, 0f, BRASS_RIM, BRASS_COLOR, BRASS_INK, BRASS_INK,
+            ),
+            WallTextBlockEntity.Style.POSTER to Panel(0.13f, 0.07f, 0.05f, 0.1f, 0.025f, 0.45f, POSTER_RIM, POSTER_BLUE, POSTER_INK, POSTER_ACCENT),
+            WallTextBlockEntity.Style.SCREEN to Panel(0.1f, 0.065f, 0.045f, 0.09f, 0.04f, 0.6f, SCREEN_FRAME, SCREEN_GLASS, SCREEN_INK, SCREEN_INK, glows = true),
+        )
     }
 }

@@ -557,7 +557,7 @@ industrial, and up its stairs the director's office (the boss's scene is still t
     his desk at the far end, his chair behind it, a lamp, a little block of diorite, a few papers, coffee. Behind
     him, over a credenza, a wall of fifteen CCTV screens showing only snow under their cameras' labels (`MonitorBankBlock`);
     four framed diplomas over the sofa and three trophies on a credenza by the south wall, each with its brass
-    plaque (`WallTextBlockEntity`'s `diploma` and `plaque` styles). On its south side a door (opened by
+    plaque (`WallTextBlockEntity`'s `diploma` and `plaque` styles; Chapter 2's factory adds `logo`, `poster` and `screen`). On its south side a door (opened by
     hand) out to a corridor of Level 1's garage, straight, lit,
     ending at Level 1's locked EXIT door under its sign. Under the corridor's end lies a pit 40 blocks deep,
     closed by its floor until the player steps onto it ([The end](#12-the-end)).

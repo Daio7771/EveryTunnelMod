@@ -4,9 +4,10 @@
 
 Level 1 of Chapter 2 is the factory, four months after Chapter 1: an ordinary scientist hired in the place of the one
 who "fell ill", three acts of tasks, a meeting and sneaking, ending in the supervisor's office. It is built in phases
-(0 to 10), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
-`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 9, the sealed zone and the end.** It is
-playable from the clock to its end, the basement swept and back to the menu (phase 10, the QA pass, is next); the LAB is not furnished yet.
+(0 to 11), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
+`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 10a, the furnishing.** It is
+playable from the clock to its end, the basement swept and back to the menu, and every room is furnished; phase 10b (two more Act 1 tasks and
+more workers) and phase 11 (the QA pass) are next.
 
 Its code is under `daio7771.everytunnel.chapter2` (the client's under the same package in `src/client`): `level1.core` (plain
 Kotlin, tested), `level1.platform` (Minecraft glue) and `level1.client`, apart from the base game, which never names it (see
@@ -130,10 +131,28 @@ picks the chalk from the wall behind: black on a wall that looks white, white on
 in its light (`Level.chalk`; `wall_chalk`, the painted font's chalk
 version from `tools/gui/wall_font.py`, with no drips).
 
-**Not there yet:** furniture (it comes with the phase that needs it: the bench with the tubes, the terminal and the analyzer, the broom, the dirt
-and the ceiling speakers came with phase 3; the lockers, the LAB's six work stations and the cameras with phase 4; Act 3's with phase 6; the rest of the
-LAB's furniture is still to come; the basement's came with phase 9) and the other text signs ("Restricted access", the room names). The hand-over from the
-prologue to the level is not there either: `enter` is called by hand.
+**The furniture** came with the phases that needed it (the tasks' with phase 3; the lockers, the LAB's first work stations and the
+cameras with phase 4; Act 3's with phase 6; the basement's with phase 9), and the rest with **phase 10a**, which also gave the factory the
+face of the rebuilt company, NONAME INDUSTRIES: corporate and clean, white with its blue.
+
+- **Entrance:** the reception desk with two monitors in front of the logo wall ("NONAME INDUSTRIES" in big blue letters on a white panel,
+  the `logo` style), a waiting corner to the west (sofas, a low table), plants. (The `screen` style, a lit screen, is there for later.)
+- **LAB:** fume hoods along the north wall, sample storage along the east wall (shelves, then cabinets past the sealed door), two islands
+  in the middle (work stations with monitors; instruments: microscopes, beakers, a tube rack), carts. The south wall east of the analyzer
+  is kept free for phase 10b's tasks.
+- **Dining room:** tables of four, the counter with two coffee machines, a water dispenser, three vending machines, plants, wall sconces
+  and **warm ceiling lights** of its own (`warm_ceiling_light`; the generator's `SPACE_LIGHTS`).
+- **WCs**, with **no cameras**: stalls (a toilet, partitions two high, a door: `toilet`, `stall_wall`, `stall_door`) and sinks with a
+  mirror over them (`wc_sink`, `wc_mirror`), new blocks of `tools/blocks/generate.py`.
+- **Security** (guard B's rest): a bank of monitors over a desk and a chair, the guards' lockers, a table, a counter with a coffee machine,
+  the key rack; its middle stays clear for guard B.
+- Plants and a bench in the main corridor, plants in the ring and the authorized corridor.
+- **Signs:** a plate over every door with the room's name, on the side one comes from (`DOOR_SIGNS`, centred over a door two blocks wide
+  with the plan's `offset`), an arrow to the dining room, and the company's posters (`poster` style: white lines on its blue) along the
+  corridors, the LAB and the dining room.
+
+The generator now also checks that no patrol's or person's way runs into furniture and that nothing stands in front of a door. The
+hand-over from the prologue to the level is not there yet: `enter` is called by hand.
 
 
 ## Voices and subtitles

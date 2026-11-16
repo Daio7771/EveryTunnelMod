@@ -61,8 +61,9 @@ class Ch2L1MapPlanTest {
     @Test
     fun `the lamps are all ceiling lamps and the lamp fills are all in the list`() {
         assertTrue(plan.lights.isNotEmpty())
-        for (c in plan.lights) assertEquals("every_tunnel:lab_ceiling_light", cells[c], "no lamp at $c")
-        assertEquals(plan.lights.size, cells.values.count { it == "every_tunnel:lab_ceiling_light" })
+        val lamps = setOf("every_tunnel:lab_ceiling_light", "every_tunnel:warm_ceiling_light")     // the dining room's are warm
+        for (c in plan.lights) assertTrue(cells[c] in lamps, "no lamp at $c")
+        assertEquals(plan.lights.size, cells.values.count { it in lamps })
     }
 
     @Test
@@ -79,7 +80,8 @@ class Ch2L1MapPlanTest {
     @Test
     fun `the doors are the mod's own, the factory door for hands and the emergency door for the locked ones`() {
         val kinds = cells.values.map { BlockSpec.parse(it).id }.filter { it.endsWith("_door") }.toSet()
-        assertEquals(setOf("every_tunnel:factory_door", "every_tunnel:emergency_door"), kinds)
+        // ...and the WCs' stall doors (phase 10).
+        assertEquals(setOf("every_tunnel:factory_door", "every_tunnel:emergency_door", "every_tunnel:stall_door"), kinds)
     }
 
     /**
@@ -89,7 +91,7 @@ class Ch2L1MapPlanTest {
      */
     @Test
     fun `the leaves of a pair of doors are hinged on the outer edges`() {
-        val leaves = cells.filter { (_, block) -> "_door[" in block && "half=lower" in block }
+        val leaves = cells.filter { (_, block) -> "_door[" in block && "half=lower" in block && "stall_door" !in block }    // stalls: single leaves
             .map { (c, block) -> c to BlockSpec.parse(block).states }
         assertTrue(leaves.isNotEmpty())
         for (facing in listOf("south", "east")) {
@@ -180,10 +182,11 @@ class Ch2L1MapPlanTest {
     @Test
     fun `every other space has a decorative camera`() {
         val spaces = listOf(
-            "entrance", "main_corridor", "lab", "wc_west", "ring_north", "ring_south", "ring_west", "ring_east", "dining", "aux_lab",
-            "authorized_corridor", "security_room", "office", "wc_east", "sealed_corridor", "basement",
+            "entrance", "main_corridor", "lab", "ring_north", "ring_south", "ring_west", "ring_east", "dining", "aux_lab",
+            "authorized_corridor", "security_room", "office", "sealed_corridor", "basement",
         )
         for (zone in spaces) assertTrue(blocksIn(zone, "factory_camera") >= 1, "no camera in $zone")
+        for (zone in listOf("wc_west", "wc_east")) assertEquals(0, blocksIn(zone, "factory_camera"), "a camera in $zone")
         assertTrue(cells.values.count { it.startsWith("every_tunnel:factory_camera[") } in 15..30)
     }
 

@@ -40,7 +40,8 @@ def write_plan(level):
         "clear": {"from": list(lo), "to": list(hi)},
         "fills": [{"from": list(a), "to": list(b), "block": block} for a, b, block in fills],
         "lights": [list(c) for c in level.lights()],
-        "texts": [{"at": list(cell), "text": key, "style": style} for cell, _, key, style in L.WALL_TEXTS],
+        "texts": [{"at": list(cell), "text": key, "style": style, **({"offset": offset} if offset else {})}
+                  for cell, _, key, style, offset in L.WALL_TEXTS],
         "messages": [{"at": list(cell), "text": key, "size": size, "rotation": rotation, "chalk": level.chalk(cell, facing)}
                      for cell, facing, key, size, rotation in L.WALL_MESSAGES],
     }

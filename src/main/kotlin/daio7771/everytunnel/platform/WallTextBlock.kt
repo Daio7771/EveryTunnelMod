@@ -67,16 +67,18 @@ class WallTextBlock(settings: Settings) : BlockWithEntity(settings) {
  * What a [WallTextBlock] says: [text], a translation key (`sign.every_tunnel.*`), and its
  * [style]: [Style.PLATE], white letters on a dark nameplate, [Style.BRASS], dark letters on a
  * brass one, [Style.LAB], black letters on a white plastic one (Level 5's lab), [Style.LETTERS], big dark letters straight
- * on the wall, [Style.DIPLOMA], a framed certificate of several lines (the director's), or [Style.PLAQUE], a small brass
- * plaque of several lines (his trophies'); [offset], blocks to the reader's right of the block's centre
+ * on the wall, [Style.DIPLOMA], a framed certificate of several lines (the director's), [Style.PLAQUE], a small brass
+ * plaque of several lines (his trophies'), and Chapter 2's factory's: [Style.LOGO], big letters in the company's blue on a white panel, [Style.POSTER],
+ * a company poster (white lines on that blue, the first one big) and [Style.SCREEN], a lit screen (pale cyan lines on a dark glass,
+ * glowing in the dark); [offset], blocks to the reader's right of the block's centre
  * (to centre a text on a wall an even number of blocks wide); [align], which of the block's
  * edges the text keeps to (a nameplate beside a door keeps to the door's side and grows along
  * the wall, never over the doorway), or `center`. NBT:
- * `{Text: "...", Style: "plate" | "letters" | "brass" | "lab" | "diploma" | "plaque", Offset: 0.5f, Align: "left" | "right" | "center"}`.
+ * `{Text: "...", Style: "plate" | "letters" | "brass" | "lab" | "diploma" | "plaque" | "logo" | "poster" | "screen", Offset: 0.5f, Align: "left" | "right" | "center"}`.
  */
 class WallTextBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlocks.WALL_TEXT_ENTITY, pos, state) {
 
-    enum class Style { PLATE, LETTERS, BRASS, LAB, DIPLOMA, PLAQUE }
+    enum class Style { PLATE, LETTERS, BRASS, LAB, DIPLOMA, PLAQUE, LOGO, POSTER, SCREEN }
 
     /** Says [newText] from now on (Level 4's darts: a plate drawn each game; not a key, so it shows as it is). */
     fun say(newText: String, newStyle: Style) {
@@ -101,7 +103,7 @@ class WallTextBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlo
         super.readNbt(nbt)
         text = nbt.getString("Text")
         style = when (nbt.getString("Style")) { "letters" -> Style.LETTERS; "brass" -> Style.BRASS; "lab" -> Style.LAB; "diploma" -> Style.DIPLOMA
-            "plaque" -> Style.PLAQUE; else -> Style.PLATE }
+            "plaque" -> Style.PLAQUE; "logo" -> Style.LOGO; "poster" -> Style.POSTER; "screen" -> Style.SCREEN; else -> Style.PLATE }
         offset = nbt.getFloat("Offset")
         align = when (nbt.getString("Align")) { "left" -> -1; "right" -> 1; else -> 0 }
     }

@@ -28,8 +28,11 @@ class Ch2L1MapPlan(
     val messages: List<WallMessage> = emptyList(),
 ) {
 
-    /** A `wall_text` block's words: the lang key [text] in [style] (`lab`, `plaque`, `brass`... as the block entity's NBT names them). */
-    data class WallText(val at: Cell, val text: String, val style: String)
+    /**
+     * A `wall_text` block's words: the lang key [text] in [style] (`lab`, `plaque`, `poster`... as the block entity's NBT names them),
+     * [offset] blocks to the reader's right (a plate centred over a door two blocks wide).
+     */
+    data class WallText(val at: Cell, val text: String, val style: String, val offset: Float = 0f)
 
     /**
      * A `wall_message` block's scrawl: the lang key [text], a line [size] blocks high, [rotation] degrees off level, in [chalk] (`white` on a
@@ -68,7 +71,7 @@ class Ch2L1MapPlan(
                 json.hashCode(),
                 root.getAsJsonArray("texts")?.map {
                     val o = it.asJsonObject
-                    WallText(cell(o["at"]), o["text"].asString, o["style"].asString)
+                    WallText(cell(o["at"]), o["text"].asString, o["style"].asString, o["offset"]?.asFloat ?: 0f)
                 } ?: emptyList(),
                 root.getAsJsonArray("messages")?.map {
                     val o = it.asJsonObject

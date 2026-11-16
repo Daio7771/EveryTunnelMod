@@ -84,7 +84,12 @@ def draw(level, path):
         furniture = {"lab_bench": (160, 160, 166), "locker": (96, 116, 156), "predecessor_locker": (200, 90, 90), "exec_desk": (60, 56, 52),
                      "bookshelf": (120, 84, 56), "leather_sofa": (70, 50, 40), "factory_glass": (110, 200, 220), "film_light": (30, 30, 34),
                      "film_camera": (30, 30, 34), "metal_shelf": (120, 124, 132), "polished_andesite_stairs": (150, 150, 156),
-                     "iron_bars": (60, 62, 68), "bricks": (150, 80, 60)}
+                     "iron_bars": (60, 62, 68), "bricks": (150, 80, 60), "counter": (176, 150, 110), "sofa": (110, 116, 126),
+                     "low_table": (220, 220, 220), "bench": (176, 150, 110), "fume_hood": (210, 214, 218), "lab_shelf": (130, 134, 140),
+                     "lab_cabinet": (225, 225, 228), "cafe_table": (240, 240, 240), "cafe_chair": (190, 190, 196),
+                     "vending_machine": (200, 50, 50), "toilet": (250, 250, 250), "stall_wall": (150, 170, 196),
+                     "stall_door": (150, 170, 196), "wc_sink": (230, 236, 240), "office_desk": (200, 196, 186), "locker": (96, 116, 156),
+                     "potted_plant": (70, 140, 70), "lab_cart": (150, 150, 156), "water_dispenser": (180, 210, 240)}
         if name in furniture and (y in floors or name == "polished_andesite_stairs"):
             d.rectangle([a + 1, b + 1, a + SCALE - 2, b + SCALE - 2], fill=furniture[name])
         elif name in ("badge_reader", "keypad", "noname_terminal", "rowan_portrait"):

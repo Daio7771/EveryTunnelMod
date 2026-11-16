@@ -4,9 +4,10 @@
 
 El Nivel 1 del Chapter 2 es la fábrica, cuatro meses después del Chapter 1: un científico normal contratado en lugar del
 que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el despacho del supervisor. Se construye por
-fases (de la 0 a la 10), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
-nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 9, la zona sellada y el final.** Se
-juega desde el reloj hasta su final, el sótano barrido y la vuelta al menú (lo siguiente es la fase 10, la pasada de QA); el LAB aún no está amueblado.
+fases (de la 0 a la 11), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
+nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 10a, el mobiliario.** Se
+juega desde el reloj hasta su final, el sótano barrido y la vuelta al menú, y todas las salas están amuebladas; lo siguiente es la fase 10b
+(dos tareas más del Acto 1 y más trabajadores) y la fase 11 (la pasada de QA).
 
 Su código está en `daio7771.everytunnel.chapter2` (el del cliente, en el mismo paquete dentro de `src/client`): `level1.core`
 (Kotlin puro, con tests), `level1.platform` (pegamento con Minecraft) y `level1.client`, aparte del juego base, que nunca lo
@@ -131,11 +132,29 @@ idioma con un estilo; `Ch2L1Build` los escribe en las entidades de los bloques a
 del retrato, los dos carteles del rellano). Sus `messages` hacen lo mismo con sus bloques `wall_message` (garabatos de tiza:
 una clave de idioma, la altura de una línea, un ángulo, el color de la tiza): el "???" sobre el terminal del sótano. Los garabatos siempre están en inglés
 (sus textos en español son los ingleses), y el generador elige la tiza según la pared de detrás: negra en una pared que se ve blanca, blanca en una
-que se ve oscura, como el hormigón blanco del sótano con su luz (`Level.chalk`; `wall_chalk`, la versión en tiza de la fuente pintada de `tools/gui/wall_font.py`, sin chorretones).
+que se ve oscura, como el hormigón blanco del sótano con su luz (`Level.chalk`; `wall_chalk`, la versión en tiza de la fuente **El mobiliario** llegó con las fases que lo necesitaban (el de las tareas con la 3; las taquillas, las primeras estaciones de trabajo del
+LAB y las cámaras con la 4; el del Acto 3 con la 6; el del sótano con la 9), y el resto con la **fase 10a**, que además dio a la fábrica la
+cara de la empresa reconstruida, NONAME INDUSTRIES: corporativa y limpia, blanca con su azul.
 
-**Todavía no hay:** mobiliario (llega con la fase que lo necesita: el banco con los tubos, el terminal, el analizador, la escoba, la suciedad y los
-altavoces de techo llegaron con la 3; las taquillas, las seis estaciones de trabajo del LAB y las cámaras con la 4; el del Acto 3 con la 6; el resto
-del mobiliario del LAB está por llegar; el del sótano llegó con la 9) ni los demás carteles de texto ("Acceso restringido", los nombres de las salas). Tampoco está el
+- **Entrada:** el mostrador de recepción con dos monitores delante de la pared del logo ("NONAME INDUSTRIES" en letras grandes azules sobre un
+  recuadro blanco, el estilo `logo`), un rincón de espera al oeste (sofás y una mesa baja) y plantas. (El estilo `screen`, una pantalla
+  iluminada, queda para más adelante.)
+- **LAB:** campanas de gases en la pared norte, el almacén de muestras en la pared este (estanterías y, pasada la puerta sellada,
+  armarios), dos islas en el centro (puestos con monitores; instrumentos: microscopios, vasos, una gradilla de tubos) y carritos. La pared
+  sur al este del analizador queda libre para las tareas de la fase 10b.
+- **Comedor:** mesas de cuatro, la barra con dos cafeteras, una fuente de agua, tres máquinas expendedoras, plantas, apliques en las
+  paredes y **luces de techo cálidas** propias (`warm_ceiling_light`; los `SPACE_LIGHTS` del generador).
+- **Aseos**, **sin cámaras**: cubículos (un inodoro, mamparas de dos de alto y una puerta: `toilet`, `stall_wall`, `stall_door`) y lavabos
+  con un espejo encima (`wc_sink`, `wc_mirror`), bloques nuevos de `tools/blocks/generate.py`.
+- **Seguridad** (donde descansa el guardia B): un banco de monitores sobre una mesa y una silla, las taquillas de los guardias, una mesa,
+  una barra con cafetera y el armario de llaves; su centro queda libre para el guardia B.
+- Plantas y un banco en el pasillo principal, y plantas en el anillo y en el pasillo autorizado.
+- **Carteles:** una placa sobre cada puerta con el nombre de la sala, del lado por el que se llega (`DOOR_SIGNS`, centrada sobre una
+  puerta de dos bloques con el `offset` del plan), una flecha al comedor y los carteles de la empresa (estilo `poster`: líneas blancas
+  sobre su azul) por los pasillos, el LAB y el comedor.
+
+El generador comprueba ahora también que ninguna ruta de patrulla ni de persona choca con un mueble y que nada tapa una puerta. Tampoco está
+aún el paso del prólogo al nivel: `enter` se llama a mano.á el
 paso del prólogo al nivel: `enter` se llama a mano.
 
 

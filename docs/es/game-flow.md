@@ -593,7 +593,7 @@ escena del jefe está por llegar). Sus zonas están en [Niveles](levels.md#nivel
     sillón detrás, una lámpara, un bloquecito de diorita, unos papeles, café. Detrás de él, sobre un aparador, un muro
     de quince monitores CCTV que solo muestran nieve bajo el rótulo de su cámara (`MonitorBankBlock`); cuatro diplomas
     enmarcados sobre el sofá y tres trofeos en un aparador junto a la pared sur, cada uno con su placa de latón (los
-    estilos `diploma` y `plaque` de `WallTextBlockEntity`). En su lado sur, una puerta
+    estilos `diploma` y `plaque` de `WallTextBlockEntity`; la fábrica del Chapter 2 añade `logo`, `poster` y `screen`). En su lado sur, una puerta
     (se abre a mano) de salida a un pasillo del garaje del nivel 1,
     recto e iluminado, que acaba en la puerta EXIT cerrada del nivel 1 bajo su cartel. Bajo el final del pasillo hay
     un pozo de 40 bloques, cerrado por su suelo hasta que el jugador lo pisa ([El final](#12-el-final)).

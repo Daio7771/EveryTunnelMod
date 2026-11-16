@@ -202,7 +202,6 @@ CAMERAS = {
     "entrance": [(24, 5, "east")],
     "main_corridor": [(30, 13, "south"), (20, 44, "north")],
     "lab": [(61, 12, "west")],
-    "wc_west": [(14, 11, "south")],
     "ring": [(24, 48, "east"), (53, 51, "west"), (24, 72, "east"), (53, 69, "west"), (19, 60, "north"), (58, 60, "south")],
     "dining": [(21, 53, "east")],
     "aux_lab": [(1, 48, "south")],
@@ -210,7 +209,6 @@ CAMERAS = {
     "authorized": [(22, 74, "east"), (53, 77, "west")],
     "security": [(27, 79, "south")],
     "office": [(29, 79, "south")],
-    "wc_east": [(47, 81, "west")],
     "sealed_zone": [(73, 25, "west")],
     "basement": [(88, 39, "west")],
 }
@@ -307,14 +305,197 @@ BASEMENT_THINGS = {
     (63, BASEMENT_Y + 1, 53): "month_plaque[facing=east]",
 }
 
-# Text on walls (wall_text blocks: cell, the way the text faces, its lang key, its style): chamber 02's label, the portrait's plaque, and,
-# on the landing behind the sealed door, the sign over the barred way and the one by the stairs down.
-WALL_TEXTS = [
-    (CHAMBER_LABEL[0], CHAMBER_LABEL[1], "every_tunnel.ch2.l1.sign.chamber_02", "lab"),
-    ((40, 1, 82), "west", "every_tunnel.ch2.l1.sign.portrait", "plaque"),
-    ((73, 2, 28), "west", "every_tunnel.ch2.l1.sign.under_construction", "plate"),
-    ((69, 2, 30), "north", "every_tunnel.ch2.l1.sign.basement", "lab"),
+# --- Phase 10: the furnishing and the company's face ------------------------------------
+# The rebuilt company, NONAME INDUSTRIES, shows itself off: corporate, clean, white with its blue (the logo, the posters), glass, screens,
+# plants. Every room gets what it is for; the 10b tasks' corner of the LAB (its south wall east of the analyzer) is kept free.
+
+def _stack2(out, x, z, facing, block, y=0):
+    """A furniture stack two high (StackFurnitureBlock: up/down)."""
+    out[(x, y, z)] = MOD + f"{block}[facing={facing},up=true,down=false]"
+    out[(x, y + 1, z)] = MOD + f"{block}[facing={facing},up=false,down=true]"
+
+
+def _row(out, cells, facing, block, y=0):
+    """A furniture row (RowFurnitureBlock: left/right joined where the neighbour is in the row)."""
+    states = row_states(cells, facing)
+    for x, z in cells:
+        out[(x, y, z)] = MOD + f"{block}[facing={facing},{states[(x, z)]}]"
+
+
+def _door(out, x, z, facing, block="stall_door"):
+    for half, y in (("lower", 0), ("upper", 1)):
+        out[(x, y, z)] = MOD + f"{block}[facing={facing},half={half},hinge=left,open=false,powered=false]"
+
+
+# The entrance: the reception desk in front of the logo wall (the logo on a white panel), a waiting corner to the west (sofas, a low table),
+# plants along the south wall between its doors.
+RECEPTION_DESK = [(x, 4) for x in range(37, 45)]
+RECEPTION_MONITORS = [(39, 1, 4), (42, 1, 4)]
+WAITING_SOFAS = [(x, 4) for x in range(25, 29)]
+WAITING_TABLE = [(26, 6), (27, 6)]
+ENTRANCE_PLANTS = [(36, 0, 4), (45, 0, 4), (24, 0, 4), (21, 0, 9), (31, 0, 9), (40, 0, 9), (43, 0, 9), (52, 0, 9), (60, 0, 9), (57, 0, 4)]
+# The main corridor: plants and a bench along its walls, clear of its doors and of the people's ways.
+CORRIDOR_PLANTS = [(20, 0, 16), (20, 0, 26), (20, 0, 40), (30, 0, 22), (30, 0, 36)]
+CORRIDOR_BENCH = [(30, 31), (30, 32), (30, 33)]
+# The LAB's empty half: fume hoods along the north wall, sample storage along the east wall (shelves, then cabinets past the sealed
+# door), two islands of benches in the middle (one of work stations, one of instruments).
+FUME_HOODS = [(x, 11) for x in range(40, 46)]
+SAMPLE_SHELVES = [(61, z) for z in range(13, 23)]
+SAMPLE_CABINETS = [(61, z) for z in range(34, 44)]
+ISLAND_STATIONS = [(x, 24) for x in range(48, 56)]
+ISLAND_STATION_MONITORS = [(49, 1, 24), (51, 1, 24), (53, 1, 24), (55, 1, 24)]
+ISLAND_INSTRUMENTS = [(x, 33) for x in range(48, 56)]
+ISLAND_INSTRUMENT_PROPS = {(48, 1, 33): "microscope", (50, 1, 33): "lab_beakers", (52, 1, 33): "tube_rack", (54, 1, 33): "microscope",
+                           (55, 1, 33): "lab_beakers"}
+LAB_CARTS = [(34, 0, 44), (59, 0, 15)]
+# The dining room: tables of four inside and outside the people's loop, the counter and the machines along the south wall, plants in
+# the corners, warm sconces on the walls (and its own warm ceiling lights: SPACE_LIGHTS).
+DINING_TABLES = [(34, 59), (42, 59), (34, 62), (42, 62), (50, 57), (54, 57), (50, 61), (54, 61), (27, 58), (27, 62)]
+DINING_COUNTER = [(x, 67) for x in range(31, 41)]
+DINING_COFFEE = [(33, 1, 67), (37, 1, 67)]
+DINING_WATER = (41, 0, 67)
+DINING_VENDING = [(49, 67), (51, 67), (53, 67)]
+DINING_PLANTS = [(22, 0, 54), (56, 0, 54), (56, 0, 66), (22, 0, 66)]
+DINING_SCONCES = [((24, 2, 53), "south"), ((33, 2, 53), "south"), ((43, 2, 53), "south"), ((52, 2, 53), "south"),
+                  ((23, 2, 67), "north"), ((48, 2, 67), "north"), ((55, 2, 67), "north")]
+# The WCs (no cameras in them): stalls with a toilet each, partitions two high, a door; sinks with a mirror over them.
+WC_WEST_TOILETS = [((14, 0, 11), "south"), ((16, 0, 11), "south")]
+WC_WEST_PARTITIONS = [(x, z) for x in (15, 17) for z in (11, 12, 13)]
+WC_WEST_DOORS = [((14, 13), "south"), ((16, 13), "south")]
+WC_WEST_SINKS = [(x, 15) for x in (14, 15, 16)]
+WC_EAST_TOILETS = [((42, 0, 81), "north"), ((44, 0, 81), "north")]
+WC_EAST_PARTITIONS = [(x, z) for x in (43, 45) for z in (80, 81)]
+WC_EAST_DOORS = [((42, 80), "north"), ((44, 80), "north")]
+WC_EAST_SINKS = [(47, z) for z in (79, 80)]
+# Security (guard B rests here): the monitor bank on the east wall over a desk, a chair; the guards' break corner to the west (lockers, a
+# table, a counter with a coffee machine) and the key rack. Its middle (x 20..22) is guard B's way and stays clear.
+SECURITY_DESK = [(27, z) for z in range(80, 84)]
+SECURITY_MONITORS = [(27, y, z) for y in (1, 2) for z in range(80, 84)]
+SECURITY_CHAIR = (26, 0, 81)
+SECURITY_LOCKERS = [(x, 79) for x in range(15, 19)]
+SECURITY_TABLE = (17, 0, 82)
+SECURITY_COUNTER = [(x, 84) for x in range(23, 26)]
+SECURITY_COFFEE = (24, 1, 84)
+SECURITY_KEYS = (19, 1, 84)
+# Plants in the ring's corners and the authorized corridor.
+MORE_PLANTS = [(61, 0, 48), (61, 0, 72), (16, 0, 72), (16, 0, 77), (48, 0, 74)]
+
+# Lights of their own: the dining room's ceiling lights are warm.
+SPACE_LIGHTS = {"dining": MOD + "warm_ceiling_light"}
+
+
+def furnishing():
+    """Phase 10's props: see the constants above."""
+    out = Cells()
+    _row(out, RECEPTION_DESK, "south", "counter")
+    for cell in RECEPTION_MONITORS:
+        out[cell] = MOD + "lab_monitor[facing=south]"
+    _row(out, WAITING_SOFAS, "south", "sofa")
+    for x, z in WAITING_TABLE:
+        out[(x, 0, z)] = MOD + "low_table[facing=north]"
+    for cell in ENTRANCE_PLANTS + CORRIDOR_PLANTS + DINING_PLANTS + MORE_PLANTS:
+        out[cell] = MOD + "potted_plant[facing=north]"
+    _row(out, CORRIDOR_BENCH, "west", "bench")
+    for x, z in FUME_HOODS:
+        _stack2(out, x, z, "south", "fume_hood")
+    for x, z in SAMPLE_SHELVES:
+        _stack2(out, x, z, "west", "lab_shelf")
+    _row(out, SAMPLE_CABINETS, "west", "lab_cabinet")
+    _row(out, ISLAND_STATIONS, "north", "lab_bench")
+    for cell in ISLAND_STATION_MONITORS:
+        out[cell] = MOD + "lab_monitor[facing=north]"
+    _row(out, ISLAND_INSTRUMENTS, "south", "lab_bench")
+    for cell, block in ISLAND_INSTRUMENT_PROPS.items():
+        out[cell] = MOD + f"{block}[facing=south]"
+    for cell in LAB_CARTS:
+        out[cell] = MOD + "lab_cart[facing=north]"
+    for x, z in DINING_TABLES:
+        out[(x, 0, z)] = MOD + "cafe_table[facing=north]"
+        for (dx, dz), facing in (((0, -1), "south"), ((0, 1), "north"), ((-1, 0), "east"), ((1, 0), "west")):
+            out[(x + dx, 0, z + dz)] = MOD + f"cafe_chair[facing={facing}]"
+    _row(out, DINING_COUNTER, "north", "counter")
+    for cell in DINING_COFFEE:
+        out[cell] = MOD + "coffee_machine[facing=north]"
+    out[DINING_WATER] = MOD + "water_dispenser[facing=north]"
+    for x, z in DINING_VENDING:
+        _stack2(out, x, z, "north", "vending_machine")
+    for cell, facing in DINING_SCONCES:
+        out[cell] = MOD + f"wall_sconce[facing={facing}]"
+    for toilets, partitions, doors, sinks, sink_facing in (
+            (WC_WEST_TOILETS, WC_WEST_PARTITIONS, WC_WEST_DOORS, WC_WEST_SINKS, "north"),
+            (WC_EAST_TOILETS, WC_EAST_PARTITIONS, WC_EAST_DOORS, WC_EAST_SINKS, "west")):
+        for cell, facing in toilets:
+            out[cell] = MOD + f"toilet[facing={facing}]"
+        for x, z in partitions:
+            _stack2(out, x, z, "north" if x in (15, 17) else "east", "stall_wall")
+        for (x, z), facing in doors:
+            _door(out, x, z, facing)
+        for x, z in sinks:
+            out[(x, 0, z)] = MOD + f"wc_sink[facing={sink_facing}]"
+        _row(out, sinks, sink_facing, "wc_mirror", y=1)
+    _row(out, SECURITY_DESK, "west", "office_desk")
+    for i, cell in enumerate(SECURITY_MONITORS):
+        out[cell] = MOD + f"monitor_bank[cam={i % 15},facing=west]"
+    out[SECURITY_CHAIR] = MOD + "lab_chair[facing=east]"
+    for x, z in SECURITY_LOCKERS:
+        _stack2(out, x, z, "south", "locker")
+    out[SECURITY_TABLE] = MOD + "cafe_table[facing=north]"
+    tx, _, tz = SECURITY_TABLE
+    for (dx, dz), facing in (((0, -1), "south"), ((0, 1), "north"), ((-1, 0), "east"), ((1, 0), "west")):
+        out[(tx + dx, 0, tz + dz)] = MOD + f"cafe_chair[facing={facing}]"
+    _row(out, SECURITY_COUNTER, "north", "counter")
+    out[SECURITY_COFFEE] = MOD + "coffee_machine[facing=north]"
+    out[SECURITY_KEYS] = MOD + "key_rack[facing=north]"
+    return out
+
+
+# Room names over the doors (lab plates, on the side one comes from), arrows, the logo and its slogan, the company's posters and screens.
+DOOR_SIGNS = [
+    ("entrance_main", "north", "main_corridor"), ("entrance_lab_1", "north", "lab"), ("entrance_lab_2", "north", "lab"),
+    ("main_lab_1", "west", "lab"), ("main_lab_2", "west", "lab"), ("wc_west", "east", "wc"), ("lockers_1", "east", "lockers"),
+    ("lockers_2", "east", "lockers"), ("main_ring", "north", "ring"), ("lab_ring", "south", "lab"),
+    ("dining_n1", "north", "dining"), ("dining_n2", "north", "dining"), ("dining_s1", "south", "dining"), ("dining_s2", "south", "dining"),
+    ("aux_lab", "east", "aux_lab"), ("ring_authorized", "north", "authorized"), ("security", "north", "security"),
+    ("office", "north", "office"), ("wc_east", "north", "wc"), ("sealed", "west", "sealed"), ("restricted_east", "west", "restricted"),
 ]
+LOGO = ((40, 5, 1), "south", "every_tunnel.ch2.l1.sign.logo", "logo", 0.5)
+POSTERS = [
+    ((54, 2, 3), "south", "every_tunnel.ch2.l1.poster.loyalty", "poster", 0.0),
+    ((30, 2, 28), "west", "every_tunnel.ch2.l1.poster.clean", "poster", 0.0),
+    ((20, 2, 36), "east", "every_tunnel.ch2.l1.poster.employee", "poster", 0.0),
+    ((38, 2, 53), "south", "every_tunnel.ch2.l1.poster.break", "poster", 0.5),
+    ((32, 2, 34), "east", "every_tunnel.ch2.l1.poster.accuracy", "poster", 0.0),
+    ((37, 2, 77), "north", "every_tunnel.ch2.l1.poster.supervisor", "poster", 0.0),
+    ((26, 2, 72), "north", "every_tunnel.ch2.l1.poster.rebuilt", "poster", 0.0),
+    ((20, 2, 12), "east", "every_tunnel.ch2.l1.sign.arrow_dining", "lab", 0.0),
+]
+
+
+def door_signs():
+    """[(cell, facing, key, style, offset)]: a plate over each door of DOOR_SIGNS, on the given side, centred on the door."""
+    doors = {d[0]: d for d in DOORS}
+    out = []
+    for door_id, side, room in DOOR_SIGNS:
+        _, axis, line, first, width, _ = doors[door_id]
+        d = (width - 1) / 2
+        if axis == "z":
+            z = line - 1 if side == "north" else line + 1
+            cell, offset = (first, 2, z), (-d if side == "north" else d)
+        else:
+            x = line - 1 if side == "west" else line + 1
+            cell, offset = (x, 2, first), (d if side == "west" else -d)
+        out.append((cell, side, f"every_tunnel.ch2.l1.sign.room.{room}", "lab", offset))
+    return out
+
+
+# Text on walls (cell, the way the text faces, its lang key, its style, blocks to the reader's right): chamber 02's label, the portrait's
+# plaque, the landing's two signs, and phase 10's room plates, logo, posters and screens.
+WALL_TEXTS = [
+    (CHAMBER_LABEL[0], CHAMBER_LABEL[1], "every_tunnel.ch2.l1.sign.chamber_02", "lab", 0.0),
+    ((40, 1, 82), "west", "every_tunnel.ch2.l1.sign.portrait", "plaque", 0.0),
+    ((73, 2, 28), "west", "every_tunnel.ch2.l1.sign.under_construction", "plate", 0.0),
+    ((69, 2, 30), "north", "every_tunnel.ch2.l1.sign.basement", "lab", 0.0),
+] + door_signs() + [LOGO] + POSTERS
 
 # Scrawls on the basement's walls (wall_message blocks, in chalk; for now only the "???" over the terminal: cell, the way the text faces, its lang key, a line's height in blocks,
 # degrees off level). Always there, always in English; the chalk is black on a wall that looks white and white on one that looks dark,
@@ -398,6 +579,8 @@ def props():
             out[(x, SPACE_TOPS[space] - 1, z)] = MOD + f"factory_camera[facing={facing},part=mount]"
     for cell, block in act3_props().items():
         out[cell] = block
+    for cell, block in furnishing().items():
+        out[cell] = block
     return out
 
 
@@ -441,7 +624,7 @@ def act3_props():
         out[cell] = MOD + "potted_plant[facing=north]"
     for x, z in OFFICE_RUG:
         out[(x, 0, z)] = MOD + "office_rug[facing=north]"
-    for cell, facing, _, _ in WALL_TEXTS:
+    for cell, facing, *_ in WALL_TEXTS:
         out[cell] = MOD + f"wall_text[facing={facing}]"
     out.update(phase9_props())
     return out
@@ -493,7 +676,7 @@ def lockers():
     return out
 
 
-CAMERA_FREE = {"lockers", "construction", "stairs"}   # the spaces with no (decorative) security cameras
+CAMERA_FREE = {"lockers", "construction", "stairs", "wc_west", "wc_east"}   # the spaces with no (decorative) security cameras
 
 
 def world(x, y, z):
@@ -585,8 +768,8 @@ class Level:
     def blocks(self):
         """{(x, y, z): block}: the shell with its lamps, the doors and the clock."""
         out = {c: BLOCKS[role] for c, role in self.shell.items()}
-        for c in self.lights():
-            out[c] = BLOCKS["light"]
+        for x, y, z in self.lights():
+            out[(x, y, z)] = SPACE_LIGHTS.get(self.air.get((x, y - 1, z)), BLOCKS["light"])
         for door in DOORS:
             _, axis, line, first, width, kind = door
             if kind == "opening":
@@ -857,6 +1040,27 @@ def check(level):
         for x, y, z in points:
             if (math.floor(x), math.floor(y), math.floor(z)) not in air:
                 raise SystemExit(f"path {path_id} goes through a wall at {(x, y, z)}")
+    # Nobody walks into furniture: every patrol's and person's way, followed step by step, stays off the props that stand on the floor
+    # (dirt and the like excepted); and nothing stands just in front of a door.
+    flat = ("dirt_spot", "floor_line", "office_rug", "lounge_rug")
+    floor_props = {(x, y, z) for (x, y, z), b in solid_props.items() if not any(f in b for f in flat)}
+    for path_id, points, closed, _ in paths:
+        if path_id.endswith("_dirt_spots"):
+            continue
+        pts = points + points[:1] if closed else points
+        for (x0, y0, z0), (x1, y1, z1) in zip(pts, pts[1:]):
+            steps = int(max(abs(x1 - x0), abs(z1 - z0)) * 4) + 1
+            for k in range(steps + 1):
+                x, z = x0 + (x1 - x0) * k / steps, z0 + (z1 - z0) * k / steps
+                if (math.floor(x), math.floor(y0), math.floor(z)) in floor_props:
+                    raise SystemExit(f"path {path_id} runs into a prop at {(round(x, 1), round(z, 1))}")
+    for door in DOORS:
+        if door[5] == "decor" or door[0] == "construction":         # the way under construction is barred on purpose
+            continue
+        for a, b in door_cells(door)[1]:
+            for c in (a, b):
+                if (c[0], 0, c[1]) in floor_props:
+                    raise SystemExit(f"a prop stands in front of the door {door[0]} at {c}")
     # The doors' graph: every space is reachable from the entrance; by free doors only (normal ones) just the unrestricted
     # spaces are; and without passing a locked door everything but what lies behind one.
     graph = {s.id: set() for s in SPACES}

@@ -3667,6 +3667,7 @@ def build():
                                         ("calm_door", "Calm Room Door", (86, 58, 38), "emergency"),
                                         ("office_door", "Office Door", (34, 34, 38), "office"),
                                         ("lab_door", "Lab Door", (226, 228, 224), "lab"),
+                                        ("stall_door", "Toilet Stall Door", (196, 206, 218), "office"),
                                         ("director_door", "Director's Door", (62, 40, 28), "wood")):
         halves = {}
         for half in ("bottom", "top"):
@@ -3745,6 +3746,34 @@ def build():
     a.block("factory_door", "Factory Door", {"variants": door_variants(f"{NS}:block/lab_door")},
             {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/lab_door"}})
     a.loot_doors.add("factory_door")
+
+    # Chapter 2 Level 1's furnishing (phase 10): the WCs' porcelain (a toilet, a sink on its counter), the stalls' partitions (two
+    # blocks high, a gap under them; the stall door is with the doors above), a mirror that joins along a wall, and the dining room's warm
+    # ceiling light (the lab's, its diffuser a warm white).
+    a.texture("porcelain", plastic_tex(r("porcelain"), (238, 240, 240)), T.PLASTIC.but(smoothness=0.85, relief=0.05))
+    a.texture("stall_panel", plastic_tex(r("stall_panel"), (196, 206, 218)), T.PLASTIC.but(smoothness=0.5, relief=0.1))
+    a.texture("countertop", plastic_tex(r("countertop"), (92, 98, 106)), T.Material(0.7, relief=0.1))
+    a.texture("wc_mirror", plastic_tex(r("wc_mirror"), (176, 192, 200)), T.Material(0.98, metal=200, relief=0.0))
+    prop("toilet", "Toilet", {"p": "porcelain", "d": "lab_steel_dark"},
+         [el((5, 0, 4), (11, 6, 12), "p"), el((4, 6, 2), (12, 7.5, 12), "p"), el((4.5, 7.5, 2.5), (11.5, 8, 11), "d"),
+          el((3, 6, 12), (13, 15, 16), "p"), el((7, 15, 13), (9, 15.5, 15), "d")])
+    prop("wc_sink", "Sink", {"p": "porcelain", "c": "countertop", "d": "lab_steel_dark"},
+         [el((0, 13, 2), (16, 14, 16), "c"), el((3, 14, 4), (13, 15, 12), "p"), el((7.5, 14, 13), (8.5, 17.5, 14), "d"),
+          el((7.5, 16.5, 10.5), (8.5, 17.5, 13), "d"), el((7, 0, 12), (9, 13, 14), "d")])
+    row("wc_mirror", "Mirror", {"m": "wc_mirror", "d": "lab_steel_dark"},
+        [el((0, 5, 15.5), (16, 15, 16), "m", east=None, west=None), el((0, 4.5, 15.3), (16, 5, 16), "d"),
+         el((0, 15, 15.3), (16, 15.5, 16), "d")],
+        left=[el((15.5, 4.5, 15.3), (16, 15.5, 16), "d")], right=[el((0, 4.5, 15.3), (0.5, 15.5, 16), "d")], ao=False)
+    stack("stall_wall", "Stall Partition", {"l": "stall_panel", "d": "lab_steel_dark"},
+          [el((7, 0, 0), (9, 16, 16), "l")], base=[el((7, 2, 0), (9, 16, 16), "l"), el((7.5, 0, 7), (8.5, 2, 9), "d")],
+          upper=[el((7, 0, 0), (9, 12, 16), "l")])
+    warm = ceiling_light_tex(r("warm_ceiling_light"))
+    warm = Image.merge("RGB", (warm.getchannel("R"), warm.getchannel("G").point(lambda v: int(v * 0.9)),
+                               warm.getchannel("B").point(lambda v: int(v * 0.72))))
+    a.texture("warm_ceiling_light", warm, ceiling_light_material, tiles=False)
+    a.models["warm_ceiling_light"] = model({"w": "lab_white", "f": "warm_ceiling_light"}, [el((0, 0, 0), (16, 16, 16), "w", down="f")])
+    a.block("warm_ceiling_light", "Warm Ceiling Light", {"variants": {"": {"model": f"{NS}:block/warm_ceiling_light"}}},
+            {"parent": f"{NS}:block/warm_ceiling_light"})
 
     # The exit sign: a lit box against the wall (PropBlock's shape: 2..14 x 2..8, 2 deep).
     a.texture("exit_sign", exit_sign_tex(r("exit_sign")), exit_sign_glow, tiles=False)

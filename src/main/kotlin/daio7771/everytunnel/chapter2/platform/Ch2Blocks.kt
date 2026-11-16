@@ -15,12 +15,14 @@ import daio7771.everytunnel.platform.LinkedDoorBlock
 import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.ModSoundGroups
 import daio7771.everytunnel.platform.PropBlock
+import daio7771.everytunnel.platform.RowFurnitureBlock
 import daio7771.everytunnel.platform.SecurityCameraBlock
 import daio7771.everytunnel.platform.SecurityCameraBlockEntity
 import daio7771.everytunnel.platform.StackFurnitureBlock
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.minecraft.block.Block
+import net.minecraft.block.DoorBlock
 import net.minecraft.block.MapColor
 import net.minecraft.block.TransparentBlock
 import net.minecraft.block.entity.BlockEntityType
@@ -87,6 +89,14 @@ object Ch2Blocks {
 
     /** Glass with no frame drawn on each block, a faint tint and a sheen that runs on from one block to the next: the factory's windows. */
     val FACTORY_GLASS: Block = register("factory_glass", TransparentBlock(ModBlocks.glass()))
+
+    /** Chapter 2 Level 1's furnishing (phase 10): the WCs' toilet, sink, mirror, stall partitions and doors; the dining room's warm light. */
+    val TOILET: Block = register("toilet", PropBlock(ModBlocks.props(MapColor.WHITE, BlockSoundGroup.STONE), listOf(box(3, 0, 2, 13, 15, 16))))
+    val WC_SINK: Block = register("wc_sink", PropBlock(ModBlocks.props(MapColor.WHITE, BlockSoundGroup.STONE), listOf(box(0, 0, 2, 16, 15, 16))))
+    val WC_MIRROR: Block = register("wc_mirror", RowFurnitureBlock(ModBlocks.props(MapColor.LIGHT_GRAY, BlockSoundGroup.GLASS).noCollision(), listOf(box(0, 4, 15, 16, 16, 16))))
+    val STALL_WALL: Block = register("stall_wall", StackFurnitureBlock(ModBlocks.props(MapColor.LIGHT_GRAY, ModSoundGroups.PLASTIC), listOf(box(7, 0, 0, 9, 16, 16))))
+    val STALL_DOOR: Block = register("stall_door", DoorBlock(ModBlocks.door(), ModBlocks.SERVICE_DOOR))
+    val WARM_CEILING_LIGHT: Block = register("warm_ceiling_light", Block(ModBlocks.props(MapColor.WHITE, ModSoundGroups.PLASTIC).luminance { 15 }))
 
     /** The factory cameras' block entity: the same as Level 5's camera's, a type of its own so the client sweeps them. */
     lateinit var FACTORY_CAMERA_ENTITY: BlockEntityType<SecurityCameraBlockEntity>

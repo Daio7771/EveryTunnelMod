@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "m": "every_tunnel:block/wc_mirror",
+    "d": "every_tunnel:block/lab_steel_dark",
+    "particle": "every_tunnel:block/wc_mirror"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        4.5,
+        15.3
+      ],
+      "to": [
+        0.5,
+        15.5,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#d"
+        },
+        "east": {
+          "texture": "#d"
+        },
+        "south": {
+          "texture": "#d"
+        },
+        "west": {
+          "texture": "#d"
+        },
+        "up": {
+          "texture": "#d"
+        },
+        "down": {
+          "texture": "#d"
+        }
+      }
+    }
+  ],
+  "ambientocclusion": false
+}

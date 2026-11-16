@@ -245,6 +245,7 @@ object Ch2L1Build {
             val nbt = NbtCompound()
             nbt.putString("Text", text.text)
             nbt.putString("Style", text.style)
+            nbt.putFloat("Offset", text.offset)
             entity.readNbt(nbt)
             entity.markDirty()
             world.updateListeners(pos, entity.cachedState, entity.cachedState, Block.NOTIFY_ALL)
