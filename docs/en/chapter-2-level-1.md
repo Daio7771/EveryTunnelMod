@@ -368,15 +368,18 @@ counters; reaching it by command gives the badge (Act 2's hook).
 
 ## Act 3: the patrols
 
-Phase 7 (`patrols.json`, `level1.core.Ch2L1Patrols`, `level1.platform.Ch2L1PatrolHooks`): two guards (`guard_1`, `guard_2`) walk their
-rounds **from the start of the level until the office's cinematic**: patrol A round the ring, clockwise, stopping 5 s by the door down into
-the authorized corridor (`patrol_a_pause`); patrol B out of Security (`patrol_b_spawn`, where it rests 6 s), along the authorized corridor
-to its east end and back. They are factory people directed tick by tick (`FactoryNpcEntity.direction`, `Ch2L1PatrolRunner`); nobody else's
-routine moves them.
+Phase 7 (`patrols.json`, `level1.core.Ch2L1Patrols`, `level1.platform.Ch2L1PatrolHooks`): guards (`guard_1`, `guard_2`) walk their
+rounds **from the start of the level to its end**: patrol A round the ring, clockwise, stopping 5 s by the door down into the authorized
+corridor (`patrol_a_pause`); patrol B out of Security (`patrol_b_spawn`, where it rests 6 s), along the authorized corridor to its east end
+and back; and, **from the overtime on** (a patrol's `from`), patrol C round the dark LAB, stopping 4 s by the sealed door
+(`patrol_c_pause`). They are factory people directed tick by tick (`FactoryNpcEntity.direction`, `Ch2L1PatrolRunner`); nobody else's
+routine moves them. They are never saved: one missing, lost with its chunk or fallen out of the level (a rebuild empties the area under
+him) is put back within 5 s, and one stuck on his round for 8 s jumps to his next point; every guard put in or taken out is logged.
 
 They do nothing to a player who behaves. A guard **sees** within 8 blocks (4 while the player crouches) and 70° of where his head looks,
 with a clear line, or within 2 blocks whatever the way he looks (`Ch2L1Watch.inView`). A player he sees is **suspicious**:
-- inside a forbidden zone (`forbidden`: the auxiliary lab and chamber 02's room, the authorized corridor, the office, Security, the east WC);
+- inside a forbidden zone (`forbidden`: the auxiliary lab and chamber 02's room, the authorized corridor, the office, Security, the east WC;
+  and from the overtime on the LAB, `from`: caught there, back to `return_lab` in the main corridor);
 - crouching within 3 blocks of him;
 - after staring at the auxiliary lab for more than 10 s (`stare_seconds`): the crosshair on it, a ray from the eyes that reaches into its zone
   through the glass (`Ch2L1Stare`); the corner of the eye does not count.
@@ -388,7 +391,8 @@ a subtitle with no voice yet: `Ch2L1Subtitles.showText`); they have `grace_secon
 black with "You've been caught." (`CaughtOverlay`, `event.ch2l1.guard_caught`), they are put back at the entrance of the zone
 (`return_aux_lab`, `return_authorized`; caught elsewhere `return_ring`) with what they opened still open, his line `guard_caught` follows, and
 he is back on his round. Out of sight for `give_up_seconds` he gives up. Nobody watches during a cinematic, in Act 2, in Creative or
-Spectator, or for 5 s after a catch. **The guards' lines are placeholders** (text only) until the author gives theirs, with a voice.
+Spectator, or for 5 s after a catch. **In the dark LAB** (`dark_zones`, from `dark_from`, the overtime) a guard sees only `dark_range` (3)
+blocks, unless the player's flashlight is on: then `flashlight_range` (12). **The guards' lines are placeholders** (text only) until the author gives theirs, with a voice.
 
 ## Act 3: the office's cinematic
 
@@ -410,7 +414,7 @@ second of Rowan's files (`Ch2L1Act3Hooks.onOfficeTrigger`) moves the player to `
   and is gone.
 - **However it ends** (played, skipped, or `ACT3_OVERTIME` reached by command): the pass (`overtime_pass`, Chapter 1's keycard in Rowan's
   colours), the flashlight, the objective "Overtime: sealed zone", the LAB almost dark (its lamps off, `factory_light_off`, one in four a
-  faint red emergency light, `factory_light_emergency`) and empty of workers, the patrols gone, and `rowan_loyal_a6` once, 3 to 5 s after
+  faint red emergency light, `factory_light_emergency`) and empty of workers, a third patrol in it, and `rowan_loyal_a6` once, 3 to 5 s after
   the player is back in control in a loudspeaker's zone. Going back before it takes the pass and the flashlight back and turns the lights on.
 
 The LAB will have two more tasks once Level 1 is decorated.

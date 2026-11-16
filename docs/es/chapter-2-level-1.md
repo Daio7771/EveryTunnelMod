@@ -379,16 +379,19 @@ olvida los contadores del acto; llegar a él por comando da la tarjeta (el hook 
 
 ## Acto 3: las patrullas
 
-Fase 7 (`patrols.json`, `level1.core.Ch2L1Patrols`, `level1.platform.Ch2L1PatrolHooks`): dos guardias (`guard_1`, `guard_2`) hacen su ronda
-**desde el inicio del nivel hasta la cinemática del despacho**: la patrulla A recorre el anillo en sentido horario y se para 5 s junto a la
-puerta que baja al pasillo autorizado (`patrol_a_pause`); la B sale de Seguridad (`patrol_b_spawn`, donde descansa 6 s), recorre el pasillo
-autorizado hasta su extremo este y vuelve. Son gente de la fábrica dirigida tick a tick (`FactoryNpcEntity.direction`, `Ch2L1PatrolRunner`);
-la rutina de nadie más los mueve.
+Fase 7 (`patrols.json`, `level1.core.Ch2L1Patrols`, `level1.platform.Ch2L1PatrolHooks`): los guardias (`guard_1`, `guard_2`) hacen su ronda
+**desde el inicio del nivel hasta su final**: la patrulla A recorre el anillo en sentido horario y se para 5 s junto a la puerta que baja al
+pasillo autorizado (`patrol_a_pause`); la B sale de Seguridad (`patrol_b_spawn`, donde descansa 6 s), recorre el pasillo autorizado hasta su
+extremo este y vuelve; y, **desde las horas extra** (el `from` de una patrulla), la C recorre el LAB a oscuras y se para 4 s junto a la puerta
+sellada (`patrol_c_pause`). Son gente de la fábrica dirigida tick a tick (`FactoryNpcEntity.direction`, `Ch2L1PatrolRunner`); la rutina de
+nadie más los mueve. Nunca se guardan: uno que falte, perdido con su chunk o caído fuera del nivel (una reconstrucción vacía la zona bajo
+sus pies), se repone en 5 s, y uno atascado 8 s en su ronda salta a su siguiente punto; cada guardia que se pone o se quita queda en el
+registro.
 
 No le hacen nada a un jugador que se porta bien. Un guardia **ve** a 8 bloques (4 si el jugador va agachado) y 70° de donde mira su cabeza,
 sin nada en medio, o a 2 bloques mire adonde mire (`Ch2L1Watch.inView`). Un jugador al que ve es **sospechoso**:
 - dentro de una zona prohibida (`forbidden`: el laboratorio auxiliar y la sala de la cámara 02, el pasillo autorizado, el despacho,
-  Seguridad, el WC del este);
+  Seguridad, el WC del este; y desde las horas extra el LAB, `from`: si te pillan ahí, vuelves a `return_lab` en el pasillo principal);
 - agachado a 3 bloques o menos de él;
 - tras mirar el laboratorio auxiliar más de 10 s (`stare_seconds`): con el punto de mira en él, un rayo desde los ojos que llega a su
   zona a través del cristal (`Ch2L1Stare`); de reojo no cuenta.
@@ -400,7 +403,9 @@ hacia él (`run_pace`, `event.ch2l1.guard_alert`) y lo pilla al alcanzarlo o tra
 con "Te han pillado." (`CaughtOverlay`, `event.ch2l1.guard_caught`), el jugador vuelve a la entrada de la zona (`return_aux_lab`,
 `return_authorized`; si le pillan en otro sitio, `return_ring`) con lo que abrió aún abierto, sigue su línea `guard_caught` y el guardia vuelve a
 su ronda. Si lo pierde de vista `give_up_seconds`, se rinde. Nadie vigila durante una cinemática, en el Acto 2, en Creativo o Espectador, ni
-5 s después de pillar a alguien. **Las líneas de los guardias son provisionales** (solo texto) hasta que el autor dé las suyas, con voz.
+5 s después de pillar a alguien. **En el LAB a oscuras** (`dark_zones`, desde `dark_from`, las horas extra) un guardia solo ve a
+`dark_range` (3) bloques, salvo que el jugador lleve la linterna encendida: entonces a `flashlight_range` (12). **Las líneas de los guardias
+son provisionales** (solo texto) hasta que el autor dé las suyas, con voz.
 
 ## Acto 3: la cinemática del despacho
 
@@ -423,8 +428,8 @@ cerrar el segundo archivo de Rowan (`Ch2L1Act3Hooks.onOfficeTrigger`) lleva al j
   desaparece.
 - **Acabe como acabe** (entera, saltada o con `ACT3_OVERTIME` por comando): el pase (`overtime_pass`, la tarjeta del Chapter 1 con los
   colores de Rowan), la linterna, el objetivo "Horas extra: zona sellada", el LAB casi a oscuras (sus lámparas apagadas,
-  `factory_light_off`, una de cada cuatro como luz de emergencia roja y tenue, `factory_light_emergency`) y sin trabajadores, las patrullas
-  fuera y `rowan_loyal_a6` una vez, de 3 a 5 s después de que el jugador recupere el control en la zona de un altavoz. Volver a antes quita
+  `factory_light_off`, una de cada cuatro como luz de emergencia roja y tenue, `factory_light_emergency`) y sin trabajadores, con una
+  tercera patrulla dentro, y `rowan_loyal_a6` una vez, de 3 a 5 s después de que el jugador recupere el control en la zona de un altavoz. Volver a antes quita
   el pase y la linterna y vuelve a encender las luces.
 
 El LAB tendrá dos tareas más cuando el Nivel 1 esté decorado.

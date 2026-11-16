@@ -625,6 +625,8 @@ def named_places(level):
     add("return_aux_lab", 18.5, 50.5, 90, False)
     add("return_authorized", 36.5, 70.0, 0, False)
     add("return_ring", 22.0, 50.5, 180, False)
+    add("return_lab", 28.5, 17.0, -90, False)                  # in the main corridor, by the LAB's first door (caught in the dark LAB)
+    add("patrol_c_pause", 58.5, 28.0, 90, False)                # patrol C stops by the sealed door, looking at it
 
     zones = []
 
@@ -661,6 +663,9 @@ def named_places(level):
     # The middle of the ring (its stretches are 4 wide: the middle is where two blocks meet) and of the authorized corridor.
     ring_pts = [(18.0, 50.0), (39.0, 50.0), (60.0, 50.0), (60.0, 60.0), (60.0, 71.0), (48.0, 71.0), (36.0, 71.0), (18.0, 71.0), (18.0, 60.0)]
     paths.append(("patrol_a_waypoints", [(x, 0.0, z) for x, z in ring_pts], True, False))
+    # Patrol C, after Rowan's office: round the dark LAB, between the work stations and the sealed door, anticlockwise.
+    lab_pts = [(35.5, 20.5), (35.5, 40.5), (58.5, 40.5), (58.5, 28.0), (58.5, 20.5)]
+    paths.append(("patrol_c_waypoints", [(x, 0.0, z) for x, z in lab_pts], True, False))
     paths.append(("task3_dirt_spots", [(x + 0.5, 0.0, z + 0.5) for x, z in DIRT_SPOTS], False, False))
     for name, (points, closed) in NPC_ROUTES.items():
         paths.append((name, [(x, 0.0, z) for x, z in points], closed, True))

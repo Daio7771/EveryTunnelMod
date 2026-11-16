@@ -18,12 +18,16 @@ data class Ch2L1PatrolSpec(
     val pace: Double = 1.0,
     /** Point anchors he stops at (at the path's point nearest each), and for how long. */
     val pauses: List<Pause> = emptyList(),
+    /** He is there only from this state on (null: from the start); patrol C, the dark LAB's, from the overtime. */
+    val from: Ch2L1State? = null,
 ) {
     data class Pause(val at: String, val ticks: Int)
 }
 
-/** A forbidden place (a zone) and where a player caught in it is put back (a point anchor). */
-data class Ch2L1Forbidden(val zone: String, val back: String)
+/** A forbidden place (a zone) and where a player caught in it is put back (a point anchor); only from [from] on, if set (the dark LAB). */
+data class Ch2L1Forbidden(val zone: String, val back: String, val from: Ch2L1State? = null) {
+    fun applies(state: Ch2L1State): Boolean = from == null || state >= from
+}
 
 /**
  * How the guards watch (`patrols.json`'s `watch`). A guard **sees** the player within [range] blocks ([crouchRange] while they crouch) and
@@ -32,6 +36,8 @@ data class Ch2L1Forbidden(val zone: String, val back: String)
  * the crosshair on it, not the corner of the eye) for more than [stareTicks]. Then his "?" fills over [noticeTicks] (and empties over
  * [decayTicks] when they stop); full, he warns them ([warnLine]) and gives them [graceTicks] to stop; if they do not, he runs at them
  * ([runPace]) and they are caught after [chaseTicks] or when he reaches them ([catchReach]); unseen for [giveUpTicks] he gives up.
+ * In the [darkZones] from [darkFrom] on (the LAB with its lights off) he sees only [darkRange] far, unless the player's flashlight is on:
+ * then [flashlightRange] ([sightRange]).
  */
 data class Ch2L1WatchSpec(
     val range: Double = 8.0,
@@ -54,12 +60,25 @@ data class Ch2L1WatchSpec(
     val forbidden: List<Ch2L1Forbidden> = DEFAULT_FORBIDDEN,
     /** Where a player caught anywhere else (staring, crouching) is put back. */
     val backElsewhere: String = "return_ring",
+    val darkZones: List<String> = listOf("lab"),
+    val darkFrom: Ch2L1State = Ch2L1State.ACT3_OVERTIME,
+    val darkRange: Double = 3.0,
+    val flashlightRange: Double = 12.0,
 ) {
+    /** How far a guard sees the player: crouching or not, in the dark or not, their flashlight on or not. */
+    fun sightRange(crouching: Boolean, inDark: Boolean, flashlightOn: Boolean): Double = when {
+        inDark && flashlightOn -> flashlightRange
+        inDark -> if (crouching) minOf(darkRange, crouchRange) else darkRange
+        crouching -> crouchRange
+        else -> range
+    }
+
     companion object {
         val DEFAULT_FORBIDDEN = listOf(
             Ch2L1Forbidden("aux_lab", "return_aux_lab"), Ch2L1Forbidden("aux_chamber", "return_aux_lab"),
             Ch2L1Forbidden("authorized_corridor", "return_authorized"), Ch2L1Forbidden("security_room", "return_authorized"),
             Ch2L1Forbidden("office", "return_authorized"), Ch2L1Forbidden("wc_east", "return_authorized"),
+            Ch2L1Forbidden("lab", "return_lab", Ch2L1State.ACT3_OVERTIME),
         )
     }
 }
@@ -70,6 +89,7 @@ data class Ch2L1Patrols(val watch: Ch2L1WatchSpec = Ch2L1WatchSpec(), val patrol
         val DEFAULT_PATROLS = listOf(
             Ch2L1PatrolSpec("patrol_a", "guard_1", "patrol_a_waypoints", pauses = listOf(Ch2L1PatrolSpec.Pause("patrol_a_pause", 100))),
             Ch2L1PatrolSpec("patrol_b", "guard_2", "patrol_b_waypoints", spawn = "patrol_b_spawn", pauses = listOf(Ch2L1PatrolSpec.Pause("patrol_b_spawn", 120))),
+            Ch2L1PatrolSpec("patrol_c", "guard_1", "patrol_c_waypoints", pauses = listOf(Ch2L1PatrolSpec.Pause("patrol_c_pause", 80)), from = Ch2L1State.ACT3_OVERTIME),
         )
         val DEFAULT = Ch2L1Patrols()
     }
@@ -83,9 +103,10 @@ data class Ch2L1Patrols(val watch: Ch2L1WatchSpec = Ch2L1WatchSpec(), val patrol
  *              "stare_zone": "aux_lab", "stare_seconds": 10, "stare_reach": 16,
  *              "notice_seconds": 1.5, "decay_seconds": 2, "grace_seconds": 3, "chase_seconds": 2.5, "give_up_seconds": 3,
  *              "catch_reach": 1.6, "run_pace": 3, "warn_line": "guard_warn", "caught_line": "guard_caught",
- *              "forbidden": [ { "zone": "aux_lab", "back": "return_aux_lab" } ], "back_elsewhere": "return_ring" },
+ *              "forbidden": [ { "zone": "aux_lab", "back": "return_aux_lab" }, { "zone": "lab", "back": "return_lab", "from": "ACT3_OVERTIME" } ],
+ *              "back_elsewhere": "return_ring", "dark_zones": ["lab"], "dark_from": "ACT3_OVERTIME", "dark_range": 3, "flashlight_range": 12 },
  *   "patrols": [ { "id": "patrol_a", "skin": "guard_1", "path": "patrol_a_waypoints", "pace": 1,
- *                  "pauses": [ { "at": "patrol_a_pause", "seconds": 5 } ] } ] }
+ *                  "pauses": [ { "at": "patrol_a_pause", "seconds": 5 } ], "from": "ACT3_OVERTIME" } ] }
  * ```
  */
 object Ch2L1PatrolsParser {
@@ -105,8 +126,9 @@ object Ch2L1PatrolsParser {
             val o = JsonFields(e.asJsonObject, "watch.forbidden[$i]", f.problems)
             val zone = o.requiredString("zone")
             val back = o.requiredString("back")
+            val from = state(o, "from")
             o.reportUnknownKeys()
-            if (zone == null || back == null) null else Ch2L1Forbidden(zone, back)
+            if (zone == null || back == null) null else Ch2L1Forbidden(zone, back, from)
         }
         val watch = Ch2L1WatchSpec(
             range = w.double("range", d.range, min = 0.0, max = 64.0),
@@ -128,6 +150,10 @@ object Ch2L1PatrolsParser {
             caughtLine = w.string("caught_line", d.caughtLine),
             forbidden = forbidden,
             backElsewhere = w.string("back_elsewhere", d.backElsewhere),
+            darkZones = if (w.has("dark_zones")) w.stringList("dark_zones") else d.darkZones,
+            darkFrom = state(w, "dark_from") ?: d.darkFrom,
+            darkRange = w.double("dark_range", d.darkRange, min = 0.0, max = 64.0),
+            flashlightRange = w.double("flashlight_range", d.flashlightRange, min = 0.0, max = 64.0),
         )
         w.reportUnknownKeys()
         val patrols = if (!f.has("patrols")) Ch2L1Patrols.DEFAULT_PATROLS else (f.array("patrols")?.toList() ?: emptyList()).mapIndexedNotNull { i, e ->
@@ -149,13 +175,21 @@ object Ch2L1PatrolsParser {
                 q.reportUnknownKeys()
                 at?.let { Ch2L1PatrolSpec.Pause(it, ticks) }
             }
+            val from = state(p, "from")
             p.reportUnknownKeys()
             if (skin !in Ch2L1Skins.ALL) f.problems += "patrols[$i].skin: \"$skin\" is not a skin of the factory"
-            if (id == null || path == null) null else Ch2L1PatrolSpec(id, skin, path, spawn, pace, pauses)
+            if (id == null || path == null) null else Ch2L1PatrolSpec(id, skin, path, spawn, pace, pauses, from)
         }
         f.reportUnknownKeys()
         if (patrols.map { it.id }.toSet().size != patrols.size) f.problems += "patrols: two patrols have the same id"
         return Result(Ch2L1Patrols(watch, patrols), f.problems.toList())
+    }
+
+    /** A state's name at [key] (`"ACT3_OVERTIME"`), or null when absent or unknown (told). */
+    private fun state(fields: JsonFields, key: String): Ch2L1State? {
+        if (!fields.has(key)) return null
+        val text = fields.string(key, "")
+        return Ch2L1State.parse(text) ?: null.also { fields.problems += "${fields.pathOf(key)}: \"$text\" is not a state" }
     }
 }
 

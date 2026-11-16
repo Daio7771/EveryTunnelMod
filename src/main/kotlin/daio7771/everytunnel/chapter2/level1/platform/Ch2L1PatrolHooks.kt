@@ -12,7 +12,8 @@ import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
 import daio7771.everytunnel.core.level.Position
-import daio7771.everytunnel.platform.KeptEntities
+import daio7771.everytunnel.config.ConfigManager
+import daio7771.everytunnel.systems.ResourceSystem
 import daio7771.everytunnel.platform.TickProfiler
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
@@ -27,10 +28,11 @@ import net.minecraft.world.GameMode
 import java.util.UUID
 
 /**
- * Act 3's patrols of Chapter 2's Level 1 (`patrols.json`, [daio7771.everytunnel.chapter2.level1.core.Ch2L1Patrols]): two guards in Chapter
- * 1's uniform walking their rounds whenever someone plays the level, from the start until the office's cinematic (patrol A round the
- * ring, clockwise, with a stop by the door down into the authorized corridor; patrol B out of Security, along the authorized corridor and
- * back). They are factory people ([FactoryNpcEntity], kept: [KeptEntities]) whose every step this hook directs ([FactoryNpcEntity.direction]).
+ * Act 3's patrols of Chapter 2's Level 1 (`patrols.json`, [daio7771.everytunnel.chapter2.level1.core.Ch2L1Patrols]): guards in Chapter 1's
+ * uniform walking their rounds whenever someone plays the level, from the start to its end (patrol A round the ring, clockwise, with a
+ * stop by the door down into the authorized corridor; patrol B out of Security, along the authorized corridor and back; patrol C, from the
+ * overtime on, round the dark LAB). They are factory people ([FactoryNpcEntity]) whose every step this hook directs
+ * ([FactoryNpcEntity.direction]); never saved, put back by [ensure] whenever one is missing (logged, like every guard taken out).
  *
  * They do nothing to a player who behaves. Each tick each guard looks ([Ch2L1Watch.inView] and a clear line); a player he sees is
  * **suspicious** inside a forbidden zone, crouching close to him, or after staring at the auxiliary lab (the crosshair on it, [Ch2L1Stare]).
@@ -62,7 +64,14 @@ object Ch2L1PatrolHooks {
     private class Guard(val spec: Ch2L1PatrolSpec, val entity: FactoryNpcEntity, val runner: Ch2L1PatrolRunner) {
         val watch = Ch2L1Watch(Ch2L1DataLoader.patrols.watch)
         var chaseFrom: Vec3d? = null
+
+        /** Where he was when last seen to make headway on his round, and how long he has walked without any. */
+        var lastAt: Vec3d = entity.pos
+        var stuckTicks = 0
     }
+
+    /** A guard walking his round who makes no headway (a shut door, a prop) this long jumps to the point he is heading for. */
+    private const val STUCK_TICKS = 160
 
     private val guards = LinkedHashMap<String, Guard>()
     private val stares = HashMap<UUID, Ch2L1Stare>()
@@ -75,7 +84,7 @@ object Ch2L1PatrolHooks {
     fun register() {
         TickProfiler.endServerTick.register(::tick)
         ServerLifecycleEvents.SERVER_STOPPED.register { forgetAll() }
-        Ch2L1.onStateChange { player, _, to -> if (to >= Ch2L1State.ACT3_CUTSCENE) clear(player.server) }
+        Ch2L1.onStateChange { player, _, _ -> ensure(player.server) }
     }
 
     private fun tick(server: MinecraftServer) {
@@ -101,6 +110,7 @@ object Ch2L1PatrolHooks {
         while (iterator.hasNext()) {
             val guard = iterator.next()
             if (guard.entity.isRemoved) {
+                EveryTunnel.LOGGER.info("Chapter 2 Level 1: guard {} lost ({}): put back at the next check", guard.spec.id, guard.entity.removalReason)
                 iterator.remove()
                 continue
             }
@@ -110,54 +120,72 @@ object Ch2L1PatrolHooks {
 
     // --- the guards in the level -----------------------------------------------------------------------
 
-    /** Puts in each guard that is missing while someone plays the level before the office's cinematic; takes them out otherwise. */
+    /**
+     * Puts in each guard that is missing while someone plays the level (a patrol with a `from` state only once a player has reached it);
+     * takes them all out when nobody does, or once the level is over.
+     */
     private fun ensure(server: MinecraftServer) {
         val world = Ch2L1Npcs.world(server) ?: return
-        val playing = Ch2L1Build.isBuilt(server) && server.playerManager.playerList.any {
-            it.serverWorld == world && Ch2L1.active(it) && Ch2L1.state(it) < Ch2L1State.ACT3_CUTSCENE
-        }
-        if (!playing) {
-            clear(server)
+        val playing = server.playerManager.playerList.filter { it.serverWorld == world && Ch2L1.active(it) && Ch2L1.state(it) < Ch2L1State.DONE }
+        if (playing.isEmpty() || !Ch2L1Build.isBuilt(server)) {
+            if (guards.isNotEmpty()) clear(server, if (playing.isEmpty()) "nobody plays the level" else "the level is not built")
             return
         }
+        val reached = playing.maxOf { Ch2L1.state(it) }
         val anchors = Ch2L1DataLoader.data.anchors
         for (spec in Ch2L1DataLoader.patrols.patrols) {
+            if (spec.from != null && reached < spec.from) {
+                guards.remove(spec.id)?.let { takeOut(it.entity, "before ${spec.from}") }
+                continue
+            }
+            guards[spec.id]?.let { guard ->
+                // Fallen out of the level (it was rebuilt under him, or he slipped out of a wall): out, and put back below.
+                val e = guard.entity
+                val floor = Ch2L1Build.plan.worldY(0)
+                if (!e.isRemoved && (e.y < floor - 1.5 || !Ch2L1Npcs.levelBox().contains(e.pos))) {
+                    takeOut(e, "fell out of the level")
+                    guards.remove(spec.id)
+                }
+            }
             if (guards[spec.id]?.entity?.isRemoved == false) continue
             val path = anchors.path(spec.path) ?: continue
             if (path.points.size < 2) continue
             val start = spec.spawn?.let { anchors.point(it)?.position } ?: path.points.first()
             if (!world.isChunkLoaded(BlockPos.ofFloored(start.x, start.y, start.z))) continue
+            // A guard of the same patrol left over (lost track of, or from before a reload) goes first.
+            world.getEntitiesByType(Ch2Entities.FACTORY_NPC, Ch2L1Npcs.levelBox()) { it.group == GROUP && it.workerId == spec.id }.forEach { it.discard() }
             val pauses = spec.pauses.mapNotNull { pause ->
                 anchors.point(pause.at)?.position?.let { Ch2L1PatrolRunner.nearest(path.points, it) to pause.ticks }
             }.toMap()
-            val npc = KeptEntities.spawn(world) { w ->
-                Ch2Entities.FACTORY_NPC.create(w)?.also {
-                    it.skin = spec.skin
-                    it.pace = spec.pace
-                    it.workerId = spec.id
-                    it.group = GROUP
-                    it.seed = spec.id.hashCode().toLong()
-                    it.life = Ch2L1DataLoader.npcs.life
-                    it.refreshPositionAndAngles(start.x, start.y, start.z, 0f, 0f)
-                    it.direction = FactoryNpcEntity.Direction()
-                }
-            } ?: continue
+            val npc = Ch2Entities.FACTORY_NPC.create(world) ?: continue
+            npc.skin = spec.skin
+            npc.pace = spec.pace
+            npc.workerId = spec.id
+            npc.group = GROUP
+            npc.seed = spec.id.hashCode().toLong()
+            npc.life = Ch2L1DataLoader.npcs.life
+            npc.refreshPositionAndAngles(start.x, start.y, start.z, 0f, 0f)
+            npc.direction = FactoryNpcEntity.Direction()
+            if (!world.spawnEntity(npc)) {
+                EveryTunnel.LOGGER.warn("Chapter 2 Level 1: guard {} could not be put in at {}, {}, {}", spec.id, start.x, start.y, start.z)
+                continue
+            }
             guards[spec.id] = Guard(spec, npc, Ch2L1PatrolRunner(path.points, path.closed, pauses))
+            EveryTunnel.LOGGER.info("Chapter 2 Level 1: guard {} ({}) put in at {}, {}, {}", spec.id, spec.skin, start.x, start.y, start.z)
         }
     }
 
+    private fun takeOut(npc: FactoryNpcEntity, why: String) {
+        npc.discard()
+        EveryTunnel.LOGGER.info("Chapter 2 Level 1: guard {} taken out ({})", npc.workerId, why)
+    }
+
     /** Every guard out of the level. */
-    fun clear(server: MinecraftServer) {
-        for (guard in guards.values) {
-            KeptEntities.forget { it === guard.entity }
-            guard.entity.discard()
-        }
+    fun clear(server: MinecraftServer, why: String = "cleared") {
+        for (guard in guards.values) takeOut(guard.entity, why)
         guards.clear()
         Ch2L1Npcs.world(server)?.let { world ->
-            world.getEntitiesByType(Ch2Entities.FACTORY_NPC, Ch2L1Npcs.levelBox()) { it.group == GROUP }.forEach {
-                KeptEntities.forget { e -> e === it }
-                it.discard()
-            }
+            world.getEntitiesByType(Ch2Entities.FACTORY_NPC, Ch2L1Npcs.levelBox()) { it.group == GROUP }.forEach { takeOut(it, why) }
         }
     }
 
@@ -182,7 +210,10 @@ object Ch2L1PatrolHooks {
         if (watching) {
             player!!
             distance = Math.sqrt((player.x - npc.x) * (player.x - npc.x) + (player.z - npc.z) * (player.z - npc.z))
-            val range = if (player.isSneaking) spec.crouchRange else spec.range
+            val state = Ch2L1.state(player)
+            val dark = state >= spec.darkFrom && spec.darkZones.any { Ch2L1DataLoader.data.anchors.zone(it)?.box?.contains(player.x, player.y + 0.1, player.z) == true }
+            val flashlight = ResourceSystem.stateOf(player.uuid, ConfigManager.gameplay).flashlightOn
+            val range = spec.sightRange(player.isSneaking, dark, flashlight)
             seen = Math.abs(player.y - npc.y) < 3 &&
                 Ch2L1Watch.inView(npc.x, npc.z, npc.headYaw, player.x, player.z, range, spec.fovDegrees, spec.proximity) &&
                 (distance <= spec.proximity || npc.canSee(player))
@@ -229,7 +260,7 @@ object Ch2L1PatrolHooks {
         }
     }
 
-    /** His round: where the runner says, at his own pace, looking about. */
+    /** His round: where the runner says, at his own pace, looking about; stuck too long, he jumps to the point he is heading for. */
     private fun round(guard: Guard, d: FactoryNpcEntity.Direction) {
         val npc = guard.entity
         d.lookAt = null
@@ -239,10 +270,21 @@ object Ch2L1PatrolHooks {
                 d.walkTo = Vec3d(command.x, command.y, command.z)
                 d.stopThere = command.brake
                 d.face = null
+                if (npc.pos.squaredDistanceTo(guard.lastAt) > 0.25) {
+                    guard.lastAt = npc.pos
+                    guard.stuckTicks = 0
+                } else if (++guard.stuckTicks >= STUCK_TICKS) {
+                    guard.stuckTicks = 0
+                    npc.refreshPositionAndAngles(command.x, command.y, command.z, npc.yaw, 0f)
+                    guard.lastAt = npc.pos
+                    EveryTunnel.LOGGER.info("Chapter 2 Level 1: guard {} was stuck; he goes on from his next point", guard.spec.id)
+                }
             }
             is Ch2L1PatrolRunner.Command.Stand -> {
                 d.walkTo = null
                 d.face = command.yaw
+                guard.lastAt = npc.pos
+                guard.stuckTicks = 0
             }
         }
     }
@@ -254,20 +296,20 @@ object Ch2L1PatrolHooks {
         guard.chaseFrom = null
     }
 
-    /** Whether the guards watch [player] now: playing, in Act 1 or Act 3's exploring, not in a cinematic, not in Creative, not just caught. */
+    /** Whether the guards watch [player] now: playing, not in Act 2, a cinematic or Creative, the level not over, not just caught. */
     private fun watches(player: ServerPlayerEntity): Boolean {
         val state = Ch2L1.state(player)
-        if (state == Ch2L1State.ACT2_FOLLOW || state == Ch2L1State.ACT2_MEETING || state >= Ch2L1State.ACT3_CUTSCENE) return false
+        if (state == Ch2L1State.ACT2_FOLLOW || state == Ch2L1State.ACT2_MEETING || state == Ch2L1State.ACT3_CUTSCENE || state == Ch2L1State.DONE) return false
         if (player.interactionManager.gameMode == GameMode.CREATIVE || player.isSpectator) return false
-        if (Ch2L1IntroHooks.isRunning(player) || player.uuid in spared || player.uuid in moving) return false
+        if (Ch2L1IntroHooks.isRunning(player) || Ch2L1OfficeHooks.isRunning(player) || player.uuid in spared || player.uuid in moving) return false
         return true
     }
 
     // --- what makes a player suspicious --------------------------------------------------------------------
 
-    /** The forbidden zone [player] stands in, or null. */
+    /** The forbidden zone [player] stands in (one that applies in their state), or null. */
     private fun forbiddenZone(player: ServerPlayerEntity) = watchSpec.forbidden.firstOrNull { f ->
-        Ch2L1DataLoader.data.anchors.zone(f.zone)?.box?.contains(player.x, player.y + 0.1, player.z) == true
+        f.applies(Ch2L1.state(player)) && Ch2L1DataLoader.data.anchors.zone(f.zone)?.box?.contains(player.x, player.y + 0.1, player.z) == true
     }
 
     /** Counts how long [player] has kept the crosshair on the auxiliary lab: a ray from their eyes that reaches into its zone. */

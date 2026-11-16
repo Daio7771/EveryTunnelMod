@@ -1,24 +1,99 @@
 {
   "watch": {
-    "range": 8, "crouch_range": 4, "fov_degrees": 70, "proximity": 2, "crouch_near": 3,
-    "stare_zone": "aux_lab", "stare_seconds": 10, "stare_reach": 16,
-    "notice_seconds": 1.5, "decay_seconds": 2, "grace_seconds": 3, "chase_seconds": 2.5, "give_up_seconds": 3,
-    "catch_reach": 1.6, "run_pace": 3,
-    "warn_line": "guard_warn", "caught_line": "guard_caught",
+    "range": 8,
+    "crouch_range": 4,
+    "fov_degrees": 70,
+    "proximity": 2,
+    "crouch_near": 3,
+    "stare_zone": "aux_lab",
+    "stare_seconds": 10,
+    "stare_reach": 16,
+    "notice_seconds": 1.5,
+    "decay_seconds": 2,
+    "grace_seconds": 3,
+    "chase_seconds": 2.5,
+    "give_up_seconds": 3,
+    "catch_reach": 1.6,
+    "run_pace": 3,
+    "warn_line": "guard_warn",
+    "caught_line": "guard_caught",
     "forbidden": [
-      { "zone": "aux_lab", "back": "return_aux_lab" },
-      { "zone": "aux_chamber", "back": "return_aux_lab" },
-      { "zone": "authorized_corridor", "back": "return_authorized" },
-      { "zone": "security_room", "back": "return_authorized" },
-      { "zone": "office", "back": "return_authorized" },
-      { "zone": "wc_east", "back": "return_authorized" }
+      {
+        "zone": "aux_lab",
+        "back": "return_aux_lab"
+      },
+      {
+        "zone": "aux_chamber",
+        "back": "return_aux_lab"
+      },
+      {
+        "zone": "authorized_corridor",
+        "back": "return_authorized"
+      },
+      {
+        "zone": "security_room",
+        "back": "return_authorized"
+      },
+      {
+        "zone": "office",
+        "back": "return_authorized"
+      },
+      {
+        "zone": "wc_east",
+        "back": "return_authorized"
+      },
+      {
+        "zone": "lab",
+        "back": "return_lab",
+        "from": "ACT3_OVERTIME"
+      }
     ],
-    "back_elsewhere": "return_ring"
+    "back_elsewhere": "return_ring",
+    "dark_zones": [
+      "lab"
+    ],
+    "dark_from": "ACT3_OVERTIME",
+    "dark_range": 3,
+    "flashlight_range": 12
   },
   "patrols": [
-    { "id": "patrol_a", "skin": "guard_1", "path": "patrol_a_waypoints", "pace": 1.0,
-      "pauses": [ { "at": "patrol_a_pause", "seconds": 5 } ] },
-    { "id": "patrol_b", "skin": "guard_2", "path": "patrol_b_waypoints", "spawn": "patrol_b_spawn", "pace": 1.0,
-      "pauses": [ { "at": "patrol_b_spawn", "seconds": 6 } ] }
+    {
+      "id": "patrol_a",
+      "skin": "guard_1",
+      "path": "patrol_a_waypoints",
+      "pace": 1.0,
+      "pauses": [
+        {
+          "at": "patrol_a_pause",
+          "seconds": 5
+        }
+      ]
+    },
+    {
+      "id": "patrol_b",
+      "skin": "guard_2",
+      "path": "patrol_b_waypoints",
+      "spawn": "patrol_b_spawn",
+      "pace": 1.0,
+      "pauses": [
+        {
+          "at": "patrol_b_spawn",
+          "seconds": 6
+        }
+      ]
+    },
+    {
+      "id": "patrol_c",
+      "skin": "guard_1",
+      "path": "patrol_c_waypoints",
+      "pace": 1.0,
+      "pauses": [
+        {
+          "at": "patrol_c_pause",
+          "seconds": 4
+        }
+      ],
+      "from": "ACT3_OVERTIME"
+    }
   ]
 }

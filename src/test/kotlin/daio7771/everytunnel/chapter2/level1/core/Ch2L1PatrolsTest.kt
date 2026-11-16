@@ -18,8 +18,9 @@ class Ch2L1PatrolsTest {
     @Test
     fun `the jar's patrols file reads without a problem and says what the plan says`() {
         assertEquals(emptyList(), result.problems)
-        assertEquals(listOf("patrol_a", "patrol_b"), result.patrols.patrols.map { it.id })
-        assertEquals(listOf("guard_1", "guard_2"), result.patrols.patrols.map { it.skin })
+        assertEquals(listOf("patrol_a", "patrol_b", "patrol_c"), result.patrols.patrols.map { it.id })
+        assertEquals(listOf("guard_1", "guard_2", "guard_1"), result.patrols.patrols.map { it.skin })
+        assertEquals(listOf(null, null, Ch2L1State.ACT3_OVERTIME), result.patrols.patrols.map { it.from })
         assertEquals(8.0, watch.range)
         assertEquals(4.0, watch.crouchRange)
         assertEquals(2.0, watch.proximity)
@@ -28,6 +29,7 @@ class Ch2L1PatrolsTest {
         val anchors = data.anchors
         assertTrue(anchors.path("patrol_a_waypoints")!!.closed, "patrol A goes round")
         assertFalse(anchors.path("patrol_b_waypoints")!!.closed, "patrol B goes there and back")
+        assertTrue(anchors.path("patrol_c_waypoints")!!.closed, "patrol C goes round the LAB")
     }
 
     @Test
@@ -108,6 +110,19 @@ class Ch2L1PatrolsTest {
         event = null
         repeat(watch.giveUpTicks) { event = w.tick(false, false, 6.0) ?: event }
         assertEquals(Ch2L1Watch.Event.GAVE_UP, event)
+    }
+
+    @Test
+    fun `the LAB is forbidden only from the overtime on, and dark, seen close or far with the flashlight on`() {
+        val lab = watch.forbidden.single { it.zone == "lab" }
+        assertFalse(lab.applies(Ch2L1State.ACT3_EXPLORE))
+        assertTrue(lab.applies(Ch2L1State.ACT3_OVERTIME))
+        assertTrue(watch.forbidden.single { it.zone == "office" }.applies(Ch2L1State.ACT1_TASK1))
+        assertEquals(watch.range, watch.sightRange(crouching = false, inDark = false, flashlightOn = false))
+        assertEquals(watch.crouchRange, watch.sightRange(crouching = true, inDark = false, flashlightOn = true))
+        assertEquals(watch.darkRange, watch.sightRange(crouching = false, inDark = true, flashlightOn = false))
+        assertEquals(watch.flashlightRange, watch.sightRange(crouching = true, inDark = true, flashlightOn = true))
+        assertTrue(watch.flashlightRange > watch.range && watch.darkRange < watch.crouchRange)
     }
 
     @Test
