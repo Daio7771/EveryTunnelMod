@@ -25,6 +25,12 @@ them (Ch2L1VoicesTest checks it). Every line has a speaker, the lang key of the 
 Run (from the repository root):   python3 tools/sounds/ch2_l1_voices.py
 Without the MP3 folders it uses the Ogg files already in voice/ch2l1/, so the cues can be redone anywhere.
 
+One more file is no line: the recording on the auxiliary lab's computer (`voice.aux_lab_recording`), an easter egg. Its
+MP3 (by default ~/Downloads/raro.mp3, the same voice rules) is played **backwards**: an old tape's echo is put on the
+voice the right way round, then the whole is reversed and grain laid over it, so a player who reverses it again hears
+the voice clean, the echo trailing as it should. It has no text and no subtitles (it is not in ch2_l1_voices.json), on
+purpose: working out what it says is the point.
+
 Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   cutscene/ch2_l1_voices.json   each line's text key, speaker, length and cues (ms from the line's start, sentence range)
 and prints every cue with its time, to check them by ear.
@@ -102,6 +108,9 @@ ROWAN = [
 ]
 
 GROUPS = {"union": UNION, "rowan": ROWAN}
+
+RECORDING = "aux_lab_recording"
+RECORDING_SOURCE = Path.home() / "Downloads" / "raro.mp3"
 LINES = UNION + ROWAN
 
 
@@ -121,6 +130,48 @@ def pa_filter(x, sr=44100):
     ceiling = 0.97
     peak = np.max(np.abs(y))
     return y * (ceiling / peak) if peak > ceiling else y
+
+
+def recording(x, sr=44100):
+    """The aux lab's recording from the voice the right way round: a small speaker's band, the slap and the long
+    repeats of an old tape, reversed; then the tape's hiss, crackle and mains hum over it. Same loudness as before."""
+    from scipy import signal
+    rng = np.random.default_rng(4719)
+    band = signal.butter(3, [160.0, 5200.0], btype="band", fs=sr, output="sos")
+    y = signal.sosfilt(band, x)
+    tail = int(sr * 2.5)
+    y = np.concatenate([np.zeros(tail), y, np.zeros(tail)])    # room for the echo, both ways round
+    wet = np.zeros_like(y)
+    for delay_ms, gain in ((63, 0.30), (310, 0.34), (620, 0.20), (930, 0.12), (1240, 0.07), (1550, 0.04)):
+        d = int(sr * delay_ms / 1000)
+        wet[d:] += y[:-d] * gain
+    wet = signal.sosfilt(signal.butter(2, 2200.0, btype="low", fs=sr, output="sos"), wet)
+    y = (y + wet)[::-1]
+    t = np.arange(len(y)) / sr
+    hiss = signal.sosfilt(signal.butter(2, [900.0, 7000.0], btype="band", fs=sr, output="sos"), rng.standard_normal(len(y)))
+    crackle = np.zeros(len(y))
+    clicks = rng.integers(0, len(y), size=int(len(y) / sr * 9))
+    crackle[clicks] = rng.uniform(-1.0, 1.0, size=len(clicks))
+    crackle = signal.sosfilt(signal.butter(2, 3000.0, btype="high", fs=sr, output="sos"), crackle)
+    hum = np.sin(2 * np.pi * 50 * t) + 0.4 * np.sin(2 * np.pi * 150 * t)
+    rms = np.sqrt(np.mean(x ** 2))
+    y = y * rms / max(np.sqrt(np.mean(y ** 2)), 1e-9)
+    y += rms * (0.10 * hiss / np.std(hiss) + 0.9 * crackle + 0.035 * hum)
+    fade = int(sr * 0.4)
+    y[:fade] *= np.linspace(0.0, 1.0, fade)
+    y[-fade:] *= np.linspace(1.0, 0.0, fade)
+    ceiling = 0.97
+    peak = np.max(np.abs(y))
+    return y * (ceiling / peak) if peak > ceiling else y
+
+
+def convert_recording():
+    """The aux lab's recording from its MP3, at the voices' loudness."""
+    factor = 10 ** (prologue_voices.group_gain_db([RECORDING_SOURCE]) / 20.0)
+    x = recording(prologue_voices.decode(RECORDING_SOURCE) * factor)
+    VOICE.mkdir(parents=True, exist_ok=True)
+    audio_io.write_ogg(VOICE / f"{RECORDING}.ogg", x, 44100, OGG_QUALITY)
+    print(f"{RECORDING}: {len(x) / 44100:5.2f} s, backwards")
 
 
 def md5(path):
@@ -216,6 +267,10 @@ def main():
             convert(group)
     elif not all((VOICE / f"{line_id}.ogg").exists() for line_id, _, _ in LINES):
         raise SystemExit(f"no MP3s in {', '.join(map(str, SOURCES.values()))} and not every Ogg in {VOICE}")
+    if RECORDING_SOURCE.exists():
+        convert_recording()
+    elif not (VOICE / f"{RECORDING}.ogg").exists():
+        raise SystemExit(f"no {RECORDING_SOURCE} and no {RECORDING}.ogg in {VOICE}")
     english = json.loads(LANG.read_text(encoding="utf-8"))
     scene = {"lines": []}
     total = 0
@@ -242,7 +297,7 @@ def main():
 
 def sounds():
     """(sound id, file path under sounds/, samples) of every voice file, for export.py."""
-    for line_id, _, _ in LINES:
+    for line_id in [line_id for line_id, _, _ in LINES] + [RECORDING]:
         yield f"voice.{line_id}", f"voice/ch2l1/{line_id}", read(line_id)
 
 

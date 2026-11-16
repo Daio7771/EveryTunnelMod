@@ -164,6 +164,12 @@ Las demás claves: `speaker.<quién>` (`coworker`, `worker_a`, `worker_b`, `rowa
 del Acto 3 y la placa del retrato se escribieron en la fase 6 (con sus nombres en NonameOS, `doc.<archivo>.name`); `notice` y `union_list`
 siguen siendo provisionales y nada los usa todavía.
 
+El ordenador del laboratorio auxiliar guarda también una grabación, `rec_7f3a__0x4719.mp3` (`recordings` en `act3.json`: su nombre,
+el mismo en todos los idiomas, y su evento de sonido). Su botón REPRODUCIR abre un reproductor en NonameOS (una onda que se mueve
+mientras suena, `[??]`, REPRODUCIR o DETENER) y hace sonar `voice.aux_lab_recording` desde el ordenador. Es un easter egg: una voz al
+revés (`ch2_l1_voices.py` la invierte, con el eco puesto del derecho), sin texto ni subtítulos a propósito, para que los jugadores la
+inviertan y la descifren. Nada la cuenta y nada la espera.
+
 ## Las personas
 
 `FactoryNpcEntity` es un solo tipo de entidad para todos: Rowan, el compañero, los trabajadores. Su `skin` (sincronizada con

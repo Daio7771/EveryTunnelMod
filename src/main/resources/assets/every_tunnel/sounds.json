@@ -1252,6 +1252,11 @@
       "every_tunnel:player/tinnitus_1"
     ]
   },
+  "voice.aux_lab_recording": {
+    "sounds": [
+      "every_tunnel:voice/ch2l1/aux_lab_recording"
+    ]
+  },
   "voice.director.boss_01": {
     "sounds": [
       "every_tunnel:voice/director/boss_01"

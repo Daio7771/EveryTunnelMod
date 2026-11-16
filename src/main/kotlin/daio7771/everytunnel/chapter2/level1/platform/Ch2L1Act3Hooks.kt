@@ -51,7 +51,10 @@ import java.util.concurrent.CopyOnWriteArrayList
  */
 object Ch2L1Act3Hooks {
 
-    /** To the client: a computer's files (its id, then each file's id and whether it has been read). */
+    /**
+     * To the client: a computer's files (its id, then each file's id and whether it has been read), its recordings (each one's name and
+     * sound event) and where it stands, which is where they play from.
+     */
     val FILES_PACKET = Identifier(EveryTunnel.MOD_ID, "ch2l1_files")
 
     /** To the server: the player closed a file (the computer's id, the file's). */
@@ -200,6 +203,12 @@ object Ch2L1Act3Hooks {
             buf.writeString(file)
             buf.writeBoolean(act3.isRead(file) { counter(player, it) })
         }
+        buf.writeVarInt(computer.recordings.size)
+        for (recording in computer.recordings) {
+            buf.writeString(recording.name)
+            buf.writeString(recording.sound)
+        }
+        buf.writeBlockPos(pos)
         ServerPlayNetworking.send(player, FILES_PACKET, buf)
         return ActionResult.CONSUME
     }

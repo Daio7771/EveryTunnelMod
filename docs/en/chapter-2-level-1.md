@@ -158,6 +158,12 @@ The other keys: `speaker.<who>` (`coworker`, `worker_a`, `worker_b`, `rowan_loud
 portrait's plaque were written in phase 6 (with their names in NonameOS, `doc.<file>.name`); `notice` and `union_list` are still
 placeholders, used by nothing yet.
 
+The aux lab's computer also holds a recording, `rec_7f3a__0x4719.mp3` (`recordings` in `act3.json`: its name, the same in every
+language, and its sound event). Its PLAY opens a player in NonameOS (a waveform that moves while it plays, `[??]`, PLAY or STOP) and
+plays `voice.aux_lab_recording` from the computer. It is an easter egg: a voice played backwards (`ch2_l1_voices.py` reverses it,
+the echo put on the right way round), with no text and no subtitles on purpose, for players to reverse and make out. Nothing counts
+it and nothing waits on it.
+
 ## The people
 
 `FactoryNpcEntity` is one entity type for everyone: Rowan, the coworker, the workers. Its `skin` (synced to the client)

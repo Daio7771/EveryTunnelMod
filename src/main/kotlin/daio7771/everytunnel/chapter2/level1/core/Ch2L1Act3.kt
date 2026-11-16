@@ -3,8 +3,14 @@ package daio7771.everytunnel.chapter2.level1.core
 import com.google.gson.JsonObject
 import daio7771.everytunnel.util.JsonFields
 
-/** A NonameOS computer of Act 3 ([Ch2L1Act3]): its block's anchor and the files it holds, each a document's id (`every_tunnel.ch2.l1.<id>`). */
-data class Ch2L1Computer(val id: String, val anchor: String, val files: List<String>)
+/** A sound file on a NonameOS computer: the name it shows (the same in every language) and the sound event it plays from the computer. */
+data class Ch2L1Recording(val name: String, val sound: String)
+
+/**
+ * A NonameOS computer of Act 3 ([Ch2L1Act3]): its block's anchor and the files it holds, each a document's id (`every_tunnel.ch2.l1.<id>`),
+ * and its recordings, which only play: nothing counts them, and nothing waits on them.
+ */
+data class Ch2L1Computer(val id: String, val anchor: String, val files: List<String>, val recordings: List<Ch2L1Recording> = emptyList())
 
 /**
  * Act 3 of Chapter 2's Level 1, its first part: exploring the auxiliary lab, the authorized corridor and Rowan's office, from `act3.json`.
@@ -87,7 +93,10 @@ data class Ch2L1Act3(
         const val MAX_CODE = 8
 
         val DEFAULT_COMPUTERS = listOf(
-            Ch2L1Computer("aux_lab", "aux_lab_computer", listOf("chamber_log", "authorization")),
+            Ch2L1Computer(
+                "aux_lab", "aux_lab_computer", listOf("chamber_log", "authorization"),
+                listOf(Ch2L1Recording("rec_7f3a__0x4719.mp3", "voice.aux_lab_recording")),
+            ),
             Ch2L1Computer("rowan", "rowan_computer", listOf("medical_file", "contract_14")),
         )
         val DEFAULT = Ch2L1Act3()
@@ -99,7 +108,8 @@ data class Ch2L1Act3(
  *
  * ```json
  * { "reader": "aux_lab_reader", "lab_door": "aux_lab_door", "keypad": "office_keypad", "office_door": "door_anchor", "code": "4719",
- *   "computers": [ { "id": "aux_lab", "anchor": "aux_lab_computer", "files": ["chamber_log", "authorization"] },
+ *   "computers": [ { "id": "aux_lab", "anchor": "aux_lab_computer", "files": ["chamber_log", "authorization"],
+ *                    "recordings": [ { "name": "rec_7f3a__0x4719.mp3", "sound": "voice.aux_lab_recording" } ] },
  *                  { "id": "rowan", "anchor": "rowan_computer", "files": ["medical_file", "contract_14"] } ],
  *   "code_file": "authorization", "office_zone": "office", "trigger_computer": "rowan",
  *   "restricted_doors": ["restricted_door_east"], "sealed_door": "sealed_door", "portrait": "painting", "chamber": "chamber_02",
@@ -122,8 +132,19 @@ object Ch2L1Act3Parser {
             val id = c.requiredString("id")
             val anchor = c.requiredString("anchor")
             val files = c.stringList("files")
+            val recordings = (c.array("recordings")?.toList() ?: emptyList()).mapIndexedNotNull { j, r ->
+                if (!r.isJsonObject) {
+                    f.problems += "computers[$i].recordings[$j]: expected an object"
+                    return@mapIndexedNotNull null
+                }
+                val rf = JsonFields(r.asJsonObject, "computers[$i].recordings[$j]", f.problems)
+                val name = rf.requiredString("name")
+                val sound = rf.requiredString("sound")
+                rf.reportUnknownKeys()
+                if (name == null || sound == null) null else Ch2L1Recording(name, sound)
+            }
             c.reportUnknownKeys()
-            if (id == null || anchor == null) null else Ch2L1Computer(id, anchor, files)
+            if (id == null || anchor == null) null else Ch2L1Computer(id, anchor, files, recordings)
         }
         val act3 = Ch2L1Act3(
             readerAnchor = f.string("reader", d.readerAnchor),

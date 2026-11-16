@@ -5,7 +5,10 @@
   "office_door": "door_anchor",
   "code": "4719",
   "computers": [
-    { "id": "aux_lab", "anchor": "aux_lab_computer", "files": ["chamber_log", "authorization"] },
+    {
+      "id": "aux_lab", "anchor": "aux_lab_computer", "files": ["chamber_log", "authorization"],
+      "recordings": [ { "name": "rec_7f3a__0x4719.mp3", "sound": "voice.aux_lab_recording" } ]
+    },
     { "id": "rowan", "anchor": "rowan_computer", "files": ["medical_file", "contract_14"] }
   ],
   "code_file": "authorization",
