@@ -9,8 +9,8 @@ who "fell ill", three acts of tasks, a meeting and sneaking, ending in the super
 finished.** It is reached from the main menu (Chapter 2, NEW GAME: the prologue, then the factory) and played from the clock to its end,
 the basement swept and back to the menu, every room furnished and peopled. Level 2 is next; both are published together as a demo.
 
-**How it is reached.** The main menu's Chapter 2, NEW GAME: the prologue (skippable), then the factory; the black of the
-prologue's end stays until the player stands in it. The level is not saved: it opens the same world as Chapter 1's saved game, so
+**How it is reached.** The main menu's Chapter 2, NEW GAME: the prologue (skippable), then the factory. The screen is black from
+the world's loading until the prologue begins, and the black of its end stays until the player stands in the factory. The level is not saved: it opens the same world as Chapter 1's saved game, so
 before going in, where the player stood and what they carried are kept (`Ch2L1Return`), and leaving the world, at the level's end or
 halfway, takes them out of the level and gives both back; a world left without leaving (the game stopped) does it on joining. Every
 NEW GAME of Chapter 2 starts again from the prologue. In development, `/et ch2 l1 enter` goes in without any of this.
@@ -248,7 +248,8 @@ patrols of phase 7 do. Being drawn by the client, they cost the server nothing.
 the state and sent to the client by Cardinal; `Ch2L1.active`) from `Ch2L1.enter` to `Ch2L1.leave`. While they are:
 
 The base game's hooks never ask for this level: `Chapter2` registers its rules with `PlayerRules` (no flashlight, no hiding,
-safe, silent, no status bars) while `Ch2L1.active`, and the hooks below ask `PlayerRules`.
+safe, silent, no status bars, and the new hire's skin, a scientist in the factory's white coat, in place of the night guard's
+uniform) while `Ch2L1.active`, and the hooks below ask `PlayerRules`.
 
 | Rule | Where it is |
 |---|---|

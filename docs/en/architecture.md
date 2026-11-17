@@ -84,7 +84,7 @@ its extension points:
 
 | Extension point | What a chapter does with it |
 |---|---|
-| `platform.PlayerRules` | Says which of the base game's rules change for a player who plays it (flashlight, hiding, damage, noise, status bars) |
+| `platform.PlayerRules` | Says which of the base game's rules change for a player who plays it (flashlight, hiding, damage, noise, status bars, the player's skin) |
 | `platform.ChapterRequest` | Registers what runs when the menu opened the world for it (`onLoaded`) |
 | `ProgressService.onReset` | Clears its own progress (its own Cardinal component) on a Chapter 1 new game |
 | `client.cutscene.CutsceneView.Kind` | Its scenes: a `Kind` with its timeline and whatever else it does, started with `CutsceneView.start` |

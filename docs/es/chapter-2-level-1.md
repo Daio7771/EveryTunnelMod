@@ -10,8 +10,9 @@ terminado.** Se llega desde el menú principal (Capítulo 2, NUEVA PARTIDA: el p
 su final, el sótano barrido y la vuelta al menú, con todas las salas amuebladas y con gente. Lo siguiente es el Nivel 2; los dos se
 publican juntos como demo.
 
-**Cómo se llega.** NUEVA PARTIDA del Capítulo 2 en el menú principal: el prólogo (se puede saltar) y luego la fábrica; el
-negro del final del prólogo se mantiene hasta que el jugador está en ella. El nivel no se guarda: abre el mismo mundo que la partida
+**Cómo se llega.** NUEVA PARTIDA del Capítulo 2 en el menú principal: el prólogo (se puede saltar) y luego la fábrica. La
+pantalla está en negro desde la carga del mundo hasta que empieza el prólogo, y el negro de su final se mantiene hasta que el jugador
+está en la fábrica. El nivel no se guarda: abre el mismo mundo que la partida
 guardada del Capítulo 1, así que antes de entrar se guarda dónde estaba el jugador y lo que llevaba (`Ch2L1Return`), y al salir del
 mundo, al final del nivel o a medias, sale del nivel y se le devuelven ambas cosas; un mundo dejado sin salir (el juego se cerró) lo hace
 al entrar. Cada NUEVA PARTIDA del Capítulo 2 empieza otra vez desde el prólogo. En desarrollo, `/et ch2 l1 enter` entra sin nada de esto.
@@ -254,7 +255,8 @@ dibujarlas el cliente, no cuestan nada al servidor.
 con el estado y enviado al cliente por Cardinal; `Ch2L1.active`) desde `Ch2L1.enter` hasta `Ch2L1.leave`. Mientras lo está:
 
 Los hooks del juego base nunca preguntan por este nivel: `Chapter2` registra sus reglas en `PlayerRules` (sin linterna, sin
-esconderse, a salvo, en silencio, sin barras de estado) mientras `Ch2L1.active`, y los hooks de abajo preguntan a `PlayerRules`.
+esconderse, a salvo, en silencio, sin barras de estado, y la skin del nuevo empleado, un científico con la bata blanca de la fábrica,
+en lugar del uniforme del guardia nocturno) mientras `Ch2L1.active`, y los hooks de abajo preguntan a `PlayerRules`.
 
 | Regla | Dónde está |
 |---|---|

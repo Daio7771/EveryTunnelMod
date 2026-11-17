@@ -86,7 +86,7 @@ por sus puntos de extensión:
 
 | Punto de extensión | Qué hace un capítulo con él |
 |---|---|
-| `platform.PlayerRules` | Dice qué reglas del juego base cambian para quien lo juega (linterna, esconderse, daño, ruido, barras de estado) |
+| `platform.PlayerRules` | Dice qué reglas del juego base cambian para quien lo juega (linterna, esconderse, daño, ruido, barras de estado, la skin del jugador) |
 | `platform.ChapterRequest` | Registra lo que se ejecuta cuando el menú abrió el mundo para él (`onLoaded`) |
 | `ProgressService.onReset` | Borra su propio progreso (su propio componente de Cardinal) con una partida nueva del Chapter 1 |
 | `client.cutscene.CutsceneView.Kind` | Sus escenas: un `Kind` con su línea de tiempo y lo demás que haga, que arranca con `CutsceneView.start` |

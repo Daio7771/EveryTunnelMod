@@ -17,6 +17,12 @@ player was not the first to wear it), each with a face of their own painted over
     guard_1     short black hair, a shadow of beard
     guard_2     a darker man, bald, with a beard
 
+and the player of Chapter 2 (the new hire, the scientist hired in the place of the one who "fell ill"), whose skin the
+chapter puts on the player in Level 1 in place of the night guard's uniform (`PlayerRules.Rules.skin`):
+
+    new_hire    an ordinary young adult: short brown hair, clean-shaven, a dark shirt and tie under the same coat, grey
+                trousers, black shoes, a plain grey badge (new: no team's colour yet). Written to textures/entity/new_hire.png
+
 `rowan.png` is NOT made here: it is the author's own skin (a beige suit and a green tie), copied as it came.
 
 Run after changing anything here (from the repository root):   python3 tools/entity/workers.py
@@ -63,6 +69,11 @@ PEOPLE = {
                       trousers=(36, 40, 52), shoes=(22, 22, 26), badge=(140, 90, 180), beard=True),
 }
 
+# The player of Chapter 2: not one of the factory's people, so not in npc/.
+NEW_HIRE = dict(skin=(230, 184, 154), hair=(96, 66, 42), style="parted", brows=(80, 54, 36), shirt=(48, 56, 72),
+                tie=(28, 30, 40), trousers=(96, 98, 104), shoes=(22, 22, 26), badge=(150, 154, 160))
+NEW_HIRE_TEXTURE = TEXTURES.parent / "new_hire.png"
+
 
 def put(img, rect, x, y, colour):
     img.putpixel((rect[0] + x, rect[1] + y), (*colour, 255))
@@ -93,6 +104,9 @@ def paint_body(img, p):
     block(img, front, 2, 1, 1, 4, COAT_SHADE)            # the lapels
     block(img, front, 5, 1, 1, 4, COAT_SHADE)
     block(img, front, 3, 4, 2, 1, shade(p["shirt"], -30))
+    if "tie" in p:                                       # a tie down the open collar: its knot, then the blade
+        block(img, front, 3, 1, 2, 1, shade(p["tie"], 16))
+        block(img, front, 3, 2, 2, 3, p["tie"])
     block(img, front, 3, 5, 1, 6, COAT_FOLD)             # the opening down the middle, with its buttons
     put(img, front, 4, 6, BUTTON)
     put(img, front, 4, 9, BUTTON)
@@ -328,11 +342,14 @@ def main():
         paint_head(img, person)
         img.save(TEXTURES / f"{name}.png")
         skins.append((name, img))
+    hire = paint(NEW_HIRE)
+    hire.save(NEW_HIRE_TEXTURE)
+    skins.append(("new_hire", hire))
     rowan = TEXTURES / "rowan.png"
     if rowan.exists():
         skins.append(("rowan", Image.open(rowan).convert("RGBA")))
     preview(skins).save(OUT / "workers_preview.png")
-    print(f"{len(PEOPLE) + len(GUARDS)} skins in {TEXTURES.relative_to(ROOT)}, preview in {OUT.relative_to(ROOT)}/workers_preview.png")
+    print(f"{len(PEOPLE) + len(GUARDS) + 1} skins in {TEXTURES.relative_to(ROOT)}, preview in {OUT.relative_to(ROOT)}/workers_preview.png")
 
 
 if __name__ == "__main__":
