@@ -27,8 +27,8 @@ import daio7771.everytunnel.platform.ModSounds
  * in at it ([CardReaderBlock.UNLOCKED], green). Right-clicked by a player playing the level ([Ch2L1.active]) who has not
  * clocked in yet ([Ch2L1State.ACT1_CLOCKIN]) it beeps, turns green and moves them on to [Ch2L1State.ACT1_TASK1]; once in
  * later steps it buzzes, "You already clocked in". For anyone else it does nothing. The light is the block's, not the
- * player's: it goes red again whenever a player is put back at the clock-in step ([relockNear]). The map will place the
- * clock; until then `/et ch2 l1 clock` puts one where the developer looks.
+ * player's: it goes red again whenever a player is put back at the clock-in step ([relockNear]). The map places it
+ * (on the entrance's south wall).
  */
 class TimeClockBlock(settings: Settings) : Block(settings) {
 

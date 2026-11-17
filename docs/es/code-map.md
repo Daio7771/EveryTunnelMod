@@ -159,7 +159,7 @@ con un comentario KDoc que cuenta más.
 | `DirectorEntity.kt` | El director en su silla (GeckoLib): se mueve con la escena del cliente, con máscara y mirada sincronizadas; `DirectorHooks` lo pone ahí con el nivel |
 | `LabHallHooks.kt` | El golpe de cuerdas y la primera Cloud del Lab hall, una vez por partida |
 | `ChemicalHooks.kt` | El puzle químico: la pareja de la partida, la mezcladora, la alarma y sus enemigos, la rejilla disolviéndose, la trampilla |
-| `ChapterRequest.kt` | Lo que pidió el menú: el mundo se abre solo para la apertura de un capítulo posterior (sin reconstruir el mapa ni nueva partida), que arranca ese capítulo (`onLoaded`); su cliente sale al menú después |
+| `ChapterRequest.kt` | Lo que pidió el menú: el mundo se abre solo para la apertura de un capítulo posterior (sin reconstruir el mapa ni nueva partida), que arranca ese capítulo (`onLoaded`) y sigue |
 | `DirectorBlocks.kt` | La antesala y el despacho del nivel 5: la puerta doble del director que abre sus dos hojas a la vez, el bloque de la cámara de seguridad, el muro de monitores CCTV |
 | `DeepWaterHooks.kt` | El agua honda del nivel 5 (las piscinas del drenaje): al caer, algo arrastra al jugador al fondo y se ahoga |
 | `DrainHooks.kt` | El drenaje del nivel 5: la trampilla cerrándose de golpe cuando el jugador ha bajado su escalera, abierta otra vez si muere antes de la Junction |
@@ -408,7 +408,7 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 |---|---|
 | `level1/platform/Ch2L1.kt` | El Nivel 1 del Chapter 2: el estado de cada jugador y si lo está jugando (las reglas le siguen: `enter`, `leave`), guardados en su progreso; todo cambio pasa por aquí y llega a los oyentes |
 | `level1/platform/Ch2L1DataLoader.kt` | Lee los archivos JSON del nivel (la copia de la carpeta de config, si no la del jar) al arrancar y con `/et reload`, y guarda los datos actuales |
-| `level1/platform/Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc\|tasks\|act3\|patrols\|intro\|say` (solo ejecuciones de desarrollo) |
+| `level1/platform/Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 enter\|leave\|build\|unbuild\|anchors\|goto\|state\|skip\|npc\|tasks\|act3\|patrols\|intro\|say` (solo ejecuciones de desarrollo) |
 | `level1/platform/Ch2L1Build.kt` | Construye el nivel desde su plan a razón de 8.000 celdas por tick (y lo vacía), recuerda qué plan construyó, comprueba antes cada bloque |
 | `level1/platform/TimeClockBlock.kt` | El reloj de fichar del Nivel 1 del Chapter 2: un lector de tarjetas (mismos modelos) que ficha al nuevo empleado, rojo y luego verde |
 | `level1/platform/Ch2L1TaskBlocks.kt` | El tubo de muestra, el terminal de NonameOS, el analizador, la escoba apoyada y la suciedad de las tareas del Capítulo 2: cada uno pasa su uso a `Ch2L1TaskHooks` |
@@ -422,6 +422,8 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `level1/platform/Ch2L1OfficeHooks.kt` | La cinemática del despacho en el servidor: el deslizamiento a la marca, Rowan movido por el recorrido de la escena, la puerta, el pase que se desliza, el salto, Rowan esperando junto a la puerta hasta que sales y lo que deja el despacho (el pase, la linterna, el LAB casi a oscuras, a6 una vez) |
 | `level1/platform/Ch2L1Doors.kt` | Las puertas de la fábrica como las usa su gente: abiertas a su paso, un vano cerrado o abierto alrededor de un sitio |
 | `level1/platform/FactoryNpcEntity.kt` | Una persona del Nivel 1 del Chapter 2 (Rowan, el compañero, los trabajadores): un solo tipo de entidad, su skin sincronizada las distingue; un trabajador sigue su rutina tick a tick (andar suave, a su ritmo), su cabeza mira sola, y su pose sincronizada dice si teclea, habla o escucha; una criatura mantenida |
+| `level1/platform/Ch2L1KeyItems.kt` | Los objetos clave del nivel no se pierden: se retiran los tirados en el nivel, y quien debería llevar uno lo recupera |
+| `level1/platform/Ch2L1Return.kt` | La vuelta al Capítulo 1: tras el prólogo del menú se guarda dónde estaba el jugador y lo que llevaba; al salir del mundo (al final o a medias) se le devuelve, fuera del nivel |
 | `level1/platform/Ch2L1Npcs.kt` | La gente de la fábrica: los trabajadores que se ponen mientras se juega el nivel y los del LAB que se quitan, las charlas entre parejas, los grupos y el `/et ch2 l1 npc` del desarrollador |
 
 ### Cliente: `client/kotlin/daio7771/everytunnel/chapter2/` (`prologue/client/`, `level1/client/`)

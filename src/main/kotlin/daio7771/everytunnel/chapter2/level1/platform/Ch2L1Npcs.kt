@@ -30,7 +30,7 @@ import daio7771.everytunnel.platform.TickProfiler
  *
  * - **The ordinary life** (`npcs.json`, `workers`): while a player plays the level, inside it and before its cinematic, [ensureAmbient]
  *   (every few seconds, and at once on entering) puts in each worker that is missing, with the routine the file gives it, where its
- *   spawn anchor says. The LAB's go away when the player reaches [Ch2L1State.ACT3_CUTSCENE] (phase 8), the others stay.
+ *   spawn anchor says. The LAB's go away when the player reaches [Ch2L1State.ACT3_CUTSCENE], the others stay.
  *   Each walks at their own pace and looks about (`life`, [FactoryNpcEntity]).
  * - **Talks**: every few ticks, workers free to talk (not at a station, not just after a talk) who are within `chat_range` of each other are
  *   paired up, nearest first; some of the pairs ([Ch2L1Life.chatChance]) stop to talk ([Ch2L1Chat]: their routines wait, they face each
@@ -121,6 +121,9 @@ object Ch2L1Npcs {
         val playing = server.playerManager.playerList.filter { it.serverWorld == world && Ch2L1.active(it) && box.contains(it.pos) }
         if (playing.isEmpty() || !Ch2L1Build.isBuilt(server)) return 0
         val lastState = playing.maxOf { Ch2L1.state(it).ordinal }
+        // A worker who fell out of the level (a rebuild empties it) is taken away: a new one is put in below.
+        world.getEntitiesByType(Ch2Entities.FACTORY_NPC, box.expand(0.0, 48.0, 0.0)) { it.workerId != null && !box.contains(it.pos) }
+            .forEach { stray -> KeptEntities.forget { it === stray }; stray.discard() }
         val present = world.getEntitiesByType(Ch2Entities.FACTORY_NPC, box) { it.workerId != null }.mapNotNull { it.workerId }.toSet()
         val data = Ch2L1DataLoader.npcs
         var count = 0

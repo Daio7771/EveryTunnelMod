@@ -12,13 +12,13 @@ object Ch2Items {
     /** Chapter 2 Level 1's third task: the broom for the dirt of the west corridor (`Ch2L1TaskHooks`); nothing else uses it. */
     val BROOM: Item = Item(Item.Settings().maxCount(1))
 
-    /** Act 2: the copy of a lab badge the coworker hands over in the meeting; it opens only the auxiliary lab's door (phase 6). */
+    /** Act 2: the copy of a lab badge the coworker hands over in the meeting; it opens only the auxiliary lab's door. */
     val LAB_BADGE_COPY: Item = Item(Item.Settings().maxCount(1))
 
-    /** Act 3: Rowan's "Unpaid Overtime Pass", slid across his desk at the end of the office's scene; it opens the sealed zone (phase 9). */
+    /** Act 3: Rowan's "Unpaid Overtime Pass", slid across his desk at the end of the office's scene; it opens the sealed zone. */
     val OVERTIME_PASS: Item = Item(Item.Settings().maxCount(1))
 
-    /** Phase 10b's reagents' task: a bottle taken from the LAB's reagent cabinet, to pour into the mixing tank (`Ch2L1LabTaskHooks`). */
+    /** The reagents' task: a bottle taken from the LAB's reagent cabinet, to pour into the mixing tank (`Ch2L1LabTaskHooks`). */
     val REAGENTS: Map<String, Item> = listOf("blue", "yellow", "red").associateWith { Item(Item.Settings().maxCount(1)) }
 
     fun register() {

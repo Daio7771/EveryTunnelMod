@@ -4,11 +4,10 @@ import net.minecraft.server.network.ServerPlayerEntity
 
 /**
  * What the main menu's NEW GAME modal asked for, read by the server and the client of the one process (the game is
- * singleplayer, as [ContinueGame.requested] is): the next opening of the world only plays the opening of a later [chapter]
- * (Chapter 2's prologue), not Chapter 1. The world is opened without rebuilding the map or starting a new game ([LoadingHooks]);
- * once the loading screen is gone, the chapter's own start runs ([onLoaded], registered by the chapter), and when its scene ends
- * the chapter's client leaves the world for the menu. The saved game of Chapter 1, if there is one, is not touched. Set by the
- * menu, cleared by the chapter's scene.
+ * singleplayer, as [ContinueGame.requested] is): the next opening of the world plays a later [chapter], not Chapter 1. The
+ * world is opened without rebuilding the map or starting a new game ([LoadingHooks]); once the loading screen is gone, the
+ * chapter's own start runs ([onLoaded], registered by the chapter), and the chapter decides what follows. It must leave the saved
+ * game of Chapter 1, if there is one, as it found it. Set by the menu, cleared when the world closes.
  */
 object ChapterRequest {
 

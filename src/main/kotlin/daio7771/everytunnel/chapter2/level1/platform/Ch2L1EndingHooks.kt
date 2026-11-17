@@ -18,8 +18,9 @@ import java.util.UUID
 /**
  * The end of Chapter 2's Level 1 ([Ch2L1State.DONE]: the basement's last dirt swept, [Ch2L1TaskHooks]). The level is marked finished in the
  * player's progress ([Ch2L1Overtime.COMPLETED]), the basement's lights go out with a thud, and after [Ch2L1Overtime.darkTicks] in the dark
- * the client is told to end ([ENDING_PACKET]: the fade, the closing text, then the main menu; `client.Ch2L1EndingOverlay`). The level is not
- * published alone, so for now nothing follows it. Leaving [Ch2L1State.DONE] (a command) lights the basement again. Server thread only.
+ * the client is told to end ([ENDING_PACKET]: the fade, the closing text, then the main menu; `client.Ch2L1EndingOverlay`). A player who
+ * left the world before the menu and comes back is still at the end: the dark and the ending again. The level is not published alone, so
+ * for now nothing follows it. Leaving [Ch2L1State.DONE] (a command) lights the basement again. Server thread only.
  */
 object Ch2L1EndingHooks {
 
@@ -31,10 +32,21 @@ object Ch2L1EndingHooks {
 
     private val overtime: Ch2L1Overtime get() = Ch2L1DataLoader.act3.overtime
 
+    /** On joining at the end, this much more before the dark's count starts (the client's world loading). */
+    private const val REJOIN_TICKS = 40
+
     fun register() {
         Ch2L1.onStateChange(::onState)
         ServerTickEvents.END_SERVER_TICK.register(::tick)
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> pending.remove(handler.player.uuid) }
+        // Back in the world after the end (it was left in the dark, before the menu): the dark, and the end again.
+        ServerPlayConnectionEvents.JOIN.register { handler, _, _ ->
+            val player = handler.player
+            if (Ch2L1.active(player) && Ch2L1.state(player) == Ch2L1State.DONE) {
+                if (Ch2L1Build.isBuilt(player.server)) Ch2L1Build.zoneLights(player.serverWorld, overtime.basementZone, true)
+                pending[player.uuid] = overtime.darkTicks + REJOIN_TICKS
+            }
+        }
     }
 
     private fun onState(player: ServerPlayerEntity, from: Ch2L1State, to: Ch2L1State) {

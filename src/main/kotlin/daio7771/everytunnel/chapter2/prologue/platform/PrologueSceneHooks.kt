@@ -50,15 +50,18 @@ import daio7771.everytunnel.platform.TickProfiler
  * [ScientistEntity.STRETCHED] and, in the last beat, becomes a Pale man ([ScientistEntity.PALE]), turning a little
  * more towards the camera each time. The camera, the voice and the sound are the client's, on the same ticks.
  *
- * For now it is started by `/everytunnel prologue` and by the main menu's NEW GAME, Chapter 2 ([ChapterRequest],
- * [startFromMenu]: the world opens only for it, and the client leaves for the menu when it ends); the game's chapter 2
- * does not exist yet. Its state lives in memory only.
+ * It is started by the main menu's NEW GAME, Chapter 2 ([ChapterRequest], [startFromMenu]: its end is told to
+ * [onEndedFromMenu], which takes the player into the factory) and, in development, by `/everytunnel prologue` (its end
+ * leaves the player where they were). Its state lives in memory only.
  */
 object PrologueSceneHooks {
 
     val START_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "prologue_scene_start")
     val END_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "prologue_scene_end")
     val SKIP_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "prologue_scene_skip")
+
+    /** The chapter the main menu asks for ([ChapterRequest]) to play the prologue and what follows it. */
+    const val MENU_CHAPTER = 2
 
     /** The room's cell 0, 0, 0 (the corner of its air): high over the world's levels, a long way from them. */
     private val ORIGIN = BlockPos(2048, 200, 2048)
@@ -87,6 +90,18 @@ object PrologueSceneHooks {
     )
 
     private var running: Running? = null
+
+    /** Told when a prologue the main menu asked for ends, played through or skipped, the player back where they were. */
+    fun interface Ended {
+        fun ended(player: ServerPlayerEntity)
+    }
+
+    private var endedFromMenu: Ended? = null
+
+    /** What follows the prologue the main menu asked for ([startFromMenu]). */
+    fun onEndedFromMenu(listener: Ended) {
+        endedFromMenu = listener
+    }
 
     private val states = mutableMapOf<String, BlockState>()
 
@@ -233,6 +248,7 @@ object PrologueSceneHooks {
         }
         if (world != null) clear(world, RoomPlan.load())
         EveryTunnel.LOGGER.info("Prologue: {}", if (skipped) "skipped" else "ends")
+        if (player != null && ChapterRequest.chapter == MENU_CHAPTER) endedFromMenu?.ended(player)
     }
 
     /** The player left the world during the scene: put back where they were (so the save is not in the room) and the room cleared. */

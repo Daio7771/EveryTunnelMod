@@ -17,9 +17,9 @@ enum class Ch2L1State {
     ACT1_TASK1,
     /** Act 1, task 2: calibrate the analyzer. */
     ACT1_TASK2,
-    /** Act 1, the LAB's reagents (phase 10b): take the three bottles from the reagent cabinet and pour each into the mixing tank. */
+    /** Act 1, the LAB's reagents: take the three bottles from the reagent cabinet and pour each into the mixing tank. */
     ACT1_REAGENTS,
-    /** Act 1, the LAB's gauge (phase 10b): read the centrifuge's speed and log it at the terminal beside it. */
+    /** Act 1, the LAB's gauge: read the centrifuge's speed and log it at the terminal beside it. */
     ACT1_GAUGE,
     /** Act 1, task 3 (the fifth and last): sweep the west corridor, in front of the auxiliary laboratory's glass. */
     ACT1_TASK3,

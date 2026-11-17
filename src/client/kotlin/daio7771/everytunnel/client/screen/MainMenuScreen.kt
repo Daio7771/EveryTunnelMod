@@ -43,7 +43,7 @@ import kotlin.random.Random
  *   (installed by `client.MapWorldInstaller`), behind the loading screen ([LoadingCover]). Starting over is
  *   Ctrl+Shift+D, explained in the guide: it erases the saved game after asking ([EraseSaveScreen]), and NEW GAME is back.
  *   In Chapter 2's menu it is NEW GAME, which only warns ([SpoilerAlertScreen]) and lets it be played anyway while
- *   Chapter 2 is locked, opens the world only to play the prologue ([ChapterRequest]) and comes back here.
+ *   Chapter 2 is locked, and opens the world for that chapter ([ChapterRequest]), which comes back here at its end.
  * - OPTIONS opens vanilla's options (the language is changed there); GUIDE opens the player
  *   guide ([GuideScreen], whose last tab rolls the credits); ACHIEVEMENTS lists the
  *   achievements ([AchievementsScreen]); EXIT closes the game.

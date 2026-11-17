@@ -1396,6 +1396,26 @@ def steel_door_tex(rng, half, colour, kind):
             rect(img, 12, 7, 14, 7, (178, 184, 192))
             px(img, 13, 8, (100, 104, 112), 1.0)
         return img
+    if kind == "secure":                                          # no window: a red plate, a lever handle
+        if half == "top":
+            rect(img, 4, 5, 11, 10, (172, 38, 34))
+            rect(img, 4, 5, 11, 5, (120, 26, 24))
+            for y, (x0, x1) in ((7, (5, 10)), (9, (6, 9))):
+                rect(img, x0, y, x1, y, (236, 230, 226), 0.95)
+        else:
+            rect(img, 12, 1, 14, 1, (178, 184, 192))
+            px(img, 13, 2, (100, 104, 112), 1.0)
+            rect(img, 1, 11, 14, 14, (112, 118, 126), 0.8)    # kick plate
+        return img
+    if kind == "stall":                                           # laminate, hinges, the lock's vacant sign
+        for y in (2, 3, 12, 13):
+            px(img, 1, y, (130, 136, 144), 0.9)
+        if half == "top":
+            rect(img, 12, 12, 13, 13, (150, 154, 160))
+            px(img, 12, 12, (62, 160, 92), 1.0)
+            px(img, 13, 12, (62, 160, 92), 1.0)
+            rect(img, 12, 14, 13, 14, (96, 100, 108))
+        return img
     if kind == "office":                                          # black, a long steel pull, nothing else
         for y in range(16):
             px(img, 12, y, (150, 154, 160), 0.9)
@@ -1698,6 +1718,83 @@ def mask_tex(rng):
     img = new(MASK_SHADE)
     noise(img, rng, 3)
     paint_mask(img, random.Random(rng.random()), (4, 4, 8, 8))
+    return img
+
+
+def broom_wood_tex(rng):
+    """The broom's handle: varnished wood, its grain running along it (up the picture): each column its own tone, a few
+    dark grain lines that wander a pixel now and then, and one pale line of varnish catching the light."""
+    base = (126, 90, 56)
+    img = new(base)
+    for x in range(16):
+        tone = rng.choice((-14, -8, 0, 6, 10))
+        for y in range(16):
+            px(img, x, y, tuple(max(0, min(255, c + tone)) for c in base), 0.55)
+    for _ in range(3):
+        x = rng.randrange(16)
+        for y in range(16):
+            if rng.random() < 0.25:
+                x = (x + rng.choice((-1, 1))) % 16
+            px(img, x, y, (84, 58, 34), 0.6)
+    shine = rng.randrange(16)
+    for y in range(16):
+        px(img, shine, y, (172, 132, 90), 0.35)
+    noise(img, rng, 2)
+    return img
+
+
+def broom_straw_tex(rng):
+    """The broom's head: stiff straw strands side by side, each its own yellow, shadow showing between some, the tips (the
+    bottom row) frayed and darker, and a red binding thread across row 12 (the head is 3.5 high: its sides show rows 12-15)."""
+    base = (204, 176, 98)
+    img = new((116, 94, 50))
+    for x in range(16):
+        tone = rng.randint(-24, 18)
+        colour = tuple(max(0, min(255, c + tone)) for c in base)
+        gappy = rng.random() < 0.25
+        for y in range(16):
+            if gappy and rng.random() < 0.6:
+                continue
+            px(img, x, y, colour, 0.9)
+        if rng.random() < 0.5:
+            px(img, x, 15, (140, 116, 60), 0.8)
+    for x in range(16):
+        px(img, x, 12, (170, 52, 40), 0.85)
+    noise(img, rng, 3)
+    return img
+
+
+def porcelain_tex(rng):
+    """Glazed porcelain: white and smooth, a cool shade towards the bottom and a soft glint up the glaze."""
+    img = new((238, 240, 240))
+    noise(img, rng, 1)
+    T.gradient(img, (198, 208, 218), 0.0, 0.3)
+    for y in range(16):
+        px(img, 4, y, (255, 255, 255), 0.7)
+        px(img, 5, y, (255, 255, 255), 0.35)
+    return img
+
+
+def stall_panel_tex(rng):
+    """The stalls' partitions: a pale blue-grey laminate, finely flecked lighter and darker (no edges: it joins on every side)."""
+    base = (196, 206, 218)
+    img = new(base)
+    noise(img, rng, 2)
+    speckle(img, rng, 26, (176, 186, 198), 0.6)
+    speckle(img, rng, 18, (216, 224, 232), 0.6)
+    return img
+
+
+def wc_mirror_tex(rng):
+    """The WCs' mirror: cool grey glass, a little brighter at the top, and two pale streaks of reflection running down to the left.
+    The streaks wrap at the sides, so a mirror that joins along a wall shows them unbroken."""
+    img = new((170, 186, 196))
+    noise(img, rng, 1)
+    T.gradient(img, (214, 226, 234), 0.35, 0.0)
+    for start, strength in ((3, 0.45), (10, 0.25)):
+        for i in range(16):
+            for w in range(2 if strength > 0.3 else 1):
+                px(img, (start + i + w) % 16, i, (236, 242, 246), strength)
     return img
 
 
@@ -3709,7 +3806,8 @@ def build():
                                         ("calm_door", "Calm Room Door", (86, 58, 38), "emergency"),
                                         ("office_door", "Office Door", (34, 34, 38), "office"),
                                         ("lab_door", "Lab Door", (226, 228, 224), "lab"),
-                                        ("stall_door", "Toilet Stall Door", (196, 206, 218), "office"),
+                                        ("stall_door", "Toilet Stall Door", (196, 206, 218), "stall"),
+                                        ("secure_door", "Authorized Personnel Door", (82, 90, 98), "secure"),
                                         ("director_door", "Director's Door", (62, 40, 28), "wood")):
         halves = {}
         for half in ("bottom", "top"):
@@ -3744,8 +3842,8 @@ def build():
     a.texture("analyzer_front", analyzer_front_tex(r("analyzer_front")), T.PLASTIC.but(smoothness=0.7), tiles=False)
     prop("analyzer", "Analyzer", {"w": "lab_white", "f": "analyzer_front", "d": "lab_steel_dark"},
          [el((2, 0, 3), (14, 9, 13), "w", north=("f", (2, 2, 14, 11))), el((5, 9, 6), (11, 10, 10), "d")])
-    a.texture("broom_wood", plastic_tex(r("broom_wood"), (126, 90, 56)), T.Material(0.4, relief=0.3))
-    a.texture("broom_straw", plastic_tex(r("broom_straw"), (204, 176, 98)), T.Material(0.3, relief=0.4))
+    a.texture("broom_wood", broom_wood_tex(r("broom_wood")), T.Material(0.4, relief=0.3))
+    a.texture("broom_straw", broom_straw_tex(r("broom_straw")), T.Material(0.3, relief=0.4))
     handle = el((7.5, 0, 8.5), (8.5, 15, 9.5), "w")
     # Its top leans back, to the wall behind it. The game takes only 0, 22.5 and 45 degrees (+ or -) for an element: any other
     # angle makes the whole model fail to load and the block shows as the purple and black of a missing one.
@@ -3805,10 +3903,10 @@ def build():
     # Chapter 2 Level 1's furnishing (phase 10): the WCs' porcelain (a toilet, a sink on its counter), the stalls' partitions (two
     # blocks high, a gap under them; the stall door is with the doors above), a mirror that joins along a wall, and the dining room's warm
     # ceiling light (the lab's, its diffuser a warm white).
-    a.texture("porcelain", plastic_tex(r("porcelain"), (238, 240, 240)), T.PLASTIC.but(smoothness=0.85, relief=0.05))
-    a.texture("stall_panel", plastic_tex(r("stall_panel"), (196, 206, 218)), T.PLASTIC.but(smoothness=0.5, relief=0.1))
+    a.texture("porcelain", porcelain_tex(r("porcelain")), T.PLASTIC.but(smoothness=0.85, relief=0.05))
+    a.texture("stall_panel", stall_panel_tex(r("stall_panel")), T.PLASTIC.but(smoothness=0.5, relief=0.1))
     a.texture("countertop", plastic_tex(r("countertop"), (92, 98, 106)), T.Material(0.7, relief=0.1))
-    a.texture("wc_mirror", plastic_tex(r("wc_mirror"), (176, 192, 200)), T.Material(0.98, metal=200, relief=0.0))
+    a.texture("wc_mirror", wc_mirror_tex(r("wc_mirror")), T.Material(0.98, metal=200, relief=0.0))
     prop("toilet", "Toilet", {"p": "porcelain", "d": "lab_steel_dark"},
          [el((5, 0, 4), (11, 6, 12), "p"), el((4, 6, 2), (12, 7.5, 12), "p"), el((4.5, 7.5, 2.5), (11.5, 8, 11), "d"),
           el((3, 6, 12), (13, 15, 16), "p"), el((7, 15, 13), (9, 15.5, 15), "d")])

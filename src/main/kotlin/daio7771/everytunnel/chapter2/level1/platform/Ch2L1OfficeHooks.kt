@@ -44,7 +44,7 @@ import net.minecraft.util.math.Vec3d
 import java.util.UUID
 
 /**
- * The office's cinematic of Chapter 2's Level 1 (phase 8, `cutscenes/office.json`, [Ch2L1OfficeScene]): Rowan catches the player at his
+ * The office's cinematic of Chapter 2's Level 1 (`cutscenes/office.json`, [Ch2L1OfficeScene]): Rowan catches the player at his
  * desk. It begins at [Ch2L1State.ACT3_CUTSCENE], which closing the second of Rowan's files reaches ([Ch2L1Act3Hooks.onOfficeTrigger]).
  *
  * - **Before the bands**: a player elsewhere in the office glides to the mark behind the desk (`glide_seconds`), facing the door; a
@@ -63,6 +63,13 @@ import java.util.UUID
  * Server thread only.
  */
 object Ch2L1OfficeHooks {
+
+    /** Players who have just joined, and the ticks left before their scene is checked ([tickResume]). */
+    private val resumeAt = HashMap<UUID, Int>()
+
+    /** A rejoined player's scene begins again this long after they joined (the client's world loaded). */
+    private const val RESUME_TICKS = 40
+
 
     val START_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "ch2l1_office_start")
     val END_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "ch2l1_office_end")
@@ -113,7 +120,10 @@ object Ch2L1OfficeHooks {
         TickProfiler.endServerTick.register(::tick)
         Ch2L1.onStateChange(::onState)
         Ch2L1Act3Hooks.onOfficeTrigger { player -> Ch2L1.setState(player, Ch2L1State.ACT3_CUTSCENE, "Rowan's files read") }
+        // Back in the world in the middle of the scene (the world was left during it): it plays again from its start, a moment after.
+        ServerPlayConnectionEvents.JOIN.register { handler, _, _ -> resumeAt[handler.player.uuid] = RESUME_TICKS }
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->
+            resumeAt.remove(handler.player.uuid)
             if (glide?.player == handler.player.uuid) glide = null
             if (running?.player == handler.player.uuid) handler.player.server.let { finish(it, skipped = true, setState = false) }
         }
@@ -253,10 +263,29 @@ object Ch2L1OfficeHooks {
     }
 
     private fun tick(server: MinecraftServer) {
+        tickResume(server)
         tickGlide(server)
         tickScene(server)
         tickWaiting(server)
         tickA6(server)
+    }
+
+    /** Players who joined [RESUME_TICKS] ago, still at [Ch2L1State.ACT3_CUTSCENE] with no scene: it begins again. */
+    private fun tickResume(server: MinecraftServer) {
+        if (resumeAt.isEmpty()) return
+        val iterator = resumeAt.entries.iterator()
+        while (iterator.hasNext()) {
+            val entry = iterator.next()
+            if (entry.value > 0) {
+                entry.setValue(entry.value - 1)
+                continue
+            }
+            iterator.remove()
+            val player = server.playerManager.getPlayer(entry.key) ?: continue
+            if (!Ch2L1.active(player) || Ch2L1.state(player) != Ch2L1State.ACT3_CUTSCENE || isRunning(player)) continue
+            EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} is back in the middle of the office's scene: it begins again", player.gameProfile.name)
+            begin(player)
+        }
     }
 
     private fun tickGlide(server: MinecraftServer) {

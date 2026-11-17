@@ -20,7 +20,7 @@ sealed interface Ch2L1StepSpec {
 }
 
 /**
- * A person of the factory's ordinary life: [skin], the [group] they belong to (the LAB's go in phase 8), where they start and what they do, over
+ * A person of the factory's ordinary life: [skin], the [group] they belong to (the LAB's go at the office's cinematic), where they start and what they do, over
  * and over; [pace]: their own walking pace (a multiple of `walk_speed`), null to draw one ([Ch2L1Life.pace]); [until]: from this state on
  * they are no longer in the factory (they leave out of sight; worker_a's and worker_b's ambient doubles, at the meeting from Act 2), null: always.
  */

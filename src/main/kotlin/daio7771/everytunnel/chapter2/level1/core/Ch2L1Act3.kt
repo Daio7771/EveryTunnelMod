@@ -48,7 +48,7 @@ data class Ch2L1Overtime(
  * The coworker's badge opens the auxiliary lab at the badge reader by its door ([readerAnchor], [labDoor]); its computer holds the
  * chamber's log and the containment authorization, which carries Rowan's [code]. The code opens the office at the keypad by its door
  * ([keypadAnchor], [officeDoor]); Rowan's computer holds the medical file and contract 14, and closing the second of its files
- * ([triggerComputer]) is when the office's cinematic will begin (phase 8). Beyond: a door onto nothing at the end of the authorized
+ * ([triggerComputer]) is when the office's cinematic begins. Beyond: a door onto nothing at the end of the authorized
  * corridor ([restrictedDoors]: "Restricted access"), the sealed zone's door ([sealedDoor]: shut until Rowan's card), the portrait over his
  * desk ([portraitAnchor]: its plaque read in the action bar) and the contained Pale man of chamber 02 ([chamberAnchor]).
  *

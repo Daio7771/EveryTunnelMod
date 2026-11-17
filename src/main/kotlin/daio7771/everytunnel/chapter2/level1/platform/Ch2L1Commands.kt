@@ -1,7 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Act3
-import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.context.CommandContext
@@ -16,9 +15,6 @@ import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
-import net.minecraft.util.hit.BlockHitResult
-import net.minecraft.util.hit.HitResult
-import daio7771.everytunnel.platform.CardReaderBlock
 import daio7771.everytunnel.platform.DevWorlds
 
 /**
@@ -33,7 +29,6 @@ import daio7771.everytunnel.platform.DevWorlds
  *   rest of the game apply again.
  * - `/et ch2 l1 build`: builds the level again over what stands (a new plan is built by itself the next time someone enters);
  *   `/et ch2 l1 unbuild` empties the whole area (do it before packing the world into a jar: it is Chapter 2's, not Chapter 1's).
- * - `/et ch2 l1 clock`: puts a time clock ([TimeClockBlock]) on the wall you look at, until the map places its own.
  * - `/et ch2 l1 anchors`: every anchor with its coordinates, the provisional ones marked.
  * - `/et ch2 l1 goto <anchor>`: takes you to a point, to the middle of a zone one block over its floor or to the first point of a path.
  * - `/et ch2 l1 state [<state>]`: shows your state, or puts you in another one (every system of the level
@@ -84,7 +79,6 @@ object Ch2L1Commands {
                             CommandManager.literal("l1")
                                 .then(CommandManager.literal("enter").executes(::enter))
                                 .then(CommandManager.literal("leave").executes(::leave))
-                                .then(CommandManager.literal("clock").executes(::clock))
                                 .then(CommandManager.literal("build").executes(::build))
                                 .then(CommandManager.literal("unbuild").executes(::unbuild))
                                 .then(CommandManager.literal("anchors").executes(::anchors))
@@ -377,29 +371,6 @@ object Ch2L1Commands {
         }
         Ch2L1.leave(player)
         reply(context, "You are out of the level: the rules of the rest of the game apply again.")
-        return 1
-    }
-
-    private fun clock(context: CommandContext<ServerCommandSource>): Int {
-        val player = context.source.playerOrThrow
-        val hit = player.raycast(6.0, 1f, false)
-        if (hit !is BlockHitResult || hit.type != HitResult.Type.BLOCK) {
-            reply(context, "Look at a wall, within 6 blocks.")
-            return 0
-        }
-        val side = hit.side
-        if (!side.axis.isHorizontal) {
-            reply(context, "Look at the side of a wall, not at its top or its bottom.")
-            return 0
-        }
-        val pos = hit.blockPos.offset(side)
-        val world = player.serverWorld
-        if (!world.getBlockState(pos).isAir) {
-            reply(context, "There is no room for a clock there.")
-            return 0
-        }
-        world.setBlockState(pos, Ch2Blocks.TIME_CLOCK.defaultState.with(CardReaderBlock.FACING, side))
-        reply(context, "A time clock hangs on the wall: right-click it to clock in (at the clock-in step).")
         return 1
     }
 

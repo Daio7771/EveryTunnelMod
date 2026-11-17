@@ -159,7 +159,7 @@ KDoc comment that says more.
 | `DirectorEntity.kt` | The director in his chair (GeckoLib): moves with the client's scene, mask and gaze synced; `DirectorHooks` puts him there with the level |
 | `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
-| `ChapterRequest.kt` | What the menu asked for: the world opens only for a later chapter's opening (no map build, no new game), which that chapter starts (`onLoaded`); its client leaves for the menu afterwards |
+| `ChapterRequest.kt` | What the menu asked for: the world opens only for a later chapter's opening (no map build, no new game), which that chapter starts (`onLoaded`) and carries on |
 | `DirectorBlocks.kt` | Level 5's anteroom and office: the director's double door that opens both leaves at once, the security camera block, the wall of CCTV screens |
 | `DeepWaterHooks.kt` | Level 5's deep water (the drain's pools): falling in pulls the player under, and they drown |
 | `DrainHooks.kt` | Level 5's drain: the hatch slamming shut once the player is down its ladder, open again on a death before the Junction |
@@ -408,7 +408,7 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 |---|---|
 | `level1/platform/Ch2L1.kt` | Chapter 2's Level 1: each player's state and whether they are playing it (the rules follow them: `enter`, `leave`), kept in their progress; every change goes through it and reaches the listeners |
 | `level1/platform/Ch2L1DataLoader.kt` | Reads the level's JSON files (the config folder's copy, else the jar's) at launch and on `/et reload`, and holds the current data |
-| `level1/platform/Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 enter\|leave\|clock\|build\|unbuild\|anchors\|goto\|state\|skip\|npc\|tasks\|act3\|patrols\|intro\|say` (development runs only) |
+| `level1/platform/Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 enter\|leave\|build\|unbuild\|anchors\|goto\|state\|skip\|npc\|tasks\|act3\|patrols\|intro\|say` (development runs only) |
 | `level1/platform/Ch2L1Build.kt` | Builds the level from its plan in steps of 8,000 cells a tick (and empties it), remembers which plan it built, checks every block first |
 | `level1/platform/TimeClockBlock.kt` | The time clock of Chapter 2's Level 1: a card reader (same models) that clocks the new hire in, red and then green |
 | `level1/platform/Ch2L1TaskBlocks.kt` | The sample tube, NonameOS's terminal, the analyzer, the leaning broom and the dirt of Chapter 2's tasks: each hands its use to `Ch2L1TaskHooks` |
@@ -422,6 +422,8 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `level1/platform/Ch2L1OfficeHooks.kt` | The office's cinematic on the server: the glide to the mark, Rowan moved on the scene's track, the door, the pass sliding, the skip, Rowan waiting by the door until the player leaves, and what the office leaves (the pass, the flashlight, the LAB almost dark, a6 once) |
 | `level1/platform/Ch2L1Doors.kt` | The factory's doors as its people use them: opened in their way, a doorway shut or opened round a place |
 | `level1/platform/FactoryNpcEntity.kt` | A person of Chapter 2's Level 1 (Rowan, the coworker, the workers): one entity type, its synced skin tells them apart; a worker follows its routine tick by tick (eased walking, its own pace), its head looks about on its own, and its synced pose says if it types, talks or listens; a kept creature |
+| `level1/platform/Ch2L1KeyItems.kt` | The level's key items cannot be lost: those lying in the level are taken away, and a player who should hold one gets it back |
+| `level1/platform/Ch2L1Return.kt` | The way back to Chapter 1: after the menu's prologue, where the player stood and what they carried are kept; leaving the world (at the end or halfway) gives them back, out of the level |
 | `level1/platform/Ch2L1Npcs.kt` | The factory's people: the workers put in while the level is played and the LAB's taken out, the talks between pairs, the groups, and the developer's `/et ch2 l1 npc` |
 
 ### Client: `client/kotlin/daio7771/everytunnel/chapter2/` (`prologue/client/`, `level1/client/`)

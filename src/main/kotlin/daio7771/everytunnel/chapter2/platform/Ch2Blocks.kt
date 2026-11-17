@@ -26,6 +26,7 @@ import daio7771.everytunnel.platform.StackFurnitureBlock
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.minecraft.block.Block
+import net.minecraft.block.BlockSetType
 import net.minecraft.block.DoorBlock
 import net.minecraft.block.MapColor
 import net.minecraft.block.TransparentBlock
@@ -72,7 +73,7 @@ object Ch2Blocks {
     val NONAME_TERMINAL: Block = register("noname_terminal", NonameTerminalBlock(ModBlocks.props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision().luminance { 3 }, listOf(box(3, 0, 1, 13, 12, 11))))
     val ANALYZER: Block = register("analyzer", AnalyzerBlock(ModBlocks.props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(2, 0, 3, 14, 10, 13))))
     val LEANING_BROOM: Block = register("leaning_broom", LeaningBroomBlock(ModBlocks.props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(6, 0, 7, 10, 16, 16))))
-    /** Phase 10b's LAB tasks (`Ch2L1LabTaskHooks`): the reagent bottles on their cabinet, the mixing tank, the centrifuge with its display. */
+    /** The LAB's two tasks (`Ch2L1LabTaskHooks`): the reagent bottles on their cabinet, the mixing tank, the centrifuge with its display. */
     val REAGENT_BOTTLE_BLUE: Block = register("reagent_bottle_blue", ReagentBottleBlock(ModBlocks.props(MapColor.BLUE, BlockSoundGroup.GLASS).noCollision(), listOf(box(6, 0, 6, 10, 10, 10))))
     val REAGENT_BOTTLE_YELLOW: Block = register("reagent_bottle_yellow", ReagentBottleBlock(ModBlocks.props(MapColor.YELLOW, BlockSoundGroup.GLASS).noCollision(), listOf(box(6, 0, 6, 10, 10, 10))))
     val REAGENT_BOTTLE_RED: Block = register("reagent_bottle_red", ReagentBottleBlock(ModBlocks.props(MapColor.RED, BlockSoundGroup.GLASS).noCollision(), listOf(box(6, 0, 6, 10, 10, 10))))
@@ -97,10 +98,13 @@ object Ch2Blocks {
     /** The lab door's look (it borrows its models), for the factory: a pair of leaves opens and shuts at once by hand. */
     val FACTORY_DOOR: Block = register("factory_door", LinkedDoorBlock(ModBlocks.door(), ModBlocks.SERVICE_DOOR))
 
+    /** The grey door of the factory's places for authorized personnel only: iron to hands, opened by its badge reader, keypad or card. */
+    val SECURE_DOOR: Block = register("secure_door", DoorBlock(ModBlocks.door(), BlockSetType.IRON))
+
     /** Glass with no frame drawn on each block, a faint tint and a sheen that runs on from one block to the next: the factory's windows. */
     val FACTORY_GLASS: Block = register("factory_glass", TransparentBlock(ModBlocks.glass()))
 
-    /** Chapter 2 Level 1's furnishing (phase 10): the WCs' toilet, sink, mirror, stall partitions and doors; the dining room's warm light. */
+    /** Chapter 2 Level 1's furnishing: the WCs' toilet, sink, mirror, stall partitions and doors; the dining room's warm light. */
     val TOILET: Block = register("toilet", PropBlock(ModBlocks.props(MapColor.WHITE, BlockSoundGroup.STONE), listOf(box(3, 0, 2, 13, 15, 16))))
     val WC_SINK: Block = register("wc_sink", PropBlock(ModBlocks.props(MapColor.WHITE, BlockSoundGroup.STONE), listOf(box(0, 0, 2, 16, 15, 16))))
     val WC_MIRROR: Block = register("wc_mirror", RowFurnitureBlock(ModBlocks.props(MapColor.LIGHT_GRAY, BlockSoundGroup.GLASS).noCollision(), listOf(box(0, 4, 15, 16, 16, 16))))

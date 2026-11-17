@@ -5,9 +5,16 @@
 El Nivel 1 del Chapter 2 es la fábrica, cuatro meses después del Chapter 1: un científico normal contratado en lugar del
 que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el despacho del supervisor. Se construye por
 fases (de la 0 a la 11), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
-nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 10b, las dos tareas del LAB.** Se
-juega desde el reloj hasta su final, el sótano barrido y la vuelta al menú, con todas las salas amuebladas y con gente; lo siguiente es la
-fase 11 (la pasada de QA).
+nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 11, la pasada de QA, hecha: el nivel está
+terminado.** Se llega desde el menú principal (Capítulo 2, NUEVA PARTIDA: el prólogo y luego la fábrica) y se juega desde el reloj hasta
+su final, el sótano barrido y la vuelta al menú, con todas las salas amuebladas y con gente. Lo siguiente es el Nivel 2; los dos se
+publican juntos como demo.
+
+**Cómo se llega.** NUEVA PARTIDA del Capítulo 2 en el menú principal: el prólogo (se puede saltar) y luego la fábrica; el
+negro del final del prólogo se mantiene hasta que el jugador está en ella. El nivel no se guarda: abre el mismo mundo que la partida
+guardada del Capítulo 1, así que antes de entrar se guarda dónde estaba el jugador y lo que llevaba (`Ch2L1Return`), y al salir del
+mundo, al final del nivel o a medias, sale del nivel y se le devuelven ambas cosas; un mundo dejado sin salir (el juego se cerró) lo hace
+al entrar. Cada NUEVA PARTIDA del Capítulo 2 empieza otra vez desde el prólogo. En desarrollo, `/et ch2 l1 enter` entra sin nada de esto.
 
 Su código está en `daio7771.everytunnel.chapter2` (el del cliente, en el mismo paquete dentro de `src/client`): `level1.core`
 (Kotlin puro, con tests), `level1.platform` (pegamento con Minecraft) y `level1.client`, aparte del juego base, que nunca lo
@@ -114,7 +121,7 @@ celdas tienen cada una su propio suelo, uno más bajo en cada fila, con un bloqu
 rellano, las escaleras, el sótano) son sus `LINKS`. Hay 21 puertas, todas propias del mod (ninguna es de vanilla): **libres**, la puerta de laboratorio
 (`factory_door`: blanca, con una ventana alta; las dos hojas de un par se abren y se cierran a la vez a mano, `LinkedDoorBlock`,
 con las bisagras en los bordes exteriores; la del anillo al pasillo autorizado también es libre, pero es
-la entrada a una zona prohibida: el círculo rojo del dibujo); **cerradas con llave**, la puerta de emergencia gris (`emergency_door`), que las manos no
+la entrada a una zona prohibida: el círculo rojo del dibujo); **cerradas con llave**, la puerta gris de personal autorizado (`secure_door`, con su placa roja), que las manos no
 abren, para el laboratorio auxiliar, el despacho y la puerta sellada (las fases siguientes las abren con la credencial, el
 código y la tarjeta de Rowan); y una más igual en el extremo este del pasillo que no abre a nada. Las tres puertas de la entrada dan al
 pasillo principal y al LAB, y el reloj de fichar cuelga de la pared sur de la entrada.
@@ -184,11 +191,9 @@ de una línea se editan solo en los archivos de lang. Una frase termina en `.`, 
 (`Ch2L1Sentences`, que es también la regla de la herramienta), y **el inglés y el español de una línea deben tener el mismo
 número de frases**: si no, `Ch2L1VoicesTest` falla. La herramienta lee el inglés de `en_us.json` y solo reescribe el tiempo de
 los fragmentos: una línea rápida (menos de un segundo por fragmento) se muestra entera.
-Las demás claves: `speaker.<quién>` (`coworker`, `worker_a`, `worker_b`, `rowan_loudspeaker`, `rowan`), `objective.<paso>`
-(los textos del panel de objetivos, para la fase 2), `restricted_door` (definitiva) y los siete documentos (`notice`,
-`union_list`, `chamber_log`, `authorization`, `medical_file`, `contract_14`, `painting_plaque`). Los cuatro archivos de los ordenadores
-del Acto 3 y la placa del retrato se escribieron en la fase 6 (con sus nombres en NonameOS, `doc.<archivo>.name`); `notice` y `union_list`
-siguen siendo provisionales y nada los usa todavía.
+Las demás claves: `speaker.<quién>` (`coworker`, `worker_a`, `worker_b`, `rowan_loudspeaker`, `rowan`, `guard`), `objective.<paso>`
+(los textos del panel de objetivos), `restricted_door` y los documentos (`chamber_log`, `authorization`, `medical_file`, `contract_14`,
+`basement_note`, `painting_plaque`): los archivos de los ordenadores, con sus nombres en NonameOS (`doc.<archivo>.name`), y la placa del retrato.
 
 El terminal del sótano (fase 9) es un easter egg propio: `cipher` en `act3.json` muestra las palabras de su ventana como símbolos de
 cifrado que parpadean (`NonameOsLook.scramble`). Guarda `?????????.mp3` (`recordings`: un nombre, el mismo en todos los idiomas, y un evento
@@ -266,7 +271,7 @@ primero (un segundo o dos) y el jugador entra cuando termina; el nuevo juego del
 **El reloj de fichar** es `TimeClockBlock`, un lector de tarjetas en una pared sin arte propio (comparte los modelos y sonidos
 del lector): rojo hasta que alguien ficha, luego verde. Con clic derecho de un jugador activo en `ACT1_CLOCKIN` pita y le pasa
 a `ACT1_TASK1`; después zumba ("Ya has fichado"); para cualquier otro no hace nada. El mapa coloca uno (en la pared
-sur de la entrada); `/et ch2 l1 clock` pone otro donde miras. Vuelve a rojo cada vez que se pone a un jugador en `ACT1_CLOCKIN`.
+sur de la entrada). Vuelve a rojo cada vez que se pone a un jugador en `ACT1_CLOCKIN`.
 
 **El panel de objetivos** (`client.hud.ObjectivePanel`) es pequeño, arriba a la derecha: "OBJETIVO" en gris y debajo el texto
 del estado del jugador (`Ch2L1Objectives`: una clave de lang por estado, bajo `every_tunnel.ch2.l1.objective.`; ninguna en las
@@ -499,6 +504,19 @@ El `overtime` de `act3.json` (`level1.core.Ch2L1Overtime`), la tarea de las hora
   menú principal. El Nivel 1 no se publica solo, así que de momento nada le sigue. Volver a antes de `DONE` (un comando) vuelve a encender
   el sótano; volver a las horas extra o a antes cierra la puerta sellada y pone su lector en rojo.
 
+## Redes de seguridad (fase 11)
+
+Lo que añadió la pasada de QA para que el jugador no se quede atascado:
+
+- **Objetos clave** (`Ch2L1KeyItems`): la escoba, los frascos de reactivo, la copia de la tarjeta y el pase de Rowan no se pueden perder.
+  Cada segundo se retira el que esté tirado en el suelo del nivel, y quien debería llevar uno según su estado y sus contadores y no lo
+  lleva lo recupera.
+- **Salir del mundo a mitad de escena**: al volver en mitad de la cinemática del despacho, esta empieza de nuevo (`Ch2L1OfficeHooks`,
+  tras 2 s); al volver en el final, el sótano se apaga y el final se repite (`Ch2L1EndingHooks`).
+- **Trabajadores perdidos** (`Ch2L1Npcs`): el que se ha caído fuera de la caja del nivel se retira y se vuelve a poner en la siguiente
+  comprobación.
+- **La vuelta al Capítulo 1** (`Ch2L1Return`): véase «Cómo se llega» al principio.
+
 ## Comandos de depuración
 
 `level1.platform.Ch2L1Commands`, nivel de operador 2, **solo en ejecuciones de desarrollo** (como explica
@@ -509,7 +527,6 @@ El `overtime` de `act3.json` (`level1.core.Ch2L1Overtime`), la tarea de las hora
 | `/et reload` | Vuelve a leer los archivos JSON del nivel y dice qué falla en ellos |
 | `/et ch2 l1 enter` | Te conviertes en nuevo empleado: se te aplican las reglas del nivel (en Supervivencia o Aventura), se vacían tus bolsillos, el estado es el inicial y estás en `spawn_clockin` |
 | `/et ch2 l1 leave` | Vuelven a aplicarte las reglas del resto del juego |
-| `/et ch2 l1 clock` | Pone un reloj de fichar en la pared que miras |
 | `/et ch2 l1 build` | Construye el nivel de nuevo sobre lo que hay (un plan nuevo se construye solo cuando alguien entra) |
 | `/et ch2 l1 unbuild` | Vacía toda la zona (antes de empaquetar el mundo en un jar); quien esté dentro cae |
 | `/et ch2 l1 anchors` | Todas las anclas (puntos, zonas, caminos) con sus coordenadas, las provisionales marcadas |

@@ -28,7 +28,7 @@ import java.util.Random
  * which draws the player's model with that skin: `client.render.FactoryNpcRenderer`). Nothing touches them: they take
  * no damage, are not pushed and never despawn.
  *
- * A worker of the factory's ordinary life carries its [workerId], its [group] (the LAB's go away in phase 8) and a routine
+ * A worker of the factory's ordinary life carries its [workerId], its [group] (the LAB's go away at the office's cinematic) and a routine
  * ([Ch2L1RoutineRunner], from `npcs.json`): each tick on the server it asks the routine what to do and does it, walking
  * straight to the next point of its path (no pathfinding: it sets its own velocity, so its pace does not depend on any attribute),
  * standing, or typing at a station. Someone with no routine stands where they were put.

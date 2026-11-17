@@ -6,11 +6,11 @@ import com.google.gson.JsonParser
 
 /**
  * Everything adjustable in Chapter 2's Level 1, as the JSON files that hold it: the places ([Ch2L1Anchors]) and one
- * document for each system that is still to be built (loudspeakers, tasks, patrols, NPCs and the two cinematics).
+ * document for each of its systems (loudspeakers, tasks, patrols, NPCs, the acts and the cinematics).
  * Plain Kotlin; `platform.Ch2L1DataLoader` reads the files and hands their texts to [Ch2L1DataParser].
  *
- * Each [documents] entry is the file as a JSON object. Only the anchors have a typed reader so far: every other
- * system gets its own, in the step that builds it, and reads its document from here. Changing a rhythm, a route
+ * Each [documents] entry is the file as a JSON object. The anchors are read here; every other system has its
+ * own reader, which takes its document from here. Changing a rhythm, a route
  * or a text means editing a file and running `/et reload`.
  */
 class Ch2L1Data(

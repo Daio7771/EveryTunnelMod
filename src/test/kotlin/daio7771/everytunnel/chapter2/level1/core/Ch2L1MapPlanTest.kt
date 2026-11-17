@@ -78,10 +78,10 @@ class Ch2L1MapPlanTest {
     }
 
     @Test
-    fun `the doors are the mod's own, the factory door for hands and the emergency door for the locked ones`() {
+    fun `the doors are the mod's own, the factory door for hands and the authorized personnel door for the locked ones`() {
         val kinds = cells.values.map { BlockSpec.parse(it).id }.filter { it.endsWith("_door") }.toSet()
         // ...and the WCs' stall doors (phase 10).
-        assertEquals(setOf("every_tunnel:factory_door", "every_tunnel:emergency_door", "every_tunnel:stall_door"), kinds)
+        assertEquals(setOf("every_tunnel:factory_door", "every_tunnel:secure_door", "every_tunnel:stall_door"), kinds)
     }
 
     /**

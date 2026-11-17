@@ -31,9 +31,12 @@ object Ch2Progress : EntityComponentInitializer {
         registry.registerForPlayers(KEY, { player: PlayerEntity -> Component(player) }, RespawnCopyStrategy.ALWAYS_COPY)
     }
 
-    /** A Chapter 1 new game forgets Chapter 2's progress too. */
+    /** A Chapter 1 new game forgets Chapter 2's progress too, and the way back to Chapter 1 ([ch2Return]). */
     fun register() {
-        ProgressService.onReset { player -> change(player) { it.clear() } }
+        ProgressService.onReset { player ->
+            KEY.get(player).returnTo = null
+            change(player) { it.clear() }
+        }
     }
 
     /** Where the player is in Chapter 2's Level 1 ([Ch2L1State.START] before they begin it). */
@@ -57,6 +60,17 @@ object Ch2Progress : EntityComponentInitializer {
     /** One line for the debug command. */
     fun describe(player: PlayerEntity): String = of(player).describe()
 
+    /**
+     * Where the player goes back to when they leave Chapter 2's Level 1 after the menu's Chapter 2 (`Ch2L1Return`): their place and their
+     * things in Chapter 1, as that object writes them; null when there is none.
+     */
+    fun ch2Return(player: PlayerEntity): NbtCompound? = KEY.get(player).returnTo
+
+    fun setCh2Return(player: PlayerEntity, tag: NbtCompound?) {
+        KEY.get(player).returnTo = tag
+        if (!player.world.isClient) KEY.sync(player)
+    }
+
     private fun of(player: PlayerEntity): Ch2PlayerProgress = KEY.get(player).progress
 
     /** Applies a change on the server and sends the result to the player's client. */
@@ -71,6 +85,9 @@ object Ch2Progress : EntityComponentInitializer {
 
         val progress = Ch2PlayerProgress()
 
+        /** [Ch2Progress.ch2Return]: kept apart from [progress], which has no Minecraft types. */
+        var returnTo: NbtCompound? = null
+
         override fun shouldSyncWith(player: ServerPlayerEntity): Boolean = player === owner
 
         override fun readFromNbt(tag: NbtCompound) {
@@ -79,6 +96,7 @@ object Ch2Progress : EntityComponentInitializer {
             progress.l1Active = tag.getBoolean(L1_ACTIVE)
             val counters = tag.getCompound(L1_COUNTERS)
             for (key in counters.keys) progress.setL1Counter(key, counters.getInt(key))
+            returnTo = if (tag.contains(RETURN_TO)) tag.getCompound(RETURN_TO) else null
         }
 
         override fun writeToNbt(tag: NbtCompound) {
@@ -87,12 +105,14 @@ object Ch2Progress : EntityComponentInitializer {
             val counters = NbtCompound()
             progress.l1CounterMap.forEach { (key, value) -> counters.putInt(key, value) }
             tag.put(L1_COUNTERS, counters)
+            returnTo?.let { tag.put(RETURN_TO, it) }
         }
 
         private companion object {
             const val L1_STATE = "l1_state"
             const val L1_ACTIVE = "l1_active"
             const val L1_COUNTERS = "l1_counters"
+            const val RETURN_TO = "return_to"
         }
     }
 }

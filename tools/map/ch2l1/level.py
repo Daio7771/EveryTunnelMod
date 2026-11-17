@@ -40,7 +40,7 @@ BLOCKS = {
 }
 # Level 5's doors: the lab's white one with a tall window (a pair of leaves opens at once), and the grey emergency one that
 # hands do not open.
-DOOR_BLOCKS = {"normal": MOD + "factory_door", "locked": MOD + "emergency_door"}
+DOOR_BLOCKS = {"normal": MOD + "factory_door", "locked": MOD + "secure_door"}
 DOOR_HEIGHT = 2
 LIGHT_SPACING = 5
 
@@ -142,7 +142,7 @@ LINKS = [("sealed_zone", "stairs"), ("stairs", "basement")]
 # The doors: (id, the wall's axis, the wall's line, first cell along it, width, kind). Axis "z": the wall runs along x at
 # z = line, and the passage goes north to south; axis "x": the wall runs along z at x = line. Kinds: "normal" (a door of
 # white steel with a window, opened by hand), "restricted" (the same, but the way into a forbidden zone: the drawing's red circle),
-# "locked" (a grey emergency door that hands do not open: a later phase opens it, with a badge, a code or Rowan's card) and
+# "locked" (a grey "authorized personnel" door that hands do not open: a badge, a code or Rowan's card opens it) and
 # "decor" (the same grey door, opening onto nothing), and "opening": no door at all, a passage two blocks high through a partition.
 DOORS = [
     ("entrance_main", "z", 10, 24, 2, "normal"),
@@ -162,7 +162,7 @@ DOORS = [
     ("aux_lab", "x", 15, 49, 2, "locked"),
     ("aux_chamber", "x", 0, 48, 3, "opening"),
     ("ring_authorized", "z", 73, 34, 2, "restricted"),
-    ("security", "z", 78, 21, 1, "normal"),
+    ("security", "z", 78, 21, 2, "normal"),               # two leaves: guard B goes through it every round
     ("office", "z", 78, 31, 2, "locked"),
     ("wc_east", "z", 78, 44, 1, "normal"),
     ("sealed", "x", 62, 26, 4, "locked"),
@@ -941,7 +941,7 @@ def named_places(level):
     add("restricted_door_east", 61.0, 75.5, -90, False)
     add("sealed_door", 62.0, 28.0, -90, False)
     add("patrol_a_pause", 36.0, 71.0, 180, False)              # by the door down into the authorized corridor, facing it
-    add("patrol_b_spawn", 21.5, 82.5, 180, False)               # in Security, where patrol B rests at each end of its round
+    add("patrol_b_spawn", 22.0, 82.5, 180, False)               # in Security, where patrol B rests at each end of its round
     # Where a player caught by a guard is put back (Act 3's patrols): before the auxiliary lab's door, before the way down into the
     # authorized corridor, and in the ring by the main corridor's door (caught anywhere else).
     add("return_aux_lab", 18.5, 50.5, 90, False)
@@ -1005,7 +1005,7 @@ def named_places(level):
     for name, (points, closed) in NPC_ROUTES.items():
         paths.append((name, [(x, 0.0, z) for x, z in points], closed, True))
     # Patrol B comes out of Security (through its door at x 21), goes along the authorized corridor to its east end and back.
-    paths.append(("patrol_b_waypoints", [(21.5, 0.0, 82.5), (21.5, 0.0, 76.0), (38.0, 0.0, 76.0), (58.0, 0.0, 76.0)], False, False))
+    paths.append(("patrol_b_waypoints", [(22.0, 0.0, 82.5), (22.0, 0.0, 76.0), (38.0, 0.0, 76.0), (58.0, 0.0, 76.0)], False, False))
     return a, zones, paths
 
 

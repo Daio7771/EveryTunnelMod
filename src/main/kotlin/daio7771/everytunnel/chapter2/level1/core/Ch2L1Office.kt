@@ -16,7 +16,7 @@ import kotlin.math.ceil
 import kotlin.math.sqrt
 
 /**
- * The office's cinematic (Act 3, phase 8), from `cutscenes/office.json` (every key optional; seconds where the spec has ticks). The
+ * The office's cinematic (Act 3), from `cutscenes/office.json` (every key optional; seconds where the spec has ticks). The
  * player is held behind Rowan's desk ([playerMark], facing the door); Rowan comes in from [spawn] through [doorway] to [threshold], just
  * inside beside the door, shuts it and says his lines ([lines], in order) from there; at [cardLine] he steps to the front of the desk
  * ([deskFront]), slides the pass across it ([cardFrom] to [cardTo]) as the line reaches [cardSentence] (the flashlight is his too from

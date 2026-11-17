@@ -32,7 +32,7 @@ data class Ch2L1GuideSpec(val enabled: Boolean, val height: Double, val hideWith
 data class Ch2L1BottleSpec(val anchor: String, val colour: String)
 
 /**
- * The LAB's two tasks of phase 10b. The reagents: the [bottles] on their cabinet, the mixing tank ([tankAnchor]) they are poured into, a
+ * The LAB's two tasks. The reagents: the [bottles] on their cabinet, the mixing tank ([tankAnchor]) they are poured into, a
  * click held [pourSeconds] for each, in any order. The gauge: the centrifuge ([centrifugeAnchor]) shows a speed, drawn for each player
  * between [minRpm] and [maxRpm] in steps of ten ([Ch2L1Gauge]), to be typed at the terminal beside it ([gaugeTerminalAnchor]).
  */

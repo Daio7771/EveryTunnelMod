@@ -27,7 +27,7 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 
 /**
- * The LAB's two tasks of phase 10b, between calibrating the analyzer and sweeping (`tasks.json`'s `reagents` and `gauge`,
+ * The LAB's two tasks, between calibrating the analyzer and sweeping (`tasks.json`'s `reagents` and `gauge`,
  * [Ch2L1LabTasksSpec]):
  *
  * - **The reagents** ([Ch2L1State.ACT1_REAGENTS]): the three bottles stand on the reagent cabinet ([ReagentBottleBlock]); a click takes one

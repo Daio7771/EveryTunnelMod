@@ -10,7 +10,7 @@ import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
 import daio7771.everytunnel.chapter2.prologue.platform.ScientistEntity
 import daio7771.everytunnel.platform.CardReaderBlock
-import daio7771.everytunnel.platform.ModBlocks
+import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.platform.ModSounds
 import daio7771.everytunnel.platform.TickProfiler
 import net.fabricmc.fabric.api.event.player.UseBlockCallback
@@ -30,7 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * Act 3 of Chapter 2's Level 1, its first part ([Ch2L1State.ACT3_EXPLORE], `act3.json`, [Ch2L1Act3]): sneaking into the auxiliary lab, the
- * authorized corridor and Rowan's office (no patrols yet: phase 7).
+ * authorized corridor and Rowan's office.
  *
  * - **The auxiliary lab**: its badge reader ([BadgeReaderBlock]) takes the coworker's badge: green, the accept sound, and the grey door
  *   opens and stays open ([Ch2L1Doors.set] with `locked`). Without the badge it buzzes.
@@ -45,7 +45,7 @@ import java.util.concurrent.CopyOnWriteArrayList
  *   overtime, or on a locked door that is still shut, says so in the action bar. The portrait's plaque is read the same way.
  * - **Chamber 02**: while someone plays the level, the scientist stands in it as the Pale man he became ([ScientistEntity.CONTAINED]), his
  *   back to the chamber's front; never saved, put back if lost.
- * - **The sealed door** (phase 9, [Ch2L1State.ACT3_OVERTIME], `act3.json`'s `overtime`): its reader takes Rowan's overtime pass and opens it;
+ * - **The sealed door** ([Ch2L1State.ACT3_OVERTIME], `act3.json`'s `overtime`): its reader takes Rowan's overtime pass and opens it;
  *   it slams shut behind the player on the landing past it, and the basement's task begins ([Ch2L1State.ACT3_BASEMENT]). Any other change
  *   of state, or coming back to the overtime, shuts it and turns its reader red.
  *
@@ -72,7 +72,7 @@ object Ch2L1Act3Hooks {
     /** To the client: whether the code was right. */
     val KEYPAD_RESULT_PACKET = Identifier(EveryTunnel.MOD_ID, "ch2l1_keypad_result")
 
-    /** Told when a player has read the last of Rowan's files (phase 8: the office's cinematic). */
+    /** Told when a player has read the last of Rowan's files (the office's cinematic). */
     fun interface OfficeTrigger {
         fun reached(player: ServerPlayerEntity)
     }
@@ -98,7 +98,7 @@ object Ch2L1Act3Hooks {
         UseBlockCallback.EVENT.register { player, world, _, hit ->
             if (world.isClient || player !is ServerPlayerEntity || !Ch2L1.active(player)) return@register ActionResult.PASS
             val pos = hit.blockPos
-            if (!world.getBlockState(pos).isOf(ModBlocks.EMERGENCY_DOOR)) return@register ActionResult.PASS
+            if (!world.getBlockState(pos).isOf(Ch2Blocks.SECURE_DOOR)) return@register ActionResult.PASS
             doorClicked(player, pos)
         }
         ServerPlayNetworking.registerGlobalReceiver(FILE_CLOSED_PACKET) { server, player, _, buf, _ ->

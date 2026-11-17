@@ -5,9 +5,15 @@
 Level 1 of Chapter 2 is the factory, four months after Chapter 1: an ordinary scientist hired in the place of the one
 who "fell ill", three acts of tasks, a meeting and sneaking, ending in the supervisor's office. It is built in phases
 (0 to 11), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
-`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 10b, the LAB's two tasks.** It is
-playable from the clock to its end, the basement swept and back to the menu, every room furnished and peopled; phase 11 (the QA pass) is
-next.
+`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 11, the QA pass, done: the level is
+finished.** It is reached from the main menu (Chapter 2, NEW GAME: the prologue, then the factory) and played from the clock to its end,
+the basement swept and back to the menu, every room furnished and peopled. Level 2 is next; both are published together as a demo.
+
+**How it is reached.** The main menu's Chapter 2, NEW GAME: the prologue (skippable), then the factory; the black of the
+prologue's end stays until the player stands in it. The level is not saved: it opens the same world as Chapter 1's saved game, so
+before going in, where the player stood and what they carried are kept (`Ch2L1Return`), and leaving the world, at the level's end or
+halfway, takes them out of the level and gives both back; a world left without leaving (the game stopped) does it on joining. Every
+NEW GAME of Chapter 2 starts again from the prologue. In development, `/et ch2 l1 enter` goes in without any of this.
 
 Its code is under `daio7771.everytunnel.chapter2` (the client's under the same package in `src/client`): `level1.core` (plain
 Kotlin, tested), `level1.platform` (Minecraft glue) and `level1.client`, apart from the base game, which never names it (see
@@ -110,7 +116,7 @@ floor lies lower (a space's `y0`: the basement's is -8) and flights of stairs (a
 row, with a stair block on it); the spaces joined with no door (the landing, the stairs, the basement) are its `LINKS`. There are 21
 doors, all the mod's own (none is vanilla): **free** ones, the lab door (`factory_door`: white, a tall window; a pair
 of leaves opens and shuts together by hand, `LinkedDoorBlock`, with the hinges on the outer edges); the one from the ring into the authorized corridor is free too, but it is the way into a
-forbidden zone (the drawing's red circle); **locked** ones, the grey emergency door (`emergency_door`), which hands do not open, for the auxiliary
+forbidden zone (the drawing's red circle); **locked** ones, the grey authorized personnel door (`secure_door`, its red plate), which hands do not open, for the auxiliary
 lab, the office and the sealed door (the later phases open them with the badge, the code and Rowan's card); and one more of
 them at the corridor's east end that opens onto nothing. The three doors of the entrance lead to the main corridor and the LAB, and the
 time clock hangs on the entrance's south wall.
@@ -180,11 +186,9 @@ sentences and shows that range, so the timing is the same in every language and 
 files alone. A sentence ends at `.`, `?` or `!` followed by a space (`Ch2L1Sentences`, also the tool's rule), and **the English
 and the Spanish of a line must have the same number of them**: `Ch2L1VoicesTest` fails otherwise. The tool reads the
 English from `en_us.json` and only rewrites the cues' timing: a quick line (under a second a cue) is shown whole.
-The other keys: `speaker.<who>` (`coworker`, `worker_a`, `worker_b`, `rowan_loudspeaker`, `rowan`), `objective.<step>`
-(the objective panel's texts, for phase 2), `restricted_door` (final) and the seven documents (`notice`, `union_list`,
-`chamber_log`, `authorization`, `medical_file`, `contract_14`, `painting_plaque`). The four files of Act 3's computers and the
-portrait's plaque were written in phase 6 (with their names in NonameOS, `doc.<file>.name`); `notice` and `union_list` are still
-placeholders, used by nothing yet.
+The other keys: `speaker.<who>` (`coworker`, `worker_a`, `worker_b`, `rowan_loudspeaker`, `rowan`, `guard`), `objective.<step>`
+(the objective panel's texts), `restricted_door` and the documents (`chamber_log`, `authorization`, `medical_file`, `contract_14`,
+`basement_note`, `painting_plaque`): the computers' files, with their names in NonameOS (`doc.<file>.name`), and the portrait's plaque.
 
 The basement's terminal (phase 9) is an easter egg of its own: `cipher` in `act3.json` shows its window's words as flickering cipher
 symbols (`NonameOsLook.scramble`). It holds `?????????.mp3` (`recordings`: a name, the same in every language, and a sound event), whose
@@ -261,7 +265,7 @@ or two) and the player goes in when it is done; the chapter's new game will call
 **The time clock** is `TimeClockBlock`, a card reader on a wall with no art of its own (it shares the reader's models and
 sounds): red until someone clocks in, then green. Right-clicked by an active player at `ACT1_CLOCKIN` it beeps and moves them
 to `ACT1_TASK1`; later it buzzes ("You already clocked in"); for anyone else it does nothing. The map places one (on the
-entrance's south wall); `/et ch2 l1 clock` puts another where you look. It goes red again whenever a player is put back at `ACT1_CLOCKIN`.
+entrance's south wall). It goes red again whenever a player is put back at `ACT1_CLOCKIN`.
 
 **The objective panel** (`client.hud.ObjectivePanel`) is small, in the top right corner: "OBJECTIVE" in grey and under it the
 text of the player's state (`Ch2L1Objectives`: one lang key per state, under `every_tunnel.ch2.l1.objective.`; none in the
@@ -485,6 +489,17 @@ The LAB will have two more tasks once Level 1 is decorated.
   is not published alone, so nothing follows it yet. Going back before `DONE` (a command) lights the basement again; going back to the
   overtime or before it shuts the sealed door and turns its reader red.
 
+## Safety nets (phase 11)
+
+What the QA pass added so that a player cannot get stuck:
+
+- **Key items** (`Ch2L1KeyItems`): the broom, the reagent bottles, the badge's copy and Rowan's pass cannot be lost. Every second, one
+  lying on the ground in the level is taken away, and a player who should hold one by their state and counters and does not gets it back.
+- **Leaving the world mid-scene**: back in the middle of the office's cinematic, it begins again (`Ch2L1OfficeHooks`, after 2 s);
+  back at the end, the basement goes dark and the ending plays again (`Ch2L1EndingHooks`).
+- **Stray workers** (`Ch2L1Npcs`): one that has fallen out of the level's box is taken away and put back at the next check.
+- **The way back to Chapter 1** (`Ch2L1Return`): see "How it is reached" at the top.
+
 ## Debug commands
 
 `level1.platform.Ch2L1Commands`, operator level 2, **development runs only** (as [Debugging](debugging.md) explains for
@@ -495,7 +510,6 @@ The LAB will have two more tasks once Level 1 is decorated.
 | `/et reload` | Reads the level's JSON files again and says what is wrong with them |
 | `/et ch2 l1 enter` | You become a new hire: the level's rules apply to you (in Survival or Adventure), your pockets are emptied, the state is the start and you are at `spawn_clockin` |
 | `/et ch2 l1 leave` | The rules of the rest of the game apply to you again |
-| `/et ch2 l1 clock` | Puts a time clock on the wall you look at |
 | `/et ch2 l1 build` | Builds the level again over what is there (a new plan is built by itself when someone enters) |
 | `/et ch2 l1 unbuild` | Empties the whole area (before packing the world into a jar); whoever stands in it falls |
 | `/et ch2 l1 anchors` | Every anchor (points, zones, paths) with its coordinates, the provisional ones marked |

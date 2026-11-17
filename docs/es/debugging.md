@@ -40,7 +40,7 @@ en la pestaña Every Tunnel al desarrollar.
 | `/everytunnel rebuilt` | Lo ejecuta `garage:build` al terminar: vuelve a poner el botín. No es para usarlo a mano |
 | `/everytunnel devworld save\|forget` | Solo en desarrollo, ver [Compilación](building-and-release.md#mundos-de-desarrollo) |
 
-El Nivel 1 del Chapter 2 tiene comandos propios bajo `/et` (`reload`, `ch2 l1 enter|leave|clock|build|unbuild|anchors|goto|state|skip|npc`), también solo en
+El Nivel 1 del Chapter 2 tiene comandos propios bajo `/et` (`reload`, `ch2 l1 enter|leave|build|unbuild|anchors|goto|state|skip|npc`), también solo en
 desarrollo (`/playsound every_tunnel:voice.<id> voice @s` reproduce cualquiera de sus voces, con sus subtítulos): véase [Chapter 2, Nivel 1](chapter-2-level-1.md#comandos-de-depuración).
 
 Comandos de vanilla útiles:
@@ -126,3 +126,4 @@ Lo que toca Minecraft se prueba en el juego.
 | La linterna no ilumina nada | Falta LambDynamicLights, o se volvió a activar colored lighting en Complementary |
 | No hay Pale man en el Nivel 2 | Aparece la primera vez que se entra en el nivel; si se le hizo `/kill`, vuelve en la siguiente entrada |
 | El Pale man se queda quieto en una persecución | Su ruta se queda corta (necesita 3 bloques libres de altura): busca las líneas de rutas en el registro `[playtest]` |
+| Se ignora un archivo de nivel | Busca sus problemas en el registro; `order` y una zona válida son obligatorios |

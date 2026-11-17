@@ -8,10 +8,12 @@ import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Act3Hooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1EndingHooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1OfficeHooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1PatrolHooks
+import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Return
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Build
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Commands
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1DataLoader
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1IntroHooks
+import daio7771.everytunnel.chapter2.level1.platform.Ch2L1KeyItems
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1LabTaskHooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Npcs
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1SpeakerHooks
@@ -55,12 +57,15 @@ object Chapter2 : ModInitializer {
                 else -> LEVEL1_RULES
             }
         }
-        ChapterRequest.onLoaded(2, PrologueSceneHooks::startFromMenu)
+        ChapterRequest.onLoaded(PrologueSceneHooks.MENU_CHAPTER, PrologueSceneHooks::startFromMenu)
+        PrologueSceneHooks.onEndedFromMenu(Ch2L1Return::enterFromPrologue)
         Ch2L1DataLoader.register()
         Ch2L1.register()
         Ch2L1Build.register()
         Ch2L1TaskHooks.register()
         Ch2L1LabTaskHooks.register()
+        Ch2L1KeyItems.register()
+        Ch2L1Return.register()
         Ch2L1Npcs.register()
         Ch2L1SpeakerHooks.register()
         Ch2L1IntroHooks.register()

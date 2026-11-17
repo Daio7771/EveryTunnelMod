@@ -90,7 +90,7 @@ object Ch2L1 {
      * empty (they are another person, with none of Chapter 1's things: no flashlight, no battery), the clocks red, and
      * at the anchor [SPAWN_ANCHOR]. The level must stand in the world: if it does not (or was built from another plan)
      * it is built first ([Ch2L1Build], a second or two) and the player goes in when it is done. Null if it works or has
-     * begun to, else why not; the player is told in chat either way.
+     * begun to, else why not.
      */
     fun enter(player: ServerPlayerEntity): String? {
         if (Ch2L1DataLoader.data.anchors.point(SPAWN_ANCHOR) == null) return "anchors.json has no anchor called $SPAWN_ANCHOR."
@@ -102,9 +102,7 @@ object Ch2L1 {
         when (asked) {
             Ch2L1Build.Asked.BUSY -> return "The level is being cleared: try again in a moment."
             Ch2L1Build.Asked.FAILED -> return "The level cannot be built: ${Ch2L1Build.lastProblem}"
-            Ch2L1Build.Asked.STARTED, Ch2L1Build.Asked.JOINED ->
-                player.sendMessage(Text.literal("Building the factory: you go in when it is done."), false)
-            Ch2L1Build.Asked.BUILT -> {}
+            Ch2L1Build.Asked.STARTED, Ch2L1Build.Asked.JOINED, Ch2L1Build.Asked.BUILT -> {}
         }
         return null
     }
@@ -129,10 +127,6 @@ object Ch2L1 {
         TimeClockBlock.relockNear(player)
         Ch2L1Npcs.ensureAmbient(player.server)
         EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} enters at {}{}", player.gameProfile.name, SPAWN_ANCHOR, if (start.provisional) " (provisional)" else "")
-        player.sendMessage(
-            Text.literal("You are a new hire of the factory, at $SPAWN_ANCHOR, your pockets empty. The level's rules apply in Survival or Adventure (not Creative); /et ch2 l1 leave ends it."),
-            false,
-        )
     }
 
     /** [player] is out of the level: the survival rules of the rest of the game apply to them again. */
