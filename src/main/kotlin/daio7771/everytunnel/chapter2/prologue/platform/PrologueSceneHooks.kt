@@ -116,7 +116,7 @@ object PrologueSceneHooks {
         }
         ServerLifecycleEvents.SERVER_STOPPED.register {
             running = null
-            ChapterRequest.chapter = 0
+            ChapterRequest.clear()
         }
     }
 
@@ -173,7 +173,7 @@ object PrologueSceneHooks {
     fun startFromMenu(player: ServerPlayerEntity) {
         val why = start(player) ?: return
         EveryTunnel.LOGGER.warn("Prologue from the menu: {}", why)
-        ChapterRequest.chapter = 0
+        ChapterRequest.clear()
         player.sendMessage(net.minecraft.text.Text.literal(why))
     }
 

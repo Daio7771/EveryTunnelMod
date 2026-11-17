@@ -3,7 +3,12 @@ package daio7771.everytunnel.chapter2.level2.platform
 import daio7771.everytunnel.chapter2.core.MapPlan
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Files
 import daio7771.everytunnel.chapter2.platform.MapBuild
+import daio7771.everytunnel.platform.FluorescentLightBlock
+import daio7771.everytunnel.platform.LightMode
+import net.minecraft.block.Block
 import net.minecraft.server.MinecraftServer
+import net.minecraft.server.world.ServerWorld
+import net.minecraft.util.math.BlockPos
 
 /**
  * Puts Chapter 2's Level 2, the catacombs, in the world, and takes it out: the chapter's [MapBuild] for the plan
@@ -12,7 +17,8 @@ import net.minecraft.server.MinecraftServer
  * again only when the plan changes. Mostly empty, its box is about two million cells: a build takes a few seconds in batches.
  *
  * The grate between the vestibule and the collector (`vestibule_gate`, one of [MapPlan.gates]) is built in its plan's `built` state, open
- * in phase 1 so that the level can be walked from end to end; phases 5 and 6 drive it.
+ * in phase 1 so that the level can be walked from end to end; phases 5 and 6 drive it. Its own on top: [zoneLights], the lamps of a
+ * zone on, flickering or off (`level.json`, `lights`).
  */
 object Ch2L2Build {
 
@@ -36,4 +42,21 @@ object Ch2L2Build {
 
     /** Empties everything the plan built; the world forgets it was built. [MapBuild.Asked.BUSY] if a job runs. */
     fun clear(server: MinecraftServer, whenDone: () -> Unit): MapBuild.Asked = build.clear(server, whenDone)
+
+    /** The plan's lamps in the zone [zoneId] in [mode] (the cage lamps of the map, or any light of the kind); how many changed. */
+    fun zoneLights(world: ServerWorld, zoneId: String, mode: LightMode): Int {
+        val box = Ch2L2DataLoader.data.anchors.zone(zoneId)?.box ?: return 0
+        var changed = 0
+        for (cell in plan.lights) {
+            val pos = BlockPos(plan.worldX(cell.x), plan.worldY(cell.y), plan.worldZ(cell.z))
+            if (!box.contains(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)) continue
+            val state = world.getBlockState(pos)
+            val block = state.block as? FluorescentLightBlock ?: continue
+            if (state.get(FluorescentLightBlock.MODE) == mode) continue
+            world.setBlockState(pos, FluorescentLightBlock.withMode(state, mode), Block.NOTIFY_ALL)
+            if (mode == LightMode.FLICKER) world.scheduleBlockTick(pos, block, 20 + world.random.nextInt(40))
+            changed++
+        }
+        return changed
+    }
 }

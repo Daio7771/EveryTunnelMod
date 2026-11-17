@@ -24,18 +24,17 @@ data class Ch2L1Computer(
  * pass, and slams shut once the player is [slamAfter] blocks past it in [zone] (the landing behind it), which starts the basement's task.
  * When the last dirt there is swept the lights of [basementZone] go out and the sealed door is bolted from outside: the player is locked
  * in ([Ch2L1State.ACT3_LOCKED_IN]). Trying the door ([TRIED_DOOR]) shows the way out, the emergency manhole in the basement's floor
- * ([manhole]), whose lid comes up with a click held on it for [liftTicks] ([MANHOLE_OPEN]). Going down it ends the level: [darkTicks]
- * later the screen fades to black over [fadeTicks], the lang key [text] stays on it for [textTicks], and the game goes back to the menu.
+ * ([manhole]), whose lid comes up with a click held on it for [liftTicks] ([MANHOLE_OPEN]). Going down it ends the level: the screen
+ * fades to black over [fadeTicks] while the player climbs down, stays black for [darkTicks], and they are at the foot of the ladder in
+ * Level 2, the catacombs (`Chapter2`).
  */
 data class Ch2L1Overtime(
     val reader: String = "sealed_reader",
     val zone: String = "sealed_corridor",
     val slamAfter: Double = 2.5,
     val basementZone: String = "basement",
-    val darkTicks: Int = 60,
-    val fadeTicks: Int = 50,
-    val textTicks: Int = 120,
-    val text: String = "every_tunnel.ch2.l1.ending.text",
+    val darkTicks: Int = 20,
+    val fadeTicks: Int = 30,
     /** Its anchor stands on the lid: the manhole block is the one under it. */
     val manhole: String = "manhole",
     val liftTicks: Int = 60,
@@ -167,8 +166,7 @@ data class Ch2L1Act3(
  *   "restricted_doors": ["restricted_door_east"], "sealed_door": "sealed_door", "portrait": "painting", "chamber": "chamber_02",
  *   "guide_after_seconds": 60,
  *   "overtime": { "reader": "sealed_reader", "zone": "sealed_corridor", "slam_after": 2.5, "basement_zone": "basement",
- *                 "dark_seconds": 1.5, "fade_seconds": 2.5, "text_seconds": 6.0, "text": "every_tunnel.ch2.l1.ending.text",
- *                 "manhole": "manhole", "lift_seconds": 3.0 } }
+ *                 "dark_seconds": 1.0, "fade_seconds": 1.5, "manhole": "manhole", "lift_seconds": 3.0 } }
  * ```
  */
 object Ch2L1Act3Parser {
@@ -184,8 +182,6 @@ object Ch2L1Act3Parser {
             basementZone = o.string("basement_zone", d.basementZone),
             darkTicks = ticks("dark_seconds", d.darkTicks),
             fadeTicks = ticks("fade_seconds", d.fadeTicks).coerceAtLeast(1),
-            textTicks = ticks("text_seconds", d.textTicks),
-            text = o.string("text", d.text),
             manhole = o.string("manhole", d.manhole),
             liftTicks = ticks("lift_seconds", d.liftTicks).coerceAtLeast(1),
         )

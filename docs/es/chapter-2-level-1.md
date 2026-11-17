@@ -7,16 +7,17 @@ que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el des
 fases (de la 0 a la 11), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
 nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 11, la pasada de QA, hecha: el nivel está
 terminado.** Se llega desde el menú principal (Capítulo 2, NUEVA PARTIDA: el prólogo y luego la fábrica) y se juega desde el reloj hasta
-su final, el sótano barrido, el encierro y la bajada por la alcantarilla de emergencia hasta el menú, con todas las salas amuebladas y
-con gente. Lo siguiente es el Nivel 2 (las alcantarillas y unas antiguas catacumbas), que empieza bajando por esa alcantarilla; los dos se
-publican juntos como demo.
+su final, el sótano barrido, el encierro y la bajada por la alcantarilla de emergencia, con todas las salas amuebladas y con gente.
+Bajando por la alcantarilla, sin corte, está el [Nivel 2](chapter-2-level-2.md), las catacumbas; los dos se publican juntos como demo.
 
 **Cómo se llega.** NUEVA PARTIDA del Capítulo 2 en el menú principal: el prólogo (se puede saltar) y luego la fábrica. La
 pantalla está en negro desde la carga del mundo hasta que empieza el prólogo, y el negro de su final se mantiene hasta que el jugador
 está en la fábrica. El nivel no se guarda: abre el mismo mundo que la partida
-guardada del Capítulo 1, así que antes de entrar se guarda dónde estaba el jugador y lo que llevaba (`Ch2L1Return`), y al salir del
-mundo, al final del nivel o a medias, sale del nivel y se le devuelven ambas cosas; un mundo dejado sin salir (el juego se cerró) lo hace
-al entrar. Cada NUEVA PARTIDA del Capítulo 2 empieza otra vez desde el prólogo. En desarrollo, `/et ch2 l1 enter` entra sin nada de esto.
+guardada del Capítulo 1, así que antes de entrar se guarda dónde estaba el jugador, lo que llevaba, su vida y sus recursos
+(`chapter2.platform.Ch2Return`), y al salir del mundo, en este nivel o en el Nivel 2, sale de los niveles del capítulo y se le devuelve
+todo; un mundo dejado sin salir (el juego se cerró) lo hace al entrar. La partida guardada del Capítulo 2 empieza en el primer checkpoint
+del Nivel 2: hasta entonces, cada NUEVA PARTIDA del Capítulo 2 empieza otra vez desde el prólogo. En desarrollo, `/et ch2 l1 enter` entra
+sin nada de esto.
 
 Su código está en `daio7771.everytunnel.chapter2` (el del cliente, en el mismo paquete dentro de `src/client`): `level1.core`
 (Kotlin puro, con tests), `level1.platform` (pegamento con Minecraft) y `level1.client`, aparte del juego base, que nunca lo
@@ -40,7 +41,7 @@ nueva (`ProgressService.reset`) devuelve a todos ahí.
 | `ACT3_OVERTIME` | Después del despacho, con el pase de horas extra sin cobrar: el camino a la zona sellada está abierto |
 | `ACT3_BASEMENT` | Tras la puerta sellada, que se cerró de golpe detrás: las horas extra, barriendo el sótano |
 | `ACT3_LOCKED_IN` | El sótano barrido: se apagaron sus luces y la puerta sellada se cerró por fuera; la salida es la alcantarilla |
-| `DONE` | Por la alcantarilla de emergencia abajo: el juego volvió al menú (de aquí seguirá el Nivel 2) |
+| `DONE` | Por la alcantarilla de emergencia abajo: sigue el Nivel 2, las catacumbas |
 
 `level1.platform.Ch2L1` es la única puerta al estado: `setState(player, state, reason)` lo guarda, escribe en el log `Chapter 2
 Level 1: <jugador> goes A -> B (<motivo>)` y avisa a los oyentes; `skip(player)` pasa al siguiente. Un sistema del nivel
@@ -489,8 +490,7 @@ El LAB tendrá dos tareas más cuando el Nivel 1 esté decorado.
 ## La zona sellada y el final (fase 9)
 
 El `overtime` de `act3.json` (`level1.core.Ch2L1Overtime`), la tarea de las horas extra en `tasks.json`, `level1.platform.Ch2L1Act3Hooks`
-(la puerta), `Ch2L1TaskHooks` (el barrido), `Ch2L1EndingHooks` (el encierro, la alcantarilla, el final) y el `Ch2L1EndingOverlay` del
-cliente (el final).
+(la puerta), `Ch2L1TaskHooks` (el barrido) y `Ch2L1EndingHooks` (el encierro, la alcantarilla, el final).
 
 - **La puerta sellada** se abre en su lector de tarjetas del lado del LAB (`sealed_reader`) con el pase de Rowan, solo en `ACT3_OVERTIME`.
   Aún no es el Nivel 2: detrás hay un rellano (`sealed_corridor`) con dos salidas. Al este, el paso a la otra parte de la fábrica,
@@ -517,9 +517,10 @@ cliente (el final).
   `a3_manhole_open`). Abierta, el bloque es un agujero con borde, un pozo oscuro con peldaños y la tapa apartada en el suelo; también se
   puede abrir antes de probar la puerta.
 - **Bajar por ella acaba el nivel** (`DONE`): un clic en el agujero abierto, o meterse en él. El jugador queda dentro mirando abajo, se
-  pone el contador `completed` (el `ch2.l1.completed` del plan), se oyen los peldaños (`block.ch2l1.ladder`) y `dark_seconds` (1,5)
-  después la pantalla funde a negro en `fade_seconds` (2,5), el texto de cierre (`ending.text`) se queda `text_seconds` (6) y se sale del
-  mundo, guardado, al menú principal. El Nivel 2, las alcantarillas y las antiguas catacumbas, empezará bajando por esta alcantarilla.
+  pone el contador `completed` (el `ch2.l1.completed` del plan), se oyen los peldaños (`block.ch2l1.ladder`) mientras la pantalla funde a
+  negro en `fade_seconds` (1,5), y `dark_seconds` (1) después, a oscuras, el nivel termina (`Ch2L1EndingHooks.onFinished`): el jugador
+  está al pie de la escalera en el [Nivel 2](chapter-2-level-2.md#cómo-se-llega) y la pantalla vuelve. Sin texto de cierre ni menú: el
+  camino sigue.
   Volver a antes de `ACT3_LOCKED_IN` (un comando) vuelve a encender el sótano y cierra la alcantarilla; volver a las horas extra o a antes
   cierra la puerta sellada y pone su lector en rojo.
 
@@ -535,7 +536,7 @@ Lo que añadió la pasada de QA para que el jugador no se quede atascado:
   repite (`Ch2L1EndingHooks`).
 - **Trabajadores perdidos** (`Ch2L1Npcs`): el que se ha caído fuera de la caja del nivel se retira y se vuelve a poner en la siguiente
   comprobación.
-- **La vuelta al Capítulo 1** (`Ch2L1Return`): véase «Cómo se llega» al principio.
+- **La vuelta al Capítulo 1** (`chapter2.platform.Ch2Return`, del capítulo, compartida con el Nivel 2): véase «Cómo se llega» al principio.
 
 ## Comandos de depuración
 

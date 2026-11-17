@@ -172,9 +172,21 @@ def run(level):
         if start_cell(lv, walk, a["id"]) is None:
             errors.append(f"anchor {a['id']} at {a['pos']}: nowhere to stand there")
 
+    # The route's zones apart: the mod tells where the player is by them (a zone of an L-shaped space is its box, which can reach
+    # into its neighbours: give it a box of its own).
+    route = lv.layout["route"]
+    zones = {z["id"]: lv.zone_box(z) for z in lv.layout["zones"] if not z.get("all")}
+    placed = [f"zone_{p}" for p in dict.fromkeys(route) if f"zone_{p}" in zones]
+    nested = {frozenset(pair) for pair in cfg.get("nested", [])}
+    for i, a in enumerate(placed):
+        for b in placed[i + 1:]:
+            ba, bb = zones[a], zones[b]
+            apart = any(ba[k] > bb[k + 3] or bb[k] > ba[k + 3] for k in range(3))
+            if not apart and frozenset((a, b)) not in nested:
+                errors.append(f"zones {a} and {b} overlap")
+
     # The route, walked.
     ways, total = [], 0
-    route = lv.layout["route"]
     for a, b in zip(route, route[1:]):
         sa, sb = start_cell(lv, walk, a), start_cell(lv, walk, b)
         if sa is None or sb is None:

@@ -32,6 +32,14 @@ class DeathCauseTest {
     }
 
     @Test
+    fun `a later chapter's level says itself whether it is quiet`() {
+        assertEquals(DeathCause.HUNTERS, DeathCause.of(quiet = false, "every_tunnel:hunter", "minecraft:mob_attack"))
+        assertEquals(DeathCause.DEEP_WATER, DeathCause.of(quiet = false, null, "minecraft:drown"))
+        assertNull(DeathCause.of(quiet = true, null, "minecraft:drown"))
+        assertEquals(DeathCause.THIRST, DeathCause.of(quiet = true, null, "minecraft:dry_out"))
+    }
+
+    @Test
     fun `causes round-trip by id`() {
         for (cause in DeathCause.entries) assertEquals(cause, DeathCause.byId(cause.id))
         assertNull(DeathCause.byId("nobody"))

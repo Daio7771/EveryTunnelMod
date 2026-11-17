@@ -89,7 +89,8 @@ por sus puntos de extensión:
 | Punto de extensión | Qué hace un capítulo con él |
 |---|---|
 | `platform.PlayerRules` | Dice qué reglas del juego base cambian para quien lo juega (linterna, esconderse, daño, ruido, barras de estado, la skin del jugador) |
-| `platform.ChapterRequest` | Registra lo que se ejecuta cuando el menú abrió el mundo para él (`onLoaded`) |
+| `platform.ChapterRequest` | Registra lo que se ejecuta cuando el menú abrió el mundo para él (`onLoaded`: NUEVA PARTIDA, o CONTINUAR, `continuing`), y escribe la marca que dice al menú que tiene partida guardada (`setSaved`, `markerName`) |
+| `platform.ChapterRestarts` | Dice adónde vuelve un jugador de sus niveles al morir, y qué repone entonces; la muerte en sí es de `DeathHooks` |
 | `ProgressService.onReset` | Borra su propio progreso (su propio componente de Cardinal) con una partida nueva del Chapter 1 |
 | `client.cutscene.CutsceneView.Kind` | Sus escenas: un `Kind` con su línea de tiempo y lo demás que haga, que arranca con `CutsceneView.start` |
 | `ModBlocks.TAB` y los ajustes de bloque | Sus bloques van a la misma pestaña creativa y comparten los ajustes y formas del juego base |
@@ -193,7 +194,10 @@ empieza limpia.
 
 El progreso del jugador va aparte, con los datos propios del jugador: `platform.ProgressService`,
 sobre Cardinal Components (`platform.CardinalProgress`; el Chapter 2 guarda su propio componente, `chapter2.platform.Ch2Progress`: las
-únicas clases que tocan la librería). Sobrevive a la muerte y llega al cliente de ese jugador; una partida nueva borra los dos.
+únicas clases que tocan la librería). Sobrevive a la muerte y llega al cliente de ese jugador; una partida nueva borra los dos. La partida
+guardada del Chapter 2 (el último checkpoint del Nivel 2: su estado, contadores e inventario) está en ese componente; solo un archivo
+vacío en la carpeta del mundo, `every_tunnel_chapter2_continue` (`ChapterRequest.setSaved`), se lo dice al menú principal, como
+`every_tunnel_continue` para el Chapter 1.
 
 Fuera del mundo, en la carpeta `config/` del juego: `every_tunnel/gameplay.json` (la
 configuración de juego) y `every_tunnel/shader_settings_applied.txt` (qué packs de shaders

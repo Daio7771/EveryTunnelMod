@@ -35,7 +35,7 @@
   {"id":"zone_central_hall","from":[1158,63,1346],"to":[1203,73,1378]},
   {"id":"zone_observer_wall","from":[1176,63,1416],"to":[1202,72,1429]},
   {"id":"zone_observer_chamber","from":[1204,63,1388],"to":[1263,75,1440]},
-  {"id":"zone_return_gallery","from":[1184,63,1416],"to":[1271,68,1448]},
+  {"id":"zone_return_gallery","from":[1184,63,1442],"to":[1271,69,1448]},
   {"id":"zone_flood_collector","from":[1085,55,1418],"to":[1174,69,1434]},
   {"id":"zone_rising_walkways","from":[1036,55,1402],"to":[1083,79,1441]},
   {"id":"zone_upper_gallery","from":[1073,74,1381],"to":[1080,89,1400]},

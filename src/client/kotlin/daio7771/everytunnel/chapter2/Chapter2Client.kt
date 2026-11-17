@@ -1,7 +1,6 @@
 package daio7771.everytunnel.chapter2
 
 import daio7771.everytunnel.EveryTunnel
-import daio7771.everytunnel.chapter2.level1.client.Ch2L1EndingOverlay
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1IntroView
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1MeetingView
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1Subtitles
@@ -47,7 +46,6 @@ object Chapter2Client : ClientModInitializer {
         KeypadScreen.register()
         GaugeLogScreen.register()
         CaughtOverlay.register()
-        Ch2L1EndingOverlay.register()
         Ch2L1OfficeView.register()
         EntityRendererRegistry.register(Ch2Entities.FACTORY_NPC, ::FactoryNpcRenderer)
         EntityRendererRegistry.register(Ch2Entities.SCIENTIST, ::ScientistRenderer)

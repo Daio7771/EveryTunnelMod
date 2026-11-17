@@ -6,21 +6,20 @@ import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
+import daio7771.everytunnel.platform.DeathHooks
 import daio7771.everytunnel.platform.ModSounds
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.block.Block
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.sound.SoundCategory
 import net.minecraft.text.Text
 import net.minecraft.util.ActionResult
-import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import java.util.UUID
+import java.util.concurrent.CopyOnWriteArrayList
 
 /**
  * The end of Chapter 2's Level 1, from the basement's last dirt swept ([Ch2L1TaskHooks]) to the way out.
@@ -32,28 +31,32 @@ import java.util.UUID
  * - **The manhole**: a click held on it for [Ch2L1Overtime.liftTicks] prises its lid up (a bar fills, iron grinds on concrete) and lets it
  *   fall aside with a clang ([Ch2L1Overtime.MANHOLE_OPEN]). A click on the open hole, or stepping into it, takes the player down.
  * - **Down it** ([Ch2L1State.DONE]): the level is marked finished in the player's progress ([Ch2L1Overtime.COMPLETED]), they climb down
- *   the rungs, and after [Ch2L1Overtime.darkTicks] the client is told to end ([ENDING_PACKET]: the fade, the closing text, then the main
- *   menu; `client.Ch2L1EndingOverlay`). Level 2, the sewers, will follow from here.
+ *   the rungs while the screen fades to black ([Ch2L1Overtime.fadeTicks], the base game's fade: `DeathHooks.sendFade`), and after
+ *   [Ch2L1Overtime.darkTicks] more in the dark the level is over: [onFinished]'s listeners are told (`Chapter2` takes the player on to
+ *   Level 2, the catacombs, at the foot of the ladder, where the screen fades back). No closing text and no menu: the way goes on.
  *
- * A player who left the world before the menu and comes back finds it as they left it: locked in in the dark, or at the end, which plays
+ * A player who left the world before the end and comes back finds it as they left it: locked in in the dark, or going down, which plays
  * again. Going back before [Ch2L1State.ACT3_LOCKED_IN] (a command) lights the basement again and shuts the manhole. Server thread only.
  */
 object Ch2L1EndingHooks {
 
-    /** To the client: the fade's ticks, the text's ticks and the text's lang key; when it is over, back to the menu. */
-    val ENDING_PACKET = Identifier(EveryTunnel.MOD_ID, "ch2l1_ending")
-
     private const val KEY = "every_tunnel.ch2.l1."
 
-    /** Players down the manhole, and the ticks left before their ending. */
-    private val pending = HashMap<UUID, Int>()
+    /** A player going down the manhole: ticks before the screen starts to fade (-1: it has), then before the level is over. */
+    private class Descent(var toFade: Int, var toEnd: Int)
+
+    /** Players going down the manhole. */
+    private val pending = HashMap<UUID, Descent>()
+
+    /** Told when a player has gone down the manhole, in the dark: the level is over. */
+    private val finished = CopyOnWriteArrayList<(ServerPlayerEntity) -> Unit>()
 
     /** Players just locked in, and the ticks left before the sealed door's bolt is heard. */
     private val bolts = HashMap<UUID, Int>()
 
     private val overtime: Ch2L1Overtime get() = Ch2L1DataLoader.act3.overtime
 
-    /** On joining at the end, this much more before the dark's count starts (the client's world loading). */
+    /** On joining at the end, this much more before the fade starts (the client's world loading). */
     private const val REJOIN_TICKS = 40
 
     /** From the lights going out to the bolt. */
@@ -77,8 +80,13 @@ object Ch2L1EndingHooks {
             if (state < Ch2L1State.ACT3_LOCKED_IN) return@register
             if (Ch2L1Build.isBuilt(player.server)) Ch2L1Build.zoneLights(player.serverWorld, overtime.basementZone, true)
             setManhole(player, Ch2Progress.ch2L1Counter(player, Ch2L1Overtime.MANHOLE_OPEN) > 0)
-            if (state == Ch2L1State.DONE) pending[player.uuid] = overtime.darkTicks + REJOIN_TICKS
+            if (state == Ch2L1State.DONE) pending[player.uuid] = Descent(REJOIN_TICKS, overtime.fadeTicks + overtime.darkTicks)
         }
+    }
+
+    /** [listener] is told when a player has gone down the manhole and the screen is black: the level is over. */
+    fun onFinished(listener: (ServerPlayerEntity) -> Unit) {
+        finished += listener
     }
 
     // --- where things are -------------------------------------------------------------------------
@@ -166,7 +174,7 @@ object Ch2L1EndingHooks {
             set(player, Ch2L1Overtime.MANHOLE_OPEN, 1)
             setManhole(player, true)
             world.playSound(null, player.blockPos, Ch2Sounds.CH2L1_LADDER, SoundCategory.BLOCKS, 1f, 1f)
-            pending[player.uuid] = overtime.darkTicks
+            pending[player.uuid] = Descent(0, overtime.fadeTicks + overtime.darkTicks)
             EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} has gone down the manhole: the level is finished", player.gameProfile.name)
         } else {
             pending.remove(player.uuid)
@@ -203,21 +211,28 @@ object Ch2L1EndingHooks {
             }
         }
         if (pending.isEmpty()) return
-        val iterator = pending.entries.iterator()
-        while (iterator.hasNext()) {
-            val entry = iterator.next()
-            if (entry.value > 0) {
-                entry.setValue(entry.value - 1)
+        val ended = mutableListOf<UUID>()
+        for ((id, descent) in pending) {
+            if (descent.toFade > 0) {
+                descent.toFade--
                 continue
             }
-            iterator.remove()
-            val player = server.playerManager.getPlayer(entry.key) ?: continue
-            if (!ServerPlayNetworking.canSend(player, ENDING_PACKET)) continue
-            val buf = PacketByteBufs.create()
-            buf.writeVarInt(overtime.fadeTicks)
-            buf.writeVarInt(overtime.textTicks)
-            buf.writeString(overtime.text)
-            ServerPlayNetworking.send(player, ENDING_PACKET, buf)
+            if (descent.toFade == 0) {
+                descent.toFade = -1
+                server.playerManager.getPlayer(id)?.let { DeathHooks.sendFade(it, 1f, overtime.fadeTicks / 20f) }
+            }
+            if (descent.toEnd > 0) descent.toEnd-- else ended += id
+        }
+        for (id in ended) {
+            pending.remove(id)
+            val player = server.playerManager.getPlayer(id) ?: continue
+            for (listener in finished) {
+                try {
+                    listener(player)
+                } catch (e: Exception) {
+                    EveryTunnel.LOGGER.error("Chapter 2 Level 1: a listener of the level's end failed", e)
+                }
+            }
         }
     }
 }

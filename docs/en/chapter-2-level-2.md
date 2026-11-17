@@ -6,12 +6,69 @@ Level 2 of Chapter 2 is the catacombs under the factory: the old catacombs the f
 down Level 1's emergency manhole, alone, and looks for a way out: the Hunters in the galleries, a creature that hunts by the floor's
 vibrations in the pump room, the Observant Guard of Chapter 1 in the lower chambers, and a flood in three stages on the way to the
 pumping station and the exit. It is built in phases (1 to 7), one at a time, on the **private** branch `chapter-2/level-2` (off
-`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 1,
-the map.** It can be built and walked from the entry to the exit (`/et ch2 l2 goto`); nothing happens in it yet.
+`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 2,
+the way in, survival and the saved game.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
+bars, dying brings the player back to the last checkpoint, and the menu's Chapter 2 continues it; there are no enemies, documents or
+flood yet.
 
 Its code is under `daio7771.everytunnel.chapter2.level2` (`core`, plain Kotlin, and `platform`), apart from the base game, which never
 names it (see [Architecture](architecture.md#chapters)). Its named places use Level 1's format (`level1.core.Ch2L1AnchorsParser`); its map
 is built by the chapter's `platform.MapBuild` from a `core.MapPlan`, as Level 1's is.
+
+## How it is reached
+
+**Down Level 1's manhole, without a break.** At the end of Level 1 the player climbs down the emergency manhole while the screen fades to
+black (`act3.json`, `overtime`: `fade_seconds`, 1.5, then `dark_seconds`, 1, in the dark); Level 1 tells the chapter
+(`Ch2L1EndingHooks.onFinished`), and the player is at the foot of the ladder in the catacombs (`sealed_entry`), where the screen fades
+back. No closing text and no menu: the way goes on. The first time, the catacombs are built behind the black (a few seconds).
+
+On arriving (`level2.platform.Ch2L2.enter`), the player's pockets are emptied (Level 1's pass is no use down there), their stamina, thirst
+and battery are as `level.json` says (`start`: all full), the lamps too (`lights`), and the first checkpoint is taken. The flashlight is
+the one Rowan gave in Level 1: it is equipment, not an item, and works from the first moment.
+
+**Playing it.** While a player plays it (`Ch2L2.active`), `Chapter2` gives them the base game's survival through `PlayerRules`: they can
+be hurt, thirst and the battery run down, the bars are drawn, and their steps make noise; the flashlight and the noise as `level.json`
+says (`rules`). They are still the new hire (the white coat), not the night guard.
+
+**The states** (`level2.core.Ch2L2State`), in the order they are played; walking into a zone of `level.json`'s `progress` moves the
+player on to its state, never back:
+
+| State | Where | Reached by |
+|---|---|---|
+| `ARRIVED` | At the foot of the ladder | Arriving |
+| `GALLERIES` | The Hunters' galleries (phase 3) | `zone_hunter_galleries` |
+| `PUMP_ROOM` | The overlook and the pump room, the vibration creature (phase 4) | `zone_pump_overlook`, `zone_vibration_chamber` |
+| `CATACOMBS` | The catacombs and lower galleries | `zone_lower_catacombs` |
+| `GUARD_APPEARS` | The vestibule: the Guard comes out of the wall (phase 5) | `zone_observer_wall` |
+| `GUARD_FIGHT` | The maintenance room and its four traps (phase 5) | `zone_observer_chamber` |
+| `GUARD_DEAD` | Back round to the vestibule, BOO! and the grate up (phase 5) | The Guard's fourth stun (phase 5; by command until then) |
+| `FLOOD_1` to `FLOOD_3` | The collector, the walkways, the gallery up: the flood's stages (phase 6) | `zone_flood_collector`, `zone_rising_walkways`, `zone_upper_gallery` |
+| `STATION` | The pumping station, dry | `zone_pumping_station` |
+| `DONE` | Out of the exit (phase 6) | (phase 6) |
+
+The four **encounters** (`Ch2L2Event`) are runs of states: `hunters` (`GALLERIES`), `creature` (`PUMP_ROOM`), `guard` (`GUARD_APPEARS` to
+`GUARD_FIGHT`) and `flood` (`FLOOD_1` to `FLOOD_3`). The flood's stage is the state's (0 before it, 3 from the third on). Each later phase
+hangs its encounter on the states: `Ch2L2.onStateChange` (a state left for another, by playing or by command) and `Ch2L2.onStart` (the
+level started at a state, by arriving, a death, CONTINUE or `reset`: the world as that state wants it, whatever was there).
+
+## Checkpoints and the saved game
+
+**Checkpoints** (`level.json`, `checkpoints`), one before each encounter: `entry` (the foot of the ladder, before the Hunters),
+`pump_overlook` (before the creature), `vestibule` (before the Guard), `collector` (after the Guard, before the flood) and `station`.
+Walking into a checkpoint's zone, if it lies ahead of the last one taken, takes it: the player's state, counters and what they carry are
+Chapter 2's **saved game** (`Ch2L2Snapshot`, in their Chapter 2 progress), and the world's folder gets Chapter 2's marker
+(`every_tunnel_chapter2_continue`, `ChapterRequest.setSaved`).
+
+**Dying** is the base game's death (the fade, the death screen with what killed them, full health and resources, the flashlight off;
+`DeathHooks`, asked through `ChapterRestarts`): the player stands at the last checkpoint, the state goes back to the one it saved, and the
+level is started again there. What they picked up since stays picked up; the death is not counted in Chapter 1's saved game.
+
+**CONTINUE.** With the marker, the menu's Chapter 2 offers CONTINUE instead of NEW GAME. It opens the world (`ChapterRequest.continuing`),
+keeps the way back to Chapter 1 (`Ch2Return`), and puts the player at the last checkpoint with that checkpoint's state, counters and
+things, full of health and resources. Leaving the world anywhere in Level 2 gives Chapter 1 back as it was (place, things, health,
+stamina, thirst and battery) and keeps the saved game. Ctrl+Shift+D in Chapter 2's menu erases it (after asking), and NEW GAME is
+back; a NEW GAME of Chapter 2, or a new game of Chapter 1, forgets it too. Level 1 is still played in one go: there is nothing to continue
+until Level 2's first checkpoint.
 
 ## The map
 
@@ -60,7 +117,9 @@ preview is what the game builds. No vanilla block the world's pack re-skins as C
 
 **The checks** (`checks.py`), run on every generation:
 - the structure: no space overlaps another, every opening joins two spaces, every feature is in its space, every anchor has floor under
-  it and room over it;
+  it and room over it, and the zones of the route's places overlap none of each other (the mod tells where the player is by them; the
+  overlook's, inside the pump room's, is the one pair allowed, `nested`): a zone of an L-shaped space is its box, which can reach into its
+  neighbours, so the return gallery's is its south leg (`box`);
 - the route walked as a player walks it (a step up of one, a drop of at most three, ladders, no swimming), with its length (about 1,000
   blocks, 4 minutes of walking alone);
 - **no shortcuts**: every way from the entry to the exit, falling and swimming included, crosses the galleries, the pump room, the
@@ -106,8 +165,19 @@ flood's stages need it `sealed` (bars do not hold water back): **when the flood 
 ## The data files
 
 The jar holds the defaults in `data/every_tunnel/ch2/l2/`; a file of the same name in `config/every_tunnel/ch2/l2/` takes its place
-while it is usable, and `/et reload` reads them again (with Level 1's). Phase 1 reads `anchors.json`; `map.json` and `flood.json` are the
-generator's and are not overridden.
+while it is usable, and `/et reload` reads them again (with Level 1's). The level reads `anchors.json` (the generator's) and `level.json`
+(written by hand); `map.json` and `flood.json` are the generator's and are not overridden. What `level.json` names is looked for in the
+anchors, and what is wrong is reported (`/et reload`).
+
+**`level.json`** (`level2.core.Ch2L2Level`):
+
+| Key | Holds |
+|---|---|
+| `rules` | `flashlight` (true: Rowan's flashlight works), `noise` (true: the steps make noise the creatures hear) |
+| `start` | On arriving from Level 1, `battery`, `thirst` and `stamina` as a share of full (0 to 1; 1, 1, 1). A death or CONTINUE gives them all full |
+| `lights` | Each zone's lamps: `on`, `flicker` or `off`, set whenever the level is started (arriving, CONTINUE, `reset`). The seven zones with lamps are listed, all `on` |
+| `checkpoints` | In the way's order: `id`, `anchor` (where a death and CONTINUE bring the player back), `zone` (walked into, it is taken), `before` (the encounter it comes before, for `reset`) |
+| `progress` | `zone` and `state`: walking into the zone moves the player on to the state |
 
 ## Debug commands
 
@@ -115,6 +185,12 @@ generator's and are not overridden.
 
 | Command | What it does |
 |---|---|
+| `/et ch2 l2 enter` | Begins the level as down Level 1's manhole: built if it is not, pockets emptied, `start`'s resources, at `sealed_entry`, its checkpoint taken. Without the way back to Chapter 1 (leaving the world keeps you there) |
+| `/et ch2 l2 leave` | Out of the level: the rest of the game's rules apply again; the saved game stays |
+| `/et ch2 l2 state` | Your state, the last checkpoint and the state it saved, the flood's stage, each encounter (`ahead`, `now`, `past`), the counters |
+| `/et ch2 l2 state <state>` | Puts you in a state (every system of the level is told, as if you had got there by playing) |
+| `/et ch2 l2 skip [<event>]` | On to the next state, or past an encounter (`hunters`, `creature`, `guard`, `flood`) as if lived |
+| `/et ch2 l2 reset <event>` | An encounter to live again: the state before it, you at the checkpoint before it (taken), the level started there |
 | `/et ch2 l2 build` | Builds the catacombs again over what is there (a new plan is built by itself when `goto` needs it) |
 | `/et ch2 l2 unbuild` | Empties the whole area (before packing the world into a jar); whoever stands in it falls |
 | `/et ch2 l2 anchors` | Every anchor and zone with its coordinates, the provisional ones marked |
@@ -123,7 +199,10 @@ generator's and are not overridden.
 
 ## Tests
 
-`MapPlanTest` (the plan format: one block, mixes picked as the generator picks them, gates, the fingerprint) in `chapter2/core`, and
-`Ch2L2MapPlanTest` (the jar's plan: its origin, every fill inside the cleared box and no cell set twice, every block known and none
-re-skinned by the world's pack but the drain's, the anchors and zones of the route, every place to stand standing, the gate open as
-built, the lamps) in `chapter2/level2/core`.
+`MapPlanTest` (the plan format: one block, mixes picked as the generator picks them, gates, the fingerprint) and `Ch2PlayerProgressTest`
+(Level 2's state, counters and saved game, apart from Level 1's) in `chapter2/core`; `Ch2L2MapPlanTest` (the jar's plan: its origin,
+every fill inside the cleared box and no cell set twice, every block known and none re-skinned by the world's pack but the drain's, the
+anchors and zones of the route, every place to stand standing, the gate open as built, the lamps) and `Ch2L2LevelTest` (the states and
+encounters; the jar's `level.json` without a problem; the checkpoints in the route's order, each in its own zone, one before every
+encounter; walking the route moves the state only on, and each checkpoint replays its encounter; a broken override falls back) in
+`chapter2/level2/core`; `DeathCauseTest` (a later chapter's level says itself whether it is quiet).

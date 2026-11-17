@@ -47,6 +47,9 @@ import java.util.UUID
  * to Level 4 by the Master Key's table, as it was before the key was taken ([LoungeClosingHooks.takeBack]),
  * and its game is over, its Cloud gone ([CloudGameHooks.died]).
  *
+ * A player of a later chapter ([ChapterRestarts]) dies the same way, and comes back where their chapter says, which then puts its level
+ * back ([ChapterRestarts.Restart.reset]); the death is not counted in Chapter 1's saved game.
+ *
  * A player who never entered a level dies the vanilla way.
  */
 object DeathHooks {
@@ -70,9 +73,13 @@ object DeathHooks {
 
     private val FREEZE_ID: UUID = UUID.fromString("5c0b8e8e-2f4c-4d0a-9a51-6f2b8f3d7a10")
 
-    /** [waits]: a death screen shows, and the black stays until the player has [retried]. [backToKey]: see [BACK_TO_KEY_TAG]. */
+    /**
+     * [levelId]: the Chapter 1 level, or null for a later chapter's [chapter] restart. [waits]: a death screen shows, and the black stays
+     * until the player has [retried]. [backToKey]: see [BACK_TO_KEY_TAG].
+     */
     private class Dying(
-        val levelId: String,
+        val levelId: String?,
+        val chapter: ChapterRestarts.Restart?,
         val waits: Boolean,
         val backToKey: Boolean,
         var ticks: Int = 0,
@@ -92,11 +99,11 @@ object DeathHooks {
                 player.health = 1f
                 return@register false
             }
+            if (!WorldRules.appliesTo(player.isCreative, player.isSpectator)) return@register true
+            val chapter = ChapterRestarts.of(player)
             val levelId = lastLevel[player.uuid]
-            if (levelId == null || !WorldRules.appliesTo(player.isCreative, player.isSpectator) || startOf(levelId) == null) {
-                return@register true
-            }
-            startDying(player, levelId, source)
+            if (chapter == null && (levelId == null || startOf(levelId) == null)) return@register true
+            startDying(player, if (chapter == null) levelId else null, chapter, source)
             false
         }
         ServerLivingEntityEvents.ALLOW_DAMAGE.register { entity, _, _ -> entity.uuid !in dying }
@@ -120,14 +127,14 @@ object DeathHooks {
     /** True from the fatal hit until the screen starts fading back in; a dying player makes no noise. */
     fun isDying(player: ServerPlayerEntity): Boolean = player.uuid in dying
 
-    private fun startDying(player: ServerPlayerEntity, levelId: String, source: DamageSource) {
+    private fun startDying(player: ServerPlayerEntity, levelId: String?, chapter: ChapterRestarts.Restart?, source: DamageSource) {
         CarryHooks.died(player)
         player.health = 1f
         player.isSprinting = false
-        val cause = causeOf(levelId, source)
+        val cause = if (chapter != null) causeOf(chapter.quiet, source) else causeOf(levelId!!, source)
         val shown = cause != null && ServerPlayNetworking.canSend(player, CAUSE_PACKET_ID)
-        val backToKey = BACK_TO_KEY_TAG in LevelManager.tagsOf(PlayerLocationTracker.locationOf(player.uuid).zones)
-        dying[player.uuid] = Dying(levelId, waits = shown, backToKey = backToKey)
+        val backToKey = chapter == null && BACK_TO_KEY_TAG in LevelManager.tagsOf(PlayerLocationTracker.locationOf(player.uuid).zones)
+        dying[player.uuid] = Dying(levelId, chapter, waits = shown, backToKey = backToKey)
         player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)?.let { speed ->
             if (speed.getModifier(FREEZE_ID) == null) {
                 speed.addTemporaryModifier(
@@ -138,9 +145,10 @@ object DeathHooks {
         player.playSound(ModSounds.DEATH, SoundCategory.PLAYERS, 1f, 1f)
         sendFade(player, 1f, FADE_OUT_TICKS / 20f)
         if (shown) ServerPlayNetworking.send(player, CAUSE_PACKET_ID, PacketByteBufs.create().writeString(cause!!.id))
-        EveryTunnel.LOGGER.info("{} died in {}: restarting the level", player.name.string, levelId)
-        PlaytestLog.died(player, levelId, source)
-        ProgressService.get().addDeath(player)
+        val where = levelId ?: "a later chapter's level"
+        EveryTunnel.LOGGER.info("{} died in {}: restarting the level", player.name.string, where)
+        PlaytestLog.died(player, where, source)
+        if (chapter == null) ProgressService.get().addDeath(player)
         AchievementHooks.died(player, source)
     }
 
@@ -168,7 +176,11 @@ object DeathHooks {
     }
 
     private fun restart(player: ServerPlayerEntity, state: Dying) {
-        val levelId = state.levelId
+        state.chapter?.let {
+            restartInChapter(player, it)
+            return
+        }
+        val levelId = state.levelId ?: return
         val level = LevelManager.get(levelId)
         // Level 5's entry corridor goes back to before Level 4's Master Key was taken.
         val back = if (state.backToKey) LoungeClosingHooks.keyTable() else null
@@ -187,12 +199,7 @@ object DeathHooks {
         }
         player.stopRiding()
         player.teleport(startWorld, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
-        player.velocity = Vec3d.ZERO
-        player.fallDistance = 0f
-        player.extinguish()
-        player.clearStatusEffects()
-        player.health = player.maxHealth
-        ResourceSystem.reset(player.uuid)
+        restored(player)
 
         for (paleMan in world.getEntitiesByType(ModEntities.PALE_MAN) { it.isAlive && it.homeKey?.startsWith("$levelId/") == true }) {
             val point = level.spawnPoint(paleMan.homeKey!!.substringAfter('/')) ?: continue
@@ -204,15 +211,43 @@ object DeathHooks {
         DrainHooks.restart(player, levelId)
     }
 
+    /** A later chapter's player at the place [restart] names, as after any death; then the chapter puts its level back. */
+    private fun restartInChapter(player: ServerPlayerEntity, restart: ChapterRestarts.Restart) {
+        val world = player.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, restart.world))
+        if (world == null) {
+            EveryTunnel.LOGGER.warn("Cannot restart {}: their chapter's place is in {}, which is not there", player.name.string, restart.world)
+            return
+        }
+        player.stopRiding()
+        player.teleport(world, restart.x, restart.y, restart.z, restart.yaw, restart.pitch)
+        restored(player)
+        restart.reset(player)
+    }
+
+    /** Standing again: still, unhurt, nothing on them, full health and resources (the flashlight off). */
+    private fun restored(player: ServerPlayerEntity) {
+        player.velocity = Vec3d.ZERO
+        player.fallDistance = 0f
+        player.extinguish()
+        player.clearStatusEffects()
+        player.health = player.maxHealth
+        ResourceSystem.reset(player.uuid)
+    }
+
     private fun worldOf(player: ServerPlayerEntity, level: LevelDefinition) =
         player.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension)))
 
     /** What the death screen names for a death in [levelId] by [source], or null for none. */
     private fun causeOf(levelId: String, source: DamageSource): DeathCause? {
         val order = LevelManager.get(levelId)?.order ?: return null
+        return causeOf(order in DeathCause.QUIET_LEVELS, source)
+    }
+
+    /** What the death screen names for a death by [source] in a level with enemies, or, [quiet], without. */
+    private fun causeOf(quiet: Boolean, source: DamageSource): DeathCause? {
         val killer = (source.attacker ?: source.source)?.let { Registries.ENTITY_TYPE.getId(it.type).toString() }
         val damage = source.typeRegistryEntry.key.map { it.value.toString() }.orElse("")
-        return DeathCause.of(order, killer, damage)
+        return DeathCause.of(quiet, killer, damage)
     }
 
     private fun unfreeze(player: ServerPlayerEntity) {

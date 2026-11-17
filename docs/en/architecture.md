@@ -87,7 +87,8 @@ its extension points:
 | Extension point | What a chapter does with it |
 |---|---|
 | `platform.PlayerRules` | Says which of the base game's rules change for a player who plays it (flashlight, hiding, damage, noise, status bars, the player's skin) |
-| `platform.ChapterRequest` | Registers what runs when the menu opened the world for it (`onLoaded`) |
+| `platform.ChapterRequest` | Registers what runs when the menu opened the world for it (`onLoaded`: NEW GAME, or CONTINUE, `continuing`), and writes the marker that tells the menu it has a saved game (`setSaved`, `markerName`) |
+| `platform.ChapterRestarts` | Says where a player of its levels comes back after dying, and what it puts back then; the dying itself is `DeathHooks`'s |
 | `ProgressService.onReset` | Clears its own progress (its own Cardinal component) on a Chapter 1 new game |
 | `client.cutscene.CutsceneView.Kind` | Its scenes: a `Kind` with its timeline and whatever else it does, started with `CutsceneView.start` |
 | `ModBlocks.TAB` and the block settings | Its blocks join the same creative tab and share the base game's settings and shapes |
@@ -188,7 +189,9 @@ What the mod remembers is saved with the world, in `<world>/data/`, as vanilla
 
 The player's progress is kept apart, with the player's own data: `platform.ProgressService`,
 on Cardinal Components (`platform.CardinalProgress`; Chapter 2 keeps its own component, `chapter2.platform.Ch2Progress`: the only
-classes that touch the library). It survives death and reaches that player's client; a new game clears both.
+classes that touch the library). It survives death and reaches that player's client; a new game clears both. Chapter 2's saved game (Level 2's last checkpoint: its state, counters and inventory) is in that component;
+only an empty file in the world's folder, `every_tunnel_chapter2_continue` (`ChapterRequest.setSaved`), tells the main menu, as
+`every_tunnel_continue` does for Chapter 1.
 
 Outside the world, in the game's `config/` folder: `every_tunnel/gameplay.json` (the
 gameplay config) and `every_tunnel/shader_settings_applied.txt` (which shader packs

@@ -1,0 +1,39 @@
+{
+  "rules": {
+    "flashlight": true,
+    "noise": true
+  },
+  "start": {
+    "battery": 1.0,
+    "thirst": 1.0,
+    "stamina": 1.0
+  },
+  "lights": {
+    "zone_sealed_entry": "on",
+    "zone_vibration_chamber": "on",
+    "zone_observer_chamber": "on",
+    "zone_flood_collector": "on",
+    "zone_rising_walkways": "on",
+    "zone_pumping_station": "on",
+    "zone_level_exit": "on"
+  },
+  "checkpoints": [
+    {"id": "entry", "anchor": "sealed_entry", "zone": "zone_sealed_entry", "before": "hunters"},
+    {"id": "pump_overlook", "anchor": "pump_overlook", "zone": "zone_pump_overlook", "before": "creature"},
+    {"id": "vestibule", "anchor": "observer_wall", "zone": "zone_observer_wall", "before": "guard"},
+    {"id": "collector", "anchor": "flood_collector", "zone": "zone_flood_collector", "before": "flood"},
+    {"id": "station", "anchor": "pumping_station", "zone": "zone_pumping_station"}
+  ],
+  "progress": [
+    {"zone": "zone_hunter_galleries", "state": "galleries"},
+    {"zone": "zone_pump_overlook", "state": "pump_room"},
+    {"zone": "zone_vibration_chamber", "state": "pump_room"},
+    {"zone": "zone_lower_catacombs", "state": "catacombs"},
+    {"zone": "zone_observer_wall", "state": "guard_appears"},
+    {"zone": "zone_observer_chamber", "state": "guard_fight"},
+    {"zone": "zone_flood_collector", "state": "flood_1"},
+    {"zone": "zone_rising_walkways", "state": "flood_2"},
+    {"zone": "zone_upper_gallery", "state": "flood_3"},
+    {"zone": "zone_pumping_station", "state": "station"}
+  ]
+}

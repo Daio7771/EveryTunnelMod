@@ -41,9 +41,11 @@ import kotlin.random.Random
  * - The way into the game depends on the state, one option and not two. In Chapter 1's menu, with a saved game
  *   ([ContinueGame]) it is CONTINUE, which goes on with it; without one it is NEW GAME, which opens Noname Complex
  *   (installed by `client.MapWorldInstaller`), behind the loading screen ([LoadingCover]). Starting over is
- *   Ctrl+Shift+D, explained in the guide: it erases the saved game after asking ([EraseSaveScreen]), and NEW GAME is back.
- *   In Chapter 2's menu it is NEW GAME, which only warns ([SpoilerAlertScreen]) and lets it be played anyway while
- *   Chapter 2 is locked, and opens the world for that chapter ([ChapterRequest]), which comes back here at its end.
+ *   Ctrl+Shift+D, explained in the guide: it erases the menu's chapter's saved game after asking ([EraseSaveScreen]), and NEW
+ *   GAME is back. In Chapter 2's menu it is NEW GAME, which only warns ([SpoilerAlertScreen]) and lets it be played anyway
+ *   while Chapter 2 is locked, and opens the world for that chapter ([ChapterRequest]), which comes back here at its end; or,
+ *   with Chapter 2's own saved game ([ChapterRequest.markerName]), CONTINUE, which opens the world to go on with it. Each
+ *   chapter's saved game is apart: erasing one leaves the other.
  * - OPTIONS opens vanilla's options (the language is changed there); GUIDE opens the player
  *   guide ([GuideScreen], whose last tab rolls the credits); ACHIEVEMENTS lists the
  *   achievements ([AchievementsScreen]); EXIT closes the game.
@@ -82,7 +84,8 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     private var selected = 0
     private var notice: Text? = null
     private var noticeUntilMs = 0L
-    private var hasSave = false
+    /** The chapters (1, 2) with a saved game to continue. */
+    private var saved = emptySet<Int>()
 
     /** The chapter this menu is (1 or 2): its scene, its music and its way into the game. */
     private var chapter = rememberedChapter
@@ -90,25 +93,29 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     /** The chapters are showing instead of the options. */
     private var choosingChapter = false
 
-    /** What the menu offers now: the chapters, or one way into the game (CONTINUE in Chapter 1 with a saved game, else NEW GAME), SELECT CHAPTER and the rest. */
+    /** What the menu offers now: the chapters, or one way into the game (CONTINUE with the chapter's saved game, else NEW GAME), SELECT CHAPTER and the rest. */
     private val options: List<Option>
         get() = if (choosingChapter) listOf(Option.CHAPTER_1, Option.CHAPTER_2, Option.BACK)
-        else listOf(if (hasSave && chapter == 1) Option.CONTINUE else Option.NEW_GAME, Option.SELECT_CHAPTER) + Option.REST
+        else listOf(if (chapter in saved) Option.CONTINUE else Option.NEW_GAME, Option.SELECT_CHAPTER) + Option.REST
 
     /** Chapter 2 is locked until the achievement "Nothing in There" is earned: it only warns. */
     private val chapterTwoLocked: Boolean get() = Achievement.NOTHING_THERE !in AchievementStore.unlocked
 
     override fun init() {
-        hasSave = saveMarker()?.isFile == true
+        saved = (1..2).filter { saveMarker(it)?.isFile == true }.toSet()
     }
 
-    private fun saveMarker(): File? = client?.levelStorage?.savesDirectory?.resolve(WORLD_FOLDER)?.resolve(ContinueGame.MARKER)?.toFile()
+    /** The file that makes [number]'s saved game one: Chapter 1's ([ContinueGame.MARKER]) or a later chapter's ([ChapterRequest.markerName]). */
+    private fun saveMarker(number: Int): File? {
+        val name = if (number == 1) ContinueGame.MARKER else ChapterRequest.markerName(number)
+        return client?.levelStorage?.savesDirectory?.resolve(WORLD_FOLDER)?.resolve(name)?.toFile()
+    }
 
-    /** Forgets the saved game: its marker is what makes it one, and a new game clears the rest. */
+    /** Forgets this menu's chapter's saved game: its marker is what makes it one, and a new game clears the rest. */
     private fun eraseSave() {
-        saveMarker()?.delete()
-        hasSave = false
-        EveryTunnel.LOGGER.info("The saved game was erased from the menu")
+        saveMarker(chapter)?.delete()
+        saved = saved - chapter
+        EveryTunnel.LOGGER.info("Chapter {}'s saved game was erased from the menu", chapter)
     }
 
     override fun shouldCloseOnEsc(): Boolean = false
@@ -273,7 +280,7 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
             showVanilla()
             return true
         }
-        if (keyCode == GLFW.GLFW_KEY_D && hasShiftDown() && hasControlDown() && hasSave) {
+        if (keyCode == GLFW.GLFW_KEY_D && hasShiftDown() && hasControlDown() && chapter in saved && !choosingChapter) {
             client?.setScreen(EraseSaveScreen(this, "menu.every_tunnel.erase.warning", ::eraseSave))
             return true
         }
@@ -292,14 +299,14 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         when (option) {
             Option.NEW_GAME -> when {
                 chapter == 1 -> open(client, false)
-                chapterTwoLocked -> client.setScreen(SpoilerAlertScreen(this) { open(client, continuing = false, prologue = true) })
-                else -> open(client, continuing = false, prologue = true)
+                chapterTwoLocked -> client.setScreen(SpoilerAlertScreen(this) { open(client, continuing = false, number = 2) })
+                else -> open(client, continuing = false, number = 2)
             }
             Option.SELECT_CHAPTER -> chooseChapter(true)
             Option.BACK -> chooseChapter(false)
             Option.CHAPTER_1 -> becomeChapter(1)
             Option.CHAPTER_2 -> becomeChapter(2)
-            Option.CONTINUE -> open(client, true)
+            Option.CONTINUE -> open(client, continuing = true, number = chapter)
             Option.OPTIONS -> client.setScreen(OptionsScreen(this, client.options))
             Option.GUIDE -> client.setScreen(GuideScreen(this))
             Option.ACHIEVEMENTS -> client.setScreen(AchievementsScreen(this))
@@ -320,12 +327,14 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         chooseChapter(false)
     }
 
-    private fun open(client: MinecraftClient, continuing: Boolean, prologue: Boolean = false) {
-        ContinueGame.requested = continuing
-        ChapterRequest.chapter = if (prologue) 2 else 0
+    /** Opens the map world for chapter [number]: to begin it or, [continuing], to go on with its saved game. */
+    private fun open(client: MinecraftClient, continuing: Boolean, number: Int = 1) {
+        ContinueGame.requested = continuing && number == 1
+        ChapterRequest.chapter = if (number == 1) 0 else number
+        ChapterRequest.continuing = continuing && number != 1
         val world = client.levelStorage.savesDirectory.resolve(WORLD_FOLDER)
         if (!world.resolve("level.dat").toFile().isFile) {
-            ChapterRequest.chapter = 0
+            ChapterRequest.clear()
             notice = Text.translatable("menu.every_tunnel.world_missing")
             noticeUntilMs = Util.getMeasuringTimeMs() + 5000L
             EveryTunnel.LOGGER.warn("No map world at {}", world)

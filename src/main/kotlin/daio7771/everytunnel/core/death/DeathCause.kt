@@ -33,14 +33,17 @@ enum class DeathCause(val id: String) {
          * What to show for a death in the level of [levelOrder], dealt by an entity of type [killer] (its id,
          * or null) with damage of type [damage] (its id); null to show nothing.
          */
-        fun of(levelOrder: Int, killer: String?, damage: String): DeathCause? {
+        fun of(levelOrder: Int, killer: String?, damage: String): DeathCause? = of(levelOrder in QUIET_LEVELS, killer, damage)
+
+        /** The same for a level that is [quiet] (without enemies) or not, whatever its chapter. */
+        fun of(quiet: Boolean, killer: String?, damage: String): DeathCause? {
             val cause = killer?.let(KILLERS::get) ?: when (damage) {
                 "minecraft:dry_out" -> THIRST
                 "minecraft:fall" -> FALL
                 "minecraft:drown" -> DEEP_WATER
                 else -> OTHER
             }
-            return if (levelOrder in QUIET_LEVELS && cause != THIRST) null else cause
+            return if (quiet && cause != THIRST) null else cause
         }
 
         fun byId(id: String): DeathCause? = entries.firstOrNull { it.id == id }

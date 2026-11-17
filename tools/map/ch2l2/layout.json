@@ -248,7 +248,7 @@
   {"id": "zone_central_hall", "spaces": ["sala_central"]},
   {"id": "zone_observer_wall", "spaces": ["vestibule"]},
   {"id": "zone_observer_chamber", "spaces": ["maintenance"]},
-  {"id": "zone_return_gallery", "spaces": ["return_gallery"]},
+  {"id": "zone_return_gallery", "box": [160, 162, 248, 169], "y": [0, 5]},
   {"id": "zone_flood_collector", "spaces": ["flood_collector"]},
   {"id": "zone_rising_walkways", "spaces": ["pasarelas"]},
   {"id": "zone_upper_gallery", "spaces": ["upper_gallery"]},
@@ -262,7 +262,8 @@
            "upper_gallery", "pumping_station", "level_exit"],
 
  "checks": {
-  "_doc": "cuts: zones every way to the exit must cross (a way round one would skip an event). locked: with the gate down (grate), these anchors cannot be reached from the entry. pump: the shortest way across the pump room, in blocks, at least min.",
+  "_doc": "cuts: zones every way to the exit must cross (a way round one would skip an event). locked: with the gate down (grate), these anchors cannot be reached from the entry. pump: the shortest way across the pump room, in blocks, at least min. The zones of the route's places overlap none of each other (the mod tells where the player is by them), but the pairs in nested, one inside the other.",
+  "nested": [["zone_pump_overlook", "zone_vibration_chamber"]],
   "cuts": ["zone_hunter_galleries", "zone_vibration_chamber", "zone_lower_catacombs", "zone_observer_wall", "zone_rising_walkways",
            "zone_upper_gallery", "zone_pumping_station"],
   "locked": {"gate": "vestibule_gate", "state": "grate", "unreachable": ["flood_collector", "rising_walkways", "pumping_station", "level_exit"]},

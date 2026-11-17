@@ -7,13 +7,14 @@ who "fell ill", three acts of tasks, a meeting and sneaking, ending in the super
 (0 to 11), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
 `origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 11, the QA pass, done: the level is
 finished.** It is reached from the main menu (Chapter 2, NEW GAME: the prologue, then the factory) and played from the clock to its end,
-the basement swept, locked in, and down the emergency manhole back to the menu, every room furnished and peopled. Level 2 (the sewers
-and old catacombs) is next and begins down that manhole; both are published together as a demo.
+the basement swept, locked in, and down the emergency manhole, every room furnished and peopled. Down the manhole, without a break, is
+[Level 2](chapter-2-level-2.md), the catacombs; both are published together as a demo.
 
 **How it is reached.** The main menu's Chapter 2, NEW GAME: the prologue (skippable), then the factory. The screen is black from
 the world's loading until the prologue begins, and the black of its end stays until the player stands in the factory. The level is not saved: it opens the same world as Chapter 1's saved game, so
-before going in, where the player stood and what they carried are kept (`Ch2L1Return`), and leaving the world, at the level's end or
-halfway, takes them out of the level and gives both back; a world left without leaving (the game stopped) does it on joining. Every
+before going in, where the player stood, what they carried, their health and their resources are kept (`chapter2.platform.Ch2Return`),
+and leaving the world, in this level or in Level 2, takes them out of the chapter's levels and gives all of it back; a world left
+without leaving (the game stopped) does it on joining. Chapter 2's saved game begins at Level 2's first checkpoint: until then, every
 NEW GAME of Chapter 2 starts again from the prologue. In development, `/et ch2 l1 enter` goes in without any of this.
 
 Its code is under `daio7771.everytunnel.chapter2` (the client's under the same package in `src/client`): `level1.core` (plain
@@ -38,7 +39,7 @@ takes everyone back there.
 | `ACT3_OVERTIME` | After the office, with the unpaid overtime pass: the way to the sealed zone is open |
 | `ACT3_BASEMENT` | Through the sealed door, which slammed behind: the overtime, sweeping the basement |
 | `ACT3_LOCKED_IN` | The basement swept: its lights went out and the sealed door was bolted from outside; the way out is the manhole |
-| `DONE` | Down the emergency manhole: the game went back to the menu (Level 2 will follow from here) |
+| `DONE` | Down the emergency manhole: on into Level 2, the catacombs |
 
 `level1.platform.Ch2L1` is the only door to the state: `setState(player, state, reason)` saves it, logs `Chapter 2 Level 1: <player>
 goes A -> B (<reason>)` and tells the listeners; `skip(player)` moves to the next one. A system of the level registers
@@ -473,7 +474,7 @@ The LAB will have two more tasks once Level 1 is decorated.
 ## The sealed zone and the end (phase 9)
 
 `act3.json`'s `overtime` (`level1.core.Ch2L1Overtime`), the overtime's task in `tasks.json`, `level1.platform.Ch2L1Act3Hooks` (the door),
-`Ch2L1TaskHooks` (the sweeping), `Ch2L1EndingHooks` (locked in, the manhole, the end) and the client's `Ch2L1EndingOverlay` (the end).
+`Ch2L1TaskHooks` (the sweeping) and `Ch2L1EndingHooks` (locked in, the manhole, the end).
 
 - **The sealed door** opens at its badge reader on the LAB's side (`sealed_reader`) with Rowan's pass, in `ACT3_OVERTIME` only. It is not
   Level 2 yet: behind it is a landing (`sealed_corridor`) with two ways on. East, the way to the factory's other part, barred and closed for
@@ -498,9 +499,10 @@ The LAB will have two more tasks once Level 1 is decorated.
   (`block.ch2l1.manhole_scrape`), then a clang as it falls aside (`block.ch2l1.manhole_open`; counter `a3_manhole_open`). Open, the block
   is a hole with a rim, a dark shaft with rungs and the lid slid aside on the floor; it can be clicked before the door is tried too.
 - **Down it ends the level** (`DONE`): a click on the open hole, or stepping into it. The player is put in the hole looking down, the
-  counter `completed` is set (the plan's `ch2.l1.completed`), the rungs are heard (`block.ch2l1.ladder`), and `dark_seconds` (1.5) later
-  the screen fades to black over `fade_seconds` (2.5), the closing text (`ending.text`) stays `text_seconds` (6), and the world is left,
-  saved, for the main menu. Level 2, the sewers and old catacombs, will begin down this manhole. Going back before `ACT3_LOCKED_IN` (a
+  counter `completed` is set (the plan's `ch2.l1.completed`), the rungs are heard (`block.ch2l1.ladder`) while the screen fades to black
+  over `fade_seconds` (1.5), and `dark_seconds` (1) later, in the dark, the level is over (`Ch2L1EndingHooks.onFinished`): the player is
+  at the foot of the ladder in [Level 2](chapter-2-level-2.md#how-it-is-reached), and the screen fades back. No closing text and no menu:
+  the way goes on. Going back before `ACT3_LOCKED_IN` (a
   command) lights the basement again and shuts the manhole; going back to the overtime or before it shuts the sealed door and turns its
   reader red.
 
@@ -513,7 +515,7 @@ What the QA pass added so that a player cannot get stuck:
 - **Leaving the world mid-scene**: back in the middle of the office's cinematic, it begins again (`Ch2L1OfficeHooks`, after 2 s);
   back locked in, the basement is dark again and the manhole as it was; back at the end, the ending plays again (`Ch2L1EndingHooks`).
 - **Stray workers** (`Ch2L1Npcs`): one that has fallen out of the level's box is taken away and put back at the next check.
-- **The way back to Chapter 1** (`Ch2L1Return`): see "How it is reached" at the top.
+- **The way back to Chapter 1** (`chapter2.platform.Ch2Return`, the chapter's, shared with Level 2): see "How it is reached" at the top.
 
 ## Debug commands
 

@@ -159,7 +159,8 @@ KDoc comment that says more.
 | `DirectorEntity.kt` | The director in his chair (GeckoLib): moves with the client's scene, mask and gaze synced; `DirectorHooks` puts him there with the level |
 | `LabHallHooks.kt` | The Lab hall's sting and first Cloud, once a game |
 | `ChemicalHooks.kt` | The chemical puzzle: the game's pair, the mixer run, the alarm and its enemies, the grate dissolving, the hatch |
-| `ChapterRequest.kt` | What the menu asked for: the world opens only for a later chapter's opening (no map build, no new game), which that chapter starts (`onLoaded`) and carries on |
+| `ChapterRequest.kt` | What the menu asked for: the world opens only for a later chapter's opening (no map build, no new game), which that chapter starts (`onLoaded`) and carries on, from its beginning or its own saved game (`continuing`); the marker in the world's folder that tells the menu a chapter has one (`markerName`, `setSaved`) |
+| `ChapterRestarts.kt` | Where a later chapter's player comes back after dying: chapters register a source, `DeathHooks` asks before Chapter 1's levels |
 | `DirectorBlocks.kt` | Level 5's anteroom and office: the director's double door that opens both leaves at once, the security camera block, the wall of CCTV screens |
 | `DeepWaterHooks.kt` | Level 5's deep water (the drain's pools): falling in pulls the player under, and they drown |
 | `DrainHooks.kt` | Level 5's drain: the hatch slamming shut once the player is down its ladder, open again on a death before the Junction |
@@ -183,7 +184,7 @@ KDoc comment that says more.
 | `NoiseHooks.kt` | Turns steps, jumps, landings, panting and game events into noises |
 | `AmbienceHooks.kt` | Sends each player their level's ambience |
 | `RespawnHooks.kt` | Sets the respawn point to the current level's start |
-| `DeathHooks.kt` | Death as fade to black and level restart |
+| `DeathHooks.kt` | Death as fade to black and level restart (or a later chapter's restart, `ChapterRestarts`) |
 | `LoadingHooks.kt` | Rebuild on open, loading state, new game, safety timeouts |
 | `NewGame.kt` | Resets the world and the player for a new game |
 | `ProgressService.kt` | The player's progress as the rest of the mod sees it; `onReset`, for a later chapter to forget its own on a new game |
@@ -328,7 +329,7 @@ KDoc comment that says more.
 
 | File | What it does |
 |---|---|
-| `MainMenuScreen.kt` | The main menu (the chalk logo in layers, its RUN easter egg and Chapter 2's line under it included) |
+| `MainMenuScreen.kt` | The main menu (the chalk logo in layers, its RUN easter egg and Chapter 2's line under it included); CONTINUE and Ctrl+Shift+D are the menu's chapter's |
 | `AchievementsScreen.kt` | The ACHIEVEMENTS screen: the list on paper |
 | `Paper.kt` | Worn paper (tile, stains, edges, inks) for the guide and the achievements |
 | `GuideScreen.kt` | The player guide: a scrolling paper sheet with tabs |
@@ -351,7 +352,7 @@ See [Architecture](architecture.md#mixins) for the target and reason of each.
 
 Everything of Chapter 2, apart from the base game (Chapter 1 and what every chapter shares, above), which never names it (`ChapterBoundaryTest`).
 It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base game only through its extension points: `PlayerRules`,
-`ChapterRequest`, `ProgressService.onReset` and `CutsceneView.Kind`. A later chapter gets a package like this one. Its tests are under
+`ChapterRequest`, `ChapterRestarts`, `ProgressService.onReset` and `CutsceneView.Kind`. A later chapter gets a package like this one. Its tests are under
 `test/kotlin/daio7771/everytunnel/chapter2/`.
 
 ### The chapter: `chapter2/`, `chapter2/core/`, `chapter2/platform/`
@@ -359,8 +360,9 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | File | What it does |
 |---|---|
 | `Chapter2.kt` | Chapter 2's common entrypoint (after the base game's in `fabric.mod.json`): registers the chapter's registries, progress, rules, menu start, hooks and commands |
-| `core/Ch2PlayerProgress.kt` | What a player has done in Chapter 2 (its Level 1's state, whether they play it, its counters), apart from Chapter 1's |
-| `platform/Ch2Progress.kt` | `Ch2PlayerProgress` on Cardinal Components, its own component (`every_tunnel:ch2_progress`), cleared with a Chapter 1 new game |
+| `core/Ch2PlayerProgress.kt` | What a player has done in Chapter 2 (the state of its Levels 1 and 2, whether they play one, their counters, Level 2's saved game), apart from Chapter 1's |
+| `platform/Ch2Progress.kt` | `Ch2PlayerProgress` on Cardinal Components, its own component (`every_tunnel:ch2_progress`, with the way back to Chapter 1 and the inventory of Level 2's saved game), cleared with a Chapter 1 new game |
+| `platform/Ch2Return.kt` | The way back to Chapter 1: before the chapter takes the player anywhere (the prologue's end, CONTINUE), where they stood, what they carried, their health and resources are kept; leaving the world gives them back, out of the chapter's levels |
 | `platform/Ch2Blocks.kt` | Chapter 2's blocks (the factory's, the prologue bench's), added to the same creative tab; the factory cameras' own block entity type |
 | `platform/Ch2Items.kt` | Chapter 2's items: the broom |
 | `platform/Ch2Sounds.kt` | Chapter 2's sound events played from code |
@@ -425,17 +427,20 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `level1/platform/Ch2L1Doors.kt` | The factory's doors as its people use them: opened in their way, a doorway shut or opened round a place |
 | `level1/platform/FactoryNpcEntity.kt` | A person of Chapter 2's Level 1 (Rowan, the coworker, the workers): one entity type, its synced skin tells them apart; a worker follows its routine tick by tick (eased walking, its own pace), its head looks about on its own, and its synced pose says if it types, talks or listens; a kept creature |
 | `level1/platform/Ch2L1KeyItems.kt` | The level's key items cannot be lost: those lying in the level are taken away, and a player who should hold one gets it back |
-| `level1/platform/Ch2L1Return.kt` | The way back to Chapter 1: after the menu's prologue, where the player stood and what they carried are kept; leaving the world (at the end or halfway) gives them back, out of the level |
 | `level1/platform/Ch2L1Npcs.kt` | The factory's people: the workers put in while the level is played and the LAB's taken out, the talks between pairs, the groups, and the developer's `/et ch2 l1 npc` |
 
 ### Level 2: `chapter2/level2/` (`core/`, `platform/`)
 
 | File | What it does |
 |---|---|
-| `level2/core/Ch2L2Data.kt` | The level's data as last read (phase 1: its anchors, Level 1's format) and how each file's copy is chosen (the config folder's while usable, else the jar's); `Ch2L2Files`, the files and where they live |
+| `level2/core/Ch2L2Data.kt` | The level's data as last read (its anchors, Level 1's format, and `level.json`, with what it names looked for in the anchors) and how each file's copy is chosen (the config folder's while usable, else the jar's); `Ch2L2Files`, the files and where they live |
+| `level2/core/Ch2L2State.kt` | The level's states in play order (`ARRIVED` to `DONE`, the flood's stage of each) and its four encounters (`Ch2L2Event`: `hunters`, `creature`, `guard`, `flood`) as runs of them |
+| `level2/core/Ch2L2Level.kt` | `level.json` and its parser: the rules, the resources on arriving, the lamps, the checkpoints and the zones that move the state on; which checkpoint and state lie ahead |
+| `level2/core/Ch2L2Snapshot.kt` | Chapter 2's saved game: the last checkpoint, the state and counters then |
+| `level2/platform/Ch2L2.kt` | Chapter 2's Level 2: each player's state (listeners of a change and of a start), whether they play it, entering down Level 1's manhole, the checkpoints and the saved game, a death's restart, CONTINUE |
 | `level2/platform/Ch2L2DataLoader.kt` | Reads the level's JSON files at launch and on `/et reload` (through `Ch2DataReload`), and holds the current data |
-| `level2/platform/Ch2L2Build.kt` | The level's `MapBuild` (its plan, `data/every_tunnel/ch2/l2/map.json`, at (1024, 64, 1280)) |
-| `level2/platform/Ch2L2Commands.kt` | `/et ch2 l2 build\|unbuild\|anchors\|goto` (development runs only) |
+| `level2/platform/Ch2L2Build.kt` | The level's `MapBuild` (its plan, `data/every_tunnel/ch2/l2/map.json`, at (1024, 64, 1280)) and its lamps by zone |
+| `level2/platform/Ch2L2Commands.kt` | `/et ch2 l2 enter\|leave\|state\|skip\|reset\|build\|unbuild\|anchors\|goto` (development runs only) |
 
 ### Client: `client/kotlin/daio7771/everytunnel/chapter2/` (`prologue/client/`, `level1/client/`)
 
