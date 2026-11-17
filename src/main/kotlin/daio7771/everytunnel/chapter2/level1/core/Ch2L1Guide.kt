@@ -7,7 +7,8 @@ import daio7771.everytunnel.core.level.Position
  * player's current step, so that the way is clear when the LAB is full of benches and machines. Plain Kotlin, unit tested.
  *
  * [targets] are the places the step can be done at, each lifted by the spec's height over its anchor: the time clock before the player
- * has clocked in; in the first task the sample tubes not taken yet and, once all are, the terminal; in the second the analyzer; in the third
+ * has clocked in; in the first task the sample tubes not taken yet and, once all are, the terminal; in the second the analyzer; in the
+ * reagents' the bottles not taken yet, or the tank with one in hand; in the gauge's the centrifuge and its terminal; in the third
  * the broom until it is taken and then the patches of dirt not swept yet, and the same in the basement's (the overtime). [nearest] is the one the arrow shows: the one closest to
  * the player. In Act 2 it floats over the coworker's head, but only when the player has lost him ([follow]). In Act 3 it points at the
  * next thing to do ([Ch2L1Act3.guide]: the badge reader, the lab's computer, the keypad, the office's door, Rowan's computer), but the
@@ -28,6 +29,14 @@ object Ch2L1Guide {
                 if (left.isEmpty()) at(tasks.terminalAnchor) else left.flatMap { at(tasks.tubes[it].anchor) }
             }
             Ch2L1State.ACT1_TASK2 -> at(tasks.analyzerAnchor)
+            Ch2L1State.ACT1_REAGENTS -> {
+                // A bottle not taken yet, or, with one in hand (taken and not poured), the tank.
+                val taken = counter(Ch2L1Tasks.REAGENTS_TAKEN)
+                val poured = counter(Ch2L1Tasks.REAGENTS_POURED)
+                if (Ch2L1Bits.count(taken) > Ch2L1Bits.count(poured)) at(tasks.lab.tankAnchor)
+                else tasks.lab.bottles.indices.filter { !Ch2L1Bits.has(taken, it) }.flatMap { at(tasks.lab.bottles[it].anchor) }
+            }
+            Ch2L1State.ACT1_GAUGE -> at(tasks.lab.centrifugeAnchor) + at(tasks.lab.gaugeTerminalAnchor)
             Ch2L1State.ACT1_TASK3 ->
                 if (counter(Ch2L1Tasks.BROOM) == 0) {
                     at(tasks.broomAnchor)

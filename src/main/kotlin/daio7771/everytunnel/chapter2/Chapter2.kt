@@ -12,6 +12,7 @@ import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Build
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Commands
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1DataLoader
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1IntroHooks
+import daio7771.everytunnel.chapter2.level1.platform.Ch2L1LabTaskHooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Npcs
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1SpeakerHooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1TaskHooks
@@ -59,6 +60,7 @@ object Chapter2 : ModInitializer {
         Ch2L1.register()
         Ch2L1Build.register()
         Ch2L1TaskHooks.register()
+        Ch2L1LabTaskHooks.register()
         Ch2L1Npcs.register()
         Ch2L1SpeakerHooks.register()
         Ch2L1IntroHooks.register()

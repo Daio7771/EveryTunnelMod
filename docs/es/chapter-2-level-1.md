@@ -5,9 +5,9 @@
 El Nivel 1 del Chapter 2 es la fábrica, cuatro meses después del Chapter 1: un científico normal contratado en lugar del
 que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el despacho del supervisor. Se construye por
 fases (de la 0 a la 11), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
-nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 10a, el mobiliario.** Se
-juega desde el reloj hasta su final, el sótano barrido y la vuelta al menú, y todas las salas están amuebladas; lo siguiente es la fase 10b
-(dos tareas más del Acto 1 y más trabajadores) y la fase 11 (la pasada de QA).
+nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 10b, las dos tareas del LAB.** Se
+juega desde el reloj hasta su final, el sótano barrido y la vuelta al menú, con todas las salas amuebladas y con gente; lo siguiente es la
+fase 11 (la pasada de QA).
 
 Su código está en `daio7771.everytunnel.chapter2` (el del cliente, en el mismo paquete dentro de `src/client`): `level1.core`
 (Kotlin puro, con tests), `level1.platform` (pegamento con Minecraft) y `level1.client`, aparte del juego base, que nunca lo
@@ -23,7 +23,7 @@ nueva (`ProgressService.reset`) devuelve a todos ahí.
 | Estado | Significado |
 |---|---|
 | `ACT1_CLOCKIN` | Recién llegado a la fábrica: falta fichar en el reloj |
-| `ACT1_TASK1`, `ACT1_TASK2`, `ACT1_TASK3` | Las tres tareas del acto 1, en orden: registrar las muestras, calibrar el analizador, barrer el pasillo oeste |
+| `ACT1_TASK1`, `ACT1_TASK2`, `ACT1_REAGENTS`, `ACT1_GAUGE`, `ACT1_TASK3` | Las cinco tareas del acto 1, en orden: registrar las muestras, calibrar el analizador, reponer los reactivos, anotar la velocidad de la centrifugadora, barrer el pasillo oeste |
 | `ACT2_FOLLOW` | El compañero se ha acercado para llevar al jugador a las taquillas |
 | `ACT2_MEETING` | La reunión en las taquillas (una cinemática) |
 | `ACT3_EXPLORE` | Sigilo por el laboratorio auxiliar, el pasillo del personal y el despacho |
@@ -47,7 +47,7 @@ Todo lo ajustable es JSON, no código: cambiar un ritmo, una ruta o un texto es 
 | `anchors.json` | Los lugares con nombre: puntos (una posición y hacia dónde mira) y zonas (una caja) | `Ch2L1AnchorsParser`, con tipos |
 | `tasks.json` | Las tres tareas del Acto 1: qué anclas tienen los tubos, el terminal, el analizador, la escoba y la suciedad, y cuánto dura cada una | `Ch2L1TasksParser`, con tipos |
 | `speakers.json` | Los altavoces de Rowan: las zonas y sus altavoces de techo, las líneas fijas y el grupo, el enfriamiento, la cinemática del primer aviso | `Ch2L1SpeakersParser`, con tipos |
-| `npcs.json` | La gente de la fábrica: dieciséis trabajadores con sus rutinas, los grupos (el de las taquillas) y cuán vivos parecen (`life`) | `Ch2L1NpcsParser`, con tipos |
+| `npcs.json` | La gente de la fábrica: veintidós trabajadores con sus rutinas (la recepcionista entre ellos), los grupos (el de las taquillas) y cuán vivos parecen (`life`) | `Ch2L1NpcsParser`, con tipos |
 | `patrols.json` | Las patrullas: cómo vigilan los guardias (la vista, qué es sospechoso, el aviso, la carrera, adónde vuelve un jugador pillado) y la ronda de cada guardia | `Ch2L1PatrolsParser`, con tipos |
 | `cutscenes/meeting.json` | El Acto 2: seguir al compañero y la reunión | `Ch2L1Act2Parser`, con tipos |
 | `act3.json` | La exploración del Acto 3: el lector de tarjetas, el teclado y el código de Rowan, los ordenadores y sus archivos, las puertas que dicen que no, la cámara 02, la espera de la flecha | `Ch2L1Act3Parser`, con tipos |
@@ -140,8 +140,8 @@ cara de la empresa reconstruida, NONAME INDUSTRIES: corporativa y limpia, blanca
   recuadro blanco, el estilo `logo`), un rincón de espera al oeste (sofás y una mesa baja) y plantas. (El estilo `screen`, una pantalla
   iluminada, queda para más adelante.)
 - **LAB:** campanas de gases en la pared norte, el almacén de muestras en la pared este (estanterías y, pasada la puerta sellada,
-  armarios), dos islas en el centro (puestos con monitores; instrumentos: microscopios, vasos, una gradilla de tubos) y carritos. La pared
-  sur al este del analizador queda libre para las tareas de la fase 10b.
+  armarios), dos islas en el centro (puestos con monitores; instrumentos: microscopios, vasos, una gradilla de tubos) y carritos. En la pared
+  sur, al este del analizador, están las dos tareas de la fase 10b (más abajo, Acto 1).
 - **Comedor:** mesas de cuatro, la barra con dos cafeteras, una fuente de agua, tres máquinas expendedoras, plantas, apliques en las
   paredes y **luces de techo cálidas** propias (`warm_ceiling_light`; los `SPACE_LIGHTS` del generador).
 - **Aseos**, **sin cámaras**: cubículos (un inodoro, mamparas de dos de alto y una puerta: `toilet`, `stall_wall`, `stall_door`) y lavabos
@@ -215,7 +215,7 @@ luego otra vez: `stand` (segundos, un número o `[min, max]`), `walk` (un ancla 
 brazos al frente, durante `seconds`). Las posiciones son anclas, así que mover el mapa mueve a la gente; las seis estaciones de trabajo del LAB (un banco con un monitor, en `level.py`), las
 rutas (`route_*`) y el sitio de cada trabajador (`npc_*`) los escribe el generador del mapa y quedan como provisionales hasta que se amueble el LAB. Las rutas se escriben a mano, no las busca el
 pathfinding del juego: `Ch2L1RoutineRunner` (Kotlin puro, probado) dice qué hacer cada tick y `FactoryNpcEntity.tick` lo hace fijando la velocidad de la propia entidad (un paseo de 1,3 bloques por segundo, en línea recta al siguiente punto;
-a quien deja de acercarse durante 5 s, un tope, se le pone en el punto), así que dieciséis personas casi no cuestan nada. `walk_speed` del archivo escala su paseo, y el `pace` propio de un trabajador (opcional), el suyo.
+a quien deja de acercarse durante 5 s, un tope, se le pone en el punto), así que una veintena de personas casi no cuesta nada. `walk_speed` del archivo escala su paseo, y el `pace` propio de un trabajador (opcional), el suyo.
 
 **Vivos, no robóticos** (fase 4B; `life` en `npcs.json`, `Ch2L1Life`, todas las claves opcionales; el código en `chapter2/level1/core/Ch2L1NpcLife.kt`, Kotlin puro, probado):
 - **Andar** (`Ch2L1Gait`): cada uno anda a su ritmo (`walk_speed` por 1 ± hasta `pace_spread`, sacado de su id), acelera poco a poco (`accel_seconds`) y frena antes del sitio donde
@@ -287,7 +287,16 @@ lee el estado del progreso del jugador, así que no hay paquete propio.
 2. **Analizador** (`ACT1_TASK2`): un clic **mantenido** sobre el `analyzer` (un bloque nuevo, hecho por `tools/blocks/generate.py`) durante
    `calibrate_seconds`. El juego repite un clic mantenido cada 4 ticks; `level1.core.HoldTracker` cuenta los ticks mientras los usos llegan con menos
    de 8 de diferencia y sobre el mismo bloque, así que apartar la vista o soltar lo reinicia. Lo muestran una barra (`client.hud.HoldBar`, del paquete
-   `ch2l1_hold`) y un pitido que sube de tono. Luego, `ACT1_TASK3`.
+   `ch2l1_hold`) y un pitido que sube de tono. Luego, las dos tareas del LAB de la fase 10b (`level1.platform.Ch2L1LabTaskHooks`, `reagents`
+   y `gauge` de `tasks.json`), en el rincón de la pared sur del LAB al este del analizador:
+   - **Reactivos** (`ACT1_REAGENTS`): tres frascos (`reagent_bottle_blue`, `_yellow`, `_red`) están sobre el armario de reactivos; un clic coge
+     uno a la mano del jugador (el objeto `factory_reagent_<color>`), y un clic mantenido sobre el `mixing_tank` durante `pour_seconds` lo
+     vierte (la misma barra), en cualquier orden (`reagents_taken`, `reagents_poured`; el panel los cuenta). El tercero hace avanzar.
+   - **Indicador** (`ACT1_GAUGE`): la `centrifuge` sobre su banco marca una velocidad en RPM, sacada para cada jugador entre `min_rpm` y
+     `max_rpm` de diez en diez (`level1.core.Ch2L1Gauge`, el contador `gauge_rpm`; el cliente la dibuja en su pantallita,
+     `Ch2L1CentrifugeRenderer`). El terminal de al lado abre el registro de mantenimiento de NonameOS (`client.GaugeLogScreen`, paquetes
+     `ch2l1_gauge_open` / `_try` / `_result`): se comprueba la velocidad escrita; una mal pita y se puede volver a escribir, la buena pasa a
+     `ACT1_TASK3`.
 3. **Barrer** (`ACT1_TASK3`): la `leaning_broom` apoyada en la pared este del tramo oeste del anillo; un clic la coge (el objeto `broom` va a la
    mano del jugador; solo existe para esta tarea y se retira al terminarla). Luego un clic mantenido durante `sweep_seconds` sobre cada una de las diez
    `dirt_spot` del suelo frente al cristal del laboratorio auxiliar la barre (un siseo y una nubecilla). La última termina la tarea: `ACT2_FOLLOW`.

@@ -101,4 +101,34 @@ class Ch2L1TasksTest {
         hold.reset()
         assertEquals(0, hold.press("b", 138))
     }
+
+    @Test
+    fun `the LAB's two tasks read from the file, and a bad colour or range is told`() {
+        val good = parse("""{ "reagents": { "bottles": [ { "anchor": "a", "colour": "red" }, { "anchor": "b", "colour": "blue" } ],
+            "tank": "t", "pour_seconds": 1.5 }, "gauge": { "centrifuge": "c", "terminal": "g", "min_rpm": 2000, "max_rpm": 3000 } }""")
+        assertEquals(emptyList(), good.problems)
+        val lab = good.tasks.lab
+        assertEquals(listOf(Ch2L1BottleSpec("a", "red"), Ch2L1BottleSpec("b", "blue")), lab.bottles)
+        assertEquals(30, lab.pourTicks)
+        assertEquals(listOf("t", "c", "g"), listOf(lab.tankAnchor, lab.centrifugeAnchor, lab.gaugeTerminalAnchor))
+        assertEquals(3, Ch2L1TasksParser.parse(JsonObject()).tasks.lab.bottles.size)
+        val bad = parse("""{ "reagents": { "bottles": [ { "anchor": "a", "colour": "green" } ] }, "gauge": { "min_rpm": 3000, "max_rpm": 2000 } }""")
+        assertTrue(bad.problems.any { "colour" in it })
+        assertTrue(bad.problems.any { "max_rpm" in it })
+        assertEquals(3, bad.tasks.lab.bottles.size, "no usable bottle: the defaults")
+    }
+
+    @Test
+    fun `the centrifuge's speed is a multiple of ten within its bounds, and only it is accepted`() {
+        val spec = Ch2L1LabTasksSpec(minRpm = 1200, maxRpm = 4800)
+        val readings = (-50..5000 step 7).map { Ch2L1Gauge.reading(spec, it) }
+        assertTrue(readings.all { it in 1200..4800 && it % 10 == 0 })
+        assertEquals(setOf(1200, 4800), setOf(Ch2L1Gauge.reading(spec, 0), Ch2L1Gauge.reading(spec, 360)))
+        assertTrue(Ch2L1Gauge.accepts("3870", 3870))
+        assertTrue(Ch2L1Gauge.accepts("03870", 3870))
+        assertTrue(Ch2L1Gauge.accepts("3870 rpm", 3870))
+        assertFalse(Ch2L1Gauge.accepts("387", 3870))
+        assertFalse(Ch2L1Gauge.accepts("", 3870))
+        assertFalse(Ch2L1Gauge.accepts("0", 0), "nothing drawn: nothing is right")
+    }
 }

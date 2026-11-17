@@ -18,6 +18,8 @@ object Ch2L1Objectives {
         Ch2L1State.ACT1_CLOCKIN -> PREFIX + "clockin"
         Ch2L1State.ACT1_TASK1 -> PREFIX + "task1"
         Ch2L1State.ACT1_TASK2 -> PREFIX + "task2"
+        Ch2L1State.ACT1_REAGENTS -> PREFIX + "reagents"
+        Ch2L1State.ACT1_GAUGE -> PREFIX + "gauge"
         Ch2L1State.ACT1_TASK3 -> PREFIX + "task3"
         Ch2L1State.ACT2_FOLLOW -> PREFIX + "follow"
         Ch2L1State.ACT2_MEETING -> null

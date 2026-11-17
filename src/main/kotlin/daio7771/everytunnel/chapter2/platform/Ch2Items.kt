@@ -6,7 +6,7 @@ import net.minecraft.registry.Registries
 import net.minecraft.registry.Registry
 import net.minecraft.util.Identifier
 
-/** Chapter 2's items (the broom, the badge's copy, Rowan's pass), registered by [daio7771.everytunnel.chapter2.Chapter2]; ids are the mod's (`every_tunnel:`). */
+/** Chapter 2's items (the broom, the reagent bottles, the badge's copy, Rowan's pass), registered by [daio7771.everytunnel.chapter2.Chapter2]; ids are the mod's (`every_tunnel:`). */
 object Ch2Items {
 
     /** Chapter 2 Level 1's third task: the broom for the dirt of the west corridor (`Ch2L1TaskHooks`); nothing else uses it. */
@@ -18,7 +18,11 @@ object Ch2Items {
     /** Act 3: Rowan's "Unpaid Overtime Pass", slid across his desk at the end of the office's scene; it opens the sealed zone (phase 9). */
     val OVERTIME_PASS: Item = Item(Item.Settings().maxCount(1))
 
+    /** Phase 10b's reagents' task: a bottle taken from the LAB's reagent cabinet, to pour into the mixing tank (`Ch2L1LabTaskHooks`). */
+    val REAGENTS: Map<String, Item> = listOf("blue", "yellow", "red").associateWith { Item(Item.Settings().maxCount(1)) }
+
     fun register() {
+        for ((colour, item) in REAGENTS) Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "factory_reagent_$colour"), item)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "broom"), BROOM)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "lab_badge_copy"), LAB_BADGE_COPY)
         Registry.register(Registries.ITEM, Identifier(EveryTunnel.MOD_ID, "overtime_pass"), OVERTIME_PASS)

@@ -3,6 +3,10 @@ package daio7771.everytunnel.chapter2.platform
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.AnalyzerBlock
 import daio7771.everytunnel.chapter2.level1.platform.BadgeReaderBlock
+import daio7771.everytunnel.chapter2.level1.platform.CentrifugeBlock
+import daio7771.everytunnel.chapter2.level1.platform.CentrifugeBlockEntity
+import daio7771.everytunnel.chapter2.level1.platform.MixingTankBlock
+import daio7771.everytunnel.chapter2.level1.platform.ReagentBottleBlock
 import daio7771.everytunnel.chapter2.level1.platform.KeypadBlock
 import daio7771.everytunnel.chapter2.level1.platform.PortraitBlock
 import daio7771.everytunnel.chapter2.level1.platform.DirtSpotBlock
@@ -68,6 +72,12 @@ object Ch2Blocks {
     val NONAME_TERMINAL: Block = register("noname_terminal", NonameTerminalBlock(ModBlocks.props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision().luminance { 3 }, listOf(box(3, 0, 1, 13, 12, 11))))
     val ANALYZER: Block = register("analyzer", AnalyzerBlock(ModBlocks.props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision(), listOf(box(2, 0, 3, 14, 10, 13))))
     val LEANING_BROOM: Block = register("leaning_broom", LeaningBroomBlock(ModBlocks.props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(6, 0, 7, 10, 16, 16))))
+    /** Phase 10b's LAB tasks (`Ch2L1LabTaskHooks`): the reagent bottles on their cabinet, the mixing tank, the centrifuge with its display. */
+    val REAGENT_BOTTLE_BLUE: Block = register("reagent_bottle_blue", ReagentBottleBlock(ModBlocks.props(MapColor.BLUE, BlockSoundGroup.GLASS).noCollision(), listOf(box(6, 0, 6, 10, 10, 10))))
+    val REAGENT_BOTTLE_YELLOW: Block = register("reagent_bottle_yellow", ReagentBottleBlock(ModBlocks.props(MapColor.YELLOW, BlockSoundGroup.GLASS).noCollision(), listOf(box(6, 0, 6, 10, 10, 10))))
+    val REAGENT_BOTTLE_RED: Block = register("reagent_bottle_red", ReagentBottleBlock(ModBlocks.props(MapColor.RED, BlockSoundGroup.GLASS).noCollision(), listOf(box(6, 0, 6, 10, 10, 10))))
+    val MIXING_TANK: Block = register("mixing_tank", MixingTankBlock(ModBlocks.props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL), listOf(box(2, 0, 2, 14, 16, 14))))
+    val CENTRIFUGE: Block = register("centrifuge", CentrifugeBlock(ModBlocks.props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision().luminance { 3 }, listOf(box(2, 0, 2, 14, 9, 14))))
     val DIRT_SPOT: Block = register("dirt_spot", DirtSpotBlock(ModBlocks.props(MapColor.BROWN, BlockSoundGroup.GRAVEL).noCollision(), listOf(box(0, 0, 0, 16, 1, 16))))
 
     /**
@@ -100,6 +110,7 @@ object Ch2Blocks {
 
     /** The factory cameras' block entity: the same as Level 5's camera's, a type of its own so the client sweeps them. */
     lateinit var FACTORY_CAMERA_ENTITY: BlockEntityType<SecurityCameraBlockEntity>
+    lateinit var CENTRIFUGE_ENTITY: BlockEntityType<CentrifugeBlockEntity>
 
     private fun register(id: String, block: Block): Block = block.also { all += id to it }
 
@@ -112,6 +123,10 @@ object Ch2Blocks {
         FACTORY_CAMERA_ENTITY = Registry.register(
             Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "factory_camera"),
             FabricBlockEntityTypeBuilder.create({ pos, state -> SecurityCameraBlockEntity(FACTORY_CAMERA_ENTITY, pos, state) }, FACTORY_CAMERA).build(),
+        )
+        CENTRIFUGE_ENTITY = Registry.register(
+            Registries.BLOCK_ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "centrifuge"),
+            FabricBlockEntityTypeBuilder.create(::CentrifugeBlockEntity, CENTRIFUGE).build(),
         )
         ItemGroupEvents.modifyEntriesEvent(ModBlocks.TAB).register { entries -> items.forEach { entries.add(it) } }
     }

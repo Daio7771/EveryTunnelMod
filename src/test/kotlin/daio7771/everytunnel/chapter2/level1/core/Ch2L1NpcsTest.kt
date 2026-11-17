@@ -57,14 +57,15 @@ class Ch2L1NpcsTest {
     }
 
     @Test
-    fun `the jar's people parse without a problem, sixteen of them, with the lab's ten`() {
+    fun `the jar's people parse without a problem, twenty-two of them, with the lab's thirteen`() {
         val result = Ch2L1NpcsParser.parse(bundled.document("npcs"))
         assertEquals(emptyList(), result.problems)
         val workers = result.data.workers
-        assertEquals(16, workers.size)
-        assertEquals(10, workers.count { it.group == "lab" })
+        assertEquals(22, workers.size)
+        assertEquals(13, workers.count { it.group == "lab" })
         assertEquals(3, workers.count { it.group == "main" })
-        assertEquals(3, workers.count { it.group == "dining" })
+        assertEquals(5, workers.count { it.group == "dining" })
+        assertEquals(1, workers.count { it.group == "entrance" })            // the receptionist (phase 10b)
         assertTrue(workers.none { it.skin == Ch2L1Skins.ROWAN || it.skin == Ch2L1Skins.COWORKER }, "the ambient people are not Rowan or the coworker")
         assertEquals(6, result.data.groups.getValue("taquillas").size)
     }

@@ -220,6 +220,10 @@ NPC_SPOTS = {
     "npc_lab_07": (36.5, 17.5, 180), "npc_lab_08": (35.5, 36.5, 90), "npc_lab_09": (57.5, 18.5, 0), "npc_lab_10": (47.5, 27.5, 270),
     "npc_main_01": (27.5, 14.5, 0), "npc_main_02": (23.5, 44.5, 180), "npc_main_03": (29.5, 30.5, 90),
     "npc_dining_01": (30.5, 56.5, 270), "npc_dining_02": (38.5, 60.5, 0), "npc_dining_03": (24.5, 58.5, 0),
+    # Phase 10b: at the LAB's new islands (two at the work stations, one at the instruments), at the dining room's counter and between its
+    # east tables, and the receptionist behind the entrance's desk.
+    "npc_lab_11": (50.5, 23.5, 0), "npc_lab_12": (53.5, 23.5, 0), "npc_lab_13": (49.5, 34.5, 180),
+    "npc_dining_04": (35.5, 65.8, 0), "npc_dining_05": (52.5, 59.5, 90), "npc_reception": (40.5, 3.5, 0),
 }
 NPC_ROUTES = {
     "route_lab_a": ([(36.5, 17.5), (36.5, 30.5), (44.5, 30.5), (44.5, 17.5)], True),
@@ -380,6 +384,15 @@ SECURITY_KEYS = (19, 1, 84)
 # Plants in the ring's corners and the authorized corridor.
 MORE_PLANTS = [(61, 0, 48), (61, 0, 72), (16, 0, 72), (16, 0, 77), (48, 0, 74)]
 
+# Phase 10b's two LAB tasks, in the corner kept for them (the south wall east of the analyzer): the reagent cabinet with its three bottles
+# (blue, yellow, red) on top, the mixing tank in front of it, and a bench with the centrifuge and the terminal its speed is logged at.
+REAGENT_CABINET = [(54, 46), (55, 46), (56, 46)]
+REAGENT_BOTTLES = {"blue": (54, 1, 46), "yellow": (55, 1, 46), "red": (56, 1, 46)}
+MIXING_TANK = (57, 0, 44)
+GAUGE_BENCH = [(58, 46), (59, 46), (60, 46)]
+CENTRIFUGE = (58, 1, 46)
+GAUGE_TERMINAL = (60, 1, 46)
+
 # Lights of their own: the dining room's ceiling lights are warm.
 SPACE_LIGHTS = {"dining": MOD + "warm_ceiling_light"}
 
@@ -443,6 +456,13 @@ def furnishing():
     tx, _, tz = SECURITY_TABLE
     for (dx, dz), facing in (((0, -1), "south"), ((0, 1), "north"), ((-1, 0), "east"), ((1, 0), "west")):
         out[(tx + dx, 0, tz + dz)] = MOD + f"cafe_chair[facing={facing}]"
+    _row(out, REAGENT_CABINET, "north", "lab_cabinet")
+    for colour, cell in REAGENT_BOTTLES.items():
+        out[cell] = MOD + f"reagent_bottle_{colour}[facing=north]"
+    out[MIXING_TANK] = MOD + "mixing_tank[facing=north]"
+    _row(out, GAUGE_BENCH, "north", "lab_bench")
+    out[CENTRIFUGE] = MOD + "centrifuge[facing=north]"
+    out[GAUGE_TERMINAL] = MOD + "noname_terminal[facing=north]"
     _row(out, SECURITY_COUNTER, "north", "counter")
     out[SECURITY_COFFEE] = MOD + "coffee_machine[facing=north]"
     out[SECURITY_KEYS] = MOD + "key_rack[facing=north]"
@@ -933,6 +953,12 @@ def named_places(level):
     add("sealed_reader", SEALED_READER[0][0] + 0.5, SEALED_READER[0][2] + 0.5, 90, False, y=float(SEALED_READER[0][1]))
     add("basement_broom_block", BASEMENT_BROOM[0] + 0.5, BASEMENT_BROOM[2] + 0.5, 0, False, y=float(BASEMENT_BROOM[1]))
     add("basement_landing", 71.5, 40.5, 0, False, y=float(BASEMENT_Y))
+    # Phase 10b's LAB tasks: the bottles, the tank, the centrifuge and its terminal.
+    for colour, (x, y, z) in REAGENT_BOTTLES.items():
+        add(f"reagent_{colour}_block", x + 0.5, z + 0.5, 0, False, y=float(y))
+    add("mixing_tank_block", MIXING_TANK[0] + 0.5, MIXING_TANK[2] + 0.5, 0, False, y=float(MIXING_TANK[1]))
+    add("centrifuge_block", CENTRIFUGE[0] + 0.5, CENTRIFUGE[2] + 0.5, 0, False, y=float(CENTRIFUGE[1]))
+    add("gauge_terminal_block", GAUGE_TERMINAL[0] + 0.5, GAUGE_TERMINAL[2] + 0.5, 0, False, y=float(GAUGE_TERMINAL[1]))
     add("basement_computer", BASEMENT_COMPUTER[0] + 0.5, BASEMENT_COMPUTER[2] + 0.5, 0, False, y=float(BASEMENT_COMPUTER[1]))
 
     zones = []

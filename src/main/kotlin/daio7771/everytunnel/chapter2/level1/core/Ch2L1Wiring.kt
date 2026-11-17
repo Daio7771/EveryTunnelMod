@@ -19,6 +19,8 @@ object Ch2L1Wiring {
         for (tube in tasks.tubes) point("tasks.json", tube.anchor)
         point("tasks.json", tasks.terminalAnchor)
         point("tasks.json", tasks.analyzerAnchor)
+        tasks.lab.bottles.forEach { point("tasks.json", it.anchor) }
+        for (id in listOf(tasks.lab.tankAnchor, tasks.lab.centrifugeAnchor, tasks.lab.gaugeTerminalAnchor)) point("tasks.json", id)
         for ((broom, dirtPath) in listOf(tasks.broomAnchor to tasks.dirtPath, tasks.basementBroomAnchor to tasks.basementDirtPath)) {
             point("tasks.json", broom)
             val dirt = anchors.path(dirtPath)

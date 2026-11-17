@@ -23,7 +23,13 @@
     {"id": "main_03", "skin": "generic_2", "group": "main", "spawn": "npc_main_03", "routine": [{"stand": [8, 16]}]},
     {"id": "dining_01", "skin": "generic_2", "group": "dining", "spawn": "npc_dining_01", "routine": [{"walk": "route_dining_a"}, {"stand": [5, 10]}]},
     {"id": "dining_02", "skin": "generic_3", "group": "dining", "spawn": "npc_dining_02", "routine": [{"stand": [8, 16]}]},
-    {"id": "dining_03", "skin": "generic_1", "group": "dining", "spawn": "npc_dining_03", "routine": [{"walk": "route_dining_b"}, {"stand": [4, 9]}, {"walk": "route_dining_b", "reverse": true}, {"stand": [4, 9]}]}
+    {"id": "dining_03", "skin": "generic_1", "group": "dining", "spawn": "npc_dining_03", "routine": [{"walk": "route_dining_b"}, {"stand": [4, 9]}, {"walk": "route_dining_b", "reverse": true}, {"stand": [4, 9]}]},
+    {"id": "lab_11", "skin": "generic_3", "group": "lab", "spawn": "npc_lab_11", "routine": [{"type": "npc_lab_11", "seconds": [25, 45]}, {"stand": [2, 5]}]},
+    {"id": "lab_12", "skin": "generic_1", "group": "lab", "spawn": "npc_lab_12", "routine": [{"type": "npc_lab_12", "seconds": [20, 40]}, {"stand": [2, 5]}]},
+    {"id": "lab_13", "skin": "generic_2", "group": "lab", "spawn": "npc_lab_13", "routine": [{"type": "npc_lab_13", "seconds": [30, 50]}, {"stand": [3, 6]}]},
+    {"id": "dining_04", "skin": "generic_1", "group": "dining", "spawn": "npc_dining_04", "routine": [{"stand": [8, 16]}]},
+    {"id": "dining_05", "skin": "generic_3", "group": "dining", "spawn": "npc_dining_05", "routine": [{"stand": [8, 16]}]},
+    {"id": "reception", "skin": "generic_2", "group": "entrance", "spawn": "npc_reception", "routine": [{"type": "npc_reception", "seconds": [30, 60]}, {"stand": [3, 6]}]}
   ],
   "groups": {
     "taquillas": [

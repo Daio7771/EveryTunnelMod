@@ -261,9 +261,10 @@ object Ch2L1Commands {
         return 1
     }
 
-    /** `/et ch2 l1 tasks`: how far the player is in the three tasks of Act 1, and anything `tasks.json` or `speakers.json` names that is missing. */
+    /** `/et ch2 l1 tasks`: how far the player is in the tasks of Act 1 (and the overtime's), and anything `tasks.json` or `speakers.json` names that is missing. */
     private fun tasks(context: CommandContext<ServerCommandSource>): Int {
         Ch2L1TaskHooks.status(context.source.playerOrThrow).forEach { reply(context, it) }
+        Ch2L1LabTaskHooks.status(context.source.playerOrThrow).forEach { reply(context, it) }
         val problems = daio7771.everytunnel.chapter2.level1.core.Ch2L1Wiring.problems(
             Ch2L1DataLoader.data.anchors, Ch2L1DataLoader.tasks, Ch2L1DataLoader.speakers,
         )
@@ -273,7 +274,8 @@ object Ch2L1Commands {
 
     private fun resetTasks(context: CommandContext<ServerCommandSource>): Int {
         Ch2L1TaskHooks.reset(context.source.playerOrThrow)
-        reply(context, "The three tasks start over (the tubes, the broom and the dirt are back where the state says).")
+        Ch2L1LabTaskHooks.reset(context.source.playerOrThrow)
+        reply(context, "The tasks start over (the tubes, the bottles, the broom and the dirt are back where the state says).")
         return 1
     }
 

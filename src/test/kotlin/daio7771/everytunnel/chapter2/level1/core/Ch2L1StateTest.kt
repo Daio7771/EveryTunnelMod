@@ -11,7 +11,7 @@ class Ch2L1StateTest {
     fun `the states come in the order of the level`() {
         assertEquals(
             listOf(
-                "ACT1_CLOCKIN", "ACT1_TASK1", "ACT1_TASK2", "ACT1_TASK3", "ACT2_FOLLOW",
+                "ACT1_CLOCKIN", "ACT1_TASK1", "ACT1_TASK2", "ACT1_REAGENTS", "ACT1_GAUGE", "ACT1_TASK3", "ACT2_FOLLOW",
                 "ACT2_MEETING", "ACT3_EXPLORE", "ACT3_CUTSCENE", "ACT3_OVERTIME", "ACT3_BASEMENT", "DONE",
             ),
             Ch2L1State.entries.map { it.name },

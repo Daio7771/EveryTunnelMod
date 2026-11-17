@@ -12,6 +12,21 @@
     "analyzer": "task2_analyzer_block",
     "calibrate_seconds": 4.0
   },
+  "reagents": {
+    "bottles": [
+      { "anchor": "reagent_blue_block", "colour": "blue" },
+      { "anchor": "reagent_yellow_block", "colour": "yellow" },
+      { "anchor": "reagent_red_block", "colour": "red" }
+    ],
+    "tank": "mixing_tank_block",
+    "pour_seconds": 2.0
+  },
+  "gauge": {
+    "centrifuge": "centrifuge_block",
+    "terminal": "gauge_terminal_block",
+    "min_rpm": 1200,
+    "max_rpm": 4800
+  },
   "task3": {
     "broom": "task3_broom_block",
     "dirt": "task3_dirt_spots",

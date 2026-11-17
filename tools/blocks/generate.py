@@ -812,6 +812,48 @@ def lab_badge_copy_tex(rng):
     return img
 
 
+FACTORY_REAGENTS = {"blue": (58, 110, 210), "yellow": (232, 196, 52), "red": (200, 50, 50)}
+
+
+def factory_reagent_tex(rng, colour):
+    """Item (Chapter 2): a reagent bottle of the factory's LAB, Level 5's flask drawn again with the factory's colour and no code."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    glass, outline = (214, 230, 236), (40, 46, 52)
+    liquid = FACTORY_REAGENTS[colour]
+    for y in range(16):
+        for x in range(16):
+            neck = 6 <= x <= 9 and 1 <= y <= 6
+            body = (x - 7.5) ** 2 + (y - 10.5) ** 2 <= 20
+            if neck or body:
+                img.putpixel((x, y), (liquid if (body and y >= 9) else glass) + (255,))
+    for y in range(16):
+        for x in range(16):
+            if img.getpixel((x, y))[3] == 0 and any(
+                    0 <= x + dx < 16 and 0 <= y + dy < 16 and img.getpixel((x + dx, y + dy))[3] == 255 and img.getpixel((x + dx, y + dy))[:3] != outline
+                    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                img.putpixel((x, y), outline + (255,))
+    for x in range(5, 11):
+        img.putpixel((x, 11), (244, 244, 240, 255))
+    return img
+
+
+def centrifuge_front_tex(rng):
+    """The front of Chapter 2's benchtop centrifuge (its 12 x 8 face in x 2..13, y 8..15 of the picture): white casing, a dark
+    display (where the game draws its speed, `client.Ch2L1CentrifugeRenderer`) and two buttons."""
+    img = new((232, 234, 236))
+    for x in range(16):
+        for y in range(16):
+            if rng.random() < 0.08:
+                px(img, x, y, (222, 224, 226), 1.0)
+    for x in range(3, 12):
+        for y in range(9, 12):
+            px(img, x, y, (16, 22, 24), 1.0)
+    for x, c in ((5, (60, 160, 80)), (9, (190, 60, 50))):
+        px(img, x, 13, c, 1.0)
+        px(img, x + 1, 13, c, 1.0)
+    return img
+
+
 def overtime_pass_tex(rng):
     """Item (Chapter 2): Rowan's "Unpaid Overtime Pass": Chapter 1's keycard recoloured in his colours, the card beige gold, the band
     the green of his tie, the chip gold."""
@@ -3747,6 +3789,19 @@ def build():
             {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/lab_door"}})
     a.loot_doors.add("factory_door")
 
+    # Chapter 2 Level 1's two LAB tasks of phase 10b: the reagent bottles on their cabinet (blue, yellow, red), the mixing tank they are
+    # poured into (not Level 5's mixer tank, which has a puzzle of its own) and the benchtop centrifuge whose speed is read off its display.
+    for colour, rgb in FACTORY_REAGENTS.items():
+        a.texture(f"reagent_liquid_{colour}", plastic_tex(r(f"reagent_liquid_{colour}"), rgb), T.Material(0.9, relief=0.0))
+        prop(f"reagent_bottle_{colour}", f"Reagent Bottle ({colour.capitalize()})", {"g": "factory_glass", "l": f"reagent_liquid_{colour}",
+                                                                                      "d": "lab_steel_dark"},
+             [el((6, 0, 6), (10, 5, 10), "l"), el((6, 5, 6), (10, 6, 10), "g"), el((7, 6, 7), (9, 9, 9), "g"), el((6.75, 9, 6.75), (9.25, 10, 9.25), "d")])
+    prop("mixing_tank", "Mixing Tank", {"s": "lab_steel", "d": "lab_steel_dark"},
+         [el((2, 0, 2), (14, 13, 14), "s"), el((1.5, 13, 1.5), (14.5, 14, 14.5), "d"), el((5, 14, 5), (11, 16, 11), "d")])
+    a.texture("centrifuge_front", centrifuge_front_tex(r("centrifuge_front")), T.PLASTIC.but(smoothness=0.6), tiles=False)
+    prop("centrifuge", "Centrifuge", {"w": "lab_white", "f": "centrifuge_front", "d": "lab_steel_dark"},
+         [el((2, 0, 2), (14, 8, 14), "w", north=("f", (2, 8, 14, 16))), el((4, 8, 4), (12, 9, 12), "d")])
+
     # Chapter 2 Level 1's furnishing (phase 10): the WCs' porcelain (a toilet, a sink on its counter), the stalls' partitions (two
     # blocks high, a gap under them; the stall door is with the doors above), a mirror that joins along a wall, and the dining room's warm
     # ceiling light (the lab's, its diffuser a warm white).
@@ -4319,6 +4374,7 @@ def main():
                           ("reel_87", reel_tex), ("reel_94", reel_tex), ("reel_102", reel_tex), ("reel_120", reel_tex),
                           ("dart", dart_tex), ("master_card", master_card_tex), ("master_key", master_key_tex),
                           ("wrench", wrench_tex), ("detector", detector_tex), ("broom", broom_tex), ("lab_badge_copy", lab_badge_copy_tex), ("overtime_pass", overtime_pass_tex),
+                          *((f"factory_reagent_{c}", lambda g, c=c: factory_reagent_tex(g, c)) for c in FACTORY_REAGENTS),
                           *((f"fuse_{amps}a", lambda g, i=i: fuse_item_tex(g, i)) for i, amps in enumerate(FUSE_AMPS)),
                           *((f"reagent_{i + 1}", lambda g, i=i: reagent_item_tex(g, i)) for i in range(4)),
                           ("master_card_nw", lambda g: card_tex(g, 0, 0)), ("master_card_ne", lambda g: card_tex(g, 1, 0)),

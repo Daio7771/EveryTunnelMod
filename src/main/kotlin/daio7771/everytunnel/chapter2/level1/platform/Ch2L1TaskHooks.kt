@@ -36,7 +36,7 @@ import daio7771.everytunnel.chapter2.platform.Ch2Progress
  *   client asks for a registration when its bar fills ([OS_REGISTER_PACKET]), the server counts it and answers with the registry as it
  *   stands ([OS_OPEN_PACKET]); the last one ends the task.
  * - **Task 2** ([Ch2L1State.ACT1_TASK2]): a click held on the analyzer for `calibrate_seconds`: a bar fills ([HOLD_PACKET]) and a pip
- *   rises in pitch; looking away or letting go starts it over ([HoldTracker]).
+ *   rises in pitch; looking away or letting go starts it over ([HoldTracker]). Then the LAB's reagents and gauge ([Ch2L1LabTaskHooks]).
  * - **Task 3** ([Ch2L1State.ACT1_TASK3]): the broom leans against a wall; taking it puts the item in the player's hand. A click
  *   held on each patch of dirt with the broom in hand for `sweep_seconds` sweeps it away; the last one ends the task, takes the
  *   broom back and goes on to [Ch2L1State.ACT2_FOLLOW].
@@ -202,7 +202,7 @@ object Ch2L1TaskHooks {
         }
         player.serverWorld.playSound(null, pos, ModSounds.CARD_READER_ACCEPT, SoundCategory.BLOCKS, 1f, 1f)
         player.sendMessage(Text.translatable(KEY + "analyzer.done"), true)
-        Ch2L1.setState(player, Ch2L1State.ACT1_TASK3, "task 2 done")
+        Ch2L1.setState(player, Ch2L1State.ACT1_REAGENTS, "task 2 done")
         return ActionResult.CONSUME
     }
 
@@ -252,8 +252,11 @@ object Ch2L1TaskHooks {
         return ActionResult.CONSUME
     }
 
-    /** A step of a held use of [on]: how far it has got, 0 to 1 (1: done, and the hold starts over). The bar goes to the client. */
-    private fun fractionHeld(player: ServerPlayerEntity, on: String, needTicks: Int, label: String): Float {
+    /**
+     * A step of a held use of [on]: how far it has got, 0 to 1 (1: done, and the hold starts over). The bar goes to the client. The LAB's
+     * reagents ([Ch2L1LabTaskHooks]) pour this way too.
+     */
+    internal fun fractionHeld(player: ServerPlayerEntity, on: String, needTicks: Int, label: String): Float {
         val tracker = holds.getOrPut(player.uuid) { HoldTracker() }
         val held = tracker.press(on, player.server.ticks.toLong())
         val done = held >= needTicks

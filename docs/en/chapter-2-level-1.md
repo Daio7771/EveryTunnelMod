@@ -5,9 +5,9 @@
 Level 1 of Chapter 2 is the factory, four months after Chapter 1: an ordinary scientist hired in the place of the one
 who "fell ill", three acts of tasks, a meeting and sneaking, ending in the supervisor's office. It is built in phases
 (0 to 11), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
-`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 10a, the furnishing.** It is
-playable from the clock to its end, the basement swept and back to the menu, and every room is furnished; phase 10b (two more Act 1 tasks and
-more workers) and phase 11 (the QA pass) are next.
+`origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 10b, the LAB's two tasks.** It is
+playable from the clock to its end, the basement swept and back to the menu, every room furnished and peopled; phase 11 (the QA pass) is
+next.
 
 Its code is under `daio7771.everytunnel.chapter2` (the client's under the same package in `src/client`): `level1.core` (plain
 Kotlin, tested), `level1.platform` (Minecraft glue) and `level1.client`, apart from the base game, which never names it (see
@@ -23,7 +23,7 @@ takes everyone back there.
 | State | Meaning |
 |---|---|
 | `ACT1_CLOCKIN` | Arrived at the factory: the time clock is still to be punched |
-| `ACT1_TASK1`, `ACT1_TASK2`, `ACT1_TASK3` | Act 1's three tasks, in order: register the samples, calibrate the analyzer, sweep the west corridor |
+| `ACT1_TASK1`, `ACT1_TASK2`, `ACT1_REAGENTS`, `ACT1_GAUGE`, `ACT1_TASK3` | Act 1's five tasks, in order: register the samples, calibrate the analyzer, restock the reagents, log the centrifuge's speed, sweep the west corridor |
 | `ACT2_FOLLOW` | The coworker has come to take the player to the lockers |
 | `ACT2_MEETING` | The meeting at the lockers (a cinematic) |
 | `ACT3_EXPLORE` | Sneaking about the auxiliary laboratory, the staff corridor and the office |
@@ -46,7 +46,7 @@ Everything adjustable is JSON, not code: changing a rhythm, a route or a text is
 | `anchors.json` | The named places: points (a position and a facing) and zones (a box) | `Ch2L1AnchorsParser`, typed |
 | `tasks.json` | The three tasks of Act 1: which anchors hold the tubes, the terminal, the analyzer, the broom and the dirt, and how long each takes | `Ch2L1TasksParser`, typed |
 | `speakers.json` | Rowan's loudspeakers: the zones and their ceiling speakers, the fixed lines and the pool, the cooldown, the first announcement's cinematic | `Ch2L1SpeakersParser`, typed |
-| `npcs.json` | The factory's people: sixteen workers with their routines, the groups (the lockers' one) and how alive they look (`life`) | `Ch2L1NpcsParser`, typed |
+| `npcs.json` | The factory's people: twenty-two workers with their routines (the receptionist among them), the groups (the lockers' one) and how alive they look (`life`) | `Ch2L1NpcsParser`, typed |
 | `patrols.json` | The patrols: how the guards watch (sight, what is suspicious, the warning, the chase, where a caught player goes back) and each guard's round | `Ch2L1PatrolsParser`, typed |
 | `cutscenes/meeting.json` | Act 2: following the coworker and the meeting | `Ch2L1Act2Parser`, typed |
 | `act3.json` | Act 3's exploring: the badge reader, the keypad and Rowan's code, the computers and their files, the doors that say no, chamber 02, the arrow's wait | `Ch2L1Act3Parser`, typed |
@@ -139,7 +139,7 @@ face of the rebuilt company, NONAME INDUSTRIES: corporate and clean, white with 
   the `logo` style), a waiting corner to the west (sofas, a low table), plants. (The `screen` style, a lit screen, is there for later.)
 - **LAB:** fume hoods along the north wall, sample storage along the east wall (shelves, then cabinets past the sealed door), two islands
   in the middle (work stations with monitors; instruments: microscopes, beakers, a tube rack), carts. The south wall east of the analyzer
-  is kept free for phase 10b's tasks.
+  holds phase 10b's two tasks (below, Act 1).
 - **Dining room:** tables of four, the counter with two coffee machines, a water dispenser, three vending machines, plants, wall sconces
   and **warm ceiling lights** of its own (`warm_ceiling_light`; the generator's `SPACE_LIGHTS`).
 - **WCs**, with **no cameras**: stalls (a toilet, partitions two high, a door: `toilet`, `stall_wall`, `stall_door`) and sinks with a
@@ -210,7 +210,7 @@ then over again: `stand` (seconds, a number or `[min, max]`), `walk` (a path anc
 type, arms out in front, for `seconds`). Positions are anchors, so moving the map moves the people; the LAB's six work stations (a bench with a monitor, in `level.py`), the
 routes (`route_*`) and every worker's spot (`npc_*`) are written by the map generator and marked provisional until the LAB is furnished. Routes are written by hand, not found
 by the game's pathfinding: `Ch2L1RoutineRunner` (plain Kotlin, tested) says what to do each tick and `FactoryNpcEntity.tick` does it by setting the entity's own velocity (a stroll of 1.3 blocks a second, straight to the next
-point; anyone who stops getting nearer for 5 s, a bump, is put at the point), so sixteen people cost almost nothing. `walk_speed` in the file scales their stroll, and a worker's own `pace` (optional) theirs.
+point; anyone who stops getting nearer for 5 s, a bump, is put at the point), so twenty-odd people cost almost nothing. `walk_speed` in the file scales their stroll, and a worker's own `pace` (optional) theirs.
 
 **Alive, not robotic** (phase 4B; `life` in `npcs.json`, `Ch2L1Life`, every key optional; the code in `chapter2/level1/core/Ch2L1NpcLife.kt`, plain Kotlin, tested):
 - **Walking** (`Ch2L1Gait`): everyone walks at their own pace (`walk_speed` times 1 ± up to `pace_spread`, drawn from their id), eases into it (`accel_seconds`) and brakes before the
@@ -282,7 +282,15 @@ each takes is `tasks.json`):
 2. **Analyzer** (`ACT1_TASK2`): a click **held** on the `analyzer` (a new block, made by `tools/blocks/generate.py`) for `calibrate_seconds`.
    The game repeats a held click every 4 ticks; `level1.core.HoldTracker` counts the ticks while the uses come within 8 of each other and on the
    same block, so looking away or letting go starts it over. A bar (`client.hud.HoldBar`, from the packet `ch2l1_hold`) and a pip that rises in pitch
-   show it. Then `ACT1_TASK3`.
+   show it. Then the LAB's two tasks of phase 10b (`level1.platform.Ch2L1LabTaskHooks`, `tasks.json`'s `reagents` and `gauge`), in the
+   corner of the LAB's south wall east of the analyzer:
+   - **Reagents** (`ACT1_REAGENTS`): three bottles (`reagent_bottle_blue`, `_yellow`, `_red`) stand on the reagent cabinet; a click takes one
+     into the player's hand (the item `factory_reagent_<colour>`), and a click held on the `mixing_tank` for `pour_seconds` pours it in (the
+     same bar), in any order (`reagents_taken`, `reagents_poured`; the panel counts them). The third moves on.
+   - **Gauge** (`ACT1_GAUGE`): the `centrifuge` on its bench shows a speed in RPM, drawn for each player between `min_rpm` and `max_rpm` in
+     steps of ten (`level1.core.Ch2L1Gauge`, the counter `gauge_rpm`; the client draws it on its display, `Ch2L1CentrifugeRenderer`). The
+     terminal beside it opens NonameOS's maintenance log (`client.GaugeLogScreen`, packets `ch2l1_gauge_open` / `_try` / `_result`): the
+     speed typed is checked, a wrong one buzzes and can be typed again, the right one moves on to `ACT1_TASK3`.
 3. **Sweep** (`ACT1_TASK3`): the `leaning_broom` against the east wall of the ring's west stretch; a click takes it (the `broom` item goes to the
    player's hand; it exists only for this task and is taken back at the end). Then a click held for `sweep_seconds` on each of the ten
    `dirt_spot`s on the floor in front of the auxiliary lab's glass sweeps it (a swish and a puff). The last one ends the task:
