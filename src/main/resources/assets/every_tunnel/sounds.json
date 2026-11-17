@@ -307,6 +307,34 @@
       "every_tunnel:block/ch2l1/keypad_key_1"
     ]
   },
+  "block.ch2l1.ladder": {
+    "sounds": [
+      "every_tunnel:block/ch2l1/ladder_1"
+    ]
+  },
+  "block.ch2l1.lock_shut": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/ch2l1/lock_shut_1",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "block.ch2l1.manhole_open": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/ch2l1/manhole_open_1",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "block.ch2l1.manhole_scrape": {
+    "sounds": [
+      "every_tunnel:block/ch2l1/manhole_scrape_1",
+      "every_tunnel:block/ch2l1/manhole_scrape_2",
+      "every_tunnel:block/ch2l1/manhole_scrape_3"
+    ]
+  },
   "block.ch2l1.sweep": {
     "sounds": [
       "every_tunnel:block/ch2l1/sweep_1",

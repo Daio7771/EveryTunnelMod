@@ -3,6 +3,7 @@ package daio7771.everytunnel.chapter2.level1.platform
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Act3
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Bits
+import daio7771.everytunnel.chapter2.level1.core.Ch2L1Overtime
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.platform.Ch2Items
@@ -42,7 +43,9 @@ import java.util.concurrent.CopyOnWriteArrayList
  *   anything else buzzes ([KEYPAD_RESULT_PACKET] tells the screen which).
  * - **The office**: stepping in moves the objective on to searching it ([Ch2L1Act3.IN_OFFICE]).
  * - **Doors that say no**: a click on the restricted door at the end of the authorized corridor, on the sealed zone's door before the
- *   overtime, or on a locked door that is still shut, says so in the action bar. The portrait's plaque is read the same way.
+ *   overtime, or on a locked door that is still shut, says so in the action bar. Locked in after the overtime, the sealed door is
+ *   "Locked from the outside.", and trying it shows the way out ([Ch2L1Overtime.TRIED_DOOR], [Ch2L1EndingHooks]). The portrait's
+ *   plaque is read the same way.
  * - **Chamber 02**: while someone plays the level, the scientist stands in it as the Pale man he became ([ScientistEntity.CONTAINED]), his
  *   back to the chamber's front; never saved, put back if lost.
  * - **The sealed door** ([Ch2L1State.ACT3_OVERTIME], `act3.json`'s `overtime`): its reader takes Rowan's overtime pass and opens it;
@@ -305,6 +308,11 @@ object Ch2L1Act3Hooks {
             at(act3.sealedDoor) -> when {
                 Ch2L1.state(player) < Ch2L1State.ACT3_OVERTIME -> "sealed_door"
                 player.serverWorld.getBlockState(pos).get(DoorBlock.OPEN) -> return ActionResult.PASS
+                // Locked in after the overtime: bolted from outside, and now the player knows it (the way out, Ch2L1EndingHooks).
+                Ch2L1.state(player) == Ch2L1State.ACT3_LOCKED_IN -> {
+                    set(player, Ch2L1Overtime.TRIED_DOOR, 1)
+                    "door_locked_outside"
+                }
                 else -> "door_locked"
             }
             at(act3.labDoor) || at(act3.officeDoor) -> if (player.serverWorld.getBlockState(pos).get(DoorBlock.OPEN)) return ActionResult.PASS else "door_locked"

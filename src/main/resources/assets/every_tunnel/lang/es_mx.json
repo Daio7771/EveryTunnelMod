@@ -538,6 +538,8 @@
   "every_tunnel.ch2.l1.objective.explore_office": "Encontrar la forma de entrar al despacho",
   "every_tunnel.ch2.l1.objective.overtime": "Horas extra: zona sellada",
   "every_tunnel.ch2.l1.objective.basement": "Horas extra: barrer el sótano",
+  "every_tunnel.ch2.l1.objective.go_home": "Vete a casa",
+  "every_tunnel.ch2.l1.objective.way_out": "Busca otra salida",
   "every_tunnel.ch2.l1.restricted_door": "Acceso restringido",
   "every_tunnel.ch2.l1.speaker.coworker": "COMPAÑERO:",
   "every_tunnel.ch2.l1.speaker.worker_a": "TRABAJADOR A:",
@@ -599,6 +601,7 @@
   "every_tunnel.ch2.l1.hold.pouring": "Vertiendo...",
   "every_tunnel.ch2.l1.gauge.hint": "Anota la velocidad que marca en el terminal de al lado.",
   "every_tunnel.ch2.l1.hold.sweeping": "Barriendo...",
+  "every_tunnel.ch2.l1.hold.lifting": "Levantando la tapa...",
   "every_tunnel.ch2.l1.os.title": "NONAME OS",
   "every_tunnel.ch2.l1.os.version": "v4.2",
   "every_tunnel.ch2.l1.os.registry": "REGISTRO DE MUESTRAS",
@@ -627,6 +630,7 @@
   "every_tunnel.ch2.l1.reader.denied": "Acceso denegado: se necesita una tarjeta del laboratorio.",
   "every_tunnel.ch2.l1.reader.granted": "Acceso concedido.",
   "every_tunnel.ch2.l1.door_locked": "Cerrada.",
+  "every_tunnel.ch2.l1.door_locked_outside": "Cerrada por fuera.",
   "every_tunnel.ch2.l1.sealed_door": "Sellada. Se necesita la tarjeta del supervisor.",
   "every_tunnel.ch2.l1.keypad.title": "Teclado",
   "every_tunnel.ch2.l1.keypad.open": "ABIERTO",
@@ -705,5 +709,6 @@
   "block.every_tunnel.reagent_bottle_yellow": "Frasco de reactivo (amarillo)",
   "block.every_tunnel.reagent_bottle_red": "Frasco de reactivo (rojo)",
   "block.every_tunnel.mixing_tank": "Tanque mezclador",
-  "block.every_tunnel.centrifuge": "Centrifugadora"
+  "block.every_tunnel.centrifuge": "Centrifugadora",
+  "block.every_tunnel.manhole": "Tapa de alcantarilla de emergencia"
 }

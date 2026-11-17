@@ -426,7 +426,7 @@ DART_FONT = {
     "M": "1000111011101011000110001", "C": "111100100100111", "L": "100100100100111", "R": "110101110101101",
     "W": "1000110001101011010101010", "T": "111010010010010", "F": "111100110100100", "D": "110101101101110",
     "N": "1000111001101011001110001", "B": "110101110101110", "I": "111010010010111", "K": "101101110101101",
-    "P": "110101110100100", "Y": "101101010010010",
+    "P": "110101110100100", "Y": "101101010010010", "X": "101101010101101",
 }
 # As in core/puzzle/darts: DartboardGeometry.ORDER.
 DART_ORDER = (20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5)
@@ -2234,6 +2234,58 @@ def dirt_spot_tex(rng):
     return img
 
 
+def manhole_lid_tex(rng):
+    """The emergency manhole's lid from above, 64 x 64: a round cast-iron lid with a raised grid in a square iron frame, rusted at the
+    seams, EMERGENCY EXIT stencilled in a worn yellow across a smooth band of it."""
+    img = Image.new("RGB", (64, 64), (58, 56, 54))
+    c, radius = 31.5, 28.5
+    for y in range(64):
+        for x in range(64):
+            d = ((x - c) ** 2 + (y - c) ** 2) ** 0.5
+            if d > radius + 1.5:                                   # the frame
+                v = 64 + rng.randint(-6, 6)
+                col = (v, v - 2, v - 4)
+                if min(x, y, 63 - x, 63 - y) == 0:
+                    col = (40, 38, 36)
+            elif d > radius:                                       # the seam round the lid
+                col = (34, 30, 28) if rng.random() < 0.7 else (92, 58, 36)
+            else:                                                  # the lid: a raised grid of squares
+                raised = (x // 4 + y // 4) % 2 == 0 and x % 4 and y % 4
+                v = (80 if raised else 52) + rng.randint(-5, 5)
+                if 21 <= y <= 40 and abs(x - c) < 24:              # the smooth cast band the words are stencilled on
+                    v = 46 + rng.randint(-3, 3)
+                col = (v, v - 3, v - 6)
+                if d > radius - 2:
+                    col = (70, 66, 62)
+                if rng.random() < 0.02:
+                    col = (104, 62, 38)                            # rust
+            img.putpixel((x, y), col)
+    paint = (196, 160, 52)
+    words = Image.new("RGB", (64, 64), (0, 0, 0))
+    for k, line in enumerate(("EMERGENCY", "EXIT")):
+        dart_text(words, (64 - dart_text_width(line)) // 2, 24 + k * 9, line, (255, 255, 255))
+    for y in range(64):
+        for x in range(64):
+            if words.getpixel((x, y))[0] and rng.random() > 0.08:  # worn: a little of the paint is gone
+                img.putpixel((x, y), tuple(max(0, v + rng.randint(-14, 8)) for v in paint))
+    return img
+
+
+def manhole_shaft_tex(rng, rungs):
+    """The inside of the manhole's shaft: dark damp concrete; with `rungs`, two iron rungs of the ladder going down."""
+    img = Image.new("RGB", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            v = 34 + rng.randint(-6, 6) - y
+            img.putpixel((x, y), (v, v, v - 2))
+    if rungs:
+        for y in (4, 12):
+            for x in range(3, 13):
+                img.putpixel((x, y), (96, 70, 48) if rng.random() < 0.3 else (78, 76, 74))
+                img.putpixel((x, y + 1), (30, 28, 26))
+    return img
+
+
 def broom_tex(rng):
     """Item: the broom of Chapter 2's third task, held like a tool: the handle from the lower left, the bristles at the far end."""
     img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
@@ -3853,6 +3905,29 @@ def build():
     a.texture("dirt_spot", dirt_spot_tex(r("dirt_spot")), T.Material(0.1, relief=0.2), tiles=False)
     prop("dirt_spot", "Dirt", {"d": "dirt_spot"},
          [el((0, 0, 0), (16, 0.5, 16), "d", north=None, south=None, east=None, west=None, down=None)])
+
+    # The emergency manhole in the basement's floor (the way out when the player is locked in after the overtime): the lid flush with the
+    # floor; open, a hole with a rim, a dark shaft with rungs going down and the lid slid aside on the floor.
+    a.texture("manhole_lid", manhole_lid_tex(r("manhole_lid")), T.STEEL.but(smoothness=0.3, relief=0.6), tiles=False)
+    a.texture("manhole_shaft", manhole_shaft_tex(r("manhole_shaft"), False), T.Material(0.1, relief=0.5))
+    a.texture("manhole_rungs", manhole_shaft_tex(r("manhole_rungs"), True), T.Material(0.1, relief=0.5))
+    a.texture("manhole_dark", plastic_tex(r("manhole_dark"), (8, 8, 9)), T.Material(0.0, relief=0.0))
+    m_tex = {"l": "manhole_lid", "s": "manhole_shaft", "g": "manhole_rungs", "d": "manhole_dark"}
+    a.models["manhole"] = model(m_tex, [el((0, 0, 0), (16, 16, 16), "s", up="l")])
+    lid_up = ("l", (0, 0, 16, 16))
+    rim = ("l", (0, 0, 2, 16))
+    a.models["manhole_open"] = model(m_tex, [
+        el((0, 0, 0), (16, 16, 2), "s", up=rim, south="g"),
+        el((0, 0, 14), (16, 16, 16), "s", up=rim),
+        el((0, 0, 2), (2, 16, 14), "s", up=rim),
+        el((14, 0, 2), (16, 16, 14), "s", up=rim),
+        el((2, 0, 2), (14, 1, 14), "d"),
+        el((9, 16, 1), (23, 16.5, 15), "l", up=lid_up, down=None, north=("s", (0, 0, 14, 1)), south=("s", (0, 0, 14, 1)),
+           east=("s", (0, 0, 14, 1)), west=("s", (0, 0, 14, 1))),
+    ], ao=False)
+    a.block("manhole", "Emergency Manhole", {"variants": {"open=false": {"model": f"{NS}:block/manhole"},
+                                                          "open=true": {"model": f"{NS}:block/manhole_open"}}},
+            {"parent": f"{NS}:block/manhole"})
 
     # Chapter 2 Level 1's Act 3: the film set in the auxiliary lab (where the prologue was shot), a studio light and a cine camera on
     # tripods, both looking the way they face (north in the model), taller than a block; and Rowan's portrait in his office, two

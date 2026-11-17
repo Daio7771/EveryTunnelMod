@@ -41,8 +41,8 @@ import daio7771.everytunnel.chapter2.platform.Ch2Progress
  *   held on each patch of dirt with the broom in hand for `sweep_seconds` sweeps it away; the last one ends the task, takes the
  *   broom back and goes on to [Ch2L1State.ACT2_FOLLOW].
  * - **The overtime** ([Ch2L1State.ACT3_BASEMENT], Rowan's three hours, past the sealed door): the same sweeping with the basement's broom
- *   and dirt (`tasks.json`'s `overtime`); the last patch ends the level ([Ch2L1State.DONE], whose lights out and ending are
- *   [Ch2L1EndingHooks]').
+ *   and dirt (`tasks.json`'s `overtime`); the last patch locks the player in ([Ch2L1State.ACT3_LOCKED_IN], whose lights out, bolted
+ *   door, manhole and ending are [Ch2L1EndingHooks]').
  *
  * A state change ([Ch2L1.onStateChange], by playing, `/et ch2 l1 state` or `skip`) brings the counters and the props of the world to what
  * that state means ([onState], [reconcile]): the tubes, the dirt and the broom stand where the player has not been yet and are gone
@@ -115,7 +115,7 @@ object Ch2L1TaskHooks {
         Sweep(Ch2L1State.ACT1_TASK3, tasks.broomAnchor, tasks.dirtPath, Ch2L1Tasks.SWEPT, Ch2L1Tasks.BROOM, Ch2L1State.ACT2_FOLLOW, "task 3"),
         Sweep(
             Ch2L1State.ACT3_BASEMENT, tasks.basementBroomAnchor, tasks.basementDirtPath, Ch2L1Tasks.BASEMENT_SWEPT, Ch2L1Tasks.BASEMENT_BROOM,
-            Ch2L1State.DONE, "the basement",
+            Ch2L1State.ACT3_LOCKED_IN, "the basement",
         ),
     )
 

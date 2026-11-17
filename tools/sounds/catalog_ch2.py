@@ -173,6 +173,49 @@ def ch2l1_office_hum(rng, variant):
     return stereo(0.5 * left, 0.5 * right)
 
 
+def ch2l1_lock_shut(rng, variant):
+    """The end of the overtime, up the stairs: the sealed door's bolt shot home from the other side, a hard dry clack and a short ring
+    of steel, heard from below."""
+    n = samples(1.2)
+    y = knock(n, rng, 0.005, rng.uniform(150, 170), [1.0, 2.4, 3.9, 5.6], [1.0, 0.5, 0.3, 0.15], [0.12, 0.08, 0.05, 0.03],
+              click=1.0, click_hi=4000.0)
+    y += 0.6 * knock(n, rng, 0.06, rng.uniform(210, 230), [1.0, 2.7], [0.8, 0.3], [0.08, 0.05], click=0.7, click_hi=3000.0)
+    return lowpass(y, 3500.0)
+
+
+def ch2l1_manhole_scrape(rng, variant):
+    """The emergency manhole's lid prised up and dragged a little over concrete: a heavy grinding of iron on stone (3 variations)."""
+    n = samples(0.7)
+    grain = 0.5 + 0.5 * smooth_random(n, 30.0, rng)
+    y = _noise(n, rng, 150.0, 1600.0) * grain * envelope(n, [(0.0, 0.0), (0.06, 1.0), (0.5, 0.8), (0.68, 0.0)])
+    y += 0.35 * _noise(n, rng, 1800.0, 5000.0) * grain * envelope(n, [(0.0, 0.0), (0.1, 0.5), (0.45, 0.4), (0.65, 0.0)])
+    y += 0.3 * damped_partials(n, [rng.uniform(300, 360), rng.uniform(720, 800)], [1.0, 0.5], [0.15, 0.1], rng, 0.02)
+    return 0.6 * y
+
+
+def ch2l1_manhole_open(rng, variant):
+    """The lid let fall beside the hole: a big iron clang on concrete, its ring humming down into the shaft."""
+    n = samples(2.2)
+    ratios = sorted(rng.uniform(1.0, 6.0, 8))
+    y = knock(n, rng, 0.005, rng.uniform(170, 190), ratios, [1.0 / (1 + i * 0.4) for i in range(8)],
+              [0.9 / (1 + i * 0.5) for i in range(8)], click=1.0, click_hi=5000.0)
+    y += 0.5 * knock(n, rng, 0.12, rng.uniform(180, 200), ratios[:4], [0.6, 0.3, 0.2, 0.1], [0.3, 0.2, 0.1, 0.05], click=0.5, click_hi=3000.0)
+    y += _noise(n, rng, 60.0, 600.0) * envelope(n, [(0.0, 0.0), (0.01, 0.8), (0.2, 0.15), (0.8, 0.0)])
+    return 0.7 * y
+
+
+def ch2l1_ladder(rng, variant):
+    """Down the shaft: three hands and feet on iron rungs, each a dull metallic knock, going down and away."""
+    n = samples(1.8)
+    y = np.zeros(n)
+    for k, start in enumerate((0.05, 0.55, 1.05)):
+        fade_k = 1.0 - 0.25 * k
+        y += fade_k * knock(n, rng, start, rng.uniform(380, 440), [1.0, 2.6, 4.1], [1.0, 0.4, 0.2], [0.08, 0.05, 0.03],
+                            click=0.6, click_hi=3000.0)
+        y += 0.4 * fade_k * _noise(n, rng, 200.0, 1500.0) * envelope(n, [(0.0, 0.0), (start, 0.0), (start + 0.01, 1.0), (start + 0.12, 0.0), (1.8, 0.0)])
+    return lowpass(0.7 * y, 4000.0)
+
+
 CHAPTER2_SOUNDS = [
     Sound("event.prologue.crack", "Chapter 2 prologue", "A stage of the scientist's change: dry cracks of joints, a dull thump, the creak of something stretched too far (3 variations)",
           "mono", False, 3, prologue_crack, -3.0, attenuation=24),
@@ -197,4 +240,11 @@ CHAPTER2_SOUNDS = [
     Sound("ambient.ch2l1.office_hum", "Chapter 2 Level 1", "The office's cinematic: a very low beating hum under Rowan's colder lines (loops)", "stereo", True, 1,
           ch2l1_office_hum, -10.0, stream=True),
     Sound("block.ch2l1.keypad_accept", "Chapter 2 Level 1", "Act 3: Rowan's code accepted, two rising beeps and the lock's clack", "mono", False, 1, ch2l1_keypad_accept, -8.0),
+    Sound("block.ch2l1.lock_shut", "Chapter 2 Level 1", "The overtime's end: the sealed door's bolt shot home from outside, a dry clack heard from the basement",
+          "mono", False, 1, ch2l1_lock_shut, -4.0, attenuation=48),
+    Sound("block.ch2l1.manhole_scrape", "Chapter 2 Level 1", "The emergency manhole's iron lid prised up, grinding on concrete (3 variations)", "mono", False, 3,
+          ch2l1_manhole_scrape, -6.0),
+    Sound("block.ch2l1.manhole_open", "Chapter 2 Level 1", "The manhole's lid let fall beside the hole: a big iron clang", "mono", False, 1, ch2l1_manhole_open, -3.0,
+          attenuation=32),
+    Sound("block.ch2l1.ladder", "Chapter 2 Level 1", "Climbing down the manhole's iron rungs, three knocks going away", "mono", False, 1, ch2l1_ladder, -6.0),
 ]

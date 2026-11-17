@@ -35,7 +35,12 @@ enum class Ch2L1State {
     ACT3_OVERTIME,
     /** Act 3: through the sealed door (it slammed shut behind): the overtime itself, sweeping the basement. */
     ACT3_BASEMENT,
-    /** The level is finished: the basement swept, its lights went out, and the game goes back to the menu. */
+    /**
+     * Act 3: locked in. The basement swept, its lights went out and the sealed door was bolted from outside: the way out is the
+     * emergency manhole in the basement's floor.
+     */
+    ACT3_LOCKED_IN,
+    /** The level is finished: down the manhole, and the game goes back to the menu (Level 2 will follow from here). */
     DONE;
 
     /** The state after this one, or null at [DONE]. */

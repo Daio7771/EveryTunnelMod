@@ -25,9 +25,11 @@
     "zone": "sealed_corridor",
     "slam_after": 2.5,
     "basement_zone": "basement",
-    "dark_seconds": 3.0,
+    "dark_seconds": 1.5,
     "fade_seconds": 2.5,
     "text_seconds": 6.0,
-    "text": "every_tunnel.ch2.l1.ending.text"
+    "text": "every_tunnel.ch2.l1.ending.text",
+    "manhole": "manhole",
+    "lift_seconds": 3.0
   }
 }

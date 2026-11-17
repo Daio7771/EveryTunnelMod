@@ -22,8 +22,10 @@ data class Ch2L1Computer(
 /**
  * The overtime, after Rowan's office (`act3.json`'s `overtime`): the sealed door opens at its reader ([reader]) with the unpaid overtime
  * pass, and slams shut once the player is [slamAfter] blocks past it in [zone] (the landing behind it), which starts the basement's task.
- * When the last dirt there is swept the lights of [basementZone] go out; [darkTicks] later the screen fades to black over [fadeTicks],
- * the lang key [text] stays on it for [textTicks], and the game goes back to the menu.
+ * When the last dirt there is swept the lights of [basementZone] go out and the sealed door is bolted from outside: the player is locked
+ * in ([Ch2L1State.ACT3_LOCKED_IN]). Trying the door ([TRIED_DOOR]) shows the way out, the emergency manhole in the basement's floor
+ * ([manhole]), whose lid comes up with a click held on it for [liftTicks] ([MANHOLE_OPEN]). Going down it ends the level: [darkTicks]
+ * later the screen fades to black over [fadeTicks], the lang key [text] stays on it for [textTicks], and the game goes back to the menu.
  */
 data class Ch2L1Overtime(
     val reader: String = "sealed_reader",
@@ -34,10 +36,26 @@ data class Ch2L1Overtime(
     val fadeTicks: Int = 50,
     val textTicks: Int = 120,
     val text: String = "every_tunnel.ch2.l1.ending.text",
+    /** Its anchor stands on the lid: the manhole block is the one under it. */
+    val manhole: String = "manhole",
+    val liftTicks: Int = 60,
 ) {
+    /** The objective's lang key suffix (`objective.<it>`) in [Ch2L1State.ACT3_LOCKED_IN]: going home, then, the door tried, another way out. */
+    fun objective(counter: (String) -> Int): String = if (counter(TRIED_DOOR) > 0) WAY_OUT else GO_HOME
+
+    /** The anchor the guide arrow points at when locked in: the manhole, once the door has been tried. */
+    fun guide(counter: (String) -> Int): String? = if (counter(TRIED_DOOR) > 0) manhole else null
+
     companion object {
         /** The player's counter set when the level is finished (`ch2.l1.completed` in the plan): 1. */
         const val COMPLETED = "completed"
+
+        /** Locked in: the player has tried the bolted sealed door (1), and the manhole's lid is up (1). Act 3's counters ([Ch2L1Act3.PREFIX]). */
+        const val TRIED_DOOR = Ch2L1Act3.PREFIX + "tried_door"
+        const val MANHOLE_OPEN = Ch2L1Act3.PREFIX + "manhole_open"
+
+        const val GO_HOME = "go_home"
+        const val WAY_OUT = "way_out"
     }
 }
 
@@ -149,7 +167,8 @@ data class Ch2L1Act3(
  *   "restricted_doors": ["restricted_door_east"], "sealed_door": "sealed_door", "portrait": "painting", "chamber": "chamber_02",
  *   "guide_after_seconds": 60,
  *   "overtime": { "reader": "sealed_reader", "zone": "sealed_corridor", "slam_after": 2.5, "basement_zone": "basement",
- *                 "dark_seconds": 3.0, "fade_seconds": 2.5, "text_seconds": 6.0, "text": "every_tunnel.ch2.l1.ending.text" } }
+ *                 "dark_seconds": 1.5, "fade_seconds": 2.5, "text_seconds": 6.0, "text": "every_tunnel.ch2.l1.ending.text",
+ *                 "manhole": "manhole", "lift_seconds": 3.0 } }
  * ```
  */
 object Ch2L1Act3Parser {
@@ -167,6 +186,8 @@ object Ch2L1Act3Parser {
             fadeTicks = ticks("fade_seconds", d.fadeTicks).coerceAtLeast(1),
             textTicks = ticks("text_seconds", d.textTicks),
             text = o.string("text", d.text),
+            manhole = o.string("manhole", d.manhole),
+            liftTicks = ticks("lift_seconds", d.liftTicks).coerceAtLeast(1),
         )
         o.reportUnknownKeys()
         return overtime

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "open=false": {
+      "model": "every_tunnel:block/manhole"
+    },
+    "open=true": {
+      "model": "every_tunnel:block/manhole_open"
+    }
+  }
+}

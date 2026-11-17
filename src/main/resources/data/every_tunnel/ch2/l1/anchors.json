@@ -89,7 +89,8 @@
   {"id":"mixing_tank_block","pos":[1081.5,64.0,1068.5],"yaw":0},
   {"id":"centrifuge_block","pos":[1082.5,65.0,1070.5],"yaw":0},
   {"id":"gauge_terminal_block","pos":[1084.5,65.0,1070.5],"yaw":0},
-  {"id":"basement_computer","pos":[1102.5,57.0,1086.5],"yaw":0}
+  {"id":"basement_computer","pos":[1102.5,57.0,1086.5],"yaw":0},
+  {"id":"manhole","pos":[1110.5,56.0,1084.5],"yaw":0}
  ],
  "zones": [
   {"id":"entrance","from":[1044,63,1025],"to":[1085,72,1033]},

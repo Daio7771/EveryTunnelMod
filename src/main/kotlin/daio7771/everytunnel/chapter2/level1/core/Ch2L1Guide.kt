@@ -12,7 +12,8 @@ import daio7771.everytunnel.core.level.Position
  * the broom until it is taken and then the patches of dirt not swept yet, and the same in the basement's (the overtime). [nearest] is the one the arrow shows: the one closest to
  * the player. In Act 2 it floats over the coworker's head, but only when the player has lost him ([follow]). In Act 3 it points at the
  * next thing to do ([Ch2L1Act3.guide]: the badge reader, the lab's computer, the keypad, the office's door, Rowan's computer), but the
- * client shows it only once the player has been [stuck] on it a while.
+ * client shows it only once the player has been [stuck] on it a while. Locked in after the overtime, it points at the emergency manhole
+ * once the player has tried the bolted door ([Ch2L1Overtime.guide]), at once.
  */
 object Ch2L1Guide {
 
@@ -52,6 +53,8 @@ object Ch2L1Guide {
                     anchors.path(tasks.basementDirtPath)?.points?.filterIndexed { i, _ -> !Ch2L1Bits.has(swept, i) } ?: emptyList()
                 }
             Ch2L1State.ACT3_EXPLORE -> act3.guide(counter)?.let(::at) ?: emptyList()
+            // Locked in: the manhole, once the bolted door has been tried, until the player is down it.
+            Ch2L1State.ACT3_LOCKED_IN -> act3.overtime.guide(counter)?.let(::at) ?: emptyList()
             else -> emptyList()
         }
         return places.map { Position(it.x, it.y + tasks.guide.height, it.z) }

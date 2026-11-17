@@ -21,6 +21,7 @@ class Ch2L1ObjectivesTest {
         assertEquals("every_tunnel.ch2.l1.objective.follow", Ch2L1Objectives.keyFor(Ch2L1State.ACT2_FOLLOW))
         assertEquals("every_tunnel.ch2.l1.objective.explore_lab", Ch2L1Objectives.keyFor(Ch2L1State.ACT3_EXPLORE))
         assertEquals("every_tunnel.ch2.l1.objective.overtime", Ch2L1Objectives.keyFor(Ch2L1State.ACT3_OVERTIME))
+        assertEquals("every_tunnel.ch2.l1.objective.go_home", Ch2L1Objectives.keyFor(Ch2L1State.ACT3_LOCKED_IN))
         assertNull(Ch2L1Objectives.keyFor(Ch2L1State.ACT2_MEETING))
         assertNull(Ch2L1Objectives.keyFor(Ch2L1State.ACT3_CUTSCENE))
         assertNull(Ch2L1Objectives.keyFor(Ch2L1State.DONE))
@@ -30,7 +31,8 @@ class Ch2L1ObjectivesTest {
     fun `every objective, and the panel's title, has its text in both languages`() {
         val english = lang("en_us")
         val spanish = lang("es_es")
-        val keys = Ch2L1State.entries.mapNotNull { Ch2L1Objectives.keyFor(it) } + Ch2L1Objectives.TITLE_KEY
+        val keys = Ch2L1State.entries.mapNotNull { Ch2L1Objectives.keyFor(it) } + Ch2L1Objectives.TITLE_KEY +
+            (Ch2L1Objectives.PREFIX + Ch2L1Overtime.WAY_OUT)
         for (key in keys) {
             assertNotNull(english[key], "$key is missing from en_us.json")
             assertNotNull(spanish[key], "$key is missing from es_es.json")

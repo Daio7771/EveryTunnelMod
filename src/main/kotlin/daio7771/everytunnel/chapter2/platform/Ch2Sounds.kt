@@ -32,6 +32,15 @@ object Ch2Sounds {
     /** Chapter 2 Level 1, the office's cinematic: the low hum under Rowan's colder lines (a loop, played by the client's scene). */
     val CH2L1_OFFICE_HUM = event("ambient.ch2l1.office_hum")
 
+    /**
+     * Chapter 2 Level 1, locked in after the overtime: the sealed door's bolt shot home from outside (heard from the basement), the
+     * emergency manhole's lid prised up and let fall, and the climb down its rungs.
+     */
+    val CH2L1_LOCK_SHUT = event("block.ch2l1.lock_shut", range = 48f)
+    val CH2L1_MANHOLE_SCRAPE = event("block.ch2l1.manhole_scrape")
+    val CH2L1_MANHOLE_OPEN = event("block.ch2l1.manhole_open", range = 32f)
+    val CH2L1_LADDER = event("block.ch2l1.ladder")
+
     private fun event(path: String, range: Float? = null): SoundEvent {
         val id = Identifier(EveryTunnel.MOD_ID, path)
         return (if (range == null) SoundEvent.of(id) else SoundEvent.of(id, range)).also { all += it }

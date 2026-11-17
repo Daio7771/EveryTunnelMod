@@ -82,6 +82,16 @@ class Ch2L1GuideTest {
     }
 
     @Test
+    fun `locked in, it points at the manhole once the door has been tried`() {
+        val act3 = Ch2L1Act3.DEFAULT
+        fun at(counters: Map<String, Int>) = Ch2L1Guide.targets(Ch2L1State.ACT3_LOCKED_IN, tasks, anchors, act3) { counters[it] ?: 0 }
+        assertEquals(emptyList(), at(emptyMap()))
+        assertEquals(listOf(over("manhole")), at(mapOf(Ch2L1Overtime.TRIED_DOOR to 1)))
+        assertEquals(Ch2L1Overtime.GO_HOME, act3.overtime.objective { 0 })
+        assertEquals(Ch2L1Overtime.WAY_OUT, act3.overtime.objective { if (it == Ch2L1Overtime.TRIED_DOOR) 1 else 0 })
+    }
+
+    @Test
     fun `the arrow shows the nearest and hides when the player is near`() {
         val list = listOf(Position(10.0, 2.0, 10.0), Position(0.0, 2.0, 0.0), Position(-8.0, 2.0, 3.0))
         assertEquals(Position(0.0, 2.0, 0.0), Ch2L1Guide.nearest(list, Position(1.0, 1.6, 2.0)))

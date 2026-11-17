@@ -7,7 +7,8 @@ que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el des
 fases (de la 0 a la 11), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
 nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 11, la pasada de QA, hecha: el nivel está
 terminado.** Se llega desde el menú principal (Capítulo 2, NUEVA PARTIDA: el prólogo y luego la fábrica) y se juega desde el reloj hasta
-su final, el sótano barrido y la vuelta al menú, con todas las salas amuebladas y con gente. Lo siguiente es el Nivel 2; los dos se
+su final, el sótano barrido, el encierro y la bajada por la alcantarilla de emergencia hasta el menú, con todas las salas amuebladas y
+con gente. Lo siguiente es el Nivel 2 (las alcantarillas y unas antiguas catacumbas), que empieza bajando por esa alcantarilla; los dos se
 publican juntos como demo.
 
 **Cómo se llega.** NUEVA PARTIDA del Capítulo 2 en el menú principal: el prólogo (se puede saltar) y luego la fábrica. La
@@ -38,7 +39,8 @@ nueva (`ProgressService.reset`) devuelve a todos ahí.
 | `ACT3_CUTSCENE` | La cinemática del despacho, desde que se cierra el segundo papel |
 | `ACT3_OVERTIME` | Después del despacho, con el pase de horas extra sin cobrar: el camino a la zona sellada está abierto |
 | `ACT3_BASEMENT` | Tras la puerta sellada, que se cerró de golpe detrás: las horas extra, barriendo el sótano |
-| `DONE` | El sótano barrido: se apagaron sus luces y el juego volvió al menú |
+| `ACT3_LOCKED_IN` | El sótano barrido: se apagaron sus luces y la puerta sellada se cerró por fuera; la salida es la alcantarilla |
+| `DONE` | Por la alcantarilla de emergencia abajo: el juego volvió al menú (de aquí seguirá el Nivel 2) |
 
 `level1.platform.Ch2L1` es la única puerta al estado: `setState(player, state, reason)` lo guarda, escribe en el log `Chapter 2
 Level 1: <jugador> goes A -> B (<motivo>)` y avisa a los oyentes; `skip(player)` pasa al siguiente. Un sistema del nivel
@@ -486,7 +488,8 @@ El LAB tendrá dos tareas más cuando el Nivel 1 esté decorado.
 ## La zona sellada y el final (fase 9)
 
 El `overtime` de `act3.json` (`level1.core.Ch2L1Overtime`), la tarea de las horas extra en `tasks.json`, `level1.platform.Ch2L1Act3Hooks`
-(la puerta), `Ch2L1TaskHooks` (el barrido), `Ch2L1EndingHooks` y el `Ch2L1EndingOverlay` del cliente (el final).
+(la puerta), `Ch2L1TaskHooks` (el barrido), `Ch2L1EndingHooks` (el encierro, la alcantarilla, el final) y el `Ch2L1EndingOverlay` del
+cliente (el final).
 
 - **La puerta sellada** se abre en su lector de tarjetas del lado del LAB (`sealed_reader`) con el pase de Rowan, solo en `ACT3_OVERTIME`.
   Aún no es el Nivel 2: detrás hay un rellano (`sealed_corridor`) con dos salidas. Al este, el paso a la otra parte de la fábrica,
@@ -500,11 +503,24 @@ El `overtime` de `act3.json` (`level1.core.Ch2L1Overtime`), la tarea de las hora
   medio, exento contra la pared sur, un terminal de NonameOS bajo un "???" de tiza (ver los ordenadores del Acto 3: la grabación rara y una
   nota cifrada). La escoba está apoyada al pie de las escaleras; sus ocho manchas se barren como las de la tarea 3 (`basement_broom_block`,
   `basement_dirt_spots`, los contadores `basement_broom` y `basement_swept`, la flecha sobre la siguiente).
-- **La última mancha acaba el nivel** (`DONE`): se pone el contador `completed` (el `ch2.l1.completed` del plan), las luces del sótano
-  se apagan con un golpe sordo (`Ch2L1Build.zoneLights`, como las del LAB tras el despacho), y `dark_seconds` (3) después la pantalla
-  funde a negro en `fade_seconds` (2,5), el texto de cierre (`ending.text`) se queda `text_seconds` (6) y se sale del mundo, guardado, al
-  menú principal. El Nivel 1 no se publica solo, así que de momento nada le sigue. Volver a antes de `DONE` (un comando) vuelve a encender
-  el sótano; volver a las horas extra o a antes cierra la puerta sellada y pone su lector en rojo.
+- **La última mancha deja al jugador encerrado** (`ACT3_LOCKED_IN`): las luces del sótano se apagan con un golpe sordo
+  (`Ch2L1Build.zoneLights`, como las del LAB tras el despacho) y, un momento después, la puerta sellada de arriba se cierra con cerrojo
+  por fuera (`block.ch2l1.lock_shut`, un clac seco que se oye desde abajo). Nadie volvió a por el nuevo; solo queda la luz de la linterna.
+  El objetivo es "Vete a casa".
+- **Probar la puerta sellada** desde el rellano dice "Cerrada por fuera." y pone el contador `a3_tried_door`: el objetivo pasa a "Busca
+  otra salida" y la flecha guía señala enseguida la **alcantarilla de emergencia** del suelo, en la esquina sureste del sótano, pasadas
+  las estanterías (`manhole`, un bloque del suelo: una tapa redonda de hierro fundido en un marco cuadrado, con EMERGENCY EXIT estarcido en
+  un amarillo gastado; su ancla `manhole` está sobre la tapa).
+- **La tapa** se levanta manteniendo el clic sobre ella `lift_seconds` (3): una barra ("Levantando la tapa..."), hierro arrastrándose
+  sobre hormigón (`block.ch2l1.manhole_scrape`) y un golpe metálico cuando cae a un lado (`block.ch2l1.manhole_open`; contador
+  `a3_manhole_open`). Abierta, el bloque es un agujero con borde, un pozo oscuro con peldaños y la tapa apartada en el suelo; también se
+  puede abrir antes de probar la puerta.
+- **Bajar por ella acaba el nivel** (`DONE`): un clic en el agujero abierto, o meterse en él. El jugador queda dentro mirando abajo, se
+  pone el contador `completed` (el `ch2.l1.completed` del plan), se oyen los peldaños (`block.ch2l1.ladder`) y `dark_seconds` (1,5)
+  después la pantalla funde a negro en `fade_seconds` (2,5), el texto de cierre (`ending.text`) se queda `text_seconds` (6) y se sale del
+  mundo, guardado, al menú principal. El Nivel 2, las alcantarillas y las antiguas catacumbas, empezará bajando por esta alcantarilla.
+  Volver a antes de `ACT3_LOCKED_IN` (un comando) vuelve a encender el sótano y cierra la alcantarilla; volver a las horas extra o a antes
+  cierra la puerta sellada y pone su lector en rojo.
 
 ## Redes de seguridad (fase 11)
 
@@ -514,7 +530,8 @@ Lo que añadió la pasada de QA para que el jugador no se quede atascado:
   Cada segundo se retira el que esté tirado en el suelo del nivel, y quien debería llevar uno según su estado y sus contadores y no lo
   lleva lo recupera.
 - **Salir del mundo a mitad de escena**: al volver en mitad de la cinemática del despacho, esta empieza de nuevo (`Ch2L1OfficeHooks`,
-  tras 2 s); al volver en el final, el sótano se apaga y el final se repite (`Ch2L1EndingHooks`).
+  tras 2 s); al volver encerrado, el sótano vuelve a estar a oscuras y la alcantarilla como estaba; al volver en el final, el final se
+  repite (`Ch2L1EndingHooks`).
 - **Trabajadores perdidos** (`Ch2L1Npcs`): el que se ha caído fuera de la caja del nivel se retira y se vuelve a poner en la siguiente
   comprobación.
 - **La vuelta al Capítulo 1** (`Ch2L1Return`): véase «Cómo se llega» al principio.

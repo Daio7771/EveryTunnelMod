@@ -11,6 +11,7 @@ import daio7771.everytunnel.chapter2.level1.platform.KeypadBlock
 import daio7771.everytunnel.chapter2.level1.platform.PortraitBlock
 import daio7771.everytunnel.chapter2.level1.platform.DirtSpotBlock
 import daio7771.everytunnel.chapter2.level1.platform.LeaningBroomBlock
+import daio7771.everytunnel.chapter2.level1.platform.ManholeBlock
 import daio7771.everytunnel.chapter2.level1.platform.NonameTerminalBlock
 import daio7771.everytunnel.chapter2.level1.platform.SampleTubeBlock
 import daio7771.everytunnel.chapter2.level1.platform.TimeClockBlock
@@ -90,6 +91,9 @@ object Ch2Blocks {
     val FILM_LIGHT: Block = register("film_light", PropBlock(ModBlocks.props(MapColor.BLACK, ModSoundGroups.METAL_PIPE).luminance { 12 }, listOf(box(5, 0, 5, 11, 16, 11))))
     val FILM_CAMERA: Block = register("film_camera", PropBlock(ModBlocks.props(MapColor.BLACK, ModSoundGroups.METAL_PIPE), listOf(box(5, 0, 5, 11, 16, 11))))
     val ROWAN_PORTRAIT: Block = register("rowan_portrait", PortraitBlock(ModBlocks.props(MapColor.BROWN, ModSoundGroups.WOOD).noCollision(), listOf(box(0, 0, 15, 16, 16, 16))))
+
+    /** The emergency manhole in the basement's floor, the way out when the player is locked in after the overtime (`Ch2L1EndingHooks`). */
+    val MANHOLE: Block = register("manhole", ManholeBlock(ModBlocks.props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL).nonOpaque()))
 
     /** The LAB's ceiling lights after Rowan's office (`Ch2L1OfficeHooks`): the lamp switched off, and a faint red emergency one here and there. */
     val FACTORY_LIGHT_OFF: Block = register("factory_light_off", Block(ModBlocks.props(MapColor.GRAY, ModSoundGroups.PLASTIC)))

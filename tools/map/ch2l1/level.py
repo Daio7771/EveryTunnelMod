@@ -297,6 +297,9 @@ BASEMENT_DIRT = [(73, 42), (77, 45), (68, 45), (84, 49), (74, 50), (67, 53), (79
 # from the shelves, a chalk "???" over it. The aux lab's strange recording is on it (act3.json's `basement` computer).
 BASEMENT_DESK = [(77, 62), (78, 62)]
 BASEMENT_COMPUTER = (78, BASEMENT_Y + 1, 62)
+# The way out when the player is locked in after the overtime: an emergency manhole in the floor of the basement's south-east corner, past
+# the shelves (its block is the floor's; the anchor `manhole` stands on its lid).
+MANHOLE = (86, BASEMENT_Y - 1, 60)
 BASEMENT_THINGS = {
     (75, BASEMENT_Y, 41): "wet_floor_sign[facing=north]",
     (66, BASEMENT_Y + 3, 43): "director_mask[facing=south]",
@@ -675,6 +678,7 @@ def phase9_props():
     out[BASEMENT_COMPUTER] = MOD + "noname_terminal[facing=north]"
     for i, (x, z) in enumerate(BASEMENT_DIRT):
         out[(x, BASEMENT_Y, z)] = MOD + f"dirt_spot[facing={FACINGS[i % 4]}]"
+    out[MANHOLE] = MOD + "manhole[open=false]"
     for cell, facing, *_ in WALL_MESSAGES:
         out[cell] = MOD + f"wall_message[facing={facing}]"
     return out
@@ -960,6 +964,7 @@ def named_places(level):
     add("centrifuge_block", CENTRIFUGE[0] + 0.5, CENTRIFUGE[2] + 0.5, 0, False, y=float(CENTRIFUGE[1]))
     add("gauge_terminal_block", GAUGE_TERMINAL[0] + 0.5, GAUGE_TERMINAL[2] + 0.5, 0, False, y=float(GAUGE_TERMINAL[1]))
     add("basement_computer", BASEMENT_COMPUTER[0] + 0.5, BASEMENT_COMPUTER[2] + 0.5, 0, False, y=float(BASEMENT_COMPUTER[1]))
+    add("manhole", MANHOLE[0] + 0.5, MANHOLE[2] + 0.5, 0, False, y=float(BASEMENT_Y))
 
     zones = []
 
@@ -1027,9 +1032,13 @@ def check(level):
                     raise SystemExit(f"door {door[0]} opens onto no air")
             elif (a[0], 0, a[1]) not in air or (b[0], 0, b[1]) not in air:
                 raise SystemExit(f"door {door[0]} does not join two spaces at {a} and {b}")
-    # Every prop stands in air; the cameras hang in the last layer of their own space, and none in the lockers.
+    # Every prop stands in air (the manhole is in the floor); the cameras hang in the last layer of their own space, and none in the lockers.
     solid_props = props()
     for (x, y, z), block in solid_props.items():
+        if (x, y, z) == MANHOLE:                                   # the one prop that is a block of a floor, under a space
+            if (x, y + 1, z) not in air:
+                raise SystemExit(f"{block} at {(x, y, z)} is not under a space")
+            continue
         if (x, y, z) not in air:
             raise SystemExit(f"{block} at {(x, y, z)} is not in a space")
     for space, cameras in CAMERAS.items():

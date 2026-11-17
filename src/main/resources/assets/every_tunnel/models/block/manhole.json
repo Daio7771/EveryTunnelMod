@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "l": "every_tunnel:block/manhole_lid",
+    "s": "every_tunnel:block/manhole_shaft",
+    "g": "every_tunnel:block/manhole_rungs",
+    "d": "every_tunnel:block/manhole_dark",
+    "particle": "every_tunnel:block/manhole_lid"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#s"
+        },
+        "east": {
+          "texture": "#s"
+        },
+        "south": {
+          "texture": "#s"
+        },
+        "west": {
+          "texture": "#s"
+        },
+        "up": {
+          "texture": "#l"
+        },
+        "down": {
+          "texture": "#s"
+        }
+      }
+    }
+  ]
+}

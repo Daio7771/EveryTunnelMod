@@ -7,7 +7,8 @@ who "fell ill", three acts of tasks, a meeting and sneaking, ending in the super
 (0 to 11), one at a time, on the **private** branch `chapter-2/level-1` (pushed only to the remote `private`, never to
 `origin`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 11, the QA pass, done: the level is
 finished.** It is reached from the main menu (Chapter 2, NEW GAME: the prologue, then the factory) and played from the clock to its end,
-the basement swept and back to the menu, every room furnished and peopled. Level 2 is next; both are published together as a demo.
+the basement swept, locked in, and down the emergency manhole back to the menu, every room furnished and peopled. Level 2 (the sewers
+and old catacombs) is next and begins down that manhole; both are published together as a demo.
 
 **How it is reached.** The main menu's Chapter 2, NEW GAME: the prologue (skippable), then the factory. The screen is black from
 the world's loading until the prologue begins, and the black of its end stays until the player stands in the factory. The level is not saved: it opens the same world as Chapter 1's saved game, so
@@ -36,7 +37,8 @@ takes everyone back there.
 | `ACT3_CUTSCENE` | The office cinematic, from the second paper closed |
 | `ACT3_OVERTIME` | After the office, with the unpaid overtime pass: the way to the sealed zone is open |
 | `ACT3_BASEMENT` | Through the sealed door, which slammed behind: the overtime, sweeping the basement |
-| `DONE` | The basement swept: its lights went out, and the game went back to the menu |
+| `ACT3_LOCKED_IN` | The basement swept: its lights went out and the sealed door was bolted from outside; the way out is the manhole |
+| `DONE` | Down the emergency manhole: the game went back to the menu (Level 2 will follow from here) |
 
 `level1.platform.Ch2L1` is the only door to the state: `setState(player, state, reason)` saves it, logs `Chapter 2 Level 1: <player>
 goes A -> B (<reason>)` and tells the listeners; `skip(player)` moves to the next one. A system of the level registers
@@ -470,7 +472,7 @@ The LAB will have two more tasks once Level 1 is decorated.
 ## The sealed zone and the end (phase 9)
 
 `act3.json`'s `overtime` (`level1.core.Ch2L1Overtime`), the overtime's task in `tasks.json`, `level1.platform.Ch2L1Act3Hooks` (the door),
-`Ch2L1TaskHooks` (the sweeping), `Ch2L1EndingHooks` and the client's `Ch2L1EndingOverlay` (the end).
+`Ch2L1TaskHooks` (the sweeping), `Ch2L1EndingHooks` (locked in, the manhole, the end) and the client's `Ch2L1EndingOverlay` (the end).
 
 - **The sealed door** opens at its badge reader on the LAB's side (`sealed_reader`) with Rowan's pass, in `ACT3_OVERTIME` only. It is not
   Level 2 yet: behind it is a landing (`sealed_corridor`) with two ways on. East, the way to the factory's other part, barred and closed for
@@ -484,11 +486,22 @@ The LAB will have two more tasks once Level 1 is decorated.
   terminal under a chalk "???" (see Act 3's computers: the strange recording and a ciphered note). The broom leans by
   the foot of the stairs; its eight patches of dirt are swept as task 3's are (`basement_broom_block`, `basement_dirt_spots`, the counters
   `basement_broom` and `basement_swept`, the guide arrow over the next one).
-- **The last patch ends the level** (`DONE`): the counter `completed` is set (the plan's `ch2.l1.completed`), the basement's lights go out
-  with a thud (`Ch2L1Build.zoneLights`, as the LAB's after the office), and `dark_seconds` (3) later the screen fades to black over
-  `fade_seconds` (2.5), the closing text (`ending.text`) stays `text_seconds` (6), and the world is left, saved, for the main menu. Level 1
-  is not published alone, so nothing follows it yet. Going back before `DONE` (a command) lights the basement again; going back to the
-  overtime or before it shuts the sealed door and turns its reader red.
+- **The last patch locks the player in** (`ACT3_LOCKED_IN`): the basement's lights go out with a thud (`Ch2L1Build.zoneLights`, as the
+  LAB's after the office), and a moment later the sealed door up the stairs is bolted from outside (`block.ch2l1.lock_shut`, a dry clack
+  heard from below). Nobody came back for the new hire; the flashlight is all the light there is. The objective is "Go home".
+- **Trying the sealed door** from the landing says "Locked from the outside." and sets the counter `a3_tried_door`: the objective becomes
+  "Find another way out" and the guide arrow points at once at the **emergency manhole** in the floor of the basement's south-east corner,
+  past the shelves (`manhole`, a block of the floor: a round cast-iron lid in a square frame, EMERGENCY EXIT stencilled on it in a worn
+  yellow; its anchor `manhole` stands on the lid).
+- **The lid** comes up with a click held on it for `lift_seconds` (3): a bar ("Lifting the lid..."), iron grinding on concrete
+  (`block.ch2l1.manhole_scrape`), then a clang as it falls aside (`block.ch2l1.manhole_open`; counter `a3_manhole_open`). Open, the block
+  is a hole with a rim, a dark shaft with rungs and the lid slid aside on the floor; it can be clicked before the door is tried too.
+- **Down it ends the level** (`DONE`): a click on the open hole, or stepping into it. The player is put in the hole looking down, the
+  counter `completed` is set (the plan's `ch2.l1.completed`), the rungs are heard (`block.ch2l1.ladder`), and `dark_seconds` (1.5) later
+  the screen fades to black over `fade_seconds` (2.5), the closing text (`ending.text`) stays `text_seconds` (6), and the world is left,
+  saved, for the main menu. Level 2, the sewers and old catacombs, will begin down this manhole. Going back before `ACT3_LOCKED_IN` (a
+  command) lights the basement again and shuts the manhole; going back to the overtime or before it shuts the sealed door and turns its
+  reader red.
 
 ## Safety nets (phase 11)
 
@@ -497,7 +510,7 @@ What the QA pass added so that a player cannot get stuck:
 - **Key items** (`Ch2L1KeyItems`): the broom, the reagent bottles, the badge's copy and Rowan's pass cannot be lost. Every second, one
   lying on the ground in the level is taken away, and a player who should hold one by their state and counters and does not gets it back.
 - **Leaving the world mid-scene**: back in the middle of the office's cinematic, it begins again (`Ch2L1OfficeHooks`, after 2 s);
-  back at the end, the basement goes dark and the ending plays again (`Ch2L1EndingHooks`).
+  back locked in, the basement is dark again and the manhole as it was; back at the end, the ending plays again (`Ch2L1EndingHooks`).
 - **Stray workers** (`Ch2L1Npcs`): one that has fallen out of the level's box is taken away and put back at the next check.
 - **The way back to Chapter 1** (`Ch2L1Return`): see "How it is reached" at the top.
 

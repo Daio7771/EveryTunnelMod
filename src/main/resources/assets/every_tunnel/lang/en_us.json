@@ -550,6 +550,8 @@
   "every_tunnel.ch2.l1.objective.explore_office": "Find a way into the office",
   "every_tunnel.ch2.l1.objective.overtime": "Overtime: sealed zone",
   "every_tunnel.ch2.l1.objective.basement": "Overtime: sweep the basement",
+  "every_tunnel.ch2.l1.objective.go_home": "Go home",
+  "every_tunnel.ch2.l1.objective.way_out": "Find another way out",
   "every_tunnel.ch2.l1.restricted_door": "Restricted access",
   "every_tunnel.ch2.l1.chamber_log": "SEALED CHAMBER 02 - OBSERVATION LOG\nSubject: former member of staff, Research. Badge withdrawn.\n\nDay 1: Brought down from the main lab after the incident at his bench. Standing. Does not react to light.\nDay 9: Reacts to sound only. Soft soles in this room from now on.\nDay 31: Takes no food. His weight does not change.\nDay 64: Has turned to face the back of the cell. Has not turned round since.\nDay 118: No change. Payroll still lists him on sick leave.\n\nDo not talk near the glass.",
   "every_tunnel.ch2.l1.authorization": "CONTAINMENT AUTHORIZATION - CHAMBER 02\nRequested by: Auxiliary Lab, night shift.\n\nMeasure: containment, indefinite. No transfer to a hospital. No contact with the family.\nOfficial record: sick leave, renewed every month.\nReason: the subject is of value to the programme beyond the sealed zone.\n\nAuthorized by the Supervisor.\nPersonal code: 4719\n- Rowan",
@@ -607,6 +609,7 @@
   "every_tunnel.ch2.l1.hold.pouring": "Pouring...",
   "every_tunnel.ch2.l1.gauge.hint": "Log the speed shown here at the terminal beside it.",
   "every_tunnel.ch2.l1.hold.sweeping": "Sweeping...",
+  "every_tunnel.ch2.l1.hold.lifting": "Lifting the lid...",
   "every_tunnel.ch2.l1.os.title": "NONAME OS",
   "every_tunnel.ch2.l1.os.version": "v4.2",
   "every_tunnel.ch2.l1.os.registry": "SAMPLE REGISTRY",
@@ -634,6 +637,7 @@
   "every_tunnel.ch2.l1.reader.denied": "Access denied: lab badge required.",
   "every_tunnel.ch2.l1.reader.granted": "Access granted.",
   "every_tunnel.ch2.l1.door_locked": "Locked.",
+  "every_tunnel.ch2.l1.door_locked_outside": "Locked from the outside.",
   "every_tunnel.ch2.l1.sealed_door": "Sealed. Supervisor's card required.",
   "every_tunnel.ch2.l1.keypad.title": "Keypad",
   "every_tunnel.ch2.l1.keypad.open": "OPEN",
@@ -712,5 +716,6 @@
   "block.every_tunnel.reagent_bottle_yellow": "Reagent Bottle (Yellow)",
   "block.every_tunnel.reagent_bottle_red": "Reagent Bottle (Red)",
   "block.every_tunnel.mixing_tank": "Mixing Tank",
-  "block.every_tunnel.centrifuge": "Centrifuge"
+  "block.every_tunnel.centrifuge": "Centrifuge",
+  "block.every_tunnel.manhole": "Emergency Manhole"
 }

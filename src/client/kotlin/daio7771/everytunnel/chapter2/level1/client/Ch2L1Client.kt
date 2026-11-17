@@ -30,7 +30,8 @@ object Ch2L1Client {
 
     /**
      * The lang key of the objective to show now, or null: not in the level, or the state has none. In Act 3's exploring it moves on with
-     * what the player has done ([Ch2L1Act3.objective]: the auxiliary lab, the way into the office, searching it).
+     * what the player has done ([Ch2L1Act3.objective]: the auxiliary lab, the way into the office, searching it); locked in after the
+     * overtime, from going home to another way out once the door has been tried ([Ch2L1Overtime.objective]).
      */
     fun objectiveKey(): String? {
         if (!active()) return null
@@ -38,6 +39,9 @@ object Ch2L1Client {
         val player = MinecraftClient.getInstance().player
         if (state == Ch2L1State.ACT3_EXPLORE && player != null) {
             return Ch2L1Objectives.PREFIX + Ch2L1DataLoader.act3.objective { Ch2Progress.ch2L1Counter(player, it) }
+        }
+        if (state == Ch2L1State.ACT3_LOCKED_IN && player != null) {
+            return Ch2L1Objectives.PREFIX + Ch2L1DataLoader.act3.overtime.objective { Ch2Progress.ch2L1Counter(player, it) }
         }
         return Ch2L1Objectives.keyFor(state)
     }
