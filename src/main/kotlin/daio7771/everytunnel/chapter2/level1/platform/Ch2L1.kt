@@ -1,5 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
+import daio7771.everytunnel.chapter2.platform.MapBuild
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.config.ConfigManager
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
@@ -100,9 +101,9 @@ object Ch2L1 {
             server.playerManager.getPlayer(id)?.let(::enterNow)
         }
         when (asked) {
-            Ch2L1Build.Asked.BUSY -> return "The level is being cleared: try again in a moment."
-            Ch2L1Build.Asked.FAILED -> return "The level cannot be built: ${Ch2L1Build.lastProblem}"
-            Ch2L1Build.Asked.STARTED, Ch2L1Build.Asked.JOINED, Ch2L1Build.Asked.BUILT -> {}
+            MapBuild.Asked.BUSY -> return "The level is being cleared: try again in a moment."
+            MapBuild.Asked.FAILED -> return "The level cannot be built: ${Ch2L1Build.lastProblem}"
+            MapBuild.Asked.STARTED, MapBuild.Asked.JOINED, MapBuild.Asked.BUILT -> {}
         }
         return null
     }

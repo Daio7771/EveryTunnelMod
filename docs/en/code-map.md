@@ -365,6 +365,9 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `platform/Ch2Items.kt` | Chapter 2's items: the broom |
 | `platform/Ch2Sounds.kt` | Chapter 2's sound events played from code |
 | `platform/Ch2Entities.kt` | Chapter 2's entity types: the factory's people, the prologue's scientist |
+| `core/MapPlan.kt` | A level's map as a plan to build (`map.json`, from its generator): the box to empty, the boxes of one block or of a weighted mix (`pick`, the generators' `cell_hash` bit for bit), the lamps, the wall texts, the gates, the origin, the fingerprint |
+| `platform/MapBuild.kt` | Builds a level's plan in batches (8,000 cells written a tick, a cell found empty an eighth of one), empties it, remembers which plan it built, checks every block first; one instance per level |
+| `platform/Ch2DataReload.kt` | What `/et reload` reads again besides Level 1's data: each later level's loader |
 
 ### The prologue: `chapter2/prologue/` (`core/`, `platform/`)
 
@@ -400,7 +403,6 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `level1/core/Ch2L1Guide.kt` | Where the guide arrow points in each step (the clock, the tubes, the terminal, the analyzer, the broom, the dirt, Act 3's next thing to do), the nearest of them, when it hides, how long it waits in Act 3 |
 | `level1/core/Ch2L1Wiring.kt` | Checks that what `tasks.json`, `speakers.json`, `npcs.json`, `cutscenes/meeting.json` and `act3.json` name is in `anchors.json` |
 | `level1/core/Ch2L1Objectives.kt` | The objective the panel shows in each state: one lang key per state, none in the cinematics and at the end |
-| `level1/core/Ch2L1MapPlan.kt` | The level's map as a plan to build: the box to empty, the boxes of one block, the lamps, what its wall texts say, the origin, the plan's fingerprint (from `map.json`) |
 
 ### Level 1, Minecraft glue: `chapter2/level1/platform/`
 
@@ -409,7 +411,7 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `level1/platform/Ch2L1.kt` | Chapter 2's Level 1: each player's state and whether they are playing it (the rules follow them: `enter`, `leave`), kept in their progress; every change goes through it and reaches the listeners |
 | `level1/platform/Ch2L1DataLoader.kt` | Reads the level's JSON files (the config folder's copy, else the jar's) at launch and on `/et reload`, and holds the current data |
 | `level1/platform/Ch2L1Commands.kt` | `/et reload` and `/et ch2 l1 enter\|leave\|build\|unbuild\|anchors\|goto\|state\|skip\|npc\|tasks\|act3\|patrols\|intro\|say` (development runs only) |
-| `level1/platform/Ch2L1Build.kt` | Builds the level from its plan in steps of 8,000 cells a tick (and empties it), remembers which plan it built, checks every block first |
+| `level1/platform/Ch2L1Build.kt` | The level's `MapBuild` (its plan, `data/every_tunnel/ch2/l1/map.json`) and its lamps turned down and up by zone |
 | `level1/platform/TimeClockBlock.kt` | The time clock of Chapter 2's Level 1: a card reader (same models) that clocks the new hire in, red and then green |
 | `level1/platform/Ch2L1TaskBlocks.kt` | The sample tube, NonameOS's terminal, the analyzer, the leaning broom and the dirt of Chapter 2's tasks: each hands its use to `Ch2L1TaskHooks` |
 | `level1/platform/Ch2L1TaskHooks.kt` | The three tasks of Act 1: the uses, the counters in the progress, the packets, and the world's props following the state |
@@ -425,6 +427,15 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `level1/platform/Ch2L1KeyItems.kt` | The level's key items cannot be lost: those lying in the level are taken away, and a player who should hold one gets it back |
 | `level1/platform/Ch2L1Return.kt` | The way back to Chapter 1: after the menu's prologue, where the player stood and what they carried are kept; leaving the world (at the end or halfway) gives them back, out of the level |
 | `level1/platform/Ch2L1Npcs.kt` | The factory's people: the workers put in while the level is played and the LAB's taken out, the talks between pairs, the groups, and the developer's `/et ch2 l1 npc` |
+
+### Level 2: `chapter2/level2/` (`core/`, `platform/`)
+
+| File | What it does |
+|---|---|
+| `level2/core/Ch2L2Data.kt` | The level's data as last read (phase 1: its anchors, Level 1's format) and how each file's copy is chosen (the config folder's while usable, else the jar's); `Ch2L2Files`, the files and where they live |
+| `level2/platform/Ch2L2DataLoader.kt` | Reads the level's JSON files at launch and on `/et reload` (through `Ch2DataReload`), and holds the current data |
+| `level2/platform/Ch2L2Build.kt` | The level's `MapBuild` (its plan, `data/every_tunnel/ch2/l2/map.json`, at (1024, 64, 1280)) |
+| `level2/platform/Ch2L2Commands.kt` | `/et ch2 l2 build\|unbuild\|anchors\|goto` (development runs only) |
 
 ### Client: `client/kotlin/daio7771/everytunnel/chapter2/` (`prologue/client/`, `level1/client/`)
 
@@ -468,6 +479,7 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 | `assets/every_tunnel/geo/`, `animations/` | The Pale man's GeckoLib files |
 | `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | The menu scene (from `tools/map/map_generator.py`) |
 | `data/every_tunnel/loot_tables/` | Block loot tables |
+| `data/every_tunnel/ch2/l2/` | Chapter 2's Level 2: `map.json`, `anchors.json` and `flood.json`, written by `tools/map/ch2l2/generate.py` from its `layout.json` |
 | `data/every_tunnel/ch2/l1/` | The defaults of Chapter 2's Level 1 data: `anchors.json` and `map.json` (written by `tools/map/ch2l1/generate.py`), `speakers.json`, `tasks.json`, `patrols.json`, `npcs.json`, `cutscenes/*.json` |
 
 ## Tests: `test/kotlin/daio7771/everytunnel/`

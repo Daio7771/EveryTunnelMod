@@ -73,9 +73,11 @@ progress, the creatures, the blocks of Chapter 1). A later chapter lives apart, 
 inside, one folder per level:
 
 ```
-daio7771.everytunnel.chapter2            Chapter2 (entrypoint), core/ (its progress), platform/ (its registries, its progress component)
+daio7771.everytunnel.chapter2            Chapter2 (entrypoint), core/ (its progress, its levels' map plans), platform/ (its registries, its progress
+                                         component, the build of a level's map)
                         .prologue        core/  platform/            (client: chapter2.prologue.client)
                         .level1          core/  platform/            (client: chapter2.level1.client)
+                        .level2          core/  platform/
 ```
 
 The rule: **the base game never names a chapter, and a chapter never names another.** `ChapterBoundaryTest` checks every source
@@ -180,6 +182,7 @@ What the mod remembers is saved with the world, in `<world>/data/`, as vanilla
 | `every_tunnel_pale_men.dat` | `PaleManSpawner` | Which Pale man spawn points have spawned |
 | `every_tunnel_lights.dat` | `KeycardHooks` | The lights the keycard put out, to restore them |
 | `every_tunnel_ch2_l1.dat` | `Ch2L1Build` | Which map plan Chapter 2's Level 1 was built from (its fingerprint), so it is rebuilt when the plan changes |
+| `every_tunnel_ch2_l2.dat` | `Ch2L2Build` | The same for Chapter 2's Level 2, the catacombs |
 
 `packMapWorld` leaves all of these out of the release jar, so a fresh install starts clean.
 
@@ -189,8 +192,8 @@ classes that touch the library). It survives death and reaches that player's cli
 
 Outside the world, in the game's `config/` folder: `every_tunnel/gameplay.json` (the
 gameplay config) and `every_tunnel/shader_settings_applied.txt` (which shader packs
-`ShaderSettings` has already set up), and, only when the developer puts them there, `every_tunnel/ch2/l1/*.json` (edited
-copies of Chapter 2's Level 1 data, read on `/et reload`).
+`ShaderSettings` has already set up), and, only when the developer puts them there, `every_tunnel/ch2/l1/*.json` and `every_tunnel/ch2/l2/*.json` (edited
+copies of the data of Chapter 2's Levels 1 and 2, read on `/et reload`).
 
 ## Mixins
 

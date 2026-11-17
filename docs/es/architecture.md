@@ -75,9 +75,11 @@ cinemáticas, el progreso, las criaturas, los bloques del Chapter 1). Un capítu
 mismas capas dentro, una carpeta por nivel:
 
 ```
-daio7771.everytunnel.chapter2            Chapter2 (entrypoint), core/ (su progreso), platform/ (sus registros, su componente de progreso)
+daio7771.everytunnel.chapter2            Chapter2 (entrypoint), core/ (su progreso, los planos de mapa de sus niveles), platform/ (sus registros,
+                                         su componente de progreso, la construcción del mapa de un nivel)
                         .prologue        core/  platform/            (cliente: chapter2.prologue.client)
                         .level1          core/  platform/            (cliente: chapter2.level1.client)
+                        .level2          core/  platform/
 ```
 
 La regla: **el juego base nunca nombra a un capítulo, y un capítulo nunca nombra a otro.** `ChapterBoundaryTest` revisa cada
@@ -184,6 +186,7 @@ Lo que el mod recuerda se guarda con el mundo, en `<mundo>/data/`, como archivos
 | `every_tunnel_pale_men.dat` | `PaleManSpawner` | Qué puntos de aparición del Pale man ya lo generaron |
 | `every_tunnel_lights.dat` | `KeycardHooks` | Las luces que apagó la tarjeta, para restaurarlas |
 | `every_tunnel_ch2_l1.dat` | `Ch2L1Build` | De qué plan de mapa se construyó el Nivel 1 del Chapter 2 (su huella), para reconstruirlo si el plan cambia |
+| `every_tunnel_ch2_l2.dat` | `Ch2L2Build` | Lo mismo para el Nivel 2 del Chapter 2, las catacumbas |
 
 `packMapWorld` deja todos estos fuera del jar de release, así que una instalación nueva
 empieza limpia.
@@ -194,8 +197,8 @@ sobre Cardinal Components (`platform.CardinalProgress`; el Chapter 2 guarda su p
 
 Fuera del mundo, en la carpeta `config/` del juego: `every_tunnel/gameplay.json` (la
 configuración de juego) y `every_tunnel/shader_settings_applied.txt` (qué packs de shaders
-ya ha configurado `ShaderSettings`) y, solo si el desarrollador los pone ahí, `every_tunnel/ch2/l1/*.json` (copias
-editadas de los datos del Nivel 1 del Chapter 2, que se leen con `/et reload`).
+ya ha configurado `ShaderSettings`) y, solo si el desarrollador los pone ahí, `every_tunnel/ch2/l1/*.json` y `every_tunnel/ch2/l2/*.json` (copias
+editadas de los datos de los Niveles 1 y 2 del Chapter 2, que se leen con `/et reload`).
 
 ## Mixins
 

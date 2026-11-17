@@ -130,7 +130,8 @@ código y la tarjeta de Rowan); y una más igual en el extremo este del pasillo 
 pasillo principal y al LAB, y el reloj de fichar cuelga de la pared sur de la entrada.
 
 **Dónde y cómo.** El plan se levanta en (1024, 64, 1024) del mundo del mapa, libre de los niveles del Chapter 1 y de la sala del
-prólogo. `level1.platform.Ch2L1Build` lo pone ahí a razón de 8.000 celdas por tick, con los chunks cargados (un segundo o dos, sin
+prólogo. `level1.platform.Ch2L1Build` lo pone ahí con el `platform.MapBuild` del capítulo (compartido con el Nivel 2 desde su fase 1;
+el formato del plan es `core.MapPlan`), 8.000 celdas escritas por tick, con los chunks cargados (un segundo o dos, sin
 tirones), vaciando antes su caja; recuerda la huella del plan que construyó (`data/every_tunnel_ch2_l1.dat`), así que
 `Ch2L1.enter` solo construye el nivel si falta o si el plan cambió. Cada bloque se busca antes de tocar el mundo; un plan con
 un bloque o un estado que el juego no conoce falla con un mensaje y deja el mundo como estaba. `/et ch2 l1 build` construye de

@@ -365,6 +365,9 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `platform/Ch2Items.kt` | Los objetos del Chapter 2: la escoba |
 | `platform/Ch2Sounds.kt` | Los eventos de sonido del Chapter 2 que reproduce el código |
 | `platform/Ch2Entities.kt` | Los tipos de entidad del Chapter 2: la gente de la fábrica, el científico del prólogo |
+| `core/MapPlan.kt` | El mapa de un nivel como plan que construir (`map.json`, de su generador): la caja que vaciar, las cajas de un bloque o de una mezcla con pesos (`pick`, igual bit a bit que el `cell_hash` de los generadores), las lámparas, los textos de pared, las compuertas, el origen, la huella |
+| `platform/MapBuild.kt` | Construye el plan de un nivel por tandas (8.000 celdas escritas por tick; una celda que ya está vacía cuenta un octavo), lo vacía, recuerda qué plan construyó, comprueba antes cada bloque; una instancia por nivel |
+| `platform/Ch2DataReload.kt` | Lo que `/et reload` vuelve a leer además de los datos del Nivel 1: el lector de cada nivel posterior |
 
 ### El prólogo: `chapter2/prologue/` (`core/`, `platform/`)
 
@@ -400,7 +403,6 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `level1/core/Ch2L1Guide.kt` | Adónde apunta la flecha guía en cada paso (el reloj, los tubos, el terminal, el analizador, la escoba, la suciedad, lo siguiente del Acto 3), la más cercana, cuándo se oculta, cuánto espera en el Acto 3 |
 | `level1/core/Ch2L1Wiring.kt` | Comprueba que lo que nombran `tasks.json`, `speakers.json`, `npcs.json`, `cutscenes/meeting.json` y `act3.json` está en `anchors.json` |
 | `level1/core/Ch2L1Objectives.kt` | El objetivo que muestra el panel en cada estado: una clave de lang por estado, ninguna en las cinemáticas ni al final |
-| `level1/core/Ch2L1MapPlan.kt` | El mapa del nivel como plan que construir: la caja que vaciar, las cajas de un bloque, las lámparas, qué dicen sus textos de pared, el origen, la huella del plan (de `map.json`) |
 
 ### Nivel 1, pegamento con Minecraft: `chapter2/level1/platform/`
 
@@ -409,7 +411,7 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `level1/platform/Ch2L1.kt` | El Nivel 1 del Chapter 2: el estado de cada jugador y si lo está jugando (las reglas le siguen: `enter`, `leave`), guardados en su progreso; todo cambio pasa por aquí y llega a los oyentes |
 | `level1/platform/Ch2L1DataLoader.kt` | Lee los archivos JSON del nivel (la copia de la carpeta de config, si no la del jar) al arrancar y con `/et reload`, y guarda los datos actuales |
 | `level1/platform/Ch2L1Commands.kt` | `/et reload` y `/et ch2 l1 enter\|leave\|build\|unbuild\|anchors\|goto\|state\|skip\|npc\|tasks\|act3\|patrols\|intro\|say` (solo ejecuciones de desarrollo) |
-| `level1/platform/Ch2L1Build.kt` | Construye el nivel desde su plan a razón de 8.000 celdas por tick (y lo vacía), recuerda qué plan construyó, comprueba antes cada bloque |
+| `level1/platform/Ch2L1Build.kt` | El `MapBuild` del nivel (su plan, `data/every_tunnel/ch2/l1/map.json`) y sus lámparas apagadas y encendidas por zona |
 | `level1/platform/TimeClockBlock.kt` | El reloj de fichar del Nivel 1 del Chapter 2: un lector de tarjetas (mismos modelos) que ficha al nuevo empleado, rojo y luego verde |
 | `level1/platform/Ch2L1TaskBlocks.kt` | El tubo de muestra, el terminal de NonameOS, el analizador, la escoba apoyada y la suciedad de las tareas del Capítulo 2: cada uno pasa su uso a `Ch2L1TaskHooks` |
 | `level1/platform/Ch2L1TaskHooks.kt` | Las tres tareas del Acto 1: los usos, los contadores en el progreso, los paquetes y los objetos del mundo siguiendo al estado |
@@ -425,6 +427,15 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `level1/platform/Ch2L1KeyItems.kt` | Los objetos clave del nivel no se pierden: se retiran los tirados en el nivel, y quien debería llevar uno lo recupera |
 | `level1/platform/Ch2L1Return.kt` | La vuelta al Capítulo 1: tras el prólogo del menú se guarda dónde estaba el jugador y lo que llevaba; al salir del mundo (al final o a medias) se le devuelve, fuera del nivel |
 | `level1/platform/Ch2L1Npcs.kt` | La gente de la fábrica: los trabajadores que se ponen mientras se juega el nivel y los del LAB que se quitan, las charlas entre parejas, los grupos y el `/et ch2 l1 npc` del desarrollador |
+
+### Nivel 2: `chapter2/level2/` (`core/`, `platform/`)
+
+| Archivo | Qué hace |
+|---|---|
+| `level2/core/Ch2L2Data.kt` | Los datos del nivel tal como se leyeron (fase 1: sus anclas, en el formato del Nivel 1) y cómo se elige la copia de cada archivo (la de la carpeta de configuración mientras sirva, si no la del jar); `Ch2L2Files`, los archivos y dónde viven |
+| `level2/platform/Ch2L2DataLoader.kt` | Lee los archivos JSON del nivel al arrancar y con `/et reload` (a través de `Ch2DataReload`) y guarda los datos actuales |
+| `level2/platform/Ch2L2Build.kt` | El `MapBuild` del nivel (su plan, `data/every_tunnel/ch2/l2/map.json`, en (1024, 64, 1280)) |
+| `level2/platform/Ch2L2Commands.kt` | `/et ch2 l2 build\|unbuild\|anchors\|goto` (solo en ejecuciones de desarrollo) |
 
 ### Cliente: `client/kotlin/daio7771/everytunnel/chapter2/` (`prologue/client/`, `level1/client/`)
 
@@ -468,6 +479,7 @@ Tiene sus propios entrypoints (`Chapter2`, `Chapter2Client`) y solo llega al jue
 | `assets/every_tunnel/geo/`, `animations/` | Los archivos de GeckoLib del Pale man |
 | `assets/every_tunnel/menu/`, `models/block/menu/`, `textures/block/menu/` | La escena del menú (de `tools/map/map_generator.py`) |
 | `data/every_tunnel/loot_tables/` | Loot tables de los bloques |
+| `data/every_tunnel/ch2/l2/` | El Nivel 2 del Chapter 2: `map.json`, `anchors.json` y `flood.json`, que escribe `tools/map/ch2l2/generate.py` a partir de su `layout.json` |
 | `data/every_tunnel/ch2/l1/` | Los valores por defecto de los datos del Nivel 1 del Chapter 2: `anchors.json` y `map.json` (los escribe `tools/map/ch2l1/generate.py`), `speakers.json`, `tasks.json`, `patrols.json`, `npcs.json`, `cutscenes/*.json` |
 
 ## Tests: `test/kotlin/daio7771/everytunnel/`

@@ -1,5 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.core
 
+import daio7771.everytunnel.chapter2.core.MapPlan
+import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Build
 import daio7771.everytunnel.chapter2.prologue.core.BlockSpec
 import daio7771.everytunnel.chapter2.prologue.core.Cell
 import java.io.File
@@ -12,7 +14,7 @@ import kotlin.test.assertTrue
 /** The map plan in the jar, as `tools/map/ch2l1/generate.py` wrote it, and how it fits the anchors beside it. */
 class Ch2L1MapPlanTest {
 
-    private val plan = Ch2L1MapPlan.load()
+    private val plan = MapPlan.load(Ch2L1Build.PLAN)
     private val assets = File("src/main/resources/assets/every_tunnel")
     private val anchors = Ch2L1DataParser.parse(emptyMap(), Ch2L1Files.readAllBundled()).data.anchors
 
@@ -252,8 +254,8 @@ class Ch2L1MapPlanTest {
 
     @Test
     fun `a plan with another content has another fingerprint`() {
-        val text = File("src/main/resources/${Ch2L1MapPlan.RESOURCE}").readText()
-        assertEquals(plan.fingerprint, Ch2L1MapPlan.parse(text).fingerprint)
-        assertNotEquals(plan.fingerprint, Ch2L1MapPlan.parse(text.replace("white_concrete", "gray_concrete")).fingerprint)
+        val text = File("src/main/resources/${Ch2L1Build.PLAN}").readText()
+        assertEquals(plan.fingerprint, MapPlan.parse(text).fingerprint)
+        assertNotEquals(plan.fingerprint, MapPlan.parse(text.replace("white_concrete", "gray_concrete")).fingerprint)
     }
 }

@@ -124,7 +124,8 @@ them at the corridor's east end that opens onto nothing. The three doors of the 
 time clock hangs on the entrance's south wall.
 
 **Where and how.** The plan stands at (1024, 64, 1024) of the map world, free of Chapter 1's levels and of the prologue's room.
-`level1.platform.Ch2L1Build` puts it there in steps of 8,000 cells a tick with the chunks kept loaded (a second or two, no stutter),
+`level1.platform.Ch2L1Build` puts it there through the chapter's `platform.MapBuild` (shared with Level 2 since its phase 1; the plan's
+format is `core.MapPlan`), 8,000 cells written a tick with the chunks kept loaded (a second or two, no stutter),
 first emptying its box; it remembers the fingerprint of the plan it built (`data/every_tunnel_ch2_l1.dat`), so `Ch2L1.enter`
 builds the level only when it is missing or the plan changed. Every block is looked up before the world is touched; a plan
 with a block or a state the game does not know fails with a message and leaves the world as it was. `/et ch2 l1 build` builds

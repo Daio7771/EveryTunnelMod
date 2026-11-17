@@ -1,5 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
+import daio7771.everytunnel.chapter2.platform.Ch2DataReload
+import daio7771.everytunnel.chapter2.platform.MapBuild
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Act3
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import com.mojang.brigadier.arguments.StringArgumentType
@@ -22,7 +24,8 @@ import daio7771.everytunnel.platform.DevWorlds
  * without playing the ones before it. **Only in the development environment**, like [DebugCommands]: a release
  * has none of them.
  *
- * - `/et reload`: reads the level's JSON files again ([Ch2L1DataLoader]) and says what is wrong with them.
+ * - `/et reload`: reads the level's JSON files again ([Ch2L1DataLoader]), and those of the chapter's later levels ([Ch2DataReload]), and
+ *   says what is wrong with them.
  * - `/et ch2 l1 enter`: you become a new hire of the factory ([Ch2L1.enter]): the level is built if it is not ([Ch2L1Build]), the
  *   level's rules apply to you (no flashlight, nothing hurts, free silent sprint, no bars; in Survival or Adventure), your
  *   pockets are emptied, the state is the start and you are at `spawn_clockin`. `/et ch2 l1 leave` ends it: the rules of the
@@ -143,6 +146,7 @@ object Ch2L1Commands {
     private fun reload(context: CommandContext<ServerCommandSource>): Int {
         val report = Ch2L1DataLoader.reload()
         report.lines().forEach { reply(context, it) }
+        Ch2DataReload.reloadAll().forEach { reply(context, it) }      // the chapter's later levels
         return if (report.problems.isEmpty()) 1 else 0
     }
 
@@ -345,17 +349,17 @@ object Ch2L1Commands {
         val source = context.source
         val asked = Ch2L1Build.ask(source.server, rebuild = true) { reply(context, "The factory is built.") }
         return when (asked) {
-            Ch2L1Build.Asked.STARTED -> { reply(context, "Building the factory (a second or two)..."); 1 }
-            Ch2L1Build.Asked.JOINED -> { reply(context, "It is being built already."); 1 }
-            Ch2L1Build.Asked.BUSY -> { reply(context, "The area is being cleared: try again in a moment."); 0 }
-            Ch2L1Build.Asked.FAILED -> { reply(context, "The plan cannot be built: ${Ch2L1Build.lastProblem}"); 0 }
-            Ch2L1Build.Asked.BUILT -> 1
+            MapBuild.Asked.STARTED -> { reply(context, "Building the factory (a second or two)..."); 1 }
+            MapBuild.Asked.JOINED -> { reply(context, "It is being built already."); 1 }
+            MapBuild.Asked.BUSY -> { reply(context, "The area is being cleared: try again in a moment."); 0 }
+            MapBuild.Asked.FAILED -> { reply(context, "The plan cannot be built: ${Ch2L1Build.lastProblem}"); 0 }
+            MapBuild.Asked.BUILT -> 1
         }
     }
 
     private fun unbuild(context: CommandContext<ServerCommandSource>): Int {
         val asked = Ch2L1Build.clear(context.source.server) { reply(context, "The area is empty.") }
-        if (asked == Ch2L1Build.Asked.BUSY) {
+        if (asked == MapBuild.Asked.BUSY) {
             reply(context, "The factory is being built or cleared: try again in a moment.")
             return 0
         }

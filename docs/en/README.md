@@ -32,6 +32,7 @@ Read them in this order the first time:
 | [Graphics](graphics.md) | With and without shaders, lights, brightness, textures, art direction |
 | [Cinematic system](cinematic-system.md) | The director's scene (guided camera, voice, subtitles, skipping), the fall, the final credits and Chapter 2's prologue |
 | [Chapter 2, Level 1](chapter-2-level-1.md) | The factory level, built in phases on a private branch: its state machine, its JSON data files (and how to tune them with `/et reload`) and its debug commands |
+| [Chapter 2, Level 2](chapter-2-level-2.md) | The catacombs under the factory, built in phases on a private branch: the map made from `layout.json` by its generator and checks, its data files and its debug commands |
 | [Python tools](tools.md) | The generators for map, sounds, blocks, entity art and GUI |
 | [Building and release](building-and-release.md) | Gradle tasks, dev worlds, the release jar |
 | [Debugging](debugging.md) | Debug commands and the `[playtest]` log |

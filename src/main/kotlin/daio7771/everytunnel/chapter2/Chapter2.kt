@@ -18,6 +18,9 @@ import daio7771.everytunnel.chapter2.level1.platform.Ch2L1LabTaskHooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Npcs
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1SpeakerHooks
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1TaskHooks
+import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Build
+import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Commands
+import daio7771.everytunnel.chapter2.level2.platform.Ch2L2DataLoader
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.platform.Ch2Items
@@ -33,7 +36,7 @@ import net.fabricmc.api.ModInitializer
 /**
  * Chapter 2's common (server + client) entrypoint, declared in `fabric.mod.json` after the base game's ([EveryTunnel], Chapter 1),
  * which runs first and never names this chapter. Everything of Chapter 2 is under `daio7771.everytunnel.chapter2`: the prologue
- * (`prologue`), the factory (`level1`) and what the chapter shares (`core`, `platform`: its registries and its progress). It hooks
+ * (`prologue`), the factory (`level1`), the catacombs (`level2`) and what the chapter shares (`core`, `platform`: its registries and its progress). It hooks
  * into the base game only through the base game's extension points: [PlayerRules] (what its levels change of the rules),
  * [ChapterRequest] (the menu's Chapter 2), `ProgressService.onReset` (a new game) and the cutscene view's kinds (client).
  */
@@ -84,6 +87,10 @@ object Chapter2 : ModInitializer {
         PrologueSceneHooks.register()
         PrologueCommand.register()
         Ch2L1Commands.register()
+        // Level 2, the catacombs (phase 1: the map, its anchors and the commands to walk it).
+        Ch2L2DataLoader.register()
+        Ch2L2Build.register()
+        Ch2L2Commands.register()
         EveryTunnel.LOGGER.info("${EveryTunnel.MOD_NAME}: Chapter 2 loaded")
     }
 }
