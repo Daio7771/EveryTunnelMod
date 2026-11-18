@@ -96,6 +96,10 @@ CUTS = [
     # every half second while the player drinks a water bottle.
     Cut("player.drink", "drinking_gulps.mp3", "One gulp while drinking a water bottle", "mono",
         segments=[(0.05, 0.6), (1.5, 2.0), (3.15, 3.65), (4.75, 5.3)], fade_in=0.02, fade_out=0.12, game_volume=0.8),
+    # Chapter 2 Level 2: the pipe the creature strikes in the pump room's first silence; from its landing (0.22 s) to the end.
+    Cut("event.ch2l2.pipe_fall", "metal_pipe_drop_2.mp3",
+        "The pipe landing in the pump room after its fall: an iron clang, its bounce and its rattle (plays where it lands)",
+        "mono", segments=[(0.22, 1.83)], fade_in=0.005, fade_out=0.35, peak_db=-1.0, attenuation=56),
     # CC BY 4.0, credited in CREDITS.md. The intro waits 25 s and then distorts and fades it
     # over 3 s, so only the first 30 s are needed.
     Cut("music.elevator", "local_forecast_elevator.mp3",

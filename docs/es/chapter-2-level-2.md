@@ -7,9 +7,9 @@ científico baja por la alcantarilla de emergencia del Nivel 1, solo, y busca un
 caza por las vibraciones del suelo en la sala de bombas, el Observant Guard del Capítulo 1 en las cámaras de abajo y una inundación en tres
 etapas camino de la estación de bombeo y la salida. Se construye por fases (de la 1 a la 7), una cada vez, en la rama **privada**
 `chapter-2/level-2` (sale de `chapter-2/level-1` y solo se sube al remoto `private`) hasta que se publiquen los Niveles 1 y 2 del capítulo.
-**En qué punto está: fase 3, Hunters, kit de supervivencia, botín y documentos.** Se llega bajando por la alcantarilla del Nivel 1 y se
+**En qué punto está: fase 4, la criatura de vibraciones y la bomba.** Se llega bajando por la alcantarilla del Nivel 1 y se
 recorre de la entrada a la salida con las barras de supervivencia; morir devuelve al último checkpoint, y el Capítulo 2 del menú lo
-continúa; el primer tramo ya tiene sus enemigos, recursos y documentos. Faltan la criatura, el Guard y la inundación.
+continúa; el primer tramo ya tiene sus enemigos, recursos y documentos, y la sala de bombas tiene su criatura y su bomba. Faltan el Guard y la inundación.
 
 Su código está en `daio7771.everytunnel.chapter2.level2` (`core`, Kotlin puro, y `platform`), aparte del juego base, que nunca lo nombra
 (véase [Arquitectura](architecture.md#capítulos)). Sus lugares con nombre usan el formato del Nivel 1 (`level1.core.Ch2L1AnchorsParser`); su
@@ -152,8 +152,8 @@ salvo los del desagüe (`Ch2L2MapPlanTest`).
 - **ningún sitio donde quedarse atrapado**: desde cualquier sitio al que se llegue desde la entrada se puede seguir llegando a la salida
   (un balcón sin su pretil, por ejemplo, dejaría caer al pozo sin salida);
 - **la sala de bombas** pide varios ciclos de la bomba: su camino más corto de lado a lado, nadando incluido, es de `min` bloques como
-  poco (56 ahora: el suelo lo cortan dos canales de cinco de ancho, más de lo que se salta corriendo, y sus escalerillas solo están junto
-  a los cruces);
+  poco (57 ahora: el suelo lo cortan dos canales de cinco de ancho, enjaulados: barrotes en sus bordes y una tapa de rejilla, así que nadie
+  entra ni los cruza);
 - **colocaciones**: el botín está en aire libre sobre algo sólido, cada ancla de nota está en un tablero de notas y cada ancla de Hunters
   existe;
 - las aberturas están despejadas: dos bloques de aire a través y sitio para estar a ambos lados;
@@ -172,7 +172,7 @@ luego tras cada etapa).
 | `collector_junction` | El balcón sobre el colector central, junto a la sala del medio de las galerías | M |
 | `hunter_galleries` | Las galerías: tres salas abiertas por el sur | M |
 | `pump_overlook` | El mirador de la sala de bombas: un bloque de hormigón enjaulado en su esquina noroeste | M |
-| `vibration_chamber` | La sala de bombas: dos canales cruzan su suelo, los cruces en extremos opuestos (un zigzag); la salida se ve desde el mirador | L |
+| `vibration_chamber` | La sala de bombas: dos canales enjaulados cruzan su suelo, los cruces en extremos opuestos (un zigzag); la salida se ve desde el mirador | L |
 | `lower_catacombs` | Las catacumbas y las galerías de abajo (sin nada al lado ahora) | L |
 | `observer_wall` | El vestíbulo (`observer_wall_face`: la pared de la que sale el Guard, provisional) | L |
 | `observer_chamber` | La sala de mantenimiento, sus cuatro trampas donde el dibujo tiene sus cuatro cuadrados (`trap_1` a `trap_4`) | L |
@@ -213,6 +213,9 @@ las anclas, y lo que está mal se avisa (`/et reload`).
 | `hunters` | `id`, `anchor`, `yaw` opcional, `until` opcional (un estado; por defecto `pump_room`): un grupo de Hunters puesto en el ancla |
 | `loot` | `id`, `item` (una clave de `LootSpawner.LOOT`: `battery`, `water`, `food_snack`, `wrench`...), `anchor`, `offset` [dx, dy, dz] bloques desde el bloque del ancla, `yaw` |
 | `notes` | `id`, `anchor` (el del tablero); el texto es `ch2_l2_<id>` |
+| `creature` | La criatura de vibraciones y la bomba (abajo) |
+
+**La criatura** (`level2.core.Ch2L2Creature`, `VibrationCreatureBrain`, `PumpCycle`; `platform.VibrationCreatureEntity`, `Ch2L2Pump`): el Stone Maw, 3,5 bloques de piedra gris (caja de colisión 1,6 x 3,5), en reposo en `creature.home`. Siente los pasos, saltos, aterrizajes y toques del jugador en las zonas de `floor_zones` (el mirador no es una) y la caída de la tubería, nunca sus propios pasos ni la bomba; ir agachado es suave, correr, saltar y aterrizar fuerte. Un paso suave: se acerca al acecho a `stalk_speed`, escucha `stalk_listen_seconds` y luego busca. Cualquier otro: `orient_seconds` girándose hacia él (chasquido de dientes; uno nuevo mueve el punto), luego el punto queda fijado y carga a `charge_speed` (`charge_speed_loud` si fue fuerte). En el punto, en el sitio más cercano al que llega o al tocar a un jugador (`touch_range`), alza los puños durante `windup_seconds` (la escapatoria) y el golpe hiere a quien esté entonces a menos de `contact_range` de su centro por `damage_fraction` de su vida máxima (dos matan; la vida se baja directamente, el daño de vanilla lo recortarían la dificultad y la armadura), como mucho cada `hit_interval_seconds`; luego `recover_seconds` quieta, una búsqueda por `search_points` puntos a `search_radius` del golpe (`search_speed`, `search_listen_seconds` en cada uno) y a casa a `walk_speed`. Las velocidades son bloques por segundo. Nunca toma un camino parado por una llegada: un punto al que no llega (en un canal) lo golpea desde el sitio más cercano. La bomba (`creature.pump`: `anchor` donde suena, `beacons`, `run_seconds`, `silent_seconds`, `slow_seconds`) funciona mientras haya en la sala un jugador que no ha pasado el encuentro: pistones pesados, tres balizas ámbar (`pump_beacon`, en la carcasa y en dos postes de pared; parpadean en el último segundo) y polvo que cae del techo alrededor del jugador; enmascara las vibraciones mientras funciona y `grace_after_stop_seconds` después. En el primer silencio de un intento cae una tubería desde `pipe.from` tras `pipe.delay_seconds`; hasta que la criatura golpea donde cae, no siente nada más. Llegar a las catacumbas termina el encuentro.
 
 ## Comandos de depuración
 
@@ -230,6 +233,7 @@ las anclas, y lo que está mal se avisa (`/et reload`).
 | `/et ch2 l2 hunters` | Los Hunters del nivel, enteros otra vez en sus puestos, sea cual sea tu estado |
 | `/et ch2 l2 loot` | Todo el botín como si no se hubiera cogido nada: tus contadores olvidados, tus bolsillos se quedan |
 | `/et ch2 l2 unbuild` | Vacía toda la zona (antes de empaquetar el mundo en un jar), también los Hunters; quien esté dentro cae |
+| `/et ch2 l2 creature state` / `pump` | El cerebro de la criatura (estado, objetivo, velocidad en bloques por segundo) o el ciclo de la bomba (fase, tick, enmascarado) en la barra de acción; otra vez para apagarlo |
 | `/et ch2 l2 anchors` | Cada ancla y zona con sus coordenadas, marcadas las provisionales |
 | `/et ch2 l2 goto <ancla>` | Construye el nivel si no lo está y te lleva a un lugar (`sealed_entry` ... `level_exit`, `trap_1`...) o al centro de una zona (`zone_<lugar>`) |
 | `/et reload` | Vuelve a leer los datos de los Niveles 1 y 2 y dice qué está mal |

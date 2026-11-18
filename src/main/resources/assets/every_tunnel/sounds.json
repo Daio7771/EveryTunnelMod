@@ -921,6 +921,62 @@
       }
     ]
   },
+  "event.ch2l2.creature_click": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/creature_click_1",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "event.ch2l2.creature_step": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/creature_step_1",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "every_tunnel:event/ch2l2/creature_step_2",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "every_tunnel:event/ch2l2/creature_step_3",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "event.ch2l2.creature_strike": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/creature_strike_1",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "event.ch2l2.creature_windup": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/creature_windup_1",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "event.ch2l2.pipe_fall": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/pipe_fall_1",
+        "attenuation_distance": 56
+      }
+    ]
+  },
+  "event.ch2l2.pump_run": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/pump_run_1",
+        "attenuation_distance": 80
+      }
+    ]
+  },
   "event.collapse": {
     "sounds": [
       "every_tunnel:event/collapse_1"

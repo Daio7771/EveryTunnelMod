@@ -41,6 +41,14 @@ object Ch2Sounds {
     val CH2L1_MANHOLE_OPEN = event("block.ch2l1.manhole_open", range = 32f)
     val CH2L1_LADDER = event("block.ch2l1.ladder")
 
+    /** Chapter 2 Level 2's pump room: the vibration creature's steps, the click of its teeth and its blow, the pump running, the pipe landing. */
+    val CH2L2_CREATURE_STEP = event("event.ch2l2.creature_step", range = 40f)
+    val CH2L2_CREATURE_CLICK = event("event.ch2l2.creature_click", range = 40f)
+    val CH2L2_CREATURE_WINDUP = event("event.ch2l2.creature_windup", range = 40f)
+    val CH2L2_CREATURE_STRIKE = event("event.ch2l2.creature_strike", range = 48f)
+    val CH2L2_PUMP_RUN = event("event.ch2l2.pump_run", range = 64f)
+    val CH2L2_PIPE_FALL = event("event.ch2l2.pipe_fall", range = 56f)
+
     private fun event(path: String, range: Float? = null): SoundEvent {
         val id = Identifier(EveryTunnel.MOD_ID, path)
         return (if (range == null) SoundEvent.of(id) else SoundEvent.of(id, range)).also { all += it }

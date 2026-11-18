@@ -36,6 +36,8 @@ data class Ch2L2Level(
     val hunters: List<Ch2L2HunterGroup> = emptyList(),
     val loot: List<Ch2L2Loot> = emptyList(),
     val notes: List<Ch2L2Note> = emptyList(),
+    /** The vibration creature and the pump (phase 4). */
+    val creature: Ch2L2Creature = Ch2L2Creature.DEFAULT,
 ) {
     fun checkpoint(id: String?): Ch2L2Checkpoint? = checkpoints.firstOrNull { it.id == id }
 
@@ -53,8 +55,8 @@ data class Ch2L2Level(
     fun checkpointBefore(event: Ch2L2Event): Ch2L2Checkpoint? = checkpoints.firstOrNull { it.before == event }
 
     /** Every anchor and zone the file names, to check against the anchors. */
-    fun anchorNames(): List<String> = checkpoints.map { it.anchor } + hunters.map { it.anchor } + loot.map { it.anchor } + notes.map { it.anchor }
-    fun zoneNames(): List<String> = (lights.keys + checkpoints.map { it.zone } + reaches.map { it.zone }).distinct()
+    fun anchorNames(): List<String> = checkpoints.map { it.anchor } + hunters.map { it.anchor } + loot.map { it.anchor } + notes.map { it.anchor } + creature.anchorNames()
+    fun zoneNames(): List<String> = (lights.keys + checkpoints.map { it.zone } + reaches.map { it.zone } + creature.zoneNames()).distinct()
 
     class Result(val level: Ch2L2Level, val problems: List<String>)
 
@@ -124,6 +126,7 @@ data class Ch2L2Level(
             val hunters = Ch2L2PlacementsParser.hunters(f)
             val loot = Ch2L2PlacementsParser.loot(f)
             val notes = Ch2L2PlacementsParser.notes(f)
+            val creature = Ch2L2CreatureParser.parse(f)
             f.reportUnknownKeys()
 
             val problems = f.problems.toMutableList()
@@ -136,7 +139,7 @@ data class Ch2L2Level(
             if (befores.toSet().size != befores.size) problems += "checkpoints: two come before the same encounter"
             val level = Ch2L2Level(
                 flashlight, noise, battery, thirst, stamina, lights,
-                checkpoints.ifEmpty { d.checkpoints }, reaches, hunters, loot, notes,
+                checkpoints.ifEmpty { d.checkpoints }, reaches, hunters, loot, notes, creature,
             )
             return Result(level, problems)
         }

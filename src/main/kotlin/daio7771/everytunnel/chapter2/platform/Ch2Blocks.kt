@@ -17,6 +17,7 @@ import daio7771.everytunnel.chapter2.level1.platform.SampleTubeBlock
 import daio7771.everytunnel.chapter2.level1.platform.TimeClockBlock
 import daio7771.everytunnel.chapter2.level2.platform.CatacombStairsBlock
 import daio7771.everytunnel.chapter2.level2.platform.CeilingCableBlock
+import daio7771.everytunnel.chapter2.level2.platform.PumpBeaconBlock
 import daio7771.everytunnel.platform.BlockShapes.box
 import daio7771.everytunnel.platform.LinkedDoorBlock
 import daio7771.everytunnel.platform.ModBlocks
@@ -141,6 +142,9 @@ object Ch2Blocks {
 
     /** The maintenance cable strung along the catacombs' vault, the work bulbs hanging from it ([CeilingCableBlock]). */
     val CEILING_CABLE: Block = register("ceiling_cable", CeilingCableBlock(ModBlocks.props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision()))
+
+    /** The amber warning beacon on the pump's housing in the pump room: lit while the pump runs ([daio7771.everytunnel.chapter2.level2.platform.Ch2L2Pump]). */
+    val PUMP_BEACON: Block = register("pump_beacon", PumpBeaconBlock(ModBlocks.props(MapColor.ORANGE, ModSoundGroups.PLASTIC).luminance(PumpBeaconBlock::luminance)))
 
     /** The factory cameras' block entity: the same as Level 5's camera's, a type of its own so the client sweeps them. */
     lateinit var FACTORY_CAMERA_ENTITY: BlockEntityType<SecurityCameraBlockEntity>

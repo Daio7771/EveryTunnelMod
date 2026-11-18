@@ -3109,6 +3109,25 @@ def build():
             {"variants": {f"lit={lit}": {"model": f"{NS}:block/warm_lamp_{'on' if lit == 'true' else 'off'}"} for lit in ("true", "false")}},
             {"parent": f"{NS}:block/warm_lamp_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
 
+    # --- Pump beacon: Chapter 2 Level 2's amber warning light, a big caged dome (on the housing and two posts) ---------
+    a.texture("pump_beacon_frame", plastic_tex(r("beacon_frame"), (62, 62, 66)), T.STEEL.but(smoothness=0.5, metal=200, relief=0.2))
+    a.texture("pump_beacon_on", plastic_tex(r("beacon_on"), (255, 176, 40)),
+              T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    a.texture("pump_beacon_off", plastic_tex(r("beacon_off"), (112, 70, 22)), T.PLASTIC.but(smoothness=0.6, relief=0.2))
+    for state in ("on", "off"):
+        a.models[f"pump_beacon_{state}"] = model(
+            {"frame": "pump_beacon_frame", "glass": f"pump_beacon_{state}"},
+            [element((1, 0, 1), (15, 2, 15), "frame"),
+             element((3, 2, 3), (13, 11, 13), "glass", shade=state == "off"),
+             element((2, 2, 2), (3, 12, 3), "frame"), element((13, 2, 2), (14, 12, 3), "frame"),
+             element((2, 2, 13), (3, 12, 14), "frame"), element((13, 2, 13), (14, 12, 14), "frame"),
+             element((2, 11, 2), (14, 12, 3), "frame"), element((2, 11, 13), (14, 12, 14), "frame"),
+             element((2, 11, 3), (3, 12, 13), "frame"), element((13, 11, 3), (14, 12, 13), "frame"),
+             element((5, 12, 5), (11, 13, 11), "frame")])
+    a.block("pump_beacon", "Pump Beacon",
+            {"variants": {f"lit={lit}": {"model": f"{NS}:block/pump_beacon_{'on' if lit == 'true' else 'off'}"} for lit in ("true", "false")}},
+            {"parent": f"{NS}:block/pump_beacon_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+
     # --- Suite bed: Level 4's, walnut frame and burgundy cover, in two blocks ---------------
     a.texture("suite_bed_frame", plastic_tex(r("bed_frame"), (58, 38, 26)), T.PLASTIC.but(smoothness=0.5, relief=0.3))
     a.texture("suite_bed_cover", plastic_tex(r("bed_cover"), (92, 26, 38), "fabric"), T.PLASTIC.but(smoothness=0.08, relief=0.3))

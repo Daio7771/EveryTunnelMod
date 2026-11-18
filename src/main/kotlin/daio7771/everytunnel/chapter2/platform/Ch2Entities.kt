@@ -2,6 +2,7 @@ package daio7771.everytunnel.chapter2.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.FactoryNpcEntity
+import daio7771.everytunnel.chapter2.level2.platform.VibrationCreatureEntity
 import daio7771.everytunnel.chapter2.prologue.platform.ScientistEntity
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricDefaultAttributeRegistry
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricEntityTypeBuilder
@@ -33,9 +34,20 @@ object Ch2Entities {
             .trackRangeBlocks(64)
             .build()
 
+    /** The vibration creature of Level 2's pump room (phase 4). Never saved: the level puts it back when it starts. */
+    val VIBRATION_CREATURE: EntityType<VibrationCreatureEntity> =
+        FabricEntityTypeBuilder.create<VibrationCreatureEntity>(SpawnGroup.MISC) { type, world -> VibrationCreatureEntity(type, world) }
+            .dimensions(EntityDimensions.fixed(1.6f, 3.5f))
+            .disableSaving()
+            .disableSummon()
+            .trackRangeBlocks(96)
+            .build()
+
     fun register() {
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "factory_npc"), FACTORY_NPC)
         FabricDefaultAttributeRegistry.register(FACTORY_NPC, FactoryNpcEntity.createAttributes())
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "scientist"), SCIENTIST)
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "vibration_creature"), VIBRATION_CREATURE)
+        FabricDefaultAttributeRegistry.register(VIBRATION_CREATURE, VibrationCreatureEntity.createAttributes())
     }
 }

@@ -6,10 +6,10 @@ Level 2 of Chapter 2 is the catacombs under the factory: the old catacombs the f
 down Level 1's emergency manhole, alone, and looks for a way out: the Hunters in the galleries, a creature that hunts by the floor's
 vibrations in the pump room, the Observant Guard of Chapter 1 in the lower chambers, and a flood in three stages on the way to the
 pumping station and the exit. It is built in phases (1 to 7), one at a time, on the **private** branch `chapter-2/level-2` (off
-`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 3,
-Hunters, survival kit, loot and documents.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
+`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 4,
+the vibration creature and the pump.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
 bars, dying brings the player back to the last checkpoint, and the menu's Chapter 2 continues it; the first stretch has its enemies,
-resources and documents. The creature, the Guard and the flood are still to come.
+resources and documents, and the pump room has its creature and its pump. The Guard and the flood are still to come.
 
 Its code is under `daio7771.everytunnel.chapter2.level2` (`core`, plain Kotlin, and `platform`), apart from the base game, which never
 names it (see [Architecture](architecture.md#chapters)). Its named places use Level 1's format (`level1.core.Ch2L1AnchorsParser`); its map
@@ -148,8 +148,8 @@ preview is what the game builds. No vanilla block the world's pack re-skins as C
   catacombs, the vestibule, the walkways, the upper gallery and the station; with the gate down (`grate`), nothing past it can be reached;
 - **nowhere to get stuck**: from every place a player can reach from the entry, the exit can still be reached (a balcony without its
   parapet, for one, would leave a fall into the shaft with no way out);
-- **the pump room** needs several cycles of the pump: its shortest way across, swimming included, is at least `min` blocks (56 now:
-  the floor is cut by two channels five wide, too wide for a sprinting jump, and their ladders are only by the crossings);
+- **the pump room** needs several cycles of the pump: its shortest way across, swimming included, is at least `min` blocks (57 now:
+  the floor is cut by two channels five wide, caged: bars on their edges and a grating lid, so nobody gets in or across);
 - **placements**: loot stands in free air over something solid, each note anchor is on a note board, and each Hunters anchor exists;
 - the openings are clear: two blocks of air through them and room to stand on both sides;
 - **the water stays put**: still water and each flood stage touch nothing that water flows into (air, bars, slabs...) outside their own
@@ -167,7 +167,7 @@ after each stage).
 | `collector_junction` | The balcony over the central collector, off the galleries' middle hall | M |
 | `hunter_galleries` | The galleries: three halls open along the south | M |
 | `pump_overlook` | The pump room's overlook: a caged block of concrete in its north-west corner | M |
-| `vibration_chamber` | The pump room: two channels across its floor, the crossings at opposite ends (a zigzag), the exit seen from the overlook | L |
+| `vibration_chamber` | The pump room: two caged channels across its floor, the crossings at opposite ends (a zigzag), the exit seen from the overlook | L |
 | `lower_catacombs` | The catacombs and the lower galleries (nothing off them now) | L |
 | `observer_wall` | The vestibule (`observer_wall_face`: the wall where the Guard comes out, provisional) | L |
 | `observer_chamber` | The maintenance room, its four traps where the drawing has its four squares (`trap_1` to `trap_4`) | L |
@@ -206,6 +206,9 @@ anchors, and what is wrong is reported (`/et reload`).
 | `hunters` | `id`, `anchor`, optional `yaw`, optional `until` (a state; default `pump_room`): a group of Hunters put at the anchor |
 | `loot` | `id`, `item` (a key of `LootSpawner.LOOT`: `battery`, `water`, `food_snack`, `wrench`...), `anchor`, `offset` [dx, dy, dz] blocks from the anchor's block, `yaw` |
 | `notes` | `id`, `anchor` (the board's); the text is `ch2_l2_<id>` |
+| `creature` | The vibration creature and the pump (below) |
+
+**The creature** (`level2.core.Ch2L2Creature`, `VibrationCreatureBrain`, `PumpCycle`; `platform.VibrationCreatureEntity`, `Ch2L2Pump`): the Stone Maw, 3.5 blocks of grey stone (hitbox 1.6 x 3.5), at rest at `creature.home`. It feels the steps, jumps, landings and touches of the player on the zones of `floor_zones` (the overlook is not one) and the pipe's landing, never its own steps or the pump; sneaking is soft, running, jumping and landing loud. A soft step: it stalks there at `stalk_speed`, listens `stalk_listen_seconds`, then searches. Any other: `orient_seconds` turning to it (teeth click; a new one moves the point), then the point is locked and it charges at `charge_speed` (`charge_speed_loud` if loud). At the point, at the nearest place it can reach, or touching a player (`touch_range`), it raises its fists for `windup_seconds` (the escape) and the blow hurts whoever is then within `contact_range` of its centre for `damage_fraction` of their maximum health (two kill; the health is lowered directly, vanilla damage would be cut by difficulty and armor), at most every `hit_interval_seconds`; then `recover_seconds` still, a search of `search_points` points `search_radius` round the blow (`search_speed`, `search_listen_seconds` at each) and home at `walk_speed`. Speeds are blocks a second. It never takes a stopped path for arrival: a point it cannot reach (in a channel) is struck from the nearest place. The pump (`creature.pump`: `anchor` where it sounds, `beacons`, `run_seconds`, `silent_seconds`, `slow_seconds`) runs while a player who has not passed the encounter is in the room: heavy pistons, three amber beacons (`pump_beacon`, on the housing and two wall posts, blinking in the last second) and dust falling from the ceiling round the player; it masks vibrations while it runs and `grace_after_stop_seconds` after. At the first silence of an attempt a pipe falls from `pipe.from` after `pipe.delay_seconds`; until the creature has struck where it lands, it feels nothing else. Reaching the catacombs ends the encounter.
 
 ## Debug commands
 
@@ -223,6 +226,7 @@ anchors, and what is wrong is reported (`/et reload`).
 | `/et ch2 l2 hunters` | The level's Hunters back whole at their posts, whatever your state |
 | `/et ch2 l2 loot` | All the loot as if none were taken: your counters forgotten, your pockets stay |
 | `/et ch2 l2 unbuild` | Empties the whole area (before packing the world into a jar), the Hunters too; whoever stands in it falls |
+| `/et ch2 l2 creature state` / `pump` | The creature's brain (state, target, speed in blocks a second) or the pump's cycle (phase, tick, masking) in the action bar; again to turn it off |
 | `/et ch2 l2 anchors` | Every anchor and zone with its coordinates, the provisional ones marked |
 | `/et ch2 l2 goto <anchor>` | Builds the level if it is not, then takes you to a place (`sealed_entry` ... `level_exit`, `trap_1`...) or to the middle of a zone (`zone_<place>`) |
 | `/et reload` | Reads Level 1's and Level 2's data again and says what is wrong |

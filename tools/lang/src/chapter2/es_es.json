@@ -213,5 +213,7 @@
   "every_tunnel.ch2.l2.withdrawal_order_body": "Dejen al Observant Guard en la cámara inferior. Retiren al personal y cierren el acceso con llave al salir. No habrá equipo de recuperación.\n\nSus credenciales quedan revocadas con efecto inmediato.\n\nAprobado por el supervisor Rowan.",
   "every_tunnel.ch2.l2.maintenance_observation_title": "Sala de bombas — Registro de mantenimiento",
   "every_tunnel.ch2.l2.maintenance_observation_body": "Mantiene las manos en el suelo. Cuando caminé, se giró hacia mí. Me detuve. Golpeó donde yo había estado.\n\nCrucé mientras funcionaba la bomba. Me perdió entre las vibraciones.\n\nEl siguiente turno puede recoger mis herramientas.",
-  "every_tunnel.ch2.l2.boo": "BOO!"
+  "every_tunnel.ch2.l2.boo": "BOO!",
+  "entity.every_tunnel.vibration_creature": "Criatura de vibraciones",
+  "block.every_tunnel.pump_beacon": "Baliza de la bomba"
 }

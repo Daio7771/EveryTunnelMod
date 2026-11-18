@@ -54,5 +54,28 @@
     {"id": "old_drainage", "anchor": "note_old_drainage"},
     {"id": "maintenance_observation", "anchor": "note_maintenance"},
     {"id": "withdrawal_order", "anchor": "note_withdrawal"}
-  ]
+  ],
+  "creature": {
+    "home": "creature_home",
+    "floor_zones": ["zone_creature_floor", "zone_creature_flight"],
+    "orient_seconds": 1.0,
+    "windup_seconds": 0.9,
+    "touch_range": 1.6,
+    "contact_range": 2.0,
+    "damage_fraction": 0.5,
+    "hit_interval_seconds": 2.0,
+    "recover_seconds": 1.5,
+    "stalk_listen_seconds": 1.5,
+    "search_points": 3,
+    "search_radius": 4.0,
+    "search_listen_seconds": 1.2,
+    "stalk_speed": 1.3,
+    "search_speed": 1.6,
+    "walk_speed": 2.0,
+    "charge_speed": 4.6,
+    "charge_speed_loud": 5.2,
+    "grace_after_stop_seconds": 0.25,
+    "pump": {"anchor": "pump_beacon", "beacons": ["pump_beacon", "pump_beacon_n", "pump_beacon_exit"], "run_seconds": 6, "silent_seconds": 6, "slow_seconds": 1},
+    "pipe": {"from": "pipe_drop", "delay_seconds": 0}
+  }
 }

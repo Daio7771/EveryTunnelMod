@@ -33,6 +33,8 @@ import net.minecraft.util.Identifier
  *   `goto` needs it); `/et ch2 l2 unbuild` empties the whole area (before packing the world into a jar: it is Chapter 2's).
  * - `/et ch2 l2 hunters`: the level's Hunters put back whole at their posts, whatever your state; `/et ch2 l2 loot`: all the loot
  *   as if none had been taken (your counters forgotten; what is in your pockets stays) ([Ch2L2Spawns]).
+ * - `/et ch2 l2 creature state|pump`: the action bar shows the creature's brain (state and target) or the pump's cycle (phase, tick of the
+ *   cycle, whether it masks vibrations); again to turn it off ([Ch2L2Pump]).
  * - `/et ch2 l2 anchors`: every anchor with its coordinates, the provisional ones marked.
  * - `/et ch2 l2 goto <anchor>`: builds the level if it is not, then takes you to a point (the places of the route, `sealed_entry` to
  *   `level_exit`, and the rest), or to the middle of a zone (`zone_<place>`) one block over its floor.
@@ -83,6 +85,11 @@ object Ch2L2Commands {
                                 .then(CommandManager.literal("unbuild").executes(::unbuild))
                                 .then(CommandManager.literal("hunters").executes(::hunters))
                                 .then(CommandManager.literal("loot").executes(::loot))
+                                .then(
+                                    CommandManager.literal("creature")
+                                        .then(CommandManager.literal("state").executes(::watchCreature))
+                                        .then(CommandManager.literal("pump").executes(::watchPump)),
+                                )
                                 .then(CommandManager.literal("anchors").executes(::anchors))
                                 .then(
                                     CommandManager.literal("goto").then(
@@ -210,8 +217,21 @@ object Ch2L2Commands {
         return if (why == null) 1 else 0
     }
 
+    private fun watchCreature(context: CommandContext<ServerCommandSource>): Int {
+        val on = Ch2L2Pump.toggleWatchCreature(context.source.playerOrThrow)
+        reply(context, if (on) "The creature's brain is in the action bar." else "The creature's readout is off.")
+        return 1
+    }
+
+    private fun watchPump(context: CommandContext<ServerCommandSource>): Int {
+        val on = Ch2L2Pump.toggleWatchPump(context.source.playerOrThrow)
+        reply(context, if (on) "The pump's cycle is in the action bar." else "The pump's readout is off.")
+        return 1
+    }
+
     private fun unbuild(context: CommandContext<ServerCommandSource>): Int {
         Ch2L2Spawns.clearHunters(context.source.server)
+        Ch2L2Pump.creatureIn(context.source.server)?.discard()
         val asked = Ch2L2Build.clear(context.source.server) { reply(context, "The area is empty.") }
         if (asked == MapBuild.Asked.BUSY) {
             reply(context, "The catacombs are being built or cleared: try again in a moment.")

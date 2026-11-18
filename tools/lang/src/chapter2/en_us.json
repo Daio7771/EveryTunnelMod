@@ -213,5 +213,7 @@
   "every_tunnel.ch2.l2.withdrawal_order_body": "Leave the Observant Guard in the lower chamber. Withdraw personnel and lock the access behind you. There will be no retrieval team.\n\nIts credentials are revoked, effective immediately.\n\nApproved by Supervisor Rowan.",
   "every_tunnel.ch2.l2.maintenance_observation_title": "Pump Room \u2014 Maintenance Log",
   "every_tunnel.ch2.l2.maintenance_observation_body": "It keeps its hands on the floor. When I walked, it turned towards me. I stopped. It struck where I had been standing.\n\nI crossed while the pump was running. It lost me in the vibration.\n\nThe next shift can collect my tools.",
-  "every_tunnel.ch2.l2.boo": "BOO!"
+  "every_tunnel.ch2.l2.boo": "BOO!",
+  "block.every_tunnel.pump_beacon": "Pump Beacon",
+  "entity.every_tunnel.vibration_creature": "Vibration Creature"
 }

@@ -35,3 +35,4 @@ Do not use these without changing the CC0-only rule:
   [197404](https://freesound.org/people/SpliceSound/sounds/197404/) male barefoot scuffs on tile,
   [338106](https://freesound.org/people/SpliceSound/sounds/338106/) barefoot on wet tile)
 - Pale man voice, if he gets one
+| `metal_pipe_drop_2.mp3` | A metal pipe dropped on the floor, a clang and a bounce (stereo, 320 kbps MP3, 1.8 s) | [Freesound 682736](https://freesound.org/people/gamer500/sounds/682736/) "Metal Pipe Drop 2" | gamer500 | CC0 | 2026-11-18 |

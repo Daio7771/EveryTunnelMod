@@ -7,6 +7,7 @@ catalog. A later chapter gets a file like this one.
 
 from catalog import *  # noqa: F401,F403  (the base catalog's Sound and its synthesis helpers)
 from catalog import _noise, stinger_heard  # noqa: E402
+import physical as ph  # noqa: E402
 
 
 def prologue_crack(rng, variant):
@@ -216,6 +217,109 @@ def ch2l1_ladder(rng, variant):
     return lowpass(0.7 * y, 4000.0)
 
 
+# --- Chapter 2 Level 2: the vibration creature, the pump and the pipe, physically modelled (tools/sounds/physical.py) ---
+
+def _finish(y, rng, size, tail, wet, fade_out, amount=1.15):
+    """Every Level 2 sound ends the same way: the room's answer, a gentle saturation, normalised, faded."""
+    y = ph.room(y, rng, size=size, tail=tail, wet=wet)
+    return fade(drive(y / np.max(np.abs(y)), amount), 0.001, fade_out)
+
+
+def ch2l2_creature_step(rng, variant):
+    """The vibration creature's heavy step (3 variations): the weight landing (a low blow felt more than heard), a lump of
+    stone meeting stone (dense, quickly damped modes, soft contact), a crumble of grit under it and a few chips settling.
+    Heavy and dry: no breath, no voice."""
+    n = samples(0.9)
+    y = thud(n, rng, 0.0, rng.uniform(40.0, 52.0), 0.13, amp=1.0, dull=260.0)
+    f, a, d = ph.stone_modes(rng, 28, 140.0, 1800.0, decay=(0.012, 0.05))
+    y += 0.7 * ph.modes(n, rng, 0.004, f, a, d, contact=0.0012)
+    y += 0.25 * ph.grains(n, rng, [(0.0, 0.0), (0.006, 5000.0), (0.08, 1500.0), (0.3, 0.0)], 300.0, 3500.0)
+    y += 0.12 * ph.grains(n, rng, [(0.0, 0.0), (0.15, 25.0), (0.6, 0.0)], 1200.0, 5000.0, length=(0.003, 0.008))
+    return _finish(y, rng, 1.2, 0.4, 0.18, 0.15)
+
+
+def ch2l2_creature_click(rng, variant):
+    """The creature's stone teeth snapping shut when it orients (the one-second warning): two hard, tiny stone impacts a
+    breath apart, each a cluster of bright, very short modes, and a few chips of enamel after."""
+    n = samples(0.45)
+    y = np.zeros(n)
+    for start, scale in ((0.0, 1.0), (0.065, 0.75)):
+        f, a, d = ph.stone_modes(rng, 18, 1500.0, 9000.0, decay=(0.004, 0.014))
+        y += scale * ph.modes(n, rng, start, f, a, d, contact=0.00008)
+        y += 0.3 * scale * thud(n, rng, start, 170.0, 0.02, amp=0.6, dull=900.0)
+    y += 0.08 * ph.grains(n, rng, [(0.0, 0.0), (0.07, 400.0), (0.2, 0.0)], 2500.0, 8000.0, length=(0.001, 0.004))
+    return _finish(y, rng, 1.0, 0.3, 0.2, 0.08, amount=1.05)
+
+
+def ch2l2_creature_windup(rng, variant):
+    """The creature raising its fists for a blow (0.9 s before it lands): stone grinding on stone, the grinding growing as the
+    arms rise, and the creak of its joints: stick-slip, a train of catches that quickens, ringing a low stone body. Dry, no
+    breath, no voice."""
+    seconds = 0.9
+    n = samples(seconds)
+    y = 0.5 * ph.grains(n, rng, [(0.0, 300.0), (0.5, 2500.0), (0.85, 6000.0), (0.9, 0.0)], 180.0, 2600.0)
+    catches = ph.impulses(n, rng, [(0.0, 18.0), (0.5, 35.0), (0.85, 70.0), (0.9, 0.0)], amp_sigma=0.4)
+    f, a, d = ph.stone_modes(rng, 16, 90.0, 900.0, decay=(0.02, 0.07))
+    y += 0.6 * ph.ring(catches, ph.body_ir(rng, f, a, d, 0.25))
+    y *= envelope(n, [(0.0, 0.3), (0.85, 1.0), (0.9, 0.6)])
+    return _finish(y, rng, 1.2, 0.35, 0.18, 0.04)
+
+
+def ch2l2_creature_strike(rng, variant):
+    """Both fists of stone slammed into the floor: the weight of it (a very low blow), two big lumps of stone ringing,
+    the crunch of the floor's surface breaking (a dense burst of grains), debris scattering and settling for a second, and
+    the room answering."""
+    n = samples(1.8)
+    y = thud(n, rng, 0.0, 36.0, 0.3, amp=1.3, dull=200.0)
+    for start in (0.0, 0.012):
+        f, a, d = ph.stone_modes(rng, 40, 70.0, 1500.0, decay=(0.04, 0.18))
+        y += 0.6 * ph.modes(n, rng, start, f, a, d, contact=0.0015)
+    y += 0.5 * ph.grains(n, rng, [(0.0, 0.0), (0.004, 18000.0), (0.06, 6000.0), (0.25, 0.0)], 250.0, 6000.0)
+    y += 0.2 * ph.grains(n, rng, [(0.0, 0.0), (0.1, 60.0), (0.6, 30.0), (1.4, 0.0)], 600.0, 4500.0, length=(0.003, 0.01))
+    y += 0.25 * ph.scrape(n, rng, 25.0, 140.0, flutter=4.0) * envelope(n, [(0.0, 0.0), (0.05, 1.0), (0.7, 0.35), (1.8, 0.0)])
+    return _finish(y, rng, 1.6, 0.7, 0.25, 0.4, amount=1.3)
+
+
+def ch2l2_pump_run(rng, variant):
+    """The pump running for six seconds, then stopping: heavy pistons in a big concrete room. Each piston blow (every 0.67 s)
+    is a deep thump and a heavy iron casing ringing (detuned modes that last), then the valve's clack; after it a hiss of air
+    that flutters, and water forced through the pipes: a gush of bubbles over a rushing flow. A loose part rattles with each
+    blow. From 4.8 s the blows come further apart and weaker; it ends in a long sigh of air by 6.0 s, so that silence follows.
+    Mono, positioned at the pump."""
+    seconds = 6.0
+    n = samples(seconds)
+    blows, at, gap = [], 0.1, 0.667
+    while at < 4.8:
+        blows.append(at)
+        at += gap
+    while at < 5.3:
+        blows.append(at)
+        gap *= 1.6
+        at += gap
+    casing = (np.array([118.0, 167.0, 243.0, 331.0, 452.0, 587.0, 761.0, 948.0]), np.array([1.0, 0.8, 0.6, 0.5, 0.35, 0.3, 0.2, 0.15]),
+              np.array([0.5, 0.45, 0.35, 0.3, 0.25, 0.2, 0.15, 0.12]))
+    y = np.zeros(n)
+    rattle_rate, flow = [(0.0, 0.0)], np.zeros(n)
+    for start in blows:
+        k = 1.0 if start < 4.8 else max(0.45, 1.0 - (start - 4.8) / 1.2)
+        y += k * thud(n, rng, start, rng.uniform(42.0, 50.0) * (0.85 + 0.15 * k), 0.25, amp=1.2, dull=240.0)
+        y += 0.35 * k * ph.modes(n, rng, start + 0.005, *casing, detune=0.01, contact=0.002)
+        f, a, d = ph.stone_modes(rng, 10, 900.0, 4000.0, decay=(0.01, 0.03))
+        y += 0.2 * k * ph.modes(n, rng, start + 0.24, f, a, d, contact=0.0002)
+        y += 0.2 * k * ph.scrape(n, rng, 1800.0, 7000.0) * envelope(
+            n, [(0.0, 0.0), (start + 0.26, 0.0), (start + 0.29, 1.0), (start + 0.58, 0.0), (seconds + 1.0, 0.0)])
+        flow += k * envelope(n, [(0.0, 0.0), (start + 0.05, 0.0), (start + 0.16, 1.0), (start + 0.5, 0.15), (seconds + 1.0, 0.0)])
+        rattle_rate += [(start + 0.001, 0.0), (start + 0.01, 400.0 * k), (start + 0.12, 0.0)]
+    flow = np.minimum(flow, 1.0)
+    y += 0.35 * flow * ph.scrape(n, rng, 120.0, 1100.0, flutter=12.0)
+    y += 0.25 * flow * ph.bubbles(n, rng, 900.0, radius=(1.0e-3, 6e-3))
+    y += 0.12 * ph.grains(n, rng, sorted(rattle_rate), 1500.0, 4500.0, length=(0.002, 0.006))
+    y += 0.35 * ph.scrape(n, rng, 20.0, 90.0, flutter=3.0) * envelope(n, [(0.0, 0.0), (0.3, 1.0), (4.8, 1.0), (6.0, 0.0)])
+    sigh = ph.scrape(n, rng, 500.0, 3800.0, flutter=8.0) * envelope(n, [(0.0, 0.0), (5.2, 0.0), (5.35, 1.0), (6.0, 0.0)])
+    y += 0.25 * lowpass(sigh, 2400.0, order=1)
+    return _finish(y, rng, 2.0, 0.6, 0.25, 0.05)
+
+
 CHAPTER2_SOUNDS = [
     Sound("event.prologue.crack", "Chapter 2 prologue", "A stage of the scientist's change: dry cracks of joints, a dull thump, the creak of something stretched too far (3 variations)",
           "mono", False, 3, prologue_crack, -3.0, attenuation=24),
@@ -247,4 +351,14 @@ CHAPTER2_SOUNDS = [
     Sound("block.ch2l1.manhole_open", "Chapter 2 Level 1", "The manhole's lid let fall beside the hole: a big iron clang", "mono", False, 1, ch2l1_manhole_open, -3.0,
           attenuation=32),
     Sound("block.ch2l1.ladder", "Chapter 2 Level 1", "Climbing down the manhole's iron rungs, three knocks going away", "mono", False, 1, ch2l1_ladder, -6.0),
+    Sound("event.ch2l2.creature_step", "Chapter 2 Level 2", "The vibration creature's knuckle gait: a heavy step of stone, dry and dull (3 variations)", "mono", False, 3,
+          ch2l2_creature_step, -4.0, attenuation=40),
+    Sound("event.ch2l2.creature_click", "Chapter 2 Level 2", "The vibration creature turning to a vibration: its stone teeth clicking shut twice (the one-second warning)", "mono", False, 1,
+          ch2l2_creature_click, -3.0, attenuation=40),
+    Sound("event.ch2l2.creature_strike", "Chapter 2 Level 2", "The vibration creature's blow: both fists slammed into the floor, a dull thud and a crunch of stone", "mono", False, 1,
+          ch2l2_creature_strike, -2.0, attenuation=48),
+    Sound("event.ch2l2.creature_windup", "Chapter 2 Level 2", "The vibration creature raising its fists for a blow: stone grinding and creaking, rising (the 0.9 s before it lands)", "mono", False, 1,
+          ch2l2_creature_windup, -3.0, attenuation=40),
+    Sound("event.ch2l2.pump_run", "Chapter 2 Level 2", "The pump room's pump: heavy pistons for six seconds, the blows spacing out at the end and a sigh of air (plays at the pump; then silence)", "mono", False, 1,
+          ch2l2_pump_run, -3.0, attenuation=80),
 ]

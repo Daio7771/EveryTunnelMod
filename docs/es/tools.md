@@ -32,6 +32,7 @@ git).
 | `tools/blocks/briefing.py` | La pizarra de seguridad del nivel 5 (la llama `generate.py`, que la corta en las texturas de los bloques): el corcho con dibujos a lápiz renderizados desde los modelos de las entidades y las fichas mecanografiadas, la placa SAFETY BRIEFING; sola, una vista previa | la pizarra |
 | `tools/film/film.py` | La película del Cinema: una grabación convertida en fotogramas de cine viejo | la película |
 | `tools/film/eye.py` | `film_eye/` | lo que muestra el Cinema durante el apagón: un ojo e INTRUDER DETECTED |
+| `tools/entity/vibration_creature.py` | Criatura de vibraciones del Capítulo 2 Nivel 2: instala el modelo Stone Maw del usuario desde `tools/entity/source/stone_maw/` (geo, textura, idle y walk; la fuente, se edita en Blockbench) y escribe sus demás animaciones (orient, stalk, charge, strike, recover, listen) y una vista previa de las poses (sin huevo) | la criatura de vibraciones |
 | `tools/entity/pale_man.py` | Geometría, animaciones, textura y máscara de brillo del Pale man, modelo del huevo | el Pale man |
 | `tools/entity/observer.py` | Geometría, animaciones y textura del Observer, modelo del huevo | el Observer |
 | `tools/entity/hunter.py` | Geometría, animaciones, textura y máscara de brillo de los ojos de los Hunters | los Hunters del nivel 5 |
@@ -194,6 +195,9 @@ dsp.py: utilidades DSP · audio_io.py: leer/escribir audio
 - `catalog.py`: cada generador recibe `(rng, variant)` y devuelve un array mono o estéreo. Los sonidos del Chapter 2 (su
   prólogo y su Nivel 1) están en su propio archivo, `catalog_ch2.py`, escrito con las herramientas de `catalog.py`; `catalog.py`
   los añade a su única lista, así que las demás herramientas ven un solo catálogo (un capítulo posterior tendrá un archivo así).
+  Los sonidos del Nivel 2 del Chapter 2 se modelan físicamente con `physical.py` (modos de cuerpos golpeados, granos de fricción y
+  desmoronamiento, burbujas, una respuesta corta de la sala) para que suenen menos sintéticos; la caída de la tubería es una
+  grabación CC0 (`cc0_cuts.py`).
   Los ids siguen los eventos de sonido (`every_tunnel:<id>`). Mono para los sonidos con
   posición en el mundo, estéreo para la música y los sonidos en la cabeza. Sus funciones
   más nuevas (la segunda pasada del nivel 5 y los sonidos que comparte) suenan menos

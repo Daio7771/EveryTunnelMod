@@ -29,6 +29,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/blocks/briefing.py` | Level 5's safety briefing (called by `generate.py`, which cuts it into the blocks' textures): the cork board with pencil drawings rendered from the entities' models and the typed cards, the SAFETY BRIEFING plate; alone, a preview | the briefing board |
 | `tools/film/film.py` | The Cinema's film: a recording into old-film frames | the film |
 | `tools/film/eye.py` | `film_eye/` | what the Cinema shows during the blackout: an eye and INTRUDER DETECTED |
+| `tools/entity/vibration_creature.py` | Chapter 2 Level 2's vibration creature: installs the user's Stone Maw model from `tools/entity/source/stone_maw/` (geo, texture, idle and walk; the source, edited in Blockbench) and writes its other animations (orient, stalk, charge, strike, recover, listen) and a preview of the poses (no spawn egg) | the vibration creature |
 | `tools/entity/pale_man.py` | Pale man geometry, animations, texture, glow mask, spawn egg model | the Pale man |
 | `tools/entity/observer.py` | The Observer's geometry, animations, texture, spawn egg model | the Observer |
 | `tools/entity/hunter.py` | The Hunters' geometry, animations, texture and eye glow mask | Level 5's Hunters |
@@ -185,7 +186,9 @@ dsp.py: the DSP toolkit · audio_io.py: reading/writing audio
 
 - `catalog.py`: each generator takes `(rng, variant)` and returns a mono or stereo array. Chapter 2's sounds (its prologue
   and its Level 1) are in their own file, `catalog_ch2.py`, written with `catalog.py`'s helpers; `catalog.py` adds them to
-  its one list, so the other tools see a single catalog (a later chapter gets a file like it).
+  its one list, so the other tools see a single catalog (a later chapter gets a file like it). Chapter 2 Level 2's sounds are
+  physically modelled with `physical.py` (struck bodies' modes, grains of friction and crumbling, bubbles, a short room answer)
+  so they sound less synthetic; the pipe's fall is a CC0 recording (`cc0_cuts.py`).
   Ids follow the sound events (`every_tunnel:<id>`). Mono for sounds positioned in the
   world, stereo for music and head sounds. Its newer helpers (Level 5's second pass and the
   sounds it shares) sound less synthetic than plain partials: `modal_hit` (a struck body's

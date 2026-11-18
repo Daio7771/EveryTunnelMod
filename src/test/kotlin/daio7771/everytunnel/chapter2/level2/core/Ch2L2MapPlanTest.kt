@@ -96,6 +96,14 @@ class Ch2L2MapPlanTest {
                 assertTrue(Cell(x, y, z) in cells, "${point.id}: no board at ${point.position}")      // the board's own cell, not a place to stand
                 continue
             }
+            if (point.id.startsWith("pump_beacon")) {
+                assertTrue(Cell(x, y, z) in cells, "${point.id}: no beacon at ${point.position}")      // the beacon's own cell, on the pump's housing or a post
+                continue
+            }
+            if (point.id == "pipe_drop") {
+                assertTrue(Cell(x, y, z) !in cells, "${point.id}: the pipe is let fall inside something at ${point.position}")      // open air
+                continue
+            }
             assertTrue(Cell(x, y, z) !in cells && Cell(x, y + 1, z) !in cells, "${point.id}: no room to stand at ${point.position}")
             assertTrue(Cell(x, y - 1, z) in cells, "${point.id}: no floor under ${point.position}")
         }

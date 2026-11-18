@@ -15,6 +15,7 @@ import daio7771.everytunnel.chapter2.level1.client.NonameOsFilesScreen
 import daio7771.everytunnel.chapter2.level1.client.NonameOsScreen
 import daio7771.everytunnel.chapter2.level1.client.ObjectivePanel
 import daio7771.everytunnel.chapter2.level1.client.TaskArrow
+import daio7771.everytunnel.chapter2.level2.client.VibrationCreatureRenderer
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.prologue.client.PrologueView
@@ -49,9 +50,11 @@ object Chapter2Client : ClientModInitializer {
         Ch2L1OfficeView.register()
         EntityRendererRegistry.register(Ch2Entities.FACTORY_NPC, ::FactoryNpcRenderer)
         EntityRendererRegistry.register(Ch2Entities.SCIENTIST, ::ScientistRenderer)
+        EntityRendererRegistry.register(Ch2Entities.VIBRATION_CREATURE, ::VibrationCreatureRenderer)
         BlockEntityRendererFactories.register(Ch2Blocks.CENTRIFUGE_ENTITY, ::Ch2L1CentrifugeRenderer)
         BlockEntityRendererFactories.register(Ch2Blocks.FACTORY_CAMERA_ENTITY) { SecurityCameraRenderer(it, Ch2Blocks.FACTORY_CAMERA, sweeping = true) }
         BlockRenderLayerMap.INSTANCE.putBlock(Ch2Blocks.DIRT_SPOT, RenderLayer.getCutout())
+        BlockRenderLayerMap.INSTANCE.putBlock(Ch2Blocks.PUMP_BEACON, RenderLayer.getCutout())
         BlockRenderLayerMap.INSTANCE.putBlock(Ch2Blocks.FACTORY_GLASS, RenderLayer.getTranslucent())
         EveryTunnel.LOGGER.info("${EveryTunnel.MOD_NAME}: Chapter 2 loaded (client)")
     }

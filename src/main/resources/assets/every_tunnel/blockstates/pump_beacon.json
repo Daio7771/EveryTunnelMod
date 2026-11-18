@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=true": {
+      "model": "every_tunnel:block/pump_beacon_on"
+    },
+    "lit=false": {
+      "model": "every_tunnel:block/pump_beacon_off"
+    }
+  }
+}
