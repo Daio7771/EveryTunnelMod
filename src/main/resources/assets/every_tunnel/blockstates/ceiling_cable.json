@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "every_tunnel:block/ceiling_cable_x"
+    },
+    "axis=z": {
+      "model": "every_tunnel:block/ceiling_cable_z"
+    }
+  }
+}

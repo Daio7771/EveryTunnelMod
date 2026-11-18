@@ -193,5 +193,17 @@
   "block.every_tunnel.reagent_bottle_red": "Frasco de reactivo (rojo)",
   "block.every_tunnel.mixing_tank": "Tanque mezclador",
   "block.every_tunnel.centrifuge": "Centrifugadora",
-  "block.every_tunnel.manhole": "Tapa de alcantarilla de emergencia"
+  "block.every_tunnel.manhole": "Tapa de alcantarilla de emergencia",
+  "block.every_tunnel.catacomb_brick": "Ladrillo de catacumba",
+  "block.every_tunnel.catacomb_brick_cracked": "Ladrillo de catacumba agrietado",
+  "block.every_tunnel.catacomb_brick_damp": "Ladrillo de catacumba húmedo",
+  "block.every_tunnel.catacomb_brick_tide": "Ladrillo de catacumba con marca de agua",
+  "block.every_tunnel.catacomb_flagstone": "Losa de catacumba",
+  "block.every_tunnel.catacomb_flagstone_cracked": "Losa de catacumba agrietada",
+  "block.every_tunnel.catacomb_vault": "Bóveda de catacumba",
+  "block.every_tunnel.catacomb_bricked": "Arco tapiado",
+  "block.every_tunnel.catacomb_brick_stairs": "Escaleras de ladrillo de catacumba",
+  "block.every_tunnel.catacomb_brick_slab": "Losa de ladrillo de catacumba",
+  "block.every_tunnel.catacomb_brick_wall": "Muro de ladrillo de catacumba",
+  "block.every_tunnel.ceiling_cable": "Cable de techo"
 }

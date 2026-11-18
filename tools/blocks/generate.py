@@ -2924,6 +2924,117 @@ BLOCK_ITEM_DISPLAY_LIGHT = {
 }
 
 
+# --- Chapter 2 Level 2's catacombs: dark damp brick, flagstones, the vault, the later bricking-up -------------
+
+BRICK = (88, 76, 66)
+BRICK_MORTAR = (40, 36, 32)
+BRICKED = (118, 70, 54)
+BRICKED_MORTAR = (128, 118, 104)
+FLAG = (82, 78, 72)
+FLAG_JOINT = (30, 28, 26)
+SALTPETRE = (196, 200, 188)
+SLIME = (46, 62, 44)
+
+
+def shade(c, f):
+    return (T.clamp(c[0] * f), T.clamp(c[1] * f), T.clamp(c[2] * f))
+
+
+def brick_course(img, rng, base, mortar, brick_w=8, row_h=4, jitter=0.16, lean=1.0):
+    """Courses of bricks: each brick its own tone, a lit top edge, the mortar recessed, every other course shifted by half a brick."""
+    tones = {}
+    for y in range(16):
+        row, in_row = divmod(y, row_h)
+        shift = (brick_w // 2) if row % 2 else 0
+        for x in range(16):
+            col, in_col = divmod((x - shift) % 16, brick_w)
+            if in_row == row_h - 1 or in_col == brick_w - 1:
+                px(img, x, y, mortar)
+                continue
+            tone = tones.setdefault((row, col), 1 + rng.uniform(-jitter, jitter))
+            edge = 1.10 if in_row == 0 else 0.94 if in_row == row_h - 2 else 1.0
+            px(img, x, y, shade(base, tone * edge * lean))
+    noise(img, rng, 5)
+
+
+def catacomb_brick_tex(rng, kind):
+    img = new(BRICK)
+    brick_course(img, rng, BRICK, BRICK_MORTAR)
+    if kind == "cracked":
+        T.crack(img, rng, (22, 20, 18), 9, 0.9, start=(rng.randint(2, 6), 0))
+        T.crack(img, rng, (22, 20, 18), 6, 0.9, start=(rng.randint(9, 13), rng.randint(6, 9)))
+        px(img, rng.randint(1, 13), rng.randint(0, 2), BRICK_MORTAR)
+    elif kind == "damp":
+        brick_course(img, rng, shade(BRICK, 0.78), shade(BRICK_MORTAR, 0.9), jitter=0.12)
+        T.streaks(img, rng, 4, (28, 38, 34), 0.45)
+        speckle(img, rng, 16, SALTPETRE, 0.55)
+    elif kind == "tide":
+        for y in range(16):
+            for x in range(16):
+                r, g, b, a = img.getpixel((x, y))
+                if y >= 8:
+                    f = 0.55 - (y - 8) * 0.02
+                    img.putpixel((x, y), (T.clamp(r * f), T.clamp(g * f * 1.04), T.clamp(b * f * 0.96), a))
+        rect(img, 0, 7, 15, 7, (28, 30, 24), 0.8)
+        for _ in range(3):
+            T.blob(img, rng, SLIME, rng.uniform(1.5, 2.5), 0.55, cy=rng.randint(10, 15))
+        T.streaks(img, rng, 3, (26, 36, 28), 0.5, top_to_bottom=False)
+    return img
+
+
+def catacomb_flagstone_tex(rng, cracked):
+    img = new(FLAG)
+    for sy in range(2):
+        for sx in range(2):
+            tone = 1 + rng.uniform(-0.14, 0.14)
+            for y in range(8):
+                for x in range(8):
+                    px(img, sx * 8 + x, sy * 8 + y, shade(FLAG, tone * (1.08 if x == 0 or y == 0 else 1.0)))
+    for i in range(16):
+        for j in (7, 15):
+            px(img, i, j, FLAG_JOINT)
+            px(img, j, i, FLAG_JOINT)
+    noise(img, rng, 7)
+    speckle(img, rng, 14, (38, 36, 32), 0.6)
+    for _ in range(2):
+        T.blob(img, rng, (30, 36, 30), rng.uniform(1.5, 2.5), 0.4)
+    if cracked:
+        T.crack(img, rng, (20, 19, 18), 10, 0.95, start=(rng.randint(1, 5), rng.randint(1, 5)))
+    return img
+
+
+def catacomb_vault_tex(rng):
+    """The vault's soffit: the brick laid end-on in short courses, darker, soot over it and a damp ring."""
+    img = new(BRICK)
+    brick_course(img, rng, shade(BRICK, 0.68), shade(BRICK_MORTAR, 0.9), brick_w=4, row_h=4, jitter=0.14)
+    for _ in range(3):
+        T.blob(img, rng, (18, 16, 14), rng.uniform(2, 3.5), 0.4)
+    T.blob(img, rng, (44, 56, 48), 2.5, 0.35)
+    speckle(img, rng, 8, SALTPETRE, 0.35)
+    return img
+
+
+def catacomb_bricked_tex(rng):
+    """A later fill in an old arch: redder, rougher brick under smeared pale mortar."""
+    img = new(BRICKED)
+    brick_course(img, rng, BRICKED, BRICKED_MORTAR, jitter=0.2)
+    for _ in range(5):
+        T.blob(img, rng, BRICKED_MORTAR, rng.uniform(1, 2), 0.5)
+    T.streaks(img, rng, 3, (30, 24, 22), 0.4)
+    noise(img, rng, 8)
+    return img
+
+
+def cable_run_tex(rng):
+    img = new((24, 24, 26))
+    for x in range(16):
+        if x % 5 == 2:
+            for y in range(16):
+                px(img, x, y, (70, 70, 74), 0.7)
+    noise(img, rng, 3)
+    return img
+
+
 class Assets:
     """Everything one run writes, collected first so it can be checked and then written at once."""
 
@@ -4467,6 +4578,72 @@ def build():
                                                   element((3, 14.5, 3), (13, 15, 13), "l", shade=state == "off")], ao=False)
     a.block("panel_light", "Panel Light", {"variants": variants["panel_light"]},
             {"parent": f"{NS}:block/panel_light_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+
+    # --- Chapter 2 Level 2's catacombs: dark damp brick, flagstones, the vault, the bricking-up -------
+    brick_mat = T.Material(0.12, porosity=0.85, relief=0.9)
+    a.texture("catacomb_brick", catacomb_brick_tex(r("catacomb_brick"), "plain"), brick_mat)
+    a.texture("catacomb_brick_cracked", catacomb_brick_tex(r("catacomb_brick_cracked"), "cracked"), brick_mat)
+    a.texture("catacomb_brick_damp", catacomb_brick_tex(r("catacomb_brick_damp"), "damp"), brick_mat.but(smoothness=0.42, porosity=0.4))
+    a.texture("catacomb_brick_tide", catacomb_brick_tex(r("catacomb_brick_tide"), "tide"),
+              lambda x, y, c: brick_mat.but(smoothness=0.5, porosity=0.3) if y >= 8 else brick_mat)
+    a.texture("catacomb_flagstone", catacomb_flagstone_tex(r("catacomb_flagstone"), False), T.Material(0.2, porosity=0.6, relief=0.8))
+    a.texture("catacomb_flagstone_cracked", catacomb_flagstone_tex(r("catacomb_flagstone_cracked"), True), T.Material(0.2, porosity=0.6, relief=0.8))
+    a.texture("catacomb_vault", catacomb_vault_tex(r("catacomb_vault")), brick_mat.but(smoothness=0.08))
+    a.texture("catacomb_bricked", catacomb_bricked_tex(r("catacomb_bricked")), brick_mat.but(smoothness=0.1))
+    for name, title in (("catacomb_brick", "Catacomb Brick"), ("catacomb_brick_cracked", "Cracked Catacomb Brick"),
+                        ("catacomb_brick_damp", "Damp Catacomb Brick"), ("catacomb_brick_tide", "Tide-Stained Catacomb Brick"),
+                        ("catacomb_flagstone", "Catacomb Flagstone"), ("catacomb_flagstone_cracked", "Cracked Catacomb Flagstone"),
+                        ("catacomb_vault", "Catacomb Vault"), ("catacomb_bricked", "Bricked-Up Arch")):
+        a.models[name] = cube_all(name)
+        a.block(name, title, {"variants": {"": {"model": f"{NS}:block/{name}"}}}, {"parent": f"{NS}:block/{name}"})
+
+    # The brick's stairs, slab and wall, drawn from vanilla's parents.
+    tx = {"bottom": "catacomb_brick", "top": "catacomb_brick", "side": "catacomb_brick"}
+    for suffix, parent in (("", "stairs"), ("_inner", "inner_stairs"), ("_outer", "outer_stairs")):
+        a.models[f"catacomb_brick_stairs{suffix}"] = {"parent": f"minecraft:block/{parent}", "textures": {k: f"{NS}:block/{v}" for k, v in tx.items()}}
+    bottom = {"east": 0, "south": 90, "west": 180, "north": 270}
+    left = {"east": 270, "south": 0, "west": 90, "north": 180}
+    top_right = {"east": 90, "south": 180, "west": 270, "north": 0}
+    top_left = {"east": 0, "south": 90, "west": 180, "north": 270}
+    stairs = {}
+    for facing in bottom:
+        for half, rotations in (("bottom", {"straight": bottom, "outer_right": bottom, "outer_left": left, "inner_right": bottom, "inner_left": left}),
+                                ("top", {"straight": bottom, "outer_right": top_right, "outer_left": top_left, "inner_right": top_right, "inner_left": top_left})):
+            for shape, rot in rotations.items():
+                kind = "" if shape == "straight" else "_inner" if shape.startswith("inner") else "_outer"
+                v = {"model": f"{NS}:block/catacomb_brick_stairs{kind}", "uvlock": True}
+                if half == "top":
+                    v["x"] = 180
+                if rot[facing]:
+                    v["y"] = rot[facing]
+                stairs[f"facing={facing},half={half},shape={shape}"] = v
+    a.block("catacomb_brick_stairs", "Catacomb Brick Stairs", {"variants": stairs}, {"parent": f"{NS}:block/catacomb_brick_stairs"})
+    a.models["catacomb_brick_slab"] = {"parent": "minecraft:block/slab", "textures": tx}
+    a.models["catacomb_brick_slab_top"] = {"parent": "minecraft:block/slab_top", "textures": tx}
+    a.block("catacomb_brick_slab", "Catacomb Brick Slab",
+            {"variants": {"type=bottom": {"model": f"{NS}:block/catacomb_brick_slab"}, "type=top": {"model": f"{NS}:block/catacomb_brick_slab_top"},
+                          "type=double": {"model": f"{NS}:block/catacomb_brick"}}},
+            {"parent": f"{NS}:block/catacomb_brick_slab"})
+    wall_tx = {"wall": f"{NS}:block/catacomb_brick"}
+    for part in ("post", "side", "side_tall"):
+        a.models[f"catacomb_brick_wall_{part}"] = {"parent": f"minecraft:block/template_wall_{part}", "textures": wall_tx}
+    a.models["catacomb_brick_wall_inventory"] = {"parent": "minecraft:block/wall_inventory", "textures": wall_tx}
+    parts = [{"when": {"up": "true"}, "apply": {"model": f"{NS}:block/catacomb_brick_wall_post"}}]
+    for side, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        for height, part in (("low", "side"), ("tall", "side_tall")):
+            apply = {"model": f"{NS}:block/catacomb_brick_wall_{part}", "uvlock": True}
+            if y:
+                apply["y"] = y
+            parts.append({"when": {side: height}, "apply": apply})
+    a.block("catacomb_brick_wall", "Catacomb Brick Wall", {"multipart": parts}, {"parent": f"{NS}:block/catacomb_brick_wall_inventory"})
+
+    # The cable along the vault: a thin dark bar at the top of the block, along its axis.
+    a.texture("ceiling_cable", cable_run_tex(r("ceiling_cable")), T.PLASTIC.but(smoothness=0.35, relief=0.2))
+    a.models["ceiling_cable_x"] = model({"t": "ceiling_cable"}, [element((0, 14, 7), (16, 16, 9), "t")], ao=False)
+    a.models["ceiling_cable_z"] = model({"t": "ceiling_cable"}, [element((7, 14, 0), (9, 16, 16), "t")], ao=False)
+    a.block("ceiling_cable", "Ceiling Cable",
+            {"variants": {"axis=x": {"model": f"{NS}:block/ceiling_cable_x"}, "axis=z": {"model": f"{NS}:block/ceiling_cable_z"}}},
+            {"parent": f"{NS}:block/ceiling_cable_x"})
     return a
 
 

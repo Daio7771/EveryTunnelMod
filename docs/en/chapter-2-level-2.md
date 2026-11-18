@@ -83,16 +83,15 @@ It runs its checks first and writes nothing if one fails. Then it writes `map.js
 world coordinates) and `flood.json` (the flood's stages) into `tools/map/ch2l2/output/` (git-ignored) with its pictures, and, with
 `--install`, the three JSON files into `data/every_tunnel/ch2/l2/` (committed).
 
-**The drawing.** The author's conceptual plan (kept out of git, in `docs/temporal/ch2l2/`) at 6 px of the drawing a block: about
-256 x 170 blocks. Corridors meet at right angles; rooms are giant (the pump room 58 x 53, the maintenance room 60 x 52, the central
-collector 36 x 102). The drawing's way straight from the lower galleries into the maintenance room is not there: it goes round, down a
+**The drawing.** The author's conceptual plan (kept out of git, in `docs/temporal/ch2l2/`) at 10 px of the drawing a block (phase 2.2; it
+was 6, and too big): 150 x 105 blocks. Corridors (5-6 wide) meet at right angles; the pump room is 38 x 37, the maintenance room 36 x 25, the
+central collector 20 x 55. The drawing's central hall and the crypt off the entry corridor are left out. The drawing's way straight from the lower galleries into the maintenance room is not there: it goes round, down a
 corridor west of the room, into the vestibule.
 
 **Four heights**, `levels` in the file: **H** (y 20) the entry, the station and the exit; **M** (10) the hunters' galleries, the
 balcony over the collector and the pump room's overlook; **L** (0) the pump room's floor, the catacombs, the vestibule and the
 maintenance room; **D** (-8) the bottom of the collectors, where the water is. The central collector is a shaft from D to over H, seen
-from the three heights: from the galleries' balcony (M), from the central hall's barred window (L) and from the station's broken bridge
-(H).
+from two heights: from the galleries' balcony (M) and from the station's broken bridge (H).
 
 **`layout.json`:**
 
@@ -100,8 +99,8 @@ from the three heights: from the galleries' balcony (M), from the central hall's
 |---|---|
 | `origin`, `dimension`, `seed` | Where plan cell 0, 0, 0 goes in the world (1024, 64, 1280, south of Level 1's), and the seed of every detail of the look |
 | `levels` | The four heights by name |
-| `styles` | The looks: `masonry` (the old catacombs: stone bricks, cracked and mossy, deepslate bricks at the foot of the walls, empty niches, moss), `drain` (the factory's drainage: Level 5's drain blocks, which the world's resource pack re-skins as stained concrete, puddles), `machine`. Each gives the shell's roles (wall, dado, floor, ceiling) one block or a weighted mix |
-| `spaces` | Each space: its boxes, floor (a height or a number), air's height, style, lamps; a `ramp` makes a flight of stairs of a whole space (the stairs down from the entry, the gallery up to the station) |
+| `styles` | The looks: `masonry` (the old catacombs: Chapter 2's own dark damp brick `catacomb_*`, cracked, saltpetre-stained and tide-lined at the foot of the walls, a brick vault, flagstones, empty niches, puddles), `drain` (the factory's drainage: Level 5's drain blocks, which the world's resource pack re-skins as stained concrete, puddles), `machine`. Each gives the shell's roles (wall, dado, floor, ceiling) one block or a weighted mix |
+| `spaces` | Each space: its boxes, floor (a height or a number), air's height, style, lamps (`ceiling`; `cable`, work bulbs hung from a cable along the vault; `wall`, lamps on the walls over each standing surface; the `lamp_gaps` leave some bulbs out, flickering or dead, by seed, but never near an anchor); a `ramp` makes a flight of stairs of a whole space (the stairs down from the entry, the gallery up to the station) |
 | `links` | Spaces whose air simply meets (a balcony over the shaft, the stairs and the corridors) |
 | `openings` | Passages through a wall one block thick: arches, a window of bars, and the **gate** (`vestibule_gate`) with a block for each of its states |
 | `features` | What stands in a space: partitions and pillars, solid blocks (the overlook, the walkway along the collector, the pump's housing), flights of stairs, decks (catwalks, the broken bridge), channels with water, still water, rails, ladders, floor patches (the four traps), bricked arches |
@@ -110,7 +109,7 @@ from the three heights: from the galleries' balcony (M), from the central hall's
 | `checks` | What the checks hold the level to |
 | `flood` | The flood's three stages (phase 6): trigger zone, delay, seconds, level, the gates' states while it holds water |
 
-**The look's details** (which brick is cracked or mossy, where a niche, a puddle or moss is) are drawn from the seed: the generator
+**The look's details** (which brick is cracked or damp, where a niche or a puddle is) are drawn from the seed: the generator
 picks with `cell_hash`, and the mod with `MapPlan.pick`, the same function bit for bit (`MapPlanTest` holds them together), so the
 preview is what the game builds. No vanilla block the world's pack re-skins as Chapter 1's is used, but the drain's stand-ins
 (`Ch2L2MapPlanTest`).
@@ -120,13 +119,13 @@ preview is what the game builds. No vanilla block the world's pack re-skins as C
   it and room over it, and the zones of the route's places overlap none of each other (the mod tells where the player is by them; the
   overlook's, inside the pump room's, is the one pair allowed, `nested`): a zone of an L-shaped space is its box, which can reach into its
   neighbours, so the return gallery's is its south leg (`box`);
-- the route walked as a player walks it (a step up of one, a drop of at most three, ladders, no swimming), with its length (about 1,000
-  blocks, 4 minutes of walking alone);
+- the route walked as a player walks it (a step up of one, a drop of at most three, ladders, no swimming), with its length (about 580
+  blocks, 2.5 minutes of walking alone);
 - **no shortcuts**: every way from the entry to the exit, falling and swimming included, crosses the galleries, the pump room, the
   catacombs, the vestibule, the walkways, the upper gallery and the station; with the gate down (`grate`), nothing past it can be reached;
 - **nowhere to get stuck**: from every place a player can reach from the entry, the exit can still be reached (a balcony without its
   parapet, for one, would leave a fall into the shaft with no way out);
-- **the pump room** needs several cycles of the pump: its shortest way across, swimming included, is at least `min` blocks (94 now:
+- **the pump room** needs several cycles of the pump: its shortest way across, swimming included, is at least `min` blocks (56 now:
   the floor is cut by two channels five wide, too wide for a sprinting jump, and their ladders are only by the crossings);
 - the openings are clear: two blocks of air through them and room to stand on both sides;
 - **the water stays put**: still water and each flood stage touch nothing that water flows into (air, bars, slabs...) outside their own
@@ -145,7 +144,7 @@ after each stage).
 | `hunter_galleries` | The galleries: three halls open along the south | M |
 | `pump_overlook` | The pump room's overlook: a caged block of concrete in its north-west corner | M |
 | `vibration_chamber` | The pump room: two channels across its floor, the crossings at opposite ends (a zigzag), the exit seen from the overlook | L |
-| `lower_catacombs` | The catacombs and the lower galleries (the central hall off them, optional) | L |
+| `lower_catacombs` | The catacombs and the lower galleries (nothing off them now) | L |
 | `observer_wall` | The vestibule (`observer_wall_face`: the wall where the Guard comes out, provisional) | L |
 | `observer_chamber` | The maintenance room, its four traps where the drawing has its four squares (`trap_1` to `trap_4`) | L |
 | `return_gallery` | Round the maintenance room's east and south, back into the vestibule | L |
@@ -155,8 +154,8 @@ after each stage).
 | `pumping_station` | The station, dry; a broken bridge seen through bars over the shaft | H |
 | `level_exit` | The exit room, past a quiet corridor | H |
 
-Most rooms of the drawing are sealed crypts, their arches bricked up by the factory; four are open, short side rooms for later phases'
-resources and documents (two crypts by the galleries, the central hall and a crypt before the vestibule).
+Most rooms of the drawing are sealed crypts, their arches bricked up by the factory; two are open, short side rooms for later phases'
+resources and documents (a crypt off the galleries and one off the service corridor before the vestibule).
 
 **The gate.** The vestibule's way to the collector (`vestibule_gate`) has three states: `grate` (down: iron bars, until the Guard is
 beaten), `open` and `sealed` (a sluice gate's plate, watertight). Phase 1 builds it open, so the level can be walked from end to end. The
@@ -175,7 +174,7 @@ anchors, and what is wrong is reported (`/et reload`).
 |---|---|
 | `rules` | `flashlight` (true: Rowan's flashlight works), `noise` (true: the steps make noise the creatures hear) |
 | `start` | On arriving from Level 1, `battery`, `thirst` and `stamina` as a share of full (0 to 1; 1, 1, 1). A death or CONTINUE gives them all full |
-| `lights` | Each zone's lamps: `on`, `flicker` or `off`, set whenever the level is started (arriving, CONTINUE, `reset`). The seven zones with lamps are listed, all `on` |
+| `lights` | Each zone's lamps: `on`, `flicker` or `off`, set whenever the level is started (arriving, CONTINUE, `reset`). Empty: the plan's own lamps (with their gaps) stand as built; a zone listed here would turn all its lamps `on`/`flicker`/`off` |
 | `checkpoints` | In the way's order: `id`, `anchor` (where a death and CONTINUE bring the player back), `zone` (walked into, it is taken), `before` (the encounter it comes before, for `reset`) |
 | `progress` | `zone` and `state`: walking into the zone moves the player on to the state |
 

@@ -8,15 +8,7 @@
     "thirst": 1.0,
     "stamina": 1.0
   },
-  "lights": {
-    "zone_sealed_entry": "on",
-    "zone_vibration_chamber": "on",
-    "zone_observer_chamber": "on",
-    "zone_flood_collector": "on",
-    "zone_rising_walkways": "on",
-    "zone_pumping_station": "on",
-    "zone_level_exit": "on"
-  },
+  "lights": {},
   "checkpoints": [
     {"id": "entry", "anchor": "sealed_entry", "zone": "zone_sealed_entry", "before": "hunters"},
     {"id": "pump_overlook", "anchor": "pump_overlook", "zone": "zone_pump_overlook", "before": "creature"},

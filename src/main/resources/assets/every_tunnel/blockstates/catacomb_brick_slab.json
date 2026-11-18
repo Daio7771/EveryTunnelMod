@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "every_tunnel:block/catacomb_brick_slab"
+    },
+    "type=top": {
+      "model": "every_tunnel:block/catacomb_brick_slab_top"
+    },
+    "type=double": {
+      "model": "every_tunnel:block/catacomb_brick"
+    }
+  }
+}

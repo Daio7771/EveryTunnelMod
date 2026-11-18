@@ -290,6 +290,27 @@ def run(level):
         report.append(f"flood stage {stage['id']}: {len(cells - still)} cells of water up to y {stage['level']} in "
                       f"{stage['seconds']} s ({len(cells - still) / (stage['seconds'] * 20):.0f} a tick)")
 
+    # The look: no vanilla stone anywhere, and a lit lamp in every space that is not left dark on purpose.
+    banned = tuple(cfg.get("banned", ()))
+    seen = set()
+    for m in lv.materials_cache.values():
+        for block, _ in (lv.mix_of(m) if isinstance(m, tuple) else [[m, 1]]):
+            name = block.split("[")[0]
+            if name.startswith(banned) and name not in seen:
+                seen.add(name)
+                errors.append(f"look: {name} is vanilla stone (banned in checks.banned)")
+    unlit = set(cfg.get("unlit", ()))
+    for sid in lv.spaces:
+        lit = [c for c in lv.lamps if lv.air.get(c) == sid and "mode=off" not in lv.blocks[c]]
+        if not lit and sid not in unlit:
+            errors.append(f"lights: {sid} has no lit lamp (list it in checks.unlit if it is dark on purpose)")
+        if lit and sid in unlit:
+            errors.append(f"lights: {sid} is listed as unlit but has lamps")
+    counts = {}
+    for c in lv.lamps:
+        counts[lv.air.get(c)] = counts.get(lv.air.get(c), 0) + 1
+    report.append("lamps: " + ", ".join(f"{k} {v}" for k, v in sorted(counts.items(), key=lambda kv: str(kv[0]))))
+
     # The build.
     lo, hi = lv.bounds()
     clear = (hi[0] - lo[0] + 1) * (hi[1] - lo[1] + 1) * (hi[2] - lo[2] + 1)

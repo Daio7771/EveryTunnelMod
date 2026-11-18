@@ -85,16 +85,15 @@ Primero pasa sus comprobaciones y no escribe nada si alguna falla. Luego escribe
 nombre, en coordenadas del mundo) y `flood.json` (las etapas de la inundación) en `tools/map/ch2l2/output/` (ignorada por git) con sus
 dibujos y, con `--install`, los tres JSON en `data/every_tunnel/ch2/l2/` (en el repositorio).
 
-**El dibujo.** El plano conceptual del autor (fuera de git, en `docs/temporal/ch2l2/`) a 6 px del dibujo por bloque: unos 256 x 170
-bloques. Los pasillos se cruzan en ángulo recto; las salas son gigantes (la sala de bombas 58 x 53, la de mantenimiento 60 x 52, el
-colector central 36 x 102). El paso directo del dibujo desde las galerías de abajo a la sala de mantenimiento no existe: se da la vuelta
+**El dibujo.** El plano conceptual del autor (fuera de git, en `docs/temporal/ch2l2/`) a 10 px del dibujo por bloque (fase 2.2; era 6 y
+resultaba enorme): 150 x 105 bloques. Los pasillos (de 5-6 de ancho) se cruzan en ángulo recto; la sala de bombas mide 38 x 37, la de
+mantenimiento 36 x 25, el colector central 20 x 55. Faltan la sala central del dibujo y la cripta junto al pasillo de entrada. El paso directo del dibujo desde las galerías de abajo a la sala de mantenimiento no existe: se da la vuelta
 por un pasillo al oeste de la sala hasta el vestíbulo.
 
 **Cuatro alturas**, `levels` en el archivo: **H** (y 20) la entrada, la estación y la salida; **M** (10) las galerías de los Hunters, el
 balcón sobre el colector y el mirador de la sala de bombas; **L** (0) el suelo de la sala de bombas, las catacumbas, el vestíbulo y la
 sala de mantenimiento; **D** (-8) el fondo de los colectores, donde está el agua. El colector central es un pozo de D hasta por encima
-de H que se ve desde las tres alturas: desde el balcón de las galerías (M), desde la ventana con barrotes de la sala central (L) y desde
-el puente roto de la estación (H).
+de H que se ve desde dos alturas: desde el balcón de las galerías (M) y desde el puente roto de la estación (H).
 
 **`layout.json`:**
 
@@ -102,8 +101,8 @@ el puente roto de la estación (H).
 |---|---|
 | `origin`, `dimension`, `seed` | Dónde va la celda 0, 0, 0 del plan en el mundo (1024, 64, 1280, al sur de la del Nivel 1) y la semilla de cada detalle del aspecto |
 | `levels` | Las cuatro alturas por nombre |
-| `styles` | Los aspectos: `masonry` (las catacumbas antiguas: ladrillo de piedra agrietado y con musgo, ladrillo de pizarra al pie de las paredes, nichos vacíos, musgo), `drain` (el drenaje de la fábrica: los bloques del desagüe del Nivel 5, que el paquete de recursos del mundo pinta como hormigón manchado, charcos), `machine`. Cada uno da a cada papel de la cáscara (pared, zócalo, suelo, techo) un bloque o una mezcla con pesos |
-| `spaces` | Cada espacio: sus cajas, su suelo (una altura o un número), la altura de su aire, su estilo, sus lámparas; un `ramp` hace de un espacio entero un tramo de escaleras (las de bajada desde la entrada, la galería que sube a la estación) |
+| `styles` | Los aspectos: `masonry` (las catacumbas antiguas: ladrillo oscuro y húmedo propio del Capítulo 2, `catacomb_*`, agrietado, con salitre y con marca de agua al pie de las paredes, bóveda de ladrillo, losas, nichos vacíos, charcos), `drain` (el drenaje de la fábrica: los bloques del desagüe del Nivel 5, que el paquete de recursos del mundo pinta como hormigón manchado, charcos), `machine`. Cada uno da a cada papel de la cáscara (pared, zócalo, suelo, techo) un bloque o una mezcla con pesos |
+| `spaces` | Cada espacio: sus cajas, su suelo (una altura o un número), la altura de su aire, su estilo, sus lámparas (`ceiling`; `cable`, bombillas de obra colgadas de un cable por la bóveda; `wall`, lámparas en las paredes sobre cada superficie; los `lamp_gaps` dejan algunas bombillas fuera, parpadeando o muertas, según la semilla, nunca junto a un ancla); un `ramp` hace de un espacio entero un tramo de escaleras (las de bajada desde la entrada, la galería que sube a la estación) |
 | `links` | Espacios cuyo aire se junta sin más (un balcón sobre el pozo, las escaleras y los pasillos) |
 | `openings` | Pasos a través de una pared de un bloque: arcos, una ventana de barrotes y la **reja** (`vestibule_gate`) con un bloque para cada uno de sus estados |
 | `features` | Lo que hay dentro de un espacio: tabiques y pilares, bloques macizos (el mirador, la pasarela del colector, la carcasa de la bomba), tramos de escaleras, plataformas (pasarelas, el puente roto), canales con agua, agua quieta, barandillas, escalerillas, parches de suelo (las cuatro trampas), arcos tapiados |
@@ -112,7 +111,7 @@ el puente roto de la estación (H).
 | `checks` | A qué se ajusta el nivel en las comprobaciones |
 | `flood` | Las tres etapas de la inundación (fase 6): zona que la dispara, retraso, segundos, nivel, el estado de las compuertas mientras tiene agua |
 
-**Los detalles del aspecto** (qué ladrillo está agrietado o con musgo, dónde hay un nicho, un charco o musgo) salen de la semilla: el
+**Los detalles del aspecto** (qué ladrillo está agrietado o húmedo, dónde hay un nicho o un charco) salen de la semilla: el
 generador elige con `cell_hash` y el mod con `MapPlan.pick`, la misma función bit a bit (`MapPlanTest` las mantiene iguales), así que lo
 que se ve en el dibujo es lo que construye el juego. No se usa ningún bloque vanilla que el paquete del mundo pinte como del Capítulo 1,
 salvo los del desagüe (`Ch2L2MapPlanTest`).
@@ -123,14 +122,14 @@ salvo los del desagüe (`Ch2L2MapPlanTest`).
   por ellas; la del mirador, dentro de la de la sala de bombas, es la única pareja permitida, `nested`): la zona de un espacio en L es su
   caja, que puede meterse en sus vecinos, así que la de la galería de retorno es su tramo sur (`box`);
 - el recorrido andado como lo anda un jugador (un escalón de uno, una caída de tres como mucho, escalerillas, sin nadar), con su longitud
-  (unos 1.000 bloques, 4 minutos solo andando);
+  (unos 580 bloques, 2,5 minutos solo andando);
 - **sin atajos**: todo camino de la entrada a la salida, cayendo y nadando incluidos, pasa por las galerías, la sala de bombas, las
   catacumbas, el vestíbulo, las pasarelas, la galería superior y la estación; con la reja bajada (`grate`) no se llega a nada de lo que
   hay detrás;
 - **ningún sitio donde quedarse atrapado**: desde cualquier sitio al que se llegue desde la entrada se puede seguir llegando a la salida
   (un balcón sin su pretil, por ejemplo, dejaría caer al pozo sin salida);
 - **la sala de bombas** pide varios ciclos de la bomba: su camino más corto de lado a lado, nadando incluido, es de `min` bloques como
-  poco (94 ahora: el suelo lo cortan dos canales de cinco de ancho, más de lo que se salta corriendo, y sus escalerillas solo están junto
+  poco (56 ahora: el suelo lo cortan dos canales de cinco de ancho, más de lo que se salta corriendo, y sus escalerillas solo están junto
   a los cruces);
 - las aberturas están despejadas: dos bloques de aire a través y sitio para estar a ambos lados;
 - **el agua no se sale**: el agua quieta y cada etapa de la inundación no tocan nada por donde pase el agua (aire, barrotes, losas...)
@@ -149,7 +148,7 @@ luego tras cada etapa).
 | `hunter_galleries` | Las galerías: tres salas abiertas por el sur | M |
 | `pump_overlook` | El mirador de la sala de bombas: un bloque de hormigón enjaulado en su esquina noroeste | M |
 | `vibration_chamber` | La sala de bombas: dos canales cruzan su suelo, los cruces en extremos opuestos (un zigzag); la salida se ve desde el mirador | L |
-| `lower_catacombs` | Las catacumbas y las galerías de abajo (con la sala central al lado, opcional) | L |
+| `lower_catacombs` | Las catacumbas y las galerías de abajo (sin nada al lado ahora) | L |
 | `observer_wall` | El vestíbulo (`observer_wall_face`: la pared de la que sale el Guard, provisional) | L |
 | `observer_chamber` | La sala de mantenimiento, sus cuatro trampas donde el dibujo tiene sus cuatro cuadrados (`trap_1` a `trap_4`) | L |
 | `return_gallery` | Alrededor de la sala de mantenimiento por el este y el sur, de vuelta al vestíbulo | L |
@@ -159,8 +158,8 @@ luego tras cada etapa).
 | `pumping_station` | La estación, seca; un puente roto sobre el pozo, visto a través de barrotes | H |
 | `level_exit` | La sala de la salida, tras un pasillo tranquilo | H |
 
-Casi todas las salas del dibujo son criptas cerradas, con los arcos tapiados por la fábrica; cuatro están abiertas, salas cortas a un
-lado para los recursos y documentos de fases posteriores (dos criptas junto a las galerías, la sala central y una cripta antes del
+Casi todas las salas del dibujo son criptas cerradas, con los arcos tapiados por la fábrica; dos están abiertas, salas cortas a un
+lado para los recursos y documentos de fases posteriores (una cripta junto a las galerías y otra junto al pasillo de servicio, antes del
 vestíbulo).
 
 **La reja.** El paso del vestíbulo al colector (`vestibule_gate`) tiene tres estados: `grate` (bajada: barrotes de hierro, hasta vencer
@@ -181,7 +180,7 @@ las anclas, y lo que está mal se avisa (`/et reload`).
 |---|---|
 | `rules` | `flashlight` (true: la linterna de Rowan funciona), `noise` (true: los pasos hacen ruido que oyen las criaturas) |
 | `start` | Al llegar del Nivel 1, `battery`, `thirst` y `stamina` como parte del máximo (0 a 1; 1, 1, 1). Morir o CONTINUAR los deja todos llenos |
-| `lights` | Las lámparas de cada zona: `on`, `flicker` u `off`, puestas cada vez que se empieza el nivel (al llegar, CONTINUAR, `reset`). Están las siete zonas con lámparas, todas `on` |
+| `lights` | Las lámparas de cada zona: `on`, `flicker` u `off`, puestas cada vez que se empieza el nivel (al llegar, CONTINUAR, `reset`). Vacío: las lámparas del plan (con sus huecos) quedan como se construyen; una zona listada aquí encendería todas sus lámparas en `on`/`flicker`/`off` |
 | `checkpoints` | En el orden del camino: `id`, `anchor` (adonde devuelven morir y CONTINUAR), `zone` (al entrar se toma), `before` (el encuentro al que precede, para `reset`) |
 | `progress` | `zone` y `state`: entrar en la zona lleva al jugador al estado |
 

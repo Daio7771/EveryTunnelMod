@@ -716,5 +716,17 @@
   "block.every_tunnel.reagent_bottle_red": "Reagent Bottle (Red)",
   "block.every_tunnel.mixing_tank": "Mixing Tank",
   "block.every_tunnel.centrifuge": "Centrifuge",
-  "block.every_tunnel.manhole": "Emergency Manhole"
+  "block.every_tunnel.manhole": "Emergency Manhole",
+  "block.every_tunnel.catacomb_brick": "Catacomb Brick",
+  "block.every_tunnel.catacomb_brick_cracked": "Cracked Catacomb Brick",
+  "block.every_tunnel.catacomb_brick_damp": "Damp Catacomb Brick",
+  "block.every_tunnel.catacomb_brick_tide": "Tide-Stained Catacomb Brick",
+  "block.every_tunnel.catacomb_flagstone": "Catacomb Flagstone",
+  "block.every_tunnel.catacomb_flagstone_cracked": "Cracked Catacomb Flagstone",
+  "block.every_tunnel.catacomb_vault": "Catacomb Vault",
+  "block.every_tunnel.catacomb_bricked": "Bricked-Up Arch",
+  "block.every_tunnel.catacomb_brick_stairs": "Catacomb Brick Stairs",
+  "block.every_tunnel.catacomb_brick_slab": "Catacomb Brick Slab",
+  "block.every_tunnel.catacomb_brick_wall": "Catacomb Brick Wall",
+  "block.every_tunnel.ceiling_cable": "Ceiling Cable"
 }

@@ -15,6 +15,8 @@ import daio7771.everytunnel.chapter2.level1.platform.ManholeBlock
 import daio7771.everytunnel.chapter2.level1.platform.NonameTerminalBlock
 import daio7771.everytunnel.chapter2.level1.platform.SampleTubeBlock
 import daio7771.everytunnel.chapter2.level1.platform.TimeClockBlock
+import daio7771.everytunnel.chapter2.level2.platform.CatacombStairsBlock
+import daio7771.everytunnel.chapter2.level2.platform.CeilingCableBlock
 import daio7771.everytunnel.platform.BlockShapes.box
 import daio7771.everytunnel.platform.LinkedDoorBlock
 import daio7771.everytunnel.platform.ModBlocks
@@ -30,6 +32,8 @@ import net.minecraft.block.Block
 import net.minecraft.block.BlockSetType
 import net.minecraft.block.DoorBlock
 import net.minecraft.block.MapColor
+import net.minecraft.block.SlabBlock
+import net.minecraft.block.WallBlock
 import net.minecraft.block.TransparentBlock
 import net.minecraft.block.entity.BlockEntityType
 import net.minecraft.item.BlockItem
@@ -115,6 +119,28 @@ object Ch2Blocks {
     val STALL_WALL: Block = register("stall_wall", StackFurnitureBlock(ModBlocks.props(MapColor.LIGHT_GRAY, ModSoundGroups.PLASTIC), listOf(box(7, 0, 0, 9, 16, 16))))
     val STALL_DOOR: Block = register("stall_door", DoorBlock(ModBlocks.door(), ModBlocks.SERVICE_DOOR))
     val WARM_CEILING_LIGHT: Block = register("warm_ceiling_light", Block(ModBlocks.props(MapColor.WHITE, ModSoundGroups.PLASTIC).luminance { 15 }))
+
+    /**
+     * Chapter 2 Level 2's catacombs (`tools/map/ch2l2/layout.json`, style `masonry`): dark damp brick, its cracked, damp and tide-lined
+     * variants, worn flagstones, the brick vault, the later bricking-up, and the brick's stairs, slab and wall. Plain stone to the hand.
+     */
+    private fun stone(color: MapColor = MapColor.BROWN): net.minecraft.block.AbstractBlock.Settings =
+        ModBlocks.solid(color, BlockSoundGroup.DEEPSLATE_BRICKS).strength(1.5f, 6f)
+
+    val CATACOMB_BRICK: Block = register("catacomb_brick", Block(stone()))
+    val CATACOMB_BRICK_CRACKED: Block = register("catacomb_brick_cracked", Block(stone()))
+    val CATACOMB_BRICK_DAMP: Block = register("catacomb_brick_damp", Block(stone()))
+    val CATACOMB_BRICK_TIDE: Block = register("catacomb_brick_tide", Block(stone()))
+    val CATACOMB_FLAGSTONE: Block = register("catacomb_flagstone", Block(stone(MapColor.STONE_GRAY)))
+    val CATACOMB_FLAGSTONE_CRACKED: Block = register("catacomb_flagstone_cracked", Block(stone(MapColor.STONE_GRAY)))
+    val CATACOMB_VAULT: Block = register("catacomb_vault", Block(stone(MapColor.TERRACOTTA_BROWN)))
+    val CATACOMB_BRICKED: Block = register("catacomb_bricked", Block(stone(MapColor.TERRACOTTA_RED)))
+    val CATACOMB_BRICK_STAIRS: Block = register("catacomb_brick_stairs", CatacombStairsBlock(CATACOMB_BRICK.defaultState, stone()))
+    val CATACOMB_BRICK_SLAB: Block = register("catacomb_brick_slab", SlabBlock(stone()))
+    val CATACOMB_BRICK_WALL: Block = register("catacomb_brick_wall", WallBlock(stone()))
+
+    /** The maintenance cable strung along the catacombs' vault, the work bulbs hanging from it ([CeilingCableBlock]). */
+    val CEILING_CABLE: Block = register("ceiling_cable", CeilingCableBlock(ModBlocks.props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision()))
 
     /** The factory cameras' block entity: the same as Level 5's camera's, a type of its own so the client sweeps them. */
     lateinit var FACTORY_CAMERA_ENTITY: BlockEntityType<SecurityCameraBlockEntity>

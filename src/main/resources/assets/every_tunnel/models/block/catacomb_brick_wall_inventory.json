@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/wall_inventory",
+  "textures": {
+    "wall": "every_tunnel:block/catacomb_brick"
+  }
+}

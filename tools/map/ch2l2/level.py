@@ -29,7 +29,7 @@ FACING = {(1, 0): "east", (-1, 0): "west", (0, 1): "south", (0, -1): "north"}
 STYLE_ORDER = ["machine", "masonry", "drain"]
 # Blocks that water flows into (it waterlogs them, or they are not in its way): a flood stage must never touch one of these
 # outside its own spaces. Everything else the plan places is watertight.
-PERMEABLE = ("minecraft:air", "minecraft:iron_bars", "_slab", "_stairs", "_wall", "minecraft:moss_carpet", "every_tunnel:puddle",
+PERMEABLE = ("minecraft:air", "minecraft:iron_bars", "_slab", "_stairs", "_wall", "every_tunnel:ceiling_cable", "every_tunnel:hanging_cable", "every_tunnel:puddle",
              "every_tunnel:metal_grating", "every_tunnel:drain_ladder", "minecraft:ladder", "every_tunnel:cage_lamp", "_trapdoor",
              "_fence", "minecraft:chain")
 WATER = "minecraft:water"
@@ -413,18 +413,97 @@ class Level:
     # --- lamps and scatter ----------------------------------------------------------------------
 
     def lay_lamps(self):
+        """The lamps of every space (`lamps`, one spec or a list): `ceiling`, a lamp under the ceiling every `spacing` blocks over
+        the boxes; `cable`, a cable strung along each box's long axis (`rows` runs) with a bulb hanging from it every `spacing`
+        blocks, at most `hang` over the floor; `wall`, a lamp `above` blocks over each standing surface, on the wall, every
+        `spacing` blocks along it. Gaps (`lamp_gaps`, or a spec's `gaps`): a share of the lamps is left out (the cable stays),
+        flickers or is dead, picked by `cell_hash`; lamps near an anchor are always on."""
         for s in self.spaces.values():
-            if not s.lamps:
+            specs = s.lamps if isinstance(s.lamps, list) else [s.lamps] if s.lamps else []
+            for spec in specs:
+                getattr(self, "lamps_" + spec.get("kind", "ceiling"))(s, spec)
+
+    def lamp_mode(self, c, spec):
+        """'on', 'flicker', 'off' or None (no lamp) for the lamp at a cell."""
+        gaps = {**self.layout.get("lamp_gaps", {}), **spec.get("gaps", {})}
+        for a in self.layout["anchors"]:
+            px_, py_, pz_ = a["pos"]
+            if abs(px_ - c[0]) <= gaps.get("safe_radius", 6) and abs(pz_ - c[2]) <= gaps.get("safe_radius", 6) and abs(py_ - c[1]) <= 5:
+                return "on"
+        r = cell_hash(*c, self.seed + 211) % 10000 / 10000
+        dark, dead, flicker = gaps.get("dark", 0), gaps.get("dead", 0), gaps.get("flicker", 0)
+        if r < dark:
+            return None
+        if r < dark + dead:
+            return "off"
+        if r < dark + dead + flicker:
+            return "flicker"
+        return "on"
+
+    def put_lamp(self, c, facing, axis, spec):
+        mode = self.lamp_mode(c, spec)
+        if mode is None:
+            return False
+        self.blocks[c] = self.layout["lamp_blocks"]["cage"].format(facing=facing, axis=axis, mode=mode, lit="false" if mode == "off" else "true")
+        self.lamps.append(c)
+        return True
+
+    def free(self, c, s):
+        return self.air.get(c) == s.id and c not in self.blocks and c not in self.water and c not in self.climb
+
+    def lamps_ceiling(self, s, spec):
+        for x0, z0, x1, z1 in s.boxes:
+            for x in grid(x0, x1 - 1, spec["spacing"]):
+                for z in grid(z0, z1 - 1, spec["spacing"]):
+                    c = (x, s.top_at(x, z) - 1, z)
+                    if self.air.get(c) == s.id and self.shell.get((x, c[1] + 1, z), (None,))[0] == "ceiling":
+                        self.put_lamp(c, "down", "x", spec)
+
+    def lamps_cable(self, s, spec):
+        blocks = self.layout["lamp_blocks"]
+        for x0, z0, x1, z1 in s.boxes:
+            along_x = (x1 - x0) >= (z1 - z0)
+            a0, a1, c0, c1 = (x0, x1 - 1, z0, z1 - 1) if along_x else (z0, z1 - 1, x0, x1 - 1)
+            rows = spec.get("rows", 1)
+            for i in range(rows):
+                cross = c0 + int((i + 0.5) * (c1 - c0 + 1) / rows)
+                cell = (lambda t: (t, cross)) if along_x else (lambda t: (cross, t))
+                axis = "x" if along_x else "z"
+                for t in range(a0, a1 + 1):
+                    x, z = cell(t)
+                    c = (x, s.top_at(x, z) - 1, z)
+                    if self.free(c, s) and self.shell.get((x, c[1] + 1, z), (None,))[0] == "ceiling":
+                        self.blocks[c] = blocks["cable"].format(axis=axis)
+                for t in grid(a0, a1, spec["spacing"]):
+                    x, z = cell(t)
+                    top = (x, s.top_at(x, z) - 1, z)
+                    if self.air.get(top) != s.id or self.shell.get((x, top[1] + 1, z), (None,))[0] != "ceiling":
+                        continue
+                    y = min(top[1], s.floor_at(x, z) + spec.get("hang", 4))
+                    lamp = (x, y, z)
+                    if not self.free(lamp, s) and lamp != top:
+                        continue
+                    if self.put_lamp(lamp, "down", axis, spec):
+                        for yy in range(y + 1, top[1]):
+                            if self.free((x, yy, z), s):
+                                self.blocks[(x, yy, z)] = blocks["drop"]
+
+    def lamps_wall(self, s, spec):
+        above, spacing = spec.get("above", 3), spec["spacing"]
+        for (x, y, z), owner in sorted(self.air.items(), key=lambda kv: kv[0]):
+            if owner != s.id or (x, y - 1, z) in self.air:
                 continue
-            block = self.layout["lamp_blocks"][s.lamps["block"]]
-            spacing = s.lamps["spacing"]
-            for x0, z0, x1, z1 in s.boxes:
-                for x in grid(x0, x1 - 1, spacing):
-                    for z in grid(z0, z1 - 1, spacing):
-                        c = (x, s.top_at(x, z) - 1, z)
-                        if self.air.get(c) == s.id and self.shell.get((x, c[1] + 1, z), (None,))[0] == "ceiling":
-                            self.blocks[c] = block
-                            self.lamps.append(c)
+            lamp = (x, y + above, z)
+            if not self.free(lamp, s):
+                continue
+            for dx, dz in SIDES:
+                wall = self.shell.get((x + dx, y + above, z + dz))
+                if wall is None or wall[0] != "wall" or (x + dx, y + above, z + dz) in self.blocks:
+                    continue
+                if (z if dx else x) % spacing:
+                    continue
+                self.put_lamp(lamp, FACING[(-dx, -dz)], "x" if dz else "z", spec)
+                break
 
     def lay_scatter(self):
         """Puddles on the drain's floors, moss on the catacombs': a share of the floor cells, chosen by the seed."""
