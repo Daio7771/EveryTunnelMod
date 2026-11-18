@@ -24,7 +24,13 @@ is the core of the mod.
 - **Commit and push only when the user says so** ("commit y push"). One commit per finished
   step, in English, prefixed `Phase N: ...`. The remote is SSH, so pushing works from here.
 - Send previews, audio drafts and builds to the user with SendUserFile.
-- Keep token use reasonable: no subagents, no unnecessary exploration.
+- **Keep token use low** (Pro plan, weekly quota): no unnecessary exploration, short replies, few progress messages.
+  - **One session per phase at most.** End it with a short hand-off in memory; above ~150k tokens of context, hand off or compact.
+  - **Models:** the main session runs `opusplan` (Opus plans and designs, Sonnet executes). Delegate only to the user's agents
+    for this project in `~/.claude/agents/` (`et-mechanic` and `et-docs-writer` on Sonnet, `et-hard-problems` on Opus for a main
+    session on Sonnet),
+    with a precise brief (files, exact changes, what done is); never a vague one, never for a one-line change.
+  - **Docs per phase:** fix only what the phase makes wrong, briefly; the level's full EN/ES page is rewritten when the level closes.
 - Update `PROJECT_STATE.md` when the user asks (usually before changing sessions).
 
 ## Rules of the codebase
