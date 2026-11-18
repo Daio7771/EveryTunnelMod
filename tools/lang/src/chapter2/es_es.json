@@ -215,5 +215,7 @@
   "every_tunnel.ch2.l2.maintenance_observation_body": "Mantiene las manos en el suelo. Cuando caminé, se giró hacia mí. Me detuve. Golpeó donde yo había estado.\n\nCrucé mientras funcionaba la bomba. Me perdió entre las vibraciones.\n\nEl siguiente turno puede recoger mis herramientas.",
   "every_tunnel.ch2.l2.boo": "BOO!",
   "entity.every_tunnel.vibration_creature": "Criatura de vibraciones",
-  "block.every_tunnel.pump_beacon": "Baliza de la bomba"
+  "block.every_tunnel.pump_beacon": "Baliza de la bomba",
+  "entity.every_tunnel.observant_guard": "Guardia observador",
+  "block.every_tunnel.trap_breaker": "Disyuntor de trampa"
 }

@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,state=spent": {
+      "model": "every_tunnel:block/trap_breaker_spent"
+    },
+    "facing=north,state=dim": {
+      "model": "every_tunnel:block/trap_breaker_dim"
+    },
+    "facing=north,state=charging": {
+      "model": "every_tunnel:block/trap_breaker_charging"
+    },
+    "facing=north,state=armed": {
+      "model": "every_tunnel:block/trap_breaker_armed"
+    },
+    "facing=east,state=spent": {
+      "model": "every_tunnel:block/trap_breaker_spent",
+      "y": 90
+    },
+    "facing=east,state=dim": {
+      "model": "every_tunnel:block/trap_breaker_dim",
+      "y": 90
+    },
+    "facing=east,state=charging": {
+      "model": "every_tunnel:block/trap_breaker_charging",
+      "y": 90
+    },
+    "facing=east,state=armed": {
+      "model": "every_tunnel:block/trap_breaker_armed",
+      "y": 90
+    },
+    "facing=south,state=spent": {
+      "model": "every_tunnel:block/trap_breaker_spent",
+      "y": 180
+    },
+    "facing=south,state=dim": {
+      "model": "every_tunnel:block/trap_breaker_dim",
+      "y": 180
+    },
+    "facing=south,state=charging": {
+      "model": "every_tunnel:block/trap_breaker_charging",
+      "y": 180
+    },
+    "facing=south,state=armed": {
+      "model": "every_tunnel:block/trap_breaker_armed",
+      "y": 180
+    },
+    "facing=west,state=spent": {
+      "model": "every_tunnel:block/trap_breaker_spent",
+      "y": 270
+    },
+    "facing=west,state=dim": {
+      "model": "every_tunnel:block/trap_breaker_dim",
+      "y": 270
+    },
+    "facing=west,state=charging": {
+      "model": "every_tunnel:block/trap_breaker_charging",
+      "y": 270
+    },
+    "facing=west,state=armed": {
+      "model": "every_tunnel:block/trap_breaker_armed",
+      "y": 270
+    }
+  }
+}

@@ -240,6 +240,13 @@ object Ch2L2 {
         EveryTunnel.LOGGER.info("Chapter 2 Level 2: {} reaches the checkpoint {} ({})", player.gameProfile.name, checkpoint.id, snapshot.state)
     }
 
+    /** Takes the checkpoint called [id] for [player] at their state now (the Guard's death saves the vestibule's with the state it leaves them in); false if there is none. */
+    fun takeCheckpoint(player: ServerPlayerEntity, id: String): Boolean {
+        val checkpoint = data.level.checkpoint(id) ?: return false
+        save(player, checkpoint)
+        return true
+    }
+
     /** Where a death of [player] brings them back: the last checkpoint, its state again. */
     private fun restartFor(player: ServerPlayerEntity): ChapterRestarts.Restart {
         val point = checkpoint(player)?.let { data.anchors.point(it.anchor) } ?: data.anchors.point(ENTRY_ANCHOR)

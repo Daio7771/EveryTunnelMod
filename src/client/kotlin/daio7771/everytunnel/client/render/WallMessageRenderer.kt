@@ -56,7 +56,7 @@ class WallMessageRenderer(context: BlockEntityRendererFactory.Context) : BlockEn
         val key = if (state.message.changed && entity.changedText.isNotEmpty()) entity.changedText else entity.text
         val seed = pos.hashCode()
         val lines = I18n.translate(key).split('\n').map { line ->
-            Text.literal(WallFont.paint(line, seed)).setStyle(Style.EMPTY.withFont(if (entity.chalk.isEmpty()) FONT else CHALK_FONT))
+            Text.literal(WallFont.paint(line, seed)).setStyle(Style.EMPTY.withFont(if (entity.chalk.isEmpty() || entity.chalk == WHITE_PAINT) FONT else CHALK_FONT))
         }
         val width = lines.maxOf { font.getWidth(it) }.toFloat()
         val height = lines.size * LINE_UNITS
@@ -84,6 +84,7 @@ class WallMessageRenderer(context: BlockEntityRendererFactory.Context) : BlockEn
         val colour = (alpha shl 24) or when (entity.chalk) {
             "white" -> WHITE_CHALK
             "black" -> BLACK_CHALK
+            WHITE_PAINT -> WHITE_PAINT_COLOUR
             else -> PAINT
         }
         lines.forEachIndexed { i, line ->
@@ -114,6 +115,9 @@ class WallMessageRenderer(context: BlockEntityRendererFactory.Context) : BlockEn
         private const val PAINT = 0x0E0C0C
         private const val WHITE_CHALK = 0xE6E3DA
         private const val BLACK_CHALK = 0x1C1B1A
+        /** `Chalk` value for white paint: the painted font (brush strokes and drips) in white, not chalk (Chapter 2 Level 2's BOO!). */
+        private const val WHITE_PAINT = "paint_white"
+        private const val WHITE_PAINT_COLOUR = 0xF2F0EA
         /** The font renderer takes an alpha this low for opaque. */
         private const val MIN_ALPHA = 5
 

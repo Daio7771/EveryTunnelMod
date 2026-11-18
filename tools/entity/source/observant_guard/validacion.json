@@ -1,0 +1,52 @@
+{
+  "height_units": 40.0,
+  "height_blocks": 2.5,
+  "bounds_min": [
+    -7.0,
+    0.0,
+    -5.25
+  ],
+  "bounds_max": [
+    7.0,
+    40.0,
+    5.25
+  ],
+  "cubes": 101,
+  "bones": 20,
+  "triangles": 1212,
+  "texture": [
+    256,
+    256
+  ],
+  "animations": [
+    "animation.observant_guard_corrupto.idle",
+    "animation.observant_guard_corrupto.walk",
+    "animation.observant_guard_corrupto.attack"
+  ],
+  "checks": [
+    "exact rest height 40/16 = 2.5",
+    "positive cuboid sizes and unique IDs",
+    "acyclic bone hierarchy",
+    "all UVs inside atlas",
+    "embedded texture equals PNG",
+    "each cube occurs exactly once in outliner",
+    "runtime geometry, UVs and pivots match editor",
+    "animation signs and durations match editor",
+    "seamless looping endpoints",
+    "finite animated geometry",
+    "attack reaches forwards",
+    "frontal sight line reaches the single point",
+    "point set back inside real cavity",
+    "empty volume inside fracture"
+  ],
+  "blockbench_import_tested": false,
+  "in_game_tested": false,
+  "head_envelope_units": [
+    10.5,
+    10.5,
+    10.5
+  ],
+  "point_depth_from_front_units": 1.85,
+  "white_point_count": 1,
+  "game_emissive_layer_enabled": false
+}

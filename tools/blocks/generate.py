@@ -3128,6 +3128,27 @@ def build():
             {"variants": {f"lit={lit}": {"model": f"{NS}:block/pump_beacon_{'on' if lit == 'true' else 'off'}"} for lit in ("true", "false")}},
             {"parent": f"{NS}:block/pump_beacon_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
 
+    # --- Trap breaker: Chapter 2 Level 2's wall box with a lever and a lamp, one per Guard trap (phase 5) -------------
+    a.texture("trap_breaker_plate", plastic_tex(r("trap_plate"), (46, 48, 50)), T.PAINTED_METAL)
+    a.texture("trap_breaker_metal", plastic_tex(r("trap_metal"), (126, 128, 132)), T.STEEL.but(smoothness=0.5, metal=255, relief=0.2))
+    a.texture("trap_breaker_handle", plastic_tex(r("trap_handle"), (196, 36, 28)), T.PLASTIC.but(smoothness=0.6, relief=0.2))
+    a.texture("trap_lamp_off", plastic_tex(r("trap_lamp_off"), (58, 50, 38)), T.PLASTIC.but(smoothness=0.6, relief=0.2))
+    a.texture("trap_lamp_amber", plastic_tex(r("trap_lamp_amber"), (255, 176, 40)),
+              T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    a.texture("trap_lamp_green", plastic_tex(r("trap_lamp_green"), (70, 255, 110)),
+              T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    box_textures = {"p": "trap_breaker_plate", "m": "trap_breaker_metal", "h": "trap_breaker_handle"}
+    for state, lever_up, lamp in (("spent", True, "off"), ("dim", False, "off"), ("charging", False, "amber"), ("armed", False, "green")):
+        lever = ([element((7, 6, 11), (9, 12, 15), "m"), element((6, 11, 10), (10, 13, 12), "h")] if lever_up
+                 else [element((7, 2, 11), (9, 6, 15), "m"), element((6, 1, 10), (10, 3, 12), "h")])
+        a.models[f"trap_breaker_{state}"] = model(
+            {**box_textures, "l": f"trap_lamp_{lamp}"},
+            [element((3, 0, 15), (13, 16, 16), "p"), element((5, 12.8, 14), (11, 15.2, 15), "l", shade=lamp == "off")] + lever)
+    a.block("trap_breaker", "Trap Breaker", {"variants": {
+        f"facing={f},state={s}": {"model": f"{NS}:block/trap_breaker_{s}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for s in ("spent", "dim", "charging", "armed")}},
+        {"parent": f"{NS}:block/trap_breaker_armed"})
+
     # --- Suite bed: Level 4's, walnut frame and burgundy cover, in two blocks ---------------
     a.texture("suite_bed_frame", plastic_tex(r("bed_frame"), (58, 38, 26)), T.PLASTIC.but(smoothness=0.5, relief=0.3))
     a.texture("suite_bed_cover", plastic_tex(r("bed_cover"), (92, 26, 38), "fabric"), T.PLASTIC.but(smoothness=0.08, relief=0.3))

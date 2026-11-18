@@ -9,6 +9,7 @@ import net.minecraft.block.Block
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Vec3d
 
 /**
  * Puts Chapter 2's Level 2, the catacombs, in the world, and takes it out: the chapter's [MapBuild] for the plan
@@ -42,6 +43,29 @@ object Ch2L2Build {
 
     /** Empties everything the plan built; the world forgets it was built. [MapBuild.Asked.BUSY] if a job runs. */
     fun clear(server: MinecraftServer, whenDone: () -> Unit): MapBuild.Asked = build.clear(server, whenDone)
+
+    /** The plan's gate [gateId] set to its state [state] ("grate", "open", "whole", "broken"...); false if the plan has no such gate or state. */
+    fun setGate(world: ServerWorld, gateId: String, state: String): Boolean {
+        val gate = plan.gate(gateId) ?: return false
+        val spec = gate.states[state] ?: return false
+        val block = build.state(spec)
+        for (cell in gate.cells) {
+            val pos = BlockPos(plan.worldX(cell.x), plan.worldY(cell.y), plan.worldZ(cell.z))
+            if (world.getBlockState(pos) != block) world.setBlockState(pos, block, Block.NOTIFY_ALL)
+        }
+        return true
+    }
+
+    /** The middle of the plan's gate [gateId] in the world (for its sound), or null. */
+    fun gateCentre(gateId: String): Vec3d? {
+        val gate = plan.gate(gateId) ?: return null
+        if (gate.cells.isEmpty()) return null
+        val n = gate.cells.size.toDouble()
+        return Vec3d(
+            plan.worldX(0) + gate.cells.sumOf { it.x } / n + 0.5, plan.worldY(0) + gate.cells.sumOf { it.y } / n + 0.5,
+            plan.worldZ(0) + gate.cells.sumOf { it.z } / n + 0.5,
+        )
+    }
 
     /** The plan's lamps in the zone [zoneId] in [mode] (the cage lamps of the map, or any light of the kind); how many changed. */
     fun zoneLights(world: ServerWorld, zoneId: String, mode: LightMode): Int {

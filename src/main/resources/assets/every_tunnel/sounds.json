@@ -342,6 +342,38 @@
       "every_tunnel:block/ch2l1/sweep_3"
     ]
   },
+  "block.ch2l2.grate": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/ch2l2/grate_1",
+        "attenuation_distance": 56
+      }
+    ]
+  },
+  "block.ch2l2.trap_armed": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/ch2l2/trap_armed_1",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "block.ch2l2.trap_charge": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/ch2l2/trap_charge_1",
+        "attenuation_distance": 36
+      }
+    ]
+  },
+  "block.ch2l2.trap_clack": {
+    "sounds": [
+      {
+        "name": "every_tunnel:block/ch2l2/trap_clack_1",
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "block.dart.hit": {
     "sounds": [
       "every_tunnel:block/dart/hit_1",
@@ -961,6 +993,63 @@
       }
     ]
   },
+  "event.ch2l2.guard_chest": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/guard_chest_1",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "event.ch2l2.guard_death": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/guard_death_1",
+        "stream": true,
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "event.ch2l2.guard_hit": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/guard_hit_1",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "event.ch2l2.guard_step": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/guard_step_1",
+        "attenuation_distance": 36
+      },
+      {
+        "name": "every_tunnel:event/ch2l2/guard_step_2",
+        "attenuation_distance": 36
+      },
+      {
+        "name": "every_tunnel:event/ch2l2/guard_step_3",
+        "attenuation_distance": 36
+      }
+    ]
+  },
+  "event.ch2l2.guard_stun": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/guard_stun_1",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "event.ch2l2.guard_windup": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/guard_windup_1",
+        "attenuation_distance": 32
+      }
+    ]
+  },
   "event.ch2l2.pipe_fall": {
     "sounds": [
       {
@@ -974,6 +1063,46 @@
       {
         "name": "every_tunnel:event/ch2l2/pump_run_1",
         "attenuation_distance": 80
+      }
+    ]
+  },
+  "event.ch2l2.trap_fizzle": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/trap_fizzle_1",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "event.ch2l2.trap_zap": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/trap_zap_1",
+        "attenuation_distance": 56
+      }
+    ]
+  },
+  "event.ch2l2.wall_burst": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/wall_burst_1",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "event.ch2l2.wall_crack": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/wall_crack_1",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "every_tunnel:event/ch2l2/wall_crack_2",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "every_tunnel:event/ch2l2/wall_crack_3",
+        "attenuation_distance": 40
       }
     ]
   },
@@ -1171,6 +1300,22 @@
       {
         "name": "every_tunnel:item/wrench/hit_3",
         "attenuation_distance": 16
+      }
+    ]
+  },
+  "music.ch2l2.guard_chase": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/ch2l2/guard_chase_1",
+        "stream": true
+      }
+    ]
+  },
+  "music.ch2l2.guard_lament": {
+    "sounds": [
+      {
+        "name": "every_tunnel:music/ch2l2/guard_lament_1",
+        "stream": true
       }
     ]
   },

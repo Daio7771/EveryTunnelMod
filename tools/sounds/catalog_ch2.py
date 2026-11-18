@@ -8,6 +8,7 @@ catalog. A later chapter gets a file like this one.
 from catalog import *  # noqa: F401,F403  (the base catalog's Sound and its synthesis helpers)
 from catalog import _noise, stinger_heard  # noqa: E402
 import physical as ph  # noqa: E402
+import menu_piano as mp  # noqa: E402  (the felt piano of the main menu, for the lament)
 
 
 def prologue_crack(rng, variant):
@@ -320,6 +321,278 @@ def ch2l2_pump_run(rng, variant):
     return _finish(y, rng, 2.0, 0.6, 0.25, 0.05)
 
 
+# --- Chapter 2 Level 2: the Observant Guard, its wall and the four traps (phase 5), physically modelled ---
+
+def ch2l2_wall_crack(rng, variant):
+    """The bricked-up wall cracking before it bursts (3 variations): brick and mortar giving way, a few sharp stone cracks, a
+    low groan of the whole wall under strain and a trickle of grit falling behind it."""
+    n = samples(1.3)
+    t = time_axis(n)
+    y = 0.6 * ph.scrape(n, rng, 30.0, 160.0, flutter=3.0) * envelope(n, [(0.0, 0.0), (0.4, 0.6), (0.9, 1.0), (1.3, 0.0)])
+    for start in sorted(rng.uniform(0.05, 1.0, int(rng.integers(2, 5)))):
+        f, a, d = ph.stone_modes(rng, 18, 400.0, 5000.0, decay=(0.005, 0.03))
+        y += rng.uniform(0.5, 1.0) * ph.modes(n, rng, float(start), f, a, d, contact=0.0001)
+        y += 0.3 * thud(n, rng, float(start), rng.uniform(55.0, 90.0), 0.05, amp=0.7, dull=500.0)
+    y += 0.3 * ph.grains(n, rng, [(0.0, 0.0), (0.3, 120.0), (1.0, 300.0), (1.3, 0.0)], 900.0, 5000.0, length=(0.002, 0.008))
+    return _finish(y, rng, 1.1, 0.4, 0.2, 0.2, amount=1.1)
+
+
+def ch2l2_wall_burst(rng, variant):
+    """The patch of wall bursting outwards: a very low blow, big lumps of brick ringing, a dense crash of stone breaking and
+    a long fall of rubble and dust settling, the room answering."""
+    n = samples(3.0)
+    y = thud(n, rng, 0.0, 32.0, 0.45, amp=1.5, dull=180.0)
+    for start in (0.0, 0.02, 0.09):
+        f, a, d = ph.stone_modes(rng, 40, 60.0, 2000.0, decay=(0.04, 0.2))
+        y += 0.5 * ph.modes(n, rng, start, f, a, d, contact=0.002)
+    y += 0.6 * ph.grains(n, rng, [(0.0, 0.0), (0.005, 25000.0), (0.1, 8000.0), (0.5, 800.0), (2.6, 0.0)], 200.0, 6000.0)
+    y += 0.3 * ph.scrape(n, rng, 20.0, 180.0, flutter=3.0) * envelope(n, [(0.0, 0.0), (0.04, 1.0), (1.4, 0.3), (3.0, 0.0)])
+    y += 0.2 * ph.grains(n, rng, [(0.3, 0.0), (0.6, 70.0), (1.5, 40.0), (2.8, 0.0)], 700.0, 5000.0, length=(0.003, 0.012))
+    return _finish(y, rng, 1.8, 0.9, 0.28, 0.5, amount=1.3)
+
+
+def ch2l2_guard_step(rng, variant):
+    """The Guard's step (3 variations): a stiff, heavy shoe on concrete: a dull heel strike, the sole slapping flat a moment
+    later, a tick of grit under it. Slower and drier than a person's: nothing alive in it."""
+    n = samples(0.6)
+    y = thud(n, rng, 0.0, rng.uniform(62.0, 78.0), 0.07, amp=1.0, dull=380.0)
+    y += 0.5 * thud(n, rng, 0.09, rng.uniform(85.0, 105.0), 0.05, amp=0.8, dull=520.0)
+    f, a, d = ph.stone_modes(rng, 14, 600.0, 3500.0, decay=(0.004, 0.02))
+    y += 0.25 * ph.modes(n, rng, 0.0, f, a, d, contact=0.0004)
+    y += 0.12 * ph.grains(n, rng, [(0.0, 0.0), (0.01, 800.0), (0.15, 0.0)], 1500.0, 6000.0, length=(0.001, 0.004))
+    return _finish(y, rng, 1.0, 0.3, 0.16, 0.1, amount=1.05)
+
+
+def ch2l2_guard_windup(rng, variant):
+    """The Guard raising its arm (the 0.6 s before the blow): stiff cloth dragging, a joint creaking as it is forced
+    (stick-slip catches quickening) and a held breath of air through the sleeve. No voice."""
+    seconds = 0.65
+    n = samples(seconds)
+    cloth = bandpass(rng.standard_normal(n), 800.0, 3500.0, order=2) * envelope(n, [(0.0, 0.0), (0.3, 0.5), (0.58, 1.0), (0.65, 0.0)])
+    catches = ph.impulses(n, rng, [(0.0, 12.0), (0.4, 40.0), (0.6, 90.0), (0.65, 0.0)], amp_sigma=0.4)
+    f, a, d = ph.stone_modes(rng, 12, 250.0, 1600.0, decay=(0.015, 0.05))
+    y = 0.5 * cloth + 0.5 * ph.ring(catches, ph.body_ir(rng, f, a, d, 0.2))
+    return _finish(y, rng, 0.9, 0.25, 0.14, 0.04, amount=1.05)
+
+
+def ch2l2_guard_hit(rng, variant):
+    """The Guard's blow landing: the weight of an arm through a body (a low thud), the slap of cloth and flesh, a short
+    crack, and the air pushed out of it."""
+    n = samples(0.9)
+    y = thud(n, rng, 0.0, 58.0, 0.14, amp=1.3, dull=300.0)
+    y += 0.4 * ph.grains(n, rng, [(0.0, 0.0), (0.003, 9000.0), (0.05, 800.0), (0.2, 0.0)], 300.0, 4000.0)
+    f, a, d = ph.stone_modes(rng, 16, 500.0, 3000.0, decay=(0.005, 0.02))
+    y += 0.25 * ph.modes(n, rng, 0.0, f, a, d, contact=0.0003)
+    y += 0.18 * ph.scrape(n, rng, 200.0, 1800.0, flutter=10.0) * envelope(n, [(0.0, 0.0), (0.02, 1.0), (0.35, 0.0), (0.9, 0.0)])
+    return _finish(y, rng, 1.0, 0.35, 0.18, 0.15, amount=1.2)
+
+
+def ch2l2_guard_stun(rng, variant):
+    """The stunned Guard: an electric buzz (mains hum and its harmonics, hard-clipped), a crackle of small discharges and a
+    shiver of the body's metal. One second, played over again while the stun lasts."""
+    n = samples(1.0)
+    t = time_axis(n)
+    wobble = 1.0 + 0.04 * np.sin(TAU * 9.0 * t + rng.uniform(0, TAU))
+    hum = sum(np.sin(TAU * 100.0 * k * wobble * t + rng.uniform(0, TAU)) / k ** 0.7 for k in range(1, 12))
+    y = 0.6 * np.tanh(2.5 * hum / 3.0) * (0.75 + 0.25 * np.sin(TAU * 17.0 * t))
+    y += 0.5 * ph.grains(n, rng, 90.0, 2500.0, 9000.0, length=(0.0008, 0.003))
+    y += 0.2 * ph.impulses(n, rng, 20.0)
+    y = lowpass(y, 7000.0, order=2)
+    return _finish(y, rng, 0.8, 0.2, 0.12, 0.02, amount=1.2)
+
+
+def ch2l2_trap_clack(rng, variant):
+    """A breaker lever thrown: the iron handle meeting its stop (a hard clack, the plate ringing), a spring and a contact
+    closing."""
+    n = samples(0.45)
+    y = thud(n, rng, 0.0, 150.0, 0.03, amp=0.9, dull=1200.0)
+    iron = (np.array([410.0, 690.0, 1180.0, 1760.0, 2500.0]), np.array([1.0, 0.7, 0.5, 0.35, 0.2]), np.array([0.09, 0.07, 0.05, 0.04, 0.03]))
+    y += 0.7 * ph.modes(n, rng, 0.0, *iron, detune=0.006, contact=0.0002)
+    y += 0.35 * ph.modes(n, rng, 0.11, *iron, detune=0.006, contact=0.0002)
+    y += 0.1 * ph.grains(n, rng, [(0.0, 0.0), (0.12, 80.0), (0.3, 0.0)], 2500.0, 8000.0, length=(0.001, 0.003))
+    return _finish(y, rng, 0.8, 0.2, 0.14, 0.08, amount=1.05)
+
+
+def ch2l2_trap_charge(rng, variant):
+    """A trap charging for three seconds: a transformer hum rising from 60 to 190 Hz and a thin whine climbing from 500 Hz to
+    2.5 kHz, swelling, with a faint crackle; it ends just short of full, the 'armed' tick follows."""
+    seconds = 3.0
+    n = samples(seconds)
+    t = time_axis(n)
+    rise = np.clip(t / seconds, 0.0, 1.0)
+    hum = glide_tone(60.0 + 130.0 * rise ** 1.4, [1.0, 0.6, 0.45, 0.3, 0.2], rng.uniform(0, TAU))
+    whine = glide_tone(500.0 + 2000.0 * rise ** 2, [1.0, 0.15], rng.uniform(0, TAU))
+    y = 0.7 * hum * envelope(n, [(0.0, 0.0), (0.4, 0.5), (3.0, 1.0)]) + 0.18 * whine * envelope(n, [(0.0, 0.0), (1.0, 0.1), (2.8, 1.0), (3.0, 0.8)])
+    y += 0.25 * ph.grains(n, rng, [(0.0, 0.0), (1.0, 8.0), (3.0, 60.0)], 2500.0, 9000.0, length=(0.001, 0.004))
+    return _finish(y, rng, 0.9, 0.2, 0.12, 0.04, amount=1.1)
+
+
+def ch2l2_trap_armed(rng, variant):
+    """The trap armed: a relay's double tick and a soft steady beep, quick and clean."""
+    n = samples(0.5)
+    t = time_axis(n)
+    y = thud(n, rng, 0.0, 190.0, 0.015, amp=0.8, dull=1800.0) + 0.7 * thud(n, rng, 0.07, 210.0, 0.015, amp=0.8, dull=1800.0)
+    y += 0.35 * np.sin(TAU * 1450.0 * t) * envelope(n, [(0.0, 0.0), (0.13, 0.0), (0.14, 1.0), (0.34, 1.0), (0.38, 0.0), (0.5, 0.0)])
+    return _finish(y, rng, 0.7, 0.15, 0.1, 0.05, amount=1.05)
+
+
+def ch2l2_trap_zap(rng, variant):
+    """The Guard on a live plate: a violent electric discharge, a hard crack and a flash of hiss, a thump under it as the
+    body locks, mains hum shorting out and a shower of sparks dying away."""
+    n = samples(1.6)
+    t = time_axis(n)
+    crack = highpass(rng.standard_normal(n), 1500.0, order=2) * envelope(n, [(0.0, 0.0), (0.001, 1.0), (0.05, 0.5), (0.3, 0.0), (1.6, 0.0)])
+    y = 1.0 * crack + thud(n, rng, 0.0, 48.0, 0.25, amp=1.4, dull=260.0)
+    y += 0.5 * np.tanh(3.0 * np.sin(TAU * 100.0 * t)) * envelope(n, [(0.0, 0.0), (0.005, 1.0), (0.6, 0.5), (1.6, 0.0)])
+    y += 0.5 * ph.grains(n, rng, [(0.0, 0.0), (0.01, 1500.0), (0.3, 300.0), (1.4, 0.0)], 2000.0, 12000.0, length=(0.0008, 0.003))
+    return _finish(y, rng, 1.2, 0.5, 0.2, 0.3, amount=1.3)
+
+
+def ch2l2_trap_fizzle(rng, variant):
+    """A trap failing: a short crackle of weak sparks and a buzz that sags and dies, one last tick."""
+    n = samples(1.2)
+    t = time_axis(n)
+    buzz = np.tanh(2.0 * np.sin(TAU * np.cumsum(100.0 * np.exp(-t / 0.5)) / SR)) * envelope(n, [(0.0, 0.0), (0.01, 1.0), (0.7, 0.0), (1.2, 0.0)])
+    y = 0.5 * buzz + 0.5 * ph.grains(n, rng, [(0.0, 0.0), (0.01, 220.0), (0.9, 10.0), (1.2, 0.0)], 1800.0, 8000.0, length=(0.0008, 0.003))
+    y += 0.5 * thud(n, rng, 0.0, 90.0, 0.05, amp=0.8, dull=700.0)
+    return _finish(y, rng, 0.8, 0.2, 0.12, 0.2, amount=1.1)
+
+
+def ch2l2_guard_death(rng, variant):
+    """The Guard falling and coming apart over fourteen seconds: a joint-by-joint collapse (creaks, the body hitting the floor at 2.1 s
+    with a heavy thud and a slide of cloth), then a low detuned drone that thins into a distorted whine, glitching bursts of
+    quantised noise (stutter, bit-crushed) coming faster as it goes, a dry hiss of dissolving and, at the end, silence. No voice."""
+    seconds = 14.0
+    k = seconds / 10.0
+    n = samples(seconds)
+    t = time_axis(n)
+    drone = sum(np.sin(TAU * f * t + rng.uniform(0, TAU)) for f in (55.0, 55.7, 82.4, 110.9)) * envelope(
+        n, [(0.0, 0.0), (2.0, 0.2), (4.2, 1.0), (11.2, 0.3), (14.0, 0.0)])
+    whine = glide_tone(300.0 + 1500.0 * (t / seconds) ** 2, [1.0, 0.3], rng.uniform(0, TAU)) * envelope(
+        n, [(0.0, 0.0), (5.6, 0.1), (11.9, 0.8), (14.0, 0.0)])
+    noise = rng.standard_normal(n)
+    hold = 220
+    held = np.repeat(noise[::hold], hold)[:n]                         # sample-and-hold: a stuttering digital hiss
+    crushed = np.round(held * 3.0) / 3.0
+    gate = np.zeros(n)
+    at = 2.6
+    while at < 13.4:
+        length = rng.uniform(0.03, 0.18)
+        gate[int(at * SR):int(min(seconds, at + length) * SR)] = 1.0
+        at += length + rng.uniform(0.05, 0.9) * (1.0 - 0.8 * at / seconds)
+    y = 0.35 * drone / 4.0 + 0.25 * whine + 0.55 * crushed * gate * envelope(n, [(0.0, 0.0), (2.6, 0.2), (8.4, 0.7), (13.3, 1.0), (14.0, 0.0)])
+    y += 0.2 * ph.scrape(n, rng, 2500.0, 9000.0, flutter=15.0) * envelope(n, [(0.0, 0.0), (7.0, 0.2), (12.6, 1.0), (14.0, 0.0)])
+    # The collapse: joints creaking as the knees go, then the body down.
+    catches = ph.impulses(n, rng, [(0.0, 0.0), (0.6, 14.0), (1.5, 30.0), (2.0, 0.0), (14.0, 0.0)], amp_sigma=0.4)
+    f, a, d = ph.stone_modes(rng, 12, 250.0, 1600.0, decay=(0.015, 0.05))
+    y += 0.5 * ph.ring(catches, ph.body_ir(rng, f, a, d, 0.2))
+    y += 1.3 * thud(n, rng, 2.1, 46.0, 0.35, amp=1.4, dull=240.0)
+    y += 0.3 * ph.scrape(n, rng, 200.0, 2500.0, flutter=8.0) * envelope(n, [(0.0, 0.0), (1.4, 0.0), (1.9, 0.8), (2.4, 0.0), (14.0, 0.0)])
+    return _finish(y, rng, 1.4, 0.5, 0.2, 0.3, amount=1.2)
+
+
+def ch2l2_guard_chase(rng, variant):
+    """Chapter 2 Level 2's music of constant danger, for the Observant Guard's hunt and the game of the traps (12.8 s, 8 bars at 150 bpm,
+    looping seamlessly: the game plays it again every 256 ticks). A kick on every beat that never lets go; a low, buzzing saw ostinato
+    on sixteenths (E, with the minor second and the tritone coming and going: the electrical hum gone mad) with an octave jump now and
+    then; ticks of rusty metal on the off-eighths; short bursts of electric static on the offbeats; a dissonant string cluster in tremolo
+    climbing a semitone over every four bars and a thin siren rising across each two. Nothing resolves."""
+    bpm = 150.0
+    beat = 60.0 / bpm
+    sixteenth = beat / 4
+    seconds = 32 * beat
+    n = samples(seconds)
+    t = time_axis(n)
+    y = np.zeros((n, 2))
+    offset = 0.01                                                             # hits just after the loop point
+    hit_n = samples(0.5)
+    ht = time_axis(hit_n)
+    kick = glide_tone(46.0 + 62.0 * np.exp(-ht / 0.04), (1.0, 0.3)) * np.exp(-ht / 0.17)
+    kick = drive(kick, 1.9) + burst(hit_n, rng, 0.0, 0.02, hi=700.0, tau=0.01, amp=0.4)
+    for b in range(32):
+        place(y, stereo(kick, kick) * (1.0 if b % 4 == 0 else 0.78), b * beat + offset, circular=True)
+    # The ostinato.
+    roots = [41.2, 41.2, 43.65, 41.2, 41.2, 46.25, 43.65, 38.9]
+    pattern = [1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0]
+    note_n = samples(sixteenth * 0.95)
+    nt = time_axis(note_n)
+    env = np.exp(-nt / 0.1) * (1.0 - np.exp(-nt / 0.002))
+    for bar in range(8):
+        for s in range(16):
+            if not pattern[s]:
+                continue
+            f = roots[bar] * (2.0 if s in (5, 14) else 1.0)
+            note = glide_tone(np.full(note_n, f), (1.0, 0.7, 0.5, 0.4, 0.3, 0.25, 0.2)) * env
+            place(y, stereo(note, note) * 0.34, (bar * 16 + s) * sixteenth + offset, circular=True)
+    # Rusty ticks on the off-eighths, static on some offbeats.
+    for e in range(64):
+        if e % 2 == 1:
+            tick = clock_tick(samples(0.2), rng, 0.0, tock=e % 4 == 3, amp=0.3)
+            place(y, pan(tick, 0.3 if e % 4 == 1 else -0.3), e * beat / 2 + offset, circular=True)
+    for s in range(0, 128, 1):
+        if s % 8 == 6 or (s % 16 == 13 and s // 16 % 2 == 1):
+            zap = burst(samples(0.12), rng, 0.0, 0.01, lo=1500.0, hi=9000.0, tau=0.03, amp=0.3)
+            place(y, pan(zap, rng.uniform(-0.6, 0.6)), s * sixteenth + offset, circular=True)
+    # Strings: a dissonant cluster in tremolo that slides between two clusters a semitone apart (whole cycles, so the loop is seamless);
+    # and the siren, a wail swinging round 900 Hz every two bars.
+    trem = 1.0 - 0.7 * (0.5 + 0.5 * np.sin(TAU * loop_frequency(12.0, seconds) * t))
+    weight = 0.5 - 0.5 * np.cos(TAU * 2.0 * t / seconds)
+    for (fa, fb), position in (((466.2, 493.9), -0.6), ((493.9, 523.3), 0.0), ((698.5, 740.0), 0.6)):
+        for f, w in ((fa, 1.0 - weight), (fb, weight)):
+            f = loop_frequency(f, seconds)
+            voice = sum(np.sin(TAU * f * k * t + k) / k for k in (1, 2, 3, 4))
+            y += pan(0.05 * voice * trem * w, position)
+    base = loop_frequency(900.0, seconds)
+    siren = np.sin(TAU * base * t + 250.0 * np.sin(TAU * t / (8 * beat)))
+    y += stereo(*(2 * [0.03 * siren * (0.5 + 0.5 * np.sin(TAU * t / (16 * beat) - 1.0))]))
+    return fft_filter(y, 30.0, 9000.0, order=2)
+
+
+def ch2l2_guard_lament(rng, variant):
+    """A short, sad song for the Observant Guard dying (14 s): the main menu's felt piano alone in A minor, slow. A low A and E held
+    underneath, a melody that sinks in two phrases (E D C B, resting on A; then F E D C, and a last A that does not resolve), a
+    little reverb, fading out as the body is gone."""
+    seconds = 14.0
+    n = int(seconds * mp.SR)
+    piano = np.zeros((n, 2))
+    for midi, start, vel in ((45, 0.0, 0.45), (52, 0.15, 0.35), (41, 6.6, 0.4), (48, 6.75, 0.32)):
+        mp.mix_in(piano, mp.piano_note(mp.midi_to_hz(midi), vel, rng), start, pan=mp.pan_for(midi))
+    melody = ((76, 0.5, 0.62), (74, 2.0, 0.55), (72, 3.2, 0.52), (71, 4.2, 0.5), (69, 5.2, 0.46),
+              (77, 7.1, 0.55), (76, 8.5, 0.5), (74, 9.7, 0.46), (72, 10.7, 0.42), (69, 11.8, 0.4))
+    for midi, start, vel in melody:
+        mp.mix_in(piano, mp.piano_note(mp.midi_to_hz(midi), vel, rng), start, pan=mp.pan_for(midi))
+    piano = mp.body_resonance(piano, rng)
+    mix = piano * 0.9 + mp.reverb_tail(piano, rng, seconds=3.0) * 0.3
+    return mp.finalize(mix, fade_in_s=0.02, fade_out_s=3.5, peak=0.95)
+
+
+def ch2l2_guard_chest(rng, variant):
+    """The Guard beating its chest with both fists (one beat, heard five times in its entrance): a hollow metal boom, as if on a
+    drum of sheet iron, two fists a hair apart, a low body under it and a short ring of the cavity. A robot's with a human weight."""
+    n = samples(0.8)
+    y = thud(n, rng, 0.0, 78.0, 0.16, amp=1.2, dull=330.0) + 0.8 * thud(n, rng, 0.018, 70.0, 0.14, amp=1.0, dull=300.0)
+    iron = (np.array([160.0, 290.0, 470.0, 760.0, 1180.0]), np.array([1.0, 0.8, 0.55, 0.35, 0.2]), np.array([0.28, 0.2, 0.15, 0.1, 0.07]))
+    y += 0.55 * ph.modes(n, rng, 0.0, *iron, detune=0.01, contact=0.0009)
+    y += 0.4 * ph.modes(n, rng, 0.018, *iron, detune=0.01, contact=0.0009)
+    y += 0.15 * ph.grains(n, rng, [(0.0, 0.0), (0.004, 1200.0), (0.08, 0.0)], 600.0, 4000.0, length=(0.001, 0.004))
+    return _finish(y, rng, 1.0, 0.35, 0.18, 0.12, amount=1.2)
+
+
+def ch2l2_grate(rng, variant):
+    """A heavy iron grate dropped or hauled up on its chains (about two seconds): chain links rattling and running over a
+    sheave, the iron frame groaning, and at the end a big iron slam and its ring."""
+    seconds = 2.2
+    n = samples(seconds)
+    links = ph.impulses(n, rng, [(0.0, 35.0), (1.6, 60.0), (1.9, 0.0)], amp_sigma=0.5)
+    f, a, d = ph.stone_modes(rng, 20, 700.0, 6000.0, decay=(0.01, 0.05))
+    y = 0.6 * ph.ring(links, ph.body_ir(rng, f, a, d, 0.15))
+    y += 0.25 * ph.scrape(n, rng, 60.0, 600.0, flutter=6.0) * envelope(n, [(0.0, 0.0), (0.2, 1.0), (1.8, 0.8), (1.9, 0.0)])
+    iron = (np.array([95.0, 180.0, 310.0, 520.0, 840.0, 1300.0]), np.array([1.0, 0.8, 0.6, 0.45, 0.3, 0.2]), np.array([0.7, 0.5, 0.4, 0.3, 0.2, 0.15]))
+    y += 0.9 * ph.modes(n, rng, 1.85, *iron, detune=0.008, contact=0.0008)
+    y += thud(n, rng, 1.85, 44.0, 0.2, amp=1.2, dull=240.0)
+    return _finish(y, rng, 1.4, 0.6, 0.22, 0.3, amount=1.25)
+
+
 CHAPTER2_SOUNDS = [
     Sound("event.prologue.crack", "Chapter 2 prologue", "A stage of the scientist's change: dry cracks of joints, a dull thump, the creak of something stretched too far (3 variations)",
           "mono", False, 3, prologue_crack, -3.0, attenuation=24),
@@ -361,4 +634,36 @@ CHAPTER2_SOUNDS = [
           ch2l2_creature_windup, -3.0, attenuation=40),
     Sound("event.ch2l2.pump_run", "Chapter 2 Level 2", "The pump room's pump: heavy pistons for six seconds, the blows spacing out at the end and a sigh of air (plays at the pump; then silence)", "mono", False, 1,
           ch2l2_pump_run, -3.0, attenuation=80),
+    Sound("event.ch2l2.wall_crack", "Chapter 2 Level 2", "The Guard's bricked-up wall cracking: brick and mortar giving way, a groan and falling grit (3 variations)", "mono", False, 3,
+          ch2l2_wall_crack, -4.0, attenuation=40),
+    Sound("event.ch2l2.wall_burst", "Chapter 2 Level 2", "The wall bursting outwards: a very low blow, a crash of brick and a long fall of rubble", "mono", False, 1,
+          ch2l2_wall_burst, -1.0, attenuation=64),
+    Sound("event.ch2l2.guard_step", "Chapter 2 Level 2", "The Observant Guard's step: a stiff, heavy shoe on concrete, heel then sole (3 variations)", "mono", False, 3,
+          ch2l2_guard_step, -5.0, attenuation=36),
+    Sound("event.ch2l2.guard_windup", "Chapter 2 Level 2", "The Observant Guard raising its arm: dragging cloth and a joint creaking, quickening (0.6 s)", "mono", False, 1,
+          ch2l2_guard_windup, -4.0, attenuation=32),
+    Sound("event.ch2l2.guard_hit", "Chapter 2 Level 2", "The Observant Guard's blow: the weight of an arm through a body, a slap and a short crack", "mono", False, 1,
+          ch2l2_guard_hit, -2.0, attenuation=40),
+    Sound("event.ch2l2.guard_stun", "Chapter 2 Level 2", "The stunned Guard: an electric buzz and a crackle of small discharges, one second, played again while the stun lasts", "mono", False, 1,
+          ch2l2_guard_stun, -5.0, attenuation=40),
+    Sound("event.ch2l2.guard_death", "Chapter 2 Level 2", "The Guard falling and coming apart over fourteen seconds: a collapse, a thud on the floor, a thinning drone, a rising distorted whine and glitching bursts of digital noise", "mono", False, 1,
+          ch2l2_guard_death, -3.0, attenuation=48),
+    Sound("block.ch2l2.trap_clack", "Chapter 2 Level 2", "A trap's breaker lever thrown: iron meeting its stop and a contact closing", "mono", False, 1,
+          ch2l2_trap_clack, -4.0, attenuation=32),
+    Sound("block.ch2l2.trap_charge", "Chapter 2 Level 2", "A trap charging for three seconds: a transformer hum rising and a thin whine climbing", "mono", False, 1,
+          ch2l2_trap_charge, -5.0, attenuation=36),
+    Sound("block.ch2l2.trap_armed", "Chapter 2 Level 2", "A trap armed: a relay's double tick and a soft steady beep", "mono", False, 1,
+          ch2l2_trap_armed, -5.0, attenuation=32),
+    Sound("event.ch2l2.trap_zap", "Chapter 2 Level 2", "The Guard on a live plate: a violent discharge, a hard crack, the hum shorting out and sparks dying", "mono", False, 1,
+          ch2l2_trap_zap, -1.0, attenuation=56),
+    Sound("event.ch2l2.trap_fizzle", "Chapter 2 Level 2", "A trap failing under the Guard: a short crackle of weak sparks and a buzz that sags and dies", "mono", False, 1,
+          ch2l2_trap_fizzle, -4.0, attenuation=40),
+    Sound("block.ch2l2.grate", "Chapter 2 Level 2", "A heavy iron grate dropped or hauled up on its chains: links rattling and a big iron slam at the end", "mono", False, 1,
+          ch2l2_grate, -2.0, attenuation=56),
+    Sound("music.ch2l2.guard_chase", "Chapter 2 Level 2", "The Observant Guard's hunt and the game of the traps: a relentless kick, a buzzing saw ostinato, rusty ticks and static, dissonant string tremolo, a rising siren (150 bpm, 8 bars, loops)", "stereo", True, 1,
+          ch2l2_guard_chase, -2.0, stream=True),
+    Sound("music.ch2l2.guard_lament", "Chapter 2 Level 2", "The Observant Guard dying: a short, sad song for felt piano in A minor, sinking in two phrases and not resolving (14 s, plays once)", "stereo", False, 1,
+          ch2l2_guard_lament, -1.0),
+    Sound("event.ch2l2.guard_chest", "Chapter 2 Level 2", "The Guard beating its chest with both fists: a hollow boom of sheet iron and a low body under it (one beat)", "mono", False, 1,
+          ch2l2_guard_chest, -2.0, attenuation=40),
 ]

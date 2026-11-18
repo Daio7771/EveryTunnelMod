@@ -77,5 +77,33 @@
     "grace_after_stop_seconds": 0.25,
     "pump": {"anchor": "pump_beacon", "beacons": ["pump_beacon", "pump_beacon_n", "pump_beacon_exit"], "run_seconds": 6, "silent_seconds": 6, "slow_seconds": 1},
     "pipe": {"from": "pipe_drop", "delay_seconds": 0}
+  },
+  "guard": {
+    "nest": "guard_nest",
+    "wall": "guard_wall",
+    "wall_face": "observer_wall_face",
+    "boo": "boo_wall",
+    "lights_zone": "zone_observer_wall",
+    "barred": ["service_far_gate", "chamber_exit", "return_door", "vestibule_gate"],
+    "arena": ["zone_observer_wall", "zone_observer_chamber", "zone_service_corridor"],
+    "plates": [
+      {"id": "trap_1", "zone": "zone_trap_1", "breaker": "breaker_1"},
+      {"id": "trap_2", "zone": "zone_trap_2", "breaker": "breaker_2"},
+      {"id": "trap_3", "zone": "zone_trap_3", "breaker": "breaker_3"},
+      {"id": "trap_4", "zone": "zone_trap_4", "breaker": "breaker_4"}
+    ],
+    "damage_fraction": 0.5,
+    "fail_chance": 0.25,
+    "stun_seconds": 4,
+    "rearm_seconds": 2,
+    "hit_interval_seconds": 2,
+    "stuns_to_kill": 4,
+    "death_seconds": 14,
+    "crack_seconds": 5,
+    "intro_seconds": 10,
+    "stare_seconds": 0.5,
+    "windup_seconds": 0.6,
+    "hit_range": 2.4,
+    "chase_speed": 3.8
   }
 }

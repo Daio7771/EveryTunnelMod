@@ -2,6 +2,7 @@ package daio7771.everytunnel.chapter2
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1IntroView
+import daio7771.everytunnel.chapter2.level2.client.Ch2L2GuardSceneView
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1MeetingView
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1Subtitles
 import daio7771.everytunnel.chapter2.level1.client.FactoryNpcRenderer
@@ -15,6 +16,7 @@ import daio7771.everytunnel.chapter2.level1.client.NonameOsFilesScreen
 import daio7771.everytunnel.chapter2.level1.client.NonameOsScreen
 import daio7771.everytunnel.chapter2.level1.client.ObjectivePanel
 import daio7771.everytunnel.chapter2.level1.client.TaskArrow
+import daio7771.everytunnel.chapter2.level2.client.ObservantGuardRenderer
 import daio7771.everytunnel.chapter2.level2.client.VibrationCreatureRenderer
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
@@ -37,6 +39,7 @@ object Chapter2Client : ClientModInitializer {
     override fun onInitializeClient() {
         PrologueView.register()
         Ch2L1IntroView.register()
+        Ch2L2GuardSceneView.registerAll()
         Ch2L1MeetingView.register()
         Ch2L1Subtitles.register()
         ObjectivePanel.register()
@@ -51,6 +54,7 @@ object Chapter2Client : ClientModInitializer {
         EntityRendererRegistry.register(Ch2Entities.FACTORY_NPC, ::FactoryNpcRenderer)
         EntityRendererRegistry.register(Ch2Entities.SCIENTIST, ::ScientistRenderer)
         EntityRendererRegistry.register(Ch2Entities.VIBRATION_CREATURE, ::VibrationCreatureRenderer)
+        EntityRendererRegistry.register(Ch2Entities.OBSERVANT_GUARD, ::ObservantGuardRenderer)
         BlockEntityRendererFactories.register(Ch2Blocks.CENTRIFUGE_ENTITY, ::Ch2L1CentrifugeRenderer)
         BlockEntityRendererFactories.register(Ch2Blocks.FACTORY_CAMERA_ENTITY) { SecurityCameraRenderer(it, Ch2Blocks.FACTORY_CAMERA, sweeping = true) }
         BlockRenderLayerMap.INSTANCE.putBlock(Ch2Blocks.DIRT_SPOT, RenderLayer.getCutout())

@@ -35,6 +35,8 @@ import net.minecraft.util.Identifier
  *   as if none had been taken (your counters forgotten; what is in your pockets stays) ([Ch2L2Spawns]).
  * - `/et ch2 l2 creature state|pump`: the action bar shows the creature's brain (state and target) or the pump's cycle (phase, tick of the
  *   cycle, whether it masks vibrations); again to turn it off ([Ch2L2Pump]).
+ * - `/et ch2 l2 guard`: the action bar shows the Observant Guard's fight (phase, stuns, each trap's phase: S spent, C charging, A armed);
+ *   again to turn it off ([Ch2L2Guard]). `skip guard` runs its finish at once; `reset guard` puts the wall whole again at the vestibule.
  * - `/et ch2 l2 anchors`: every anchor with its coordinates, the provisional ones marked.
  * - `/et ch2 l2 goto <anchor>`: builds the level if it is not, then takes you to a point (the places of the route, `sealed_entry` to
  *   `level_exit`, and the rest), or to the middle of a zone (`zone_<place>`) one block over its floor.
@@ -90,6 +92,7 @@ object Ch2L2Commands {
                                         .then(CommandManager.literal("state").executes(::watchCreature))
                                         .then(CommandManager.literal("pump").executes(::watchPump)),
                                 )
+                                .then(CommandManager.literal("guard").executes(::watchGuard))
                                 .then(CommandManager.literal("anchors").executes(::anchors))
                                 .then(
                                     CommandManager.literal("goto").then(
@@ -220,6 +223,12 @@ object Ch2L2Commands {
     private fun watchCreature(context: CommandContext<ServerCommandSource>): Int {
         val on = Ch2L2Pump.toggleWatchCreature(context.source.playerOrThrow)
         reply(context, if (on) "The creature's brain is in the action bar." else "The creature's readout is off.")
+        return 1
+    }
+
+    private fun watchGuard(context: CommandContext<ServerCommandSource>): Int {
+        val on = Ch2L2Guard.toggleWatch(context.source.playerOrThrow)
+        reply(context, if (on) "The action bar shows the Guard's fight." else "The Guard's readout is off.")
         return 1
     }
 

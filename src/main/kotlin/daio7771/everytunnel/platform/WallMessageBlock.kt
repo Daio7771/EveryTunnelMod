@@ -51,9 +51,9 @@ class WallMessageBlock(settings: Settings) : BlockWithEntity(settings) {
 
 /**
  * A wall message's data. NBT: `{Text: "<lang key>", Changed: "<lang key>", Size: 0.5f, Rotation: -2f, Trigger:
- * "fixed" | "on_approach" | "on_look_away_change", Once: 1b, Patch: 1b, Chalk: "white" | "black"}`: [size] is a line's
+ * "fixed" | "on_approach" | "on_look_away_change", Once: 1b, Patch: 1b, Chalk: "white" | "black" | "paint_white"}`: [size] is a line's
  * height in blocks, [rotation] degrees off level, [patch] a pale patch behind it on a dark wall, [chalk] written in chalk of
- * that colour instead of painted (white on a wall that looks dark, black on one that looks white). A line break in the lang text
+ * that colour instead of painted (white on a wall that looks dark, black on one that looks white); `paint_white` is white *paint* (the painted font, drips and all) on a dark wall. A line break in the lang text
  * makes two lines. What has happened to it is the client's ([WallMessageState]).
  */
 class WallMessageBlockEntity(pos: BlockPos, state: BlockState) : BlockEntity(ModBlocks.WALL_MESSAGE_ENTITY, pos, state) {

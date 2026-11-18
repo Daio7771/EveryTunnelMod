@@ -291,6 +291,19 @@ def run(level):
             errors.append(f"locked: {aid} can be reached with {locked['gate']} {locked['state']}")
     report.append(f"locked: with {locked['gate']} {locked['state']}, {', '.join(locked['unreachable'])} cannot be reached")
 
+    # The Guard's arena (phase 5): with its four grates down, from the vestibule only the trap room can be reached.
+    arena = cfg["arena"]
+    shut = dict(built, **arena["gates"])
+    seen = Walker(lv, shut, max_drop=DOWN_ANY, swim=True).search(start_cell(lv, anyway, arena["from"]))
+    for aid in arena["reachable"]:
+        if start_cell(lv, anyway, aid) not in seen:
+            errors.append(f"arena: {aid} cannot be reached from {arena['from']} with the grates down")
+    for aid in arena["unreachable"]:
+        if start_cell(lv, anyway, aid) in seen:
+            errors.append(f"arena: {aid} can be reached from {arena['from']} with the grates down")
+    report.append(f"arena: with {', '.join(arena['gates'])} down, from {arena['from']} the trap room is reached and "
+                  f"{', '.join(arena['unreachable'])} are not")
+
     # The pump room.
     pump = cfg["pump"]
     a, b = start_cell(lv, anyway, pump["from"]), start_cell(lv, anyway, pump["to"])

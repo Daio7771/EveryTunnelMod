@@ -5,11 +5,11 @@
 El Nivel 2 del Capítulo 2 son las catacumbas bajo la fábrica: las catacumbas antiguas en las que se metió el drenaje de la fábrica. El
 científico baja por la alcantarilla de emergencia del Nivel 1, solo, y busca una salida: los Hunters en las galerías, una criatura que
 caza por las vibraciones del suelo en la sala de bombas, el Observant Guard del Capítulo 1 en las cámaras de abajo y una inundación en tres
-etapas camino de la estación de bombeo y la salida. Se construye por fases (de la 1 a la 7), una cada vez, en la rama **privada**
+etapas camino de la estación de bombeo y la salida. Se construye por fases (de la 1 a la 7, y una fase 8 por venir: iluminación y decoración), una cada vez, en la rama **privada**
 `chapter-2/level-2` (sale de `chapter-2/level-1` y solo se sube al remoto `private`) hasta que se publiquen los Niveles 1 y 2 del capítulo.
-**En qué punto está: fase 4, la criatura de vibraciones y la bomba.** Se llega bajando por la alcantarilla del Nivel 1 y se
+**En qué punto está: fase 5, el Observant Guard y sus cuatro trampas.** Se llega bajando por la alcantarilla del Nivel 1 y se
 recorre de la entrada a la salida con las barras de supervivencia; morir devuelve al último checkpoint, y el Capítulo 2 del menú lo
-continúa; el primer tramo ya tiene sus enemigos, recursos y documentos, y la sala de bombas tiene su criatura y su bomba. Faltan el Guard y la inundación.
+continúa; el primer tramo ya tiene sus enemigos, recursos y documentos, la sala de bombas tiene su criatura y su bomba, y el vestíbulo y la sala de mantenimiento tienen el Guard y sus trampas. Falta la inundación.
 
 Su código está en `daio7771.everytunnel.chapter2.level2` (`core`, Kotlin puro, y `platform`), aparte del juego base, que nunca lo nombra
 (véase [Arquitectura](architecture.md#capítulos)). Sus lugares con nombre usan el formato del Nivel 1 (`level1.core.Ch2L1AnchorsParser`); su
@@ -41,7 +41,7 @@ jugador a su estado, nunca hacia atrás:
 | `CATACOMBS` | Las catacumbas y las galerías de abajo | `zone_lower_catacombs` |
 | `GUARD_APPEARS` | El vestíbulo: el Guard sale de la pared (fase 5) | `zone_observer_wall` |
 | `GUARD_FIGHT` | La sala de mantenimiento y sus cuatro trampas (fase 5) | `zone_observer_chamber` |
-| `GUARD_DEAD` | De vuelta al vestíbulo, BOO! y la reja arriba (fase 5) | El cuarto aturdimiento del Guard (fase 5; hasta entonces, por comando) |
+| `GUARD_DEAD` | De vuelta al vestíbulo, BOO! y las rejas arriba (fase 5) | El cuarto aturdimiento efectivo del Guard (o `skip guard`) |
 | `FLOOD_1` a `FLOOD_3` | El colector, las pasarelas, la galería de subida: las etapas de la inundación (fase 6) | `zone_flood_collector`, `zone_rising_walkways`, `zone_upper_gallery` |
 | `STATION` | La estación de bombeo, seca | `zone_pumping_station` |
 | `DONE` | Fuera por la salida (fase 6) | (fase 6) |
@@ -93,6 +93,52 @@ plan: `old_drainage` (pasillo de entrada), `maintenance_observation` (sala de bo
 (`tools/lang/src/chapter2/*.json`, claves `every_tunnel.ch2.l2.<id>_title` y `_body`); `tools/lang/langfiles.py` (`NOTES`,
 `write_notes`, que ejecuta `build`) escribe a partir de ellas `assets/every_tunnel/notes/<en|es>/ch2_l2_<id>.txt`. Un tablero se lee
 a través de `NoteHooks.Source`; el contador `read.<id>` lo recuerda. La clave `every_tunnel.ch2.l2.boo` queda para la fase 5.
+
+## El Observant Guard y sus trampas (fase 5)
+
+Entrar en el vestíbulo (`GUARD_APPEARS`) empieza el combate (`Ch2L2Guard`, sobre el `guard` de `level.json`; los relojes son `GuardFight` y
+`TrapBoard`, Kotlin puro con tests). El jugador nunca pierde el control y no hay nada que saltar:
+
+- **La arena** es el vestíbulo, el pasillo de servicio y la sala de mantenimiento. Cuatro puertas del plan (`guard.barred`:
+  `service_far_gate` al fondo del pasillo, `chamber_exit`, `return_door` y `vestibule_gate`) caen al empezar, así que solo quedan el camino de
+  vuelta al norte (un callejón sin salida donde el Guard alcanza al jugador) y la sala de las trampas; suben al morir. Las cuatro se construyen abiertas.
+- **Salir: un aviso, una cinemática y la caza.** Al empezar el combate caen las rejas (se oyen las cadenas) y durante `crack_seconds` (5) las
+  lámparas del vestíbulo parpadean y, el último segundo, se apagan, mientras el parche de la pared norte (`guard_wall`, una puerta con estados
+  `whole`/`broken` sobre un cuartito, `guard_nest`) se agrieta y suelta polvo. Luego una **cinemática saltable con bandas** (`intro_seconds`, 10; `Ch2L2GuardScenes.INTRO`, los momentos en `core.GuardIntro`),
+  **toda en primera persona**, con los ojos del propio jugador: la cámara no los deja, solo gira, como lo haría su cabeza. Gira de golpe hacia
+  la pared a oscuras; el Guard (`ObservantGuardEntity`, el modelo del usuario), detrás en su nido, revienta la pared de un puñetazo (vuelven las
+  lámparas, escombros, un sonido seco y una sacudida de la cámara), sale del hueco, se gira hacia el jugador, le señala y se golpea el pecho
+  con los dos puños cinco veces (animaciones `punch`, `point`, `chest`: los codos abiertos, los puños nunca se tocan), con la cámara temblando
+  en cada golpe. Termina con el jugador girado mirando al Guard. No tiene voz: se comunica con señales, y no hay subtítulo. Saltarla lo deja fuera del hueco mirando al jugador. Vuelve el control, mira fijo
+  `stare_seconds` (0,5) y caza: siempre sabe dónde está el jugador dentro de la arena, derecho hacia él a `chase_speed` (algo menos
+  que un sprint). A `hit_range` levanta un brazo (`windup_seconds`) y, si el jugador sigue a su alcance, le quita `damage_fraction` de su
+  vida máxima (dos golpes matan), al menos `hit_interval_seconds` después del anterior.
+- **Música.** El aviso suena con la caída del Nivel 5 (`music.fall`, reciclada: 5 s que suben hasta un golpe, que cae justo cuando aparece el
+  Guard). Desde que aparece hasta su agonía suena la música de la caza (`music.ch2l2.guard_chase`, 150 bpm, 12,8 s, escrita en código en
+  `tools/sounds/catalog_ch2.py`, repetida cada 256 ticks por `Ch2L2Guard`), durante los aturdimientos y el juego de las trampas; se
+  corta con el aturdimiento mortal, al terminar y al morir. Ambas suenan dos veces a la vez (la segunda a media volumen, porque el juego
+  limita un sonido a su volumen máximo) para ganar unos 3,5 dB. La agonía tiene su propia canción corta y triste (`music.ch2l2.guard_lament`,
+  piano de fieltro, 14 s, una vez).
+- **Las trampas.** Cuatro cuadrados de chapa (zonas `zone_trap_1` a `4`) con un disyuntor cada uno en la pared de mantenimiento
+  (`trap_breaker`: palanca y lámpara). Tirar de uno lo carga `rearm_seconds` (lámpara ámbar parpadeando) y queda armado (verde). El Guard
+  pisando una chapa armada es **una activación**, tirada al entrar: con `fail_chance` falla, si no queda aturdido `stun_seconds`; de
+  cualquier modo la trampa se gasta (palanca arriba) hasta que se vuelva a tirar. Seguir encima nunca vuelve a tirar; una chapa pisada con
+  la trampa sin armar, o con el Guard sin cazar, no hace nada. Las chapas nunca tocan al jugador.
+- **Muerte.** `stuns_to_kill` aturdimientos (una trampa puede repetirse; una tirada fallida no cuenta) empiezan una agonía de
+  `death_seconds` (14) y una **cinemática** (`Ch2L2GuardDeathScene`, tres planos alrededor del Guard, saltable con la tecla de salto dos veces;
+  saltarla ejecuta el final al instante): el Guard se tira al suelo y luego su cuerpo se deshace (la animación `death`) en una nube de motas y desaparece. **Un solo final** (`Ch2L2Guard.finish`,
+  idempotente; `skip guard` hace lo mismo): suben las rejas, la pared queda rota con sus escombros, BOO! aparece en pintura blanca
+  (`WallMessageBlock`, `Chalk: paint_white`) en la pared sobre el hueco, el estado pasa a `GUARD_DEAD` y se toma con él el checkpoint del
+  vestíbulo: una muerte después vuelve al vestíbulo con el hueco abierto y BOO! puesto. Una muerte en pleno combate vuelve con la pared entera. Las chapas son de 6 x 6 y el Guard queda clavado en el sitio mientras está aturdido.
+
+## Fase 8 (por venir): iluminación y decoración
+
+El nivel está construido y se juega, pero su aspecto sigue siendo el del generador: lámparas por regla (lámparas enjauladas, cables, algún
+parpadeo) y mobiliario solo donde una fase lo necesitó. Una última fase, tras la revisión de la fase 7, dará a cada lugar su propia
+**iluminación** (el ambiente de cada sala: cuánta oscuridad, qué lámparas funcionan, color; la de la sala de bombas, la del vestíbulo y la
+del colector, cada una a su manera) y **decoración** (objetos, escombros, carteles, óxido, marcas de agua, cables y tuberías, lo que dejó
+la gente que trabajó aquí). Se diseñará con el usuario en su propia ronda; sus cambios viven en `layout.json` (lámparas, features),
+`tools/blocks` y `tools/map/ch2l2`, de modo que el nivel se reconstruye desde la herramienta.
 
 ## El mapa
 
@@ -174,7 +220,7 @@ luego tras cada etapa).
 | `pump_overlook` | El mirador de la sala de bombas: un bloque de hormigón enjaulado en su esquina noroeste | M |
 | `vibration_chamber` | La sala de bombas: dos canales enjaulados cruzan su suelo, los cruces en extremos opuestos (un zigzag); la salida se ve desde el mirador | L |
 | `lower_catacombs` | Las catacumbas y las galerías de abajo (sin nada al lado ahora) | L |
-| `observer_wall` | El vestíbulo (`observer_wall_face`: la pared de la que sale el Guard, provisional) | L |
+| `observer_wall` | El vestíbulo (`observer_wall_face`: el centro del parche de pared del que sale el Guard; `guard_nest` detrás; `boo_wall`: el bloque de BOO! sobre el hueco) | L |
 | `observer_chamber` | La sala de mantenimiento, sus cuatro trampas donde el dibujo tiene sus cuatro cuadrados (`trap_1` a `trap_4`) | L |
 | `return_gallery` | Alrededor de la sala de mantenimiento por el este y el sur, de vuelta al vestíbulo | L |
 | `flood_collector` | El colector, una pasarela a lo largo de su canal, pasada la reja del vestíbulo y cuatro escalones abajo | D |
@@ -188,6 +234,8 @@ luego tras cada etapa).
 Casi todas las salas del dibujo son criptas cerradas, con los arcos tapiados por la fábrica; dos están abiertas, salas cortas a un
 lado para los recursos y documentos de fases posteriores (una cripta junto a las galerías y otra junto al pasillo de servicio, antes del
 vestíbulo).
+
+**Las puertas del Guard.** Además de la de abajo, `service_far_gate`, `chamber_exit` y `return_door` son puertas con estados `grate`/`open`, construidas abiertas, y `guard_wall` tiene `whole` (construido, `catacomb_bricked`) y `broken`; `Ch2L2Build.setGate` pone cualquiera. La comprobación `arena` del plan demuestra que con las cuatro rejas abajo, desde el vestíbulo solo se llega a la sala de las trampas.
 
 **La reja.** El paso del vestíbulo al colector (`vestibule_gate`) tiene tres estados: `grate` (bajada: barrotes de hierro, hasta vencer
 al Guard), `open` y `sealed` (la plancha de una compuerta, estanca). La fase 1 la construye abierta, para poder recorrer el nivel de punta
@@ -234,6 +282,7 @@ las anclas, y lo que está mal se avisa (`/et reload`).
 | `/et ch2 l2 loot` | Todo el botín como si no se hubiera cogido nada: tus contadores olvidados, tus bolsillos se quedan |
 | `/et ch2 l2 unbuild` | Vacía toda la zona (antes de empaquetar el mundo en un jar), también los Hunters; quien esté dentro cae |
 | `/et ch2 l2 creature state` / `pump` | El cerebro de la criatura (estado, objetivo, velocidad en bloques por segundo) o el ciclo de la bomba (fase, tick, enmascarado) en la barra de acción; otra vez para apagarlo |
+| `/et ch2 l2 guard` | El combate del Guard (fase, aturdimientos, cada trampa: S gastada, C cargando, A armada) en la barra de acción; otra vez para apagarlo. `skip guard` ejecuta su final al instante, `reset guard` vuelve a poner la pared entera |
 | `/et ch2 l2 anchors` | Cada ancla y zona con sus coordenadas, marcadas las provisionales |
 | `/et ch2 l2 goto <ancla>` | Construye el nivel si no lo está y te lleva a un lugar (`sealed_entry` ... `level_exit`, `trap_1`...) o al centro de una zona (`zone_<lugar>`) |
 | `/et reload` | Vuelve a leer los datos de los Niveles 1 y 2 y dice qué está mal |

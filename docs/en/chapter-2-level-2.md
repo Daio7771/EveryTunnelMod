@@ -5,11 +5,11 @@
 Level 2 of Chapter 2 is the catacombs under the factory: the old catacombs the factory's drainage was built into. The scientist comes
 down Level 1's emergency manhole, alone, and looks for a way out: the Hunters in the galleries, a creature that hunts by the floor's
 vibrations in the pump room, the Observant Guard of Chapter 1 in the lower chambers, and a flood in three stages on the way to the
-pumping station and the exit. It is built in phases (1 to 7), one at a time, on the **private** branch `chapter-2/level-2` (off
-`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 4,
-the vibration creature and the pump.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
+pumping station and the exit. It is built in phases (1 to 7, and a phase 8 to come: lighting and decoration), one at a time, on the **private** branch `chapter-2/level-2` (off
+`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 5,
+the Observant Guard and its four traps.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
 bars, dying brings the player back to the last checkpoint, and the menu's Chapter 2 continues it; the first stretch has its enemies,
-resources and documents, and the pump room has its creature and its pump. The Guard and the flood are still to come.
+resources and documents, the pump room has its creature and its pump, and the vestibule and maintenance room have the Guard and its traps. The flood is still to come.
 
 Its code is under `daio7771.everytunnel.chapter2.level2` (`core`, plain Kotlin, and `platform`), apart from the base game, which never
 names it (see [Architecture](architecture.md#chapters)). Its named places use Level 1's format (`level1.core.Ch2L1AnchorsParser`); its map
@@ -41,7 +41,7 @@ player on to its state, never back:
 | `CATACOMBS` | The catacombs and lower galleries | `zone_lower_catacombs` |
 | `GUARD_APPEARS` | The vestibule: the Guard comes out of the wall (phase 5) | `zone_observer_wall` |
 | `GUARD_FIGHT` | The maintenance room and its four traps (phase 5) | `zone_observer_chamber` |
-| `GUARD_DEAD` | Back round to the vestibule, BOO! and the grate up (phase 5) | The Guard's fourth stun (phase 5; by command until then) |
+| `GUARD_DEAD` | Back round to the vestibule, BOO! and the grates up (phase 5) | The Guard's fourth effective stun (or `skip guard`) |
 | `FLOOD_1` to `FLOOD_3` | The collector, the walkways, the gallery up: the flood's stages (phase 6) | `zone_flood_collector`, `zone_rising_walkways`, `zone_upper_gallery` |
 | `STATION` | The pumping station, dry | `zone_pumping_station` |
 | `DONE` | Out of the exit (phase 6) | (phase 6) |
@@ -92,6 +92,50 @@ the way to the Guard). The text lives once, in the lang sources (`tools/lang/src
 and `_body`); `tools/lang/langfiles.py` (`NOTES`, `write_notes`, run by `build`) writes `assets/every_tunnel/notes/<en|es>/ch2_l2_<id>.txt`
 from them. A board is read through `NoteHooks.Source`; the counter `read.<id>` remembers it. The key `every_tunnel.ch2.l2.boo` is there
 for phase 5.
+
+## The Observant Guard and its traps (phase 5)
+
+Entering the vestibule (`GUARD_APPEARS`) begins the fight (`Ch2L2Guard`, over `level.json`'s `guard`; the clocks are the plain-Kotlin
+`GuardFight` and `TrapBoard`, unit tested). The player never loses control and nothing is skipped:
+
+- **The arena** is the vestibule, the service corridor and the maintenance room. Four gates of the plan (`guard.barred`: `service_far_gate`
+  at the corridor's far end, `chamber_exit`, `return_door` and `vestibule_gate`) drop as the fight begins, so the only ways are back north
+  (a dead end where the Guard catches the player) and the trap room; they rise when it dies. All four are built open.
+- **Coming out: a warning, a cinematic, then the hunt.** As the fight begins the grates fall (their chains are heard) and for `crack_seconds` (5)
+  the vestibule's lamps flicker and, the last second, die, while the patch of the north wall (`guard_wall`, a gate with states
+  `whole`/`broken` over a small nest room, `guard_nest`) cracks and sheds dust. Then a **skippable cinematic with bands** (`intro_seconds`, 10; `Ch2L2GuardScenes.INTRO`, the moments in `core.GuardIntro`),
+  **all of it in first person**, through the player's own eyes: the camera never leaves them, it only turns, as their head would. It whips
+  round to the wall in the dark; the Guard (`ObservantGuardEntity`, the user's model), behind it in its nest, punches the wall open (lamps
+  back, rubble, a hard sound and a jolt of the camera), steps out of the hole, turns to the player, points at them and beats its chest
+  with both fists five times (animations `punch`, `point`, `chest`: the elbows flared, the fists never meet), the camera shaking at each
+  blow. It ends with the player turned to look at the Guard. It has no voice: it speaks with signs, and there is no subtitle. Skipping puts it outside the hole facing the player. Control returns, it stares `stare_seconds` (0.5) and
+  hunts: always knowing where the player is inside the arena, straight at them at `chase_speed`
+  (a little under a sprint). Within `hit_range` it raises an arm (`windup_seconds`) and, if the player is still in range, takes
+  `damage_fraction` of their maximum health (two hits kill), at least `hit_interval_seconds` after the last.
+- **Music.** The warning plays Level 5's fall (`music.fall`, recycled: 5 s rising to a hit, which lands as the Guard appears). From its
+  appearing until its dying the hunt's own music plays (`music.ch2l2.guard_chase`, 150 bpm, 12.8 s, written in code by
+  `tools/sounds/catalog_ch2.py`, played again every 256 ticks by `Ch2L2Guard`), through the stuns and the game of the traps; it stops
+  at the fatal stun, on the finish and on a death. Both are played twice at once (the second at half volume, since the game caps a
+  sound at full volume) for about 3.5 dB more. The dying has its own short, sad song (`music.ch2l2.guard_lament`, felt piano, 14 s, once).
+- **The traps.** Four checker-plate squares (zones `zone_trap_1` to `4`) with a breaker each on the maintenance wall (`trap_breaker`: lever
+  and lamp). Pulling one charges it `rearm_seconds` (amber lamp blinking), then it is armed (green). The Guard stepping on an armed plate
+  is **one activation**, rolled on entering: `fail_chance` it fizzles, else it is stunned `stun_seconds`; either way the trap is spent
+  (lever up) until pulled again. Standing on it never rolls again; a plate entered while the trap is not armed, or while the Guard is
+  not hunting, does nothing. The plates never touch the player.
+- **Death.** `stuns_to_kill` stuns (a trap may be used again; a failed roll does not count) start a `death_seconds` (14) dying and a
+  **cinematic** (`Ch2L2GuardDeathScene`, three shots round the Guard, skippable with the jump key twice; skipping runs the finish at once):
+  the Guard falls to the floor, then its body comes apart (the `death` animation) into a cloud of specks and is gone. **One finish** (`Ch2L2Guard.finish`, idempotent; `skip guard` runs the
+  same): the grates rise, the wall stays broken with its rubble, BOO! goes up in white paint (`WallMessageBlock`, `Chalk: paint_white`)
+  on the wall over the hole, the state becomes `GUARD_DEAD` and the vestibule's checkpoint is taken with it: a death after it comes back to
+  the vestibule with the hole open and BOO! up. A death mid-fight comes back with the wall whole. The plates are 6 x 6 and the Guard is frozen in place while stunned.
+
+## Phase 8 (to come): lighting and decoration
+
+The level is built and plays, but its look is still the generator's: lamps by rule (cage lamps, cables, a few flickers) and furniture only
+where a phase needed it. A last phase, after the review of phase 7, will give each place its own **lighting** (the mood of each room: how
+dark, which lamps work, colour, the pump room's, the vestibule's and the collector's own) and **decoration** (props, debris, signs,
+rust, water marks, cables and pipes, what the people who worked here left). It will be designed with the user in its own round; its
+changes live in `layout.json` (lamps, features), `tools/blocks` and `tools/map/ch2l2`, so the level is rebuilt from the tool.
 
 ## The map
 
@@ -169,8 +213,8 @@ after each stage).
 | `pump_overlook` | The pump room's overlook: a caged block of concrete in its north-west corner | M |
 | `vibration_chamber` | The pump room: two caged channels across its floor, the crossings at opposite ends (a zigzag), the exit seen from the overlook | L |
 | `lower_catacombs` | The catacombs and the lower galleries (nothing off them now) | L |
-| `observer_wall` | The vestibule (`observer_wall_face`: the wall where the Guard comes out, provisional) | L |
-| `observer_chamber` | The maintenance room, its four traps where the drawing has its four squares (`trap_1` to `trap_4`) | L |
+| `observer_wall` | The vestibule (`observer_wall_face`: the middle of the patch of wall the Guard comes out of; `guard_nest` behind it; `boo_wall`: BOO!'s block over the hole) | L |
+| `observer_chamber` | The maintenance room, its four traps where the drawing has its four squares (`trap_1` to `trap_4`, each with its zone and its breaker `breaker_1` to `4`, kind wall) | L |
 | `return_gallery` | Round the maintenance room's east and south, back into the vestibule | L |
 | `flood_collector` | The collector, a walkway along its channel, past the vestibule's gate and down four steps | D |
 | `rising_walkways` | The walkways' hall: up from the walkway to the lower catwalk and up again to the upper one | D to M |
@@ -182,6 +226,8 @@ after each stage).
 
 Most rooms of the drawing are sealed crypts, their arches bricked up by the factory; two are open, short side rooms for later phases'
 resources and documents (a crypt off the galleries and one off the service corridor before the vestibule).
+
+**The Guard's gates.** Besides the one below, `service_far_gate`, `chamber_exit` and `return_door` are gates with states `grate`/`open`, built open, and `guard_wall` has `whole` (built, `catacomb_bricked`) and `broken`; `Ch2L2Build.setGate` sets any of them. The plan check `arena` proves that with the four grates down only the trap room can be reached from the vestibule.
 
 **The gate.** The vestibule's way to the collector (`vestibule_gate`) has three states: `grate` (down: iron bars, until the Guard is
 beaten), `open` and `sealed` (a sluice gate's plate, watertight). Phase 1 builds it open, so the level can be walked from end to end. The
@@ -227,6 +273,7 @@ anchors, and what is wrong is reported (`/et reload`).
 | `/et ch2 l2 loot` | All the loot as if none were taken: your counters forgotten, your pockets stay |
 | `/et ch2 l2 unbuild` | Empties the whole area (before packing the world into a jar), the Hunters too; whoever stands in it falls |
 | `/et ch2 l2 creature state` / `pump` | The creature's brain (state, target, speed in blocks a second) or the pump's cycle (phase, tick, masking) in the action bar; again to turn it off |
+| `/et ch2 l2 guard` | The Guard's fight (phase, stuns, each trap: S spent, C charging, A armed) in the action bar; again to turn it off. `skip guard` runs its finish at once, `reset guard` puts the wall whole again |
 | `/et ch2 l2 anchors` | Every anchor and zone with its coordinates, the provisional ones marked |
 | `/et ch2 l2 goto <anchor>` | Builds the level if it is not, then takes you to a place (`sealed_entry` ... `level_exit`, `trap_1`...) or to the middle of a zone (`zone_<place>`) |
 | `/et reload` | Reads Level 1's and Level 2's data again and says what is wrong |

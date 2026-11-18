@@ -100,6 +100,14 @@ class Ch2L2MapPlanTest {
                 assertTrue(Cell(x, y, z) in cells, "${point.id}: no beacon at ${point.position}")      // the beacon's own cell, on the pump's housing or a post
                 continue
             }
+            if (point.id.startsWith("breaker_")) {
+                assertTrue(Cell(x, y, z) in cells, "${point.id}: no breaker at ${point.position}")      // the breaker's own cell, on the maintenance wall
+                continue
+            }
+            if (point.id == "boo_wall") {
+                assertTrue(Cell(x, y, z) !in cells && Cell(x, y, z - 1) in cells, "${point.id}: not open air in front of a wall at ${point.position}")      // BOO!'s block
+                continue
+            }
             if (point.id == "pipe_drop") {
                 assertTrue(Cell(x, y, z) !in cells, "${point.id}: the pipe is let fall inside something at ${point.position}")      // open air
                 continue
@@ -117,6 +125,32 @@ class Ch2L2MapPlanTest {
         assertTrue(gate.states.getValue("grate").startsWith("minecraft:iron_bars"))
         assertTrue(gate.states.getValue("sealed").startsWith("every_tunnel:sluice_gate"))
         for (c in gate.cells) assertTrue(c !in cells, "the open gate's cell $c is filled")
+    }
+
+    @Test
+    fun `the Guard's wall is whole as built and its grates are open, each with a grate state`() {
+        val wall = plan.gate("guard_wall") ?: error("no guard_wall")
+        assertEquals("whole", wall.built)
+        assertEquals("minecraft:air", wall.states["broken"])
+        for (c in wall.cells) assertTrue(c in cells, "the whole wall's cell $c is empty")
+        for (id in data.level.guard.barred) {
+            val gate = plan.gate(id) ?: error("no gate $id")
+            assertEquals("open", gate.built, id)
+            assertTrue(gate.states.getValue("grate").startsWith("minecraft:iron_bars"), id)
+            for (c in gate.cells) assertTrue(c !in cells, "$id's open cell $c is filled")
+        }
+    }
+
+    @Test
+    fun `the Guard's plates and breakers are where level json says`() {
+        val guard = data.level.guard
+        assertEquals(4, guard.plates.size)
+        for (plate in guard.plates) {
+            assertTrue(data.anchors.zone(plate.zone) != null, plate.zone)
+            assertTrue(data.anchors.point(plate.breaker) != null, plate.breaker)
+        }
+        assertTrue(data.level.anchorNames().containsAll(guard.anchorNames()))
+        assertTrue(data.level.zoneNames().containsAll(guard.zoneNames()))
     }
 
     @Test

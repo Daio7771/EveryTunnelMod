@@ -21,6 +21,8 @@ import daio7771.everytunnel.chapter2.level2.platform.Ch2L2
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Build
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Commands
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2DataLoader
+import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Guard
+import daio7771.everytunnel.chapter2.level2.platform.Ch2L2GuardScenes
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Pump
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Spawns
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
@@ -113,6 +115,8 @@ object Chapter2 : ModInitializer {
         Ch2L2.register()
         Ch2L2Spawns.register()
         Ch2L2Pump.register()
+        Ch2L2Guard.register()
+        Ch2L2GuardScenes.register()
         Ch2L2Commands.register()
         EveryTunnel.LOGGER.info("${EveryTunnel.MOD_NAME}: Chapter 2 loaded")
     }

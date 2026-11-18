@@ -18,6 +18,7 @@ import daio7771.everytunnel.chapter2.level1.platform.TimeClockBlock
 import daio7771.everytunnel.chapter2.level2.platform.CatacombStairsBlock
 import daio7771.everytunnel.chapter2.level2.platform.CeilingCableBlock
 import daio7771.everytunnel.chapter2.level2.platform.PumpBeaconBlock
+import daio7771.everytunnel.chapter2.level2.platform.TrapBreakerBlock
 import daio7771.everytunnel.platform.BlockShapes.box
 import daio7771.everytunnel.platform.LinkedDoorBlock
 import daio7771.everytunnel.platform.ModBlocks
@@ -145,6 +146,9 @@ object Ch2Blocks {
 
     /** The amber warning beacon on the pump's housing in the pump room: lit while the pump runs ([daio7771.everytunnel.chapter2.level2.platform.Ch2L2Pump]). */
     val PUMP_BEACON: Block = register("pump_beacon", PumpBeaconBlock(ModBlocks.props(MapColor.ORANGE, ModSoundGroups.PLASTIC).luminance(PumpBeaconBlock::luminance)))
+
+    /** The breaker of one of the Guard's four traps: a lever and a lamp on the maintenance wall ([daio7771.everytunnel.chapter2.level2.platform.TrapBreakerBlock]). */
+    val TRAP_BREAKER: Block = register("trap_breaker", TrapBreakerBlock(ModBlocks.props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL).noCollision().luminance(TrapBreakerBlock::luminance)))
 
     /** The factory cameras' block entity: the same as Level 5's camera's, a type of its own so the client sweeps them. */
     lateinit var FACTORY_CAMERA_ENTITY: BlockEntityType<SecurityCameraBlockEntity>

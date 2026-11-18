@@ -2,6 +2,7 @@ package daio7771.everytunnel.chapter2.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.FactoryNpcEntity
+import daio7771.everytunnel.chapter2.level2.platform.ObservantGuardEntity
 import daio7771.everytunnel.chapter2.level2.platform.VibrationCreatureEntity
 import daio7771.everytunnel.chapter2.prologue.platform.ScientistEntity
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricDefaultAttributeRegistry
@@ -43,11 +44,22 @@ object Ch2Entities {
             .trackRangeBlocks(96)
             .build()
 
+    /** The Observant Guard of Level 2's vestibule and maintenance room (phase 5). Never saved: `Ch2L2Guard` makes it when the wall bursts. */
+    val OBSERVANT_GUARD: EntityType<ObservantGuardEntity> =
+        FabricEntityTypeBuilder.create<ObservantGuardEntity>(SpawnGroup.MISC) { type, world -> ObservantGuardEntity(type, world) }
+            .dimensions(EntityDimensions.fixed(0.9f, 2.5f))
+            .disableSaving()
+            .disableSummon()
+            .trackRangeBlocks(80)
+            .build()
+
     fun register() {
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "factory_npc"), FACTORY_NPC)
         FabricDefaultAttributeRegistry.register(FACTORY_NPC, FactoryNpcEntity.createAttributes())
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "scientist"), SCIENTIST)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "vibration_creature"), VIBRATION_CREATURE)
         FabricDefaultAttributeRegistry.register(VIBRATION_CREATURE, VibrationCreatureEntity.createAttributes())
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "observant_guard"), OBSERVANT_GUARD)
+        FabricDefaultAttributeRegistry.register(OBSERVANT_GUARD, ObservantGuardEntity.createAttributes())
     }
 }

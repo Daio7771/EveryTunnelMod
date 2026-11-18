@@ -174,7 +174,10 @@ def rotate(p, pivot, rot):
     rx, ry, rz = (math.radians(a) for a in rot)
     y, z = y * math.cos(rx) + z * math.sin(rx), -y * math.sin(rx) + z * math.cos(rx)
     x, z = x * math.cos(ry) + z * math.sin(ry), -x * math.sin(ry) + z * math.cos(ry)
-    x, y = x * math.cos(rz) - y * math.sin(rz), x * math.sin(rz) + y * math.cos(rz)
+    # GeckoLib turns a bone about z the other way from a plain right-handed rotation of the Blockbench model (it mirrors x when it bakes
+    # the model, and turns z by the animation's value as it is): a positive z swings the arm at +x (the "left" one) towards the body.
+    # x and y match Blockbench's. Checked against GeckoLib 4.8.4's BakedModelFactory and RenderUtils.rotateMatrixAroundBone.
+    x, y = x * math.cos(rz) + y * math.sin(rz), -x * math.sin(rz) + y * math.cos(rz)
     return [x + pivot[0], y + pivot[1], z + pivot[2]]
 
 

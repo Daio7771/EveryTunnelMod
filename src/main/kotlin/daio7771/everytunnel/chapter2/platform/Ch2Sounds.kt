@@ -49,6 +49,22 @@ object Ch2Sounds {
     val CH2L2_PUMP_RUN = event("event.ch2l2.pump_run", range = 64f)
     val CH2L2_PIPE_FALL = event("event.ch2l2.pipe_fall", range = 56f)
 
+    /** Chapter 2 Level 2's Observant Guard (phase 5): its wall, its steps, blow and death, and the four traps' breakers and plates. */
+    val CH2L2_WALL_CRACK = event("event.ch2l2.wall_crack", range = 40f)
+    val CH2L2_WALL_BURST = event("event.ch2l2.wall_burst", range = 64f)
+    val CH2L2_GUARD_STEP = event("event.ch2l2.guard_step", range = 36f)
+    val CH2L2_GUARD_WINDUP = event("event.ch2l2.guard_windup", range = 32f)
+    val CH2L2_GUARD_HIT = event("event.ch2l2.guard_hit", range = 40f)
+    val CH2L2_GUARD_STUN = event("event.ch2l2.guard_stun", range = 40f)
+    val CH2L2_GUARD_DEATH = event("event.ch2l2.guard_death", range = 48f)
+    val CH2L2_TRAP_CLACK = event("block.ch2l2.trap_clack", range = 32f)
+    val CH2L2_TRAP_CHARGE = event("block.ch2l2.trap_charge", range = 36f)
+    val CH2L2_TRAP_ARMED = event("block.ch2l2.trap_armed", range = 32f)
+    val CH2L2_TRAP_ZAP = event("event.ch2l2.trap_zap", range = 56f)
+    val CH2L2_TRAP_FIZZLE = event("event.ch2l2.trap_fizzle", range = 40f)
+    val CH2L2_GUARD_CHEST = event("event.ch2l2.guard_chest", range = 40f)
+    val CH2L2_GRATE = event("block.ch2l2.grate", range = 56f)
+
     private fun event(path: String, range: Float? = null): SoundEvent {
         val id = Identifier(EveryTunnel.MOD_ID, path)
         return (if (range == null) SoundEvent.of(id) else SoundEvent.of(id, range)).also { all += it }
