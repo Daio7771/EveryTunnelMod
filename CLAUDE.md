@@ -26,10 +26,11 @@ is the core of the mod.
 - Send previews, audio drafts and builds to the user with SendUserFile.
 - **Keep token use low** (Pro plan, weekly quota): no unnecessary exploration, short replies, few progress messages.
   - **One session per phase at most.** End it with a short hand-off in memory; above ~150k tokens of context, hand off or compact.
-  - **Models:** the main session runs `opusplan` (Opus plans and designs, Sonnet executes). Delegate only to the user's agents
-    for this project in `~/.claude/agents/` (`et-mechanic` and `et-docs-writer` on Sonnet, `et-hard-problems` on Opus for a main
-    session on Sonnet),
-    with a precise brief (files, exact changes, what done is); never a vague one, never for a one-line change.
+  - **Models:** the session runs on Sonnet; a phase goes `/et-design` (Opus: reads, asks the round, writes the phase plan to
+    `docs/temporal/`), `/et-build` (Sonnet: builds from that plan, verifies, previews), `/et-close` (Sonnet: after CC, docs, commit,
+    tag, memory hand-off); the skills are in `~/.claude/skills/`. Delegate only to `~/.claude/agents/` (`et-mechanic`,
+    `et-docs-writer` on Sonnet; `et-hard-problems` on Opus for what Sonnet cannot settle), with a precise brief (files, exact
+    changes, what done is); never a vague one, never for a one-line change.
   - **Docs per phase:** fix only what the phase makes wrong, briefly; the level's full EN/ES page is rewritten when the level closes.
 - Update `PROJECT_STATE.md` when the user asks (usually before changing sessions).
 
