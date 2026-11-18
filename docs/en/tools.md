@@ -142,6 +142,8 @@ The game's lang files (`assets/every_tunnel/lang/*.json`) are generated, one par
 `es_es` to `es_ar`, `es_cl`, `es_ec`, `es_mx`, `es_uy` and `es_ve`, because Minecraft does not fall back from one Spanish locale
 to another. Texts written by hand go in a part's file, then run `build.py`; the tools that write names and subtitles
 (`langfiles.update`) write into their chapter's part and rebuild. `LangFilesTest` fails if the game's files are not the merge.
+`langfiles.write_notes` (run by `build.py`) also writes the in-game notes that come from the lang sources (`NOTES`: Chapter 2 Level 2's three) as
+`assets/every_tunnel/notes/<en|es>/<id>.txt`, so their text lives once.
 
 ## Blocks
 

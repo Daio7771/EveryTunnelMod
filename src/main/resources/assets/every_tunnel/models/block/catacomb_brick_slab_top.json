@@ -1,8 +1,8 @@
 {
   "parent": "minecraft:block/slab_top",
   "textures": {
-    "bottom": "catacomb_brick",
-    "top": "catacomb_brick",
-    "side": "catacomb_brick"
+    "bottom": "every_tunnel:block/catacomb_brick",
+    "top": "every_tunnel:block/catacomb_brick",
+    "side": "every_tunnel:block/catacomb_brick"
   }
 }

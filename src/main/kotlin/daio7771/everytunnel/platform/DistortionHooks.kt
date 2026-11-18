@@ -201,7 +201,7 @@ object DistortionHooks {
      * may already be in that corridor, and the build's end ([levelBuilt]) once took it from a game that had just begun.
      * A death ([restart]) and a new game ([clearAll]) still remove it.
      */
-    private fun discard(world: ServerWorld, levelId: String?) {
+    fun discard(world: ServerWorld, levelId: String?) {
         KeptEntities.forget { (it is HunterEntity && it.levelId == levelId) || (it is DistortionEntity && it.levelId == levelId) }
         for (entity in world.iterateEntities().toList()) {
             if (entity is DistortionCloudEntity && entity.inGame) continue
@@ -329,7 +329,8 @@ object DistortionHooks {
 
     /**
      * Three Hunters ([what] [HUNTERS_TAG]) or a Junior ([JUNIOR_TAG]) put in at [position], for once (no post:
-     * a death in their level clears them): the chemical room's alarm ([ChemicalHooks]).
+     * a death in their level clears them): the chemical room's alarm ([ChemicalHooks]). A chapter's own level (not a [LevelDefinition])
+     * puts its groups in this way, under a [levelId] of its own, and puts them back with [discard].
      */
     fun putIn(world: ServerWorld, what: String, position: Position, yaw: Float, levelId: String?) {
         val kind = if (what == HUNTERS_TAG) Kind.HUNTERS else Kind.JUNIOR

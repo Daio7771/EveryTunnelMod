@@ -23,7 +23,15 @@
   {"id":"rising_walkways","pos":[1050.5,60,1370.5],"yaw":90},
   {"id":"upper_gallery","pos":[1057.5,84,1349.5],"yaw":180},
   {"id":"pumping_station","pos":[1059.5,84,1336.5],"yaw":90},
-  {"id":"level_exit","pos":[1030.5,84,1336.5],"yaw":90}
+  {"id":"level_exit","pos":[1030.5,84,1336.5],"yaw":90},
+  {"id":"survival_kit","pos":[1031.5,84,1292.5],"yaw":180},
+  {"id":"hunters_post","pos":[1102.5,74,1288.5],"yaw":0},
+  {"id":"loot_galleries","pos":[1121.5,74,1285.5],"yaw":90},
+  {"id":"loot_catacombs","pos":[1146.5,64,1343.5],"yaw":0},
+  {"id":"loot_station","pos":[1061.5,84,1344.5],"yaw":0},
+  {"id":"note_old_drainage","pos":[1044.5,85,1288.5],"yaw":0},
+  {"id":"note_maintenance","pos":[1136.5,75,1294.5],"yaw":0},
+  {"id":"note_withdrawal","pos":[1145.5,65,1343.5],"yaw":0}
  ],
  "zones": [
   {"id":"zone_sealed_entry","from":[1026,83,1286],"to":[1039,99,1295]},

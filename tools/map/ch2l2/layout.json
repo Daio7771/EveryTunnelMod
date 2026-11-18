@@ -69,7 +69,7 @@
   {"id": "entry_corridor", "name": "", "style": "masonry", "boxes": [[17, 8, 27, 14]], "floor": "H", "height": 6,
    "lamps": {"kind": "cable", "block": "cage", "spacing": 4, "hang": 3}},
   {"id": "top_stairs", "name": "", "style": "masonry", "boxes": [[27, 8, 37, 14]], "floor": "M", "height": 6,
-   "ramp": {"axis": "x", "start": 27, "step": 1, "from": 19, "to": 10},
+   "ramp": {"axis": "x", "start": 27, "step": 1, "from": 20, "to": 11, "first_step": true},
    "lamps": {"kind": "cable", "block": "cage", "spacing": 4, "hang": 3}},
   {"id": "top_corridor", "name": "", "style": "masonry", "boxes": [[37, 8, 56, 14]], "floor": "M", "height": 6,
    "lamps": {"kind": "cable", "block": "cage", "spacing": 4, "hang": 3}},
@@ -225,7 +225,21 @@
   {"type": "bricked", "wall": "z", "line": 104, "span": [112, 114], "y": [0, 3]},
   {"type": "bricked", "wall": "z", "line": 104, "span": [136, 138], "y": [0, 3]},
   {"type": "bricked", "wall": "z", "line": 98, "span": [50, 52], "y": [-4, -1]},
-  {"type": "bricked", "wall": "z", "line": 98, "span": [70, 72], "y": [-4, -1]}
+  {"type": "bricked", "wall": "z", "line": 98, "span": [70, 72], "y": [-4, -1]},
+  {"type": "prop", "space": "entrance", "at": [5, 14], "block": "every_tunnel:counter[facing=north,left=false,right=true]"},
+  {"type": "prop", "space": "entrance", "at": [6, 14], "block": "every_tunnel:counter[facing=north,left=true,right=true]"},
+  {"type": "prop", "space": "entrance", "at": [7, 14], "block": "every_tunnel:counter[facing=north,left=true,right=true]"},
+  {"type": "prop", "space": "entrance", "at": [8, 14], "block": "every_tunnel:counter[facing=north,left=true,right=true]"},
+  {"type": "prop", "space": "entrance", "at": [9, 14], "block": "every_tunnel:counter[facing=north,left=true,right=false]"},
+  {"type": "prop", "space": "entrance", "at": [5, 15], "block": "every_tunnel:counter[facing=north,left=false,right=true]"},
+  {"type": "prop", "space": "entrance", "at": [6, 15], "block": "every_tunnel:counter[facing=north,left=true,right=true]"},
+  {"type": "prop", "space": "entrance", "at": [7, 15], "block": "every_tunnel:counter[facing=north,left=true,right=true]"},
+  {"type": "prop", "space": "entrance", "at": [8, 15], "block": "every_tunnel:counter[facing=north,left=true,right=true]"},
+  {"type": "prop", "space": "entrance", "at": [9, 15], "block": "every_tunnel:counter[facing=north,left=true,right=false]"},
+  {"type": "prop", "space": "entrance", "at": [7, 15], "dy": 2, "block": "every_tunnel:wall_text[facing=north]", "text": "every_tunnel.ch2.l2.survival_kit", "style": "poster", "_doc": "The SURVIVAL KIT sign over the counter (loot: level.json)"},
+  {"type": "prop", "space": "entry_corridor", "at": [20, 8], "dy": 1, "block": "every_tunnel:note_board[facing=south]", "_doc": "Drainage Integration"},
+  {"type": "prop", "space": "pump_room", "at": [112, 14], "dy": 11, "block": "every_tunnel:note_board[facing=east]", "_doc": "Maintenance log, by the overlook door"},
+  {"type": "prop", "space": "lower_galleries", "at": [121, 63], "dy": 1, "block": "every_tunnel:note_board[facing=north]", "_doc": "Withdrawal Order, by the way to the Guard"}
  ],
 
  "anchors": [
@@ -252,7 +266,15 @@
   {"id": "rising_walkways", "pos": [26.5, -4, 90.5], "yaw": 90},
   {"id": "upper_gallery", "pos": [33.5, 20, 69.5], "yaw": 180},
   {"id": "pumping_station", "pos": [35.5, 20, 56.5], "yaw": 90},
-  {"id": "level_exit", "pos": [6.5, 20, 56.5], "yaw": 90}
+  {"id": "level_exit", "pos": [6.5, 20, 56.5], "yaw": 90},
+  {"id": "survival_kit", "pos": [7.5, 20, 12.5], "yaw": 180, "_doc": "In front of the kit's counter; level.json's loot is laid out from its block"},
+  {"id": "hunters_post", "pos": [78.5, 10, 8.5], "yaw": 0, "_doc": "Where the galleries' group of Hunters wanders"},
+  {"id": "loot_galleries", "pos": [97.5, 10, 5.5], "yaw": 90},
+  {"id": "loot_catacombs", "pos": [122.5, 0, 63.5], "yaw": 0},
+  {"id": "loot_station", "pos": [37.5, 20, 64.5], "yaw": 0},
+  {"id": "note_old_drainage", "pos": [20.5, 21, 8.5], "kind": "wall", "_doc": "The cell of the board (kind wall: not a place to stand)"},
+  {"id": "note_maintenance", "pos": [112.5, 11, 14.5], "kind": "wall"},
+  {"id": "note_withdrawal", "pos": [121.5, 1, 63.5], "kind": "wall"}
  ],
 
  "zones": [

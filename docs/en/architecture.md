@@ -91,6 +91,9 @@ its extension points:
 | `platform.ChapterRestarts` | Says where a player of its levels comes back after dying, and what it puts back then; the dying itself is `DeathHooks`'s |
 | `ProgressService.onReset` | Clears its own progress (its own Cardinal component) on a Chapter 1 new game |
 | `client.cutscene.CutsceneView.Kind` | Its scenes: a `Kind` with its timeline and whatever else it does, started with `CutsceneView.start` |
+| `platform.DistortionHooks.putIn` / `discard` | Puts its own groups of Hunters in under a level id of its own, and takes them away |
+| `platform.NoteHooks.addSource` | Names the note on a board that no base level holds, and remembers it was read |
+| `platform.LootSpawner.addTakenListener` | Hears each pick-up of a loot block; a chapter lays its own loot blocks with `LootSpawner.LOOT` |
 | `ModBlocks.TAB` and the block settings | Its blocks join the same creative tab and share the base game's settings and shapes |
 
 Its texts and sounds are apart too: the lang files are merged from `tools/lang/src/<part>/` (one part per chapter,

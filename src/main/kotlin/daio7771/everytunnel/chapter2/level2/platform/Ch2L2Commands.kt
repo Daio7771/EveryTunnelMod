@@ -31,6 +31,8 @@ import net.minecraft.util.Identifier
  *
  * - `/et ch2 l2 build`: builds the catacombs again over what stands ([Ch2L2Build]; a new plan is built by itself the next time
  *   `goto` needs it); `/et ch2 l2 unbuild` empties the whole area (before packing the world into a jar: it is Chapter 2's).
+ * - `/et ch2 l2 hunters`: the level's Hunters put back whole at their posts, whatever your state; `/et ch2 l2 loot`: all the loot
+ *   as if none had been taken (your counters forgotten; what is in your pockets stays) ([Ch2L2Spawns]).
  * - `/et ch2 l2 anchors`: every anchor with its coordinates, the provisional ones marked.
  * - `/et ch2 l2 goto <anchor>`: builds the level if it is not, then takes you to a point (the places of the route, `sealed_entry` to
  *   `level_exit`, and the rest), or to the middle of a zone (`zone_<place>`) one block over its floor.
@@ -79,6 +81,8 @@ object Ch2L2Commands {
                                 )
                                 .then(CommandManager.literal("build").executes(::build))
                                 .then(CommandManager.literal("unbuild").executes(::unbuild))
+                                .then(CommandManager.literal("hunters").executes(::hunters))
+                                .then(CommandManager.literal("loot").executes(::loot))
                                 .then(CommandManager.literal("anchors").executes(::anchors))
                                 .then(
                                     CommandManager.literal("goto").then(
@@ -187,7 +191,27 @@ object Ch2L2Commands {
         MapBuild.Asked.BUILT -> 1
     }
 
+    private fun hunters(context: CommandContext<ServerCommandSource>): Int {
+        val world = context.source.server.getWorld(
+            RegistryKey.of(RegistryKeys.WORLD, Identifier.tryParse(Ch2L2DataLoader.data.anchors.dimension) ?: return 0),
+        )
+        if (world == null) {
+            reply(context, "The anchors' dimension ${Ch2L2DataLoader.data.anchors.dimension} is not there.")
+            return 0
+        }
+        Ch2L2Spawns.putHunters(world, null)
+        reply(context, "The Hunters are back at their posts (${Ch2L2DataLoader.data.level.hunters.size} group(s)).")
+        return 1
+    }
+
+    private fun loot(context: CommandContext<ServerCommandSource>): Int {
+        val why = Ch2L2Spawns.restock(context.source.playerOrThrow)
+        reply(context, why ?: "All the loot is back (${Ch2L2DataLoader.data.level.loot.size} pieces).")
+        return if (why == null) 1 else 0
+    }
+
     private fun unbuild(context: CommandContext<ServerCommandSource>): Int {
+        Ch2L2Spawns.clearHunters(context.source.server)
         val asked = Ch2L2Build.clear(context.source.server) { reply(context, "The area is empty.") }
         if (asked == MapBuild.Asked.BUSY) {
             reply(context, "The catacombs are being built or cleared: try again in a moment.")

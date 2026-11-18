@@ -32,6 +32,10 @@ data class Ch2L2Level(
     /** In the order of the way. */
     val checkpoints: List<Ch2L2Checkpoint>,
     val reaches: List<Ch2L2Reach>,
+    /** The groups of Hunters, the loot lying about and the notes on boards (phase 3). */
+    val hunters: List<Ch2L2HunterGroup> = emptyList(),
+    val loot: List<Ch2L2Loot> = emptyList(),
+    val notes: List<Ch2L2Note> = emptyList(),
 ) {
     fun checkpoint(id: String?): Ch2L2Checkpoint? = checkpoints.firstOrNull { it.id == id }
 
@@ -49,7 +53,7 @@ data class Ch2L2Level(
     fun checkpointBefore(event: Ch2L2Event): Ch2L2Checkpoint? = checkpoints.firstOrNull { it.before == event }
 
     /** Every anchor and zone the file names, to check against the anchors. */
-    fun anchorNames(): List<String> = checkpoints.map { it.anchor }
+    fun anchorNames(): List<String> = checkpoints.map { it.anchor } + hunters.map { it.anchor } + loot.map { it.anchor } + notes.map { it.anchor }
     fun zoneNames(): List<String> = (lights.keys + checkpoints.map { it.zone } + reaches.map { it.zone }).distinct()
 
     class Result(val level: Ch2L2Level, val problems: List<String>)
@@ -117,16 +121,22 @@ data class Ch2L2Level(
                 r.reportUnknownKeys()
                 if (zone == null || state == null) null else Ch2L2Reach(zone, state)
             }
+            val hunters = Ch2L2PlacementsParser.hunters(f)
+            val loot = Ch2L2PlacementsParser.loot(f)
+            val notes = Ch2L2PlacementsParser.notes(f)
             f.reportUnknownKeys()
 
             val problems = f.problems.toMutableList()
+            problems += Ch2L2PlacementsParser.duplicates("hunters", hunters.map { it.id })
+            problems += Ch2L2PlacementsParser.duplicates("loot", loot.map { it.id })
+            problems += Ch2L2PlacementsParser.duplicates("notes", notes.map { it.id })
             if (checkpoints.isEmpty()) problems += "checkpoints: none; at least the entry's is needed"
             if (checkpoints.map { it.id }.toSet().size != checkpoints.size) problems += "checkpoints: two have the same id"
             val befores = checkpoints.mapNotNull { it.before }
             if (befores.toSet().size != befores.size) problems += "checkpoints: two come before the same encounter"
             val level = Ch2L2Level(
                 flashlight, noise, battery, thirst, stamina, lights,
-                checkpoints.ifEmpty { d.checkpoints }, reaches,
+                checkpoints.ifEmpty { d.checkpoints }, reaches, hunters, loot, notes,
             )
             return Result(level, problems)
         }

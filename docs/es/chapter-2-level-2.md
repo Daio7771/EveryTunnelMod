@@ -7,9 +7,9 @@ científico baja por la alcantarilla de emergencia del Nivel 1, solo, y busca un
 caza por las vibraciones del suelo en la sala de bombas, el Observant Guard del Capítulo 1 en las cámaras de abajo y una inundación en tres
 etapas camino de la estación de bombeo y la salida. Se construye por fases (de la 1 a la 7), una cada vez, en la rama **privada**
 `chapter-2/level-2` (sale de `chapter-2/level-1` y solo se sube al remoto `private`) hasta que se publiquen los Niveles 1 y 2 del capítulo.
-**En qué punto está: fase 2, la entrada, la supervivencia y la partida guardada.** Se llega bajando por la alcantarilla del Nivel 1 y se
+**En qué punto está: fase 3, Hunters, kit de supervivencia, botín y documentos.** Se llega bajando por la alcantarilla del Nivel 1 y se
 recorre de la entrada a la salida con las barras de supervivencia; morir devuelve al último checkpoint, y el Capítulo 2 del menú lo
-continúa. Todavía no hay enemigos, documentos ni inundación.
+continúa; el primer tramo ya tiene sus enemigos, recursos y documentos. Faltan la criatura, el Guard y la inundación.
 
 Su código está en `daio7771.everytunnel.chapter2.level2` (`core`, Kotlin puro, y `platform`), aparte del juego base, que nunca lo nombra
 (véase [Arquitectura](architecture.md#capítulos)). Sus lugares con nombre usan el formato del Nivel 1 (`level1.core.Ch2L1AnchorsParser`); su
@@ -71,6 +71,29 @@ cosas, vida, aguante, sed y batería) y conserva la partida guardada. Ctrl+Shift
 vuelve NUEVA PARTIDA; un NUEVA PARTIDA del Capítulo 2, o una partida nueva del Capítulo 1, también la olvida. El Nivel 1 se sigue jugando del tirón:
 no hay nada que continuar hasta el primer checkpoint del Nivel 2.
 
+## Hunters, botín y documentos
+
+**Kit de supervivencia.** Al pie de la escalera, un mostrador (5 x 2, `every_tunnel:counter`) bajo un cartel de póster
+(`every_tunnel.ch2.l2.survival_kit`, SURVIVAL KIT) tiene 3 baterías, 2 botellas de agua, 4 barras de energía (`food_snack`, que se ve
+como "Snack") y la llave inglesa del Nivel 5 (un golpe mata a un Hunter). Es la fila de botín "Entry" del plan.
+
+**Hunters.** Un grupo de tres (el del Nivel 5, puesto con `DistortionHooks.putIn` bajo el id de nivel `chapter2_level2`) está en el ancla
+`hunters_post` de las galerías; ven, no oyen. Empezar el nivel (al llegar, al morir, con CONTINUAR, `reset`) se los lleva y los pone
+enteros en su puesto, para un estado no posterior al `until` del grupo (`pump_room`).
+
+**Botín** (tabla provisional): tras los Hunters (extremo este de las galerías, `loot_galleries`) 1 bebida y 1 batería; antes del Guard
+(galerías de abajo, `loot_catacombs`) 1 bebida, 1 barra y 1 batería; la estación (`loot_station`) 1 bebida y 1 batería. Nada en las
+criptas opcionales. Lo recogido es el contador `loot.<id>` del jugador en el Nivel 2, que se pone al recoger
+(`LootSpawner.addTakenListener`). Morir conserva los bolsillos (regla base), así que conserva los contadores; CONTINUAR restaura los
+contadores y bolsillos del checkpoint, de modo que lo recogido desde entonces vuelve a estar ahí.
+
+**Documentos.** Tres tableros de notas (`every_tunnel:note_board`, puestos por el elemento `prop` del mapa) con los textos aprobados del
+plan: `old_drainage` (pasillo de entrada), `maintenance_observation` (sala de bombas, junto a la puerta del mirador) y
+`withdrawal_order` (galerías de abajo, junto al camino al Guard). El texto vive una sola vez, en las fuentes de idioma
+(`tools/lang/src/chapter2/*.json`, claves `every_tunnel.ch2.l2.<id>_title` y `_body`); `tools/lang/langfiles.py` (`NOTES`,
+`write_notes`, que ejecuta `build`) escribe a partir de ellas `assets/every_tunnel/notes/<en|es>/ch2_l2_<id>.txt`. Un tablero se lee
+a través de `NoteHooks.Source`; el contador `read.<id>` lo recuerda. La clave `every_tunnel.ch2.l2.boo` queda para la fase 5.
+
 ## El mapa
 
 El nivel son **datos**: `tools/map/ch2l2/layout.json` tiene todo aquello de lo que está hecho, y `tools/map/ch2l2/generate.py` lo
@@ -105,7 +128,7 @@ de H que se ve desde dos alturas: desde el balcón de las galerías (M) y desde 
 | `spaces` | Cada espacio: sus cajas, su suelo (una altura o un número), la altura de su aire, su estilo, sus lámparas (`ceiling`; `cable`, bombillas de obra colgadas de un cable por la bóveda; `wall`, lámparas en las paredes sobre cada superficie; los `lamp_gaps` dejan algunas bombillas fuera, parpadeando o muertas, según la semilla, nunca junto a un ancla); un `ramp` hace de un espacio entero un tramo de escaleras (las de bajada desde la entrada, la galería que sube a la estación) |
 | `links` | Espacios cuyo aire se junta sin más (un balcón sobre el pozo, las escaleras y los pasillos) |
 | `openings` | Pasos a través de una pared de un bloque: arcos, una ventana de barrotes y la **reja** (`vestibule_gate`) con un bloque para cada uno de sus estados |
-| `features` | Lo que hay dentro de un espacio: tabiques y pilares, bloques macizos (el mirador, la pasarela del colector, la carcasa de la bomba), tramos de escaleras, plataformas (pasarelas, el puente roto), canales con agua, agua quieta, barandillas, escalerillas, parches de suelo (las cuatro trampas), arcos tapiados |
+| `features` | Lo que hay dentro de un espacio: tabiques y pilares, bloques macizos (el mirador, la pasarela del colector, la carcasa de la bomba), tramos de escaleras, plataformas (pasarelas, el puente roto), canales con agua, agua quieta, barandillas, escalerillas, parches de suelo (las cuatro trampas), arcos tapiados, y `prop`: un bloque de mobiliario, cartel o tablero de notas dentro del aire de un espacio (`space`, `at` [x, z], `dy`, `block`; con `text` y `style` para un cartel wall_text, que lleva el `texts` del plan) |
 | `anchors`, `zones` | Los lugares con nombre y las cajas que vigilarán los sistemas del nivel (más abajo) |
 | `route` | El camino por el nivel, en orden, de `sealed_entry` a `level_exit` |
 | `checks` | A qué se ajusta el nivel en las comprobaciones |
@@ -131,6 +154,8 @@ salvo los del desagüe (`Ch2L2MapPlanTest`).
 - **la sala de bombas** pide varios ciclos de la bomba: su camino más corto de lado a lado, nadando incluido, es de `min` bloques como
   poco (56 ahora: el suelo lo cortan dos canales de cinco de ancho, más de lo que se salta corriendo, y sus escalerillas solo están junto
   a los cruces);
+- **colocaciones**: el botín está en aire libre sobre algo sólido, cada ancla de nota está en un tablero de notas y cada ancla de Hunters
+  existe;
 - las aberturas están despejadas: dos bloques de aire a través y sitio para estar a ambos lados;
 - **el agua no se sale**: el agua quieta y cada etapa de la inundación no tocan nada por donde pase el agua (aire, barrotes, losas...)
   fuera de sus propios espacios, con las compuertas como dice la etapa;
@@ -157,6 +182,8 @@ luego tras cada etapa).
 | `upper_gallery` | Las escaleras que suben a la estación | M a H |
 | `pumping_station` | La estación, seca; un puente roto sobre el pozo, visto a través de barrotes | H |
 | `level_exit` | La sala de la salida, tras un pasillo tranquilo | H |
+| `survival_kit`, `hunters_post`, `loot_galleries`, `loot_catacombs`, `loot_station` | De la fase 3: el mostrador del kit, el puesto de los Hunters y los tres sitios de botín, en los espacios de arriba | H, M, L |
+| `note_old_drainage`, `note_maintenance`, `note_withdrawal` | La celda propia de un tablero de notas (`kind: wall`: no es un sitio donde estar) | H, M, L |
 
 Casi todas las salas del dibujo son criptas cerradas, con los arcos tapiados por la fábrica; dos están abiertas, salas cortas a un
 lado para los recursos y documentos de fases posteriores (una cripta junto a las galerías y otra junto al pasillo de servicio, antes del
@@ -183,6 +210,9 @@ las anclas, y lo que está mal se avisa (`/et reload`).
 | `lights` | Las lámparas de cada zona: `on`, `flicker` u `off`, puestas cada vez que se empieza el nivel (al llegar, CONTINUAR, `reset`). Vacío: las lámparas del plan (con sus huecos) quedan como se construyen; una zona listada aquí encendería todas sus lámparas en `on`/`flicker`/`off` |
 | `checkpoints` | En el orden del camino: `id`, `anchor` (adonde devuelven morir y CONTINUAR), `zone` (al entrar se toma), `before` (el encuentro al que precede, para `reset`) |
 | `progress` | `zone` y `state`: entrar en la zona lleva al jugador al estado |
+| `hunters` | `id`, `anchor`, `yaw` opcional, `until` opcional (un estado; por defecto `pump_room`): un grupo de Hunters puesto en el ancla |
+| `loot` | `id`, `item` (una clave de `LootSpawner.LOOT`: `battery`, `water`, `food_snack`, `wrench`...), `anchor`, `offset` [dx, dy, dz] bloques desde el bloque del ancla, `yaw` |
+| `notes` | `id`, `anchor` (el del tablero); el texto es `ch2_l2_<id>` |
 
 ## Comandos de depuración
 
@@ -197,7 +227,9 @@ las anclas, y lo que está mal se avisa (`/et reload`).
 | `/et ch2 l2 skip [<evento>]` | Al estado siguiente, o más allá de un encuentro (`hunters`, `creature`, `guard`, `flood`) como si se hubiera vivido |
 | `/et ch2 l2 reset <evento>` | Un encuentro para vivirlo otra vez: el estado de antes, tú en el checkpoint de antes (tomado), el nivel empezado allí |
 | `/et ch2 l2 build` | Vuelve a construir las catacumbas encima de lo que haya (un plan nuevo se construye solo cuando `goto` lo necesita) |
-| `/et ch2 l2 unbuild` | Vacía toda la zona (antes de empaquetar el mundo en un jar); quien esté dentro cae |
+| `/et ch2 l2 hunters` | Los Hunters del nivel, enteros otra vez en sus puestos, sea cual sea tu estado |
+| `/et ch2 l2 loot` | Todo el botín como si no se hubiera cogido nada: tus contadores olvidados, tus bolsillos se quedan |
+| `/et ch2 l2 unbuild` | Vacía toda la zona (antes de empaquetar el mundo en un jar), también los Hunters; quien esté dentro cae |
 | `/et ch2 l2 anchors` | Cada ancla y zona con sus coordenadas, marcadas las provisionales |
 | `/et ch2 l2 goto <ancla>` | Construye el nivel si no lo está y te lleva a un lugar (`sealed_entry` ... `level_exit`, `trap_1`...) o al centro de una zona (`zone_<lugar>`) |
 | `/et reload` | Vuelve a leer los datos de los Niveles 1 y 2 y dice qué está mal |
@@ -208,7 +240,8 @@ las anclas, y lo que está mal se avisa (`/et reload`).
 `Ch2PlayerProgressTest` (el estado, los contadores y la partida guardada del Nivel 2, aparte de los del Nivel 1) en `chapter2/core`;
 `Ch2L2MapPlanTest` (el plan del jar: su origen, cada relleno dentro de la caja que se vacía y ninguna celda dos veces, cada bloque
 conocido y ninguno pintado por el paquete del mundo salvo los del desagüe, las anclas y zonas del recorrido, cada sitio para estar de pie
-con suelo, la reja abierta al construir, las lámparas) y `Ch2L2LevelTest` (los estados y encuentros; el `level.json` del jar sin
+con suelo, la reja abierta al construir, las lámparas, que el ancla de una nota sea su tablero) y `Ch2L2LevelTest` (los estados y encuentros; el `level.json` del jar sin
 problemas; los checkpoints en el orden del recorrido, cada uno en su zona, uno antes de cada encuentro; andar el recorrido solo hace
 avanzar el estado, y cada checkpoint repite su encuentro; un override roto vuelve a la copia del jar) en `chapter2/level2/core`;
-`DeathCauseTest` (el nivel de un capítulo posterior dice él mismo si es tranquilo).
+`Ch2L2PlacementsTest` (los Hunters, el kit, la tabla de botín y las notas del jar; cómo trata el parser la entrada mala) en el mismo
+sitio; `DeathCauseTest` (el nivel de un capítulo posterior dice él mismo si es tranquilo).

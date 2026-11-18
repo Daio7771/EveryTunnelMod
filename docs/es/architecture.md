@@ -93,6 +93,9 @@ por sus puntos de extensión:
 | `platform.ChapterRestarts` | Dice adónde vuelve un jugador de sus niveles al morir, y qué repone entonces; la muerte en sí es de `DeathHooks` |
 | `ProgressService.onReset` | Borra su propio progreso (su propio componente de Cardinal) con una partida nueva del Chapter 1 |
 | `client.cutscene.CutsceneView.Kind` | Sus escenas: un `Kind` con su línea de tiempo y lo demás que haga, que arranca con `CutsceneView.start` |
+| `platform.DistortionHooks.putIn` / `discard` | Pone grupos propios de Hunters bajo un id de nivel propio, y se los lleva |
+| `platform.NoteHooks.addSource` | Nombra la nota de un tablero que no tiene ningún nivel base, y recuerda que se leyó |
+| `platform.LootSpawner.addTakenListener` | Oye cada recogida de un bloque de botín; un capítulo coloca sus propios bloques de botín con `LootSpawner.LOOT` |
 | `ModBlocks.TAB` y los ajustes de bloque | Sus bloques van a la misma pestaña creativa y comparten los ajustes y formas del juego base |
 
 Sus textos y sonidos también van aparte: los archivos de idioma se unen desde `tools/lang/src/<parte>/` (una parte por capítulo,

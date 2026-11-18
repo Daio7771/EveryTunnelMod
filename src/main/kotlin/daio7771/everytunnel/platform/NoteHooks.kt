@@ -14,6 +14,9 @@ import net.minecraft.util.math.BlockPos
  * its id names the text (`assets/every_tunnel/notes/<lang>/<id>.txt`).
  * The server sends the id and the values for the text's placeholders (the valve digits of this
  * game, [ValveHooks.values]); the client shows it on paper (`client.screen.NoteScreen`).
+ *
+ * A level that is not a [LevelDefinition] (a chapter's) names its boards' notes through a [Source]: asked, when no spawn point
+ * of a level holds the block, which note the board at a position is (and so the place to remember that it was read).
  */
 object NoteHooks {
 
@@ -22,15 +25,34 @@ object NoteHooks {
     /** To the client: a note to show. Payload: id, then the values (count, then name and value each). */
     val NOTE_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "note")
 
+    /** A chapter's way to name the note a player reads on a board: the note's id (its text file), or null if the board is not one of its own. */
+    fun interface Source {
+        fun noteAt(player: ServerPlayerEntity, pos: BlockPos): String?
+    }
+
+    private val sources = java.util.concurrent.CopyOnWriteArrayList<Source>()
+
+    fun addSource(source: Source) {
+        sources += source
+    }
+
     fun read(player: ServerPlayerEntity, pos: BlockPos) {
-        val level = LevelManager.levelAt(player.serverWorld.registryKey.value.toString(), pos.x + 0.5, pos.y + 0.5, pos.z + 0.5) ?: return
-        val note = level.spawnPoints.firstOrNull {
+        val level = LevelManager.levelAt(player.serverWorld.registryKey.value.toString(), pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)
+        val note = level?.spawnPoints?.firstOrNull {
             NOTE_TAG in it.tags && BlockPos.ofFloored(it.position.x, it.position.y, it.position.z) == pos
-        } ?: return
+        }
+        if (level == null || note == null) {
+            val id = sources.firstNotNullOfOrNull { it.noteAt(player, pos) } ?: return
+            send(player, id, emptyMap())
+            return
+        }
         ProgressService.get().markNoteRead(player, note.id)
-        val values = ValveHooks.values(level) + LoungePuzzleHooks.noteValues(level)
+        send(player, DartHooks.noteShown(note.id), ValveHooks.values(level) + LoungePuzzleHooks.noteValues(level))
+    }
+
+    private fun send(player: ServerPlayerEntity, id: String, values: Map<String, Int>) {
         val buf = PacketByteBufs.create()
-        buf.writeString(DartHooks.noteShown(note.id))
+        buf.writeString(id)
         buf.writeVarInt(values.size)
         for ((name, value) in values) {
             buf.writeString(name)

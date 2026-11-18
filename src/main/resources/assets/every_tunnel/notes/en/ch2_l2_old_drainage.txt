@@ -1,0 +1,3 @@
+Drainage Integration
+
+The factory drainage network now discharges through the existing catacombs. Retain the original masonry. Upper maintenance galleries must remain accessible when the lower passages flood.

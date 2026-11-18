@@ -59,7 +59,7 @@ def write_plan(level):
         "clear": {"from": list(lo), "to": list(hi)},
         "fills": [fill_entry(level, a, b, m) for a, b, m in fills],
         "lights": [list(c) for c in sorted(level.lamps)],
-        "texts": [],
+        "texts": level.texts,
         "messages": [],
         "gates": [{"id": gid, "cells": [list(c) for c in cells], "states": states, "built": built}
                   for gid, (cells, states, built) in sorted(level.gates.items())],

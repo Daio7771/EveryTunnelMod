@@ -12,11 +12,16 @@ Chapter 2, Level 2: the checks generate.py runs on the level before writing anyt
 - **Doors**: every opening is clear: two blocks of air through it, and room to stand on both sides.
 - **Water**: still water and each flood stage stay where they belong (layout.json's `flood`): no cell of water touches air,
   or a block water flows into, outside its own spaces.
+- **Placements**: what `level.json` puts in the map (the Hunters' posts, the loot, the notes) stands where it says: each loot
+  piece in a cell of air over something solid, each note on a board of the map, each group's anchor a place to stand.
 - **Build**: how many cells the mod clears and fills and how long it takes it in batches (`Ch2L2Build`: 8000 cells written a
   tick, cells already empty read at 8 times that), against `max_build_seconds`.
 """
 
+import json
+import math
 from collections import deque
+from pathlib import Path
 
 from level import AIR, permeable
 
@@ -156,11 +161,48 @@ def zone_cells(level, zone_id):
     return {c for c in level.air if x0 <= c[0] <= x1 and y0 <= c[1] <= y1 and z0 <= c[2] <= z1}
 
 
+LEVEL_JSON = Path(__file__).resolve().parents[3] / "src" / "main" / "resources" / "data" / "every_tunnel" / "ch2" / "l2" / "level.json"
+
+
+def placements(lv):
+    """Errors in what level.json puts in the map: loot over solid ground in the air, notes on boards, the Hunters' anchors."""
+    errors = []
+    if not LEVEL_JSON.exists():
+        return errors
+    doc = json.loads(LEVEL_JSON.read_text(encoding="utf-8"))
+    anchors = {a["id"]: a for a in lv.layout["anchors"]}
+
+    def cell_of(anchor_id):
+        a = anchors.get(anchor_id)
+        return None if a is None else tuple(math.floor(v) for v in a["pos"])
+
+    for item in doc.get("loot", []):
+        base = cell_of(item["anchor"])
+        if base is None:
+            errors.append(f"loot {item['id']}: no anchor {item['anchor']}")
+            continue
+        dx, dy, dz = item.get("offset", [0, 0, 0])
+        c = (base[0] + dx, base[1] + dy, base[2] + dz)
+        below = (c[0], c[1] - 1, c[2])
+        if c not in lv.air or c in lv.blocks:
+            errors.append(f"loot {item['id']} at {c}: not a cell of free air")
+        elif below in lv.air and below not in lv.blocks:
+            errors.append(f"loot {item['id']} at {c}: nothing under it")
+    for note in doc.get("notes", []):
+        c = cell_of(note["anchor"])
+        if c is None or not str(lv.blocks.get(c, "")).startswith("every_tunnel:note_board"):
+            errors.append(f"note {note['id']}: no note_board of the map at its anchor {note['anchor']} {c}")
+    for group in doc.get("hunters", []):
+        if group["anchor"] not in anchors:
+            errors.append(f"hunters {group['id']}: no anchor {group['anchor']}")
+    return errors
+
+
 def run(level):
     """All the checks: (errors, report lines, the route's ways as lists of cells for the preview)."""
     lv = level
     cfg = lv.layout["checks"]
-    errors = list(lv.problems)
+    errors = list(lv.problems) + placements(lv)
     report = []
     built = {gid: g[2] for gid, g in lv.gates.items()}
 

@@ -27,5 +27,32 @@
     {"zone": "zone_rising_walkways", "state": "flood_2"},
     {"zone": "zone_upper_gallery", "state": "flood_3"},
     {"zone": "zone_pumping_station", "state": "station"}
+  ],
+  "hunters": [
+    {"id": "galleries", "anchor": "hunters_post", "until": "pump_room"}
+  ],
+  "loot": [
+    {"id": "kit_battery_1", "item": "battery", "anchor": "survival_kit", "offset": [-2, 1, 2], "yaw": 180},
+    {"id": "kit_battery_2", "item": "battery", "anchor": "survival_kit", "offset": [-1, 1, 2], "yaw": 180},
+    {"id": "kit_battery_3", "item": "battery", "anchor": "survival_kit", "offset": [0, 1, 2], "yaw": 180},
+    {"id": "kit_water_1", "item": "water", "anchor": "survival_kit", "offset": [1, 1, 2], "yaw": 180},
+    {"id": "kit_water_2", "item": "water", "anchor": "survival_kit", "offset": [2, 1, 2], "yaw": 180},
+    {"id": "kit_bar_1", "item": "food_snack", "anchor": "survival_kit", "offset": [-2, 1, 3], "yaw": 180},
+    {"id": "kit_bar_2", "item": "food_snack", "anchor": "survival_kit", "offset": [-1, 1, 3], "yaw": 180},
+    {"id": "kit_bar_3", "item": "food_snack", "anchor": "survival_kit", "offset": [0, 1, 3], "yaw": 180},
+    {"id": "kit_bar_4", "item": "food_snack", "anchor": "survival_kit", "offset": [1, 1, 3], "yaw": 180},
+    {"id": "kit_wrench", "item": "wrench", "anchor": "survival_kit", "offset": [2, 1, 3], "yaw": 180},
+    {"id": "galleries_water", "item": "water", "anchor": "loot_galleries", "offset": [0, 0, 0], "yaw": 90},
+    {"id": "galleries_battery", "item": "battery", "anchor": "loot_galleries", "offset": [1, 0, 0], "yaw": 90},
+    {"id": "catacombs_water", "item": "water", "anchor": "loot_catacombs", "offset": [0, 0, 0], "yaw": 0},
+    {"id": "catacombs_bar", "item": "food_snack", "anchor": "loot_catacombs", "offset": [1, 0, 0], "yaw": 0},
+    {"id": "catacombs_battery", "item": "battery", "anchor": "loot_catacombs", "offset": [2, 0, 0], "yaw": 0},
+    {"id": "station_water", "item": "water", "anchor": "loot_station", "offset": [0, 0, 0], "yaw": 0},
+    {"id": "station_battery", "item": "battery", "anchor": "loot_station", "offset": [1, 0, 0], "yaw": 0}
+  ],
+  "notes": [
+    {"id": "old_drainage", "anchor": "note_old_drainage"},
+    {"id": "maintenance_observation", "anchor": "note_maintenance"},
+    {"id": "withdrawal_order", "anchor": "note_withdrawal"}
   ]
 }

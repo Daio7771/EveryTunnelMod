@@ -140,6 +140,7 @@ class Level:
         self.gates = {}        # gate id -> (cells, states, built)
         self.openings = {}     # opening id -> its cells
         self.lamps = []
+        self.texts = []        # {"at": cell, "text": lang key, "style": ...}: what the plan's wall_text blocks say
         self.lay_air()
         self.lay_openings()
         self.lay_features()
@@ -314,6 +315,22 @@ class Level:
     def feature_patch(self, f, s):
         for x, z in self.box_cells(f["box"]):
             self.blocks[(x, s.floor_at(x, z) - 1, z)] = f["block"]
+
+    def feature_prop(self, f, s):
+        """A block of furniture or a sign standing in a space's air: `at` [x, z], `dy` blocks over the space's floor there, the `block`;
+        `text` (a lang key) and `style` if it is a wall_text. Like a rail, it is no longer air."""
+        x, z = f["at"]
+        c = (x, s.floor_at(x, z) + f.get("dy", 0), z)
+        if c not in self.air:
+            self.problems.append(f"prop in {s.id} at {c}: no air there")
+            return
+        self.remove_air(c, s.id)
+        self.blocks[c] = f["block"]
+        if "text" in f:
+            entry = {"at": list(c), "text": f["text"], "style": f.get("style", "poster")}
+            if f.get("offset"):
+                entry["offset"] = f["offset"]
+            self.texts.append(entry)
 
     def feature_bricked(self, f, s):
         self._bricked = getattr(self, "_bricked", []) + [f]

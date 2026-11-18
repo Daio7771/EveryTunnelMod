@@ -6,10 +6,10 @@ Level 2 of Chapter 2 is the catacombs under the factory: the old catacombs the f
 down Level 1's emergency manhole, alone, and looks for a way out: the Hunters in the galleries, a creature that hunts by the floor's
 vibrations in the pump room, the Observant Guard of Chapter 1 in the lower chambers, and a flood in three stages on the way to the
 pumping station and the exit. It is built in phases (1 to 7), one at a time, on the **private** branch `chapter-2/level-2` (off
-`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 2,
-the way in, survival and the saved game.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
-bars, dying brings the player back to the last checkpoint, and the menu's Chapter 2 continues it; there are no enemies, documents or
-flood yet.
+`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 3,
+Hunters, survival kit, loot and documents.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
+bars, dying brings the player back to the last checkpoint, and the menu's Chapter 2 continues it; the first stretch has its enemies,
+resources and documents. The creature, the Guard and the flood are still to come.
 
 Its code is under `daio7771.everytunnel.chapter2.level2` (`core`, plain Kotlin, and `platform`), apart from the base game, which never
 names it (see [Architecture](architecture.md#chapters)). Its named places use Level 1's format (`level1.core.Ch2L1AnchorsParser`); its map
@@ -70,6 +70,29 @@ stamina, thirst and battery) and keeps the saved game. Ctrl+Shift+D in Chapter 2
 back; a NEW GAME of Chapter 2, or a new game of Chapter 1, forgets it too. Level 1 is still played in one go: there is nothing to continue
 until Level 2's first checkpoint.
 
+## Hunters, loot and documents
+
+**Survival kit.** At the foot of the ladder, a counter (5 x 2, `every_tunnel:counter`) under a poster sign (`every_tunnel.ch2.l2.survival_kit`,
+SURVIVAL KIT) holds 3 batteries, 2 water bottles, 4 energy bars (`food_snack`, shown as "Snack") and Level 5's wrench (one blow kills a
+Hunter). It is the plan's "Entry" loot row.
+
+**Hunters.** One group of three (Level 5's, put in by `DistortionHooks.putIn` under the level id `chapter2_level2`) stands at the anchor
+`hunters_post` in the galleries; they see, they do not hear. Starting the level (entering, a death, CONTINUE, `reset`) takes them away and
+puts them whole at their post, for a state no later than the group's `until` (`pump_room`).
+
+**Loot** (provisional table): after the Hunters (east end of the galleries, `loot_galleries`) 1 drink and 1 battery; before the Guard
+(lower galleries, `loot_catacombs`) 1 drink, 1 bar and 1 battery; the station (`loot_station`) 1 drink and 1 battery. Nothing in the
+optional crypts. What was picked up is the player's Level 2 counter `loot.<id>`, set on pick-up (`LootSpawner.addTakenListener`). Death
+keeps the pockets (base rule), so it keeps the counters; CONTINUE restores the checkpoint's counters and pockets, so what was picked up
+since lies there again.
+
+**Documents.** Three note boards (`every_tunnel:note_board`, placed by the map's `prop` feature) with the plan's approved texts:
+`old_drainage` (entry corridor), `maintenance_observation` (pump room, by the overlook door) and `withdrawal_order` (lower galleries, by
+the way to the Guard). The text lives once, in the lang sources (`tools/lang/src/chapter2/*.json`, keys `every_tunnel.ch2.l2.<id>_title`
+and `_body`); `tools/lang/langfiles.py` (`NOTES`, `write_notes`, run by `build`) writes `assets/every_tunnel/notes/<en|es>/ch2_l2_<id>.txt`
+from them. A board is read through `NoteHooks.Source`; the counter `read.<id>` remembers it. The key `every_tunnel.ch2.l2.boo` is there
+for phase 5.
+
 ## The map
 
 The level is **data**: `tools/map/ch2l2/layout.json` holds everything it is made of, and `tools/map/ch2l2/generate.py` turns it into what
@@ -103,7 +126,7 @@ from two heights: from the galleries' balcony (M) and from the station's broken 
 | `spaces` | Each space: its boxes, floor (a height or a number), air's height, style, lamps (`ceiling`; `cable`, work bulbs hung from a cable along the vault; `wall`, lamps on the walls over each standing surface; the `lamp_gaps` leave some bulbs out, flickering or dead, by seed, but never near an anchor); a `ramp` makes a flight of stairs of a whole space (the stairs down from the entry, the gallery up to the station) |
 | `links` | Spaces whose air simply meets (a balcony over the shaft, the stairs and the corridors) |
 | `openings` | Passages through a wall one block thick: arches, a window of bars, and the **gate** (`vestibule_gate`) with a block for each of its states |
-| `features` | What stands in a space: partitions and pillars, solid blocks (the overlook, the walkway along the collector, the pump's housing), flights of stairs, decks (catwalks, the broken bridge), channels with water, still water, rails, ladders, floor patches (the four traps), bricked arches |
+| `features` | What stands in a space: partitions and pillars, solid blocks (the overlook, the walkway along the collector, the pump's housing), flights of stairs, decks (catwalks, the broken bridge), channels with water, still water, rails, ladders, floor patches (the four traps), bricked arches, and `prop`: one block of furniture, sign or note board standing in a space's air (`space`, `at` [x, z], `dy`, `block`; with `text` and `style` for a wall_text sign, which the plan's `texts` carries) |
 | `anchors`, `zones` | The named places and the boxes the level's systems will watch (see below) |
 | `route` | The way through the level, in order, from `sealed_entry` to `level_exit` |
 | `checks` | What the checks hold the level to |
@@ -127,6 +150,7 @@ preview is what the game builds. No vanilla block the world's pack re-skins as C
   parapet, for one, would leave a fall into the shaft with no way out);
 - **the pump room** needs several cycles of the pump: its shortest way across, swimming included, is at least `min` blocks (56 now:
   the floor is cut by two channels five wide, too wide for a sprinting jump, and their ladders are only by the crossings);
+- **placements**: loot stands in free air over something solid, each note anchor is on a note board, and each Hunters anchor exists;
 - the openings are clear: two blocks of air through them and room to stand on both sides;
 - **the water stays put**: still water and each flood stage touch nothing that water flows into (air, bars, slabs...) outside their own
   spaces, with the gates as the stage says;
@@ -153,6 +177,8 @@ after each stage).
 | `upper_gallery` | The stairs up to the station | M to H |
 | `pumping_station` | The station, dry; a broken bridge seen through bars over the shaft | H |
 | `level_exit` | The exit room, past a quiet corridor | H |
+| `survival_kit`, `hunters_post`, `loot_galleries`, `loot_catacombs`, `loot_station` | Phase 3's: the kit's counter, the Hunters' post and the three loot spots, in the spaces above | H, M, L |
+| `note_old_drainage`, `note_maintenance`, `note_withdrawal` | A note board's own cell (`kind: wall`: not a place to stand) | H, M, L |
 
 Most rooms of the drawing are sealed crypts, their arches bricked up by the factory; two are open, short side rooms for later phases'
 resources and documents (a crypt off the galleries and one off the service corridor before the vestibule).
@@ -177,6 +203,9 @@ anchors, and what is wrong is reported (`/et reload`).
 | `lights` | Each zone's lamps: `on`, `flicker` or `off`, set whenever the level is started (arriving, CONTINUE, `reset`). Empty: the plan's own lamps (with their gaps) stand as built; a zone listed here would turn all its lamps `on`/`flicker`/`off` |
 | `checkpoints` | In the way's order: `id`, `anchor` (where a death and CONTINUE bring the player back), `zone` (walked into, it is taken), `before` (the encounter it comes before, for `reset`) |
 | `progress` | `zone` and `state`: walking into the zone moves the player on to the state |
+| `hunters` | `id`, `anchor`, optional `yaw`, optional `until` (a state; default `pump_room`): a group of Hunters put at the anchor |
+| `loot` | `id`, `item` (a key of `LootSpawner.LOOT`: `battery`, `water`, `food_snack`, `wrench`...), `anchor`, `offset` [dx, dy, dz] blocks from the anchor's block, `yaw` |
+| `notes` | `id`, `anchor` (the board's); the text is `ch2_l2_<id>` |
 
 ## Debug commands
 
@@ -191,7 +220,9 @@ anchors, and what is wrong is reported (`/et reload`).
 | `/et ch2 l2 skip [<event>]` | On to the next state, or past an encounter (`hunters`, `creature`, `guard`, `flood`) as if lived |
 | `/et ch2 l2 reset <event>` | An encounter to live again: the state before it, you at the checkpoint before it (taken), the level started there |
 | `/et ch2 l2 build` | Builds the catacombs again over what is there (a new plan is built by itself when `goto` needs it) |
-| `/et ch2 l2 unbuild` | Empties the whole area (before packing the world into a jar); whoever stands in it falls |
+| `/et ch2 l2 hunters` | The level's Hunters back whole at their posts, whatever your state |
+| `/et ch2 l2 loot` | All the loot as if none were taken: your counters forgotten, your pockets stay |
+| `/et ch2 l2 unbuild` | Empties the whole area (before packing the world into a jar), the Hunters too; whoever stands in it falls |
 | `/et ch2 l2 anchors` | Every anchor and zone with its coordinates, the provisional ones marked |
 | `/et ch2 l2 goto <anchor>` | Builds the level if it is not, then takes you to a place (`sealed_entry` ... `level_exit`, `trap_1`...) or to the middle of a zone (`zone_<place>`) |
 | `/et reload` | Reads Level 1's and Level 2's data again and says what is wrong |
@@ -201,7 +232,8 @@ anchors, and what is wrong is reported (`/et reload`).
 `MapPlanTest` (the plan format: one block, mixes picked as the generator picks them, gates, the fingerprint) and `Ch2PlayerProgressTest`
 (Level 2's state, counters and saved game, apart from Level 1's) in `chapter2/core`; `Ch2L2MapPlanTest` (the jar's plan: its origin,
 every fill inside the cleared box and no cell set twice, every block known and none re-skinned by the world's pack but the drain's, the
-anchors and zones of the route, every place to stand standing, the gate open as built, the lamps) and `Ch2L2LevelTest` (the states and
+anchors and zones of the route, every place to stand standing, the gate open as built, the lamps, a note's anchor being its board) and `Ch2L2LevelTest` (the states and
 encounters; the jar's `level.json` without a problem; the checkpoints in the route's order, each in its own zone, one before every
 encounter; walking the route moves the state only on, and each checkpoint replays its encounter; a broken override falls back) in
-`chapter2/level2/core`; `DeathCauseTest` (a later chapter's level says itself whether it is quiet).
+`chapter2/level2/core`; `Ch2L2PlacementsTest` (the jar's Hunters, kit, loot table and notes; the parser's handling of bad input) in the same place;
+`DeathCauseTest` (a later chapter's level says itself whether it is quiet).

@@ -4618,8 +4618,9 @@ def build():
                     v["y"] = rot[facing]
                 stairs[f"facing={facing},half={half},shape={shape}"] = v
     a.block("catacomb_brick_stairs", "Catacomb Brick Stairs", {"variants": stairs}, {"parent": f"{NS}:block/catacomb_brick_stairs"})
-    a.models["catacomb_brick_slab"] = {"parent": "minecraft:block/slab", "textures": tx}
-    a.models["catacomb_brick_slab_top"] = {"parent": "minecraft:block/slab_top", "textures": tx}
+    tx_ns = {k: f"{NS}:block/{v}" for k, v in tx.items()}
+    a.models["catacomb_brick_slab"] = {"parent": "minecraft:block/slab", "textures": tx_ns}
+    a.models["catacomb_brick_slab_top"] = {"parent": "minecraft:block/slab_top", "textures": tx_ns}
     a.block("catacomb_brick_slab", "Catacomb Brick Slab",
             {"variants": {"type=bottom": {"model": f"{NS}:block/catacomb_brick_slab"}, "type=top": {"model": f"{NS}:block/catacomb_brick_slab_top"},
                           "type=double": {"model": f"{NS}:block/catacomb_brick"}}},

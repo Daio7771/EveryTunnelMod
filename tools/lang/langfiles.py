@@ -15,6 +15,10 @@ in the part's file and then:
     python3 tools/lang/build.py
 
 Never edit `assets/every_tunnel/lang/*.json` by hand: `LangFilesTest` checks they are the merge of the sources.
+
+The notes read in game (`assets/every_tunnel/notes/<en|es>/<id>.txt`) that are documents of a chapter are written from the lang
+sources too, so a text lives in one place: [NOTES] names each note's id and the lang key it starts with (`<key>_title` then
+`<key>_body`); [build] writes them (the title, a blank line, the body).
 """
 
 import json
@@ -65,10 +69,29 @@ def merged(locale):
     return out
 
 
+NOTES_DIR = ROOT / "src" / "main" / "resources" / "assets" / "every_tunnel" / "notes"
+NOTES = {
+    "ch2_l2_old_drainage": "every_tunnel.ch2.l2.old_drainage",
+    "ch2_l2_maintenance_observation": "every_tunnel.ch2.l2.maintenance_observation",
+    "ch2_l2_withdrawal_order": "every_tunnel.ch2.l2.withdrawal_order",
+}
+
+
+def write_notes():
+    """The notes that come from the lang sources ([NOTES]), one file per language (`en`, `es`)."""
+    for locale, folder in (("en_us", "en"), ("es_es", "es")):
+        texts = merged(locale)
+        (NOTES_DIR / folder).mkdir(parents=True, exist_ok=True)
+        for note, key in NOTES.items():
+            title, body = texts[key + "_title"], texts[key + "_body"]
+            (NOTES_DIR / folder / f"{note}.txt").write_text(f"{title}\n\n{body}\n", encoding="utf-8")
+
+
 def build():
     for locale in LOCALES:
         (LANG / f"{locale}.json").write_text(_dump(locale, merged(locale)), encoding="utf-8")
     spanish_variants.main()
+    write_notes()
 
 
 def update(part, locale, entries, drop_prefix=None):

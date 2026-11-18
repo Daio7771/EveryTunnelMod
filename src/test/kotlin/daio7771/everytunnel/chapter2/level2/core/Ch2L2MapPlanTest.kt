@@ -83,13 +83,17 @@ class Ch2L2MapPlanTest {
     }
 
     @Test
-    fun `every place to stand is air with a floor under it, and the wall where the Guard comes out is a wall`() {
+    fun `every place to stand is air with a floor under it, the wall where the Guard comes out is a wall, and a note's anchor is its board`() {
         for (point in data.anchors.points) {
             val x = floor(point.position.x).toInt() - plan.origin.x
             val y = floor(point.position.y).toInt() - plan.origin.y
             val z = floor(point.position.z).toInt() - plan.origin.z
             if (point.id.endsWith("_face")) {
                 assertTrue(Cell(x, y, z - 1) in cells, "${point.id}: no wall behind it")
+                continue
+            }
+            if (point.id.startsWith("note_")) {
+                assertTrue(Cell(x, y, z) in cells, "${point.id}: no board at ${point.position}")      // the board's own cell, not a place to stand
                 continue
             }
             assertTrue(Cell(x, y, z) !in cells && Cell(x, y + 1, z) !in cells, "${point.id}: no room to stand at ${point.position}")

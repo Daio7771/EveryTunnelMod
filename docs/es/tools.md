@@ -148,7 +148,8 @@ Los archivos de idioma del juego (`assets/every_tunnel/lang/*.json`) se generan,
 copia `es_es` a `es_ar`, `es_cl`, `es_ec`, `es_mx`, `es_uy` y `es_ve`, porque Minecraft no pasa de un idioma en español a otro.
 Los textos escritos a mano van en el archivo de una parte, y luego `build.py`; las herramientas que escriben nombres y
 subtítulos (`langfiles.update`) escriben en la parte de su capítulo y reconstruyen. `LangFilesTest` falla si los archivos del
-juego no son la unión.
+juego no son la unión. `langfiles.write_notes` (que ejecuta `build.py`) escribe también las notas del juego que salen de las fuentes de idioma
+(`NOTES`: las tres del Nivel 2 del Capítulo 2) como `assets/every_tunnel/notes/<en|es>/<id>.txt`, así su texto vive una sola vez.
 
 ## Bloques
 

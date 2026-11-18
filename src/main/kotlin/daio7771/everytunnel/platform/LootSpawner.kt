@@ -26,6 +26,9 @@ import net.minecraft.world.PersistentState
  * Each spot is filled once per world: the world remembers it
  * (`data/every_tunnel_loot.dat`), so what was picked up stays picked up, also after
  * dying or reopening the world. A new game ([restock]) puts everything back.
+ *
+ * A chapter's own level (not a [LevelDefinition]) lays its loot blocks itself, with [LOOT]'s blocks, and hears each pick-up
+ * through [addTakenListener] (the world's memory above is for the base levels only).
  */
 object LootSpawner {
 
@@ -90,6 +93,22 @@ object LootSpawner {
             state.markDirty()
         }
         if (count > 0) EveryTunnel.LOGGER.info("Loot placed in {}: {}", level.id, count)
+    }
+
+    /** Told when [player] picks up the loot block that stood at [pos] (any level): the [item] it gave. */
+    fun interface TakenListener {
+        fun taken(player: net.minecraft.server.network.ServerPlayerEntity, pos: BlockPos, item: net.minecraft.item.Item)
+    }
+
+    private val takenListeners = java.util.concurrent.CopyOnWriteArrayList<TakenListener>()
+
+    fun addTakenListener(listener: TakenListener) {
+        takenListeners += listener
+    }
+
+    /** [player] picked up the loot block at [pos] ([LootBlock]): the listeners hear of it. */
+    fun pickedUp(player: net.minecraft.server.network.ServerPlayerEntity, pos: BlockPos, item: net.minecraft.item.Item) {
+        for (listener in takenListeners) listener.taken(player, pos, item)
     }
 
     /** The loot block at [pos] was picked up. */
