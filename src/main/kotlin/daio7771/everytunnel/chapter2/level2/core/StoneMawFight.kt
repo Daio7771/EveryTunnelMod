@@ -21,8 +21,9 @@ import kotlin.random.Random
  *   `contact_range` on the way is struck by phase 4's blow, for its `damage_fraction`, at most once every `hit_interval_seconds`; the
  *   ram goes on. The wall (or the time) stuns it: [Mode.STUNNED] for `stun_seconds`, still; a hit during the stun counts (and ends it:
  *   it comes for the player again). Afterwards it is handed back to the brain, searching round where it stands.
- * - **The last hit** ([Mode.WALK_TO_CENTRE]): it walks to the centre of the arena (at `death.walk_speed`, at most `death.walk_seconds`),
- *   [Mode.CROUCH]es for `death.crouch_seconds`, and then [Decision.collapse] is true once: the platform drops the ceiling on it.
+ * - **The last hit** ([Mode.WALK_TO_CENTRE]): it limps to the centre of the arena (at `death.walk_speed`, at most `death.walk_seconds`),
+ *   [Mode.CROUCH]es (kneels) for `death.crouch_seconds`, and then [Decision.collapse] is true once (the platform's death scene, on the clock of
+ *   `MawDeathScene`, brings the ceiling down on it).
  *   [Mode.DEAD] after: it decides nothing.
  *
  * A miss is not this class's business: the platform feeds the clang to the brain as a loud pipe vibration. Plain Kotlin, unit tested;

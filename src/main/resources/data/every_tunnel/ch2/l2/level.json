@@ -144,8 +144,9 @@
     "gates": {"entry": "maw_entry", "mouth": "maw_pipe_mouth", "far": "maw_far", "mouth_anchor": "maw_mouth", "entry_anchor": "maw_entry_door", "far_anchor": "maw_far_door"},
     "exit_door": {"gate": "exit_hatch", "zone": "zone_exit_door", "anchor": "exit_hatch"},
     "death": {
-      "walk_speed": 2.2, "walk_seconds": 4.5, "crouch_seconds": 3.0, "collapse_seconds": 3.6, "after_seconds": 2.0,
-      "collapse_radius": 4, "collapse_columns": 40, "collapse_spread_ticks": 30,
+      "walk_speed": 1.6, "walk_seconds": 6.0, "crouch_seconds": 3.5, "collapse_seconds": 3.6, "after_seconds": 2.0,
+      "collapse_radius": 4, "bit_count": 6, "first_slab_delay_ticks": 12, "slab_count": 5, "slab_spread_ticks": 20,
+      "slab_start_speed": 0.35, "crush_height": 2.0, "max_height": 3,
       "collapse_blocks": ["every_tunnel:catacomb_brick_cracked", "every_tunnel:catacomb_brick", "every_tunnel:catacomb_brick_damp"]
     }
   },

@@ -178,9 +178,15 @@ stub Stone Maw comes out of, grated by the gate `maw_pipe_mouth`) and `reunion` 
   One piece at a time (`pipes.at_once`): `pipes.respawn_seconds` after one is gone another falls from one of `pipes.points` (never the one nearest the
   creature or the player, nor twice the same). The jump is blocked in the arena while the fight lasts: `platform.MovementRules` (a base hook) read by
   `LivingEntityJumpMixin`, a rule of `Ch2L2Maw` on the server and `JUMP_PACKET` for the client.
-- **The death**: the last hit has it walk to `maw_centre`, crouch, and the ceiling comes down on it (falling blocks of `death.collapse_blocks`, a mix, from the middle out over `collapse_spread_ticks`, dust,
-  shake; it sinks to the floor looking down, then flinches under the rubble: animations `dying`, `crushed`) while a third-person cinematic (`Ch2L2GuardScenes.MAW_DEATH`, skippable) plays on `MawDeathScene`'s clock. `Ch2L2Maw.finishDeath` is the one
-  idempotent end (the scene's end, its skip, `skip maw`): rubble in place, far door open, `MAW_DEAD`.
+- **The death** (phase 6.2): the last hit has it limp to `maw_centre` (animation `limp`: a dragged leg, an arm hanging with its knuckles near the floor),
+  kneel facing the far wall with both hands flat on the floor and its head bowed (`dying`), and the ceiling comes down: first `death.bit_count` small bits, then big slabs
+  (`core.MawCollapse`, `plan` from a fixed seed): the first, 3 x 3, falls `first_slab_delay_ticks` later at `slab_start_speed` blocks a tick, lands on it at `crush_height`
+  and slams it flat (`crushed`; the burst of dust hides it and it is gone), then `slab_count` - 1 more over `slab_spread_ticks`, leaving a mound of at most `max_height`
+  (`collapse_blocks` is the mix, within `collapse_radius`). Dust, shake (hardest at the first slab) and the cinematic (`Ch2L2GuardScenes.MAW_DEATH`, skippable) follow `MawDeathScene`'s clock;
+  `walk_speed`, `walk_seconds`, `crouch_seconds`, `collapse_seconds` and `after_seconds` time the rest. `Ch2L2Maw.finishDeath` is the one
+  idempotent end (the scene's end, its skip, `skip maw`): the plan's mound in place (the same a live fall leaves), far door open, `MAW_DEAD`.
+- **The fight's music** (phase 6.2): the Observant Guard's hunt music, recycled (`music.ch2l2.guard_chase`, 256 ticks, seamless), played from the arena's door shutting, again every 256 ticks by `Ch2L2Maw.music` (twice at once, the second at half volume, like the Guard's);
+  the killing hit cuts it dry, so the death scene has only the stone's sound.
 - **The reunion** (`Ch2L2Reunion`, `reunion` in `level.json`, `ReunionScene` in `core`): at the middle of the room (the `reunion` checkpoint stands
   there) the state goes to `REUNION`, the coworker and worker B (`FactoryNpcEntity`) stand at their anchors and a first-person cinematic turns the
   player's eyes to whoever speaks (`reunion.lines`: who, lang key under `reunion.text`, optional sound, seconds). The NPCs talk with their hands,

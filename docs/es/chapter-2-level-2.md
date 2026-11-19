@@ -185,10 +185,15 @@ con la puerta cerrada del Nivel 3 en el muro del fondo). Las compuertas `maw_ent
   `pipes.respawn_seconds` después de que uno desaparezca cae otro de uno de `pipes.points` (nunca el más cercano a la criatura o al jugador, ni el
   mismo dos veces). El salto está bloqueado en la arena mientras dura la pelea: `platform.MovementRules` (un gancho del juego base) que lee
   `LivingEntityJumpMixin`, una regla de `Ch2L2Maw` en el servidor y `JUMP_PACKET` para el cliente.
-- **La muerte**: el último golpe la hace caminar a `maw_centre`, agacharse, y el techo le cae encima (bloques de `death.collapse_blocks`, una mezcla, del centro hacia fuera durante `collapse_spread_ticks`, polvo,
-  temblor; se hunde hasta el suelo mirando abajo y se encoge bajo los escombros: animaciones `dying` y `crushed`) mientras una cinemática en tercera persona (`Ch2L2GuardScenes.MAW_DEATH`, saltable) corre en el reloj de `MawDeathScene`.
-  `Ch2L2Maw.finishDeath` es el final único e idempotente (fin de la escena, su salto, `skip maw`): escombros en su sitio, puerta del fondo
-  abierta, `MAW_DEAD`.
+- **La muerte** (fase 6.2): el último golpe la hace cojear hasta `maw_centre` (animación `limp`: una pierna arrastrada, un brazo colgando con los nudillos casi en el suelo),
+  arrodillarse mirando a la pared del fondo con las dos manos planas en el suelo y la cabeza gacha (`dying`), y el techo cae: primero `death.bit_count` trocitos y luego grandes losas
+  (`core.MawCollapse`, `plan` con una semilla fija): la primera, de 3 x 3, cae `first_slab_delay_ticks` después a `slab_start_speed` bloques por tick, le cae encima a `crush_height`
+  y la aplasta contra el suelo (`crushed`; la ráfaga de polvo la oculta y desaparece), luego `slab_count` - 1 más durante `slab_spread_ticks`, y queda un montículo de como mucho `max_height`
+  (`collapse_blocks` es la mezcla, dentro de `collapse_radius`). Polvo, temblor (el más fuerte con la primera losa) y la cinemática (`Ch2L2GuardScenes.MAW_DEATH`, saltable) siguen el reloj de `MawDeathScene`;
+  `walk_speed`, `walk_seconds`, `crouch_seconds`, `collapse_seconds` y `after_seconds` marcan el resto de tiempos. `Ch2L2Maw.finishDeath` es el final único e idempotente
+  (fin de la escena, su salto, `skip maw`): el montículo del plan en su sitio (el mismo que deja la caída en vivo), puerta del fondo abierta, `MAW_DEAD`.
+- **La música de la pelea** (fase 6.2): la música de caza del Guardia Observador, reciclada (`music.ch2l2.guard_chase`, 256 ticks, sin costuras), desde que se cierra la puerta de la arena, repetida cada 256 ticks por `Ch2L2Maw.music` (dos veces a la vez, la segunda a medio volumen, como la del Guardia);
+  el golpe mortal la corta en seco, así que la escena de la muerte solo tiene el sonido de la piedra.
 - **El reencuentro** (`Ch2L2Reunion`, `reunion` en `level.json`, `ReunionScene` en `core`): en el centro de la sala (ahí está el checkpoint
   `reunion`) el estado pasa a `REUNION`, el compañero y el trabajador B (`FactoryNpcEntity`) están en sus anclas y una cinemática en primera
   persona gira los ojos del jugador hacia quien habla (`reunion.lines`: quién, clave de lang bajo `reunion.text`, sonido opcional, segundos). Los

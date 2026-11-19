@@ -4,6 +4,7 @@ import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Flood
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Maw as MawRules
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
+import daio7771.everytunnel.chapter2.level2.core.MawCollapse
 import daio7771.everytunnel.chapter2.level2.core.MawDeathScene
 import daio7771.everytunnel.chapter2.level2.core.PipeSupply
 import daio7771.everytunnel.chapter2.level2.core.StoneMawFight
@@ -27,7 +28,10 @@ import net.minecraft.entity.ItemEntity
 import net.minecraft.item.ItemStack
 import net.minecraft.particle.BlockStateParticleEffect
 import net.minecraft.particle.ParticleTypes
+import net.minecraft.network.packet.s2c.play.PlaySoundFromEntityS2CPacket
+import net.minecraft.network.packet.s2c.play.StopSoundS2CPacket
 import net.minecraft.registry.Registries
+import net.minecraft.registry.entry.RegistryEntry
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
 import net.minecraft.server.MinecraftServer
@@ -57,9 +61,14 @@ import kotlin.random.Random
  *   and thrown with a right click ([PipePieceItem], [ThrownPipeEntity]): a hit on the creature is [pieceHit], anything else
  *   [pieceBroke] (a clang the creature goes to). The jump is blocked in the arena while it lasts ([MovementRules]: the server's rule
  *   here, the client's by [JUMP_PACKET]).
- * - **The death**: the last hit has it walk to the centre and crouch while a short cinematic ([Ch2L2GuardScenes.MAW_DEATH]) runs on the
- *   clock of [MawDeathScene]; the ceiling comes down on it ([collapse]), then [finishDeath] (one idempotent end, also what a skip runs):
- *   the creature gone, the rubble where it stood, the far door open, the state [Ch2L2State.MAW_DEAD].
+ * - **The death** (phase 6.2): the last hit has it limp to the centre ([VibrationCreatureEntity.POSE_LIMP]) and kneel with its hands flat
+ *   on the floor ([VibrationCreatureEntity.POSE_DYING], facing the far wall) while a short cinematic ([Ch2L2GuardScenes.MAW_DEATH]) runs on
+ *   the clock of [MawDeathScene]; the ceiling comes down on it ([collapse] spawns the pieces of [MawCollapse]'s plan as falling blocks:
+ *   small bits, then big slabs, the first of which crushes it at `impactAt`: [crush], then the creature is gone under the burst), then
+ *   [finishDeath] (one idempotent end, also what a skip runs): the creature gone, the mound of the plan left where it stood, the far door
+ *   open, the state [Ch2L2State.MAW_DEAD].
+ * - **The music** (phase 6.2): the Observant Guard's hunt music, recycled (`music.ch2l2.guard_chase`, 256 ticks, seamless), played again every
+ *   [CHASE_MUSIC_TICKS] from the arena's door shutting until the killing hit, which cuts it dry (the death scene has only the stone's sound).
  * - **Starts** ([Ch2L2.onStart]: entering, a death, CONTINUE, `reset`): everything put as the state wants it (fight over and reset,
  *   the gates, the rubble, the pieces gone from the pockets).
  *
@@ -83,10 +92,10 @@ object Ch2L2Maw {
     private var enteringSince = 0L
     private var deathStart = 0L
     private var collapsed = false
-    private var buried = false
     private var lastMode = StoneMawFight.Mode.BRAIN
     private var exitOpenAt: Long? = null
     private var burstAt: Long? = null
+    private var musicStart: Long? = null
 
     /** The pieces that are falling, by entity id (their landing is a clang). */
     private val falling = HashSet<UUID>()
@@ -157,6 +166,7 @@ object Ch2L2Maw {
         }
         clangs.removeAll { now - it.tick > CLANG_TICKS }
         if (phase == Phase.FIGHT) supplyTick(world, now)
+        if (phase == Phase.FIGHT) music(world, now)
         if (phase == Phase.DYING) dying(server, world, now)
     }
 
@@ -180,10 +190,10 @@ object Ch2L2Maw {
         fighter = player.uuid
         lastMode = StoneMawFight.Mode.BRAIN
         collapsed = false
-        buried = false
         Ch2L2Build.setGate(world, rules.entryGate, "shut")
         data.anchors.point(rules.entryAnchor)?.position?.let { world.playSound(null, it.x, it.y, it.z, Ch2Sounds.CH2L2_FLOOD_GATE_SLAM, SoundCategory.BLOCKS, 1.5f, 1.0f) }
         burstAt = now + BURST_DELAY_TICKS
+        musicStart = now
         firstPiece(world, player)
         EveryTunnel.LOGGER.info("Chapter 2 Level 2: {} enters the arena: the fight begins", player.gameProfile.name)
     }
@@ -242,7 +252,7 @@ object Ch2L2Maw {
             lastMode = d.mode
         }
         e.fightPose(d.state)
-        if (phase == Phase.DYING && !crushed && (d.mode == StoneMawFight.Mode.CROUCH || d.mode == StoneMawFight.Mode.DEAD)) e.fightDeathPose(VibrationCreatureEntity.POSE_DYING)
+        if (phase == Phase.DYING && !crushed) deathPose(e, d.mode)
         when {
             d.straight -> e.fightRam(d.heading!!, d.speed)
             d.target == null || d.speed <= 0.0 -> {
@@ -260,6 +270,18 @@ object Ch2L2Maw {
         if (d.rammed) rammed(world, e)
         if (d.mode == StoneMawFight.Mode.STUNNED && e.age % STUN_SOUND_TICKS == 0) e.fightSound(Ch2Sounds.CH2L2_MAW_STUNNED, 0.9f)
         if (d.mode == StoneMawFight.Mode.WALK_TO_CENTRE && phase == Phase.FIGHT) beginDeath(world, now)
+    }
+
+    /** The wounded walk, then the kneel facing the far wall (the way the scene's camera frame looks), so that the side shots see it in profile. */
+    private fun deathPose(e: VibrationCreatureEntity, mode: StoneMawFight.Mode) {
+        when (mode) {
+            StoneMawFight.Mode.WALK_TO_CENTRE -> e.fightDeathPose(VibrationCreatureEntity.POSE_LIMP)
+            StoneMawFight.Mode.CROUCH, StoneMawFight.Mode.DEAD -> {
+                e.fightDeathPose(VibrationCreatureEntity.POSE_DYING)
+                data.anchors.point(rules.centre)?.let { e.fightTurn(it.yaw.toFloat()) }
+            }
+            else -> Unit
+        }
     }
 
     private fun rammed(world: ServerWorld, e: VibrationCreatureEntity) {
@@ -369,6 +391,29 @@ object Ch2L2Maw {
         player.sendMessage(Text.translatable("every_tunnel.ch2.l2.maw.hint_throw"), true)
     }
 
+    // --- the music ------------------------------------------------------------------------------------
+
+    /**
+     * The hunt's music (the Guard's: `music.ch2l2.guard_chase`) is played to the fighter every [CHASE_MUSIC_TICKS] from the fight's start. The game
+     * caps a sound's volume at 1, so it is played a second time at half volume at the same moment: about 3.5 dB more (as the Guard's is).
+     */
+    private fun music(world: ServerWorld, now: Long) {
+        val start = musicStart ?: return
+        if ((now - start) % CHASE_MUSIC_TICKS != 0L) return
+        val player = fighter?.let { world.getPlayerByUuid(it) as? ServerPlayerEntity } ?: return
+        val entry = RegistryEntry.of(SoundEvent.of(CHASE_MUSIC))
+        val seed = world.random.nextLong()
+        player.networkHandler.sendPacket(PlaySoundFromEntityS2CPacket(entry, SoundCategory.MUSIC, player, 1.0f, 1.0f, seed))
+        player.networkHandler.sendPacket(PlaySoundFromEntityS2CPacket(entry, SoundCategory.MUSIC, player, 0.5f, 1.0f, seed))
+    }
+
+    /** The music cut, for everybody. */
+    private fun stopMusic(server: MinecraftServer) {
+        if (musicStart == null) return
+        musicStart = null
+        for (player in server.playerManager.playerList) player.networkHandler.sendPacket(StopSoundS2CPacket(CHASE_MUSIC, SoundCategory.MUSIC))
+    }
+
     // --- the jump -------------------------------------------------------------------------------------
 
     private fun tellJump(player: ServerPlayerEntity) {
@@ -386,11 +431,12 @@ object Ch2L2Maw {
 
     private fun beginDeath(world: ServerWorld, now: Long) {
         phase = Phase.DYING
+        stopMusic(world.server)
         deathStart = now
         collapsed = false
-        buried = false
         crushed = false
         crackSound = false
+        smashAt = null
         coming.clear()
         takePieces(world)
         val player = fighter?.let { world.getPlayerByUuid(it) as? ServerPlayerEntity }
@@ -402,31 +448,31 @@ object Ch2L2Maw {
         EveryTunnel.LOGGER.info("Stone Maw takes its last hit: the death scene begins")
     }
 
-    /** One block of the collapse still to fall: at server tick [at], from [pos] (a ceiling cell), landing about [LAND_TICKS] later. */
-    private class Rubble(val at: Long, val pos: BlockPos, val state: net.minecraft.block.BlockState, var fell: Boolean = false)
+    /** One piece of [MawCollapse]'s plan still to fall: it starts at server tick [at] and reaches the stone at [lands]. */
+    private class Fall(val at: Long, val lands: Long, val piece: MawCollapse.Piece, var fell: Boolean = false)
 
-    private val coming = ArrayList<Rubble>()
+    private val coming = ArrayList<Fall>()
     private var crackSound = false
     private var crushed = false
+    private var smashAt: Long? = null
 
     private fun dying(server: MinecraftServer, world: ServerWorld, now: Long) {
         val phases = MawDeathScene.phases(rules)
         val t = (now - deathStart).toInt()
-        // The stone speaks first: its cracking and groaning begin while it is still sinking, so that the crash lands as the first blocks fall.
-        if (!crackSound && t >= phases.collapseAt - SOUND_LEAD_TICKS) {
+        // The stone speaks first: its cracking and groaning begin while the bits fall and the blow lands as the first slab hits it.
+        if (!crackSound && t >= phases.impactAt - SOUND_LEAD_TICKS) {
             crackSound = true
             position(rules.centre)?.let { world.playSound(null, it.x, it.y + 2.0, it.z, Ch2Sounds.CH2L2_MAW_COLLAPSE, SoundCategory.BLOCKS, 2.0f, 1.0f) }
         }
         if (t >= phases.crouchAt && t < phases.collapseAt && t % CRACK_EVERY_TICKS == 0) crackDust(world, t - phases.crouchAt, phases.collapseAt - phases.crouchAt)
         if (!collapsed && t >= phases.collapseAt) collapse(world, now)
         if (collapsed) fall(world, now)
-        if (collapsed && !crushed && t >= phases.collapseAt + FLINCH_AFTER_TICKS) {
-            crushed = true
-            creatures(world).forEach { it.fightDeathPose(VibrationCreatureEntity.POSE_CRUSHED) }
-        }
-        if (collapsed && !buried && t >= phases.collapseAt + rules.collapseSpreadTicks + LAND_TICKS + BURY_AFTER_TICKS) {
-            buried = true
-            creatures(world).forEach { it.discard() }
+        if (collapsed && !crushed && t >= phases.impactAt) crush(world, now)
+        smashAt?.let { at ->
+            if (now >= at) {
+                smashAt = null
+                smash(world)
+            }
         }
         if (t >= phases.settledAt) finishDeath(server)
     }
@@ -444,49 +490,68 @@ object Ch2L2Maw {
         }
     }
 
-    /**
-     * The ceiling comes down, not all at once: the columns start from the middle (where the crack is) and spread out over
-     * `death.collapse_spread_ticks`, each of one or two blocks of a mix, and each lands in a puff of dust ([fall]).
-     */
+    /** The ceiling comes down as [MawCollapse]'s plan says: its pieces start at their delays ([fall]), and the creature is crushed by the first slab ([crush]). */
     private fun collapse(world: ServerWorld, now: Long) {
         collapsed = true
         val c = position(rules.centre) ?: return
-        val blocks = rubbleBlocks()
-        val top = BlockPos.ofFloored(c.x, c.y + CEILING_OFFSET - 1, c.z)
-        val random = Random(RUBBLE_SEED + 1)
-        val spread = rules.collapseSpreadTicks
-        for ((dx, dz) in rubbleColumns()) {
-            val reach = Math.hypot(dx.toDouble(), dz.toDouble()) / rules.collapseRadius.coerceAtLeast(1)
-            val delay = (reach * spread * 0.7 + random.nextInt((spread * 0.3).toInt().coerceAtLeast(1))).toLong()
-            coming += Rubble(now + delay, top.add(dx, 0, dz), blocks[random.nextInt(blocks.size)])
-            if (random.nextInt(3) == 0) coming += Rubble(now + delay + 3 + random.nextInt(4), top.add(dx, 0, dz), blocks[random.nextInt(blocks.size)])
-        }
+        val plan = MawCollapse.plan(rules, MawDeathScene.COLLAPSE_SEED)
+        val landings = MawCollapse.landings(plan, rules.slabStartSpeed)
+        for ((i, piece) in plan.withIndex()) coming += Fall(now + piece.delayTicks, now + landings[i], piece)
         world.spawnParticles(BlockStateParticleEffect(ParticleTypes.BLOCK, Blocks.GRAY_CONCRETE.defaultState), c.x, c.y + CEILING_OFFSET - 0.5, c.z, 80, 2.0, 0.3, 2.0, 0.15)
-        EveryTunnel.LOGGER.info("Stone Maw: the ceiling comes down ({} blocks over {} ticks)", coming.size, spread)
+        EveryTunnel.LOGGER.info("Stone Maw: the ceiling comes down ({} pieces, {} of them slabs)", plan.size, plan.count { it.kind == MawCollapse.Kind.SLAB })
     }
 
     private fun fall(world: ServerWorld, now: Long) {
-        val land = ArrayList<Rubble>()
-        for (r in coming) {
-            if (!r.fell && now >= r.at) {
-                r.fell = true
-                if (world.getBlockState(r.pos).isAir) {
-                    val block = FallingBlockEntity.spawnFromBlock(world, r.pos, r.state)
-                    block.dropItem = false
-                    block.setHurtEntities(0f, 0)
-                    world.spawnParticles(BlockStateParticleEffect(ParticleTypes.FALLING_DUST, Blocks.GRAY_CONCRETE_POWDER.defaultState), r.pos.x + 0.5, r.pos.y + 0.5, r.pos.z + 0.5, 6, 0.3, 0.2, 0.3, 0.0)
-                }
+        val c = position(rules.centre) ?: return
+        val blocks = rubbleBlocks()
+        val top = BlockPos.ofFloored(c.x, c.y + MawCollapse.TOP_CELL, c.z)
+        for (f in coming) {
+            if (f.fell || now < f.at) continue
+            f.fell = true
+            // A slab falls as one piece: all its blocks leave the ceiling in this tick, thrown downwards.
+            for ((dx, dz) in f.piece.cells) {
+                val pos = top.add(dx, 0, dz)
+                if (!world.getBlockState(pos).isAir) continue
+                val block = FallingBlockEntity.spawnFromBlock(world, pos, blocks[Random(RUBBLE_SEED + pos.hashCode()).nextInt(blocks.size)])
+                block.dropItem = false
+                block.setHurtEntities(0f, 0)
+                block.setVelocity(0.0, -rules.slabStartSpeed, 0.0)
+                block.velocityModified = true
             }
+            val slab = f.piece.kind == MawCollapse.Kind.SLAB
+            val dust = BlockStateParticleEffect(ParticleTypes.FALLING_DUST, Blocks.GRAY_CONCRETE_POWDER.defaultState)
+            world.spawnParticles(dust, top.x + 0.5, top.y + 0.8, top.z + 0.5, if (slab) 40 else 6, if (slab) 2.0 else 0.3, 0.2, if (slab) 2.0 else 0.3, 0.0)
         }
-        // The landing: a puff of dust and chips where each block should have reached the floor.
-        for (r in coming) {
-            if (r.fell && now == r.at + LAND_TICKS) land += r
+        // The landing: a puff of dust and chips where each piece reaches the stone, bigger for a slab.
+        for (f in coming) {
+            if (!f.fell || now != f.lands) continue
+            val slab = f.piece.kind == MawCollapse.Kind.SLAB
+            val x = c.x + 0.5 + f.piece.cells.map { it.first }.average()
+            val z = c.z + 0.5 + f.piece.cells.map { it.second }.average()
+            val state = blocks[Random(RUBBLE_SEED + f.at.toInt()).nextInt(blocks.size)]
+            world.spawnParticles(BlockStateParticleEffect(ParticleTypes.BLOCK, state), x, c.y + 0.6, z, if (slab) 50 else 14, if (slab) 1.5 else 0.4, 0.2, if (slab) 1.5 else 0.4, if (slab) 0.12 else 0.06)
+            world.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, x, c.y + 0.8, z, if (slab) 6 else 1, if (slab) 1.2 else 0.3, 0.1, if (slab) 1.2 else 0.3, 0.02)
         }
-        for (r in land) {
-            val c = position(rules.centre) ?: return
-            world.spawnParticles(BlockStateParticleEffect(ParticleTypes.BLOCK, r.state), r.pos.x + 0.5, c.y + 0.6, r.pos.z + 0.5, 14, 0.4, 0.15, 0.4, 0.06)
-            world.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, r.pos.x + 0.5, c.y + 0.8, r.pos.z + 0.5, 1, 0.3, 0.1, 0.3, 0.02)
+    }
+
+    /** The first slab reaches the creature: it is slammed flat ([VibrationCreatureEntity.POSE_CRUSHED], seen for a few ticks), then [smash] hides it. */
+    private fun crush(world: ServerWorld, now: Long) {
+        crushed = true
+        creatures(world).forEach { it.fightDeathPose(VibrationCreatureEntity.POSE_CRUSHED) }
+        smashAt = now + SMASH_DELAY_TICKS
+    }
+
+    /** The big burst of dust and chips over the centre, and the creature gone under it. */
+    private fun smash(world: ServerWorld) {
+        val c = position(rules.centre) ?: return
+        val blocks = rubbleBlocks()
+        for (state in blocks) {
+            world.spawnParticles(BlockStateParticleEffect(ParticleTypes.BLOCK, state), c.x, c.y + 0.8, c.z, 60, 1.4, 0.5, 1.4, 0.25)
         }
+        world.spawnParticles(BlockStateParticleEffect(ParticleTypes.FALLING_DUST, Blocks.GRAY_CONCRETE_POWDER.defaultState), c.x, c.y + 1.0, c.z, 120, 1.6, 0.8, 1.6, 0.1)
+        world.spawnParticles(ParticleTypes.CAMPFIRE_COSY_SMOKE, c.x, c.y + 0.8, c.z, 24, 1.4, 0.4, 1.4, 0.06)
+        world.spawnParticles(ParticleTypes.POOF, c.x, c.y + 0.8, c.z, 30, 1.4, 0.5, 1.4, 0.12)
+        creatures(world).forEach { it.discard() }
     }
 
     /**
@@ -498,9 +563,11 @@ object Ch2L2Maw {
         phase = Phase.DEAD
         entering = false
         burstAt = null
+        stopMusic(server)
         val world = levelWorld(server) ?: return
         creatures(world).forEach { it.discard() }
         takePieces(world)
+        for (e in world.getEntitiesByType(net.minecraft.entity.EntityType.FALLING_BLOCK, arenaBox()) { true }) e.discard()
         placeRubble(world)
         if (!Ch2L2Build.gateIs(world, rules.farGate, "open")) {
             data.anchors.point(rules.farAnchor)?.position?.let { world.playSound(null, it.x, it.y, it.z, Ch2Sounds.CH2L2_EXIT_DOOR, SoundCategory.BLOCKS, 1.5f, 1.0f) }
@@ -516,6 +583,7 @@ object Ch2L2Maw {
     /** The arena as [state] wants it (see the class). */
     private fun started(player: ServerPlayerEntity, state: Ch2L2State) {
         val world = levelWorld(player.server) ?: return
+        stopMusic(player.server)
         reset()
         takePieces(world)
         creatures(world).forEach { it.discard() }
@@ -531,6 +599,7 @@ object Ch2L2Maw {
 
     /** All the state of a fight forgotten. */
     private fun reset() {
+        musicStart = null
         phase = Phase.IDLE
         fighter = null
         entering = false
@@ -540,7 +609,7 @@ object Ch2L2Maw {
         crushed = false
         crackSound = false
         coming.clear()
-        buried = false
+        smashAt = null
         lastMode = StoneMawFight.Mode.BRAIN
         falling.clear()
         clangs.clear()
@@ -559,23 +628,17 @@ object Ch2L2Maw {
     private fun rubbleBlocks(): List<net.minecraft.block.BlockState> =
         rules.collapseBlocks.mapNotNull { Identifier.tryParse(it)?.let(Registries.BLOCK::get)?.defaultState }.ifEmpty { listOf(Blocks.GRAY_CONCRETE.defaultState) }
 
-    /** The columns (dx, dz) the ceiling falls in: the same every time, within the radius of the centre. */
-    private fun rubbleColumns(): List<Pair<Int, Int>> {
-        val random = Random(RUBBLE_SEED)
-        val r = rules.collapseRadius
-        val all = (-r..r).flatMap { dx -> (-r..r).filter { dz -> dx * dx + dz * dz <= r * r }.map { dz -> dx to dz } }
-        return all.shuffled(random).take(rules.collapseColumns)
-    }
-
-    /** The rubble where the creature stood, at once (a skip, or the level started past its death). */
+    /** The mound where the creature stood, at once (a skip, or the level started past its death): [MawCollapse.heights] of the plan, filling only air. */
     private fun placeRubble(world: ServerWorld) {
         val c = position(rules.centre) ?: return
         val blocks = rubbleBlocks()
         val floor = BlockPos.ofFloored(c.x, c.y, c.z)
-        val random = Random(RUBBLE_SEED + 2)
-        for ((dx, dz) in rubbleColumns()) {
-            val pos = floor.add(dx, 0, dz)
-            if (world.getBlockState(pos).isAir) world.setBlockState(pos, blocks[random.nextInt(blocks.size)], Block.NOTIFY_ALL)
+        val heights = MawCollapse.heights(MawCollapse.plan(rules, MawDeathScene.COLLAPSE_SEED), rules.maxHeight)
+        for ((cell, height) in heights) {
+            for (dy in 0 until height) {
+                val pos = floor.add(cell.first, dy, cell.second)
+                if (world.getBlockState(pos).isAir) world.setBlockState(pos, blocks[Random(RUBBLE_SEED + pos.hashCode()).nextInt(blocks.size)], Block.NOTIFY_ALL)
+            }
         }
     }
 
@@ -607,6 +670,8 @@ object Ch2L2Maw {
     private fun levelWorld(server: MinecraftServer): ServerWorld? =
         Identifier.tryParse(data.anchors.dimension)?.let { server.getWorld(RegistryKey.of(RegistryKeys.WORLD, it)) }
 
+    private val CHASE_MUSIC = Identifier(EveryTunnel.MOD_ID, "music.ch2l2.guard_chase")
+    private const val CHASE_MUSIC_TICKS = 256L
     private const val HINT_KEY = "maw_hint"
     private const val EXIT_DOOR_TICKS = 70L
     private const val BURST_DELAY_TICKS = 25L
@@ -618,11 +683,12 @@ object Ch2L2Maw {
     private const val PICKUP_DELAY_TICKS = 15
     private const val FIRST_PIECE_HEIGHT = 5.0
     private const val CRACK_EVERY_TICKS = 3
-    private const val BURY_AFTER_TICKS = 14
+    /** Ticks of the crack sound before its blow (`event.ch2l2.maw_collapse`: the blow is at 1.62 s). */
     private const val SOUND_LEAD_TICKS = 32
-    private const val FLINCH_AFTER_TICKS = 14
-    private const val LAND_TICKS = 16L
+    /** Ticks the crushed pose is seen before the burst hides it. */
+    private const val SMASH_DELAY_TICKS = 3L
     private const val CEILING_OFFSET = 6.0
     private const val RUBBLE_SEED = 61
-    private const val RUBBLE_HEIGHT = 4
+    /** At least as high as the parser lets `death.max_height` go: [clearRubble] clears this many layers. */
+    private const val RUBBLE_HEIGHT = 5
 }

@@ -13,8 +13,11 @@ import daio7771.everytunnel.util.JsonFields
  * - **A hit** (any impact of a thrown piece on the creature) makes it orient on the player for [ramOrientSeconds], then charge in a straight
  *   line at [ramSpeed] blocks a second, turning at most [ramTurnDegreesPerSecond] towards the player, until it hits a wall (or after
  *   [ramMaxSeconds]); then it is stunned [stunSeconds]. The [hits]th kills it.
- * - **The death**: it walks to [centre] at [deathWalkSpeed] and sinks to the floor [crouchSeconds] (the ceiling cracks, its sound first); then
- *   [collapseColumns] columns of [collapseBlocks] (a mix) fall within [collapseRadius] of the centre, over [collapseSpreadTicks] ticks, from the middle out (a [collapseSeconds] long cinematic of third-person shots, then [afterSeconds] of calm).
+ * - **The death** (phase 6.2): it limps to [centre] at [deathWalkSpeed] (at most [deathWalkSeconds]) and kneels [crouchSeconds] (the
+ *   ceiling cracks, its sound first); then [bitCount] small bits of [collapseBlocks] (a mix) fall within [collapseRadius] of the centre
+ *   and, [firstSlabDelayTicks] after, a 3 x 3 slab falling at [slabStartSpeed] blocks a tick lands on it at [crushHeight] blocks above the
+ *   floor, followed by [slabCount] - 1 more over [slabSpreadTicks] ticks; the mound is at most [maxHeight] high ([MawCollapse]). The scene
+ *   lasts [collapseSeconds] from the first bit, then [afterSeconds] of calm.
  * - [arenaZone] (the jump is blocked in it), [middleZone] (reaching it shuts [entryGate] and lets it out of [mouthGate]), [farGate]
  *   (opens when it dies), the [exitDoor]'s gate, zone and sound anchor (the heavy door of the exit room, which opens when reached).
  */
@@ -50,9 +53,14 @@ data class Ch2L2Maw(
     val collapseSeconds: Double,
     val afterSeconds: Double,
     val collapseRadius: Int,
-    val collapseColumns: Int,
     val collapseBlocks: List<String>,
-    val collapseSpreadTicks: Int,
+    val bitCount: Int,
+    val firstSlabDelayTicks: Int,
+    val slabCount: Int,
+    val slabSpreadTicks: Int,
+    val slabStartSpeed: Double,
+    val crushHeight: Double,
+    val maxHeight: Int,
     val burstSeconds: Double,
 ) {
     fun anchorNames(): List<String> = pipePoints + listOf(home, centre, mouthAnchor, entryAnchor, farAnchor, exitAnchor)
@@ -65,8 +73,9 @@ data class Ch2L2Maw(
             pipePoints = emptyList(), home = "maw_home", centre = "maw_centre", arenaZone = "zone_maw_arena", middleZone = "zone_maw_middle",
             entryGate = "maw_entry", mouthGate = "maw_pipe_mouth", farGate = "maw_far", mouthAnchor = "maw_mouth", entryAnchor = "maw_entry_door",
             farAnchor = "maw_far_door", exitGate = "exit_hatch", exitZone = "zone_exit_door", exitAnchor = "exit_hatch",
-            deathWalkSpeed = 2.2, deathWalkSeconds = 4.5, crouchSeconds = 3.0, collapseSeconds = 3.6, afterSeconds = 2.0,
-            collapseRadius = 4, collapseColumns = 40, collapseBlocks = listOf("every_tunnel:catacomb_brick_cracked", "every_tunnel:catacomb_brick", "every_tunnel:catacomb_brick_damp"), collapseSpreadTicks = 30, burstSeconds = 2.6,
+            deathWalkSpeed = 1.6, deathWalkSeconds = 6.0, crouchSeconds = 3.5, collapseSeconds = 3.6, afterSeconds = 2.0,
+            collapseRadius = 4, collapseBlocks = listOf("every_tunnel:catacomb_brick_cracked", "every_tunnel:catacomb_brick", "every_tunnel:catacomb_brick_damp"),
+            bitCount = 6, firstSlabDelayTicks = 12, slabCount = 5, slabSpreadTicks = 20, slabStartSpeed = 0.35, crushHeight = 2.0, maxHeight = 3, burstSeconds = 2.6,
         )
     }
 }
@@ -116,9 +125,14 @@ object Ch2L2MawParser {
             collapseSeconds = death.double("collapse_seconds", d.collapseSeconds, min = 0.5, max = 30.0),
             afterSeconds = death.double("after_seconds", d.afterSeconds, min = 0.0, max = 30.0),
             collapseRadius = death.int("collapse_radius", d.collapseRadius, min = 1, max = 12),
-            collapseColumns = death.int("collapse_columns", d.collapseColumns, min = 1, max = 200),
             collapseBlocks = death.stringList("collapse_blocks").ifEmpty { d.collapseBlocks },
-            collapseSpreadTicks = death.int("collapse_spread_ticks", d.collapseSpreadTicks, min = 0, max = 200),
+            bitCount = death.int("bit_count", d.bitCount, min = 0, max = 40),
+            firstSlabDelayTicks = death.int("first_slab_delay_ticks", d.firstSlabDelayTicks, min = 1, max = 200),
+            slabCount = death.int("slab_count", d.slabCount, min = 1, max = 12),
+            slabSpreadTicks = death.int("slab_spread_ticks", d.slabSpreadTicks, min = 0, max = 200),
+            slabStartSpeed = death.double("slab_start_speed", d.slabStartSpeed, min = 0.0, max = 2.0),
+            crushHeight = death.double("crush_height", d.crushHeight, min = 0.5, max = 4.0),
+            maxHeight = death.int("max_height", d.maxHeight, min = 1, max = 5),
             burstSeconds = f.double("burst_seconds", d.burstSeconds, min = 0.2, max = 30.0),
         )
         for (child in listOf(throwing, pipes, ram, death, gates, exit)) child.reportUnknownKeys()

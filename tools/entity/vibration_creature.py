@@ -8,7 +8,7 @@ animations, the editable Blockbench file and its LEEME.md). It is the source: ch
 never edit what this tool writes. This tool writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   geo/entity/vibration_creature.geo.json                 the source geo, renamed geometry.vibration_creature
   animations/entity/vibration_creature.animation.json    idle and walk from the source; orient, stalk, charge, strike,
-                                                         recover, listen, dying and crushed written here on its bones
+                                                         recover, listen, limp, dying (to the kneel) and crushed written here on its bones
   textures/entity/vibration_creature.png                 the source texture
   and the entity's name in Chapter 2's lang part (tools/lang/src/chapter2); no spawn egg: it is never summoned
 and tools/entity/output/vibration_creature_preview.png (git-ignored): front and side views of the key poses.
@@ -67,6 +67,22 @@ def legs(length, amplitude, bend, crouch=0.0):
         "left_shin": {"rotation": swing(length, amplitude * 0.6, -math.pi / 2, offset=(bend, 0, 0))},
         "right_shin": {"rotation": swing(length, amplitude * 0.6, math.pi / 2, offset=(bend, 0, 0))},
     }
+
+
+def multi(length, offset, comps, steps=8):
+    """Sine swings on several axes at once over one loop: comps = {axis: (amplitude, phase, cycles)} round the offset."""
+    frames = []
+    for i in range(steps * 2 + 1):
+        v = list(offset)
+        for axis, (amp, phase, cycles) in comps.items():
+            v[axis] += amp * math.sin(2 * math.pi * cycles * i / (steps * 2) + phase)
+        frames.append((length * i / (steps * 2), v))
+    return keys(*frames)
+
+
+# The crushed pose (the first slab slammed it flat): solved from the geometry like the kneel.
+CRUSH = {"pelvis": [0, -12.0, 0], "body": [86, 0, 0], "head": [10, 0, 0], "leg": [86, 0, 0], "shin": [4, 0, 0],
+         "left_arm": [-10, 0, -90], "right_arm": [-10, 0, 90]}
 
 
 def our_animations():
@@ -141,37 +157,73 @@ def our_animations():
         "left_arm": {"rotation": still([-6, 0, -2])},
         "right_arm": {"rotation": still([-6, 0, 2])},
     }}
-    A[f"animation.{n}.dying"] = {"loop": "hold_on_last_frame", "animation_length": 2.6, "bones": {
-        # Phase 6.1, Stone Maw's last stand: after the last hit it sinks to the floor without lying down: the knees buckle (it squats low,
-        # thighs forward, shins folded back), the body leans over its long arms until they hang to the floor, and the head drops till it
-        # looks straight down at the stone. Held at the end.
-        "pelvis": {"position": keys((0, [0, 0, 0]), (0.5, [0, 0, 0]), (1.2, [0, 0, 0]), (2.0, [0, -3.3, 0]), (2.6, [0, -3.2, 0]))},
-        "body": {"rotation": keys((0, [0, 0, 0]), (0.6, [6, 0, 0]), (1.4, [24, 0, 0]), (2.2, [40, 0, 0]), (2.6, [42, 0, 0]))},
-        "head": {"rotation": keys((0, [0, 0, 0]), (0.8, [8, 6, 0]), (1.6, [32, 2, 0]), (2.2, [52, 0, 0]), (2.6, [56, 0, 0]))},
-        "jaw": {"rotation": keys((0, [0, 0, 0]), (1.0, [10, 0, 0]), (2.6, [4, 0, 0]))},
-        "left_arm": {"rotation": keys((0, [0, 0, 0]), (1.0, [-14, 0, -3]), (2.0, [-62, 0, -4]), (2.6, [-70, 0, -4]))},
-        "right_arm": {"rotation": keys((0, [0, 0, 0]), (1.0, [-14, 0, 3]), (2.0, [-62, 0, 4]), (2.6, [-70, 0, 4]))},
-        "left_forearm": {"rotation": keys((0, [0, 0, 0]), (2.0, [-12, 0, 0]), (2.6, [-14, 0, 0]))},
-        "right_forearm": {"rotation": keys((0, [0, 0, 0]), (2.0, [-12, 0, 0]), (2.6, [-14, 0, 0]))},
-        "left_leg": {"rotation": keys((0, [0, 0, 0]), (0.8, [-14, 0, 0]), (1.6, [-52, 0, 0]), (2.2, [-72, 0, 0]), (2.6, [-74, 0, 0]))},
-        "right_leg": {"rotation": keys((0, [0, 0, 0]), (0.8, [-14, 0, 0]), (1.6, [-52, 0, 0]), (2.2, [-72, 0, 0]), (2.6, [-74, 0, 0]))},
-        "left_shin": {"rotation": keys((0, [0, 0, 0]), (0.8, [20, 0, 0]), (1.6, [70, 0, 0]), (2.2, [104, 0, 0]), (2.6, [106, 0, 0]))},
-        "right_shin": {"rotation": keys((0, [0, 0, 0]), (0.8, [20, 0, 0]), (1.6, [70, 0, 0]), (2.2, [104, 0, 0]), (2.6, [106, 0, 0]))},
+    limp_len = 1.6
+    A[f"animation.{n}.limp"] = {"loop": True, "animation_length": limp_len, "bones": {
+        # Phase 6.2, the wounded walk to the centre: the right leg is stiff and dragged, the body leans forward and to that side, the right
+        # arm hangs low with its knuckles near the floor, the head lolls with each step. The numbers come from the geometry (the
+        # knuckles brush the floor at their lowest, the supporting foot stays on it), not by eye.
+        "pelvis": {"position": multi(limp_len, (0, 1.2, 0), {1: (0.9, 0.0, 2)}),
+                   "rotation": multi(limp_len, (0, 0, -4), {2: (3, 0.0, 1), 1: (3, 0.0, 1)})},
+        "body": {"rotation": multi(limp_len, (22, 0, -7), {0: (2.5, 0.0, 2), 1: (5, math.pi, 1), 2: (2, 0.0, 1)})},
+        "head": {"rotation": multi(limp_len, (-4, 0, 0), {0: (4, math.pi / 2, 2), 2: (7, math.pi / 2, 1), 1: (4, 0.0, 1)})},
+        "jaw": {"rotation": still([8, 0, 0])},
+        "left_arm": {"rotation": multi(limp_len, (-30, 0, -4), {0: (10, math.pi, 1)})},
+        "left_forearm": {"rotation": multi(limp_len, (-34, 0, 0), {0: (8, math.pi, 1)})},
+        "right_arm": {"rotation": multi(limp_len, (-42, 0, 3), {0: (5, 0.0, 1)})},
+        "right_forearm": {"rotation": multi(limp_len, (-8, 0, 0), {0: (3, 0.0, 1)})},
+        "left_leg": {"rotation": multi(limp_len, (-8, 0, 0), {0: (26, 0.0, 1)})},
+        "left_shin": {"rotation": multi(limp_len, (14, 0, 0), {0: (16, -math.pi / 2, 1)})},
+        "right_leg": {"rotation": multi(limp_len, (-6, 0, 0), {0: (9, math.pi, 1)})},
+        "right_shin": {"rotation": multi(limp_len, (9, 0, 0), {0: (3, math.pi / 2, 1)})},
+        "right_foot": {"rotation": multi(limp_len, (0, 0, 0), {0: (6, math.pi, 1)})},
     }}
-    A[f"animation.{n}.crushed"] = {"loop": "hold_on_last_frame", "animation_length": 1.4, "bones": {
-        # The ceiling comes down on it: it flinches, both arms thrown over its head, the body folding lower, then they drop limp.
-        "pelvis": {"position": keys((0, [0, -3.2, 0]), (0.25, [0, -3.2, 0]), (1.4, [0, 1.6, 0]))},
-        "body": {"rotation": keys((0, [42, 0, 0]), (0.2, [34, 0, 0]), (0.5, [48, 0, 0]), (1.4, [50, 0, 0]))},
-        "head": {"rotation": keys((0, [56, 0, 0]), (0.2, [40, 0, 0]), (0.5, [62, 0, 0]), (1.4, [64, 0, 0]))},
-        "jaw": {"rotation": keys((0, [4, 0, 0]), (0.2, [24, 0, 0]), (0.5, [6, 0, 0]))},
-        "left_arm": {"rotation": keys((0, [-70, 0, -4]), (0.2, [-150, 0, -10]), (0.6, [-120, 0, -8]), (1.4, [-74, 0, -4]))},
-        "right_arm": {"rotation": keys((0, [-70, 0, 4]), (0.2, [-150, 0, 10]), (0.6, [-120, 0, 8]), (1.4, [-74, 0, 4]))},
-        "left_forearm": {"rotation": keys((0, [-14, 0, 0]), (0.2, [-50, 0, 0]), (1.4, [-10, 0, 0]))},
-        "right_forearm": {"rotation": keys((0, [-14, 0, 0]), (0.2, [-50, 0, 0]), (1.4, [-10, 0, 0]))},
-        "left_leg": {"rotation": still([-74, 0, 0])},
-        "right_leg": {"rotation": still([-74, 0, 0])},
-        "left_shin": {"rotation": still([106, 0, 0])},
-        "right_shin": {"rotation": still([106, 0, 0])},
+    # The kneel (also the end of the dying walk): numbers solved from the geometry so the shins lie on the floor, both hands lie flat on it
+    # (palm and fingers at y = 0) ahead of the knees, and the head hangs over them looking straight down.
+    kneel = {"pelvis": [0, -3.2, 0], "body": [50, 0, 0], "head": [40, 0, 0], "leg": [-5, 0, 0], "shin": [90, 0, 0],
+             "arm": [-35, 0, 0], "forearm": [-50, 0, 0], "hand": [-40, 0, 0]}
+    dying = 4.5
+    A[f"animation.{n}.dying"] = {"loop": "hold_on_last_frame", "animation_length": dying, "bones": {
+        # Phase 6.2: after the last hit and the limp to the centre it drops to its knees (the injured right one first), the body folds
+        # forward, both hands come down flat on the stone in front of the knees and the head lowers till it looks straight down. Then,
+        # still, it listens one last time: a faint jaw tremble and one slow breath-like rise of the body (held at the end).
+        "pelvis": {"position": keys((0, [0, 0, 0]), (0.8, [0, -1.2, 0]), (1.6, [0, -2.6, 0]), (2.4, kneel["pelvis"]),
+                                    (3.4, [0, -3.0, 0]), (4.5, kneel["pelvis"]))},
+        "body": {"rotation": keys((0, [0, 0, 0]), (0.8, [10, 0, 0]), (1.6, [30, 0, 0]), (2.4, kneel["body"]),
+                                  (3.4, [47.5, 0, 0]), (4.5, kneel["body"]))},
+        "head": {"rotation": keys((0, [0, 0, 0]), (0.9, [8, 4, 0]), (1.7, [22, 0, 0]), (2.4, kneel["head"]),
+                                  (3.4, [42, 0, 0]), (4.5, kneel["head"]))},
+        "jaw": {"rotation": keys((0, [0, 0, 0]), (1.0, [10, 0, 0]), (2.4, [4, 0, 0]), (2.55, [7, 0, 0]), (2.7, [3, 0, 0]),
+                                 (2.85, [7, 0, 0]), (3.0, [3, 0, 0]), (3.15, [7, 0, 0]), (3.3, [3, 0, 0]), (4.5, [4, 0, 0]))},
+        "left_arm": {"rotation": keys((0, [0, 0, 0]), (1.0, [-24, 0, -3]), (1.6, [-44, 0, -3]), (2.0, [-40, 0, -2]), (2.4, kneel["arm"]),
+                                      (3.4, [-34, 0, 0]), (4.5, kneel["arm"]))},
+        "right_arm": {"rotation": keys((0, [0, 0, 0]), (1.0, [-24, 0, 3]), (1.6, [-44, 0, 3]), (2.0, [-40, 0, 2]), (2.4, kneel["arm"]),
+                                       (3.4, [-34, 0, 0]), (4.5, kneel["arm"]))},
+        "left_forearm": {"rotation": keys((0, [0, 0, 0]), (1.0, [-24, 0, 0]), (1.6, [-56, 0, 0]), (2.0, [-52, 0, 0]), (2.4, kneel["forearm"]), (4.5, kneel["forearm"]))},
+        "right_forearm": {"rotation": keys((0, [0, 0, 0]), (1.0, [-24, 0, 0]), (1.6, [-56, 0, 0]), (2.0, [-52, 0, 0]), (2.4, kneel["forearm"]), (4.5, kneel["forearm"]))},
+        "left_hand": {"rotation": keys((0, [0, 0, 0]), (1.6, [-14, 0, 0]), (2.0, [-34, 0, 0]), (2.4, kneel["hand"]), (4.5, kneel["hand"]))},
+        "right_hand": {"rotation": keys((0, [0, 0, 0]), (1.6, [-14, 0, 0]), (2.0, [-34, 0, 0]), (2.4, kneel["hand"]), (4.5, kneel["hand"]))},
+        "left_leg": {"rotation": keys((0, [0, 0, 0]), (1.0, [-22, 0, 0]), (1.9, [-18, 0, 0]), (2.4, kneel["leg"]), (4.5, kneel["leg"]))},
+        "left_shin": {"rotation": keys((0, [0, 0, 0]), (1.0, [45, 0, 0]), (1.9, [95, 0, 0]), (2.4, kneel["shin"]), (4.5, kneel["shin"]))},
+        "right_leg": {"rotation": keys((0, [0, 0, 0]), (0.7, [-18, 0, 0]), (1.5, [-26, 0, 0]), (2.4, kneel["leg"]), (4.5, kneel["leg"]))},
+        "right_shin": {"rotation": keys((0, [0, 0, 0]), (0.7, [40, 0, 0]), (1.5, [96, 0, 0]), (2.4, kneel["shin"]), (4.5, kneel["shin"]))},
+    }}
+    A[f"animation.{n}.crushed"] = {"loop": "hold_on_last_frame", "animation_length": 0.3, "bones": {
+        # Phase 6.2: the first slab slams it flat: it starts from the kneel and in 0.12 s lies prone, chest and head on the floor, the legs
+        # stretched out behind and the arms thrown out flat to the sides. Seen only a few ticks, before the burst of dust hides it.
+        "pelvis": {"position": keys((0, kneel["pelvis"]), (0.12, CRUSH["pelvis"]))},
+        "body": {"rotation": keys((0, kneel["body"]), (0.12, CRUSH["body"]))},
+        "head": {"rotation": keys((0, kneel["head"]), (0.12, CRUSH["head"]))},
+        "jaw": {"rotation": keys((0, [4, 0, 0]), (0.05, [24, 0, 0]), (0.12, [12, 0, 0]))},
+        "left_arm": {"rotation": keys((0, kneel["arm"]), (0.12, CRUSH["left_arm"]))},
+        "right_arm": {"rotation": keys((0, kneel["arm"]), (0.12, CRUSH["right_arm"]))},
+        "left_forearm": {"rotation": keys((0, kneel["forearm"]), (0.12, [0, 0, 0]))},
+        "right_forearm": {"rotation": keys((0, kneel["forearm"]), (0.12, [0, 0, 0]))},
+        "left_hand": {"rotation": keys((0, kneel["hand"]), (0.12, [0, 0, 0]))},
+        "right_hand": {"rotation": keys((0, kneel["hand"]), (0.12, [0, 0, 0]))},
+        "left_leg": {"rotation": keys((0, kneel["leg"]), (0.12, CRUSH["leg"]))},
+        "right_leg": {"rotation": keys((0, kneel["leg"]), (0.12, CRUSH["leg"]))},
+        "left_shin": {"rotation": keys((0, kneel["shin"]), (0.12, CRUSH["shin"]))},
+        "right_shin": {"rotation": keys((0, kneel["shin"]), (0.12, CRUSH["shin"]))},
     }}
     return A
 
@@ -270,7 +322,8 @@ def write_preview(geo, anims):
     poses = [("idle", "idle", 0.0), ("orient: click", "orient", 0.94), ("stalk", "stalk", 0.4),
              ("charge", "charge", 0.2), ("strike: windup top", "strike", 0.9), ("strike: impact", "strike", 1.0),
              ("recover", "recover", 0.0), ("listen", "listen", 0.5),
-             ("dying: sinking", "dying", 1.4), ("dying: held", "dying", 2.6), ("crushed: arms up", "crushed", 0.2), ("crushed: held", "crushed", 1.4)]
+             ("limp: step", "limp", 0.0), ("limp: drag", "limp", 0.8),
+             ("dying: mid", "dying", 1.5), ("dying: held (kneel)", "dying", 3.0), ("crushed: held", "crushed", 0.3)]
     scale, cell_w, cell_h = 4, 300, 300
     sheet = Image.new("RGB", (cell_w * len(poses), cell_h * 2 + 40), (24, 25, 28))
     d = ImageDraw.Draw(sheet)
@@ -278,7 +331,7 @@ def write_preview(geo, anims):
         cubes = posed_cubes(geo, anims[f"animation.{NAME}.{name}"], t)
         for row, view in enumerate(("front", "side")):
             ox, oy = cell_w * i + cell_w // 2, 30 + cell_h * row + 260
-            d.line((ox - 130, oy, ox + 130, oy), fill=(90, 90, 90))
+            d.line((ox - 130, oy, ox + 130, oy), fill=(150, 150, 150), width=2)     # the floor
             d.line((ox - 130, oy - 56 * scale, ox + 130, oy - 56 * scale), fill=(50, 70, 50))     # 3.5 blocks up
             draw_view(d, cubes, ox, oy, view, scale)
         d.text((cell_w * i + 8, 8), label, fill=(210, 210, 210))

@@ -318,7 +318,16 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
         if (dataTracker.get(STATE) != state.ordinal) dataTracker.set(STATE, state.ordinal)
     }
 
-    /** The death pose ([POSE_DYING], [POSE_CRUSHED]; 0 none). */
+    /** Turns its body and head, a step a tick, to face [yaw] (Minecraft's degrees); it stays where it is. */
+    internal fun fightTurn(yaw: Float) {
+        stand()
+        val turned = MathHelper.stepUnwrappedAngleTowards(bodyYaw, yaw, TURN_PER_TICK)
+        bodyYaw = turned
+        headYaw = turned
+        this.yaw = turned
+    }
+
+    /** The death pose ([POSE_LIMP], [POSE_DYING], [POSE_CRUSHED]; 0 none). */
     internal fun fightDeathPose(pose: Int) {
         if (dataTracker.get(DEATH_POSE) != pose) dataTracker.set(DEATH_POSE, pose)
     }
@@ -353,6 +362,7 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
                     when {
                         dataTracker.get(DEATH_POSE) == POSE_CRUSHED -> CRUSHED
                         dataTracker.get(DEATH_POSE) == POSE_DYING -> DYING
+                        dataTracker.get(DEATH_POSE) == POSE_LIMP -> LIMP
                         else -> null
                     } ?: when (brainState) {
                         State.REST -> IDLE
@@ -383,10 +393,14 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
     companion object {
         private val STATE: TrackedData<Int> = DataTracker.registerData(VibrationCreatureEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
 
-        /** Stone Maw's death pose (phase 6.1): 0 none, [POSE_DYING] sunk to the floor looking down, [POSE_CRUSHED] flinching under the rubble. */
+        /**
+         * Stone Maw's death pose (phases 6.1 and 6.2): 0 none, [POSE_LIMP] the wounded walk to the centre, [POSE_DYING] kneeling with its
+         * hands flat on the floor and its head bowed, [POSE_CRUSHED] slammed flat by the first slab.
+         */
         private val DEATH_POSE: TrackedData<Int> = DataTracker.registerData(VibrationCreatureEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
         const val POSE_DYING = 1
         const val POSE_CRUSHED = 2
+        const val POSE_LIMP = 3
 
         /** What a player does on the floor that shakes it, and how hard. Breathing, sips and equipment are not felt. */
         private val KINDS = mapOf(
@@ -429,6 +443,7 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
         val RECOVER: RawAnimation = RawAnimation.begin().thenLoop("animation.vibration_creature.recover")
         val DYING: RawAnimation = RawAnimation.begin().thenPlayAndHold("animation.vibration_creature.dying")
         val CRUSHED: RawAnimation = RawAnimation.begin().thenPlayAndHold("animation.vibration_creature.crushed")
+        val LIMP: RawAnimation = RawAnimation.begin().thenLoop("animation.vibration_creature.limp")
         val LISTEN: RawAnimation = RawAnimation.begin().thenLoop("animation.vibration_creature.listen")
 
         fun createAttributes(): DefaultAttributeContainer.Builder = MobEntity.createMobAttributes()
