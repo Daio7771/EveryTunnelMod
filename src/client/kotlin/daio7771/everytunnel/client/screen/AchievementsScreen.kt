@@ -3,7 +3,8 @@ package daio7771.everytunnel.client.screen
 import daio7771.everytunnel.client.AchievementIcons
 import daio7771.everytunnel.client.AchievementStore
 import daio7771.everytunnel.client.hud.AchievementToast
-import daio7771.everytunnel.core.achievement.Achievement
+import daio7771.everytunnel.core.achievement.AchievementDef
+import daio7771.everytunnel.core.achievement.AchievementRegistry
 import net.minecraft.client.gui.DrawContext
 import net.minecraft.client.gui.screen.Screen
 import net.minecraft.text.OrderedText
@@ -18,9 +19,10 @@ import kotlin.math.roundToInt
 
 /**
  * The ACHIEVEMENTS screen, opened from the main menu ([MainMenuScreen]): one sheet of worn paper
- * like the player guide's ([Paper]) with the title, how many are earned ("3 / 8") and every
- * achievement in list order ([Achievement]). An earned one shows its icon, its title and the
- * line on how it was earned; one not earned yet a "?" and "Not yet unlocked"
+ * like the player guide's ([Paper]) with the title, a tab for each chapter that has achievements
+ * (CHAPTER 1, CHAPTER 2...: click, Left/Right or Tab), how many of that chapter's are earned ("3 / 11") and
+ * every achievement of the tab in list order ([AchievementRegistry]). An earned one shows its icon, its title and the
+ * line on how it was earned; one not earned yet a "?" and "Not yet unlocked" ("Hidden achievement" for a hidden one)
  * ([AchievementIcons], [AchievementStore]).
  *
  * The sheet scrolls (wheel, up/down, page keys) when the window is too short for it; Esc or
@@ -28,7 +30,12 @@ import kotlin.math.roundToInt
  */
 class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable("screen.every_tunnel.achievements.title")) {
 
-    private var unlocked: Set<Achievement> = emptySet()
+    private var unlocked: Set<AchievementDef> = emptySet()
+    private val chapters = AchievementRegistry.chapters()
+    private var tab = 0
+    private var tabBoxes: List<IntRange> = emptyList()
+    private var tabsTop = 0
+    private val entries: List<AchievementDef> get() = AchievementRegistry.inChapter(chapters[tab])
     private var sheetLeft = 0
     private var sheetWidth = 0
     private var scrollTarget = 0.0
@@ -38,16 +45,16 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
 
     private val viewTop get() = MARGIN
     private val viewBottom get() = height - MARGIN
-    private val sheetHeight get() = maxOf(PAD_TOP + HEADER_HEIGHT + Achievement.entries.sumOf { rowHeight(it) } + PAD_BOTTOM, viewBottom - viewTop - SHEET_GAP * 2)
+    private val sheetHeight get() = maxOf(PAD_TOP + HEADER_HEIGHT + entries.sumOf { rowHeight(it) } + PAD_BOTTOM, viewBottom - viewTop - SHEET_GAP * 2)
 
     /** The width the title and the line of an achievement have, beside its icon. */
     private val lineWidth get() = sheetWidth - PAD_X * 2 - ICON_SIZE - ICON_GAP
 
     /** An earned achievement's line, wrapped to [lineWidth]: a longer translation takes more lines, never cut short. */
-    private fun lineOf(achievement: Achievement): List<OrderedText> =
+    private fun lineOf(achievement: AchievementDef): List<OrderedText> =
         textRenderer.wrapLines(AchievementToast.description(achievement), lineWidth.coerceAtLeast(40))
 
-    private fun rowHeight(achievement: Achievement): Int =
+    private fun rowHeight(achievement: AchievementDef): Int =
         if (achievement in unlocked) ROW_HEIGHT + (lineOf(achievement).size - 1).coerceAtLeast(0) * LINE_STEP else ROW_HEIGHT
 
     override fun init() {
@@ -100,11 +107,25 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
         context.matrices.scale(TITLE_SCALE, TITLE_SCALE, 1f)
         context.drawText(textRenderer, title, 0, 0, Paper.INK_DARK, false)
         context.matrices.pop()
-        val count = Text.translatable("screen.every_tunnel.achievements.count", unlocked.size, Achievement.entries.size)
+        val boxes = ArrayList<IntRange>()
+        var tabX = textLeft
+        for ((i, chapter) in chapters.withIndex()) {
+            val label = Text.translatable("screen.every_tunnel.achievements.chapter", chapter).string.uppercase()
+            val labelWidth = textRenderer.getWidth(label)
+            val selected = i == tab
+            context.drawText(textRenderer, label, tabX, y + TABS_Y, if (selected) Paper.INK_DARK else Paper.INK_SOFT, false)
+            if (selected) context.fill(tabX, y + TABS_Y + 10, tabX + labelWidth, y + TABS_Y + 11, Paper.INK_DARK)
+            boxes += tabX..(tabX + labelWidth)
+            tabX += labelWidth + TAB_GAP
+        }
+        tabBoxes = boxes
+        tabsTop = y + TABS_Y
+        val chapterList = entries
+        val count = Text.translatable("screen.every_tunnel.achievements.count", chapterList.count { it in unlocked }, chapterList.size)
         context.drawText(textRenderer, count, textLeft, y + COUNT_Y, Paper.INK_SOFT, false)
         y += HEADER_HEIGHT
 
-        for (achievement in Achievement.entries) {
+        for (achievement in chapterList) {
             context.fill(textLeft, y, textLeft + textWidth, y + 1, Paper.RULE_COLOR)
             val earned = achievement in unlocked
             AchievementIcons.draw(context, achievement, textLeft, y + ICON_Y, locked = !earned)
@@ -117,7 +138,7 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
                     context.drawText(textRenderer, line, textX, y + LINE_Y + k * LINE_STEP, Paper.INK_SOFT, false)
                 }
             } else {
-                context.drawText(textRenderer, lockedText, textX, y + LOCKED_Y, Paper.INK_SOFT, false)
+                context.drawText(textRenderer, if (achievement.hidden) hiddenText else lockedText, textX, y + LOCKED_Y, Paper.INK_SOFT, false)
             }
             y += rowHeight(achievement)
         }
@@ -134,6 +155,13 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
             close()
             return true
         }
+        if (chapters.size > 1 && mouseY.toInt() in (tabsTop - 2)..(tabsTop + 12)) {
+            val hit = tabBoxes.indexOfFirst { mouseX.toInt() in (it.first - 4)..(it.last + 4) }
+            if (hit >= 0) {
+                showTab(hit)
+                return true
+            }
+        }
         return super.mouseClicked(mouseX, mouseY, button)
     }
 
@@ -149,6 +177,8 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
         }
         val page = (viewBottom - viewTop - PAGE_KEEP).toDouble()
         when (keyCode) {
+            GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_A -> showTab(tab - 1)
+            GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_D, GLFW.GLFW_KEY_TAB -> showTab(if (tab + 1 < chapters.size) tab + 1 else 0)
             GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> scrollBy(-KEY_STEP)
             GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> scrollBy(KEY_STEP)
             GLFW.GLFW_KEY_PAGE_UP -> scrollBy(-page)
@@ -160,6 +190,15 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
         return true
     }
 
+    /** The tab [index] (not past the first and last), at the top of its list. */
+    private fun showTab(index: Int) {
+        val next = index.coerceIn(0, chapters.size - 1)
+        if (next == tab) return
+        tab = next
+        scrollTarget = 0.0
+        scroll = 0.0
+    }
+
     private fun scrollBy(amount: Double) {
         scrollTarget = (scrollTarget + amount).coerceIn(0.0, maxScroll())
     }
@@ -167,6 +206,7 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
     companion object {
         private val backText: Text get() = Text.translatable("screen.every_tunnel.guide.back").let { Text.literal("< ").append(it) }
         private val lockedText: Text get() = Text.translatable("screen.every_tunnel.achievements.locked")
+        private val hiddenText: Text get() = Text.translatable("screen.every_tunnel.achievements.hidden")
 
         // The same sizes as the guide's sheet.
         private const val MARGIN = 8
@@ -180,8 +220,10 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
         private const val STAIN_SEED = 0xAC41L
 
         private const val TITLE_SCALE = 2f
-        private const val COUNT_Y = 22
-        private const val HEADER_HEIGHT = 40
+        private const val TABS_Y = 22
+        private const val TAB_GAP = 14
+        private const val COUNT_Y = 36
+        private const val HEADER_HEIGHT = 54
 
         /** One achievement: a rule on top, the icon, the title and its line beside it. */
         private const val ROW_HEIGHT = 28

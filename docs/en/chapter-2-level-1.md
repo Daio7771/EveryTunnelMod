@@ -517,6 +517,15 @@ What the QA pass added so that a player cannot get stuck:
 - **Stray workers** (`Ch2L1Npcs`): one that has fallen out of the level's box is taken away and put back at the next check.
 - **The way back to Chapter 1** (`chapter2.platform.Ch2Return`, the chapter's, shared with Level 2): see "How it is reached" at the top.
 
+## Chapter 2's achievements
+
+Ten achievements are Chapter 2's tab of the ACHIEVEMENTS screen (`chapter2.core.Ch2Achievement`, registered by `platform.Ch2Achievements`, which
+also earns them; texts in `tools/lang/src/chapter2/`, icons drawn by `tools/gui/achievement_icons.py`). Hidden ones (marked *) show "Hidden
+achievement" until earned. Level 1: *Don't Be Late!* (the time clock), *On the Sly...* (out of the union's meeting), *Terrible Stealth* (caught by a
+guard), *???\** (PLAY on the basement recording: the window sends `ch2l1_recording_played`), *A Familiar Face\** (Chamber 02's occupant looked at, still,
+for 5 s inside the aux chamber zone: `StillGaze`) and *What a Waste of Time!\** (both `follow_02` and `follow_03` heard). Level 2 is in
+[its page](chapter-2-level-2.md#chapter-2s-achievements).
+
 ## Debug commands
 
 `level1.platform.Ch2L1Commands`, operator level 2, **development runs only** (as [Debugging](debugging.md) explains for

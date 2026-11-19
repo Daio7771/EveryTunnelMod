@@ -161,5 +161,6 @@
       {"who": "worker_b", "key": "reunion_03_b", "sound": "every_tunnel:voice.reunion_03_b", "seconds": 4.4},
       {"who": "coworker", "key": "reunion_04", "sound": "every_tunnel:voice.reunion_04", "seconds": 3.8}
     ]
-  }
+  },
+  "explore": ["room_entrance", "room_entry_corridor", "room_top_stairs", "room_top_corridor", "room_hunter_galleries", "room_junction_balcony", "room_side_gallery_room", "room_pump_corridor", "room_pump_room", "room_catacombs", "room_lower_galleries", "room_service_corridor", "room_side_service_crypt", "room_vestibule", "room_maintenance", "zone_return_gallery", "room_flood_collector", "room_pasarelas", "room_upper_gallery", "room_station", "room_exit_corridor", "room_salida", "room_maw_corridor", "room_maw_arena", "room_reunion"]
 }

@@ -11,15 +11,17 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 /**
  * One of the Observant Guard's cinematics on the client ([Ch2L2GuardScenes]): the scene ([kind], its timeline built by the server's scene
  * from the Guard's timings) that [CutsceneView] plays when the server says it begins, round the place it sends. No speaker, no voice:
- * the Guard has none. The entrance shakes and flashes with [GuardIntro].
+ * the Guard has none. The entrance shakes and flashes with [GuardIntro]; Stone Maw's death is third person and draws the player, watching
+ * from [Ch2L2Maw]'s watch spot.
  */
 class Ch2L2GuardSceneView(
     private val scene: Ch2L2GuardScene,
     private val shakeAt: (Double) -> Double = { 0.0 },
     private val flashAt: (Double) -> Double = { 0.0 },
+    drawsPlayer: Boolean = false,
 ) {
 
-    val kind = object : CutsceneView.Kind({ scene.clientTimeline() }, scene.skipId, null, "voice.", false) {
+    val kind = object : CutsceneView.Kind({ scene.clientTimeline() }, scene.skipId, null, "voice.", drawsPlayer) {
         override fun shake(n: Double): Double = shakeAt(n)
 
         override fun flash(t: Double): Double = flashAt(t)
@@ -59,7 +61,7 @@ class Ch2L2GuardSceneView(
         fun registerAll() {
             Ch2L2GuardSceneView(Ch2L2GuardScenes.INTRO, GuardIntro::shake, GuardIntro::flash).register()
             Ch2L2GuardSceneView(Ch2L2GuardScenes.DEATH).register()
-            Ch2L2GuardSceneView(Ch2L2GuardScenes.MAW_DEATH, shakeAt = ::mawShake).register()
+            Ch2L2GuardSceneView(Ch2L2GuardScenes.MAW_DEATH, shakeAt = ::mawShake, drawsPlayer = true).register()
             Ch2L2ReunionView.register()
         }
     }

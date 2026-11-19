@@ -13,7 +13,6 @@ import daio7771.everytunnel.core.cutscene.SceneFrame
 import daio7771.everytunnel.core.cutscene.Timeline
 import daio7771.everytunnel.core.level.Position
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
@@ -60,7 +59,7 @@ object Ch2L2Reunion {
     private var waiting: Pair<FactoryNpcEntity, FactoryNpcEntity>? = null
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        Ch2L2Perf.register("reunion", ::tick)
         Ch2L2.onStart { player, _ -> drop(player.server) }
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> if (running?.player == handler.player.uuid) drop(handler.player.server) }
         ServerLifecycleEvents.SERVER_STOPPED.register {

@@ -1,6 +1,7 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
 import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.chapter2.level2.core.Ch2L2Event
 import daio7771.everytunnel.chapter2.level2.core.GuardIntro
 import daio7771.everytunnel.chapter2.level2.core.MawDeathScene
 import daio7771.everytunnel.core.cutscene.Cutscene
@@ -9,7 +10,6 @@ import daio7771.everytunnel.core.cutscene.Look
 import daio7771.everytunnel.core.cutscene.SceneFrame
 import daio7771.everytunnel.core.cutscene.Shot
 import daio7771.everytunnel.core.cutscene.Timeline
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -25,12 +25,14 @@ import java.util.UUID
  * the scene's length, tells the client to begin ([startId], which carries a place and some numbers for [build]; `client.Ch2L2GuardSceneView`
  * plays it with `CutsceneView`, building the same [Timeline] from them) and gives the player back at the end ([endId]), looking where [start]
  * says if it says (the entrance ends with the player looking at the Guard). A skip from the
- * client ([skipId]) ends it at once and runs [onSkip], which leaves the same world as watching it. Leaving the world drops it. Server
- * thread, but [build] is also read by the client (a single-player game shares the data). The two scenes are in [Ch2L2GuardScenes].
+ * client ([skipId]) ends it at once and runs [onSkip], which leaves the same world as watching it. Leaving the world drops it, after
+ * [onLeave] if the scene has one (what a scene that is a win must still do, so that CONTINUE does not play the fight again); a start of
+ * the level (a death, CONTINUE, `reset`) or the player dying drops it too, with no effects. Server thread, but [build] is also read by the client (a single-player game shares the data). The two scenes are in [Ch2L2GuardScenes].
  */
 class Ch2L2GuardScene(
     key: String,
     private val build: (DoubleArray) -> Timeline,
+    private val onLeave: ((MinecraftServer, ServerPlayerEntity) -> Unit)? = null,
     private val onSkip: (MinecraftServer, ServerPlayerEntity) -> Unit,
 ) {
     val startId = Identifier(EveryTunnel.MOD_ID, "ch2l2_guard_${key}_start")
@@ -57,8 +59,32 @@ class Ch2L2GuardScene(
         ServerPlayNetworking.registerGlobalReceiver(skipId) { server, player, _, _, _ ->
             server.execute { if (current?.player == player.uuid) finish(server, skipped = true) }
         }
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
-        ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> if (current?.player == handler.player.uuid) current = null }
+        Ch2L2Perf.register("scenes", ::tick)
+        ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->
+            if (current?.player == handler.player.uuid) {
+                current = null
+                onLeave?.let { leave ->
+                    try {
+                        leave(handler.player.server, handler.player)
+                    } catch (e: Exception) {
+                        EveryTunnel.LOGGER.error("Chapter 2 Level 2: the end of the {} cinematic on leaving failed", startId.path, e)
+                    }
+                }
+            }
+        }
+        Ch2L2.onStart { player, _ -> drop(player) }
+    }
+
+    /** The scene dropped with no effects, if it is [player]'s (the level started again, or they died): the client gives their camera and keys back. */
+    private fun drop(player: ServerPlayerEntity) {
+        val scene = current ?: return
+        if (scene.player != player.uuid) return
+        current = null
+        if (ServerPlayNetworking.canSend(player, endId)) {
+            val buf = PacketByteBufs.create()
+            buf.writeBoolean(true)
+            ServerPlayNetworking.send(player, endId, buf)
+        }
     }
 
     /**
@@ -109,6 +135,10 @@ class Ch2L2GuardScene(
             current = null
             return
         }
+        if (!player.isAlive) {
+            drop(player)
+            return
+        }
         val t = server.ticks - scene.startTick
         if (t >= scene.total) {
             finish(server, skipped = false)
@@ -153,10 +183,17 @@ object Ch2L2GuardScenes {
 
     val INTRO = Ch2L2GuardScene("intro", ::introTimeline) { server, _ -> Ch2L2Guard.skipIntro(server) }
 
-    val DEATH = Ch2L2GuardScene("death", ::deathTimeline) { server, player -> Ch2L2Guard.finish(server, player) }
+    val DEATH = Ch2L2GuardScene("death", ::deathTimeline, onLeave = { server, player -> Ch2L2Guard.finish(server, player) }) { server, player -> Ch2L2Guard.finish(server, player) }
 
     /** Stone Maw's death (phase 6.1): third person, on the clock of [MawDeathScene]; its end, played or skipped, is [Ch2L2Maw.finishDeath]. */
-    val MAW_DEATH = Ch2L2GuardScene("maw_death", { MawDeathScene.timeline(Ch2L2DataLoader.data.level.maw) }) { server, _ -> Ch2L2Maw.finishDeath(server) }
+    val MAW_DEATH = Ch2L2GuardScene(
+        "maw_death", { MawDeathScene.timeline(Ch2L2DataLoader.data.level.maw) },
+        // Leaving in the middle of it: Stone Maw is dead all the same, and CONTINUE stands in the reunion room, not at the arena's door.
+        onLeave = { server, player ->
+            Ch2L2Maw.finishDeath(server)
+            Ch2L2.takeCheckpointBefore(player, Ch2L2Event.REUNION)
+        },
+    ) { server, _ -> Ch2L2Maw.finishDeath(server) }
 
     fun register() {
         INTRO.register()

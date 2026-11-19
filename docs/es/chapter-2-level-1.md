@@ -538,6 +538,15 @@ Lo que añadió la pasada de QA para que el jugador no se quede atascado:
   comprobación.
 - **La vuelta al Capítulo 1** (`chapter2.platform.Ch2Return`, del capítulo, compartida con el Nivel 2): véase «Cómo se llega» al principio.
 
+## Logros del Capítulo 2
+
+Diez logros son la pestaña del Capítulo 2 de la pantalla ACHIEVEMENTS (`chapter2.core.Ch2Achievement`, registrados por `platform.Ch2Achievements`, que
+también los consigue; textos en `tools/lang/src/chapter2/`, iconos dibujados por `tools/gui/achievement_icons.py`). Los ocultos (con *) muestran "Logro
+oculto" hasta conseguirlos. Nivel 1: *¡No llegues tarde!* (el reloj de fichar), *A escondidas...* (salir de la reunión de la unión), *Pésimo sigilo*
+(te pilla un guardia), *???\** (PLAY en la grabación del sótano: la ventana manda `ch2l1_recording_played`), *Una cara familiar\** (mirar al ocupante de la
+Cámara 02, quieto, 5 s dentro de la zona `aux_chamber`: `StillGaze`) y *¡Vaya pérdida de tiempo!\** (oír `follow_02` y `follow_03`). El Nivel 2 está en
+[su página](chapter-2-level-2.md#logros-del-capítulo-2).
+
 ## Comandos de depuración
 
 `level1.platform.Ch2L1Commands`, nivel de operador 2, **solo en ejecuciones de desarrollo** (como explica

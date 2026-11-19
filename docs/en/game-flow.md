@@ -649,6 +649,12 @@ challenge toast with its fanfare
 `config/every_tunnel/achievements.json` (`client.AchievementStore`), across games and worlds.
 The vanilla advancements are not touched.
 
+The ACHIEVEMENTS screen has a **tab per chapter** (CHAPTER 1, and the next chapter's once it has achievements: click, Left/Right or Tab), each with its
+own list and count. The base game never names a later chapter: `core.achievement.AchievementRegistry` holds every `AchievementDef` (id, chapter
+number, puzzle flag, icon `item:<id>`), Chapter 1's enum first, and a chapter adds its own at start-up; `AchievementHooks.earned` and
+`puzzleSolved` work with any registered id, and `AchievementStore` keeps ids it does not know, so a jar without a chapter does not erase
+what that chapter earned. The table below is Chapter 1's tab.
+
 | Achievement | Earned when | Icon |
 |---|---|---|
 | First Day at Work | walking out of the elevator (the zone tagged `start` of a level with an intro) | the guard's badge |

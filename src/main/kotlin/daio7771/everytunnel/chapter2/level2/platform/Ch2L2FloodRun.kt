@@ -7,7 +7,6 @@ import daio7771.everytunnel.chapter2.level2.core.FloodStage
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
 import daio7771.everytunnel.platform.CollapseHooks
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -95,7 +94,7 @@ object Ch2L2FloodRun {
     private val JET_ID = Identifier(EveryTunnel.MOD_ID, "ambient.ch2l2.flood_jet")
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        Ch2L2Perf.register("flood", ::tick)
         Ch2L2.onStateChange { player, from, to -> changed(player, from, to) }
         Ch2L2.onStart { player, state -> settle(player, state) }
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> if (owner == handler.player.uuid) forgetRun(handler.player.server) }
@@ -218,6 +217,18 @@ object Ch2L2FloodRun {
         water = 0
         for (cell in flood.allCells) drain(world, cell)
         stopSounds(server)
+    }
+
+    /** How many of the flood's cells hold water now, of how many there are (cells in unloaded chunks are not counted); `/et ch2 l2 perf`. */
+    fun wetCells(world: ServerWorld): Pair<Int, Int> {
+        var wet = 0
+        for (cell in flood.allCells) {
+            val at = pos(world, cell)
+            if (!world.isChunkLoaded(at)) continue
+            val state = world.getBlockState(at)
+            if (state.isOf(Blocks.WATER) || (state.contains(Properties.WATERLOGGED) && state.get(Properties.WATERLOGGED))) wet++
+        }
+        return wet to flood.allCells.size
     }
 
     private const val FLAGS = Block.NOTIFY_LISTENERS or Block.FORCE_STATE

@@ -7,7 +7,7 @@ científico baja por la alcantarilla de emergencia del Nivel 1, solo, y busca un
 caza por las vibraciones del suelo en la sala de bombas, el Observant Guard del Capítulo 1 en las cámaras de abajo y una inundación en tres
 etapas camino de la estación de bombeo y la salida. Se construye por fases (de la 1 a la 7, y una fase 8 por venir: iluminación y decoración), una cada vez, en la rama **privada**
 `chapter-2/level-2` (sale de `chapter-2/level-1` y solo se sube al remoto `private`) hasta que se publiquen los Niveles 1 y 2 del capítulo.
-**En qué punto está: fase 6, la inundación y la salida.** Se llega bajando por la alcantarilla del Nivel 1 y se
+**En qué punto está: fase 7, la revisión integral.** Se llega bajando por la alcantarilla del Nivel 1 y se
 recorre de la entrada a la salida con las barras de supervivencia; morir devuelve al último checkpoint, y el Capítulo 2 del menú lo
 continúa; el primer tramo ya tiene sus enemigos, recursos y documentos, la sala de bombas tiene su criatura y su bomba, el vestíbulo y la sala de mantenimiento tienen el Guard y sus trampas, y el camino a la salida se inunda en tres etapas y acaba en una puerta pesada que se abre a la última batalla de Stone Maw (fase 6.1), el reencuentro con el compañero y el trabajador B y "CONTINUARÁ".
 
@@ -162,8 +162,9 @@ generador) y las escaleras suben de nuevo a quien caiga.
   sale al menú principal. La primera vez también fija `DONE` y guarda el checkpoint `chapter_end` (ancla `chapter_end`, en la sala del
   reencuentro): CONTINUAR deja ahí, con toda la inundación puesta. `/et ch2 l2 ending` lo reproduce, para probar.
 
-El generador informa del paseo tranquilo desde justo dentro de la puerta de la estación (`station_door_in`) hasta la puerta de salida: 36
-bloques, unos 8 s.
+El generador informa del paseo tranquilo desde justo dentro de la puerta de la estación (`station_door_in`) hasta la puerta de salida: 52
+bloques, unos 12 s (fase 7: el pasillo de salida es un zigzag, oeste, sur, oeste, norte, oeste; las dos puertas siguen donde estaban), y
+`checks.py` falla por debajo de 50.
 
 ## La última batalla de Stone Maw y el reencuentro (fase 6.1)
 
@@ -202,6 +203,21 @@ con la puerta cerrada del Nivel 3 en el muro del fondo). Las compuertas `maw_ent
   trabajador B, compañero), con sus subtítulos en `tools/lang/src/chapter2`; sin líneas la escena es una corta y muda.
 - **Arranques** (entrar, una muerte, CONTINUAR, `reset maw`): todo como el estado quiere: la pelea terminada, las compuertas, los trozos fuera de
   los bolsillos, los escombros solo desde `MAW_DEAD`. Checkpoints `maw` (antes de la arena), `reunion` y `chapter_end`.
+
+## Fase 7: la revisión integral
+
+Una auditoría de la partida guardada, las muertes y las cinemáticas, con estos arreglos: morir en la arena de Stone Maw devuelve el salto al cliente; una
+cinemática se descarta (sin efectos) cuando el nivel vuelve a empezar o el jugador muere; salir durante la muerte del Guardia o de Stone Maw conserva la
+victoria (corre el final de la escena, y el de la Maw toma también el checkpoint del reencuentro); y al morir Stone Maw el jugador se pone en un punto de
+vigilancia (radio del derrumbe + 2, lado de la entrada, mirando al centro) para que no le caiga ningún bloque, y la cinemática lo dibuja. No hizo falta un
+suelo de reintento: la muerte ya da vida y recursos al máximo. `/et ch2 l2 perf` (ver Comandos de depuración) y los logros tienen sus propias secciones.
+
+## Logros del Capítulo 2
+
+*¿Qué era eso?* (ningún golpe de la criatura de las bombas al llegar a las catacumbas: contador `pump_hits`, que se pone a cero al empezar el nivel antes de
+ellas), *Una despedida triste* (5 s vivo tras la muerte del Guardia observador), *Explorador\** (todas las zonas de `explore` de `level.json`, incluidas las dos
+CRYPT opcionales: los contadores `seen.<zona>`; las zonas `room_*` las pone el generador) y *La puntería no es lo tuyo\** (más de dos tuberías que fallaron a
+Stone Maw en un combate: contador `maw_misses`). Los ocultos llevan *. El resto está en [la página del Nivel 1](chapter-2-level-1.md#logros-del-capítulo-2).
 
 ## Fase 8 (por venir): iluminación y decoración
 
@@ -360,6 +376,7 @@ las anclas, y lo que está mal se avisa (`/et reload`).
 | `/et ch2 l2 ending` | Reproduce el final (fundido, "CONTINUARÁ", menú principal); el nivel solo se termina si estás en el reencuentro o más allá |
 | `/et ch2 l2 maw` / `maw hit` / `maw kill` | La pelea de Stone Maw en el chat (fase, golpes que faltan, modo) / cuenta un golpe / reproduce su muerte. `skip maw` ejecuta el final de la muerte, `reset maw` devuelve la pelea a su inicio |
 | `/et ch2 l2 reunion` | Te pone en el punto de la sala del reencuentro y suena el reencuentro |
+| `/et ch2 l2 perf` | Lo que cuesta el nivel en tu mundo (fase 7): sus entidades por tipo (un segundo Guardia, criatura, Maw o PNJ del reencuentro sale marcado `DUPLICATES`), las celdas de agua de la inundación, las lámparas por modo, y los ms medios y peores que un tick del servidor gasta en los manejadores del nivel en los últimos 100 ticks, por manejador |
 | `/et ch2 l2 anchors` | Cada ancla y zona con sus coordenadas, marcadas las provisionales |
 | `/et ch2 l2 goto <ancla>` | Construye el nivel si no lo está y te lleva a un lugar (`sealed_entry` ... `level_exit`, `trap_1`...) o al centro de una zona (`zone_<lugar>`) |
 | `/et reload` | Vuelve a leer los datos de los Niveles 1 y 2 y dice qué está mal |

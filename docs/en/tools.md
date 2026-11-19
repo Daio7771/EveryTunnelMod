@@ -50,7 +50,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/gui/locker_view.py` | `locker_view.png` | the view from inside a locker |
 | `tools/gui/safe_dial.py` | `safe_dial.png` | the dial of the safes in the Suites |
 | `tools/gui/wall_font.py` | `wall_paint.png`, `wall_paint.json`, `wall_chalk.png`, `wall_chalk.json` | the painted font of the wall messages, and its chalk version |
-| `tools/gui/achievement_icons.py` | `achievement_icons.png` | the achievement icons drawn for the mod (badge, skull, Pale man, puzzle piece, padlock, the Director's mask, locked) |
+| `tools/gui/achievement_icons.py` | `achievement_icons.png` | the achievement icons drawn for the mod (badge, skull, Pale man, puzzle piece, padlock, the Director's mask, locked, and Chapter 2's ten) |
 | `tools/gui/credits_art.py` | `textures/gui/credits/*.png`: the final credits' four drawings by the author (`tools/gui/credits/*.webp`), shrunk | the credits' drawings |
 | `tools/gui/congrats_art.py` | `congrats_observer.png` | the congratulations window's pixel art, a sheet of 16 frames (4 poses of his arm by 4 phases of the steam): the Observer with his coffee, steaming and sipping |
 | `tools/gui/guide_paper.py` | `guide_paper.png` (seamless tile), `guide_stains.png` | the guide's paper |

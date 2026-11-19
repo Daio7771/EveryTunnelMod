@@ -1,5 +1,6 @@
 package daio7771.everytunnel.chapter2
 
+import daio7771.everytunnel.chapter2.platform.Ch2Achievements
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
@@ -86,6 +87,7 @@ object Chapter2 : ModInitializer {
         Ch2Entities.register()
         Ch2Sounds.register()
         Ch2Progress.register()
+        Ch2Achievements.register()
         PlayerRules.register { player ->
             when {
                 Ch2L1.active(player) -> if (Ch2L1.state(player) >= Ch2L1State.ACT3_OVERTIME) LEVEL1_OVERTIME_RULES else LEVEL1_RULES

@@ -16,7 +16,6 @@ import daio7771.everytunnel.platform.ChapterRestarts
 import daio7771.everytunnel.platform.DeathHooks
 import daio7771.everytunnel.platform.LightMode
 import daio7771.everytunnel.systems.ResourceSystem
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.nbt.NbtList
 import net.minecraft.registry.RegistryKey
@@ -78,7 +77,7 @@ object Ch2L2 {
     private val data get() = Ch2L2DataLoader.data
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        Ch2L2Perf.register("level", ::tick)
         ChapterRestarts.register { player -> if (active(player)) restartFor(player) else null }
     }
 
@@ -243,6 +242,13 @@ object Ch2L2 {
     /** Takes the checkpoint called [id] for [player] at their state now (the Guard's death saves the vestibule's with the state it leaves them in); false if there is none. */
     fun takeCheckpoint(player: ServerPlayerEntity, id: String): Boolean {
         val checkpoint = data.level.checkpoint(id) ?: return false
+        save(player, checkpoint)
+        return true
+    }
+
+    /** Takes the checkpoint that comes before [event] for [player] at their state now (the Maw's death saves the reunion's, so CONTINUE stands in the room); false if there is none. */
+    fun takeCheckpointBefore(player: ServerPlayerEntity, event: Ch2L2Event): Boolean {
+        val checkpoint = data.level.checkpointBefore(event) ?: return false
         save(player, checkpoint)
         return true
     }

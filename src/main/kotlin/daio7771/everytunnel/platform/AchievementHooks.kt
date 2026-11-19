@@ -3,6 +3,7 @@ package daio7771.everytunnel.platform
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.core.LevelManager
 import daio7771.everytunnel.core.achievement.Achievement
+import daio7771.everytunnel.core.achievement.AchievementDef
 import daio7771.everytunnel.world.LevelTriggers
 import daio7771.everytunnel.world.WorldRules
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -19,7 +20,8 @@ import java.util.UUID
  * Earning the achievements ([Achievement]): the server tells the client, which shows the
  * "Achievement Unlocked!" toast the first time and remembers it for good (`client.hud.AchievementToast`,
  * `client.AchievementStore`, which Ctrl+Shift+D in the ACHIEVEMENTS screen resets). Each one is told
- * once per game at most. The vanilla advancements are not touched. Only in worlds with levels.
+ * once per game at most. The vanilla advancements are not touched. Only in worlds with levels. A later chapter's achievements
+ * ([daio7771.everytunnel.core.achievement.AchievementRegistry]) are earned through the same two calls, [earned] and [puzzleSolved].
  *
  * - First Day at Work: walking out of the start zone (tagged `start`, [IntroHooks.START_TAG])
  *   of a level with an intro: out of the elevator ([register], from [LevelTriggers]).
@@ -42,7 +44,7 @@ object AchievementHooks {
     private var server: MinecraftServer? = null
 
     // Server thread only. Player -> what they have earned in this game.
-    private val earnedThisGame = mutableMapOf<UUID, MutableSet<Achievement>>()
+    private val earnedThisGame = mutableMapOf<UUID, MutableSet<String>>()
 
     fun register() {
         ServerLifecycleEvents.SERVER_STARTED.register { server = it }
@@ -60,10 +62,10 @@ object AchievementHooks {
         }
     }
 
-    /** [player] earned [achievement]: their toast, unless they already earned it in this game. */
-    fun earned(player: ServerPlayerEntity, achievement: Achievement) {
+    /** [player] earned [achievement] (Chapter 1's or any chapter's registered one): their toast, unless they already earned it in this game. */
+    fun earned(player: ServerPlayerEntity, achievement: AchievementDef) {
         if (!WorldRules.active) return
-        if (!earnedThisGame.getOrPut(player.uuid) { mutableSetOf() }.add(achievement)) return
+        if (!earnedThisGame.getOrPut(player.uuid) { mutableSetOf() }.add(achievement.id)) return
         if (!ServerPlayNetworking.canSend(player, PACKET_ID)) return
         val buf = PacketByteBufs.create()
         buf.writeString(achievement.id)
@@ -77,7 +79,7 @@ object AchievementHooks {
     }
 
     /** A puzzle was solved in [world]: every player there earns it. */
-    fun puzzleSolved(world: ServerWorld, achievement: Achievement) {
+    fun puzzleSolved(world: ServerWorld, achievement: AchievementDef) {
         for (player in world.players) earned(player, achievement)
     }
 

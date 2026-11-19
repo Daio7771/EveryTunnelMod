@@ -1,5 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.client
 
+import daio7771.everytunnel.chapter2.platform.Ch2Achievements
 import daio7771.everytunnel.chapter2.level1.client.NonameOsLook.DIM_GREEN
 import daio7771.everytunnel.chapter2.level1.client.NonameOsLook.GREEN
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Act3Hooks
@@ -175,6 +176,7 @@ class NonameOsFilesScreen(
             )
             manager.play(instance)
             playingNow = instance
+            ClientPlayNetworking.send(Ch2Achievements.RECORDING_PACKET, PacketByteBufs.create().also { it.writeString(sound) })
         }
         beep()
     }

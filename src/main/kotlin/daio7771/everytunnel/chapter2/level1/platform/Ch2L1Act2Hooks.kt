@@ -1,5 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
+import daio7771.everytunnel.chapter2.platform.Ch2Achievements
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Angles
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Follow
@@ -330,6 +331,7 @@ object Ch2L1Act2Hooks {
         d.pose = if (talking) Ch2L1Pose.TALKING else Ch2L1Pose.NONE
         step.say?.let { line ->
             say(player, coworker, line)
+            if (line in spec.follow.reminders) Ch2Achievements.followReminder(player, line, spec.follow.reminders)
             f.talkUntil = server.ticks.toLong() + (voices.line(line)?.ms ?: 1000) / 50
         }
         val zone = Ch2L1DataLoader.data.anchors.zone(spec.meeting.zone)?.box ?: return

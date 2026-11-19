@@ -6,8 +6,8 @@ Level 2 of Chapter 2 is the catacombs under the factory: the old catacombs the f
 down Level 1's emergency manhole, alone, and looks for a way out: the Hunters in the galleries, a creature that hunts by the floor's
 vibrations in the pump room, the Observant Guard of Chapter 1 in the lower chambers, and a flood in three stages on the way to the
 pumping station and the exit. It is built in phases (1 to 7, and a phase 8 to come: lighting and decoration), one at a time, on the **private** branch `chapter-2/level-2` (off
-`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 6,
-the flood and the exit.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
+`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 7,
+the integral review.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
 bars, dying brings the player back to the last checkpoint, and the menu's Chapter 2 continues it; the first stretch has its enemies,
 resources and documents, the pump room has its creature and its pump, the vestibule and maintenance room have the Guard and its traps, and the way on to the exit floods in three stages and ends at a heavy door that opens on Stone Maw's last stand (phase 6.1), the reunion with the coworker and worker B and "TO BE CONTINUED".
 
@@ -157,7 +157,8 @@ nothing lethal but vanilla drowning; the route always stays over each stage (the
   `card_seconds` and leaves for the main menu. The first time it also sets `DONE` and saves the `chapter_end` checkpoint (anchor `chapter_end`,
   in the reunion room): CONTINUE stands there with the whole flood in place. `/et ch2 l2 ending` plays it for testing.
 
-The generator reports the quiet walk from just inside the station's door (`station_door_in`) to the exit's door: 36 blocks, about 8 s.
+The generator reports the quiet walk from just inside the station's door (`station_door_in`) to the exit's door: 52 blocks, about 12 s (phase 7: the
+exit corridor is a dog-leg, west, south, west, north, west; both doors stayed where they were), and `checks.py` fails under 50.
 
 ## Stone Maw's last stand and the reunion (phase 6.1)
 
@@ -195,6 +196,21 @@ stub Stone Maw comes out of, grated by the gate `maw_pipe_mouth`) and `reunion` 
   coworker), their subtitles in `tools/lang/src/chapter2`; with no lines the scene is a short silent one.
 - **Starts** (entering, a death, CONTINUE, `reset maw`): everything as the state wants it: the fight over, the gates, the pieces out of the pockets,
   the rubble only from `MAW_DEAD`. Checkpoints `maw` (before the arena), `reunion` and `chapter_end`.
+
+## Phase 7: the integral review
+
+An audit of the saved game, deaths and cinematics, with these fixes: dying in Stone Maw's arena gives the client its jump back; a cinematic is dropped
+(no effects) when the level starts again or the player dies; leaving during the Guard's or Stone Maw's death keeps the win (the scene's end runs, and
+the Maw's also takes the reunion's checkpoint); and when Stone Maw dies the player is put at a watch spot (collapse radius + 2, entrance side, facing
+the centre) so no block lands on them, and the cinematic draws them. A retry floor was not needed: a death already gives full health and resources.
+`/et ch2 l2 perf` (see Debug commands) and the achievements are in their own sections.
+
+## Chapter 2's achievements
+
+*What Was That?* (no blow from the pump creature by the time the catacombs are reached: counter `pump_hits`, reset when the level starts before them),
+*A Sad Farewell* (5 s alive after the Observant Guard's death), *Explorer\** (every zone of `level.json`'s `explore`, the two optional CRYPTs
+included: the counters `seen.<zone>`; the `room_*` zones come from the generator) and *Your Aim Is Not Your Thing\** (more than two pipes that missed
+Stone Maw in one fight: counter `maw_misses`). Hidden ones are marked *. The rest are in [Level 1's page](chapter-2-level-1.md#chapter-2s-achievements).
 
 ## Phase 8 (to come): lighting and decoration
 
@@ -346,6 +362,7 @@ anchors, and what is wrong is reported (`/et reload`).
 | `/et ch2 l2 ending` | Plays the ending (fade, "TO BE CONTINUED", main menu); the level finishes only if you are in the reunion or past it |
 | `/et ch2 l2 maw` / `maw hit` / `maw kill` | Stone Maw's fight in the chat (phase, hits left, mode) / counts a hit / plays its death. `skip maw` runs the death's end, `reset maw` puts the fight back at its start |
 | `/et ch2 l2 reunion` | You are put at the reunion room's spot and the reunion plays |
+| `/et ch2 l2 perf` | What the level costs in your world (phase 7): its entities by type (a second Guard, creature, Maw or reunion NPC is flagged `DUPLICATES`), the flood's water cells, the lamps by mode, and the mean and worst ms a server tick spends on the level's own handlers over the last 100 ticks, by handler |
 | `/et ch2 l2 anchors` | Every anchor and zone with its coordinates, the provisional ones marked |
 | `/et ch2 l2 goto <anchor>` | Builds the level if it is not, then takes you to a place (`sealed_entry` ... `level_exit`, `trap_1`...) or to the middle of a zone (`zone_<place>`) |
 | `/et reload` | Reads Level 1's and Level 2's data again and says what is wrong |

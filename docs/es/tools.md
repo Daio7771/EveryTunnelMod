@@ -53,7 +53,7 @@ git).
 | `tools/gui/locker_view.py` | `locker_view.png` | la vista desde dentro de una taquilla |
 | `tools/gui/safe_dial.py` | `safe_dial.png` | el dial de las cajas fuertes de las Suites |
 | `tools/gui/wall_font.py` | `wall_paint.png`, `wall_paint.json`, `wall_chalk.png`, `wall_chalk.json` | la fuente pintada de los mensajes en la pared, y su versión en tiza |
-| `tools/gui/achievement_icons.py` | `achievement_icons.png` | los iconos de logro dibujados para el mod (placa, calavera, Pale man, pieza de puzle, candado, la máscara del director, bloqueado) |
+| `tools/gui/achievement_icons.py` | `achievement_icons.png` | los iconos de logro dibujados para el mod (placa, calavera, Pale man, pieza de puzle, candado, la máscara del director, bloqueado y los diez del Capítulo 2) |
 | `tools/gui/credits_art.py` | `textures/gui/credits/*.png`: los cuatro dibujos del autor de los créditos finales (`tools/gui/credits/*.webp`), reducidos | los dibujos de los créditos |
 | `tools/gui/congrats_art.py` | `congrats_observer.png` | el pixel art de la ventana de felicitación, una hoja de 16 fotogramas (4 poses del brazo por 4 fases del vapor): el Observer con su café, echando vapor y dando sorbos |
 | `tools/gui/guide_paper.py` | `guide_paper.png` (mosaico sin costuras), `guide_stains.png` | el papel de la guía |

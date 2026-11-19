@@ -25,6 +25,7 @@ from pathlib import Path
 
 from level import AIR, permeable
 
+ENDING_WALK_MIN = 50   # blocks from the station's door to the exit's heavy door (about 12 s walking)
 DOWN_WALK = 3          # the farthest drop of an honest walk
 DOWN_ANY = 64          # any drop (a shortcut may cost health)
 CLIMB_OUT = 2          # out of the water onto a floor at most this many blocks over the water's top cell
@@ -250,6 +251,8 @@ def run(level):
         if sb in seen:
             blocks = seen[sb][0]
             report.append(f"ending walk: station door to exit door, {blocks} blocks, about {blocks * cfg['walk_seconds_per_block']:.0f} s")
+            if blocks < ENDING_WALK_MIN:
+                errors.append(f"ending walk: {blocks} blocks from the station's door to the exit's, at least {ENDING_WALK_MIN} wanted (about 12 s)")
         else:
             errors.append("ending walk: no way from the station's door to the exit's door")
 

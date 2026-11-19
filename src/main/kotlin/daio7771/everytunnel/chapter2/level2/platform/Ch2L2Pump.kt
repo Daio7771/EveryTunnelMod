@@ -9,7 +9,6 @@ import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
 import daio7771.everytunnel.core.level.Position
 import daio7771.everytunnel.platform.ModBlocks
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.block.Block
 import net.minecraft.block.Blocks
 import net.minecraft.block.ConnectingBlock
@@ -72,7 +71,7 @@ object Ch2L2Pump {
     private const val INTRO_LIMIT_TICKS = 120L
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        Ch2L2Perf.register("pump", ::tick)
         Ch2L2.onStart { player, state -> started(player, state) }
         Ch2L2.onStateChange { player, from, to ->
             if (to >= Ch2L2State.CATACOMBS) stop(player.server, removeCreature = true)

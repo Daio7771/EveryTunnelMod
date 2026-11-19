@@ -9,6 +9,7 @@ import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import daio7771.everytunnel.chapter2.platform.MapBuild
 import daio7771.everytunnel.platform.DevWorlds
+import daio7771.everytunnel.platform.LightMode
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.command.CommandSource
 import net.minecraft.registry.RegistryKey
@@ -43,6 +44,9 @@ import net.minecraft.util.Identifier
  *   `/et ch2 l2 ending` plays the ending (fade, card, main menu; the level is finished only if you are in the reunion or past it) ([Ch2L2Ending]).
  * - `/et ch2 l2 maw`: Stone Maw's fight (phase 6.1): its phase, hits left and mode; `maw hit` counts a hit, `maw kill` plays its death. `skip maw`
  *   runs its death's end at once, `reset maw` puts the fight back at its start. `/et ch2 l2 reunion` plays the reunion (you are put at its spot) ([Ch2L2Maw], [Ch2L2Reunion]).
+ * - `/et ch2 l2 perf`: what the level costs where you stand (phase 7): its entities by type (more than one where only one belongs is flagged), the
+ *   flood's water cells, the lamps by mode and the mean and worst milliseconds a server tick spends on the level's own handlers over the last
+ *   100 ticks, by handler ([Ch2L2Perf]).
  * - `/et ch2 l2 anchors`: every anchor with its coordinates, the provisional ones marked.
  * - `/et ch2 l2 goto <anchor>`: builds the level if it is not, then takes you to a point (the places of the route, `sealed_entry` to
  *   `level_exit`, and the rest), or to the middle of a zone (`zone_<place>`) one block over its floor.
@@ -112,6 +116,7 @@ object Ch2L2Commands {
                                         .then(CommandManager.literal("kill").executes(::mawKill)),
                                 )
                                 .then(CommandManager.literal("reunion").executes(::reunion))
+                                .then(CommandManager.literal("perf").executes(::perf))
                                 .then(CommandManager.literal("anchors").executes(::anchors))
                                 .then(
                                     CommandManager.literal("goto").then(
@@ -366,6 +371,34 @@ object Ch2L2Commands {
             }
         }
         return if (asked == MapBuild.Asked.BUILT) 1 else answer(context, asked)
+    }
+
+    private fun perf(context: CommandContext<ServerCommandSource>): Int {
+        val player = context.source.playerOrThrow
+        val world = player.serverWorld
+        if (world.registryKey.value.toString() != Ch2L2DataLoader.data.anchors.dimension) {
+            reply(context, "Level 2's world is ${Ch2L2DataLoader.data.anchors.dimension}; you are in ${world.registryKey.value}.")
+            return 0
+        }
+        val entities = world.iterateEntities().filter { it !is net.minecraft.entity.player.PlayerEntity }.toList()
+        val byType = entities.groupingBy { net.minecraft.registry.Registries.ENTITY_TYPE.getId(it.type).path }.eachCount().toSortedMap()
+        reply(context, "entities (${entities.size}): ${byType.entries.joinToString(", ") { "${it.key} ${it.value}" }.ifEmpty { "none" }}")
+        val onlyOne = listOf(
+            "Observant Guard" to entities.count { it is ObservantGuardEntity },
+            "pump creature" to entities.count { it is VibrationCreatureEntity && !it.inFight },
+            "Stone Maw" to entities.count { it is VibrationCreatureEntity && it.inFight },
+        ).filter { it.second > 1 }
+        if (onlyOne.isNotEmpty()) reply(context, "  DUPLICATES: ${onlyOne.joinToString { "${it.first} x${it.second}" }}")
+        val npcs = entities.count { it is daio7771.everytunnel.chapter2.level1.platform.FactoryNpcEntity && it.group == "ch2l2_reunion" }
+        if (npcs > 2) reply(context, "  DUPLICATES: reunion NPCs x$npcs (two belong)")
+        val (wet, cells) = Ch2L2FloodRun.wetCells(world)
+        reply(context, "water: $wet of $cells flood cells hold water; ${Ch2L2FloodRun.describe()}")
+        val lamps = Ch2L2Build.lampModes(world)
+        reply(context, "lamps: ${lamps.values.sum()} (on ${lamps[LightMode.ON]}, flicker ${lamps[LightMode.FLICKER]}, off ${lamps[LightMode.OFF]})")
+        val budget = Ch2L2Perf.budget
+        reply(context, "level's tick work, last ${budget.ticks} ticks: mean %.3f ms, worst %.3f ms (a tick is 50 ms)".format(budget.meanMillis(), budget.worstMillis()))
+        reply(context, "  by handler: ${budget.meanMillisByName().joinToString(", ") { "%s %.3f".format(it.first, it.second) }.ifEmpty { "none yet" }}")
+        return 1
     }
 
     private fun mark(provisional: Boolean) = if (provisional) " (provisional)" else ""

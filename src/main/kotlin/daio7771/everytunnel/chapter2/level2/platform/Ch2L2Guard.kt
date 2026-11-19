@@ -18,7 +18,6 @@ import daio7771.everytunnel.platform.LightMode
 import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.WallMessageBlock
 import daio7771.everytunnel.platform.WallMessageBlockEntity
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.nbt.NbtCompound
@@ -126,7 +125,7 @@ object Ch2L2Guard {
     private val RUBBLE = listOf(-2 to 0, -1 to 0, 1 to 0, -1 to 1, 0 to 1)
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        Ch2L2Perf.register("guard", ::tick)
         Ch2L2.onStart { player, state -> restore(player.server, state) }
         Ch2L2.onStateChange { player, from, to ->
             if (to >= Ch2L2State.GUARD_DEAD) finish(player.server, player)
@@ -333,7 +332,9 @@ object Ch2L2Guard {
     }
 
     /** Called every tick by the Guard itself ([ObservantGuardEntity.mobTick]): what it does now. */
-    fun drive(guard: ObservantGuardEntity, world: ServerWorld, now: Long) {
+    fun drive(guard: ObservantGuardEntity, world: ServerWorld, now: Long) = Ch2L2Perf.time(world.server, "guard brain") { driveNow(guard, world, now) }
+
+    private fun driveNow(guard: ObservantGuardEntity, world: ServerWorld, now: Long) {
         if (guardId == null) guardId = guard.uuid
         if (guard.uuid != guardId || fight.finished) {
             if (guard.uuid != guardId) guard.discard()

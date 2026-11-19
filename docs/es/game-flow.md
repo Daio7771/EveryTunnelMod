@@ -686,6 +686,12 @@ vez, porque siguen desbloqueados hasta que Ctrl+Shift+D en la pantalla ACHIEVEME
 `config/every_tunnel/achievements.json` (`client.AchievementStore`), entre partidas y mundos.
 Los logros de vanilla no se tocan.
 
+La pantalla ACHIEVEMENTS tiene una **pestaña por capítulo** (CAPÍTULO 1, y la del siguiente cuando tenga logros: clic, Izquierda/Derecha o Tab), cada
+una con su lista y su cuenta. El juego base nunca nombra un capítulo posterior: `core.achievement.AchievementRegistry` guarda cada `AchievementDef`
+(id, número de capítulo, si es de puzle, icono `item:<id>`), primero el enum del Capítulo 1, y cada capítulo añade los suyos al arrancar;
+`AchievementHooks.earned` y `puzzleSolved` sirven para cualquier id registrado, y `AchievementStore` conserva los ids que no conoce, así que un
+jar sin un capítulo no borra lo que ese capítulo consiguió. La tabla de abajo es la pestaña del Capítulo 1.
+
 | Logro | Se consigue al | Icono |
 |---|---|---|
 | First Day at Work | salir del ascensor (la zona con la etiqueta `start` de un nivel con intro) | la placa del vigilante |

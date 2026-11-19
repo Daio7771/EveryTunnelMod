@@ -1,5 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
+import daio7771.everytunnel.chapter2.platform.Ch2Achievements
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Creature
 import daio7771.everytunnel.chapter2.level2.core.VibrationCreatureBrain
@@ -103,6 +104,11 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
     }
 
     override fun mobTick() {
+        val server = (world as? ServerWorld)?.server
+        if (server == null) brainTick() else Ch2L2Perf.time(server, if (inFight) "maw brain" else "creature brain") { brainTick() }
+    }
+
+    private fun brainTick() {
         super.mobTick()
         val world = world as? ServerWorld ?: return
         if (inFight) {
@@ -245,6 +251,7 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
         val fraction = Ch2L2DataLoader.data.level.creature.damageFraction
         val loss = (player.maxHealth * fraction).toFloat()
         val lethal = player.health - loss <= 0.0f
+        if (!inFight) Ch2Achievements.creatureHit(player)
         if (lethal) {
             player.damage(damageSources.mobAttack(this), LETHAL_DAMAGE)
         } else {

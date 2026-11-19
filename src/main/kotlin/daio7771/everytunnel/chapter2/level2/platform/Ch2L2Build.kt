@@ -86,6 +86,19 @@ object Ch2L2Build {
         )
     }
 
+    /** How many of the plan's lamps stand in each mode now (those in unloaded chunks and any block that is not a lamp are not counted); `/et ch2 l2 perf`. */
+    fun lampModes(world: ServerWorld): Map<LightMode, Int> {
+        val counts = LightMode.entries.associateWith { 0 }.toMutableMap()
+        for (cell in plan.lights) {
+            val pos = BlockPos(plan.worldX(cell.x), plan.worldY(cell.y), plan.worldZ(cell.z))
+            if (!world.isChunkLoaded(pos)) continue
+            val state = world.getBlockState(pos)
+            if (state.block !is FluorescentLightBlock) continue
+            counts.merge(state.get(FluorescentLightBlock.MODE), 1, Int::plus)
+        }
+        return counts
+    }
+
     /** The plan's lamps in the zone [zoneId] in [mode] (the cage lamps of the map, or any light of the kind); how many changed. */
     fun zoneLights(world: ServerWorld, zoneId: String, mode: LightMode): Int {
         val box = Ch2L2DataLoader.data.anchors.zone(zoneId)?.box ?: return 0

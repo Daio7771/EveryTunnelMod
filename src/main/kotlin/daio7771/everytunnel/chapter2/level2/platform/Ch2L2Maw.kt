@@ -1,5 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
+import daio7771.everytunnel.chapter2.platform.Ch2Achievements
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Flood
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Maw as MawRules
@@ -17,7 +18,6 @@ import daio7771.everytunnel.core.cutscene.SceneFrame
 import daio7771.everytunnel.core.level.Position
 import daio7771.everytunnel.platform.MovementRules
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -107,7 +107,7 @@ object Ch2L2Maw {
     var clientJumpBlocked = false
 
     fun register() {
-        ServerTickEvents.END_SERVER_TICK.register(::tick)
+        Ch2L2Perf.register("maw", ::tick)
         Ch2L2.onStart { player, state -> started(player, state) }
         Ch2L2.onStateChange { player, _, to -> if (to >= Ch2L2State.MAW_DEAD) finishDeath(player.server) }
         ServerPlayConnectionEvents.DISCONNECT.register { handler, _ -> jumpTold.remove(handler.player.uuid) }
@@ -195,6 +195,7 @@ object Ch2L2Maw {
         burstAt = now + BURST_DELAY_TICKS
         musicStart = now
         firstPiece(world, player)
+        Ch2Achievements.fightBegan(player)
         EveryTunnel.LOGGER.info("Chapter 2 Level 2: {} enters the arena: the fight begins", player.gameProfile.name)
     }
 
@@ -309,7 +310,10 @@ object Ch2L2Maw {
         val world = piece.world as? ServerWorld ?: return
         world.playSound(null, piece.x, piece.y, piece.z, Ch2Sounds.CH2L2_MAW_PIPE_BREAK, SoundCategory.BLOCKS, 1.4f, 1.0f)
         world.spawnParticles(ParticleTypes.CRIT, piece.x, piece.y, piece.z, 12, 0.2, 0.2, 0.2, 0.2)
-        if (phase == Phase.FIGHT) clang(piece.x, piece.y, piece.z, world.server.ticks.toLong())
+        if (phase == Phase.FIGHT) {
+            (piece.owner as? ServerPlayerEntity)?.let(Ch2Achievements::pipeMissed)
+            clang(piece.x, piece.y, piece.z, world.server.ticks.toLong())
+        }
     }
 
     private fun clang(x: Double, y: Double, z: Double, now: Long) {
@@ -420,6 +424,10 @@ object Ch2L2Maw {
         val blocked = jumpBlocked(player)
         if (blocked == (player.uuid in jumpTold)) return
         if (blocked) jumpTold += player.uuid else jumpTold -= player.uuid
+        sendJump(player, blocked)
+    }
+
+    private fun sendJump(player: ServerPlayerEntity, blocked: Boolean) {
         if (ServerPlayNetworking.canSend(player, JUMP_PACKET)) {
             val buf = PacketByteBufs.create()
             buf.writeBoolean(blocked)
@@ -441,11 +449,32 @@ object Ch2L2Maw {
         takePieces(world)
         val player = fighter?.let { world.getPlayerByUuid(it) as? ServerPlayerEntity }
         val centre = data.anchors.point(rules.centre)
+        // The ceiling comes down round the centre: the player watches from outside it (the scene holds them where they are).
+        if (player != null) moveToWatch(player)
         if (player != null && centre != null) {
             val frame = SceneFrame(centre.position.x, centre.position.y, centre.position.z, centre.yaw.toDouble())
             Ch2L2GuardScenes.MAW_DEATH.start(player, frame)
         }
         EveryTunnel.LOGGER.info("Stone Maw takes its last hit: the death scene begins")
+    }
+
+    /**
+     * Where the player stands to watch the collapse: on the entrance side of the centre, [rules]'s collapse radius and a little more away (so
+     * no falling block or mound reaches them), facing the centre. Null if the centre has no anchor.
+     */
+    private fun watchSpot(): Triple<Position, Float, Float>? {
+        val c = data.anchors.point(rules.centre) ?: return null
+        val frame = SceneFrame(c.position.x, c.position.y, c.position.z, c.yaw.toDouble())
+        val (x, y, z) = frame.at(-(rules.collapseRadius + WATCH_MARGIN), 0.0, 0.0)
+        return Triple(Position(x, y, z), c.yaw, 0f)
+    }
+
+    private fun moveToWatch(player: ServerPlayerEntity) {
+        val (at, yaw, pitch) = watchSpot() ?: return
+        player.stopRiding()
+        player.teleport(player.serverWorld, at.x, at.y, at.z, yaw, pitch)
+        player.velocity = net.minecraft.util.math.Vec3d.ZERO
+        player.fallDistance = 0f
     }
 
     /** One piece of [MawCollapse]'s plan still to fall: it starts at server tick [at] and reaches the stone at [lands]. */
@@ -568,6 +597,13 @@ object Ch2L2Maw {
         creatures(world).forEach { it.discard() }
         takePieces(world)
         for (e in world.getEntitiesByType(net.minecraft.entity.EntityType.FALLING_BLOCK, arenaBox()) { true }) e.discard()
+        // The mound fills only air: nobody may be standing where it goes (a skip, or a scene that could not hold the player).
+        val c = position(rules.centre)
+        if (c != null) {
+            for (p in world.players) {
+                if (Ch2L2.active(p) && Math.hypot(p.x - (c.x), p.z - c.z) <= rules.collapseRadius + WATCH_MARGIN - 0.5 && Math.abs(p.y - c.y) < 6.0) moveToWatch(p)
+            }
+        }
         placeRubble(world)
         if (!Ch2L2Build.gateIs(world, rules.farGate, "open")) {
             data.anchors.point(rules.farAnchor)?.position?.let { world.playSound(null, it.x, it.y, it.z, Ch2Sounds.CH2L2_EXIT_DOOR, SoundCategory.BLOCKS, 1.5f, 1.0f) }
@@ -584,6 +620,8 @@ object Ch2L2Maw {
     private fun started(player: ServerPlayerEntity, state: Ch2L2State) {
         val world = levelWorld(player.server) ?: return
         stopMusic(player.server)
+        // A death in the arena: the client still thinks the jump is blocked and reset() forgets it was told, so it is told again.
+        for (p in player.server.playerManager.playerList) if (p.uuid in jumpTold) sendJump(p, false)
         reset()
         takePieces(world)
         creatures(world).forEach { it.discard() }
@@ -685,6 +723,9 @@ object Ch2L2Maw {
     private const val CRACK_EVERY_TICKS = 3
     /** Ticks of the crack sound before its blow (`event.ch2l2.maw_collapse`: the blow is at 1.62 s). */
     private const val SOUND_LEAD_TICKS = 32
+
+    /** Blocks beyond the collapse radius where the player watches the ceiling fall. */
+    private const val WATCH_MARGIN = 2.0
     /** Ticks the crushed pose is seen before the burst hides it. */
     private const val SMASH_DELAY_TICKS = 3L
     private const val CEILING_OFFSET = 6.0

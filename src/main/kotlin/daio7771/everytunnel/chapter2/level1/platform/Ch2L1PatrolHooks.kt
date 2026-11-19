@@ -1,5 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
+import daio7771.everytunnel.chapter2.platform.Ch2Achievements
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Angles
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1PatrolRunner
@@ -357,6 +358,7 @@ object Ch2L1PatrolHooks {
         val anchors = Ch2L1DataLoader.data.anchors
         val back = anchors.point(forbiddenZone(player)?.back ?: watchSpec.backElsewhere)
         EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} caught by {}", player.gameProfile.name, guard.spec.id)
+        Ch2Achievements.caught(player)
         if (ServerPlayNetworking.canSend(player, CAUGHT_PACKET)) ServerPlayNetworking.send(player, CAUGHT_PACKET, PacketByteBufs.empty())
         player.playSound(Ch2Sounds.CH2L1_GUARD_CAUGHT, SoundCategory.HOSTILE, 1f, 1f)
         guard.chaseFrom?.let { guard.entity.refreshPositionAndAngles(it.x, it.y, it.z, guard.entity.yaw, 0f) }

@@ -2,7 +2,8 @@ package daio7771.everytunnel.client.hud
 
 import daio7771.everytunnel.client.AchievementIcons
 import daio7771.everytunnel.client.AchievementStore
-import daio7771.everytunnel.core.achievement.Achievement
+import daio7771.everytunnel.core.achievement.AchievementDef
+import daio7771.everytunnel.core.achievement.AchievementRegistry
 import daio7771.everytunnel.platform.AchievementHooks
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.gui.DrawContext
@@ -24,9 +25,9 @@ import net.minecraft.util.math.MathHelper
  * vanilla does.
  *
  * The texts are lang keys: `toast.every_tunnel.achievement_unlocked` and
- * `achievement.every_tunnel.<id>` ([Achievement.id]).
+ * `achievement.every_tunnel.<id>` ([AchievementDef.id]).
  */
-class AchievementToast(private val achievement: Achievement) : Toast {
+class AchievementToast(private val achievement: AchievementDef) : Toast {
 
     private var soundPlayed = false
 
@@ -67,13 +68,13 @@ class AchievementToast(private val achievement: Achievement) : Toast {
         private const val TITLE_MS = 1500L
         private const val FADE_MS = 300f
 
-        fun title(achievement: Achievement): Text = Text.translatable("achievement.every_tunnel.${achievement.id}")
+        fun title(achievement: AchievementDef): Text = Text.translatable("achievement.every_tunnel.${achievement.id}")
 
-        fun description(achievement: Achievement): Text = Text.translatable("achievement.every_tunnel.${achievement.id}.description")
+        fun description(achievement: AchievementDef): Text = Text.translatable("achievement.every_tunnel.${achievement.id}.description")
 
         fun register() {
             ClientPlayNetworking.registerGlobalReceiver(AchievementHooks.PACKET_ID) { client, _, buf, _ ->
-                val achievement = Achievement.byId(buf.readString()) ?: return@registerGlobalReceiver
+                val achievement = AchievementRegistry.byId(buf.readString()) ?: return@registerGlobalReceiver
                 client.execute {
                     // Only the first time ever: it stays unlocked, game after game.
                     if (AchievementStore.unlock(achievement)) client.toastManager.add(AchievementToast(achievement))

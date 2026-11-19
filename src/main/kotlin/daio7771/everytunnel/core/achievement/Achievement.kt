@@ -10,8 +10,11 @@ package daio7771.everytunnel.core.achievement
  * `achievement.every_tunnel.<id>` (the title, a little tongue-in-cheek) and
  * `achievement.every_tunnel.<id>.description` (one line on how it was earned, shown once it is).
  * [puzzle] marks the ones a puzzle ends with; every player in the world gets those.
+ *
+ * These eleven are Chapter 1's, the first tab of the screen ([chapter] 1). A later chapter adds its own as [AchievementDef]s to the
+ * [AchievementRegistry]; everything that earns, stores or lists an achievement works with the interface.
  */
-enum class Achievement(val id: String, val puzzle: Boolean = false) {
+enum class Achievement(override val id: String, override val puzzle: Boolean = false) : AchievementDef {
     /** Level 1: stepping out of the service elevator after the intro. */
     FIRST_DAY("first_day"),
 
@@ -45,11 +48,13 @@ enum class Achievement(val id: String, val puzzle: Boolean = false) {
     /** Level 5: the game finished, down the Director's corridor that had "nothing in there". Earned by the client when the congratulations window opens. */
     NOTHING_THERE("nothing_there");
 
+    override val chapter: Int get() = 1
+
     companion object {
         /** The achievement named [id], or null for an id this version does not know. */
         fun byId(id: String): Achievement? = entries.firstOrNull { it.id == id }
 
-        /** The achievements named in [ids], in list order; unknown ids are left out. */
+        /** Chapter 1's achievements named in [ids], in list order; unknown ids are left out (see [AchievementRegistry.fromIds] for every chapter's). */
         fun fromIds(ids: Iterable<String>): Set<Achievement> {
             val known = ids.mapNotNull(::byId).toSet()
             return entries.filterTo(linkedSetOf()) { it in known }

@@ -4,7 +4,8 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import daio7771.everytunnel.EveryTunnel
-import daio7771.everytunnel.core.achievement.Achievement
+import daio7771.everytunnel.core.achievement.AchievementDef
+import daio7771.everytunnel.core.achievement.AchievementRegistry
 import net.fabricmc.loader.api.FabricLoader
 import java.io.IOException
 import java.nio.file.Files
@@ -15,7 +16,7 @@ import java.nio.file.Path
  * `config/every_tunnel/achievements.json` (`{"unlocked": ["first_day", ...]}`), the same for
  * every world and every new game. Read the first time it is needed, written on each new one.
  * A missing or broken file counts as none earned (and is logged); ids this version does not know
- * are kept in the file but not shown.
+ * are kept in the file but not shown (a jar without a chapter does not erase what that chapter earned).
  *
  * Client thread only. The server says what was earned (`platform.AchievementHooks`); the ACHIEVEMENTS
  * screen (`client.screen.AchievementsScreen`) reads [unlocked].
@@ -28,13 +29,13 @@ object AchievementStore {
 
     private fun ids(): MutableSet<String> = ids ?: load().also { ids = it }
 
-    /** The achievements earned, in list order. */
-    val unlocked: Set<Achievement> get() = Achievement.fromIds(ids())
+    /** The achievements earned, of every chapter, in list order. */
+    val unlocked: Set<AchievementDef> get() = AchievementRegistry.fromIds(ids())
 
-    fun isUnlocked(achievement: Achievement): Boolean = achievement.id in ids()
+    fun isUnlocked(achievement: AchievementDef): Boolean = achievement.id in ids()
 
     /** Remembers [achievement]; true if it is new. */
-    fun unlock(achievement: Achievement): Boolean {
+    fun unlock(achievement: AchievementDef): Boolean {
         if (!ids().add(achievement.id)) return false
         save()
         return true
