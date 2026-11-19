@@ -238,6 +238,7 @@ KDoc comment that says more.
 | File | What it does |
 |---|---|
 | `ServerWorldMixin.java` | Lets the noise system hear vanilla game events |
+| `FlowableFluidMixin.java` | Keeps the mod's own blocks from being washed away by flowing water |
 | `LivingEntityMixin.java` | No vanilla sipping sound for the water bottle |
 
 ## Client: `client/kotlin/daio7771/everytunnel/client/`

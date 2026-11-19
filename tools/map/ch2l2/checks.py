@@ -242,6 +242,16 @@ def run(level):
     seconds = total * cfg["walk_seconds_per_block"]
     report.append(f"route: {len(route)} places, {total} blocks walked, about {seconds / 60:.1f} min of walking alone")
 
+    # The quiet walk of the ending: from just inside the station's door to the exit's heavy door (the plan asks 10 to 15 s).
+    sa, sb = start_cell(lv, walk, "station_door_in"), start_cell(lv, walk, "exit_door_front")
+    if sa is not None and sb is not None:
+        seen = walk.search(sa, goal=sb)
+        if sb in seen:
+            blocks = seen[sb][0]
+            report.append(f"ending walk: station door to exit door, {blocks} blocks, about {blocks * cfg['walk_seconds_per_block']:.0f} s")
+        else:
+            errors.append("ending walk: no way from the station's door to the exit's door")
+
     # No shortcuts: every way to the exit crosses each cut.
     anyway = Walker(lv, built, max_drop=DOWN_ANY, swim=True)
     entry = start_cell(lv, anyway, route[0])

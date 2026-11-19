@@ -7,9 +7,9 @@ científico baja por la alcantarilla de emergencia del Nivel 1, solo, y busca un
 caza por las vibraciones del suelo en la sala de bombas, el Observant Guard del Capítulo 1 en las cámaras de abajo y una inundación en tres
 etapas camino de la estación de bombeo y la salida. Se construye por fases (de la 1 a la 7, y una fase 8 por venir: iluminación y decoración), una cada vez, en la rama **privada**
 `chapter-2/level-2` (sale de `chapter-2/level-1` y solo se sube al remoto `private`) hasta que se publiquen los Niveles 1 y 2 del capítulo.
-**En qué punto está: fase 5, el Observant Guard y sus cuatro trampas.** Se llega bajando por la alcantarilla del Nivel 1 y se
+**En qué punto está: fase 6, la inundación y la salida.** Se llega bajando por la alcantarilla del Nivel 1 y se
 recorre de la entrada a la salida con las barras de supervivencia; morir devuelve al último checkpoint, y el Capítulo 2 del menú lo
-continúa; el primer tramo ya tiene sus enemigos, recursos y documentos, la sala de bombas tiene su criatura y su bomba, y el vestíbulo y la sala de mantenimiento tienen el Guard y sus trampas. Falta la inundación.
+continúa; el primer tramo ya tiene sus enemigos, recursos y documentos, la sala de bombas tiene su criatura y su bomba, el vestíbulo y la sala de mantenimiento tienen el Guard y sus trampas, y el camino a la salida se inunda en tres etapas y acaba en una puerta pesada y "CONTINUARÁ".
 
 Su código está en `daio7771.everytunnel.chapter2.level2` (`core`, Kotlin puro, y `platform`), aparte del juego base, que nunca lo nombra
 (véase [Arquitectura](architecture.md#capítulos)). Sus lugares con nombre usan el formato del Nivel 1 (`level1.core.Ch2L1AnchorsParser`); su
@@ -131,6 +131,36 @@ Entrar en el vestíbulo (`GUARD_APPEARS`) empieza el combate (`Ch2L2Guard`, sobr
   (`WallMessageBlock`, `Chalk: paint_white`) en la pared sobre el hueco, el estado pasa a `GUARD_DEAD` y se toma con él el checkpoint del
   vestíbulo: una muerte después vuelve al vestíbulo con el hueco abierto y BOO! puesto. Una muerte en pleno combate vuelve con la pared entera. Las chapas son de 6 x 6 y el Guard queda clavado en el sitio mientras está aturdido.
 
+## La inundación y la salida (fase 6)
+
+Entrar en el colector (`FLOOD_1`) desencadena la inundación (`Ch2L2FloodRun`, sobre las etapas de `flood.json`, el bloque `flood` de
+`level.json` y el Kotlin puro `Ch2L2Flood`, con tests). El agua es ambiente y prisa: sube por detrás y por debajo del jugador y frena al
+vadear, sin corriente y sin más letalidad que el ahogo de vanilla; la ruta siempre queda por encima de cada etapa (las comprobaciones del
+generador) y las escaleras suben de nuevo a quien caiga.
+
+- **Etapa 1.** La compuerta del vestíbulo se cierra de golpe a la espalda del jugador (`sealed`: el camino de vuelta queda cerrado para
+  siempre), las tuberías crujen los `delay_seconds` de la etapa (3), después revienta la tubería del ancla `pipe_burst` (sonido, un
+  temblor ligero de cámara, un chorro de partículas durante los segundos de la etapa y un hilo más fino después) y el agua sube capa a
+  capa, de abajo arriba, a ritmo parejo durante los segundos de la etapa, con un máximo de `cells_per_tick` celdas por tick. Las
+  **etapas 2 y 3** (`zone_rising_walkways`, `zone_upper_gallery`) solo llenan. Cada etapa guarda solo las celdas que añade a las de la
+  anterior (`flood.json` trae las cajas enteras de cada una); el agua es un bloque fuente en el aire o `waterlogged` en un bloque que lo
+  admite, y nunca sobre otro; una celda vaciada queda como la tiene el mapa. El agua quieta del mapa no está en `flood.json` y se queda.
+- **El rugido** (`ambient.ch2l2.flood_rumble`, un bucle que se vuelve a lanzar cada 196 ticks) suena en la cabeza del jugador al volumen de la
+  etapa (`rumble.stage_1..3`); desde `STATION`, la **puerta de la estación** (`station_south`, una compuerta: `open` al construir, `shut` una
+  compuerta de esclusa) se cierra cuando el jugador está `station_door.clear_blocks` (3) dentro y el rugido se amortigua (`rumble.muffled`).
+- **Un arranque** (una muerte, CONTINUAR, `reset`) deja el agua como la quiere el estado antes de devolver el control: vaciada hasta la
+  inundación (morir dentro vuelve al checkpoint `collector`, en seco, y al entrar de nuevo empieza desde cero) y toda desde `STATION`, con
+  las compuertas como toca. `/et ch2 l2 flood <0|1|2|3>` pone el agua al instante, para probar.
+- **El final** (`Ch2L2Ending`, `ending` en `level.json`): desde `STATION`, entrar en `zone_exit_door` (anidada en `zone_level_exit`) frente
+  a la puerta pesada de la salida (un `fill` de placas de compuerta en la pared oeste de la sala de salida, siempre cerrada) deja al
+  jugador quieto, suena `event.ch2l2.exit_door` y, pasados `door_sound_seconds`, el cliente (`Ch2L2EndingOverlay`) funde a negro en
+  `fade_seconds`, muestra "CONTINUARÁ" (`every_tunnel.ch2.l2.ending.continued`) durante `card_seconds` y sale al menú principal. La
+  primera vez también fija `DONE` y guarda el checkpoint `exit` (ancla `level_exit`, de cara a la puerta): CONTINUAR deja ahí, con toda la
+  inundación puesta, y entrar en la puerta reproduce el final otra vez. `/et ch2 l2 ending` lo reproduce, para probar.
+
+El generador informa del paseo tranquilo desde justo dentro de la puerta de la estación (`station_door_in`) hasta la puerta de salida: 36
+bloques, unos 8 s.
+
 ## Fase 8 (por venir): iluminación y decoración
 
 El nivel está construido y se juega, pero su aspecto sigue siendo el del generador: lámparas por regla (lámparas enjauladas, cables, algún
@@ -178,7 +208,7 @@ de H que se ve desde dos alturas: desde el balcón de las galerías (M) y desde 
 | `anchors`, `zones` | Los lugares con nombre y las cajas que vigilarán los sistemas del nivel (más abajo) |
 | `route` | El camino por el nivel, en orden, de `sealed_entry` a `level_exit` |
 | `checks` | A qué se ajusta el nivel en las comprobaciones |
-| `flood` | Las tres etapas de la inundación (fase 6): zona que la dispara, retraso, segundos, nivel, el estado de las compuertas mientras tiene agua |
+| `flood` | Las tres etapas de la inundación (fase 6): zona que la dispara, retraso, segundos, nivel, el estado de las compuertas mientras tiene agua. El rasgo `fill` pone un bloque en cada celda de una caja del aire de un espacio (la puerta de la salida) |
 
 **Los detalles del aspecto** (qué ladrillo está agrietado o húmedo, dónde hay un nicho o un charco) salen de la semilla: el
 generador elige con `cell_hash` y el mod con `MapPlan.pick`, la misma función bit a bit (`MapPlanTest` las mantiene iguales), así que lo
@@ -246,7 +276,7 @@ vuelta se cierra detrás del jugador.**
 
 El jar tiene los valores por defecto en `data/every_tunnel/ch2/l2/`; un archivo con el mismo nombre en `config/every_tunnel/ch2/l2/`
 ocupa su lugar mientras sirva, y `/et reload` los vuelve a leer (junto con los del Nivel 1). El nivel lee `anchors.json` (del generador)
-y `level.json` (escrito a mano); `map.json` y `flood.json` son del generador y no se sustituyen. Lo que nombra `level.json` se busca en
+y `level.json` (escrito a mano, con los ajustes de la inundación y el final); `flood.json` es del generador y se puede sustituir para afinar el tiempo de una etapa, `map.json` no. Lo que nombra `level.json` se busca en
 las anclas, y lo que está mal se avisa (`/et reload`).
 
 **`level.json`** (`level2.core.Ch2L2Level`):
@@ -283,6 +313,8 @@ las anclas, y lo que está mal se avisa (`/et reload`).
 | `/et ch2 l2 unbuild` | Vacía toda la zona (antes de empaquetar el mundo en un jar), también los Hunters; quien esté dentro cae |
 | `/et ch2 l2 creature state` / `pump` | El cerebro de la criatura (estado, objetivo, velocidad en bloques por segundo) o el ciclo de la bomba (fase, tick, enmascarado) en la barra de acción; otra vez para apagarlo |
 | `/et ch2 l2 guard` | El combate del Guard (fase, aturdimientos, cada trampa: S gastada, C cargando, A armada) en la barra de acción; otra vez para apagarlo. `skip guard` ejecuta su final al instante, `reset guard` vuelve a poner la pared entera |
+| `/et ch2 l2 flood <0\|1\|2\|3>` | El agua de la inundación al instante en esa etapa (0 la vacía), sea cual sea tu estado; `skip flood` la llena toda y cierra la puerta de la estación, `reset flood` la vacía y reabre la compuerta del vestíbulo |
+| `/et ch2 l2 ending` | Reproduce el final (puerta, fundido, "CONTINUARÁ", menú principal); el nivel solo se termina si estás en la estación o más allá |
 | `/et ch2 l2 anchors` | Cada ancla y zona con sus coordenadas, marcadas las provisionales |
 | `/et ch2 l2 goto <ancla>` | Construye el nivel si no lo está y te lleva a un lugar (`sealed_entry` ... `level_exit`, `trap_1`...) o al centro de una zona (`zone_<lugar>`) |
 | `/et reload` | Vuelve a leer los datos de los Niveles 1 y 2 y dice qué está mal |

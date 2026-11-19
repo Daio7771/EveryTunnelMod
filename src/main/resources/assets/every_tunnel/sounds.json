@@ -7,6 +7,30 @@
       }
     ]
   },
+  "ambient.ch2l2.flood_jet": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/ch2l2/flood_jet_1",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "ambient.ch2l2.flood_rumble": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/ch2l2/flood_rumble_1",
+        "stream": true
+      }
+    ]
+  },
+  "ambient.ch2l2.flood_rumble_muffled": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/ch2l2/flood_rumble_muffled_1",
+        "stream": true
+      }
+    ]
+  },
   "ambient.cloud_game.static": {
     "sounds": [
       {
@@ -990,6 +1014,38 @@
       {
         "name": "every_tunnel:event/ch2l2/creature_windup_1",
         "attenuation_distance": 40
+      }
+    ]
+  },
+  "event.ch2l2.exit_door": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/exit_door_1",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "event.ch2l2.flood_burst": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/flood_burst_1",
+        "attenuation_distance": 72
+      }
+    ]
+  },
+  "event.ch2l2.flood_creak": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/flood_creak_1",
+        "attenuation_distance": 56
+      }
+    ]
+  },
+  "event.ch2l2.flood_gate_slam": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/flood_gate_slam_1",
+        "attenuation_distance": 64
       }
     ]
   },

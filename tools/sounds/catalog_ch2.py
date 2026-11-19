@@ -593,6 +593,135 @@ def ch2l2_grate(rng, variant):
     return _finish(y, rng, 1.4, 0.6, 0.22, 0.3, amount=1.25)
 
 
+# --- Chapter 2 Level 2: the flood and the exit (phase 6), physically modelled ---
+
+
+def ch2l2_flood_gate_slam(rng, variant):
+    """The vestibule's sluice gate dropping behind the player (about 1.6 s): a short rush of the plate sliding down its guides,
+    a huge iron plate hitting its sill (a very low blow, a long ringing of heavy iron modes and a concrete thud under it) and
+    the bolts shot home after it."""
+    seconds = 2.6
+    n = samples(seconds)
+    iron = (np.array([62.0, 91.0, 137.0, 205.0, 310.0, 470.0, 720.0, 1100.0, 1700.0]), np.array([1.0, 0.9, 0.7, 0.55, 0.45, 0.35, 0.25, 0.18, 0.12]),
+            np.array([1.1, 0.9, 0.7, 0.55, 0.4, 0.3, 0.2, 0.15, 0.1]))
+    y = 0.35 * ph.scrape(n, rng, 120.0, 2500.0, flutter=9.0) * envelope(n, [(0.0, 0.0), (0.05, 0.7), (0.5, 1.0), (0.62, 0.0), (seconds, 0.0)])
+    y += 0.5 * ph.impulses(n, rng, [(0.0, 0.0), (0.05, 45.0), (0.6, 30.0), (0.63, 0.0)], amp_sigma=0.6) * 0.05
+    y += 1.2 * thud(n, rng, 0.62, 34.0, 0.4, amp=1.4, dull=200.0)
+    y += 0.8 * ph.modes(n, rng, 0.62, *iron, detune=0.01, contact=0.0012)
+    f, a, d = ph.stone_modes(rng, 18, 120.0, 1800.0, decay=(0.03, 0.12))
+    y += 0.35 * ph.modes(n, rng, 0.625, f, a, d, contact=0.001)
+    for at, base in ((1.12, 210.0), (1.28, 250.0)):
+        y += 0.55 * knock(n, rng, at, base, [1.0, 2.4, 3.9, 5.6], [1.0, 0.5, 0.3, 0.15], [0.12, 0.08, 0.05, 0.03], click=1.0, click_hi=4000.0)
+    return _finish(y, rng, 1.8, 0.8, 0.26, 0.4, amount=1.25)
+
+
+def ch2l2_flood_creak(rng, variant):
+    """Old pipes groaning under pressure (3 s), heard from the vestibule's far side: a long iron groan whose pitch bends up and
+    down (a stuck joint giving a little at a time), shorter ticks of metal expanding, a low throb of water pushing hard and a
+    faint hiss of weeping seams; it swells towards the end, when the pipe is about to go."""
+    seconds = 3.0
+    n = samples(seconds)
+    t = time_axis(n)
+    swell = envelope(n, [(0.0, 0.0), (0.4, 0.55), (1.6, 0.8), (2.6, 1.0), (3.0, 0.0)])
+    pitch = 118.0 * (1.0 + 0.08 * np.sin(TAU * 0.7 * t + rng.uniform(0, TAU)) + 0.5 * (t / seconds) ** 2)
+    groan = glide_tone(pitch, harmonics=(1.0, 0.6, 0.45, 0.3, 0.2, 0.12))
+    groan *= 0.75 + 0.25 * smooth_random(n, 6.0, rng)
+    y = 0.5 * lowpass(groan, 2600.0, order=2) * swell
+    second = glide_tone(190.0 * (1.0 + 0.12 * np.sin(TAU * 0.45 * t + rng.uniform(0, TAU)) - 0.2 * (t / seconds)), harmonics=(1.0, 0.5, 0.3, 0.15))
+    y += 0.3 * lowpass(second, 2200.0, order=2) * envelope(n, [(0.0, 0.0), (0.7, 0.0), (1.2, 0.8), (2.2, 0.6), (2.8, 0.0), (seconds, 0.0)])
+    y += 0.25 * ph.scrape(n, rng, 400.0, 3200.0, flutter=7.0) * envelope(n, [(0.0, 0.0), (0.3, 0.3), (1.8, 0.4), (2.7, 0.8), (3.0, 0.0)])
+    f, a, d = ph.stone_modes(rng, 10, 500.0, 4200.0, decay=(0.01, 0.04))
+    ticks = ph.impulses(n, rng, [(0.0, 0.0), (0.2, 3.0), (2.0, 5.0), (3.0, 0.0)], amp_sigma=0.6)
+    y += 0.35 * ph.ring(ticks, ph.body_ir(rng, f, a, d, 0.1))
+    y += 0.3 * shaped_noise(n, rng, exponent=2.0, lo=20.0, hi=110.0) * envelope(n, [(0.0, 0.0), (1.0, 0.6), (2.7, 1.0), (3.0, 0.0)])
+    y += 0.08 * ph.scrape(n, rng, 3000.0, 9000.0, flutter=15.0) * envelope(n, [(0.0, 0.0), (1.2, 0.5), (3.0, 1.0)])
+    return _finish(y, rng, 1.4, 0.6, 0.2, 0.3, amount=1.1)
+
+
+def ch2l2_flood_burst(rng, variant):
+    """A pressurised pipe bursting in a concrete hall (2.4 s): a sharp metallic crack of the seam splitting, a very low blast as the
+    water is let out, a roar of a thick jet that thins to a hiss and bubbles over it, pieces of the pipe ringing and falling."""
+    seconds = 2.8
+    n = samples(seconds)
+    y = knock(n, rng, 0.0, rng.uniform(900.0, 1100.0), [1.0, 1.7, 2.6, 3.9], [1.0, 0.6, 0.4, 0.25], [0.03, 0.02, 0.012, 0.008], click=1.3, click_hi=11000.0)
+    y += 1.1 * thud(n, rng, 0.015, 38.0, 0.3, amp=1.3, dull=300.0)
+    iron = (np.array([84.0, 143.0, 236.0, 390.0, 620.0, 980.0, 1500.0]), np.array([1.0, 0.8, 0.6, 0.45, 0.3, 0.2, 0.12]), np.array([0.5, 0.4, 0.3, 0.22, 0.15, 0.1, 0.07]))
+    y += 0.5 * ph.modes(n, rng, 0.01, *iron, detune=0.01, contact=0.001)
+    roar = envelope(n, [(0.0, 0.0), (0.02, 1.0), (0.4, 0.9), (1.4, 0.55), (2.8, 0.3)])
+    y += 0.7 * ph.scrape(n, rng, 150.0, 5000.0, flutter=18.0) * roar
+    y += 0.3 * ph.scrape(n, rng, 4000.0, 11000.0, flutter=30.0) * envelope(n, [(0.0, 0.0), (0.03, 1.0), (0.8, 0.5), (2.8, 0.25)])
+    y += 0.35 * ph.bubbles(n, rng, [(0.0, 0.0), (0.05, 1500.0), (1.0, 700.0), (2.8, 200.0)], radius=(0.8e-3, 8e-3))
+    y += 0.4 * shaped_noise(n, rng, exponent=2.0, lo=20.0, hi=140.0) * envelope(n, [(0.0, 0.0), (0.03, 1.0), (1.2, 0.7), (2.8, 0.2)])
+    y += 0.2 * ph.grains(n, rng, [(0.05, 0.0), (0.2, 60.0), (1.2, 20.0), (2.0, 0.0)], 700.0, 5000.0, length=(0.003, 0.012))
+    return _finish(y, rng, 1.8, 0.8, 0.25, 0.5, amount=1.3)
+
+
+def ch2l2_flood_jet(rng, variant):
+    """The burst pipe's jet, heard from a few blocks (a loop of 8 s): a steady, thick hiss of water forced through a hole with a
+    slow unevenness and a wet rumble under it; mono (it sits at the pipe), built in the frequency domain so it loops."""
+    seconds = 8.0
+    n = samples(seconds)
+    for _ in range(1):
+        body = shaped_noise(n, rng, exponent=0.6, lo=300.0, hi=7500.0, order=2)
+        body *= 1.0 + 0.25 * smooth_random(n, 0.9, rng, periodic=True) + 0.1 * smooth_random(n, 5.0, rng, periodic=True)
+        hiss = shaped_noise(n, rng, exponent=0.0, lo=4500.0, hi=12000.0, order=2) * 0.22
+        low = shaped_noise(n, rng, exponent=2.0, lo=25.0, hi=240.0) * 0.5 * (1.0 + 0.3 * smooth_random(n, 0.5, rng, periodic=True))
+    return 0.5 * body + hiss + low
+
+
+def ch2l2_flood_rumble(rng, variant):
+    """The flood in the pipes and under the floor: deep rushing water (a loop of 10 s): a wide, turbulent roar with a slow swell,
+    a floor of sub-bass you feel, and the slap and gurgle of water against concrete far off; stereo and seamless."""
+    seconds = 10.0
+    n = samples(seconds)
+    sides = []
+    for _ in range(2):
+        roar = shaped_noise(n, rng, exponent=1.2, lo=50.0, hi=2200.0, order=2)
+        roar *= 1.0 + 0.3 * smooth_random(n, 0.35, rng, periodic=True) + 0.15 * smooth_random(n, 2.2, rng, periodic=True)
+        sub = shaped_noise(n, rng, exponent=2.0, lo=18.0, hi=90.0) * 0.9 * (1.0 + 0.25 * smooth_random(n, 0.2, rng, periodic=True))
+        wash = shaped_noise(n, rng, exponent=0.4, lo=800.0, hi=6000.0, order=2) * 0.12 * np.clip(0.5 + 0.5 * smooth_random(n, 0.8, rng, periodic=True), 0.0, 1.0)
+        sides.append(0.4 * roar + 0.55 * sub + wash)
+    return stereo(sides[0], sides[1])
+
+
+def ch2l2_flood_rumble_muffled(rng, variant):
+    """The same flood through the station's door: the roar low-passed to what a heavy plate lets through and quieter, mostly a
+    deep rumble with a faint hiss on top (a loop of 10 s)."""
+    seconds = 10.0
+    n = samples(seconds)
+    sides = []
+    for _ in range(2):
+        roar = shaped_noise(n, rng, exponent=1.4, lo=40.0, hi=420.0, order=3)
+        roar *= 1.0 + 0.3 * smooth_random(n, 0.3, rng, periodic=True)
+        sub = shaped_noise(n, rng, exponent=2.0, lo=18.0, hi=80.0) * 0.9 * (1.0 + 0.2 * smooth_random(n, 0.2, rng, periodic=True))
+        sides.append(0.5 * roar + 0.5 * sub)
+    return stereo(sides[0], sides[1])
+
+
+def ch2l2_exit_door(rng, variant):
+    """The exit's heavy door (about 4 s): a big iron wheel turned against its rust (a ratchet of clanks and a long groan of the
+    spindle), then two heavy bolts drawn back, each a slide of iron and a hard clack, and the door's seal letting go in a sigh of
+    stale air."""
+    seconds = 4.4
+    n = samples(seconds)
+    t = time_axis(n)
+    iron = (np.array([105.0, 190.0, 330.0, 560.0, 900.0, 1400.0]), np.array([1.0, 0.8, 0.6, 0.45, 0.3, 0.2]), np.array([0.25, 0.2, 0.15, 0.12, 0.08, 0.06]))
+    y = np.zeros(n)
+    at = 0.1
+    while at < 2.1:
+        y += rng.uniform(0.5, 0.8) * knock(n, rng, at, rng.uniform(170.0, 210.0), [1.0, 2.3, 3.7, 5.5], [1.0, 0.5, 0.3, 0.15], [0.07, 0.05, 0.03, 0.02], click=0.8, click_hi=5000.0)
+        at += rng.uniform(0.17, 0.26)
+    spindle = glide_tone(75.0 + 30.0 * np.sin(TAU * 0.5 * t) * envelope(n, [(0.0, 0.0), (0.2, 1.0), (2.0, 1.0), (2.2, 0.0), (seconds, 0.0)]), harmonics=(1.0, 0.6, 0.4, 0.25))
+    y += 0.25 * lowpass(spindle, 1600.0, order=2) * envelope(n, [(0.0, 0.0), (0.15, 1.0), (2.1, 0.8), (2.3, 0.0), (seconds, 0.0)])
+    y += 0.25 * ph.scrape(n, rng, 200.0, 1800.0, flutter=6.0) * envelope(n, [(0.0, 0.0), (0.15, 1.0), (2.1, 0.8), (2.3, 0.0), (seconds, 0.0)])
+    for slide, clack in ((2.45, 2.85), (3.0, 3.38)):
+        y += 0.4 * ph.scrape(n, rng, 300.0, 2800.0, flutter=5.0) * envelope(n, [(0.0, 0.0), (slide, 0.0), (slide + 0.05, 1.0), (clack - 0.02, 0.8), (clack, 0.0), (seconds, 0.0)])
+        y += 0.9 * ph.modes(n, rng, clack, *iron, detune=0.01, contact=0.001)
+        y += thud(n, rng, clack, 52.0, 0.12, amp=0.9, dull=300.0)
+    y += 0.3 * ph.scrape(n, rng, 600.0, 4500.0, flutter=9.0) * envelope(n, [(0.0, 0.0), (3.55, 0.0), (3.65, 1.0), (4.4, 0.0)])
+    return _finish(y, rng, 1.4, 0.6, 0.2, 0.4, amount=1.2)
+
+
 CHAPTER2_SOUNDS = [
     Sound("event.prologue.crack", "Chapter 2 prologue", "A stage of the scientist's change: dry cracks of joints, a dull thump, the creak of something stretched too far (3 variations)",
           "mono", False, 3, prologue_crack, -3.0, attenuation=24),
@@ -666,4 +795,18 @@ CHAPTER2_SOUNDS = [
           ch2l2_guard_lament, -1.0),
     Sound("event.ch2l2.guard_chest", "Chapter 2 Level 2", "The Guard beating its chest with both fists: a hollow boom of sheet iron and a low body under it (one beat)", "mono", False, 1,
           ch2l2_guard_chest, -2.0, attenuation=40),
+    Sound("event.ch2l2.flood_gate_slam", "Chapter 2 Level 2", "The vestibule's sluice gate dropping behind the player: a rush down its guides, a huge iron plate on its sill and the bolts shot home (about 1.6 s)", "mono", False, 1,
+          ch2l2_flood_gate_slam, -1.0, attenuation=64),
+    Sound("event.ch2l2.flood_creak", "Chapter 2 Level 2", "Old pipes groaning under pressure before they burst: a long iron groan bending in pitch, ticks of metal and a low throb, swelling (3 s)", "mono", False, 1,
+          ch2l2_flood_creak, -3.0, attenuation=56),
+    Sound("event.ch2l2.flood_burst", "Chapter 2 Level 2", "A pipe bursting in the far wall of the collector: a metallic crack, a low blast, a roar of water thinning to a hiss over bubbles (about 2.4 s)", "mono", False, 1,
+          ch2l2_flood_burst, -1.0, attenuation=72),
+    Sound("ambient.ch2l2.flood_jet", "Chapter 2 Level 2", "The burst pipe's jet of water, steady and thick, heard from a few blocks (8 s loop)", "mono", True, 1,
+          ch2l2_flood_jet, -6.0, attenuation=40, stream=False),
+    Sound("ambient.ch2l2.flood_rumble", "Chapter 2 Level 2", "The flood: deep rushing water in the pipes and under the floor, a roar and sub-bass (10 s loop, its volume set by the stage)", "stereo", True, 1,
+          ch2l2_flood_rumble, -6.0, stream=True),
+    Sound("ambient.ch2l2.flood_rumble_muffled", "Chapter 2 Level 2", "The same flood heard through the station's shut door: a low rumble and little else (10 s loop)", "stereo", True, 1,
+          ch2l2_flood_rumble_muffled, -8.0, stream=True),
+    Sound("event.ch2l2.exit_door", "Chapter 2 Level 2", "The exit's heavy door: a big iron wheel turned against rust, two bolts drawn back and a sigh of air (about 4 s)", "mono", False, 1,
+          ch2l2_exit_door, -2.0, attenuation=48),
 ]

@@ -332,6 +332,19 @@ class Level:
                 entry["offset"] = f["offset"]
             self.texts.append(entry)
 
+    def feature_fill(self, f, s):
+        """A block set in every cell of a box of a space's air, for the `y` range (its floor's y, both ends in): a door leaning on a wall.
+        Like a rail, those cells are no longer air."""
+        a, b = f["y"]
+        for x, z in self.box_cells(f["box"]):
+            for y in range(a, b + 1):
+                c = (x, y, z)
+                if c not in self.air:
+                    self.problems.append(f"fill in {s.id} at {c}: no air there")
+                    continue
+                self.remove_air(c, s.id)
+                self.blocks[c] = f["block"]
+
     def feature_bricked(self, f, s):
         self._bricked = getattr(self, "_bricked", []) + [f]
 

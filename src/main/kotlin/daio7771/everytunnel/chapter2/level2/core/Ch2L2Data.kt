@@ -9,19 +9,20 @@ import daio7771.everytunnel.chapter2.level1.core.Ch2L1AnchorsParser
  * format as Level 1's: [Ch2L1AnchorsParser], points, zones and paths, in world coordinates) and how it is played ([level],
  * `level.json`: [Ch2L2Level]). Plain Kotlin.
  *
- * Every later phase adds its file to [Ch2L2Files.ALL] and its parsed shape here. The map itself (`map.json`) and the flood's stages
- * (`flood.json`) are written by `tools/map/ch2l2/generate.py` with the anchors.
+ * Every later phase adds its file to [Ch2L2Files.ALL] and its parsed shape here. The map itself (`map.json`) is written by `tools/map/ch2l2/generate.py`, with the anchors and the flood's stages (`flood.json`, read as [flood]).
  */
 class Ch2L2Data(
     val anchors: Ch2L1Anchors,
     val level: Ch2L2Level,
+    /** The flood's stages (`flood.json`, written by the generator with the anchors). */
+    val flood: Ch2L2Flood,
     /** What is wrong with the files, one line each, naming the file. */
     val problems: List<String>,
     /** The files read from the config folder's copy. */
     val overridden: Set<String>,
 ) {
     companion object {
-        val EMPTY = Ch2L2Data(Ch2L1Anchors.EMPTY, Ch2L2Level.DEFAULT, emptyList(), emptySet())
+        val EMPTY = Ch2L2Data(Ch2L1Anchors.EMPTY, Ch2L2Level.DEFAULT, Ch2L2Flood.EMPTY, emptyList(), emptySet())
 
         /**
          * Chooses and parses each file's copy: one in [overrides] (the config folder's) wins over the jar's [bundled] one while it is
@@ -67,12 +68,17 @@ class Ch2L2Data(
                     result.level to result.problems
                 }
             } ?: Ch2L2Level.DEFAULT
+            val flood = choose(Ch2L2Files.FLOOD) { text ->
+                val result = Ch2L2Flood.parse(text)
+                (if (result.problems.any { it == "not a JSON object" }) null else result.flood) to result.problems
+            } ?: Ch2L2Flood.EMPTY
 
             if (anchors.points.isNotEmpty()) {
                 for (id in level.anchorNames()) if (anchors.point(id) == null) problems += "level.json: no anchor \"$id\" in anchors.json"
                 for (id in level.zoneNames()) if (anchors.zone(id) == null) problems += "level.json: no zone \"$id\" in anchors.json"
+                for (stage in flood.stages) if (anchors.zone(stage.trigger) == null) problems += "flood.json: no zone \"${stage.trigger}\" in anchors.json"
             }
-            return Ch2L2Data(anchors, level, problems, overridden)
+            return Ch2L2Data(anchors, level, flood, problems, overridden)
         }
     }
 }
@@ -84,9 +90,10 @@ class Ch2L2Data(
 object Ch2L2Files {
     const val ANCHORS = "anchors"
     const val LEVEL = "level"
+    const val FLOOD = "flood"
 
     /** The files the level reads, in reading order. */
-    val ALL: List<String> = listOf(ANCHORS, LEVEL)
+    val ALL: List<String> = listOf(ANCHORS, LEVEL, FLOOD)
 
     /** Inside the jar. */
     const val BUNDLED_FOLDER = "data/every_tunnel/ch2/l2"

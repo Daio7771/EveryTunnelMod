@@ -2,6 +2,7 @@ package daio7771.everytunnel.chapter2
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1IntroView
+import daio7771.everytunnel.chapter2.level2.client.Ch2L2EndingOverlay
 import daio7771.everytunnel.chapter2.level2.client.Ch2L2GuardSceneView
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1MeetingView
 import daio7771.everytunnel.chapter2.level1.client.Ch2L1Subtitles
@@ -40,6 +41,7 @@ object Chapter2Client : ClientModInitializer {
         PrologueView.register()
         Ch2L1IntroView.register()
         Ch2L2GuardSceneView.registerAll()
+        Ch2L2EndingOverlay.register()
         Ch2L1MeetingView.register()
         Ch2L1Subtitles.register()
         ObjectivePanel.register()

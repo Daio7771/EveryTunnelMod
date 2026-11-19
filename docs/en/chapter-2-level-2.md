@@ -6,10 +6,10 @@ Level 2 of Chapter 2 is the catacombs under the factory: the old catacombs the f
 down Level 1's emergency manhole, alone, and looks for a way out: the Hunters in the galleries, a creature that hunts by the floor's
 vibrations in the pump room, the Observant Guard of Chapter 1 in the lower chambers, and a flood in three stages on the way to the
 pumping station and the exit. It is built in phases (1 to 7, and a phase 8 to come: lighting and decoration), one at a time, on the **private** branch `chapter-2/level-2` (off
-`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 5,
-the Observant Guard and its four traps.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
+`chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 6,
+the flood and the exit.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
 bars, dying brings the player back to the last checkpoint, and the menu's Chapter 2 continues it; the first stretch has its enemies,
-resources and documents, the pump room has its creature and its pump, and the vestibule and maintenance room have the Guard and its traps. The flood is still to come.
+resources and documents, the pump room has its creature and its pump, the vestibule and maintenance room have the Guard and its traps, and the way on to the exit floods in three stages and ends at a heavy door and "TO BE CONTINUED".
 
 Its code is under `daio7771.everytunnel.chapter2.level2` (`core`, plain Kotlin, and `platform`), apart from the base game, which never
 names it (see [Architecture](architecture.md#chapters)). Its named places use Level 1's format (`level1.core.Ch2L1AnchorsParser`); its map
@@ -129,6 +129,33 @@ Entering the vestibule (`GUARD_APPEARS`) begins the fight (`Ch2L2Guard`, over `l
   on the wall over the hole, the state becomes `GUARD_DEAD` and the vestibule's checkpoint is taken with it: a death after it comes back to
   the vestibule with the hole open and BOO! up. A death mid-fight comes back with the wall whole. The plates are 6 x 6 and the Guard is frozen in place while stunned.
 
+## The flood and the exit (phase 6)
+
+Entering the collector (`FLOOD_1`) starts the flood (`Ch2L2FloodRun`, over `flood.json`'s stages, `level.json`'s `flood` and the plain-Kotlin
+`Ch2L2Flood`, unit tested). The water is atmosphere and hurry: it rises behind and under the player and slows wading, with no current and
+nothing lethal but vanilla drowning; the route always stays over each stage (the generator's checks) and the ladders take back up whoever falls.
+
+- **Stage 1.** The vestibule's gate slams down behind the player (`sealed`: the way back is shut for good), the pipes creak for the stage's
+  `delay_seconds` (3), then the pipe at the `pipe_burst` anchor bursts (sound, a light camera shake, a jet of particles for the stage's
+  seconds and a thinner trickle after) and the water rises layer by layer, bottom up, evenly over the stage's seconds, at most
+  `cells_per_tick` cells a tick. **Stages 2 and 3** (`zone_rising_walkways`, `zone_upper_gallery`) only fill. A stage keeps only the cells it
+  adds to the one before's (`flood.json` holds each stage's boxes whole); water is a source block in the air or `waterlogged` in a block that
+  has it, and never over another; a drained cell is what the map has there. The still water of the map is not in `flood.json` and stays.
+- **The rumble** (`ambient.ch2l2.flood_rumble`, a loop played again every 196 ticks) is in the player's head at the stage's volume
+  (`rumble.stage_1..3`); from `STATION` on, the **station's door** (`station_south`, a gate: `open` as built, `shut` a sluice gate) shuts
+  once the player is `station_door.clear_blocks` (3) inside it and the rumble goes muffled (`rumble.muffled`).
+- **A start** (a death, CONTINUE, `reset`) puts the water as the state wants it before control returns: drained up to the flood (a death in it
+  comes back to the `collector` checkpoint, dry, and walking in starts it again from zero) and all of it from `STATION`, with the
+  gates as they go. `/et ch2 l2 flood <0|1|2|3>` sets the water at once for testing.
+- **The ending** (`Ch2L2Ending`, `ending` in `level.json`): from `STATION` on, walking into `zone_exit_door` (nested in `zone_level_exit`)
+  in front of the exit's heavy door (a `fill` feature of sluice-gate plates on the exit room's west wall, always shut) holds the player
+  still, plays `event.ch2l2.exit_door`, and after `door_sound_seconds` the client (`Ch2L2EndingOverlay`) fades to black over
+  `fade_seconds`, shows "TO BE CONTINUED" (`every_tunnel.ch2.l2.ending.continued`) for `card_seconds` and leaves for the main menu. The first
+  time it also sets `DONE` and saves the `exit` checkpoint (anchor `level_exit`, facing the door): CONTINUE stands there with the whole
+  flood in place, and walking into the door plays the ending again. `/et ch2 l2 ending` plays it for testing.
+
+The generator reports the quiet walk from just inside the station's door (`station_door_in`) to the exit's door: 36 blocks, about 8 s.
+
 ## Phase 8 (to come): lighting and decoration
 
 The level is built and plays, but its look is still the generator's: lamps by rule (cage lamps, cables, a few flickers) and furniture only
@@ -174,7 +201,7 @@ from two heights: from the galleries' balcony (M) and from the station's broken 
 | `anchors`, `zones` | The named places and the boxes the level's systems will watch (see below) |
 | `route` | The way through the level, in order, from `sealed_entry` to `level_exit` |
 | `checks` | What the checks hold the level to |
-| `flood` | The flood's three stages (phase 6): trigger zone, delay, seconds, level, the gates' states while it holds water |
+| `flood` | The flood's three stages (phase 6): trigger zone, delay, seconds, level, the gates' states while it holds water. The `fill` feature sets a block in every cell of a box of a space's air (the exit's door) |
 
 **The look's details** (which brick is cracked or damp, where a niche or a puddle is) are drawn from the seed: the generator
 picks with `cell_hash`, and the mod with `MapPlan.pick`, the same function bit for bit (`MapPlanTest` holds them together), so the
@@ -237,7 +264,7 @@ flood's stages need it `sealed` (bars do not hold water back): **when the flood 
 
 The jar holds the defaults in `data/every_tunnel/ch2/l2/`; a file of the same name in `config/every_tunnel/ch2/l2/` takes its place
 while it is usable, and `/et reload` reads them again (with Level 1's). The level reads `anchors.json` (the generator's) and `level.json`
-(written by hand); `map.json` and `flood.json` are the generator's and are not overridden. What `level.json` names is looked for in the
+(written by hand, with the flood's tunables and the ending); `flood.json` is the generator's and can be overridden for tuning a stage's timing, `map.json` cannot. What `level.json` names is looked for in the
 anchors, and what is wrong is reported (`/et reload`).
 
 **`level.json`** (`level2.core.Ch2L2Level`):
@@ -274,6 +301,8 @@ anchors, and what is wrong is reported (`/et reload`).
 | `/et ch2 l2 unbuild` | Empties the whole area (before packing the world into a jar), the Hunters too; whoever stands in it falls |
 | `/et ch2 l2 creature state` / `pump` | The creature's brain (state, target, speed in blocks a second) or the pump's cycle (phase, tick, masking) in the action bar; again to turn it off |
 | `/et ch2 l2 guard` | The Guard's fight (phase, stuns, each trap: S spent, C charging, A armed) in the action bar; again to turn it off. `skip guard` runs its finish at once, `reset guard` puts the wall whole again |
+| `/et ch2 l2 flood <0\|1\|2\|3>` | The flood's water at once to that stage (0 drains it), whatever your state; `skip flood` fills all of it and shuts the station's door, `reset flood` drains it and opens the vestibule's gate again |
+| `/et ch2 l2 ending` | Plays the ending (door, fade, "TO BE CONTINUED", main menu); the level finishes only if you are at the station or past it |
 | `/et ch2 l2 anchors` | Every anchor and zone with its coordinates, the provisional ones marked |
 | `/et ch2 l2 goto <anchor>` | Builds the level if it is not, then takes you to a place (`sealed_entry` ... `level_exit`, `trap_1`...) or to the middle of a zone (`zone_<place>`) |
 | `/et reload` | Reads Level 1's and Level 2's data again and says what is wrong |

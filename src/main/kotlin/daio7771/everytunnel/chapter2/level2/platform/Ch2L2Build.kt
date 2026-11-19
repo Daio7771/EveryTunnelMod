@@ -9,6 +9,7 @@ import net.minecraft.block.Block
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
 
 /**
@@ -54,6 +55,24 @@ object Ch2L2Build {
             if (world.getBlockState(pos) != block) world.setBlockState(pos, block, Block.NOTIFY_ALL)
         }
         return true
+    }
+
+    /** The plan's gate [gateId] stands in its state [state] now (judged by its first cell). */
+    fun gateIs(world: ServerWorld, gateId: String, state: String): Boolean {
+        val gate = plan.gate(gateId) ?: return false
+        val spec = gate.states[state] ?: return false
+        val cell = gate.cells.firstOrNull() ?: return false
+        return world.getBlockState(BlockPos(plan.worldX(cell.x), plan.worldY(cell.y), plan.worldZ(cell.z))) == build.state(spec)
+    }
+
+    /** The box the plan's gate [gateId] fills in the world (its cells, whole), or null. */
+    fun gateBox(gateId: String): Box? {
+        val gate = plan.gate(gateId) ?: return null
+        if (gate.cells.isEmpty()) return null
+        return Box(
+            plan.worldX(gate.cells.minOf { it.x }).toDouble(), plan.worldY(gate.cells.minOf { it.y }).toDouble(), plan.worldZ(gate.cells.minOf { it.z }).toDouble(),
+            plan.worldX(gate.cells.maxOf { it.x } + 1).toDouble(), plan.worldY(gate.cells.maxOf { it.y } + 1).toDouble(), plan.worldZ(gate.cells.maxOf { it.z } + 1).toDouble(),
+        )
     }
 
     /** The middle of the plan's gate [gateId] in the world (for its sound), or null. */

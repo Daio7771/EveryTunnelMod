@@ -104,6 +104,10 @@ class Ch2L2MapPlanTest {
                 assertTrue(Cell(x, y, z) in cells, "${point.id}: no breaker at ${point.position}")      // the breaker's own cell, on the maintenance wall
                 continue
             }
+            if (point.id == "pipe_burst" || point.id == "exit_hatch") {
+                assertTrue(Cell(x, y, z) in cells, "${point.id}: no pipe or door at ${point.position}")      // the burst pipe's own cell, and the exit door's plates
+                continue
+            }
             if (point.id == "boo_wall") {
                 assertTrue(Cell(x, y, z) !in cells && Cell(x, y, z - 1) in cells, "${point.id}: not open air in front of a wall at ${point.position}")      // BOO!'s block
                 continue
@@ -125,6 +129,18 @@ class Ch2L2MapPlanTest {
         assertTrue(gate.states.getValue("grate").startsWith("minecraft:iron_bars"))
         assertTrue(gate.states.getValue("sealed").startsWith("every_tunnel:sluice_gate"))
         for (c in gate.cells) assertTrue(c !in cells, "the open gate's cell $c is filled")
+    }
+
+    @Test
+    fun `the station's door is open in the build and shuts with a sluice gate, and the exit's door is always shut`() {
+        val door = plan.gate("station_south") ?: error("no station_south")
+        assertEquals("open", door.built)
+        assertEquals("minecraft:air", door.states["open"])
+        assertTrue(door.states.getValue("shut").startsWith("every_tunnel:sluice_gate"))
+        for (c in door.cells) assertTrue(c !in cells, "the open door's cell $c is filled")
+        val hatch = data.anchors.point("exit_hatch")!!.position
+        val at = Cell(Math.floor(hatch.x).toInt() - plan.origin.x, Math.floor(hatch.y).toInt() - plan.origin.y, Math.floor(hatch.z).toInt() - plan.origin.z)
+        assertTrue(cells[at]?.startsWith("every_tunnel:sluice_gate") == true, "no door at the exit hatch ($at): ${cells[at]}")
     }
 
     @Test

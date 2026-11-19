@@ -14,7 +14,8 @@
     {"id": "pump_overlook", "anchor": "pump_overlook", "zone": "zone_pump_overlook", "before": "creature"},
     {"id": "vestibule", "anchor": "observer_wall", "zone": "zone_observer_wall", "before": "guard"},
     {"id": "collector", "anchor": "flood_collector", "zone": "zone_flood_collector", "before": "flood"},
-    {"id": "station", "anchor": "pumping_station", "zone": "zone_pumping_station"}
+    {"id": "station", "anchor": "pumping_station", "zone": "zone_pumping_station"},
+    {"id": "exit", "anchor": "level_exit", "zone": "zone_level_exit"}
   ],
   "progress": [
     {"zone": "zone_hunter_galleries", "state": "galleries"},
@@ -105,5 +106,23 @@
     "windup_seconds": 0.6,
     "hit_range": 2.4,
     "chase_speed": 3.8
+  },
+  "flood": {
+    "pipe_anchor": "pipe_burst",
+    "particles": {"jet": 6, "trickle": 2, "jet_speed": 0.32, "trickle_speed": 0.12},
+    "shake": {"gate": 0.5, "burst": 0.4, "seconds": 1.5},
+    "rumble": {"stage_1": 0.35, "stage_2": 0.6, "stage_3": 0.9, "muffled": 0.3},
+    "jet_volume": 1.0,
+    "trickle_volume": 0.4,
+    "station_door": {"gate": "station_south", "inside": "station_door_in", "clear_blocks": 3},
+    "cells_per_tick": 500
+  },
+  "ending": {
+    "zone": "zone_exit_door",
+    "checkpoint": "exit",
+    "door_sound_seconds": 3.5,
+    "fade_seconds": 2,
+    "card_seconds": 4,
+    "text": "every_tunnel.ch2.l2.ending.continued"
   }
 }

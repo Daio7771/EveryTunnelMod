@@ -1,5 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
+import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.SuggestionProvider
@@ -37,6 +38,9 @@ import net.minecraft.util.Identifier
  *   cycle, whether it masks vibrations); again to turn it off ([Ch2L2Pump]).
  * - `/et ch2 l2 guard`: the action bar shows the Observant Guard's fight (phase, stuns, each trap's phase: S spent, C charging, A armed);
  *   again to turn it off ([Ch2L2Guard]). `skip guard` runs its finish at once; `reset guard` puts the wall whole again at the vestibule.
+ * - `/et ch2 l2 flood <0|1|2|3>`: the water at once to that stage, whatever your state (0 drains it); `skip flood` fills all three and
+ *   shuts the station's door, `reset flood` drains it and opens the vestibule's gate again at the collector ([Ch2L2FloodRun]).
+ *   `/et ch2 l2 ending` plays the ending (door, fade, card, main menu; the level is finished only if you are at the station or past it) ([Ch2L2Ending]).
  * - `/et ch2 l2 anchors`: every anchor with its coordinates, the provisional ones marked.
  * - `/et ch2 l2 goto <anchor>`: builds the level if it is not, then takes you to a point (the places of the route, `sealed_entry` to
  *   `level_exit`, and the rest), or to the middle of a zone (`zone_<place>`) one block over its floor.
@@ -93,6 +97,12 @@ object Ch2L2Commands {
                                         .then(CommandManager.literal("pump").executes(::watchPump)),
                                 )
                                 .then(CommandManager.literal("guard").executes(::watchGuard))
+                                .then(
+                                    CommandManager.literal("flood").then(
+                                        CommandManager.argument("stage", IntegerArgumentType.integer(0, 3)).executes(::flood),
+                                    ),
+                                )
+                                .then(CommandManager.literal("ending").executes(::ending))
                                 .then(CommandManager.literal("anchors").executes(::anchors))
                                 .then(
                                     CommandManager.literal("goto").then(
@@ -133,7 +143,7 @@ object Ch2L2Commands {
         val snapshot = Ch2Progress.ch2L2Snapshot(player)
         reply(context, "Level 2: $state${if (Ch2L2.active(player)) "" else " (not playing it: /et ch2 l2 enter)"}")
         reply(context, "  checkpoint: ${snapshot?.let { "${it.checkpoint}, saved at ${it.state}" } ?: "none"}")
-        reply(context, "  water: stage ${state.floodStage} of 3")
+        reply(context, "  water: stage ${state.floodStage} of 3 by state; ${Ch2L2FloodRun.describe()}${if (Ch2L2Ending.isRunning(player)) "; the ending is playing" else ""}")
         reply(context, "  encounters: ${Ch2L2Event.entries.joinToString { "${it.id} ${it.progress(state)}" }}")
         reply(context, "  counters: ${Ch2Progress.ch2L2Counters(player).ifEmpty { "none" }}")
         reply(context, "  states: ${Ch2L2State.entries.joinToString(" ") { it.name.lowercase() }}")
@@ -218,6 +228,29 @@ object Ch2L2Commands {
         val why = Ch2L2Spawns.restock(context.source.playerOrThrow)
         reply(context, why ?: "All the loot is back (${Ch2L2DataLoader.data.level.loot.size} pieces).")
         return if (why == null) 1 else 0
+    }
+
+    private fun flood(context: CommandContext<ServerCommandSource>): Int {
+        val stage = IntegerArgumentType.getInteger(context, "stage")
+        val asked = Ch2L2Build.ask(context.source.server, rebuild = false) {
+            val n = Ch2L2FloodRun.setWater(context.source.server, stage)
+            reply(context, if (n == 0) "The flood's water is drained." else "The flood's water is at stage $n.")
+        }
+        return if (asked == MapBuild.Asked.BUILT) 1 else answer(context, asked)
+    }
+
+    private fun ending(context: CommandContext<ServerCommandSource>): Int {
+        val player = context.source.playerOrThrow
+        if (!Ch2L2.active(player)) {
+            reply(context, "You are not in Level 2: /et ch2 l2 enter first.")
+            return 0
+        }
+        if (!Ch2L2Ending.start(player, force = true)) {
+            reply(context, "The ending is playing already.")
+            return 0
+        }
+        reply(context, "The ending: the door, the fade, the card, the menu.${if (Ch2L2.state(player) < Ch2L2State.STATION) " (You are before the station: the level does not finish.)" else ""}")
+        return 1
     }
 
     private fun watchCreature(context: CommandContext<ServerCommandSource>): Int {

@@ -34,6 +34,10 @@
   {"id":"upper_gallery","pos":[1057.5,84,1349.5],"yaw":180},
   {"id":"pumping_station","pos":[1059.5,84,1336.5],"yaw":90},
   {"id":"level_exit","pos":[1030.5,84,1336.5],"yaw":90},
+  {"id":"exit_door_front","pos":[1028.5,84,1336.5],"yaw":90},
+  {"id":"station_door_in","pos":[1056.5,84,1344.5],"yaw":180},
+  {"id":"exit_hatch","pos":[1026.5,85,1337.0],"yaw":270},
+  {"id":"pipe_burst","pos":[1087.5,63,1377.5],"yaw":0},
   {"id":"survival_kit","pos":[1031.5,84,1292.5],"yaw":180},
   {"id":"hunters_post","pos":[1102.5,74,1288.5],"yaw":0},
   {"id":"loot_galleries","pos":[1121.5,74,1285.5],"yaw":90},
@@ -64,6 +68,7 @@
   {"id":"zone_upper_gallery","from":[1054,74,1347],"to":[1060,89,1360]},
   {"id":"zone_pumping_station","from":[1049,83,1328],"to":[1077,95,1345]},
   {"id":"zone_level_exit","from":[1026,83,1331],"to":[1047,90,1342]},
+  {"id":"zone_exit_door","from":[1027,83,1334],"to":[1029,87,1338]},
   {"id":"level_box","from":[1025,55,1282],"to":[1174,100,1386]}
  ],
  "paths": [

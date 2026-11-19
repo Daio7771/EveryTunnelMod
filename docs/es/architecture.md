@@ -214,6 +214,7 @@ Las mínimas: una mixin solo donde Fabric API no tiene evento.
 | Mixin | Objetivo | Por qué |
 |---|---|---|
 | `ServerWorldMixin` | `ServerWorld.emitGameEvent` | Permite al sistema de ruido oír puertas, palancas, cofres (las "vibraciones" de vanilla); no cambia nada |
+| `FlowableFluidMixin` | `FlowableFluid.canFill` | El agua que fluye ya no se lleva los bloques propios del mod (lámparas, objetos) ni los suelta como ítems en un nivel inundado |
 | `LivingEntityMixin` | `LivingEntity.shouldSpawnConsumptionEffects` | Sin el sorbo de vanilla para la botella de agua; tiene sus propios tragos |
 | `ClientPlayerEntityMixin` | `canSprint` | No se puede esprintar agotado (el sprint lo decide el cliente) |
 | `GameRendererMixin` | `tiltViewWhenHurt` (final) | Hace temblar la cámara en el derrumbe del túnel del nivel 3 (`CameraShake`) |

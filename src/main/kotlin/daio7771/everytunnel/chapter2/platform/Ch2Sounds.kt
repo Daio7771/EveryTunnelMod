@@ -65,6 +65,15 @@ object Ch2Sounds {
     val CH2L2_GUARD_CHEST = event("event.ch2l2.guard_chest", range = 40f)
     val CH2L2_GRATE = event("block.ch2l2.grate", range = 56f)
 
+    /** Chapter 2 Level 2's flood (phase 6): the gate slamming, the pipes groaning and bursting, the jet and the rumble (loops), and the exit's door. */
+    val CH2L2_FLOOD_GATE_SLAM = event("event.ch2l2.flood_gate_slam", range = 64f)
+    val CH2L2_FLOOD_CREAK = event("event.ch2l2.flood_creak", range = 56f)
+    val CH2L2_FLOOD_BURST = event("event.ch2l2.flood_burst", range = 72f)
+    val CH2L2_FLOOD_JET = event("ambient.ch2l2.flood_jet", range = 40f)
+    val CH2L2_FLOOD_RUMBLE = event("ambient.ch2l2.flood_rumble")
+    val CH2L2_FLOOD_RUMBLE_MUFFLED = event("ambient.ch2l2.flood_rumble_muffled")
+    val CH2L2_EXIT_DOOR = event("event.ch2l2.exit_door", range = 48f)
+
     private fun event(path: String, range: Float? = null): SoundEvent {
         val id = Identifier(EveryTunnel.MOD_ID, path)
         return (if (range == null) SoundEvent.of(id) else SoundEvent.of(id, range)).also { all += it }

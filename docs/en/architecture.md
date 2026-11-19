@@ -208,6 +208,7 @@ Kept to the minimum: a mixin only where Fabric API has no event.
 | Mixin | Target | Why |
 |---|---|---|
 | `ServerWorldMixin` | `ServerWorld.emitGameEvent` | Lets the noise system hear doors, levers, chests (vanilla "vibrations"); changes nothing |
+| `FlowableFluidMixin` | `FlowableFluid.canFill` | Flowing water no longer washes away the mod's own blocks (lamps, props) and drops them as items in a flooded level |
 | `LivingEntityMixin` | `LivingEntity.shouldSpawnConsumptionEffects` | No vanilla sipping sound for the water bottle; it plays its own gulps |
 | `ClientPlayerEntityMixin` | `canSprint` | No sprinting while exhausted (sprint is decided on the client) |
 | `GameRendererMixin` | `tiltViewWhenHurt` (tail) | Shakes the camera in Level 3's tunnel collapse (`CameraShake`) |

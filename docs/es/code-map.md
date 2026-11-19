@@ -238,6 +238,7 @@ con un comentario KDoc que cuenta más.
 | Archivo | Qué hace |
 |---|---|
 | `ServerWorldMixin.java` | Permite al sistema de ruido oír los game events de vanilla |
+| `FlowableFluidMixin.java` | Evita que el agua que fluye se lleve los bloques propios del mod |
 | `LivingEntityMixin.java` | Sin el sorbo de vanilla para la botella de agua |
 
 ## Cliente: `client/kotlin/daio7771/everytunnel/client/`

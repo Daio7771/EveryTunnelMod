@@ -155,7 +155,9 @@
    "built": "open"},
   {"id": "walkways_door", "wall": "x", "line": 37, "span": [89, 92], "y": [-4, -1]},
   {"id": "upper_gallery_door", "wall": "z", "line": 81, "span": [31, 34], "y": [10, 13]},
-  {"id": "station_south", "wall": "z", "line": 66, "span": [31, 34], "y": [20, 23]},
+  {"id": "station_south", "wall": "z", "line": 66, "span": [31, 34], "y": [20, 23], "kind": "gate",
+   "_doc": "The station's door (phase 6): open as built; it shuts behind the player once they are in the station (the flood's roar goes muffled)",
+   "states": {"open": "minecraft:air", "shut": "every_tunnel:sluice_gate[facing=north]"}, "built": "open"},
   {"id": "station_west", "wall": "x", "line": 24, "span": [55, 58], "y": [20, 23]},
   {"id": "exit_door", "wall": "x", "line": 13, "span": [55, 58], "y": [20, 23]}
  ],
@@ -201,6 +203,9 @@
   {"type": "prop", "space": "maintenance", "at": [111, 96], "dy": 1, "block": "every_tunnel:trap_breaker[facing=north,state=spent]"},
   {"type": "prop", "space": "maintenance", "at": [135, 96], "dy": 1, "block": "every_tunnel:trap_breaker[facing=north,state=spent]"},
 
+  {"type": "fill", "space": "salida", "box": [2, 55, 3, 59], "y": [20, 23], "block": "every_tunnel:sluice_gate[facing=east]",
+   "_doc": "The exit's heavy door (phase 6), on the exit room's west wall: always shut; reaching it ends the level (the fade covers it)"},
+
   {"type": "water", "space": "shaft", "below": -6},
   {"type": "water", "space": "flood_collector", "below": -6},
   {"type": "water", "space": "pasarelas", "below": -6},
@@ -212,6 +217,8 @@
   {"type": "ladder", "space": "flood_collector", "at": [43, 93], "y": [-8, -4], "facing": "south"},
   {"type": "ladder", "space": "flood_collector", "at": [60, 93], "y": [-8, -4], "facing": "south"},
   {"type": "ladder", "space": "flood_collector", "at": [76, 93], "y": [-8, -4], "facing": "south"},
+  {"type": "prop", "space": "flood_collector", "at": [63, 97], "dy": 7, "block": "every_tunnel:pipe[north=false,east=false,south=true,west=false,up=false,down=false]",
+   "_doc": "The pipe that bursts (phase 6): a stub out of the collector's south wall, over the channel, seen from the entrance; the jet comes out of its open end"},
 
   {"type": "solid", "space": "pasarelas", "box": [24, 88, 37, 93], "top": -4, "style": "drain", "_doc": "The collector's walkway, on into the walkways' hall"},
   {"type": "flight", "space": "pasarelas", "box": [24, 93, 30, 98], "axis": "z", "start": 93, "step": 1, "from": -3, "to": 1},
@@ -305,6 +312,10 @@
   {"id": "upper_gallery", "pos": [33.5, 20, 69.5], "yaw": 180},
   {"id": "pumping_station", "pos": [35.5, 20, 56.5], "yaw": 90},
   {"id": "level_exit", "pos": [6.5, 20, 56.5], "yaw": 90},
+  {"id": "exit_door_front", "pos": [4.5, 20, 56.5], "yaw": 90, "_doc": "In front of the exit's heavy door (the ending's trigger zone is round it)"},
+  {"id": "station_door_in", "pos": [32.5, 20, 64.5], "yaw": 180, "_doc": "Just inside the station's door (the walk to the exit door is measured from here)"},
+  {"id": "exit_hatch", "pos": [2.5, 21, 57.0], "yaw": 270, "kind": "wall", "_doc": "The exit's heavy door (its sound plays here)"},
+  {"id": "pipe_burst", "pos": [63.5, -1, 97.5], "yaw": 0, "kind": "wall", "_doc": "The cell of the pipe that bursts (its open end faces north)"},
   {"id": "survival_kit", "pos": [7.5, 20, 12.5], "yaw": 180, "_doc": "In front of the kit's counter; level.json's loot is laid out from its block"},
   {"id": "hunters_post", "pos": [78.5, 10, 8.5], "yaw": 0, "_doc": "Where the galleries' group of Hunters wanders"},
   {"id": "loot_galleries", "pos": [97.5, 10, 5.5], "yaw": 90},
@@ -336,6 +347,7 @@
   {"id": "zone_upper_gallery", "spaces": ["upper_gallery"]},
   {"id": "zone_pumping_station", "spaces": ["station"]},
   {"id": "zone_level_exit", "spaces": ["exit_corridor", "salida"]},
+  {"id": "zone_exit_door", "box": [3, 54, 6, 59], "y": [20, 23], "_doc": "In front of the exit's heavy door: reaching it plays the ending (inside zone_level_exit)"},
   {"id": "level_box", "all": true}
  ],
 
@@ -348,7 +360,7 @@
              "minecraft:cracked_", "minecraft:moss_carpet"],
   "unlit": ["side_gallery_room", "side_service_crypt", "guard_nest"],
   "_doc": "cuts: zones every way to the exit must cross (a way round one would skip an event). locked: with the gate down (grate), these anchors cannot be reached from the entry. pump: the shortest way across the pump room, in blocks, at least min. The zones of the route's places overlap none of each other (the mod tells where the player is by them), but the pairs in nested, one inside the other.",
-  "nested": [["zone_pump_overlook", "zone_vibration_chamber"]],
+  "nested": [["zone_pump_overlook", "zone_vibration_chamber"], ["zone_exit_door", "zone_level_exit"]],
   "cuts": ["zone_hunter_galleries", "zone_vibration_chamber", "zone_lower_catacombs", "zone_observer_wall", "zone_rising_walkways",
            "zone_upper_gallery", "zone_pumping_station"],
   "locked": {"gate": "vestibule_gate", "state": "grate", "unreachable": ["flood_collector", "rising_walkways", "pumping_station", "level_exit"]},

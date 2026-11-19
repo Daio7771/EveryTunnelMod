@@ -40,6 +40,9 @@ data class Ch2L2Level(
     val creature: Ch2L2Creature = Ch2L2Creature.DEFAULT,
     /** The Observant Guard and its four traps (phase 5). */
     val guard: Ch2L2Guard = Ch2L2Guard.DEFAULT,
+    /** The flood's tunables and the ending (phase 6). */
+    val flood: Ch2L2FloodRules = Ch2L2FloodRules.DEFAULT,
+    val ending: Ch2L2Ending = Ch2L2Ending.DEFAULT,
 ) {
     fun checkpoint(id: String?): Ch2L2Checkpoint? = checkpoints.firstOrNull { it.id == id }
 
@@ -57,8 +60,8 @@ data class Ch2L2Level(
     fun checkpointBefore(event: Ch2L2Event): Ch2L2Checkpoint? = checkpoints.firstOrNull { it.before == event }
 
     /** Every anchor and zone the file names, to check against the anchors. */
-    fun anchorNames(): List<String> = checkpoints.map { it.anchor } + hunters.map { it.anchor } + loot.map { it.anchor } + notes.map { it.anchor } + creature.anchorNames() + guard.anchorNames()
-    fun zoneNames(): List<String> = (lights.keys + checkpoints.map { it.zone } + reaches.map { it.zone } + creature.zoneNames() + guard.zoneNames()).distinct()
+    fun anchorNames(): List<String> = checkpoints.map { it.anchor } + hunters.map { it.anchor } + loot.map { it.anchor } + notes.map { it.anchor } + creature.anchorNames() + guard.anchorNames() + flood.anchorNames()
+    fun zoneNames(): List<String> = (lights.keys + checkpoints.map { it.zone } + reaches.map { it.zone } + creature.zoneNames() + guard.zoneNames() + ending.zone).distinct()
 
     class Result(val level: Ch2L2Level, val problems: List<String>)
 
@@ -130,6 +133,8 @@ data class Ch2L2Level(
             val notes = Ch2L2PlacementsParser.notes(f)
             val creature = Ch2L2CreatureParser.parse(f)
             val guard = Ch2L2GuardParser.parse(f)
+            val flood = Ch2L2FloodParser.flood(f)
+            val ending = Ch2L2FloodParser.ending(f)
             f.reportUnknownKeys()
 
             val problems = f.problems.toMutableList()
@@ -142,7 +147,7 @@ data class Ch2L2Level(
             if (befores.toSet().size != befores.size) problems += "checkpoints: two come before the same encounter"
             val level = Ch2L2Level(
                 flashlight, noise, battery, thirst, stamina, lights,
-                checkpoints.ifEmpty { d.checkpoints }, reaches, hunters, loot, notes, creature, guard,
+                checkpoints.ifEmpty { d.checkpoints }, reaches, hunters, loot, notes, creature, guard, flood, ending,
             )
             return Result(level, problems)
         }

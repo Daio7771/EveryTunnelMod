@@ -59,6 +59,6 @@ class Ch2L2PlacementsTest {
         assertTrue(result.problems.any { "offset" in it }, result.problems.toString())
         assertTrue(result.problems.any { "two have the id \"m\"" in it }, result.problems.toString())
         assertTrue(result.problems.any { "notes[0].anchor" in it }, result.problems.toString())
-        assertEquals(setOf("x", "y"), result.level.anchorNames().toSet() - "sealed_entry" - Ch2L2Creature.DEFAULT.anchorNames().toSet() - Ch2L2Guard.DEFAULT.anchorNames().toSet())
+        assertEquals(setOf("x", "y"), result.level.anchorNames().toSet() - "sealed_entry" - Ch2L2Creature.DEFAULT.anchorNames().toSet() - Ch2L2Guard.DEFAULT.anchorNames().toSet() - Ch2L2FloodRules.DEFAULT.anchorNames().toSet())
     }
 }

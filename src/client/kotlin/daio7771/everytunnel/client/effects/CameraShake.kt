@@ -14,6 +14,9 @@ import kotlin.math.sin
  * jolts round all three axes, a mix of uneven wobbles up to [MAX_DEGREES], as strong as
  * [CollapseSchedule.shake] says at that moment. Only the picture moves; where the player looks
  * does not. Applied by `GameRendererMixin` after the hurt tilt.
+ *
+ * The packet's payload is optional: with none it is the collapse's six seconds; a level may send its own, a strength ([Float], 1 is the
+ * collapse's peak) and a length in ticks ([Int]), for a shorter tremor that dies away (a gate slamming, a pipe bursting).
  */
 object CameraShake {
 
@@ -21,9 +24,20 @@ object CameraShake {
     /** World time (ticks) the shake started, or null. */
     private var startedAt: Long? = null
 
+    /** Strength and length (ticks) of a shake with its own payload; length 0: the collapse's own curve. */
+    private var scale = 1f
+    private var length = 0
+
     fun register() {
-        ClientPlayNetworking.registerGlobalReceiver(CollapseHooks.SHAKE_PACKET_ID) { client, _, _, _ ->
-            client.execute { startedAt = client.world?.time }
+        ClientPlayNetworking.registerGlobalReceiver(CollapseHooks.SHAKE_PACKET_ID) { client, _, buf, _ ->
+            val own = buf.readableBytes() > 0
+            val strength = if (own) buf.readFloat() else 1f
+            val ticks = if (own) buf.readVarInt() else 0
+            client.execute {
+                startedAt = client.world?.time
+                scale = strength
+                length = ticks
+            }
         }
         ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> startedAt = null }
     }
@@ -33,9 +47,9 @@ object CameraShake {
         val start = startedAt ?: return
         val world = MinecraftClient.getInstance().world ?: return
         val t = (world.time - start) + tickDelta
-        val strength = CollapseSchedule.shake(t)
+        val strength = if (length > 0) scale * (1f - t / length).coerceAtLeast(0f).let { it * it } else CollapseSchedule.shake(t)
         if (strength <= 0f) {
-            if (t >= CollapseSchedule.LENGTH) startedAt = null
+            if (t >= (if (length > 0) length else CollapseSchedule.LENGTH).toFloat()) startedAt = null
             return
         }
         val a = MAX_DEGREES * strength
