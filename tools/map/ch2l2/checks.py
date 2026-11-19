@@ -205,9 +205,10 @@ def run(level):
     errors = list(lv.problems) + placements(lv)
     report = []
     built = {gid: g[2] for gid, g in lv.gates.items()}
+    play = dict(built, **cfg.get("route_gates", {}))     # the gates as the player finds them on the way (the exit's door opens)
 
     # Anchors stand.
-    walk = Walker(lv, built)
+    walk = Walker(lv, play)
     for a in lv.layout["anchors"]:
         if a.get("kind") == "wall":
             continue
@@ -253,7 +254,7 @@ def run(level):
             errors.append("ending walk: no way from the station's door to the exit's door")
 
     # No shortcuts: every way to the exit crosses each cut.
-    anyway = Walker(lv, built, max_drop=DOWN_ANY, swim=True)
+    anyway = Walker(lv, play, max_drop=DOWN_ANY, swim=True)
     entry = start_cell(lv, anyway, route[0])
     exit_ = start_cell(lv, anyway, route[-1])
     for zone_id in cfg["cuts"]:
@@ -293,7 +294,7 @@ def run(level):
 
     # The gate down.
     locked = cfg["locked"]
-    shut = dict(built, **{locked["gate"]: locked["state"]})
+    shut = dict(play, **{locked["gate"]: locked["state"]})
     seen = Walker(lv, shut, max_drop=DOWN_ANY, swim=True).search(entry)
     for aid in locked["unreachable"]:
         c = start_cell(lv, anyway, aid)
@@ -303,7 +304,7 @@ def run(level):
 
     # The Guard's arena (phase 5): with its four grates down, from the vestibule only the trap room can be reached.
     arena = cfg["arena"]
-    shut = dict(built, **arena["gates"])
+    shut = dict(play, **arena["gates"])
     seen = Walker(lv, shut, max_drop=DOWN_ANY, swim=True).search(start_cell(lv, anyway, arena["from"]))
     for aid in arena["reachable"]:
         if start_cell(lv, anyway, aid) not in seen:
@@ -313,6 +314,25 @@ def run(level):
             errors.append(f"arena: {aid} can be reached from {arena['from']} with the grates down")
     report.append(f"arena: with {', '.join(arena['gates'])} down, from {arena['from']} the trap room is reached and "
                   f"{', '.join(arena['unreachable'])} are not")
+
+    # Stone Maw's arena (phase 6.1): nothing in it to get up on. Everyone who can walk in stands on its floor, and the only blocks in
+    # its air are lamps under the ceiling (and the floor's puddles).
+    nc = cfg.get("no_climb")
+    if nc:
+        space = lv.spaces[nc["space"]]
+        seen = anyway.search(start_cell(lv, anyway, nc["from"]))
+        high = sorted(c for c in seen if lv.air.get(c) == space.id and c[1] != space.floor)
+        if high:
+            errors.append(f"no climb: {nc['space']} has {len(high)} places to stand over its floor (e.g. {high[0]})")
+        stuff = sorted(c for c, o in lv.air.items() if o == space.id and c in lv.blocks and "cage_lamp" not in lv.blocks[c]
+                       and "puddle" not in lv.blocks[c] and "cable" not in lv.blocks[c])
+        if stuff:
+            errors.append(f"no climb: {nc['space']} holds a block ({lv.blocks[stuff[0]]} at {stuff[0]}) besides its lamps")
+        low = [c for c in lv.lamps if lv.air.get(c) == space.id and c[1] < space.floor + space.height - 1]
+        if low:
+            errors.append(f"no climb: a lamp of {nc['space']} hangs lower than its ceiling's first row at {low[0]}")
+        report.append(f"no climb: in {nc['space']} every place to stand is on its floor; its only blocks are {len([c for c in lv.lamps if lv.air.get(c) == space.id])} "
+                      f"lamps under the ceiling")
 
     # The pump room.
     pump = cfg["pump"]

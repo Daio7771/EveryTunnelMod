@@ -741,5 +741,11 @@
   "block.every_tunnel.pump_beacon": "Pump Beacon",
   "entity.every_tunnel.vibration_creature": "Vibration Creature",
   "entity.every_tunnel.observant_guard": "Observant Guard",
-  "block.every_tunnel.trap_breaker": "Trap Breaker"
+  "block.every_tunnel.trap_breaker": "Trap Breaker",
+  "item.every_tunnel.pipe_piece": "Piece of pipe",
+  "every_tunnel.ch2.l2.maw.hint_throw": "Right click to throw",
+  "every_tunnel.ch2.l2.reunion.reunion_01": "Oh, you\u2019re finally here. We were waiting for you.",
+  "every_tunnel.ch2.l2.reunion.reunion_02": "I was told you had some overtime. Well, nobody ever finishes it.",
+  "every_tunnel.ch2.l2.reunion.reunion_03_b": "Rowan is a great leader, but also a wicked person.",
+  "every_tunnel.ch2.l2.reunion.reunion_04": "Come on, we\u2019ve got to get out of here before they start suspecting something."
 }

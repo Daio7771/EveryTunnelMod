@@ -722,6 +722,153 @@ def ch2l2_exit_door(rng, variant):
     return _finish(y, rng, 1.4, 0.6, 0.2, 0.4, amount=1.2)
 
 
+# --- Chapter 2 Level 2: Stone Maw's last stand (phase 6.1), physically modelled ---
+
+PIPE_MODES = (np.array([230.0, 610.0, 1130.0, 1790.0, 2650.0, 3700.0]), np.array([1.0, 0.8, 0.6, 0.45, 0.3, 0.2]), np.array([0.35, 0.25, 0.18, 0.12, 0.08, 0.05]))
+
+
+def ch2l2_maw_pipe_fall(rng, variant):
+    """A piece of pipe coming away from the ceiling and falling (about 0.9 s, heard at the ceiling point): a crumble of rust and
+    mortar, a groan of old iron letting go and a snap, then the thin whistle of the fall, rising. It ends where the clang (the
+    phase 4 pipe cut) takes over."""
+    seconds = 0.95
+    n = samples(seconds)
+    t = time_axis(n)
+    y = 0.5 * ph.grains(n, rng, [(0.0, 0.0), (0.03, 900.0), (0.2, 300.0), (0.5, 0.0)], 600.0, 5000.0, length=(0.002, 0.008))
+    groan = lowpass(ph.scrape(n, rng, 180.0, 900.0, flutter=8.0), 1400.0, order=2)
+    y += 0.3 * groan * envelope(n, [(0.0, 0.0), (0.05, 1.0), (0.3, 0.6), (0.38, 0.0), (seconds, 0.0)])
+    y += 0.7 * knock(n, rng, 0.33, 520.0, [1.0, 2.3, 3.6], [1.0, 0.5, 0.25], [0.05, 0.03, 0.02], click=1.0, click_hi=5000.0)
+    whistle = glide_tone(700.0 + 1500.0 * (t / seconds) ** 1.5, harmonics=(1.0, 0.35))
+    y += 0.1 * bandpass(whistle, 600.0, 3500.0, order=2) * envelope(n, [(0.0, 0.0), (0.4, 0.0), (0.9, 1.0), (seconds, 0.8)])
+    y += 0.08 * ph.scrape(n, rng, 1200.0, 6000.0, flutter=30.0) * envelope(n, [(0.0, 0.0), (0.4, 0.0), (0.9, 1.0), (seconds, 0.8)])
+    return fade(drive(y / np.max(np.abs(y)), 1.1), 0.002, 0.04)
+
+
+def ch2l2_maw_throw(rng, variant):
+    """A heavy piece of pipe thrown (0.55 s): a low rush of air as a long iron weight swings and flies, the body of the throw
+    (a dull blow of the arm) and a faint hollow tone of the tube cutting the air, dropping in pitch as it passes."""
+    seconds = 0.55
+    n = samples(seconds)
+    t = time_axis(n)
+    air = ph.scrape(n, rng, 120.0, 1100.0, flutter=14.0) * envelope(n, [(0.0, 0.0), (0.05, 0.6), (0.18, 1.0), (0.4, 0.5), (seconds, 0.0)])
+    y = 0.8 * air
+    y += 0.3 * lowpass(ph.scrape(n, rng, 800.0, 4000.0, flutter=40.0), 3500.0, order=2) * envelope(n, [(0.0, 0.0), (0.12, 0.2), (0.2, 0.7), (0.34, 0.0), (seconds, 0.0)])
+    hollow = glide_tone(430.0 - 200.0 * t / seconds, harmonics=(1.0, 0.4))
+    y += 0.12 * hollow * envelope(n, [(0.0, 0.0), (0.12, 0.0), (0.2, 1.0), (0.42, 0.0), (seconds, 0.0)])
+    y += 0.5 * thud(n, rng, 0.0, 90.0, 0.05, amp=0.7, dull=500.0)
+    return fade(drive(y / np.max(np.abs(y)), 1.05), 0.002, 0.15)
+
+
+def ch2l2_maw_hit(rng, variant):
+    """The pipe landing on Stone Maw (about 1 s): iron meeting cracked stone (a short, hard ring of the pipe's modes, cut by the
+    contact), a dull lump of stone taking the blow, the dry crack of its skin splitting and a few chips falling. No voice."""
+    n = samples(1.3)
+    y = 0.9 * ph.modes(n, rng, 0.0, *PIPE_MODES, detune=0.01, contact=0.0003) * 0.6
+    y += 0.8 * thud(n, rng, 0.0, 60.0, 0.1, amp=1.0, dull=300.0)
+    f, a, d = ph.stone_modes(rng, 30, 160.0, 2600.0, decay=(0.02, 0.09))
+    y += 0.6 * ph.modes(n, rng, 0.002, f, a, d, contact=0.0006)
+    y += 0.7 * burst(n, rng, 0.0, 0.01, lo=1500.0, hi=9000.0, tau=0.003, amp=1.0)
+    y += 0.4 * ph.grains(n, rng, [(0.0, 0.0), (0.004, 6000.0), (0.06, 2500.0), (0.3, 0.0)], 1500.0, 7000.0, length=(0.001, 0.005))
+    y += 0.2 * ph.grains(n, rng, [(0.0, 0.0), (0.15, 40.0), (0.7, 20.0), (1.2, 0.0)], 800.0, 4500.0, length=(0.003, 0.01))
+    return _finish(y, rng, 1.2, 0.4, 0.2, 0.25, amount=1.25)
+
+
+def ch2l2_maw_pipe_break(rng, variant):
+    """A thrown piece of pipe breaking on the floor (about 1.3 s): the first iron clang cut short as the tube splits, rusted metal
+    tearing, bits of iron skittering and spinning on the stone, a last small ringing."""
+    n = samples(1.5)
+    y = 0.9 * ph.modes(n, rng, 0.0, *PIPE_MODES, detune=0.012, contact=0.0004)
+    y += 0.5 * thud(n, rng, 0.0, 70.0, 0.1, amp=0.9, dull=350.0)
+    y += 0.5 * ph.scrape(n, rng, 600.0, 5000.0, flutter=30.0) * envelope(n, [(0.0, 0.0), (0.02, 1.0), (0.18, 0.5), (0.3, 0.0), (1.5, 0.0)])
+    shards = ph.impulses(n, rng, [(0.0, 0.0), (0.05, 90.0), (0.4, 40.0), (1.0, 8.0), (1.4, 0.0)], amp_sigma=0.6)
+    f, a, d = ph.stone_modes(rng, 18, 900.0, 6500.0, decay=(0.006, 0.03))
+    y += 0.5 * ph.ring(shards, ph.body_ir(rng, f, a, d, 0.12))
+    y += 0.35 * ph.grains(n, rng, [(0.0, 0.0), (0.05, 120.0), (0.5, 40.0), (1.4, 0.0)], 1800.0, 8000.0, length=(0.002, 0.007))
+    return _finish(y, rng, 1.0, 0.35, 0.18, 0.3, amount=1.2)
+
+
+def ch2l2_maw_wall_ram(rng, variant):
+    """Stone Maw running headlong into a wall (about 2.2 s): a huge, dull blow, almost all weight (a very low tone, a lump of
+    stone ringing, a concrete crack), dust and chips raining off the wall and the room's answer rolling away. Phase 4's strike
+    with more behind it and no fists."""
+    n = samples(2.4)
+    y = thud(n, rng, 0.0, 30.0, 0.45, amp=1.6, dull=180.0)
+    f, a, d = ph.stone_modes(rng, 44, 60.0, 1400.0, decay=(0.05, 0.22))
+    y += 0.7 * ph.modes(n, rng, 0.0, f, a, d, contact=0.002)
+    f, a, d = ph.stone_modes(rng, 30, 220.0, 3000.0, decay=(0.02, 0.08))
+    y += 0.4 * ph.modes(n, rng, 0.004, f, a, d, contact=0.001)
+    y += 0.6 * ph.grains(n, rng, [(0.0, 0.0), (0.004, 22000.0), (0.08, 7000.0), (0.3, 0.0)], 250.0, 6000.0)
+    y += 0.25 * ph.grains(n, rng, [(0.0, 0.0), (0.1, 80.0), (0.8, 40.0), (2.0, 0.0)], 600.0, 4500.0, length=(0.003, 0.012))
+    y += 0.3 * ph.scrape(n, rng, 25.0, 160.0, flutter=4.0) * envelope(n, [(0.0, 0.0), (0.05, 1.0), (1.0, 0.4), (2.4, 0.0)])
+    return _finish(y, rng, 1.8, 0.8, 0.26, 0.5, amount=1.35)
+
+
+def ch2l2_maw_stunned(rng, variant):
+    """Stone Maw stunned (a loop of 1 s, played again while the stun lasts): a low grinding of stone on stone from somewhere deep in
+    it, the slow settling of a big body (a few dull ticks and a creak) and a trickle of grit; built so that it loops."""
+    seconds = 1.0
+    n = samples(seconds)
+    pad = samples(0.4)
+    grind = shaped_noise(n, rng, exponent=1.5, lo=40.0, hi=420.0, order=2) * (1.0 + 0.35 * smooth_random(n, 3.0, rng, periodic=True))
+    creak = lowpass(shaped_noise(n, rng, exponent=0.5, lo=200.0, hi=1100.0, order=2), 1100.0, order=2) * (0.5 + 0.5 * smooth_random(n, 2.0, rng, periodic=True)) ** 2
+    m = n + pad
+    ticks = ph.impulses(m, rng, 7.0, amp_sigma=0.5)
+    f, a, d = ph.stone_modes(rng, 16, 90.0, 1200.0, decay=(0.02, 0.08))
+    ticks = ph.ring(ticks, ph.body_ir(rng, f, a, d, 0.25))
+    grit = ph.grains(m, rng, 40.0, 1200.0, 5000.0, length=(0.002, 0.007))
+    extra = 0.4 * ticks + 0.15 * grit
+    extra[:pad] += extra[n:]                      # what rings past the end wraps round to the start: the loop has no seam
+    return 0.7 * grind + 0.12 * creak + extra[:n]
+
+
+def ch2l2_maw_burst(rng, variant):
+    """The grate over the pipe's mouth torn off as Stone Maw comes out (about 2.4 s): iron screaming against its bolts, three
+    bolts shearing with a crack each, the grate wrenched off and flung (a big iron clang and its bounce), and a crumble of
+    wall round the mouth."""
+    seconds = 2.6
+    n = samples(seconds)
+    iron = (np.array([75.0, 120.0, 190.0, 300.0, 480.0, 780.0, 1200.0, 1900.0]), np.array([1.0, 0.9, 0.7, 0.55, 0.45, 0.3, 0.2, 0.12]),
+            np.array([0.9, 0.7, 0.55, 0.4, 0.3, 0.2, 0.15, 0.1]))
+    y = 0.4 * ph.scrape(n, rng, 500.0, 3800.0, flutter=7.0) * envelope(n, [(0.0, 0.0), (0.1, 0.8), (0.75, 1.0), (0.85, 0.0), (seconds, 0.0)])
+    squeal = glide_tone(950.0 + 700.0 * np.sin(TAU * 0.9 * time_axis(n)), harmonics=(1.0, 0.5, 0.3))
+    y += 0.1 * bandpass(squeal, 500.0, 3500.0, order=2) * envelope(n, [(0.0, 0.0), (0.15, 1.0), (0.7, 0.8), (0.8, 0.0), (seconds, 0.0)])
+    for at in (0.3, 0.55, 0.78):
+        y += 0.7 * knock(n, rng, at, rng.uniform(900.0, 1400.0), [1.0, 2.4, 3.9], [1.0, 0.5, 0.25], [0.04, 0.025, 0.015], click=1.2, click_hi=8000.0)
+    y += 1.1 * thud(n, rng, 0.85, 40.0, 0.3, amp=1.3, dull=220.0)
+    y += 0.9 * ph.modes(n, rng, 0.85, *iron, detune=0.01, contact=0.001)
+    y += 0.6 * ph.modes(n, rng, 1.32, *iron, detune=0.01, contact=0.0012) * 0.5
+    y += 0.45 * ph.grains(n, rng, [(0.0, 0.0), (0.3, 80.0), (0.85, 260.0), (1.4, 50.0), (2.4, 0.0)], 300.0, 5500.0, length=(0.003, 0.012))
+    f, a, d = ph.stone_modes(rng, 24, 100.0, 1600.0, decay=(0.03, 0.14))
+    y += 0.4 * ph.modes(n, rng, 0.87, f, a, d, contact=0.001)
+    return _finish(y, rng, 1.8, 0.8, 0.26, 0.4, amount=1.25)
+
+
+def ch2l2_maw_collapse(rng, variant):
+    """Part of the ceiling coming down (about 3.4 s): first the stone cracking (a quickening train of dry cracks and a growing low
+    groan, grit sifting down), then everything giving way at once: a very low blow, tons of rubble hitting the floor in a dense
+    roar of impacts that thins out into stones settling, and a rumble rolling off under it."""
+    seconds = 3.6
+    n = samples(seconds)
+    t = time_axis(n)
+    cracks = ph.impulses(n, rng, [(0.0, 3.0), (0.9, 12.0), (1.5, 40.0), (1.62, 0.0), (seconds, 0.0)], amp_sigma=0.7)
+    f, a, d = ph.stone_modes(rng, 22, 200.0, 4200.0, decay=(0.008, 0.05))
+    y = 0.8 * ph.ring(cracks, ph.body_ir(rng, f, a, d, 0.2))
+    y += 0.35 * lowpass(shaped_noise(n, rng, exponent=1.5, lo=30.0, hi=300.0, order=2), 300.0, order=2) * envelope(n, [(0.0, 0.0), (0.3, 0.4), (1.6, 1.0), (1.7, 0.0), (seconds, 0.0)])
+    y += 0.3 * ph.grains(n, rng, [(0.0, 0.0), (0.2, 60.0), (1.5, 160.0), (1.65, 0.0)], 1500.0, 6500.0, length=(0.002, 0.007))
+    at = 1.62
+    y += 1.4 * thud(n, rng, at, 28.0, 0.6, amp=1.7, dull=160.0)
+    for k in range(3):
+        f, a, d = ph.stone_modes(rng, 40, 50.0 + 20.0 * k, 1400.0, decay=(0.06, 0.25))
+        y += 0.5 * ph.modes(n, rng, at + 0.03 * k, f, a, d, contact=0.002)
+    rubble = ph.grains(n, rng, [(0.0, 0.0), (at, 0.0), (at + 0.02, 900.0), (at + 0.5, 600.0), (at + 1.4, 120.0), (seconds, 0.0)], 120.0, 3800.0, length=(0.004, 0.02))
+    y += 0.9 * rubble
+    heavy = ph.impulses(n, rng, [(0.0, 0.0), (at, 0.0), (at + 0.03, 35.0), (at + 0.9, 8.0), (at + 1.8, 0.0)], amp_sigma=0.8)
+    f, a, d = ph.stone_modes(rng, 26, 80.0, 900.0, decay=(0.05, 0.2))
+    y += 0.8 * ph.ring(heavy, ph.body_ir(rng, f, a, d, 0.4))
+    y += 0.45 * lowpass(shaped_noise(n, rng, exponent=2.0, lo=20.0, hi=140.0), 140.0, order=2) * envelope(n, [(0.0, 0.0), (at, 0.0), (at + 0.05, 1.0), (at + 1.6, 0.4), (seconds, 0.0)])
+    return _finish(y, rng, 2.2, 1.0, 0.28, 0.9, amount=1.35)
+
+
 CHAPTER2_SOUNDS = [
     Sound("event.prologue.crack", "Chapter 2 prologue", "A stage of the scientist's change: dry cracks of joints, a dull thump, the creak of something stretched too far (3 variations)",
           "mono", False, 3, prologue_crack, -3.0, attenuation=24),
@@ -809,4 +956,20 @@ CHAPTER2_SOUNDS = [
           ch2l2_flood_rumble_muffled, -8.0, stream=True),
     Sound("event.ch2l2.exit_door", "Chapter 2 Level 2", "The exit's heavy door: a big iron wheel turned against rust, two bolts drawn back and a sigh of air (about 4 s)", "mono", False, 1,
           ch2l2_exit_door, -2.0, attenuation=48),
+    Sound("event.ch2l2.maw_pipe_fall", "Chapter 2 Level 2", "A piece of pipe coming away from the ceiling and falling (0.95 s, at the ceiling point): rust and mortar crumbling, iron groaning and snapping, the thin whistle of the fall; the landing is the pipe_fall cut",
+          "mono", False, 1, ch2l2_maw_pipe_fall, -4.0, attenuation=40),
+    Sound("event.ch2l2.maw_throw", "Chapter 2 Level 2", "A piece of pipe thrown at Stone Maw: a heavy rush of air and the hollow tone of the tube, dropping as it passes (0.55 s)",
+          "mono", False, 1, ch2l2_maw_throw, -4.0, attenuation=24),
+    Sound("event.ch2l2.maw_hit", "Chapter 2 Level 2", "The pipe landing on Stone Maw: iron on cracked stone, a dull lump taking the blow, the dry crack of its skin splitting and chips falling (no voice)",
+          "mono", False, 1, ch2l2_maw_hit, -2.0, attenuation=56),
+    Sound("event.ch2l2.maw_pipe_break", "Chapter 2 Level 2", "A thrown piece of pipe breaking on the floor: a clang cut short as the tube splits, rusted iron tearing, bits skittering on the stone (1.5 s)",
+          "mono", False, 1, ch2l2_maw_pipe_break, -3.0, attenuation=56),
+    Sound("event.ch2l2.maw_wall_ram", "Chapter 2 Level 2", "Stone Maw running headlong into a wall: a huge dull blow, stone ringing, a concrete crack and dust and chips raining down (2.4 s)",
+          "mono", False, 1, ch2l2_maw_wall_ram, -1.0, attenuation=72),
+    Sound("ambient.ch2l2.maw_stunned", "Chapter 2 Level 2", "Stone Maw stunned: a low grinding of stone on stone, a big body settling in dull ticks and a trickle of grit (1 s loop, played again while the stun lasts)",
+          "mono", True, 1, ch2l2_maw_stunned, -6.0, attenuation=40, stream=False),
+    Sound("event.ch2l2.maw_burst", "Chapter 2 Level 2", "The grate over the pipe's mouth torn off as Stone Maw comes out: iron screaming, three bolts shearing, the grate flung and clanging, wall crumbling (2.6 s)",
+          "mono", False, 1, ch2l2_maw_burst, -1.0, attenuation=72),
+    Sound("event.ch2l2.maw_collapse", "Chapter 2 Level 2", "Part of the arena's ceiling coming down on Stone Maw: stone cracking and groaning, then a very low blow and a roar of rubble thinning into settling stones (3.6 s)",
+          "mono", False, 1, ch2l2_maw_collapse, -1.0, attenuation=80),
 ]

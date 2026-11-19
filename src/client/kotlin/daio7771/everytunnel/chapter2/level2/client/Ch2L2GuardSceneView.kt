@@ -1,6 +1,8 @@
 package daio7771.everytunnel.chapter2.level2.client
 
 import daio7771.everytunnel.chapter2.level2.core.GuardIntro
+import daio7771.everytunnel.chapter2.level2.core.MawDeathScene
+import daio7771.everytunnel.chapter2.level2.platform.Ch2L2DataLoader
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2GuardScene
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2GuardScenes
 import daio7771.everytunnel.client.cutscene.CutsceneView
@@ -35,9 +37,23 @@ class Ch2L2GuardSceneView(
     }
 
     companion object {
+        /** Stone Maw's death: the camera trembles as the stone cracks, shakes hard when the ceiling comes down and settles after. */
+        private fun mawShake(tick: Double): Double {
+            val phases = MawDeathScene.phases(Ch2L2DataLoader.data.level.maw)
+            val crack = (tick - phases.crouchAt) / (phases.collapseAt - phases.crouchAt).coerceAtLeast(1)
+            val after = (tick - phases.collapseAt) / 40.0
+            return when {
+                tick < phases.crouchAt -> 0.0
+                tick < phases.collapseAt -> 0.08 + 0.12 * crack.coerceIn(0.0, 1.0)
+                else -> (1.0 - after).coerceIn(0.0, 1.0)
+            }
+        }
+
         fun registerAll() {
             Ch2L2GuardSceneView(Ch2L2GuardScenes.INTRO, GuardIntro::shake, GuardIntro::flash).register()
             Ch2L2GuardSceneView(Ch2L2GuardScenes.DEATH).register()
+            Ch2L2GuardSceneView(Ch2L2GuardScenes.MAW_DEATH, shakeAt = ::mawShake).register()
+            Ch2L2ReunionView.register()
         }
     }
 }

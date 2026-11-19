@@ -148,7 +148,7 @@ object Ch2L2Pump {
     fun creatureIn(server: MinecraftServer): VibrationCreatureEntity? = levelWorld(server)?.let { creatures(it).firstOrNull() }
 
     private fun creatures(world: ServerWorld): List<VibrationCreatureEntity> =
-        world.iterateEntities().filterIsInstance<VibrationCreatureEntity>().toList()
+        world.iterateEntities().filterIsInstance<VibrationCreatureEntity>().filter { !it.inFight }.toList()
 
     // --- the clock ------------------------------------------------------------------------------------
 

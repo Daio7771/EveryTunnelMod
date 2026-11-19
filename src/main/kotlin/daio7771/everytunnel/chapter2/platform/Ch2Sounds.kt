@@ -74,6 +74,16 @@ object Ch2Sounds {
     val CH2L2_FLOOD_RUMBLE_MUFFLED = event("ambient.ch2l2.flood_rumble_muffled")
     val CH2L2_EXIT_DOOR = event("event.ch2l2.exit_door", range = 48f)
 
+    /** Chapter 2 Level 2, Stone Maw's last stand (phase 6.1): the pieces of pipe, the throw and what it does, the ram, the stun, the burst and the collapse. */
+    val CH2L2_MAW_PIPE_FALL = event("event.ch2l2.maw_pipe_fall", range = 40f)
+    val CH2L2_MAW_THROW = event("event.ch2l2.maw_throw", range = 24f)
+    val CH2L2_MAW_HIT = event("event.ch2l2.maw_hit", range = 56f)
+    val CH2L2_MAW_PIPE_BREAK = event("event.ch2l2.maw_pipe_break", range = 56f)
+    val CH2L2_MAW_WALL_RAM = event("event.ch2l2.maw_wall_ram", range = 72f)
+    val CH2L2_MAW_STUNNED = event("ambient.ch2l2.maw_stunned", range = 40f)
+    val CH2L2_MAW_BURST = event("event.ch2l2.maw_burst", range = 72f)
+    val CH2L2_MAW_COLLAPSE = event("event.ch2l2.maw_collapse", range = 80f)
+
     private fun event(path: String, range: Float? = null): SoundEvent {
         val id = Identifier(EveryTunnel.MOD_ID, path)
         return (if (range == null) SoundEvent.of(id) else SoundEvent.of(id, range)).also { all += it }

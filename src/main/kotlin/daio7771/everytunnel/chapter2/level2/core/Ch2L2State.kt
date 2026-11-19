@@ -31,9 +31,15 @@ enum class Ch2L2State {
     FLOOD_2,
     /** The gallery up to the station: the third stage. */
     FLOOD_3,
-    /** The pumping station, dry, and the way to the exit. */
+    /** The pumping station, dry, and the way to the exit (its heavy door opens when it is reached). */
     STATION,
-    /** Out of the exit: the level is finished (phase 6). */
+    /** In the arena beyond the exit: Stone Maw and its last stand (phase 6.1). */
+    MAW,
+    /** Stone Maw is dead and the far door open: the way to the reunion room. */
+    MAW_DEAD,
+    /** The reunion with the coworker and worker B is playing (phase 6.1). */
+    REUNION,
+    /** The reunion is over: the level is finished (the card, then the menu). */
     DONE;
 
     /** The state after this one, or null at [DONE]. */
@@ -64,14 +70,16 @@ enum class Ch2L2State {
 }
 
 /**
- * The level's four encounters, each a run of states from [first] to the state it leaves the player in, [after]: what the debug commands
+ * The level's six encounters, each a run of states from [first] to the state it leaves the player in, [after]: what the debug commands
  * skip and reset (`/et ch2 l2 skip <event>`, `reset <event>`).
  */
 enum class Ch2L2Event(val id: String, val first: Ch2L2State, val after: Ch2L2State) {
     HUNTERS("hunters", Ch2L2State.GALLERIES, Ch2L2State.PUMP_ROOM),
     CREATURE("creature", Ch2L2State.PUMP_ROOM, Ch2L2State.CATACOMBS),
     GUARD("guard", Ch2L2State.GUARD_APPEARS, Ch2L2State.GUARD_DEAD),
-    FLOOD("flood", Ch2L2State.FLOOD_1, Ch2L2State.STATION);
+    FLOOD("flood", Ch2L2State.FLOOD_1, Ch2L2State.STATION),
+    MAW("maw", Ch2L2State.MAW, Ch2L2State.MAW_DEAD),
+    REUNION("reunion", Ch2L2State.REUNION, Ch2L2State.DONE);
 
     /** The state just before it, where resetting it leaves the player. */
     val before: Ch2L2State

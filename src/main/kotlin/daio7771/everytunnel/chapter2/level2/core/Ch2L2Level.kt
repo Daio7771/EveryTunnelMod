@@ -43,6 +43,9 @@ data class Ch2L2Level(
     /** The flood's tunables and the ending (phase 6). */
     val flood: Ch2L2FloodRules = Ch2L2FloodRules.DEFAULT,
     val ending: Ch2L2Ending = Ch2L2Ending.DEFAULT,
+    /** Stone Maw's last stand beyond the exit and the reunion that follows it (phase 6.1). */
+    val maw: Ch2L2Maw = Ch2L2Maw.DEFAULT,
+    val reunion: Ch2L2Reunion = Ch2L2Reunion.DEFAULT,
 ) {
     fun checkpoint(id: String?): Ch2L2Checkpoint? = checkpoints.firstOrNull { it.id == id }
 
@@ -60,8 +63,8 @@ data class Ch2L2Level(
     fun checkpointBefore(event: Ch2L2Event): Ch2L2Checkpoint? = checkpoints.firstOrNull { it.before == event }
 
     /** Every anchor and zone the file names, to check against the anchors. */
-    fun anchorNames(): List<String> = checkpoints.map { it.anchor } + hunters.map { it.anchor } + loot.map { it.anchor } + notes.map { it.anchor } + creature.anchorNames() + guard.anchorNames() + flood.anchorNames()
-    fun zoneNames(): List<String> = (lights.keys + checkpoints.map { it.zone } + reaches.map { it.zone } + creature.zoneNames() + guard.zoneNames() + ending.zone).distinct()
+    fun anchorNames(): List<String> = checkpoints.map { it.anchor } + hunters.map { it.anchor } + loot.map { it.anchor } + notes.map { it.anchor } + creature.anchorNames() + guard.anchorNames() + flood.anchorNames() + maw.anchorNames() + reunion.anchorNames()
+    fun zoneNames(): List<String> = (lights.keys + checkpoints.map { it.zone } + reaches.map { it.zone } + creature.zoneNames() + guard.zoneNames() + maw.zoneNames() + reunion.zoneNames()).distinct()
 
     class Result(val level: Ch2L2Level, val problems: List<String>)
 
@@ -135,6 +138,8 @@ data class Ch2L2Level(
             val guard = Ch2L2GuardParser.parse(f)
             val flood = Ch2L2FloodParser.flood(f)
             val ending = Ch2L2FloodParser.ending(f)
+            val maw = Ch2L2MawParser.parse(f)
+            val reunion = Ch2L2ReunionParser.parse(f)
             f.reportUnknownKeys()
 
             val problems = f.problems.toMutableList()
@@ -147,7 +152,7 @@ data class Ch2L2Level(
             if (befores.toSet().size != befores.size) problems += "checkpoints: two come before the same encounter"
             val level = Ch2L2Level(
                 flashlight, noise, battery, thirst, stamina, lights,
-                checkpoints.ifEmpty { d.checkpoints }, reaches, hunters, loot, notes, creature, guard, flood, ending,
+                checkpoints.ifEmpty { d.checkpoints }, reaches, hunters, loot, notes, creature, guard, flood, ending, maw, reunion,
             )
             return Result(level, problems)
         }

@@ -80,6 +80,12 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
     val brainState: State
         get() = State.entries.getOrElse(dataTracker.get(STATE)) { State.REST }
 
+    /**
+     * This is Stone Maw of the arena beyond the exit (phase 6.1): [Ch2L2Maw] runs it (its [StoneMawFight][daio7771.everytunnel.chapter2.level2.core.StoneMawFight]
+     * decides, this body acts through the `fight*` functions below), and the pump room's logic ([Ch2L2Pump]) leaves it alone. Server only.
+     */
+    var inFight = false
+
     init {
         setPathfindingPenalty(PathNodeType.WATER, -1.0f)
         setPathfindingPenalty(PathNodeType.WATER_BORDER, -1.0f)
@@ -89,6 +95,7 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
     override fun initDataTracker() {
         super.initDataTracker()
         dataTracker.startTracking(STATE, State.REST.ordinal)
+        dataTracker.startTracking(DEATH_POSE, 0)
     }
 
     override fun initGoals() {
@@ -98,6 +105,11 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
     override fun mobTick() {
         super.mobTick()
         val world = world as? ServerWorld ?: return
+        if (inFight) {
+            Ch2L2Maw.tickBody(this, world)
+            footsteps()
+            return
+        }
         val data = Ch2L2DataLoader.data
         val config = data.level.creature
         val now = world.server.ticks.toLong()
@@ -136,6 +148,21 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
         footsteps()
     }
 
+    /** The players' noises on the felt floors since the last tick (the arena's, for Stone Maw): the fight adds the clangs of the pipes. */
+    internal fun feltNoises(world: ServerWorld, floors: List<daio7771.everytunnel.core.level.BlockBox>): List<VibrationCreatureBrain.Vibration> {
+        val dimension = world.registryKey.value.toString()
+        val out = ArrayList<VibrationCreatureBrain.Vibration>()
+        for (noise in NoiseSystem.recent()) {
+            if (noise.tick <= lastVibrationScan) break
+            if (noise.dimension != dimension || noise.playerId == null) continue
+            val kind = KINDS[noise.source] ?: continue
+            if (floors.none { it.contains(noise.x, noise.y, noise.z) }) continue
+            out += VibrationCreatureBrain.Vibration(Position(noise.x, noise.y, noise.z), noise.tick, VibrationCreatureBrain.Source.PLAYER, kind, playerId = noise.playerId)
+        }
+        lastVibrationScan = world.server.ticks.toLong() - 1
+        return out
+    }
+
     /** The players' noises on the felt floors since the last tick, and the pipe's landing. */
     private fun vibrations(world: ServerWorld, now: Long): List<VibrationCreatureBrain.Vibration> {
         val data = Ch2L2DataLoader.data
@@ -157,11 +184,13 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
         return out
     }
 
-    private fun nearestPlayer(world: ServerWorld): VibrationCreatureBrain.NearbyPlayer? = world.players
+    private fun nearestPlayer(world: ServerWorld): VibrationCreatureBrain.NearbyPlayer? = nearestActivePlayer(world)?.let { VibrationCreatureBrain.NearbyPlayer(it.uuid, Math.hypot(it.x - x, it.z - z)) }
+
+    /** The nearest player playing the level, alive and about its height. */
+    internal fun nearestActivePlayer(world: ServerWorld): ServerPlayerEntity? = world.players
         .filterIsInstance<ServerPlayerEntity>()
         .filter { it.isAlive && !it.isSpectator && Ch2L2.active(it) && it.y - y in -2.0..4.0 }
         .minByOrNull { Math.hypot(it.x - x, it.z - z) }
-        ?.let { VibrationCreatureBrain.NearbyPlayer(it.uuid, Math.hypot(it.x - x, it.z - z)) }
 
     // --- moving -------------------------------------------------------------------------------------
 
@@ -257,6 +286,49 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
         world.playSound(null, x, y, z, Ch2Sounds.CH2L2_CREATURE_STEP, SoundCategory.HOSTILE, volume, 0.9f + random.nextFloat() * 0.2f)
     }
 
+    // --- Stone Maw's body (phase 6.1): what [Ch2L2Maw] asks of it ------------------------------------------------
+
+    /** Goes to [target] at [blocksPerSecond] by the navigation; true if it cannot get closer. */
+    internal fun fightSteer(target: Position, blocksPerSecond: Double): Boolean {
+        steer(target, blocksPerSecond)
+        return navBlocked
+    }
+
+    /** Stands still, facing [target] if given. */
+    internal fun fightStand(target: Position?) {
+        stand()
+        if (target != null) face(target)
+    }
+
+    /** Charges in a straight line along [heading] (a unit vector, x and z) at [blocksPerSecond], with no pathfinding: it stops only at a wall ([horizontalCollision]). */
+    internal fun fightRam(heading: Pair<Double, Double>, blocksPerSecond: Double) {
+        if (!navigation.isIdle) navigation.stop()
+        pathTarget = null
+        val step = blocksPerSecond / 20.0
+        setVelocity(heading.first * step, velocity.y, heading.second * step)
+        velocityModified = true
+        val turned = (MathHelper.atan2(heading.second, heading.first) * MathHelper.DEGREES_PER_RADIAN).toFloat() - 90f
+        yaw = turned
+        bodyYaw = turned
+        headYaw = turned
+    }
+
+    /** The pose its brain state's animation shows. */
+    internal fun fightPose(state: State) {
+        if (dataTracker.get(STATE) != state.ordinal) dataTracker.set(STATE, state.ordinal)
+    }
+
+    /** The death pose ([POSE_DYING], [POSE_CRUSHED]; 0 none). */
+    internal fun fightDeathPose(pose: Int) {
+        if (dataTracker.get(DEATH_POSE) != pose) dataTracker.set(DEATH_POSE, pose)
+    }
+
+    internal fun fightSound(event: SoundEvent, volume: Float) = sound(event, volume)
+
+    internal fun fightHurt(player: ServerPlayerEntity) = hit(player)
+
+    internal val fightNavBlocked: Boolean get() = navBlocked
+
     /** Back at [x], [y], [z] at rest as if just spawned (the encounter restarts). */
     fun returnHome(x: Double, y: Double, z: Double, yaw: Float) {
         stand()
@@ -278,7 +350,11 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
             AnimationController(this, "main", TRANSITION_TICKS) { state ->
                 val moving = state.isMoving
                 state.setAndContinue(
-                    when (brainState) {
+                    when {
+                        dataTracker.get(DEATH_POSE) == POSE_CRUSHED -> CRUSHED
+                        dataTracker.get(DEATH_POSE) == POSE_DYING -> DYING
+                        else -> null
+                    } ?: when (brainState) {
                         State.REST -> IDLE
                         State.STALK -> if (moving) STALK else LISTEN
                         State.ORIENT -> ORIENT
@@ -306,6 +382,11 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
 
     companion object {
         private val STATE: TrackedData<Int> = DataTracker.registerData(VibrationCreatureEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
+
+        /** Stone Maw's death pose (phase 6.1): 0 none, [POSE_DYING] sunk to the floor looking down, [POSE_CRUSHED] flinching under the rubble. */
+        private val DEATH_POSE: TrackedData<Int> = DataTracker.registerData(VibrationCreatureEntity::class.java, TrackedDataHandlerRegistry.INTEGER)
+        const val POSE_DYING = 1
+        const val POSE_CRUSHED = 2
 
         /** What a player does on the floor that shakes it, and how hard. Breathing, sips and equipment are not felt. */
         private val KINDS = mapOf(
@@ -346,6 +427,8 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
         val CHARGE: RawAnimation = RawAnimation.begin().thenLoop("animation.vibration_creature.charge")
         val STRIKE: RawAnimation = RawAnimation.begin().thenPlay("animation.vibration_creature.strike")
         val RECOVER: RawAnimation = RawAnimation.begin().thenLoop("animation.vibration_creature.recover")
+        val DYING: RawAnimation = RawAnimation.begin().thenPlayAndHold("animation.vibration_creature.dying")
+        val CRUSHED: RawAnimation = RawAnimation.begin().thenPlayAndHold("animation.vibration_creature.crushed")
         val LISTEN: RawAnimation = RawAnimation.begin().thenLoop("animation.vibration_creature.listen")
 
         fun createAttributes(): DefaultAttributeContainer.Builder = MobEntity.createMobAttributes()

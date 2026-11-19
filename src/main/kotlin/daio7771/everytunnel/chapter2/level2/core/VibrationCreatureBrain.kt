@@ -257,6 +257,11 @@ class VibrationCreatureBrain(private val random: Random = Random.Default) {
         moveTicks = 0
     }
 
+    /** Starts a search round [centre] now, whatever it was doing (the fight of phase 6.1 hands it back after a stun): it walks to a few points, listens, then goes home. */
+    fun searchAround(centre: Position) {
+        search(centre)
+    }
+
     /** Back at rest as if just spawned (the player died and restarts the encounter); what it felt is forgotten. */
     fun reset() {
         state = State.REST

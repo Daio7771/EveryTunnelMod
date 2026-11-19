@@ -2,6 +2,7 @@ package daio7771.everytunnel.chapter2.level2.platform
 
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.GuardIntro
+import daio7771.everytunnel.chapter2.level2.core.MawDeathScene
 import daio7771.everytunnel.core.cutscene.Cutscene
 import daio7771.everytunnel.core.cutscene.Local
 import daio7771.everytunnel.core.cutscene.Look
@@ -154,9 +155,13 @@ object Ch2L2GuardScenes {
 
     val DEATH = Ch2L2GuardScene("death", ::deathTimeline) { server, player -> Ch2L2Guard.finish(server, player) }
 
+    /** Stone Maw's death (phase 6.1): third person, on the clock of [MawDeathScene]; its end, played or skipped, is [Ch2L2Maw.finishDeath]. */
+    val MAW_DEATH = Ch2L2GuardScene("maw_death", { MawDeathScene.timeline(Ch2L2DataLoader.data.level.maw) }) { server, _ -> Ch2L2Maw.finishDeath(server) }
+
     fun register() {
         INTRO.register()
         DEATH.register()
+        MAW_DEATH.register()
     }
 
     private fun ticks(seconds: Double) = Math.round(seconds * 20.0).toInt()
@@ -185,5 +190,15 @@ object Ch2L2GuardScenes {
             ),
             emptyList(), emptyList(),
         )
+    }
+}
+
+/** The reunion's cinematic (phase 6.1): the generic scene, with [Ch2L2Reunion]'s timeline; its skip is [Ch2L2Reunion.finish]. */
+object Ch2L2Scenes {
+
+    val REUNION = Ch2L2GuardScene("reunion", { Ch2L2Reunion.timeline() }) { server, player -> Ch2L2Reunion.finish(server, player) }
+
+    fun register() {
+        REUNION.register()
     }
 }

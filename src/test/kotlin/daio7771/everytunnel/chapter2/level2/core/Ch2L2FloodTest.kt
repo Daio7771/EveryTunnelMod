@@ -72,7 +72,7 @@ class Ch2L2FloodTest {
             assertEquals(0, resume.water, "$inside")
             assertEquals(Ch2L2State.GUARD_DEAD, resume.state, "$inside")
         }
-        for (after in listOf(Ch2L2State.STATION, Ch2L2State.DONE)) {
+        for (after in listOf(Ch2L2State.STATION, Ch2L2State.MAW, Ch2L2State.REUNION, Ch2L2State.DONE)) {
             val resume = flood.resume(after)
             assertEquals(3, resume.water, "$after")
             assertEquals(after, resume.state)
@@ -80,9 +80,12 @@ class Ch2L2FloodTest {
     }
 
     @Test
-    fun `the ending can be reached only from the station on, and the jar's tunables and checkpoint are in place`() {
-        assertTrue(!Ch2L2Flood.endingAllowed(Ch2L2State.FLOOD_3))
-        assertTrue(Ch2L2Flood.endingAllowed(Ch2L2State.STATION))
+    fun `the exit door opens from the station on, the ending only from the reunion, and the jar's tunables and checkpoint are in place`() {
+        assertTrue(!Ch2L2Flood.exitDoorAllowed(Ch2L2State.FLOOD_3))
+        assertTrue(Ch2L2Flood.exitDoorAllowed(Ch2L2State.STATION))
+        assertTrue(!Ch2L2Flood.endingAllowed(Ch2L2State.STATION))
+        assertTrue(!Ch2L2Flood.endingAllowed(Ch2L2State.MAW_DEAD))
+        assertTrue(Ch2L2Flood.endingAllowed(Ch2L2State.REUNION))
         assertTrue(Ch2L2Flood.endingAllowed(Ch2L2State.DONE))
         val level = data.level
         val rules = level.flood
@@ -90,7 +93,7 @@ class Ch2L2FloodTest {
         assertEquals(listOf(0.35, 0.6, 0.9), rules.rumbleVolume)
         assertEquals(0.9, rules.rumbleAt(3))
         assertEquals(0.9, rules.rumbleAt(7))
-        assertEquals("zone_exit_door", level.ending.zone)
+        assertEquals("zone_exit_door", level.maw.exitZone)
         assertNotNull(level.checkpoint(level.ending.checkpoint))
         assertNotNull(data.anchors.point(rules.pipeAnchor))
         assertNotNull(data.anchors.point("exit_hatch"))

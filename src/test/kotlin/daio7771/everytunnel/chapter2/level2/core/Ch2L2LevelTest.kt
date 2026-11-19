@@ -17,7 +17,7 @@ class Ch2L2LevelTest {
     private val route = listOf(
         "sealed_entry", "collector_junction", "hunter_galleries", "pump_overlook", "vibration_chamber", "lower_catacombs", "observer_wall",
         "observer_chamber", "return_gallery", "observer_wall", "flood_collector", "rising_walkways", "upper_gallery", "pumping_station",
-        "level_exit",
+        "level_exit", "maw_entry", "maw_centre", "reunion_player", "chapter_end",
     )
 
     private fun at(anchor: String): (String) -> Boolean {
@@ -38,7 +38,7 @@ class Ch2L2LevelTest {
         assertEquals("ahead", Ch2L2Event.GUARD.progress(Ch2L2State.CATACOMBS))
         assertEquals("now", Ch2L2Event.GUARD.progress(Ch2L2State.GUARD_FIGHT))
         assertEquals("past", Ch2L2Event.GUARD.progress(Ch2L2State.GUARD_DEAD))
-        assertEquals(listOf(0, 1, 2, 3, 3), listOf(Ch2L2State.GUARD_DEAD, Ch2L2State.FLOOD_1, Ch2L2State.FLOOD_2, Ch2L2State.FLOOD_3, Ch2L2State.STATION).map { it.floodStage })
+        assertEquals(listOf(0, 1, 2, 3, 3, 3, 3), listOf(Ch2L2State.GUARD_DEAD, Ch2L2State.FLOOD_1, Ch2L2State.FLOOD_2, Ch2L2State.FLOOD_3, Ch2L2State.STATION, Ch2L2State.MAW, Ch2L2State.DONE).map { it.floodStage })
     }
 
     @Test
@@ -65,7 +65,7 @@ class Ch2L2LevelTest {
             val reached = level.stateAhead(state, at(place))
             if (reached != null) state = reached
         }
-        assertEquals(Ch2L2State.STATION, state)
+        assertEquals(Ch2L2State.MAW, state)
         // Reset (or a death) at the checkpoint before an encounter: the state before it, and standing there starts it again, or walking on does.
         for (event in Ch2L2Event.entries) {
             val checkpoint = level.checkpointBefore(event)!!

@@ -9,7 +9,7 @@ pumping station and the exit. It is built in phases (1 to 7, and a phase 8 to co
 `chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 6,
 the flood and the exit.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
 bars, dying brings the player back to the last checkpoint, and the menu's Chapter 2 continues it; the first stretch has its enemies,
-resources and documents, the pump room has its creature and its pump, the vestibule and maintenance room have the Guard and its traps, and the way on to the exit floods in three stages and ends at a heavy door and "TO BE CONTINUED".
+resources and documents, the pump room has its creature and its pump, the vestibule and maintenance room have the Guard and its traps, and the way on to the exit floods in three stages and ends at a heavy door that opens on Stone Maw's last stand (phase 6.1), the reunion with the coworker and worker B and "TO BE CONTINUED".
 
 Its code is under `daio7771.everytunnel.chapter2.level2` (`core`, plain Kotlin, and `platform`), apart from the base game, which never
 names it (see [Architecture](architecture.md#chapters)). Its named places use Level 1's format (`level1.core.Ch2L1AnchorsParser`); its map
@@ -44,10 +44,13 @@ player on to its state, never back:
 | `GUARD_DEAD` | Back round to the vestibule, BOO! and the grates up (phase 5) | The Guard's fourth effective stun (or `skip guard`) |
 | `FLOOD_1` to `FLOOD_3` | The collector, the walkways, the gallery up: the flood's stages (phase 6) | `zone_flood_collector`, `zone_rising_walkways`, `zone_upper_gallery` |
 | `STATION` | The pumping station, dry | `zone_pumping_station` |
-| `DONE` | Out of the exit (phase 6) | (phase 6) |
+| `MAW` | Stone Maw's arena beyond the exit door (phase 6.1) | `zone_maw_middle` |
+| `MAW_DEAD` | Stone Maw is dead, the far door open | its death (or `skip maw`) |
+| `REUNION` | The reunion with the coworker and worker B is playing | the middle of the reunion room |
+| `DONE` | The reunion is over: the card, then the menu | the reunion's end |
 
-The four **encounters** (`Ch2L2Event`) are runs of states: `hunters` (`GALLERIES`), `creature` (`PUMP_ROOM`), `guard` (`GUARD_APPEARS` to
-`GUARD_FIGHT`) and `flood` (`FLOOD_1` to `FLOOD_3`). The flood's stage is the state's (0 before it, 3 from the third on). Each later phase
+The six **encounters** (`Ch2L2Event`) are runs of states: `hunters` (`GALLERIES`), `creature` (`PUMP_ROOM`), `guard` (`GUARD_APPEARS` to
+`GUARD_FIGHT`), `flood` (`FLOOD_1` to `FLOOD_3`), `maw` (`MAW`) and `reunion` (`REUNION`). The flood's stage is the state's (0 before it, 3 from the third on). Each later phase
 hangs its encounter on the states: `Ch2L2.onStateChange` (a state left for another, by playing or by command) and `Ch2L2.onStart` (the
 level started at a state, by arriving, a death, CONTINUE or `reset`: the world as that state wants it, whatever was there).
 
@@ -147,14 +150,45 @@ nothing lethal but vanilla drowning; the route always stays over each stage (the
 - **A start** (a death, CONTINUE, `reset`) puts the water as the state wants it before control returns: drained up to the flood (a death in it
   comes back to the `collector` checkpoint, dry, and walking in starts it again from zero) and all of it from `STATION`, with the
   gates as they go. `/et ch2 l2 flood <0|1|2|3>` sets the water at once for testing.
-- **The ending** (`Ch2L2Ending`, `ending` in `level.json`): from `STATION` on, walking into `zone_exit_door` (nested in `zone_level_exit`)
-  in front of the exit's heavy door (a `fill` feature of sluice-gate plates on the exit room's west wall, always shut) holds the player
-  still, plays `event.ch2l2.exit_door`, and after `door_sound_seconds` the client (`Ch2L2EndingOverlay`) fades to black over
-  `fade_seconds`, shows "TO BE CONTINUED" (`every_tunnel.ch2.l2.ending.continued`) for `card_seconds` and leaves for the main menu. The first
-  time it also sets `DONE` and saves the `exit` checkpoint (anchor `level_exit`, facing the door): CONTINUE stands there with the whole
-  flood in place, and walking into the door plays the ending again. `/et ch2 l2 ending` plays it for testing.
+- **The exit door** is the gate `exit_hatch` (shut as built, on the exit room's west wall): from `STATION` on, walking into `zone_exit_door`
+  (nested in `zone_level_exit`) plays `event.ch2l2.exit_door` and opens it for good (`Ch2L2Maw`, `maw.exit_door`); the corridor beyond leads to the arena.
+- **The ending** (`Ch2L2Ending`, `ending` in `level.json`) is no longer at the door: it starts when the reunion's scene ends (below). The client
+  (`Ch2L2EndingOverlay`) fades to black over `fade_seconds`, shows "TO BE CONTINUED" (`every_tunnel.ch2.l2.ending.continued`) for
+  `card_seconds` and leaves for the main menu. The first time it also sets `DONE` and saves the `chapter_end` checkpoint (anchor `chapter_end`,
+  in the reunion room): CONTINUE stands there with the whole flood in place. `/et ch2 l2 ending` plays it for testing.
 
 The generator reports the quiet walk from just inside the station's door (`station_door_in`) to the exit's door: 36 blocks, about 8 s.
+
+## Stone Maw's last stand and the reunion (phase 6.1)
+
+Beyond the exit door the map goes on west (negative plan coordinates): `maw_corridor` (4 wide), `maw_arena` (20 x 20, ceiling 7, flat, bare:
+its only blocks are lamps under the ceiling; the generator's `no_climb` check proves that every place to stand is on its floor), `maw_pipe` (the
+stub Stone Maw comes out of, grated by the gate `maw_pipe_mouth`) and `reunion` (10 x 10, lit, the shut door of Level 3 on its far wall). The gates
+`maw_entry` (open as built, shuts behind the player) and `maw_far` (shut until the death) join them. `checks.route_gates` opens `exit_hatch` and
+`maw_far` for the route's walk.
+
+- **The fight** (`Ch2L2Maw` in `platform`, `maw` in `level.json`; the rules are `StoneMawFight`, `PipeSupply`, `MawDeathScene` in `core`). Reaching
+  `zone_maw_middle` sets `MAW`: the door shuts, the grate is torn off, Stone Maw (the phase 4 `VibrationCreatureEntity` in fight mode,
+  `inFight`; the pump's code leaves it alone) crawls out to `maw_home`, the first piece of pipe falls in front of the player. In its rest, stalk,
+  charge and blow it is phase 4's brain (fed by the player's steps in the arena and by pipes landing, loud). A piece (`pipe_piece`, picked up by
+  walking over it) is thrown with a right click (`ThrownPipeEntity`, `maw.throw`): on Stone Maw it is a **hit** (5 in all), on anything else it
+  breaks and clangs where it lands (it goes to the noise). A hit makes it orient on the player (`ram.orient_seconds`) and **ram in a straight line**
+  (`ram.speed`, turning at most `ram.turn_degrees_per_second`) until a wall (the body's `horizontalCollision`) or `ram.max_seconds`: then it is
+  **stunned** `stun_seconds` (a hit then counts and ends it), and goes back to the brain searching. A player on its way is struck as in phase 4.
+  One piece at a time (`pipes.at_once`): `pipes.respawn_seconds` after one is gone another falls from one of `pipes.points` (never the one nearest the
+  creature or the player, nor twice the same). The jump is blocked in the arena while the fight lasts: `platform.MovementRules` (a base hook) read by
+  `LivingEntityJumpMixin`, a rule of `Ch2L2Maw` on the server and `JUMP_PACKET` for the client.
+- **The death**: the last hit has it walk to `maw_centre`, crouch, and the ceiling comes down on it (falling blocks of `death.collapse_blocks`, a mix, from the middle out over `collapse_spread_ticks`, dust,
+  shake; it sinks to the floor looking down, then flinches under the rubble: animations `dying`, `crushed`) while a third-person cinematic (`Ch2L2GuardScenes.MAW_DEATH`, skippable) plays on `MawDeathScene`'s clock. `Ch2L2Maw.finishDeath` is the one
+  idempotent end (the scene's end, its skip, `skip maw`): rubble in place, far door open, `MAW_DEAD`.
+- **The reunion** (`Ch2L2Reunion`, `reunion` in `level.json`, `ReunionScene` in `core`): at the middle of the room (the `reunion` checkpoint stands
+  there) the state goes to `REUNION`, the coworker and worker B (`FactoryNpcEntity`) stand at their anchors and a first-person cinematic turns the
+  player's eyes to whoever speaks (`reunion.lines`: who, lang key under `reunion.text`, optional sound, seconds). The NPCs talk with their hands,
+  listen, glance at the door now and then; afterwards the three look at Level 3's door and they walk towards it. The scene's end (or skip) is
+  `Ch2L2Reunion.finish`: NPCs gone, then the ending. The lines are the user's (ElevenLabs voices, `tools/sounds/ch2_l2_voices.py`, `voice.reunion_*`): four so far (coworker, coworker, worker B,
+  coworker), their subtitles in `tools/lang/src/chapter2`; with no lines the scene is a short silent one.
+- **Starts** (entering, a death, CONTINUE, `reset maw`): everything as the state wants it: the fight over, the gates, the pieces out of the pockets,
+  the rubble only from `MAW_DEAD`. Checkpoints `maw` (before the arena), `reunion` and `chapter_end`.
 
 ## Phase 8 (to come): lighting and decoration
 
@@ -248,6 +282,7 @@ after each stage).
 | `upper_gallery` | The stairs up to the station | M to H |
 | `pumping_station` | The station, dry; a broken bridge seen through bars over the shaft | H |
 | `level_exit` | The exit room, past a quiet corridor | H |
+| `maw_entry`, `maw_centre`, `reunion_player`, `chapter_end` | The arena's entry corridor, the arena's middle, the reunion room's middle and its corner (phase 6.1) | H |
 | `survival_kit`, `hunters_post`, `loot_galleries`, `loot_catacombs`, `loot_station` | Phase 3's: the kit's counter, the Hunters' post and the three loot spots, in the spaces above | H, M, L |
 | `note_old_drainage`, `note_maintenance`, `note_withdrawal` | A note board's own cell (`kind: wall`: not a place to stand) | H, M, L |
 
@@ -302,7 +337,9 @@ anchors, and what is wrong is reported (`/et reload`).
 | `/et ch2 l2 creature state` / `pump` | The creature's brain (state, target, speed in blocks a second) or the pump's cycle (phase, tick, masking) in the action bar; again to turn it off |
 | `/et ch2 l2 guard` | The Guard's fight (phase, stuns, each trap: S spent, C charging, A armed) in the action bar; again to turn it off. `skip guard` runs its finish at once, `reset guard` puts the wall whole again |
 | `/et ch2 l2 flood <0\|1\|2\|3>` | The flood's water at once to that stage (0 drains it), whatever your state; `skip flood` fills all of it and shuts the station's door, `reset flood` drains it and opens the vestibule's gate again |
-| `/et ch2 l2 ending` | Plays the ending (door, fade, "TO BE CONTINUED", main menu); the level finishes only if you are at the station or past it |
+| `/et ch2 l2 ending` | Plays the ending (fade, "TO BE CONTINUED", main menu); the level finishes only if you are in the reunion or past it |
+| `/et ch2 l2 maw` / `maw hit` / `maw kill` | Stone Maw's fight in the chat (phase, hits left, mode) / counts a hit / plays its death. `skip maw` runs the death's end, `reset maw` puts the fight back at its start |
+| `/et ch2 l2 reunion` | You are put at the reunion room's spot and the reunion plays |
 | `/et ch2 l2 anchors` | Every anchor and zone with its coordinates, the provisional ones marked |
 | `/et ch2 l2 goto <anchor>` | Builds the level if it is not, then takes you to a place (`sealed_entry` ... `level_exit`, `trap_1`...) or to the middle of a zone (`zone_<place>`) |
 | `/et reload` | Reads Level 1's and Level 2's data again and says what is wrong |

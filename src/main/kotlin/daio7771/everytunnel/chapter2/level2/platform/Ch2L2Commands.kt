@@ -40,7 +40,9 @@ import net.minecraft.util.Identifier
  *   again to turn it off ([Ch2L2Guard]). `skip guard` runs its finish at once; `reset guard` puts the wall whole again at the vestibule.
  * - `/et ch2 l2 flood <0|1|2|3>`: the water at once to that stage, whatever your state (0 drains it); `skip flood` fills all three and
  *   shuts the station's door, `reset flood` drains it and opens the vestibule's gate again at the collector ([Ch2L2FloodRun]).
- *   `/et ch2 l2 ending` plays the ending (door, fade, card, main menu; the level is finished only if you are at the station or past it) ([Ch2L2Ending]).
+ *   `/et ch2 l2 ending` plays the ending (fade, card, main menu; the level is finished only if you are in the reunion or past it) ([Ch2L2Ending]).
+ * - `/et ch2 l2 maw`: Stone Maw's fight (phase 6.1): its phase, hits left and mode; `maw hit` counts a hit, `maw kill` plays its death. `skip maw`
+ *   runs its death's end at once, `reset maw` puts the fight back at its start. `/et ch2 l2 reunion` plays the reunion (you are put at its spot) ([Ch2L2Maw], [Ch2L2Reunion]).
  * - `/et ch2 l2 anchors`: every anchor with its coordinates, the provisional ones marked.
  * - `/et ch2 l2 goto <anchor>`: builds the level if it is not, then takes you to a point (the places of the route, `sealed_entry` to
  *   `level_exit`, and the rest), or to the middle of a zone (`zone_<place>`) one block over its floor.
@@ -103,6 +105,13 @@ object Ch2L2Commands {
                                     ),
                                 )
                                 .then(CommandManager.literal("ending").executes(::ending))
+                                .then(
+                                    CommandManager.literal("maw")
+                                        .executes(::mawState)
+                                        .then(CommandManager.literal("hit").executes(::mawHit))
+                                        .then(CommandManager.literal("kill").executes(::mawKill)),
+                                )
+                                .then(CommandManager.literal("reunion").executes(::reunion))
                                 .then(CommandManager.literal("anchors").executes(::anchors))
                                 .then(
                                     CommandManager.literal("goto").then(
@@ -249,8 +258,36 @@ object Ch2L2Commands {
             reply(context, "The ending is playing already.")
             return 0
         }
-        reply(context, "The ending: the door, the fade, the card, the menu.${if (Ch2L2.state(player) < Ch2L2State.STATION) " (You are before the station: the level does not finish.)" else ""}")
+        reply(context, "The ending: the fade, the card, the menu.${if (Ch2L2.state(player) < Ch2L2State.REUNION) " (You are before the reunion: the level does not finish.)" else ""}")
         return 1
+    }
+
+    private fun mawState(context: CommandContext<ServerCommandSource>): Int {
+        reply(context, Ch2L2Maw.describe())
+        return 1
+    }
+
+    private fun mawHit(context: CommandContext<ServerCommandSource>): Int {
+        val ok = Ch2L2Maw.debugHit(context.source.server)
+        reply(context, if (ok) "A hit on Stone Maw. ${Ch2L2Maw.describe()}" else "Stone Maw is not fighting (enter the arena first, or skip/reset maw).")
+        return if (ok) 1 else 0
+    }
+
+    private fun mawKill(context: CommandContext<ServerCommandSource>): Int {
+        val ok = Ch2L2Maw.debugKill()
+        reply(context, if (ok) "Stone Maw's death begins." else "Stone Maw is not fighting.")
+        return if (ok) 1 else 0
+    }
+
+    private fun reunion(context: CommandContext<ServerCommandSource>): Int {
+        val player = context.source.playerOrThrow
+        if (!Ch2L2.active(player)) {
+            reply(context, "You are not in Level 2: /et ch2 l2 enter first.")
+            return 0
+        }
+        val why = Ch2L2Reunion.debugPlay(player)
+        reply(context, why ?: "The reunion plays.")
+        return if (why == null) 1 else 0
     }
 
     private fun watchCreature(context: CommandContext<ServerCommandSource>): Int {

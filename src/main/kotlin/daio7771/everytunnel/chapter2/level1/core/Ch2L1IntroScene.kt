@@ -1,5 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.core
 
+import daio7771.everytunnel.chapter2.core.toLocal as sharedToLocal
 import daio7771.everytunnel.core.cutscene.Cutscene
 import daio7771.everytunnel.core.cutscene.Local
 import daio7771.everytunnel.core.cutscene.Look
@@ -11,8 +12,6 @@ import daio7771.everytunnel.core.cutscene.Timeline
 import daio7771.everytunnel.core.cutscene.VoiceLine
 import daio7771.everytunnel.core.level.Position
 import kotlin.math.ceil
-import kotlin.math.cos
-import kotlin.math.sin
 
 /**
  * The cinematic of the first announcement (Rowan's `a1`, when the first task is done and the player has left the terminal): the
@@ -66,12 +65,5 @@ object Ch2L1IntroScene {
     }
 
     /** [position] as the scene's someone sees it: so far ahead, to their right, up (the inverse of [SceneFrame.at]). */
-    fun SceneFrame.toLocal(position: Position): Local {
-        val r = Math.toRadians(yaw)
-        val fx = -sin(r)
-        val fz = cos(r)
-        val dx = position.x - x
-        val dz = position.z - z
-        return Local(dx * fx + dz * fz, -dx * fz + dz * fx, position.y - y)
-    }
+    fun SceneFrame.toLocal(position: Position): Local = sharedToLocal(position)
 }

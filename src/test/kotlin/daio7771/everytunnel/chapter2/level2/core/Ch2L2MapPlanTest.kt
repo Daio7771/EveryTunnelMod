@@ -104,6 +104,7 @@ class Ch2L2MapPlanTest {
                 assertTrue(Cell(x, y, z) in cells, "${point.id}: no breaker at ${point.position}")      // the breaker's own cell, on the maintenance wall
                 continue
             }
+            if (point.id.startsWith("maw_pipe_") || point.id in setOf("maw_entry_door", "maw_mouth", "maw_far_door")) continue      // a ceiling point, or a gate's sound: not places to stand
             if (point.id == "pipe_burst" || point.id == "exit_hatch") {
                 assertTrue(Cell(x, y, z) in cells, "${point.id}: no pipe or door at ${point.position}")      // the burst pipe's own cell, and the exit door's plates
                 continue
@@ -132,7 +133,7 @@ class Ch2L2MapPlanTest {
     }
 
     @Test
-    fun `the station's door is open in the build and shuts with a sluice gate, and the exit's door is always shut`() {
+    fun `the station's door is open in the build and shuts with a sluice gate, and the exit's door is shut as built and opens with the level`() {
         val door = plan.gate("station_south") ?: error("no station_south")
         assertEquals("open", door.built)
         assertEquals("minecraft:air", door.states["open"])

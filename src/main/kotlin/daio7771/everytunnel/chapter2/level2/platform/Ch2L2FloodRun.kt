@@ -350,11 +350,12 @@ object Ch2L2FloodRun {
         EveryTunnel.LOGGER.info("Chapter 2 Level 2: the station's door shuts behind {}", player.gameProfile.name)
     }
 
-    /** Which rumble the player hears now: their stage's while in the flood, muffled once the station's door is shut, none otherwise. */
+    /** Which rumble the player hears now: their stage's while in the flood, muffled once the station's door is shut, none beyond the exit door or otherwise. */
     private fun wantedRumble(world: ServerWorld, player: ServerPlayerEntity): Int {
         val state = Ch2L2.state(player)
         return when {
             state < Ch2L2State.FLOOD_1 -> 0
+            state >= Ch2L2State.MAW -> 0      // beyond the exit door (phase 6.1) the flood is out of earshot: nothing masks the player in the arena
             state >= Ch2L2State.STATION -> if (Ch2L2Build.gateIs(world, rules.stationDoor, "shut")) MUFFLED else flood.stages.size
             else -> state.floodStage
         }

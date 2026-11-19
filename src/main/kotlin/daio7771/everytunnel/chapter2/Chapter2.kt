@@ -25,7 +25,10 @@ import daio7771.everytunnel.chapter2.level2.platform.Ch2L2FloodRun
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2DataLoader
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Guard
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2GuardScenes
+import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Maw
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Pump
+import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Reunion
+import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Scenes
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Spawns
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
@@ -117,8 +120,11 @@ object Chapter2 : ModInitializer {
         Ch2L2.register()
         Ch2L2Spawns.register()
         Ch2L2Pump.register()
+        Ch2L2Maw.register()
         Ch2L2Guard.register()
         Ch2L2GuardScenes.register()
+        Ch2L2Scenes.register()
+        Ch2L2Reunion.register()
         Ch2L2FloodRun.register()
         Ch2L2Ending.register()
         Ch2L2Commands.register()

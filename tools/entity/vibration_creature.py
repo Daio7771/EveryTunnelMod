@@ -8,7 +8,7 @@ animations, the editable Blockbench file and its LEEME.md). It is the source: ch
 never edit what this tool writes. This tool writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   geo/entity/vibration_creature.geo.json                 the source geo, renamed geometry.vibration_creature
   animations/entity/vibration_creature.animation.json    idle and walk from the source; orient, stalk, charge, strike,
-                                                         recover and listen written here on its bones
+                                                         recover, listen, dying and crushed written here on its bones
   textures/entity/vibration_creature.png                 the source texture
   and the entity's name in Chapter 2's lang part (tools/lang/src/chapter2); no spawn egg: it is never summoned
 and tools/entity/output/vibration_creature_preview.png (git-ignored): front and side views of the key poses.
@@ -141,6 +141,38 @@ def our_animations():
         "left_arm": {"rotation": still([-6, 0, -2])},
         "right_arm": {"rotation": still([-6, 0, 2])},
     }}
+    A[f"animation.{n}.dying"] = {"loop": "hold_on_last_frame", "animation_length": 2.6, "bones": {
+        # Phase 6.1, Stone Maw's last stand: after the last hit it sinks to the floor without lying down: the knees buckle (it squats low,
+        # thighs forward, shins folded back), the body leans over its long arms until they hang to the floor, and the head drops till it
+        # looks straight down at the stone. Held at the end.
+        "pelvis": {"position": keys((0, [0, 0, 0]), (0.5, [0, 0, 0]), (1.2, [0, 0, 0]), (2.0, [0, -3.3, 0]), (2.6, [0, -3.2, 0]))},
+        "body": {"rotation": keys((0, [0, 0, 0]), (0.6, [6, 0, 0]), (1.4, [24, 0, 0]), (2.2, [40, 0, 0]), (2.6, [42, 0, 0]))},
+        "head": {"rotation": keys((0, [0, 0, 0]), (0.8, [8, 6, 0]), (1.6, [32, 2, 0]), (2.2, [52, 0, 0]), (2.6, [56, 0, 0]))},
+        "jaw": {"rotation": keys((0, [0, 0, 0]), (1.0, [10, 0, 0]), (2.6, [4, 0, 0]))},
+        "left_arm": {"rotation": keys((0, [0, 0, 0]), (1.0, [-14, 0, -3]), (2.0, [-62, 0, -4]), (2.6, [-70, 0, -4]))},
+        "right_arm": {"rotation": keys((0, [0, 0, 0]), (1.0, [-14, 0, 3]), (2.0, [-62, 0, 4]), (2.6, [-70, 0, 4]))},
+        "left_forearm": {"rotation": keys((0, [0, 0, 0]), (2.0, [-12, 0, 0]), (2.6, [-14, 0, 0]))},
+        "right_forearm": {"rotation": keys((0, [0, 0, 0]), (2.0, [-12, 0, 0]), (2.6, [-14, 0, 0]))},
+        "left_leg": {"rotation": keys((0, [0, 0, 0]), (0.8, [-14, 0, 0]), (1.6, [-52, 0, 0]), (2.2, [-72, 0, 0]), (2.6, [-74, 0, 0]))},
+        "right_leg": {"rotation": keys((0, [0, 0, 0]), (0.8, [-14, 0, 0]), (1.6, [-52, 0, 0]), (2.2, [-72, 0, 0]), (2.6, [-74, 0, 0]))},
+        "left_shin": {"rotation": keys((0, [0, 0, 0]), (0.8, [20, 0, 0]), (1.6, [70, 0, 0]), (2.2, [104, 0, 0]), (2.6, [106, 0, 0]))},
+        "right_shin": {"rotation": keys((0, [0, 0, 0]), (0.8, [20, 0, 0]), (1.6, [70, 0, 0]), (2.2, [104, 0, 0]), (2.6, [106, 0, 0]))},
+    }}
+    A[f"animation.{n}.crushed"] = {"loop": "hold_on_last_frame", "animation_length": 1.4, "bones": {
+        # The ceiling comes down on it: it flinches, both arms thrown over its head, the body folding lower, then they drop limp.
+        "pelvis": {"position": keys((0, [0, -3.2, 0]), (0.25, [0, -3.2, 0]), (1.4, [0, 1.6, 0]))},
+        "body": {"rotation": keys((0, [42, 0, 0]), (0.2, [34, 0, 0]), (0.5, [48, 0, 0]), (1.4, [50, 0, 0]))},
+        "head": {"rotation": keys((0, [56, 0, 0]), (0.2, [40, 0, 0]), (0.5, [62, 0, 0]), (1.4, [64, 0, 0]))},
+        "jaw": {"rotation": keys((0, [4, 0, 0]), (0.2, [24, 0, 0]), (0.5, [6, 0, 0]))},
+        "left_arm": {"rotation": keys((0, [-70, 0, -4]), (0.2, [-150, 0, -10]), (0.6, [-120, 0, -8]), (1.4, [-74, 0, -4]))},
+        "right_arm": {"rotation": keys((0, [-70, 0, 4]), (0.2, [-150, 0, 10]), (0.6, [-120, 0, 8]), (1.4, [-74, 0, 4]))},
+        "left_forearm": {"rotation": keys((0, [-14, 0, 0]), (0.2, [-50, 0, 0]), (1.4, [-10, 0, 0]))},
+        "right_forearm": {"rotation": keys((0, [-14, 0, 0]), (0.2, [-50, 0, 0]), (1.4, [-10, 0, 0]))},
+        "left_leg": {"rotation": still([-74, 0, 0])},
+        "right_leg": {"rotation": still([-74, 0, 0])},
+        "left_shin": {"rotation": still([106, 0, 0])},
+        "right_shin": {"rotation": still([106, 0, 0])},
+    }}
     return A
 
 
@@ -237,7 +269,8 @@ def draw_view(d, cubes, ox, oy, view, scale):
 def write_preview(geo, anims):
     poses = [("idle", "idle", 0.0), ("orient: click", "orient", 0.94), ("stalk", "stalk", 0.4),
              ("charge", "charge", 0.2), ("strike: windup top", "strike", 0.9), ("strike: impact", "strike", 1.0),
-             ("recover", "recover", 0.0), ("listen", "listen", 0.5)]
+             ("recover", "recover", 0.0), ("listen", "listen", 0.5),
+             ("dying: sinking", "dying", 1.4), ("dying: held", "dying", 2.6), ("crushed: arms up", "crushed", 0.2), ("crushed: held", "crushed", 1.4)]
     scale, cell_w, cell_h = 4, 300, 300
     sheet = Image.new("RGB", (cell_w * len(poses), cell_h * 2 + 40), (24, 25, 28))
     d = ImageDraw.Draw(sheet)

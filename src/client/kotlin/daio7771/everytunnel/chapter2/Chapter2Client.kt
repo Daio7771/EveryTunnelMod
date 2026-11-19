@@ -19,6 +19,7 @@ import daio7771.everytunnel.chapter2.level1.client.ObjectivePanel
 import daio7771.everytunnel.chapter2.level1.client.TaskArrow
 import daio7771.everytunnel.chapter2.level2.client.ObservantGuardRenderer
 import daio7771.everytunnel.chapter2.level2.client.VibrationCreatureRenderer
+import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Maw
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.prologue.client.PrologueView
@@ -26,8 +27,11 @@ import daio7771.everytunnel.chapter2.prologue.client.ScientistRenderer
 import daio7771.everytunnel.client.render.SecurityCameraRenderer
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry
 import net.minecraft.client.render.RenderLayer
+import net.minecraft.client.render.entity.FlyingItemEntityRenderer
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories
 
 /**
@@ -42,6 +46,7 @@ object Chapter2Client : ClientModInitializer {
         Ch2L1IntroView.register()
         Ch2L2GuardSceneView.registerAll()
         Ch2L2EndingOverlay.register()
+        registerMawClient()
         Ch2L1MeetingView.register()
         Ch2L1Subtitles.register()
         ObjectivePanel.register()
@@ -57,11 +62,21 @@ object Chapter2Client : ClientModInitializer {
         EntityRendererRegistry.register(Ch2Entities.SCIENTIST, ::ScientistRenderer)
         EntityRendererRegistry.register(Ch2Entities.VIBRATION_CREATURE, ::VibrationCreatureRenderer)
         EntityRendererRegistry.register(Ch2Entities.OBSERVANT_GUARD, ::ObservantGuardRenderer)
+        EntityRendererRegistry.register(Ch2Entities.THROWN_PIPE, ::FlyingItemEntityRenderer)
         BlockEntityRendererFactories.register(Ch2Blocks.CENTRIFUGE_ENTITY, ::Ch2L1CentrifugeRenderer)
         BlockEntityRendererFactories.register(Ch2Blocks.FACTORY_CAMERA_ENTITY) { SecurityCameraRenderer(it, Ch2Blocks.FACTORY_CAMERA, sweeping = true) }
         BlockRenderLayerMap.INSTANCE.putBlock(Ch2Blocks.DIRT_SPOT, RenderLayer.getCutout())
         BlockRenderLayerMap.INSTANCE.putBlock(Ch2Blocks.PUMP_BEACON, RenderLayer.getCutout())
         BlockRenderLayerMap.INSTANCE.putBlock(Ch2Blocks.FACTORY_GLASS, RenderLayer.getTranslucent())
         EveryTunnel.LOGGER.info("${EveryTunnel.MOD_NAME}: Chapter 2 loaded (client)")
+    }
+
+    /** Stone Maw's arena (phase 6.1): the server says when the jump is blocked there ([Ch2L2Maw.JUMP_PACKET]); the base game's jump rule reads it. */
+    private fun registerMawClient() {
+        ClientPlayNetworking.registerGlobalReceiver(Ch2L2Maw.JUMP_PACKET) { client, _, buf, _ ->
+            val blocked = buf.readBoolean()
+            client.execute { Ch2L2Maw.clientJumpBlocked = blocked }
+        }
+        ClientPlayConnectionEvents.DISCONNECT.register { _, _ -> Ch2L2Maw.clientJumpBlocked = false }
     }
 }

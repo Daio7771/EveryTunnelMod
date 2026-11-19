@@ -73,8 +73,11 @@ class Ch2L2Flood(val stages: List<FloodStage>) {
     companion object {
         val EMPTY = Ch2L2Flood(emptyList())
 
-        /** The ending's door may be reached from the station on only. */
-        fun endingAllowed(state: Ch2L2State): Boolean = state >= Ch2L2State.STATION
+        /** The exit's heavy door opens when it is reached, from the station on only (phase 6.1: it no longer ends the level). */
+        fun exitDoorAllowed(state: Ch2L2State): Boolean = state >= Ch2L2State.STATION
+
+        /** The ending (the fade, the card, the menu) follows the reunion, so it is only for a player who has reached it. */
+        fun endingAllowed(state: Ch2L2State): Boolean = state >= Ch2L2State.REUNION
 
         fun parse(text: String): Result {
             val problems = mutableListOf<String>()

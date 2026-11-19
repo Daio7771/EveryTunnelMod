@@ -872,6 +872,34 @@ def overtime_pass_tex(rng):
     return img
 
 
+def pipe_piece_tex(rng):
+    """Item (Chapter 2 Level 2, Stone Maw's arena): a short stub of rusty iron pipe lying on the diagonal, a dark hollow at its torn end, a flange
+    at the other, scabs of rust and a few bright scratches."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    body = [(116, 70, 44, 255), (136, 82, 50, 255), (98, 58, 38, 255), (150, 96, 58, 255)]
+    edge, dark, scratch = (66, 40, 30, 255), (22, 18, 18, 255), (176, 150, 128, 255)
+    # a thick diagonal from the lower left to the upper right
+    for k in range(11):
+        cx, cy = 3 + k, 12 - k
+        for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1), (-1, 0), (0, -1)):
+            x, y = cx + dx, cy + dy
+            if 0 <= x < 16 and 0 <= y < 16:
+                img.putpixel((x, y), body[rng.randrange(len(body))])
+    for k in range(11):
+        cx, cy = 3 + k, 12 - k
+        for dx, dy in ((-1, 1), (2, 0), (0, 2), (1, -1), (-2, 1), (1, -2)):
+            x, y = cx + dx, cy + dy
+            if 0 <= x < 16 and 0 <= y < 16 and img.getpixel((x, y))[3] == 0:
+                img.putpixel((x, y), edge)
+    for x, y in ((12, 3), (13, 3), (12, 4), (13, 4), (11, 4)):          # the hollow torn end
+        img.putpixel((x, y), dark)
+    for x, y in ((2, 12), (3, 13), (4, 13), (2, 13)):                    # the flange
+        img.putpixel((x, y), edge)
+    for x, y in ((6, 8), (8, 6), (9, 5), (5, 9)):
+        img.putpixel((x, y), scratch)
+    return img
+
+
 def keycard_tex(rng):
     """Item: the guard's keycard on a black lanyard clip: a white plastic card with a
     blue-grey band, a photo, name lines and a gold chip."""
@@ -4764,7 +4792,7 @@ def main():
                           ("record_still_water", lambda g: record_tex(g, (70, 110, 190))), ("record_chefs_plate", lambda g: record_tex(g, (150, 50, 60))),
                           ("reel_87", reel_tex), ("reel_94", reel_tex), ("reel_102", reel_tex), ("reel_120", reel_tex),
                           ("dart", dart_tex), ("master_card", master_card_tex), ("master_key", master_key_tex),
-                          ("wrench", wrench_tex), ("detector", detector_tex), ("broom", broom_tex), ("lab_badge_copy", lab_badge_copy_tex), ("overtime_pass", overtime_pass_tex),
+                          ("wrench", wrench_tex), ("detector", detector_tex), ("broom", broom_tex), ("lab_badge_copy", lab_badge_copy_tex), ("overtime_pass", overtime_pass_tex), ("pipe_piece", pipe_piece_tex),
                           *((f"factory_reagent_{c}", lambda g, c=c: factory_reagent_tex(g, c)) for c in FACTORY_REAGENTS),
                           *((f"fuse_{amps}a", lambda g, i=i: fuse_item_tex(g, i)) for i, amps in enumerate(FUSE_AMPS)),
                           *((f"reagent_{i + 1}", lambda g, i=i: reagent_item_tex(g, i)) for i in range(4)),

@@ -734,5 +734,11 @@
   "entity.every_tunnel.vibration_creature": "Criatura de vibraciones",
   "block.every_tunnel.pump_beacon": "Baliza de la bomba",
   "entity.every_tunnel.observant_guard": "Guardia observador",
-  "block.every_tunnel.trap_breaker": "Disyuntor de trampa"
+  "block.every_tunnel.trap_breaker": "Disyuntor de trampa",
+  "item.every_tunnel.pipe_piece": "Trozo de tubería",
+  "every_tunnel.ch2.l2.maw.hint_throw": "Clic derecho para lanzar",
+  "every_tunnel.ch2.l2.reunion.reunion_01": "Ah, por fin has llegado. Te estábamos esperando.",
+  "every_tunnel.ch2.l2.reunion.reunion_02": "Me dijeron que tenías que hacer horas extra. Bueno, aquí nadie termina nunca de hacerlas.",
+  "every_tunnel.ch2.l2.reunion.reunion_03_b": "Rowan es un gran líder, pero también es una mala persona.",
+  "every_tunnel.ch2.l2.reunion.reunion_04": "Vamos, tenemos que salir de aquí antes de que empiecen a sospechar algo."
 }

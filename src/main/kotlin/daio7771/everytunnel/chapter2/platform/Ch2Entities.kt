@@ -3,6 +3,7 @@ package daio7771.everytunnel.chapter2.platform
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.FactoryNpcEntity
 import daio7771.everytunnel.chapter2.level2.platform.ObservantGuardEntity
+import daio7771.everytunnel.chapter2.level2.platform.ThrownPipeEntity
 import daio7771.everytunnel.chapter2.level2.platform.VibrationCreatureEntity
 import daio7771.everytunnel.chapter2.prologue.platform.ScientistEntity
 import net.fabricmc.fabric.api.`object`.builder.v1.entity.FabricDefaultAttributeRegistry
@@ -53,7 +54,18 @@ object Ch2Entities {
             .trackRangeBlocks(80)
             .build()
 
+    /** A piece of pipe in flight (phase 6.1): thrown at Stone Maw, it breaks on whatever it hits. Never saved. */
+    val THROWN_PIPE: EntityType<ThrownPipeEntity> =
+        FabricEntityTypeBuilder.create<ThrownPipeEntity>(SpawnGroup.MISC) { type, world -> ThrownPipeEntity(type, world) }
+            .dimensions(EntityDimensions.fixed(0.4f, 0.4f))
+            .disableSaving()
+            .disableSummon()
+            .trackRangeBlocks(64)
+            .trackedUpdateRate(2)
+            .build()
+
     fun register() {
+        Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "thrown_pipe"), THROWN_PIPE)
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "factory_npc"), FACTORY_NPC)
         FabricDefaultAttributeRegistry.register(FACTORY_NPC, FactoryNpcEntity.createAttributes())
         Registry.register(Registries.ENTITY_TYPE, Identifier(EveryTunnel.MOD_ID, "scientist"), SCIENTIST)

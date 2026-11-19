@@ -31,6 +31,14 @@
       }
     ]
   },
+  "ambient.ch2l2.maw_stunned": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/ch2l2/maw_stunned_1",
+        "attenuation_distance": 40
+      }
+    ]
+  },
   "ambient.cloud_game.static": {
     "sounds": [
       {
@@ -1106,6 +1114,62 @@
       }
     ]
   },
+  "event.ch2l2.maw_burst": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_burst_1",
+        "attenuation_distance": 72
+      }
+    ]
+  },
+  "event.ch2l2.maw_collapse": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_collapse_1",
+        "attenuation_distance": 80
+      }
+    ]
+  },
+  "event.ch2l2.maw_hit": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_hit_1",
+        "attenuation_distance": 56
+      }
+    ]
+  },
+  "event.ch2l2.maw_pipe_break": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_pipe_break_1",
+        "attenuation_distance": 56
+      }
+    ]
+  },
+  "event.ch2l2.maw_pipe_fall": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_pipe_fall_1",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "event.ch2l2.maw_throw": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_throw_1",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "event.ch2l2.maw_wall_ram": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_wall_ram_1",
+        "attenuation_distance": 72
+      }
+    ]
+  },
   "event.ch2l2.pipe_fall": {
     "sounds": [
       {
@@ -1780,6 +1844,38 @@
   "voice.prologue_04": {
     "sounds": [
       "every_tunnel:voice/prologue/prologue_04"
+    ]
+  },
+  "voice.reunion_01": {
+    "sounds": [
+      {
+        "name": "every_tunnel:voice/ch2l2/reunion_01",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "voice.reunion_02": {
+    "sounds": [
+      {
+        "name": "every_tunnel:voice/ch2l2/reunion_02",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "voice.reunion_03_b": {
+    "sounds": [
+      {
+        "name": "every_tunnel:voice/ch2l2/reunion_03_b",
+        "attenuation_distance": 24
+      }
+    ]
+  },
+  "voice.reunion_04": {
+    "sounds": [
+      {
+        "name": "every_tunnel:voice/ch2l2/reunion_04",
+        "attenuation_distance": 24
+      }
     ]
   },
   "voice.rowan_loyal_a1": {

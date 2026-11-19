@@ -46,20 +46,18 @@ data class Ch2L2FloodRules(
 }
 
 /**
- * The ending (`ending` in `level.json`): reaching [zone] from the station on plays the door's sound, then after [doorSoundSeconds] the
- * screen fades to black over [fadeSeconds], the card ([textKey], a lang key) stays [cardSeconds] and the game goes back to the main
- * menu. [checkpoint] is saved with the level finished: CONTINUE stands at its anchor, in front of the door.
+ * The ending (`ending` in `level.json`), started when the reunion's scene ends (phase 6.1; before, the exit's door did): the screen fades to
+ * black over [fadeSeconds], the card ([textKey], a lang key) stays [cardSeconds] and the game goes back to the main menu. [checkpoint] is
+ * saved with the level finished: CONTINUE stands at its anchor, in the reunion room.
  */
 data class Ch2L2Ending(
-    val zone: String,
     val checkpoint: String,
-    val doorSoundSeconds: Double,
     val fadeSeconds: Double,
     val cardSeconds: Double,
     val textKey: String,
 ) {
     companion object {
-        val DEFAULT = Ch2L2Ending("zone_exit_door", "exit", 3.5, 2.0, 4.0, "every_tunnel.ch2.l2.ending.continued")
+        val DEFAULT = Ch2L2Ending("chapter_end", 2.0, 4.0, "every_tunnel.ch2.l2.ending.continued")
     }
 }
 
@@ -109,9 +107,7 @@ object Ch2L2FloodParser {
         if (!root.has("ending")) return d
         val f = root.child("ending")
         val ending = Ch2L2Ending(
-            zone = f.string("zone", d.zone),
             checkpoint = f.string("checkpoint", d.checkpoint),
-            doorSoundSeconds = f.double("door_sound_seconds", d.doorSoundSeconds, min = 0.0, max = 30.0),
             fadeSeconds = f.double("fade_seconds", d.fadeSeconds, min = 0.1, max = 30.0),
             cardSeconds = f.double("card_seconds", d.cardSeconds, min = 0.5, max = 60.0),
             textKey = f.string("text", d.textKey),
