@@ -7,6 +7,12 @@ tools/map/ch2l2/output/, git-ignored):
 - `level_H.png`, `level_M.png`, `level_L.png`, `level_D.png`: one height each: what stands on it in colour, the rest grey.
 - `flood_0.png` to `flood_3.png`: the still water, then the water after each flood stage, deeper bluer.
 
+- `light_H.png` ... `light_D.png` (phase 8): the floor light of each height as the light check counts it (flickering lamps off, the fill
+  on): green at or over the target, orange within 2 under it, red under; the lamps as dots in their tint (a ring: flickering, grey: dead),
+  the fill blocks as white crosses, the emergency lamps red squares, the alarm lights magenta.
+- `decor_H.png` ... `decor_D.png` (phase 8): the decoration of each height: pipes and trays blue, valves and gauges yellow, rust and stains
+  brown, floor clutter orange, set pieces and other props white.
+
 Colours: the old catacombs' masonry warm grey, the factory's drainage a brownish concrete, machinery steel blue; water blue;
 stairs and ramps lighter; rails, bars and ladders white; openings orange; the gate red.
 """
@@ -14,6 +20,7 @@ stairs and ramps lighter; rails, bars and ladders white; openings orange; the ga
 from PIL import Image, ImageDraw, ImageFont
 
 import checks as C
+import light as Light
 
 SCALE = 4
 MARGIN = 24
@@ -170,6 +177,9 @@ def draw_all(level, ways, out_dir):
         anchors(canvas, lv, band)
         canvas.save(out_dir / f"level_{name}.png")
 
+    draw_light(lv, out_dir)
+    draw_decor(lv, out_dir)
+
     still = set(lv.water)
     stages = [("still water", still, None)]
     for stage in lv.layout["flood"]["stages"]:
@@ -197,3 +207,77 @@ def draw_all(level, ways, out_dir):
                 canvas.cell(x, z, GATE if state != "open" else OPENING)
         anchors(canvas, lv)
         canvas.save(out_dir / f"flood_{i}.png")
+
+
+TINT_COLOURS = {"warm": (255, 196, 122), "amber": (255, 154, 46), "cold": (150, 200, 255), "red": (255, 64, 48), "white": (244, 244, 238)}
+GREEN, ORANGE, RED = (60, 170, 80), (230, 150, 40), (200, 50, 50)
+DECOR_COLOURS = [("pipe", (80, 150, 255)), ("cable_tray", (80, 150, 255)), ("valve_wheel", (240, 220, 60)), ("pressure_gauge", (240, 220, 60)),
+                 ("rust_stain", (160, 90, 40)), ("stain", (160, 90, 40)), ("oil_drum", (240, 140, 30)), ("pallet", (240, 140, 30)),
+                 ("cardboard_box", (240, 140, 30)), ("rubble_pile", (200, 130, 90)), ("loose_bricks", (200, 130, 90))]
+
+
+def bands(lv):
+    lo, hi = lv.bounds()
+    levels = sorted(lv.levels.items(), key=lambda kv: kv[1])
+    for i, (name, y) in enumerate(levels):
+        top = levels[i + 1][1] if i + 1 < len(levels) else hi[1] + 1
+        yield name, (y - (6 if name == "D" else 0), top)
+
+
+def draw_light(lv, out_dir):
+    walker = C.Walker(lv, {gid: g[2] for gid, g in lv.gates.items()})
+    cells, no_fill = lv.fill_report["cells"], lv.fill_report["no_fill"]
+    with_fill = Light.light_map(lv, Light.emitters(lv, True))
+    lamps_only = Light.light_map(lv, Light.emitters(lv))
+    for name, band in bands(lv):
+        canvas = Canvas(lv, f"Floor light at height {name} (y {band[0]} to {band[1] - 1}): green at target, orange within 2, red under; flickering lamps counted off")
+        paint(canvas, lv, columns(lv, walker, band), band[0], band[1], faded=columns(lv, walker))
+        for c, target in cells.items():
+            if not band[0] <= c[1] < band[1]:
+                continue
+            value = (lamps_only if lv.air[c] in no_fill else with_fill).get(c, 0)
+            canvas.cell(c[0], c[2], GREEN if value >= target else ORANGE if value >= target - 2 else RED)
+        for c in lv.lamps:
+            if not band[0] - 2 <= c[1] < band[1] + 20 and not band[0] <= c[1] < band[1]:
+                continue
+            mode = lv.lamp_info[c][0]
+            tint = lv.blocks[c].split("tint=")[1].rstrip("]") if "tint=" in lv.blocks[c] else "warm"
+            px, pz = canvas.xy(c[0] + 0.5, c[2] + 0.5)
+            colour = TINT_COLOURS[tint] if mode == "on" else (110, 110, 110)
+            canvas.draw.ellipse([px - 2, pz - 2, px + 2, pz + 2], fill=colour if mode != "flicker" else None, outline=(0, 0, 0) if mode != "flicker" else colour)
+        for c in lv.fill:
+            if band[0] <= c[1] - 2 < band[1]:
+                px, pz = canvas.xy(c[0] + 0.5, c[2] + 0.5)
+                canvas.draw.line([px - 2, pz, px + 2, pz], fill=(255, 255, 255))
+                canvas.draw.line([px, pz - 2, px, pz + 2], fill=(255, 255, 255))
+        for c in lv.glow:
+            if band[0] <= c[1] < band[1] + 4:
+                px, pz = canvas.xy(c[0] + 0.5, c[2] + 0.5)
+                canvas.draw.rectangle([px - 1, pz - 1, px + 1, pz + 1], fill=(230, 40, 40))
+        for c in lv.alarms:
+            px, pz = canvas.xy(c[0] + 0.5, c[2] + 0.5)
+            canvas.draw.rectangle([px - 2, pz - 2, px + 2, pz + 2], outline=(255, 0, 255))
+        legend(canvas, [("at target", GREEN), ("within 2", ORANGE), ("under", RED), ("lamp on (tint)", TINT_COLOURS["warm"]), ("fill block", (255, 255, 255)),
+                        ("emergency lamp", (230, 40, 40)), ("alarm light", (255, 0, 255))])
+        canvas.save(out_dir / f"light_{name}.png")
+
+
+def draw_decor(lv, out_dir):
+    walker = C.Walker(lv, {gid: g[2] for gid, g in lv.gates.items()})
+    for name, band in bands(lv):
+        canvas = Canvas(lv, f"Decoration at height {name} (y {band[0]} to {band[1] - 1})")
+        paint(canvas, lv, columns(lv, walker, band), band[0], band[1], faded=columns(lv, walker))
+        for c, block in lv.blocks.items():
+            if not isinstance(block, str) or not block.startswith("every_tunnel:") or not band[0] <= c[1] < band[1] + 6:
+                continue
+            kind = block.split(":")[1].split("[")[0]
+            colour = next((col for key, col in DECOR_COLOURS if kind == key), None)
+            if colour is None:
+                if "lamp" in kind or kind in ("ceiling_cable", "hanging_cable", "alarm_light", "wall_sconce", "drain_ladder", "catwalk_rail", "metal_grating", "checker_plate", "metal_panel", "pump_beacon", "trap_breaker", "sluice_gate", "note_board", "counter") or "catacomb" in kind or kind.startswith("puddle"):
+                    continue
+                colour = (255, 255, 255)
+            px, pz = canvas.xy(c[0] + 0.5, c[2] + 0.5)
+            canvas.draw.rectangle([px - 1, pz - 1, px + 1, pz + 1], fill=colour)
+        legend(canvas, [("pipes, trays", (80, 150, 255)), ("valves, gauges", (240, 220, 60)), ("rust, stains", (160, 90, 40)), ("floor clutter", (240, 140, 30)),
+                        ("rubble, bricks", (200, 130, 90)), ("set pieces and other props", (255, 255, 255))])
+        canvas.save(out_dir / f"decor_{name}.png")

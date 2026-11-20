@@ -30,7 +30,12 @@ STYLE_ORDER = ["machine", "masonry", "drain"]
 # Blocks that water flows into (it waterlogs them, or they are not in its way): a flood stage must never touch one of these
 # outside its own spaces. Everything else the plan places is watertight.
 PERMEABLE = ("minecraft:air", "minecraft:iron_bars", "_slab", "_stairs", "_wall", "every_tunnel:ceiling_cable", "every_tunnel:hanging_cable", "every_tunnel:puddle",
-             "every_tunnel:metal_grating", "every_tunnel:drain_ladder", "minecraft:ladder", "every_tunnel:cage_lamp", "_trapdoor",
+             "every_tunnel:metal_grating", "every_tunnel:drain_ladder", "minecraft:ladder", "every_tunnel:cage_lamp", "every_tunnel:catacomb_lamp", "every_tunnel:emergency_lamp", "every_tunnel:alarm_light", "_trapdoor",
+             # phase 8's decoration with no collision (a player walks through it, and water goes round it)
+             "every_tunnel:pipe", "every_tunnel:cable_tray", "every_tunnel:valve_wheel", "every_tunnel:pressure_gauge", "every_tunnel:rust_stain",
+             "every_tunnel:stain", "every_tunnel:wall_sconce", "every_tunnel:electrical_panel", "every_tunnel:tool_board", "every_tunnel:first_aid_box",
+             "every_tunnel:chalk_arrow", "every_tunnel:time_clock", "every_tunnel:loose_bricks", "every_tunnel:mattress", "every_tunnel:tin_cans",
+             "every_tunnel:dead_flashlight", "every_tunnel:wooden_chair", "every_tunnel:leaning_broom",
              "_fence", "minecraft:chain")
 WATER = "minecraft:water"
 AIR = "minecraft:air"
@@ -139,7 +144,14 @@ class Level:
         self.climb = set()     # ladder cells (air one can climb)
         self.gates = {}        # gate id -> (cells, states, built)
         self.openings = {}     # opening id -> its cells
-        self.lamps = []
+        self.lamps = []        # the cells of the lamps the build can switch (fluorescent-like: on, flicker, off)
+        self.lamp_info = {}    # lamp cell -> (mode, space)
+        self.glow = {}         # cell -> the light a lit mod lamp (emergency) gives there, besides self.lamps
+        self.alarms = []       # cells of the alarm lights (red, off as built; the flood switches them on)
+        self.fill = {}         # cell -> the invisible minecraft:light block of the fill (phase 8's light pass)
+        self.fill_report = {}
+        self.decor_counts = {}
+        self.dim = []          # fill cells of the spaces the level switches (the vestibule): the level dims them with the lamps
         self.texts = []        # {"at": cell, "text": lang key, "style": ...}: what the plan's wall_text blocks say
         self.lay_air()
         self.lay_openings()
@@ -148,8 +160,11 @@ class Level:
         self.lay_niches()
         self.shell = self.build_shell()
         self.lay_bricked()
+        self.connect_bars()
         self.lay_lamps()
         self.lay_scatter()
+        self.lay_decor()
+        self.lay_fill()
         self.materials_cache = self.materials()
 
     # --- air ---------------------------------------------------------------------------------
@@ -440,16 +455,31 @@ class Level:
                     role, style = self.shell[c]
                     self.blocks[c] = ("mix", "bricked", style)
 
+    def connect_bars(self):
+        """Every bar of the plan joined as the game joins them: to the bars and to the solid wall beside it, on the four sides (the rails
+        were laid with the sides of their own line only, so corners and ends met a gap: phase 8). The gates' own states are left as written."""
+        bars = {c for c, b in self.blocks.items() if isinstance(b, str) and b.startswith("minecraft:iron_bars")}
+        gate_cells = {c for cells, _, _ in self.gates.values() for c in cells}
+        for c in bars - gate_cells:
+            wet = "true" if "waterlogged=true" in self.blocks[c] else "false"
+            sides = {}
+            for name, (dx, dz) in (("north", (0, -1)), ("south", (0, 1)), ("east", (1, 0)), ("west", (-1, 0))):
+                n = (c[0] + dx, c[1], c[2] + dz)
+                sides[name] = n in bars or n in self.shell and self.shell[n][0] != "ceiling" and n not in self.air
+            self.blocks[c] = "minecraft:iron_bars[" + ",".join(f"{k}={str(v).lower()}" for k, v in sides.items()) + f",waterlogged={wet}]"
+
     # --- lamps and scatter ----------------------------------------------------------------------
 
     def lay_lamps(self):
         """The lamps of every space (`lamps`, one spec or a list): `ceiling`, a lamp under the ceiling every `spacing` blocks over
         the boxes; `cable`, a cable strung along each box's long axis (`rows` runs) with a bulb hanging from it every `spacing`
-        blocks, at most `hang` over the floor; `wall`, a lamp `above` blocks over each standing surface, on the wall, every
+        blocks, at most `hang` over the floor; `ceiling` with `follow` hangs each lamp (`dry`: not over water) `hang` over whatever the column stands on (a tall hall's walkways and flights),
+        or over `base` if given; `wall`, a lamp `above` blocks over each standing surface, on the wall, every
         `spacing` blocks along it. Gaps (`lamp_gaps`, or a spec's `gaps`): a share of the lamps is left out (the cable stays),
         flickers or is dead, picked by `cell_hash`; lamps near an anchor are always on."""
         for s in self.spaces.values():
             specs = s.lamps if isinstance(s.lamps, list) else [s.lamps] if s.lamps else []
+            specs = specs + self.layout.get("lamp_extras", {}).get(s.id, [])
             for spec in specs:
                 getattr(self, "lamps_" + spec.get("kind", "ceiling"))(s, spec)
 
@@ -470,31 +500,85 @@ class Level:
             return "flicker"
         return "on"
 
-    def put_lamp(self, c, facing, axis, spec):
+    def lamp_tint(self, s, spec):
+        return spec.get("tint") or self.layout.get("lamp_tints", {}).get(s.id) or "warm"
+
+    def put_lamp(self, c, facing, axis, spec, space=None):
         mode = self.lamp_mode(c, spec)
         if mode is None:
             return False
-        self.blocks[c] = self.layout["lamp_blocks"]["cage"].format(facing=facing, axis=axis, mode=mode, lit="false" if mode == "off" else "true")
+        s = space or self.spaces[self.air[c]]
+        self.blocks[c] = self.layout["lamp_blocks"][spec.get("block", "tinted")].format(
+            facing=facing, axis=axis, mode=mode, lit="false" if mode == "off" else "true", tint=self.lamp_tint(s, spec))
         self.lamps.append(c)
+        self.lamp_info[c] = (mode, s.id)
         return True
+
+    def put_wall_block(self, c, facing, spec):
+        """A lamp that is a block of its own (`emergency`, `alarm`, `sconce`): never in the gaps; the emergency lamp is lit as built."""
+        kind = spec["block"]
+        self.blocks[c] = self.layout["lamp_blocks"][kind].format(facing=facing)
+        if kind == "emergency":
+            self.glow[c] = self.layout["luminance"]["every_tunnel:emergency_lamp"]
+        elif kind == "alarm":
+            self.alarms.append(c)
+
+    def density(self, spec):
+        """A spec's `spacing` (a number or [x, z]), `rows`, `hang` and `above` as layout.json's `lamp_density` thins and raises them:
+        few lamps, hung high (phase 8: the first pass had too many, too low); the fill carries the floor's light."""
+        d = self.layout.get("lamp_density", {})
+        sp = spec["spacing"]
+        scale = d.get("spacing_scale", 1)
+        sp = [max(2, round(v * scale)) for v in sp] if isinstance(sp, list) else max(2, round(sp * scale))
+        rows = max(1, round(spec.get("rows", 1) * d.get("rows_scale", 1)))
+        return sp, rows, max(spec.get("hang", 0), d.get("hang_min", 0)) if "hang" in spec else None, max(spec.get("above", 3), d.get("above_min", 0))
+
+    def excluded(self, spec, x, z):
+        e = spec.get("exclude")
+        return bool(e) and e[0] <= x < e[2] and e[1] <= z < e[3]
+
+    def surface(self, x, y, z):
+        """The y of the first cell of air over what is under the column (x, z) from y down: the floor, a deck, a rail's top or the water."""
+        while (x, y - 1, z) in self.air and (x, y - 1, z) not in self.water:
+            y -= 1
+        return y
 
     def free(self, c, s):
         return self.air.get(c) == s.id and c not in self.blocks and c not in self.water and c not in self.climb
 
     def lamps_ceiling(self, s, spec):
-        for x0, z0, x1, z1 in s.boxes:
-            for x in grid(x0, x1 - 1, spec["spacing"]):
-                for z in grid(z0, z1 - 1, spec["spacing"]):
-                    c = (x, s.top_at(x, z) - 1, z)
-                    if self.air.get(c) == s.id and self.shell.get((x, c[1] + 1, z), (None,))[0] == "ceiling":
-                        self.put_lamp(c, "down", "x", spec)
+        spacing, _, hang, _ = self.density(spec)
+        sx, sz = spacing if isinstance(spacing, list) else [spacing] * 2
+        for box in ([spec["within"]] if "within" in spec else s.boxes):
+            x0, z0, x1, z1 = box
+            for x in grid(x0, x1 - 1, sx):
+                for z in grid(z0, z1 - 1, sz):
+                    top = (x, s.top_at(x, z) - 1, z)
+                    if not (self.air.get(top) == s.id and self.shell.get((x, top[1] + 1, z), (None,))[0] == "ceiling") or self.excluded(spec, x, z):
+                        continue
+                    # `follow`: hung `hang` over whatever the column stands on (a tall hall's walkways and flights); `base`: over that y;
+                    # on a hanging cable either way.
+                    if spec.get("follow"):
+                        ground = self.surface(x, top[1], z)
+                        if spec.get("dry") and (x, ground - 1, z) in self.water:
+                            continue
+                        y = min(top[1], ground + hang)
+                    else:
+                        y = min(top[1], spec["base"] + hang) if hang is not None else top[1]
+                    lamp = (x, y, z)
+                    if lamp != top and not self.free(lamp, s):
+                        continue
+                    if self.put_lamp(lamp, "down", "x", spec, s):
+                        for yy in range(y + 1, top[1]):
+                            if self.free((x, yy, z), s):
+                                self.blocks[(x, yy, z)] = self.layout["lamp_blocks"]["drop"]
 
     def lamps_cable(self, s, spec):
         blocks = self.layout["lamp_blocks"]
+        spacing, rows, hang, _ = self.density(spec)
         for x0, z0, x1, z1 in s.boxes:
             along_x = (x1 - x0) >= (z1 - z0)
             a0, a1, c0, c1 = (x0, x1 - 1, z0, z1 - 1) if along_x else (z0, z1 - 1, x0, x1 - 1)
-            rows = spec.get("rows", 1)
             for i in range(rows):
                 cross = c0 + int((i + 0.5) * (c1 - c0 + 1) / rows)
                 cell = (lambda t: (t, cross)) if along_x else (lambda t: (cross, t))
@@ -504,12 +588,12 @@ class Level:
                     c = (x, s.top_at(x, z) - 1, z)
                     if self.free(c, s) and self.shell.get((x, c[1] + 1, z), (None,))[0] == "ceiling":
                         self.blocks[c] = blocks["cable"].format(axis=axis)
-                for t in grid(a0, a1, spec["spacing"]):
+                for t in grid(a0, a1, spacing):
                     x, z = cell(t)
                     top = (x, s.top_at(x, z) - 1, z)
-                    if self.air.get(top) != s.id or self.shell.get((x, top[1] + 1, z), (None,))[0] != "ceiling":
+                    if self.air.get(top) != s.id or self.shell.get((x, top[1] + 1, z), (None,))[0] != "ceiling" or self.excluded(spec, x, z):
                         continue
-                    y = min(top[1], s.floor_at(x, z) + spec.get("hang", 4))
+                    y = min(top[1], s.floor_at(x, z) + (hang or 4))
                     lamp = (x, y, z)
                     if not self.free(lamp, s) and lamp != top:
                         continue
@@ -519,7 +603,9 @@ class Level:
                                 self.blocks[(x, yy, z)] = blocks["drop"]
 
     def lamps_wall(self, s, spec):
-        above, spacing = spec.get("above", 3), spec["spacing"]
+        spacing, _, _, above = self.density(spec)
+        if spec.get("block", "tinted") in ("emergency", "alarm", "sconce"):
+            spacing, above = spec["spacing"], spec.get("above", 3)             # the mod's own lamps keep their own say
         for (x, y, z), owner in sorted(self.air.items(), key=lambda kv: kv[0]):
             if owner != s.id or (x, y - 1, z) in self.air:
                 continue
@@ -530,9 +616,14 @@ class Level:
                 wall = self.shell.get((x + dx, y + above, z + dz))
                 if wall is None or wall[0] != "wall" or (x + dx, y + above, z + dz) in self.blocks:
                     continue
-                if (z if dx else x) % spacing:
+                if ((z if dx else x) + spec.get("offset", 0)) % spacing or self.excluded(spec, x, z):
                     continue
-                self.put_lamp(lamp, FACING[(-dx, -dz)], "x" if dz else "z", spec)
+                if spec.get("share") is not None and cell_hash(*lamp, self.seed + 307) % 1000 >= spec["share"] * 1000:
+                    continue
+                if spec.get("block", "tinted") in ("emergency", "alarm", "sconce"):
+                    self.put_wall_block(lamp, FACING[(-dx, -dz)], spec)
+                else:
+                    self.put_lamp(lamp, FACING[(-dx, -dz)], "x" if dz else "z", spec, s)
                 break
 
     def lay_scatter(self):
@@ -548,6 +639,16 @@ class Level:
             if mix and cell_hash(x, y, z, self.seed + 101) % 10000 < share * 10000:
                 self.blocks[(x, y, z)] = pick(mix, x, y, z, self.seed + 102)
 
+    def lay_decor(self):
+        """The decoration pass (decor.py): pipes, valves, stains, clutter by rule, never in the way."""
+        import decor
+        decor.lay_decor(self)
+
+    def lay_fill(self):
+        """The light pass (light.py): the invisible fill that brings the floor up to checks.light."""
+        import light
+        light.lay_fill(self)
+
     # --- what the plan holds ------------------------------------------------------------------
 
     def materials(self):
@@ -558,6 +659,7 @@ class Level:
             out[c] = ("mix", role, style)
         for c in self.water:
             out[c] = WATER
+        out.update(self.fill)
         out.update(self.blocks)
         return out
 

@@ -1,0 +1,544 @@
+{
+  "variants": {
+    "facing=down,axis=x,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on"
+    },
+    "facing=down,axis=x,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on"
+    },
+    "facing=down,axis=x,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on"
+    },
+    "facing=down,axis=x,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on"
+    },
+    "facing=down,axis=x,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on"
+    },
+    "facing=down,axis=x,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off"
+    },
+    "facing=down,axis=x,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off"
+    },
+    "facing=down,axis=x,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off"
+    },
+    "facing=down,axis=x,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off"
+    },
+    "facing=down,axis=x,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off"
+    },
+    "facing=down,axis=z,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on",
+      "y": 90
+    },
+    "facing=down,axis=z,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on",
+      "y": 90
+    },
+    "facing=down,axis=z,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on",
+      "y": 90
+    },
+    "facing=down,axis=z,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on",
+      "y": 90
+    },
+    "facing=down,axis=z,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on",
+      "y": 90
+    },
+    "facing=down,axis=z,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off",
+      "y": 90
+    },
+    "facing=down,axis=z,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off",
+      "y": 90
+    },
+    "facing=down,axis=z,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off",
+      "y": 90
+    },
+    "facing=down,axis=z,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off",
+      "y": 90
+    },
+    "facing=down,axis=z,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off",
+      "y": 90
+    },
+    "facing=up,axis=x,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on",
+      "x": 180
+    },
+    "facing=up,axis=x,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on",
+      "x": 180
+    },
+    "facing=up,axis=x,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on",
+      "x": 180
+    },
+    "facing=up,axis=x,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on",
+      "x": 180
+    },
+    "facing=up,axis=x,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on",
+      "x": 180
+    },
+    "facing=up,axis=x,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off",
+      "x": 180
+    },
+    "facing=up,axis=x,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off",
+      "x": 180
+    },
+    "facing=up,axis=x,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off",
+      "x": 180
+    },
+    "facing=up,axis=x,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off",
+      "x": 180
+    },
+    "facing=up,axis=x,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off",
+      "x": 180
+    },
+    "facing=up,axis=z,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,axis=z,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,axis=z,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,axis=z,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,axis=z,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,axis=z,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,axis=z,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,axis=z,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,axis=z,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,axis=z,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off",
+      "x": 180,
+      "y": 90
+    },
+    "facing=north,axis=x,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on",
+      "x": 270
+    },
+    "facing=north,axis=x,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on",
+      "x": 270
+    },
+    "facing=north,axis=x,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on",
+      "x": 270
+    },
+    "facing=north,axis=x,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on",
+      "x": 270
+    },
+    "facing=north,axis=x,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on",
+      "x": 270
+    },
+    "facing=north,axis=x,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off",
+      "x": 270
+    },
+    "facing=north,axis=x,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off",
+      "x": 270
+    },
+    "facing=north,axis=x,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off",
+      "x": 270
+    },
+    "facing=north,axis=x,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off",
+      "x": 270
+    },
+    "facing=north,axis=x,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off",
+      "x": 270
+    },
+    "facing=north,axis=z,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on",
+      "x": 270
+    },
+    "facing=north,axis=z,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on",
+      "x": 270
+    },
+    "facing=north,axis=z,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on",
+      "x": 270
+    },
+    "facing=north,axis=z,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on",
+      "x": 270
+    },
+    "facing=north,axis=z,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on",
+      "x": 270
+    },
+    "facing=north,axis=z,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off",
+      "x": 270
+    },
+    "facing=north,axis=z,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off",
+      "x": 270
+    },
+    "facing=north,axis=z,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off",
+      "x": 270
+    },
+    "facing=north,axis=z,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off",
+      "x": 270
+    },
+    "facing=north,axis=z,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off",
+      "x": 270
+    },
+    "facing=east,axis=x,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=x,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=x,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=x,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=x,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=x,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=x,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=x,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=x,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=x,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=z,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=z,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=z,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=z,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=z,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=z,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=z,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=z,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=z,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,axis=z,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off",
+      "x": 270,
+      "y": 90
+    },
+    "facing=south,axis=x,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=x,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=x,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=x,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=x,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=x,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=x,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=x,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=x,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=x,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,axis=z,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off",
+      "x": 270,
+      "y": 180
+    },
+    "facing=west,axis=x,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=x,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=x,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=x,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=x,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=x,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=x,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=x,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=x,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=x,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=true,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_on",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=true,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_on",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=true,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_on",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=true,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_on",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=true,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_on",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=false,tint=warm": {
+      "model": "every_tunnel:block/catacomb_lamp_warm_off",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=false,tint=amber": {
+      "model": "every_tunnel:block/catacomb_lamp_amber_off",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=false,tint=cold": {
+      "model": "every_tunnel:block/catacomb_lamp_cold_off",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=false,tint=red": {
+      "model": "every_tunnel:block/catacomb_lamp_red_off",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,axis=z,lit=false,tint=white": {
+      "model": "every_tunnel:block/catacomb_lamp_white_off",
+      "x": 270,
+      "y": 270
+    }
+  }
+}

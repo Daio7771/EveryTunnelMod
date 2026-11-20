@@ -136,10 +136,12 @@ object Ch2L2FloodRun {
         val resume = flood.resume(state)
         if (resume.water > 0) {
             fillTo(world, resume.water)
+            Ch2L2Build.setAlarms(world, true)
             for ((gate, gateState) in flood.stages.last().gates) Ch2L2Build.setGate(world, gate, gateState)
             Ch2L2Build.setGate(world, rules.stationDoor, "shut")
         } else {
             if (water > 0 || isWet(world)) drainAll(world, player.server)
+            Ch2L2Build.setAlarms(world, false)
             Ch2L2Build.setGate(world, rules.stationDoor, "open")
         }
         if (resume.state != state) Ch2L2.setState(player, resume.state, "the flood is lived again from the collector")
@@ -175,6 +177,7 @@ object Ch2L2FloodRun {
             Ch2L2Build.gateCentre(gate)?.let { world.playSound(null, it.x, it.y, it.z, Ch2Sounds.CH2L2_FLOOD_GATE_SLAM, SoundCategory.BLOCKS, 1.5f, 1.0f) }
         }
         if (slammed) shake(player.server, rules.shakeGate)
+        Ch2L2Build.setAlarms(world, true)
         if (stage.delayTicks > 0) {
             pipeAt(world)?.let { world.playSound(null, it.first, it.second, it.third, Ch2Sounds.CH2L2_FLOOD_CREAK, SoundCategory.BLOCKS, 1.2f, 1.0f) }
         }
@@ -216,6 +219,7 @@ object Ch2L2FloodRun {
         jetOn = false
         water = 0
         for (cell in flood.allCells) drain(world, cell)
+        Ch2L2Build.setAlarms(world, false)
         stopSounds(server)
     }
 

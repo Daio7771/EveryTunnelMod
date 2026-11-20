@@ -39,8 +39,8 @@ class Ch2L2FloodTest {
         assertEquals(seen.size, flood.allCells.size)
         // The cumulative sizes are the generator's own counts (flood.json's `cells`, which the checks' leak proof is made over).
         assertEquals(2746, flood.stage(1)!!.cellCount)
-        assertEquals(6177, flood.stage(1)!!.cellCount + flood.stage(2)!!.cellCount)
-        assertEquals(15342, total)
+        assertEquals(6178, flood.stage(1)!!.cellCount + flood.stage(2)!!.cellCount)
+        assertEquals(15343, total)
     }
 
     @Test

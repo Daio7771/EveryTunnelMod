@@ -173,6 +173,21 @@ class Ch2L2MapPlanTest {
     @Test
     fun `the lamps are lamps`() {
         assertTrue(plan.lights.isNotEmpty())
-        for (c in plan.lights) assertTrue(cells[c]?.startsWith("every_tunnel:cage_lamp") == true, "no lamp at $c")
+        for (c in plan.lights) assertTrue(cells[c]?.startsWith("every_tunnel:catacomb_lamp") == true, "no lamp at $c")
+    }
+
+    @Test
+    fun `the alarms are alarm lights, off as built`() {
+        assertTrue(plan.alarms.isNotEmpty())
+        for (c in plan.alarms) {
+            val block = cells[c]
+            assertTrue(block != null && block.startsWith("every_tunnel:alarm_light") && "on=false" in block, "no alarm light at $c")
+        }
+    }
+
+    @Test
+    fun `the vestibule's fill is light blocks the Guard's warning dims`() {
+        assertTrue(plan.dim.isNotEmpty())
+        for (c in plan.dim) assertTrue(cells[c]?.startsWith("minecraft:light") == true, "no light block at $c")
     }
 }

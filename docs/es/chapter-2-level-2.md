@@ -5,7 +5,7 @@
 El Nivel 2 del Capítulo 2 son las catacumbas bajo la fábrica: las catacumbas antiguas en las que se metió el drenaje de la fábrica. El
 científico baja por la alcantarilla de emergencia del Nivel 1, solo, y busca una salida: los Hunters en las galerías, una criatura que
 caza por las vibraciones del suelo en la sala de bombas, el Observant Guard del Capítulo 1 en las cámaras de abajo y una inundación en tres
-etapas camino de la estación de bombeo y la salida. Se construye por fases (de la 1 a la 7, y una fase 8 por venir: iluminación y decoración), una cada vez, en la rama **privada**
+etapas camino de la estación de bombeo y la salida. Se construye por fases (de la 1 a la 8; la fase 8 es iluminación y decoración), una cada vez, en la rama **privada**
 `chapter-2/level-2` (sale de `chapter-2/level-1` y solo se sube al remoto `private`) hasta que se publiquen los Niveles 1 y 2 del capítulo.
 **En qué punto está: fase 7, la revisión integral.** Se llega bajando por la alcantarilla del Nivel 1 y se
 recorre de la entrada a la salida con las barras de supervivencia; morir devuelve al último checkpoint, y el Capítulo 2 del menú lo
@@ -219,14 +219,32 @@ ellas), *Una despedida triste* (5 s vivo tras la muerte del Guardia observador),
 CRYPT opcionales: los contadores `seen.<zona>`; las zonas `room_*` las pone el generador) y *La puntería no es lo tuyo\** (más de dos tuberías que fallaron a
 Stone Maw en un combate: contador `maw_misses`). Los ocultos llevan *. El resto está en [la página del Nivel 1](chapter-2-level-1.md#logros-del-capítulo-2).
 
-## Fase 8 (por venir): iluminación y decoración
+## Fase 8: iluminación y decoración
 
-El nivel está construido y se juega, pero su aspecto sigue siendo el del generador: lámparas por regla (lámparas enjauladas, cables, algún
-parpadeo) y mobiliario solo donde una fase lo necesitó. Una última fase, tras la revisión de la fase 7, dará a cada lugar su propia
-**iluminación** (el ambiente de cada sala: cuánta oscuridad, qué lámparas funcionan, color; la de la sala de bombas, la del vestíbulo y la
-del colector, cada una a su manera) y **decoración** (objetos, escombros, carteles, óxido, marcas de agua, cables y tuberías, lo que dejó
-la gente que trabajó aquí). Se diseñará con el usuario en su propia ronda; sus cambios viven en `layout.json` (lámparas, features),
-`tools/blocks` y `tools/map/ch2l2`, de modo que el nivel se reconstruye desde la herramienta.
+**Luz.** En vanilla (sin shaders) el nivel se veía demasiado oscuro, así que las lámparas son ahora la `catacomb_lamp` del Capítulo 2 (luz
+14; la `cage_lamp` del Nivel 5 sigue en 10) con un `tint` en la bombilla (la luz de vanilla no tiene color; los shaders colorean por
+bloque): cálida en las catacumbas y el reencuentro, ámbar en la sala de bombas y el pozo, fría en el vestíbulo y mantenimiento, roja en el
+colector, las pasarelas y la galería superior, blanca en la entrada, la estación, la salida y la arena del Maw (`layout.json`,
+`lamp_tints`). En la ruta solo queda parpadeo (un 8 %, sin zonas oscuras ni lámparas muertas); las salas opcionales tienen alguna muerta.
+Las lámparas propias del mod se suman (`lamp_extras`): `emergency_lamp` encendidas y cinco `alarm_light` (apagadas al construir; la primera
+etapa de la inundación las enciende y se apagan al reintentar o reiniciar: `MapPlan.alarms`, `Ch2L2Build.setAlarms`) en el colector y las
+pasarelas, y `wall_sconce` apagados en los muros viejos. Las lámparas son pocas y cuelgan altas (`lamp_density`: separación escalada, al menos 5 bloques sobre el suelo; la primera pasada tenía
+demasiadas y demasiado bajas, y tapaban la cinemática del Guardia: el vestíbulo no tiene ninguna entre el jugador y el nido), así que la luz
+del suelo es la del relleno. `checks.light` exige una luz de suelo de al menos 9 en cada celda donde se pueda estar en un espacio
+iluminado (5 en las salas opcionales), contando las lámparas que parpadean o están muertas como apagadas; donde las lámparas dejan una
+celda por debajo, `light.py` pone bloques `minecraft:light[level=14]` invisibles dos bloques por encima. La inundación los anega (siguen
+encendidos) y los del vestíbulo están en `dim` (`MapPlan.dim`): el aviso del Guardia los atenúa con las lámparas (a la mitad mientras
+parpadean, a cero cuando mueren: `Ch2L2Build.zoneLights`). `guard_nest` y `maw_pipe` siguen oscuros. Las barras de hierro del plan se
+unen como las une el juego (`Level.connect_bars`: las jaulas de los canales tenían huecos en las esquinas).
+
+**Decoración** (`layout.json`, reglas `decor` por estilo, ejecutadas por `decor.py`; nunca junto a una abertura, un ancla o el botín, ni
+donde se estrechase el camino): las salas del drenaje llevan unos pocos tramos de tuberías y bandejas de cables por las paredes, válvulas y manómetros sobre las tuberías,
+manchas de óxido bajas, bidones, palés y cajas en las esquinas; las catacumbas, escombros, ladrillos sueltos y manchas. Seis piezas de
+escena son `prop`: los conos y el tablero de herramientas de la entrada, el campamento de un obrero en `side_service_crypt`, las
+herramientas del autor del registro de mantenimiento en el mirador, el cuadro eléctrico y la estantería de la sala de trampas, las
+taquillas, el botiquín, el reloj de fichar y una flecha de tiza hacia la salida en la estación, y una silla caída y marcas de tiza en
+`side_gallery_room`. Bloques nuevos (`tools/blocks`): `catacomb_lamp`, `rubble_pile`, `loose_bricks`, `rust_stain`. Las imágenes
+`light_*.png` y `decor_*.png` de la herramienta muestran la luz del suelo y la decoración de cada altura.
 
 ## El mapa
 

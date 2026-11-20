@@ -15,11 +15,15 @@ import daio7771.everytunnel.chapter2.level1.platform.ManholeBlock
 import daio7771.everytunnel.chapter2.level1.platform.NonameTerminalBlock
 import daio7771.everytunnel.chapter2.level1.platform.SampleTubeBlock
 import daio7771.everytunnel.chapter2.level1.platform.TimeClockBlock
+import daio7771.everytunnel.chapter2.level2.platform.CatacombLampBlock
 import daio7771.everytunnel.chapter2.level2.platform.CatacombStairsBlock
+import daio7771.everytunnel.chapter2.level2.platform.RustStainBlock
+import daio7771.everytunnel.chapter2.level2.platform.ScatterBlock
 import daio7771.everytunnel.chapter2.level2.platform.CeilingCableBlock
 import daio7771.everytunnel.chapter2.level2.platform.PumpBeaconBlock
 import daio7771.everytunnel.chapter2.level2.platform.TrapBreakerBlock
 import daio7771.everytunnel.platform.BlockShapes.box
+import daio7771.everytunnel.platform.FluorescentLightBlock
 import daio7771.everytunnel.platform.LinkedDoorBlock
 import daio7771.everytunnel.platform.ModBlocks
 import daio7771.everytunnel.platform.ModSoundGroups
@@ -149,6 +153,21 @@ object Ch2Blocks {
 
     /** The breaker of one of the Guard's four traps: a lever and a lamp on the maintenance wall ([daio7771.everytunnel.chapter2.level2.platform.TrapBreakerBlock]). */
     val TRAP_BREAKER: Block = register("trap_breaker", TrapBreakerBlock(ModBlocks.props(MapColor.IRON_GRAY, ModSoundGroups.SHEET_METAL).noCollision().luminance(TrapBreakerBlock::luminance)))
+
+    /**
+     * Phase 8's lighting and decoration: the catacombs' tinted lamp (light 14, Level 5's caged lamp is 10), the heap of fallen brick,
+     * the loose bricks on the floor and the rust stain on a wall ([CatacombLampBlock], [ScatterBlock], [RustStainBlock]).
+     */
+    val CATACOMB_LAMP: Block = register(
+        "catacomb_lamp",
+        CatacombLampBlock(
+            ModBlocks.props(MapColor.YELLOW, BlockSoundGroup.GLASS).noCollision().luminance { CatacombLampBlock.luminance(it) }
+                .emissiveLighting { state, _, _ -> FluorescentLightBlock.glows(state) },
+        ),
+    )
+    val RUBBLE_PILE: Block = register("rubble_pile", ScatterBlock(ModBlocks.props(MapColor.BROWN, BlockSoundGroup.DEEPSLATE_BRICKS), ScatterBlock.RUBBLE_SHAPE))
+    val LOOSE_BRICKS: Block = register("loose_bricks", ScatterBlock(ModBlocks.props(MapColor.BROWN, BlockSoundGroup.DEEPSLATE_BRICKS).noCollision(), ScatterBlock.BRICKS_SHAPE))
+    val RUST_STAIN: Block = register("rust_stain", RustStainBlock(ModBlocks.props(MapColor.ORANGE, BlockSoundGroup.STONE).noCollision()))
 
     /** The factory cameras' block entity: the same as Level 5's camera's, a type of its own so the client sweeps them. */
     lateinit var FACTORY_CAMERA_ENTITY: BlockEntityType<SecurityCameraBlockEntity>

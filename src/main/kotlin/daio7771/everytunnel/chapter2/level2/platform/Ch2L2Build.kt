@@ -3,9 +3,13 @@ package daio7771.everytunnel.chapter2.level2.platform
 import daio7771.everytunnel.chapter2.core.MapPlan
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Files
 import daio7771.everytunnel.chapter2.platform.MapBuild
+import daio7771.everytunnel.platform.AlarmLightBlock
 import daio7771.everytunnel.platform.FluorescentLightBlock
 import daio7771.everytunnel.platform.LightMode
+import daio7771.everytunnel.platform.ModBlocks
 import net.minecraft.block.Block
+import net.minecraft.block.Blocks
+import net.minecraft.block.LightBlock
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.math.BlockPos
@@ -23,6 +27,10 @@ import net.minecraft.util.math.Vec3d
  * zone on, flickering or off (`level.json`, `lights`).
  */
 object Ch2L2Build {
+
+    /** The level of the invisible light blocks the generator places (`checks.light.fill_level`), and while their room's lamps flicker. */
+    private const val FILL_LEVEL = 14
+    private const val FILL_LEVEL_FLICKER = 6
 
     private val build = MapBuild("Chapter 2 Level 2", "every_tunnel_ch2_l2", Ch2L2Files.PLAN) { Ch2L2DataLoader.data.anchors.dimension }
 
@@ -99,6 +107,20 @@ object Ch2L2Build {
         return counts
     }
 
+    /** The plan's alarm lights (`alarms`: the collector's red ones, off as built) switched on or off; how many changed. */
+    fun setAlarms(world: ServerWorld, on: Boolean): Int {
+        var changed = 0
+        for (cell in plan.alarms) {
+            val pos = BlockPos(plan.worldX(cell.x), plan.worldY(cell.y), plan.worldZ(cell.z))
+            if (!world.isChunkLoaded(pos)) continue
+            val state = world.getBlockState(pos)
+            if (!state.isOf(ModBlocks.ALARM_LIGHT) || state.get(AlarmLightBlock.ON) == on) continue
+            world.setBlockState(pos, state.with(AlarmLightBlock.ON, on), Block.NOTIFY_ALL)
+            changed++
+        }
+        return changed
+    }
+
     /** The plan's lamps in the zone [zoneId] in [mode] (the cage lamps of the map, or any light of the kind); how many changed. */
     fun zoneLights(world: ServerWorld, zoneId: String, mode: LightMode): Int {
         val box = Ch2L2DataLoader.data.anchors.zone(zoneId)?.box ?: return 0
@@ -112,6 +134,19 @@ object Ch2L2Build {
             world.setBlockState(pos, FluorescentLightBlock.withMode(state, mode), Block.NOTIFY_ALL)
             if (mode == LightMode.FLICKER) world.scheduleBlockTick(pos, block, 20 + world.random.nextInt(40))
             changed++
+        }
+        // The invisible light blocks of such a room go with its lamps (the floor's light is theirs): full, half while they flicker, none.
+        val level = when (mode) {
+            LightMode.ON -> FILL_LEVEL
+            LightMode.FLICKER -> FILL_LEVEL_FLICKER
+            LightMode.OFF -> 0
+        }
+        for (cell in plan.dim) {
+            val pos = BlockPos(plan.worldX(cell.x), plan.worldY(cell.y), plan.worldZ(cell.z))
+            if (!box.contains(pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)) continue
+            val state = world.getBlockState(pos)
+            if (!state.isOf(Blocks.LIGHT) || state.get(LightBlock.LEVEL_15) == level) continue
+            world.setBlockState(pos, state.with(LightBlock.LEVEL_15, level), Block.NOTIFY_ALL)
         }
         return changed
     }

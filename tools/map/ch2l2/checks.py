@@ -23,6 +23,7 @@ import math
 from collections import deque
 from pathlib import Path
 
+import light
 from level import AIR, permeable
 
 ENDING_WALK_MIN = 50   # blocks from the station's door to the exit's heavy door (about 12 s walking)
@@ -327,7 +328,7 @@ def run(level):
         high = sorted(c for c in seen if lv.air.get(c) == space.id and c[1] != space.floor)
         if high:
             errors.append(f"no climb: {nc['space']} has {len(high)} places to stand over its floor (e.g. {high[0]})")
-        stuff = sorted(c for c, o in lv.air.items() if o == space.id and c in lv.blocks and "cage_lamp" not in lv.blocks[c]
+        stuff = sorted(c for c, o in lv.air.items() if o == space.id and c in lv.blocks and "_lamp[" not in lv.blocks[c]
                        and "puddle" not in lv.blocks[c] and "cable" not in lv.blocks[c])
         if stuff:
             errors.append(f"no climb: {nc['space']} holds a block ({lv.blocks[stuff[0]]} at {stuff[0]}) besides its lamps")
@@ -398,6 +399,9 @@ def run(level):
     for c in lv.lamps:
         counts[lv.air.get(c)] = counts.get(lv.air.get(c), 0) + 1
     report.append("lamps: " + ", ".join(f"{k} {v}" for k, v in sorted(counts.items(), key=lambda kv: str(kv[0]))))
+    light_errors, light_report = light.check(lv)
+    errors += light_errors
+    report += light_report
 
     # The build.
     lo, hi = lv.bounds()

@@ -244,5 +244,9 @@
   "achievement.every_tunnel.explorer": "Explorer",
   "achievement.every_tunnel.explorer.description": "Visited every room of the catacombs, even the ones nobody asked you to.",
   "achievement.every_tunnel.bad_aim": "Your Aim Is Not Your Thing",
-  "achievement.every_tunnel.bad_aim.description": "Threw more than two pipes at Stone Maw and missed."
+  "achievement.every_tunnel.bad_aim.description": "Threw more than two pipes at Stone Maw and missed.",
+  "block.every_tunnel.catacomb_lamp": "Catacomb Lamp",
+  "block.every_tunnel.rubble_pile": "Rubble Pile",
+  "block.every_tunnel.loose_bricks": "Loose Bricks",
+  "block.every_tunnel.rust_stain": "Rust Stain"
 }

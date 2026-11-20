@@ -5,7 +5,7 @@
 Level 2 of Chapter 2 is the catacombs under the factory: the old catacombs the factory's drainage was built into. The scientist comes
 down Level 1's emergency manhole, alone, and looks for a way out: the Hunters in the galleries, a creature that hunts by the floor's
 vibrations in the pump room, the Observant Guard of Chapter 1 in the lower chambers, and a flood in three stages on the way to the
-pumping station and the exit. It is built in phases (1 to 7, and a phase 8 to come: lighting and decoration), one at a time, on the **private** branch `chapter-2/level-2` (off
+pumping station and the exit. It is built in phases (1 to 8; phase 8 is lighting and decoration), one at a time, on the **private** branch `chapter-2/level-2` (off
 `chapter-2/level-1`, pushed only to the remote `private`) until Levels 1 and 2 of the chapter are published. **Where it stands: phase 7,
 the integral review.** It is reached down Level 1's manhole and walked from the entry to the exit with the survival
 bars, dying brings the player back to the last checkpoint, and the menu's Chapter 2 continues it; the first stretch has its enemies,
@@ -212,13 +212,29 @@ the centre) so no block lands on them, and the cinematic draws them. A retry flo
 included: the counters `seen.<zone>`; the `room_*` zones come from the generator) and *Your Aim Is Not Your Thing\** (more than two pipes that missed
 Stone Maw in one fight: counter `maw_misses`). Hidden ones are marked *. The rest are in [Level 1's page](chapter-2-level-1.md#chapter-2s-achievements).
 
-## Phase 8 (to come): lighting and decoration
+## Phase 8: lighting and decoration
 
-The level is built and plays, but its look is still the generator's: lamps by rule (cage lamps, cables, a few flickers) and furniture only
-where a phase needed it. A last phase, after the review of phase 7, will give each place its own **lighting** (the mood of each room: how
-dark, which lamps work, colour, the pump room's, the vestibule's and the collector's own) and **decoration** (props, debris, signs,
-rust, water marks, cables and pipes, what the people who worked here left). It will be designed with the user in its own round; its
-changes live in `layout.json` (lamps, features), `tools/blocks` and `tools/map/ch2l2`, so the level is rebuilt from the tool.
+**Light.** In vanilla (no shaders) the first look at the level was too dark, so the lamps are now Chapter 2's `catacomb_lamp` (light 14;
+Level 5's `cage_lamp` stays at 10) with a `tint` on its bulb (vanilla light has no colour; shaders colour by block): warm in the catacombs
+and the reunion, amber in the pump room and the shaft, cold in the vestibule and maintenance, red in the collector, walkways and upper
+gallery, white at the entrance, station, exit and the Maw's arena (`layout.json`, `lamp_tints`). On the route only flicker remains
+(about 8 %, no dark, no dead lamps); the optional rooms have some dead ones. The mod's own lamps join them (`lamp_extras`): lit
+`emergency_lamp`s and five `alarm_light`s (off as built, switched on by the flood's first stage and off on retry or reset: `MapPlan.alarms`,
+`Ch2L2Build.setAlarms`) in the collector and walkways, dead `wall_sconce`s on the old walls. The lamps are few and hung high (`lamp_density`: spacing scaled, at least 5 blocks over the floor; the first pass had too many, too low, and
+they got in the way of the Guard's cinematic: the vestibule has none between the player and the nest), so the light of the floor is the
+fill's. `checks.light` demands a floor light of at least 9 on every cell a player can stand on in a lit space (5 in the optional rooms),
+counting flickering and dead lamps as off; where the lamps leave a cell under it, `light.py` places invisible `minecraft:light[level=14]`
+blocks two blocks over it. The flood waterlogs them (they stay lit) and the vestibule's are listed in `dim` (`MapPlan.dim`): the Guard's
+warning dims them with the lamps (half while they flicker, none when they die: `Ch2L2Build.zoneLights`). `guard_nest` and `maw_pipe` stay
+dark. The iron bars of the plan are joined as the game joins them (`Level.connect_bars`: the channels' cages had gaps at their corners).
+
+**Decoration** (`layout.json`, `decor` rules by style, run by `decor.py`; never near an opening, an anchor or the loot, never where the way
+would narrow): the drain's rooms get a few pipe and cable-tray runs along the walls, valves and gauges on the pipes, rust stains low on the walls, drums, pallets
+and boxes in the corners; the catacombs get rubble, loose bricks and stains. Six set pieces are `prop` features: the entrance's cones and
+tool board, a worker's camp in `side_service_crypt`, the maintenance log author's tools on the overlook, the trap room's panel and shelf,
+the station's lockers, first-aid box, time clock and a chalk arrow towards the exit, and a fallen chair and chalk marks in
+`side_gallery_room`. New blocks (`tools/blocks`): `catacomb_lamp`, `rubble_pile`, `loose_bricks`, `rust_stain`. The pictures
+`light_*.png` and `decor_*.png` of the tool show the floor light and the decoration of each height.
 
 ## The map
 

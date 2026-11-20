@@ -17,7 +17,9 @@ import daio7771.everytunnel.chapter2.prologue.core.Cell
  * cells of the ceiling lamps, for turning them down and up, [texts] what the plan's `wall_text` blocks say (Level 3's nameplates: a
  * lang key in a style, set on the block's entity once it is built), [messages] what its `wall_message` blocks say (chalk scrawls: a
  * lang key, a line's height in blocks, degrees off level, the chalk's colour), and [gates] the openings whose block changes with the
- * level's story (Level 2's grate: its cells and a block for each of its states; the build puts the `built` one). [fingerprint]
+ * level's story (Level 2's grate: its cells and a block for each of its states; the build puts the `built` one), and [alarms] the cells
+ * of the alarm lights the build puts off and the level's story switches on (Level 2's flood), and [dim] the invisible light blocks
+ * of the rooms whose lamps the story switches (Level 2's vestibule), dimmed and raised with the lamps. [fingerprint]
  * changes whenever the file does: a world that was built from another plan is built again.
  */
 class MapPlan(
@@ -29,6 +31,8 @@ class MapPlan(
     val texts: List<WallText> = emptyList(),
     val messages: List<WallMessage> = emptyList(),
     val gates: List<Gate> = emptyList(),
+    val alarms: List<Cell> = emptyList(),
+    val dim: List<Cell> = emptyList(),
 ) {
 
     /** A block of a mix and how often it comes, against the others' weights. */
@@ -137,6 +141,8 @@ class MapPlan(
                         o.getAsJsonObject("states").entrySet().associate { (k, v) -> k to v.asString }, o["built"].asString,
                     )
                 } ?: emptyList(),
+                root.getAsJsonArray("alarms")?.map(::cell) ?: emptyList(),
+                root.getAsJsonArray("dim")?.map(::cell) ?: emptyList(),
             )
         }
 

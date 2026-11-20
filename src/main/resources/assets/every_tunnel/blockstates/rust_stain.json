@@ -1,0 +1,80 @@
+{
+  "variants": {
+    "facing=north,pattern=0": {
+      "model": "every_tunnel:block/rust_stain_0",
+      "x": 90
+    },
+    "facing=north,pattern=1": {
+      "model": "every_tunnel:block/rust_stain_1",
+      "x": 90
+    },
+    "facing=north,pattern=2": {
+      "model": "every_tunnel:block/rust_stain_2",
+      "x": 90
+    },
+    "facing=north,pattern=3": {
+      "model": "every_tunnel:block/rust_stain_3",
+      "x": 90
+    },
+    "facing=east,pattern=0": {
+      "model": "every_tunnel:block/rust_stain_0",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=1": {
+      "model": "every_tunnel:block/rust_stain_1",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=2": {
+      "model": "every_tunnel:block/rust_stain_2",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,pattern=3": {
+      "model": "every_tunnel:block/rust_stain_3",
+      "x": 90,
+      "y": 90
+    },
+    "facing=south,pattern=0": {
+      "model": "every_tunnel:block/rust_stain_0",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=1": {
+      "model": "every_tunnel:block/rust_stain_1",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=2": {
+      "model": "every_tunnel:block/rust_stain_2",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,pattern=3": {
+      "model": "every_tunnel:block/rust_stain_3",
+      "x": 90,
+      "y": 180
+    },
+    "facing=west,pattern=0": {
+      "model": "every_tunnel:block/rust_stain_0",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=1": {
+      "model": "every_tunnel:block/rust_stain_1",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=2": {
+      "model": "every_tunnel:block/rust_stain_2",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,pattern=3": {
+      "model": "every_tunnel:block/rust_stain_3",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

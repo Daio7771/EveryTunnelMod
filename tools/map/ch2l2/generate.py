@@ -59,6 +59,8 @@ def write_plan(level):
         "clear": {"from": list(lo), "to": list(hi)},
         "fills": [fill_entry(level, a, b, m) for a, b, m in fills],
         "lights": [list(c) for c in sorted(level.lamps)],
+        "alarms": [list(c) for c in sorted(level.alarms)],
+        "dim": [list(c) for c in level.dim],
         "texts": level.texts,
         "messages": [],
         "gates": [{"id": gid, "cells": [list(c) for c in cells], "states": states, "built": built}

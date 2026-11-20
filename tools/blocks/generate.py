@@ -3063,6 +3063,65 @@ def cable_run_tex(rng):
     return img
 
 
+# Chapter 2 Level 2's lamps and decoration (phase 8).
+LAMP_TINTS = {"warm": (255, 196, 122), "amber": (255, 154, 46), "cold": (191, 224, 255), "red": (255, 64, 48), "white": (244, 244, 238)}
+
+
+def tint_bulb_tex(rng, color, lit):
+    """A caged lamp's bulb in a tinted glass: bright and saturated lit, a dull darker glass off."""
+    base = color if lit else tuple(int(c * 0.34 + 22) for c in color)
+    img = new(base)
+    noise(img, rng, 3)
+    for x in range(16):
+        px(img, x, 0, shade(base, 0.78), 0.6)
+    if lit:                                              # a hot core
+        rect(img, 5, 5, 10, 10, mix(color, (255, 255, 255), 0.35), 0.55)
+    return img
+
+
+def rubble_tex(rng, pieces):
+    """Broken brick and mortar crumbs: the catacomb brick's colours in chunks."""
+    img = new(shade(BRICK_MORTAR, 1.15))
+    noise(img, rng, 6)
+    for _ in range(pieces):
+        w, h = rng.randint(2, 5), rng.randint(2, 4)
+        x0, y0 = rng.randint(0, 16 - w), rng.randint(0, 16 - h)
+        tone = 1 + rng.uniform(-0.2, 0.2)
+        for y in range(y0, y0 + h):
+            for x in range(x0, x0 + w):
+                px(img, x, y, shade(BRICK, tone * (1.12 if y == y0 else 0.9 if y == y0 + h - 1 else 1.0)))
+    speckle(img, rng, 10, SALTPETRE, 0.4)
+    return img
+
+
+def rust_stain_tex(rng, i):
+    """A rust stain on a wall: an orange-brown patch with runs down from it, fading out (4 pictures)."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+
+    def put(x, y, c, a):
+        if 0 <= x < 16 and 0 <= y < 16:
+            old = img.getpixel((x, y))
+            img.putpixel((x, y), tuple(c) + (max(old[3], a),))
+
+    cx, cy = rng.uniform(5, 11), rng.uniform(3, 8)
+    rx, ry = rng.uniform(2, 4.5), rng.uniform(1.5, 3.5)
+    for y in range(16):
+        for x in range(16):
+            d = math.hypot((x - cx) / rx, (y - cy) / ry)
+            if d < 1.0:
+                tone = rng.uniform(0.8, 1.15)
+                put(x, y, (T.clamp(128 * tone), T.clamp(70 * tone), T.clamp(34 * tone)), int(210 * (1 - d * 0.5)))
+    for _ in range(2 + i % 3):                           # the runs
+        x = int(cx + rng.uniform(-rx, rx))
+        for y in range(int(cy), 16):
+            fade = 1 - (y - cy) / 14
+            if rng.random() < 0.9 and fade > 0:
+                put(x, y, (112, 62, 30), int(170 * fade))
+            if rng.random() < 0.15:
+                x = max(0, min(15, x + rng.choice([-1, 1])))
+    return img
+
+
 class Assets:
     """Everything one run writes, collected first so it can be checked and then written at once."""
 
@@ -4713,6 +4772,63 @@ def build():
     a.block("ceiling_cable", "Ceiling Cable",
             {"variants": {"axis=x": {"model": f"{NS}:block/ceiling_cable_x"}, "axis=z": {"model": f"{NS}:block/ceiling_cable_z"}}},
             {"parent": f"{NS}:block/ceiling_cable_x"})
+
+    # --- Phase 8: the catacombs' tinted lamp, rubble, loose bricks, rust stains ------------------------
+    for tint, color in LAMP_TINTS.items():
+        for lit in (True, False):
+            state = "on" if lit else "off"
+            a.texture(f"catacomb_bulb_{tint}_{state}", tint_bulb_tex(r(f"catacomb_bulb_{tint}_{state}"), color, lit),
+                      T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]) if lit else T.PLASTIC.but(smoothness=0.6))
+            bars = [element((x, 4, z), (x + 1, 12, z + 1), "cage") for x, z in ((5, 5), (10, 5), (5, 10), (10, 10))]
+            rings = [element((5, 4, 5), (11, 5, 11), "cage"), element((5, 11, 5), (11, 12, 11), "cage")]
+            a.models[f"catacomb_lamp_{tint}_{state}"] = model(
+                {"cage": "rusty_steel_dark", "bulb": f"catacomb_bulb_{tint}_{state}"},
+                [element((5, 15, 5), (11, 16, 11), "cage"), element((7, 12, 7), (9, 15, 9), "cage"),
+                 element((6, 5, 6), (10, 11, 10), "bulb", shade=not lit)] + bars + rings, ao=False)
+    variants = {}
+    for facing, (x_rot, y_by_axis) in {
+            "down": (0, {"x": 0, "z": 90}), "up": (180, {"x": 0, "z": 90}),
+            "north": (270, {"x": 0, "z": 0}), "east": (270, {"x": 90, "z": 90}),
+            "south": (270, {"x": 180, "z": 180}), "west": (270, {"x": 270, "z": 270})}.items():
+        for axis, y_rot in y_by_axis.items():
+            for lit in ("true", "false"):
+                for tint in LAMP_TINTS:
+                    v = {"model": f"{NS}:block/catacomb_lamp_{tint}_{'on' if lit == 'true' else 'off'}"}
+                    if x_rot:
+                        v["x"] = x_rot
+                    if y_rot:
+                        v["y"] = y_rot
+                    variants[f"facing={facing},axis={axis},lit={lit},tint={tint}"] = v
+    a.block("catacomb_lamp", "Catacomb Lamp", {"variants": variants},
+            {"parent": f"{NS}:block/catacomb_lamp_warm_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+
+    rubble_mat = T.Material(0.1, porosity=0.8, relief=1.2)
+    a.texture("rubble_pile", rubble_tex(r("rubble_pile"), 16), rubble_mat)
+    a.texture("loose_bricks", rubble_tex(r("loose_bricks"), 7), rubble_mat)
+    a.models["rubble_pile_0"] = model({"t": "rubble_pile"}, [
+        element((2, 0, 2), (14, 2, 14), "t"), element((4, 2, 3), (12, 3.5, 11), "t"), element((6, 3.5, 5), (10, 4, 9), "t"),
+        element((10, 0, 10), (14.5, 3, 14.5), "t")])
+    a.models["rubble_pile_1"] = model({"t": "rubble_pile"}, [
+        element((1, 0, 3), (13, 2, 15), "t"), element((3, 2, 5), (10, 3, 12), "t"), element((5, 3, 7), (8, 4, 10), "t"),
+        element((10.5, 0, 1.5), (14, 2.5, 5), "t")])
+    a.models["loose_bricks_0"] = model({"t": "loose_bricks"}, [
+        element((3, 0, 4), (9, 2, 7), "t"), element((6, 0, 9), (12, 2, 12), "t"), element((9.5, 2, 9.5), (13.5, 3, 11.5), "t")])
+    a.models["loose_bricks_1"] = model({"t": "loose_bricks"}, [
+        element((4, 0, 3), (10, 2, 6), "t"), element((4.5, 2, 3.5), (9.5, 3, 5.5), "t"), element((9, 0, 8), (12, 2, 14), "t")])
+    for name, title in (("rubble_pile", "Rubble Pile"), ("loose_bricks", "Loose Bricks")):
+        a.block(name, title, {"variants": {f"pattern={i}": {"model": f"{NS}:block/{name}_{i}"} for i in range(2)}},
+                {"parent": f"{NS}:block/{name}_0", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+
+    variants = {}
+    for i in range(4):
+        picture = f"rust_stain_{i}"
+        a.texture(picture, rust_stain_tex(r(picture), i), T.DECAL_MATERIALS["rust"], tiles=False)
+        a.models[picture] = plane(picture)
+    for facing in HORIZONTAL:
+        for pattern in range(4):
+            variants[f"facing={facing},pattern={pattern}"] = dict({"model": f"{NS}:block/rust_stain_{pattern}"}, **PLANE_ROTATION[facing])
+    a.block("rust_stain", "Rust Stain", {"variants": variants},
+            {"parent": "minecraft:item/generated", "textures": {"layer0": tex_ref("rust_stain_0")}})
     return a
 
 
