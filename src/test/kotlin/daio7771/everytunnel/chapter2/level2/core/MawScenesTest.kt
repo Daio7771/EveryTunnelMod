@@ -16,21 +16,12 @@ class MawScenesTest {
     fun `the jar's maw and reunion read without a problem and name anchors and zones that exist`() {
         assertEquals(emptyList(), data.problems)
         val maw = data.level.maw
-        assertEquals(5, maw.hits)
+        assertEquals(3, maw.pillars.size)
+        for (id in maw.pillars) assertNotNull(data.anchors.point(id), id)
         assertEquals(8, maw.pipePoints.size)
         for (id in maw.pipePoints) assertNotNull(data.anchors.point(id), id)
         assertEquals(listOf("coworker", "coworker", "worker_b", "coworker"), data.level.reunion.lines.map { it.who })
         assertTrue(data.level.reunion.lines.all { it.sound != null && it.seconds > 3.0 })
-    }
-
-    @Test
-    fun `the death scene's moments follow the timings, in order, inside the whole`() {
-        val maw = Ch2L2Maw.DEFAULT
-        val p = MawDeathScene.phases(maw)
-        assertTrue(0 < p.crouchAt && p.crouchAt < p.collapseAt && p.collapseAt < p.settledAt && p.settledAt < p.total)
-        assertEquals(MawDeathScene.FLY_IN + Math.round(maw.deathWalkSeconds * 20).toInt(), p.crouchAt)
-        assertEquals(p.crouchAt + Math.round(maw.crouchSeconds * 20).toInt(), p.collapseAt)
-        assertEquals(MawDeathScene.timeline(maw).cutscene.totalTicks, p.total)
     }
 
     private val frame = SceneFrame(0.0, 0.0, 0.0, 90.0)

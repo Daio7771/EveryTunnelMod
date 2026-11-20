@@ -6,7 +6,7 @@ package daio7771.everytunnel.chapter2.level2.core
  * Chapter 2 progress, so it survives leaving the world and a death.
  *
  * The order is the declaration order, so a later state compares greater. Walking into a place moves the player on to its state
- * (`level.json`, `progress`); the Guard's death is the one state reached by what happens, not by where one goes (phase 5). What
+ * (`level.json`, `progress`); the Guard's death and the escape are the states reached by what happens, not by where one goes (phase 5). What
  * entering a state does in the world (an enemy, the gate, the water) is the business of the system that owns it, which listens to
  * `level2.platform.Ch2L2`.
  */
@@ -35,7 +35,9 @@ enum class Ch2L2State {
     STATION,
     /** In the arena beyond the exit: Stone Maw and its last stand (phase 6.1). */
     MAW,
-    /** Stone Maw is dead and the far door open: the way to the reunion room. */
+    /** The last pillar is down and Stone Maw under the ceiling: the arena caves in and the player runs for the far door (phase 9). */
+    MAW_ESCAPE,
+    /** The far door slammed behind the player: the way to the reunion room. */
     MAW_DEAD,
     /** The reunion with the coworker and worker B is playing (phase 6.1). */
     REUNION,
@@ -78,7 +80,7 @@ enum class Ch2L2Event(val id: String, val first: Ch2L2State, val after: Ch2L2Sta
     CREATURE("creature", Ch2L2State.PUMP_ROOM, Ch2L2State.CATACOMBS),
     GUARD("guard", Ch2L2State.GUARD_APPEARS, Ch2L2State.GUARD_DEAD),
     FLOOD("flood", Ch2L2State.FLOOD_1, Ch2L2State.STATION),
-    MAW("maw", Ch2L2State.MAW, Ch2L2State.MAW_DEAD),
+    MAW("maw", Ch2L2State.MAW, Ch2L2State.MAW_DEAD),   // the escape is part of it
     REUNION("reunion", Ch2L2State.REUNION, Ch2L2State.DONE);
 
     /** The state just before it, where resetting it leaves the player. */

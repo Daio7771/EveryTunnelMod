@@ -1114,6 +1114,22 @@
       }
     ]
   },
+  "event.ch2l2.lift_gate": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/lift_gate_1",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "event.ch2l2.lift_motor": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/lift_motor_1",
+        "attenuation_distance": 48
+      }
+    ]
+  },
   "event.ch2l2.maw_burst": {
     "sounds": [
       {
@@ -1130,11 +1146,51 @@
       }
     ]
   },
+  "event.ch2l2.maw_debris_warn": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_debris_warn_1",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "event.ch2l2.maw_escape_rumble": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_escape_rumble_1",
+        "attenuation_distance": 80
+      }
+    ]
+  },
   "event.ch2l2.maw_hit": {
     "sounds": [
       {
         "name": "every_tunnel:event/ch2l2/maw_hit_1",
         "attenuation_distance": 56
+      }
+    ]
+  },
+  "event.ch2l2.maw_pillar_break": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_pillar_break_1",
+        "attenuation_distance": 80
+      }
+    ]
+  },
+  "event.ch2l2.maw_pillar_crack": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_pillar_crack_1",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "event.ch2l2.maw_pillar_ram": {
+    "sounds": [
+      {
+        "name": "every_tunnel:event/ch2l2/maw_pillar_ram_1",
+        "attenuation_distance": 72
       }
     ]
   },

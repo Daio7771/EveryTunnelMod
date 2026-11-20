@@ -83,6 +83,13 @@ object Ch2Sounds {
     val CH2L2_MAW_STUNNED = event("ambient.ch2l2.maw_stunned", range = 40f)
     val CH2L2_MAW_BURST = event("event.ch2l2.maw_burst", range = 72f)
     val CH2L2_MAW_COLLAPSE = event("event.ch2l2.maw_collapse", range = 80f)
+    val CH2L2_MAW_PILLAR_RAM = event("event.ch2l2.maw_pillar_ram", range = 72f)
+    val CH2L2_MAW_PILLAR_CRACK = event("event.ch2l2.maw_pillar_crack", range = 64f)
+    val CH2L2_MAW_PILLAR_BREAK = event("event.ch2l2.maw_pillar_break", range = 80f)
+    val CH2L2_MAW_DEBRIS_WARN = event("event.ch2l2.maw_debris_warn", range = 32f)
+    val CH2L2_MAW_ESCAPE_RUMBLE = event("event.ch2l2.maw_escape_rumble", range = 80f)
+    val CH2L2_LIFT_GATE = event("event.ch2l2.lift_gate", range = 48f)
+    val CH2L2_LIFT_MOTOR = event("event.ch2l2.lift_motor", range = 48f)
 
     private fun event(path: String, range: Float? = null): SoundEvent {
         val id = Identifier(EveryTunnel.MOD_ID, path)

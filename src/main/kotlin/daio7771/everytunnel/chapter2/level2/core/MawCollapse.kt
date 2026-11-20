@@ -3,9 +3,10 @@ package daio7771.everytunnel.chapter2.level2.core
 import kotlin.random.Random
 
 /**
- * How the ceiling comes down on Stone Maw (phase 6.2), as data: [plan] says which pieces fall, when and where, all from `maw.death`
- * and a seed (so a skip and the live fall agree), [landings] when each lands, [heights] the mound left. Plain Kotlin, unit tested;
- * `platform.Ch2L2Maw` spawns the falling blocks, `MawDeathScene` reads the ticks.
+ * How the ceiling comes down on Stone Maw (phase 6.2, live since phase 9), as data: [plan] says which pieces fall, when and where, all
+ * from `maw.death` and a seed (so a CONTINUE at the escape and the live fall leave the same mound), relative to a centre (Stone Maw's cell
+ * when the last pillar breaks); [landings] when each lands, [heights] the mound left, [mound] the cells it fills. Plain Kotlin, unit tested;
+ * `platform.Ch2L2Maw` spawns the falling blocks.
  *
  * A **piece** is a set of cells (dx, dz from the centre) that fall together at [Piece.delayTicks] after the collapse begins:
  * first [Ch2L2Maw.bitCount] single [Kind.BIT]s round the centre (the small bits), then the first [Kind.SLAB], 3 x 3 over the centre
@@ -18,6 +19,9 @@ object MawCollapse {
     enum class Kind { BIT, SLAB }
 
     data class Piece(val delayTicks: Int, val cells: List<Pair<Int, Int>>, val kind: Kind)
+
+    /** The plan's seed: the live fall and a CONTINUE's rubble are the same mound. */
+    const val SEED = 61
 
     /** Blocks between the floor cell and the top cell the pieces start in (the last of air under the ceiling). */
     const val TOP_CELL = 5
@@ -106,6 +110,10 @@ object MawCollapse {
         }
         return ticks
     }
+
+    /** The cells (absolute, from a [centreX], [centreZ] the plan is relative to) the mound of [plan] fills, `maxHeight` high at most. */
+    fun mound(plan: List<Piece>, centreX: Int, centreZ: Int): Set<Pair<Int, Int>> =
+        plan.flatMap { it.cells }.mapTo(HashSet()) { (dx, dz) -> (centreX + dx) to (centreZ + dz) }
 
     private fun square(dx: Int, dz: Int, size: Int): List<Pair<Int, Int>> {
         val from = if (size == 3) -1 else 0

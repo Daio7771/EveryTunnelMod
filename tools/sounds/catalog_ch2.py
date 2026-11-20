@@ -869,6 +869,126 @@ def ch2l2_maw_collapse(rng, variant):
     return _finish(y, rng, 2.2, 1.0, 0.28, 0.9, amount=1.35)
 
 
+def ch2l2_maw_pillar_ram(rng, variant):
+    """Stone Maw's charge ending against a pillar (about 2.8 s): the same weight as the wall's blow but deeper and tighter, a very
+    low blow with a long sub tail, a block of masonry shaking (stone modes), one hard crack running up the shaft and dust and
+    chips sifting after it. Heavier and more physical than the wall's, so that the two are never mistaken."""
+    n = samples(2.8)
+    y = 1.3 * thud(n, rng, 0.0, 26.0, 0.7, amp=1.9, dull=140.0)
+    y += 0.6 * thud(n, rng, 0.012, 48.0, 0.25, amp=1.0, dull=300.0)
+    f, a, d = ph.stone_modes(rng, 50, 45.0, 1100.0, decay=(0.08, 0.35))
+    y += 0.8 * ph.modes(n, rng, 0.0, f, a, d, contact=0.003)
+    f, a, d = ph.stone_modes(rng, 26, 700.0, 4200.0, decay=(0.01, 0.05))
+    y += 0.55 * ph.modes(n, rng, 0.03, f, a, d, contact=0.0008)
+    crack = ph.impulses(n, rng, [(0.0, 0.0), (0.03, 70.0), (0.2, 14.0), (0.7, 0.0)], amp_sigma=0.8)
+    f, a, d = ph.stone_modes(rng, 20, 300.0, 5200.0, decay=(0.006, 0.03))
+    y += 0.7 * ph.ring(crack, ph.body_ir(rng, f, a, d, 0.2))
+    y += 0.5 * ph.grains(n, rng, [(0.0, 0.0), (0.03, 800.0), (0.4, 260.0), (1.4, 40.0), (2.8, 0.0)], 400.0, 6500.0, length=(0.003, 0.012))
+    y += 0.4 * lowpass(shaped_noise(n, rng, exponent=2.0, lo=18.0, hi=120.0), 120.0, order=2) * envelope(n, [(0.0, 0.0), (0.03, 1.0), (1.2, 0.4), (2.8, 0.0)])
+    return _finish(y, rng, 2.0, 0.9, 0.26, 0.6, amount=1.4)
+
+
+def ch2l2_maw_pillar_crack(rng, variant):
+    """A pillar cracking (about 1.8 s): masonry grinding as a seam opens in it, a quickening run of dry cracks, a short groan of
+    stone under load and grit trickling out of the crack."""
+    seconds = 1.8
+    n = samples(seconds)
+    cracks = ph.impulses(n, rng, [(0.0, 6.0), (0.5, 22.0), (0.9, 55.0), (1.0, 0.0), (seconds, 0.0)], amp_sigma=0.8)
+    f, a, d = ph.stone_modes(rng, 24, 180.0, 4800.0, decay=(0.008, 0.045))
+    y = 0.9 * ph.ring(cracks, ph.body_ir(rng, f, a, d, 0.25))
+    y += 0.45 * lowpass(shaped_noise(n, rng, exponent=1.5, lo=45.0, hi=380.0, order=2), 380.0, order=2) * envelope(n, [(0.0, 0.0), (0.4, 0.5), (1.0, 1.0), (1.4, 0.3), (seconds, 0.0)])
+    y += 0.3 * ph.scrape(n, rng, 60.0, 420.0, flutter=7.0) * envelope(n, [(0.0, 0.0), (0.3, 0.6), (1.0, 1.0), (seconds, 0.0)])
+    y += 0.35 * ph.grains(n, rng, [(0.0, 0.0), (0.2, 80.0), (1.0, 200.0), (seconds, 0.0)], 1500.0, 6500.0, length=(0.002, 0.007))
+    y += 0.6 * thud(n, rng, 0.98, 52.0, 0.12, amp=0.8, dull=260.0)
+    return _finish(y, rng, 1.4, 0.5, 0.2, 0.3, amount=1.3)
+
+
+def ch2l2_maw_pillar_break(rng, variant):
+    """A pillar giving way (about 4 s): a long splitting groan, the column shearing with a huge crack, then its stone coming apart
+    and falling in a dense roar of blocks and rubble on the floor that thins out into stones rolling and settling, a very low
+    rumble under it all."""
+    seconds = 4.0
+    n = samples(seconds)
+    cracks = ph.impulses(n, rng, [(0.0, 4.0), (0.8, 18.0), (1.3, 60.0), (1.4, 0.0), (seconds, 0.0)], amp_sigma=0.8)
+    f, a, d = ph.stone_modes(rng, 26, 140.0, 4600.0, decay=(0.008, 0.05))
+    y = 0.8 * ph.ring(cracks, ph.body_ir(rng, f, a, d, 0.25))
+    y += 0.5 * lowpass(shaped_noise(n, rng, exponent=1.5, lo=35.0, hi=300.0, order=2), 300.0, order=2) * envelope(n, [(0.0, 0.0), (0.5, 0.5), (1.4, 1.0), (1.5, 0.0), (seconds, 0.0)])
+    at = 1.4
+    y += 1.5 * thud(n, rng, at, 30.0, 0.55, amp=1.7, dull=170.0)
+    for k in range(4):
+        f, a, d = ph.stone_modes(rng, 40, 50.0 + 25.0 * k, 1500.0, decay=(0.06, 0.25))
+        y += 0.45 * ph.modes(n, rng, at + 0.05 * k, f, a, d, contact=0.002)
+    rubble = ph.grains(n, rng, [(0.0, 0.0), (at, 0.0), (at + 0.02, 1100.0), (at + 0.7, 700.0), (at + 1.8, 140.0), (seconds, 0.0)], 100.0, 4000.0, length=(0.004, 0.022))
+    y += 1.0 * rubble
+    heavy = ph.impulses(n, rng, [(0.0, 0.0), (at, 0.0), (at + 0.03, 28.0), (at + 1.1, 7.0), (at + 2.3, 0.0)], amp_sigma=0.85)
+    f, a, d = ph.stone_modes(rng, 26, 70.0, 900.0, decay=(0.05, 0.22))
+    y += 0.8 * ph.ring(heavy, ph.body_ir(rng, f, a, d, 0.4))
+    y += 0.45 * lowpass(shaped_noise(n, rng, exponent=2.0, lo=18.0, hi=130.0), 130.0, order=2) * envelope(n, [(0.0, 0.0), (at, 0.0), (at + 0.05, 1.0), (at + 2.0, 0.4), (seconds, 0.0)])
+    return _finish(y, rng, 2.4, 1.1, 0.28, 0.9, amount=1.35)
+
+
+def ch2l2_maw_debris_warn(rng, variant):
+    """A piece of the ceiling about to come away (about 0.9 s): a small dry crumble, a couple of chips ticking, grit sifting. Quiet
+    but near: the tell to step away from a spot on the floor."""
+    seconds = 0.9
+    n = samples(seconds)
+    y = 0.5 * ph.grains(n, rng, [(0.0, 0.0), (0.05, 160.0), (0.5, 90.0), (seconds, 0.0)], 1500.0, 6800.0, length=(0.002, 0.007))
+    ticks = ph.impulses(n, rng, [(0.0, 0.0), (0.05, 14.0), (0.5, 6.0), (seconds, 0.0)], amp_sigma=0.7)
+    f, a, d = ph.stone_modes(rng, 14, 700.0, 4800.0, decay=(0.004, 0.02))
+    y += 0.6 * ph.ring(ticks, ph.body_ir(rng, f, a, d, 0.12))
+    y += 0.12 * lowpass(shaped_noise(n, rng, exponent=1.0, lo=120.0, hi=900.0, order=2), 900.0, order=2) * envelope(n, [(0.0, 0.0), (0.1, 1.0), (seconds, 0.0)])
+    return _finish(y, rng, 0.8, 0.25, 0.12, 0.2, amount=1.1)
+
+
+def ch2l2_maw_escape_rumble(rng, variant):
+    """The arena caving in (8 s): a very low, wide rumble swelling and shuddering, deep stone groans, dull far impacts of heavy
+    pieces landing and a constant sift of grit; it keeps rising to the end."""
+    seconds = 8.0
+    n = samples(seconds)
+    wobble = 0.65 + 0.35 * smooth_random(n, 1.7, rng)
+    y = 0.9 * lowpass(shaped_noise(n, rng, exponent=2.0, lo=16.0, hi=150.0, order=2), 150.0, order=2) * wobble * envelope(n, [(0.0, 0.2), (3.0, 0.7), (8.0, 1.0)])
+    y += 0.35 * lowpass(shaped_noise(n, rng, exponent=1.5, lo=40.0, hi=420.0, order=2), 420.0, order=2) * (0.5 + 0.5 * smooth_random(n, 3.0, rng)) ** 2 * envelope(n, [(0.0, 0.0), (2.0, 0.5), (8.0, 1.0)])
+    heavy = ph.impulses(n, rng, [(0.0, 0.6), (3.0, 1.3), (8.0, 2.6)], amp_sigma=0.9)
+    f, a, d = ph.stone_modes(rng, 26, 45.0, 800.0, decay=(0.08, 0.3))
+    y += 0.9 * ph.ring(heavy, ph.body_ir(rng, f, a, d, 0.7))
+    y += 0.35 * ph.grains(n, rng, [(0.0, 20.0), (4.0, 70.0), (8.0, 160.0)], 800.0, 6000.0, length=(0.003, 0.012))
+    return _finish(y, rng, 2.6, 0.9, 0.3, 0.6, amount=1.3)
+
+
+def ch2l2_lift_gate(rng, variant):
+    """The lift's iron gate shut by hand (about 1.7 s): the gate rattling along its track, the slam into the post (an iron clang
+    with a short bar-ring), the latch dropping with a hard click and a last settle of the frame."""
+    n = samples(1.7)
+    y = 0.4 * ph.scrape(n, rng, 120.0, 900.0, flutter=15.0) * envelope(n, [(0.0, 0.0), (0.05, 1.0), (0.5, 0.8), (0.55, 0.0), (1.7, 0.0)])
+    at = 0.55
+    y += 1.0 * thud(n, rng, at, 85.0, 0.09, amp=1.0, dull=900.0)
+    y += 0.9 * knock(n, rng, at, rng.uniform(330, 370), [1.0, 2.76, 5.4, 8.9], [1.0, 0.7, 0.4, 0.2], [0.35, 0.22, 0.12, 0.06], click=0.8, click_hi=5000.0)
+    y += 0.5 * knock(n, rng, at + 0.012, rng.uniform(780, 860), [1.0, 2.4, 4.1], [1.0, 0.5, 0.25], [0.2, 0.12, 0.07], click=0.4, click_hi=6000.0)
+    y += 0.6 * knock(n, rng, at + 0.34, rng.uniform(1500, 1700), [1.0, 1.9], [1.0, 0.4], [0.05, 0.03], click=1.0, click_hi=7000.0)
+    y += 0.25 * ph.scrape(n, rng, 300.0, 1600.0, flutter=30.0) * envelope(n, [(0.0, 0.0), (at + 0.05, 0.0), (at + 0.08, 0.8), (at + 0.5, 0.0), (1.7, 0.0)])
+    return _finish(y, rng, 1.0, 0.45, 0.16, 0.25, amount=1.2)
+
+
+def ch2l2_lift_motor(rng, variant):
+    """The service lift starting (about 4 s): a relay clunk, an electric motor winding up into a steady low whine with its
+    gear hum, a steel cable creaking and whining under tension, the cab shuddering as it starts to climb."""
+    seconds = 4.0
+    n = samples(seconds)
+    t = time_axis(n)
+    ramp = 1.0 - np.exp(-t / 0.7)
+    f0 = 52.0 * (0.4 + 0.6 * ramp)
+    phase = np.cumsum(f0) / SR
+    motor = sum(amp * np.sin(TAU * k * phase) for k, amp in ((1, 1.0), (2, 0.6), (3, 0.35), (5, 0.18)))
+    y = 0.35 * motor * ramp * (0.85 + 0.15 * smooth_random(n, 5.0, rng))
+    whine = np.sin(TAU * np.cumsum(780.0 * (0.5 + 0.5 * ramp) * (1.0 + 0.01 * smooth_random(n, 3.0, rng))) / SR)
+    y += 0.07 * whine * ramp * envelope(n, [(0.0, 0.0), (0.6, 0.8), (seconds, 1.0)])
+    y += 0.3 * bandpass(shaped_noise(n, rng, exponent=0.5, lo=200.0, hi=2400.0, order=2), 250.0, 2200.0, order=2) * (0.3 + 0.7 * smooth_random(n, 6.0, rng) ** 2) * ramp * 0.5
+    y += 0.8 * thud(n, rng, 0.0, 70.0, 0.1, amp=0.8, dull=700.0)
+    y += 0.6 * knock(n, rng, 0.01, rng.uniform(900, 1000), [1.0, 2.2], [1.0, 0.5], [0.04, 0.02], click=1.0, click_hi=6000.0)
+    y += 0.25 * lowpass(shaped_noise(n, rng, exponent=2.0, lo=20.0, hi=130.0), 130.0, order=2) * smooth_random(n, 2.5, rng) ** 2 * ramp
+    return _finish(y, rng, 1.0, 0.4, 0.12, 0.5, amount=1.15)
+
+
 CHAPTER2_SOUNDS = [
     Sound("event.prologue.crack", "Chapter 2 prologue", "A stage of the scientist's change: dry cracks of joints, a dull thump, the creak of something stretched too far (3 variations)",
           "mono", False, 3, prologue_crack, -3.0, attenuation=24),
@@ -972,4 +1092,18 @@ CHAPTER2_SOUNDS = [
           "mono", False, 1, ch2l2_maw_burst, -1.0, attenuation=72),
     Sound("event.ch2l2.maw_collapse", "Chapter 2 Level 2", "Part of the arena's ceiling coming down on Stone Maw: stone cracking and groaning, then a very low blow and a roar of rubble thinning into settling stones (3.6 s)",
           "mono", False, 1, ch2l2_maw_collapse, -1.0, attenuation=80),
+    Sound("event.ch2l2.maw_pillar_ram", "Chapter 2 Level 2", "Stone Maw's charge ending against a pillar: a deeper, tighter and heavier blow than the wall's, a block of masonry shaking, one hard crack and dust sifting (2.8 s)",
+          "mono", False, 1, ch2l2_maw_pillar_ram, -1.0, attenuation=72),
+    Sound("event.ch2l2.maw_pillar_crack", "Chapter 2 Level 2", "A pillar cracking after a ram: masonry grinding as a seam opens, a quickening run of dry cracks, a groan of stone under load and grit trickling (1.8 s)",
+          "mono", False, 1, ch2l2_maw_pillar_crack, -2.0, attenuation=64),
+    Sound("event.ch2l2.maw_pillar_break", "Chapter 2 Level 2", "A pillar giving way: a long splitting groan, the column shearing, then its stone falling in a dense roar of rubble that thins into stones settling (4 s)",
+          "mono", False, 1, ch2l2_maw_pillar_break, -1.0, attenuation=80),
+    Sound("event.ch2l2.maw_debris_warn", "Chapter 2 Level 2", "A piece of the ceiling about to fall on a spot of the floor: a small dry crumble, chips ticking, grit sifting (0.9 s)",
+          "mono", False, 1, ch2l2_maw_debris_warn, -4.0, attenuation=32),
+    Sound("event.ch2l2.maw_escape_rumble", "Chapter 2 Level 2", "The arena caving in during the escape: a very low wide rumble that swells and shudders, deep groans, far heavy impacts and grit, rising to the end (8 s)",
+          "mono", False, 1, ch2l2_maw_escape_rumble, -2.0, attenuation=80),
+    Sound("event.ch2l2.lift_gate", "Chapter 2 Level 2", "The service lift's iron gate shut: it rattles along its track, slams into the post with an iron clang and the latch drops (1.7 s)",
+          "mono", False, 1, ch2l2_lift_gate, -2.0, attenuation=48),
+    Sound("event.ch2l2.lift_motor", "Chapter 2 Level 2", "The service lift starting: a relay clunk, an electric motor winding up into a low whine, the cable creaking under tension (4 s)",
+          "mono", False, 1, ch2l2_lift_motor, -3.0, attenuation=48),
 ]

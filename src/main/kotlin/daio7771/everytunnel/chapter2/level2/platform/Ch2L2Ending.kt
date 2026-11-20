@@ -15,12 +15,12 @@ import java.util.UUID
 import kotlin.math.roundToInt
 
 /**
- * The end of Chapter 2's Level 2, after the reunion (phase 6.1; at the exit's door before): [start] holds the player where they stand,
+ * The end of Chapter 2's Level 2, in the service lift after the reunion (phase 9; in the reunion room in 6.1, at the exit's door before): [start] holds the player where they stand,
  * tells the client to fade to black over `ending.fade_seconds`, show the card (`ending.text`) for `card_seconds` and leave for the main
- * menu (`client.Ch2L2EndingOverlay`, [PACKET]). [Ch2L2Reunion] calls it when its scene ends.
+ * menu (`client.Ch2L2EndingOverlay`, [PACKET]). [Ch2L2Reunion] calls it when the lift's motor has run.
  *
  * [start] is the one, idempotent end: the first time it also puts the player in [Ch2L2State.DONE] and saves the `ending.checkpoint`
- * with it, so that CONTINUE stands in the reunion room. Nothing else changes in the world. A start of the level, leaving the world or a
+ * with it, so that CONTINUE stands in the lift. Nothing else changes in the world. A start of the level, leaving the world or a
  * death clears it. Server thread only.
  */
 object Ch2L2Ending {

@@ -42,7 +42,7 @@ import net.minecraft.util.Identifier
  * - `/et ch2 l2 flood <0|1|2|3>`: the water at once to that stage, whatever your state (0 drains it); `skip flood` fills all three and
  *   shuts the station's door, `reset flood` drains it and opens the vestibule's gate again at the collector ([Ch2L2FloodRun]).
  *   `/et ch2 l2 ending` plays the ending (fade, card, main menu; the level is finished only if you are in the reunion or past it) ([Ch2L2Ending]).
- * - `/et ch2 l2 maw`: Stone Maw's fight (phase 6.1): its phase, hits left and mode; `maw hit` counts a hit, `maw kill` plays its death. `skip maw`
+ * - `/et ch2 l2 maw`: Stone Maw's fight (phase 6.1): its phase, pillars broken and mode; `maw hit` counts a hit, `maw kill` breaks the pillars at once (the ceiling comes down, the escape begins), `maw pillar <n>` damages pillar n once. `skip maw`
  *   runs its death's end at once, `reset maw` puts the fight back at its start. `/et ch2 l2 reunion` plays the reunion (you are put at its spot) ([Ch2L2Maw], [Ch2L2Reunion]).
  * - `/et ch2 l2 perf`: what the level costs where you stand (phase 7): its entities by type (more than one where only one belongs is flagged), the
  *   flood's water cells, the lamps by mode and the mean and worst milliseconds a server tick spends on the level's own handlers over the last
@@ -113,7 +113,12 @@ object Ch2L2Commands {
                                     CommandManager.literal("maw")
                                         .executes(::mawState)
                                         .then(CommandManager.literal("hit").executes(::mawHit))
-                                        .then(CommandManager.literal("kill").executes(::mawKill)),
+                                        .then(CommandManager.literal("kill").executes(::mawKill))
+                                        .then(
+                                            CommandManager.literal("pillar").then(
+                                                CommandManager.argument("n", IntegerArgumentType.integer(1, 3)).executes(::mawPillar),
+                                            ),
+                                        ),
                                 )
                                 .then(CommandManager.literal("reunion").executes(::reunion))
                                 .then(CommandManager.literal("perf").executes(::perf))
@@ -279,9 +284,16 @@ object Ch2L2Commands {
     }
 
     private fun mawKill(context: CommandContext<ServerCommandSource>): Int {
-        val ok = Ch2L2Maw.debugKill()
-        reply(context, if (ok) "Stone Maw's death begins." else "Stone Maw is not fighting.")
+        val ok = Ch2L2Maw.debugKill(context.source.server)
+        reply(context, if (ok) "The pillars break at once: the ceiling comes down on Stone Maw and the escape begins." else "Stone Maw is not fighting.")
         return if (ok) 1 else 0
+    }
+
+    private fun mawPillar(context: CommandContext<ServerCommandSource>): Int {
+        val number = IntegerArgumentType.getInteger(context, "n")
+        val what = Ch2L2Maw.debugPillar(context.source.server, number)
+        reply(context, if (what != null) "Pillar $number damaged once: $what. ${Ch2L2Maw.describe()}" else "Pillar $number cannot be damaged now (Stone Maw is not fighting, or it is broken).")
+        return if (what != null) 1 else 0
     }
 
     private fun reunion(context: CommandContext<ServerCommandSource>): Int {

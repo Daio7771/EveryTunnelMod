@@ -3,7 +3,9 @@ package daio7771.everytunnel.chapter2.level2.core
 import com.google.gson.JsonParser
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.test.fail
 
 class MawCollapseTest {
 
@@ -93,27 +95,15 @@ class MawCollapseTest {
     }
 
     @Test
-    fun `the first slab reaches the creature between the collapse and the dust settling, and every slab lands before the shot ends`() {
-        val p = MawDeathScene.phases(maw)
-        assertTrue(p.collapseAt < p.impactAt && p.impactAt < p.settledAt, "$p")
-        assertEquals(maw.firstSlabDelayTicks + MawCollapse.fallTicks(MawCollapse.TOP_CELL - maw.crushHeight, maw.slabStartSpeed), p.impactAt - p.collapseAt)
-        assertTrue(p.landings.isNotEmpty() && p.landings.all { it in p.impactAt..p.settledAt }, "$p")
-        assertTrue(p.landings.first() >= p.impactAt)
-    }
-
-    @Test
     fun `the death keys are read, and defaults stand without them`() {
         val read = Ch2L2Level.parse(
             JsonParser.parseString(
-                """{"maw": {"death": {"walk_speed": 1.2, "walk_seconds": 7, "crouch_seconds": 4, "bit_count": 3, "first_slab_delay_ticks": 8,
+                """{"maw": {"death": {"bit_count": 3, "first_slab_delay_ticks": 8,
                     "slab_count": 3, "slab_spread_ticks": 10, "slab_start_speed": 0.5, "crush_height": 1.5, "max_height": 2}}}""",
             ).asJsonObject,
         )
         assertEquals(emptyList(), read.problems.filter { it.contains("death") }, "${read.problems}")
         val m = read.level.maw
-        assertEquals(1.2, m.deathWalkSpeed)
-        assertEquals(7.0, m.deathWalkSeconds)
-        assertEquals(4.0, m.crouchSeconds)
         assertEquals(3, m.bitCount)
         assertEquals(8, m.firstSlabDelayTicks)
         assertEquals(3, m.slabCount)
@@ -128,14 +118,60 @@ class MawCollapseTest {
     }
 
     @Test
-    fun `the jar's death keys are the defaults' and the old keys are gone`() {
+    fun `the jar's death keys are the defaults'`() {
         val data = Ch2L2Data.parse(emptyMap(), Ch2L2Files.readAllBundled())
         assertEquals(emptyList(), data.problems)
         val m = data.level.maw
         assertEquals(Ch2L2Maw.DEFAULT.copy(burstSeconds = m.burstSeconds).bitCount, m.bitCount)
         assertEquals(Ch2L2Maw.DEFAULT.slabCount, m.slabCount)
-        assertEquals(1.6, m.deathWalkSpeed)
-        assertEquals(6.0, m.deathWalkSeconds)
-        assertEquals(3.5, m.crouchSeconds)
     }
+
+    @Test
+    fun `wherever the last pillar is and Stone Maw stands against it, the mound leaves a way from the rest of the arena (beyond where the player is thrown from) to the far door`() {
+        val data = Ch2L2Data.parse(emptyMap(), Ch2L2Files.readAllBundled())
+        val rules = data.level.maw
+        val arena = data.anchors.zone(rules.arenaZone)!!.box
+        val door = data.anchors.point(rules.farAnchor)!!.position
+        // The cell inside the arena the far door opens on: the door's x is the wall's line, the arena starts one in.
+        val goal = (arena.minX to Math.floor(door.z).toInt())
+        val footprints = rules.pillars.map { id ->
+            val c = data.anchors.point(id)!!.position
+            val cx = Math.floor(c.x).toInt()
+            val cz = Math.floor(c.z).toInt()
+            setOf(cx - 1 to cz - 1, cx to cz - 1, cx - 1 to cz, cx to cz)
+        }
+        val standing = footprints.flatten().toSet()
+        val cells = (arena.minX..arena.maxX).flatMap { x -> (arena.minZ..arena.maxZ).map { z -> x to z } }
+        for ((last, footprint) in footprints.withIndex()) {
+            // Every cell round the pillar Stone Maw could be rammed against.
+            // Every cell Stone Maw's middle can be in with its charge ended against this pillar: within the hit radius of its faces.
+            val minX = footprint.minOf { it.first }
+            val minZ = footprint.minOf { it.second }
+            val around = cells.filter { (x, z) ->
+                val dx = maxOf(minX - (x + 0.5), 0.0, (x + 0.5) - (minX + 2.0))
+                val dz = maxOf(minZ - (z + 0.5), 0.0, (z + 0.5) - (minZ + 2.0))
+                Math.hypot(dx, dz) <= rules.pillarHitRadius && free(x, z, standing)
+            }
+            assertTrue(around.isNotEmpty())
+            for ((cx, cz) in around) {
+                val blocked = MawCollapse.mound(plan, cx, cz) + standing
+                assertFalse(goal in blocked, "pillar ${last + 1}, Maw at ($cx, $cz): the far door's cell is under the mound")
+                val reach = HashSet<Pair<Int, Int>>().also { it += goal }
+                val queue = ArrayDeque(listOf(goal))
+                while (queue.isNotEmpty()) {
+                    val (x, z) = queue.removeFirst()
+                    for ((dx, dz) in listOf(1 to 0, -1 to 0, 0 to 1, 0 to -1)) {
+                        val n = (x + dx) to (z + dz)
+                        if (n in cells.toSet() && n !in blocked && reach.add(n)) queue += n
+                    }
+                }
+                // Whoever stands within a little more than the radius of Stone Maw when the ceiling comes down is thrown clear of it, so the cells
+                // that matter are the ones beyond that.
+                val cut = cells.filter { it !in blocked && it !in reach && Math.hypot((it.first - cx).toDouble(), (it.second - cz).toDouble()) > rules.collapseRadius + 1.5 }
+                if (cut.isNotEmpty()) fail("pillar ${last + 1}, Maw at ($cx, $cz): ${cut.size} cells cannot reach the far door, e.g. ${cut.first()}")
+            }
+        }
+    }
+
+    private fun free(x: Int, z: Int, standing: Set<Pair<Int, Int>>) = (x to z) !in standing
 }

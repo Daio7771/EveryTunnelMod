@@ -45,12 +45,13 @@ jugador a su estado, nunca hacia atrás:
 | `FLOOD_1` a `FLOOD_3` | El colector, las pasarelas, la galería de subida: las etapas de la inundación (fase 6) | `zone_flood_collector`, `zone_rising_walkways`, `zone_upper_gallery` |
 | `STATION` | La estación de bombeo, seca | `zone_pumping_station` |
 | `MAW` | La arena de Stone Maw tras la puerta de salida (fase 6.1) | `zone_maw_middle` |
-| `MAW_DEAD` | Stone Maw ha muerto y la puerta del fondo está abierta | su muerte (o `skip maw`) |
-| `REUNION` | Suena el reencuentro con el compañero y el trabajador B | el centro de la sala del reencuentro |
-| `DONE` | El reencuentro ha acabado: el cartel y el menú | el final del reencuentro |
+| `MAW_ESCAPE` | Cae el último pilar y Stone Maw queda aplastada: la arena se derrumba (fase 9) | romperse el tercer pilar |
+| `MAW_DEAD` | La puerta del fondo se cerró tras el jugador: el camino a la sala del reencuentro | salir de la arena por la puerta del fondo (o `skip maw`) |
+| `REUNION` | Suena el reencuentro con el compañero y el trabajador B, y luego el paseo hasta el ascensor | el centro de la sala del reencuentro |
+| `DONE` | La reja cerrada y el motor en marcha: el cartel y el menú | el final del ascensor |
 
 Los seis **encuentros** (`Ch2L2Event`) son tramos de estados: `hunters` (`GALLERIES`), `creature` (`PUMP_ROOM`), `guard` (de
-`GUARD_APPEARS` a `GUARD_FIGHT`), `flood` (de `FLOOD_1` a `FLOOD_3`), `maw` (`MAW`) y `reunion` (`REUNION`). La etapa de la inundación es la del estado (0 antes, 3 desde la
+`GUARD_APPEARS` a `GUARD_FIGHT`), `flood` (de `FLOOD_1` a `FLOOD_3`), `maw` (de `MAW` a `MAW_ESCAPE`) y `reunion` (`REUNION`). La etapa de la inundación es la del estado (0 antes, 3 desde la
 tercera). Cada fase posterior cuelga su encuentro de los estados: `Ch2L2.onStateChange` (un estado que se deja por otro, jugando o por
 comando) y `Ch2L2.onStart` (el nivel empezado en un estado, al llegar, al morir, con CONTINUAR o con `reset`: el mundo como ese estado lo
 quiere, haya lo que haya).
@@ -157,10 +158,10 @@ generador) y las escaleras suben de nuevo a quien caiga.
 - **La puerta de salida** es la compuerta `exit_hatch` (cerrada al construir, en la pared oeste de la sala de salida): desde `STATION`, entrar en
   `zone_exit_door` (anidada en `zone_level_exit`) suena `event.ch2l2.exit_door` y se abre para siempre (`Ch2L2Maw`, `maw.exit_door`); el pasillo de
   detrás lleva a la arena.
-- **El final** (`Ch2L2Ending`, `ending` en `level.json`) ya no está en la puerta: empieza cuando acaba la escena del reencuentro (abajo). El cliente
+- **El final** (`Ch2L2Ending`, `ending` en `level.json`) ya no está en la puerta: empieza en el ascensor (abajo). El cliente
   (`Ch2L2EndingOverlay`) funde a negro en `fade_seconds`, muestra "CONTINUARÁ" (`every_tunnel.ch2.l2.ending.continued`) durante `card_seconds` y
-  sale al menú principal. La primera vez también fija `DONE` y guarda el checkpoint `chapter_end` (ancla `chapter_end`, en la sala del
-  reencuentro): CONTINUAR deja ahí, con toda la inundación puesta. `/et ch2 l2 ending` lo reproduce, para probar.
+  sale al menú principal. La primera vez también fija `DONE` y guarda el checkpoint `chapter_end` (ancla `chapter_end`, en el ascensor,
+  fase 9): CONTINUAR deja ahí, con toda la inundación puesta. `/et ch2 l2 ending` lo reproduce, para probar.
 
 El generador informa del paseo tranquilo desde justo dentro de la puerta de la estación (`station_door_in`) hasta la puerta de salida: 52
 bloques, unos 12 s (fase 7: el pasillo de salida es un zigzag, oeste, sur, oeste, norte, oeste; las dos puertas siguen donde estaban), y
@@ -174,35 +175,43 @@ suelo), `maw_pipe` (el hueco del que sale Stone Maw, con reja en la compuerta `m
 con la puerta cerrada del Nivel 3 en el muro del fondo). Las compuertas `maw_entry` (abierta al construir, se cierra a la espalda del jugador) y
 `maw_far` (cerrada hasta la muerte) las unen. `checks.route_gates` abre `exit_hatch` y `maw_far` para el paseo de la ruta.
 
-- **La pelea** (`Ch2L2Maw` en `platform`, `maw` en `level.json`; las reglas son `StoneMawFight`, `PipeSupply` y `MawDeathScene` en `core`). Llegar a
+- **La pelea** (`Ch2L2Maw` en `platform`, `maw` en `level.json`; las reglas son `StoneMawFight`, `PipeSupply`, `MawCollapse` y `MawEscape` en `core`). Llegar a
   `zone_maw_middle` pone `MAW`: la puerta se cierra, la reja se arranca, Stone Maw (la `VibrationCreatureEntity` de la fase 4 en modo pelea,
   `inFight`; el código de la bomba la deja en paz) sale a rastras hasta `maw_home` y cae el primer trozo de tubería delante del jugador. En su
   reposo, acecho, carga y golpe es el cerebro de la fase 4 (alimentado por los pasos del jugador en la arena y por las tuberías al caer, fuertes).
   Un trozo (`pipe_piece`, se recoge pasando por encima) se lanza con clic derecho (`ThrownPipeEntity`, `maw.throw`): contra Stone Maw es un
-  **golpe** (5 en total); contra cualquier otra cosa se rompe y resuena donde cae (va hacia el ruido). Un golpe la orienta hacia el jugador
-  (`ram.orient_seconds`) y **embiste en línea recta** (`ram.speed`, girando como mucho `ram.turn_degrees_per_second`) hasta una pared (el
-  `horizontalCollision` del cuerpo) o `ram.max_seconds`: entonces queda **aturdida** `stun_seconds` (un golpe entonces cuenta y la despierta) y
-  vuelve al cerebro, buscando. Un jugador en su camino recibe el golpe como en la fase 4. Un trozo a la vez (`pipes.at_once`):
+  **golpe** (nunca la mata); contra cualquier otra cosa se rompe y resuena donde cae (va hacia el ruido). Un golpe la orienta hacia el jugador y **embiste en línea recta**
+  hasta algo sólido (el `horizontalCollision` del cuerpo) o `ram.max_seconds`: entonces queda **aturdida** (un golpe entonces la despierta) y
+  vuelve al cerebro, buscando. También embiste **por su cuenta** cuando oye algo y hay un jugador en la arena (`ram.auto_cooldown_seconds` tras cada aturdimiento): las tuberías solo la molestan, esconderse tras un pilar es el juego. Lo rápida, lo cerrada que gira, lo que tarda en orientarse y lo que dura el aturdimiento son las `stages` de `maw` (una por pilar roto:
+  6,0, 6,8 y 7,6 bloques por segundo; la etapa 3 es la muerte, así que son tres). Un jugador en su camino recibe el golpe como en la fase 4. Un trozo a la vez (`pipes.at_once`):
   `pipes.respawn_seconds` después de que uno desaparezca cae otro de uno de `pipes.points` (nunca el más cercano a la criatura o al jugador, ni el
   mismo dos veces). El salto está bloqueado en la arena mientras dura la pelea: `platform.MovementRules` (un gancho del juego base) que lee
   `LivingEntityJumpMixin`, una regla de `Ch2L2Maw` en el servidor y `JUMP_PACKET` para el cliente.
-- **La muerte** (fase 6.2): el último golpe la hace cojear hasta `maw_centre` (animación `limp`: una pierna arrastrada, un brazo colgando con los nudillos casi en el suelo),
-  arrodillarse mirando a la pared del fondo con las dos manos planas en el suelo y la cabeza gacha (`dying`), y el techo cae: primero `death.bit_count` trocitos y luego grandes losas
-  (`core.MawCollapse`, `plan` con una semilla fija): la primera, de 3 x 3, cae `first_slab_delay_ticks` después a `slab_start_speed` bloques por tick, le cae encima a `crush_height`
-  y la aplasta contra el suelo (`crushed`; la ráfaga de polvo la oculta y desaparece), luego `slab_count` - 1 más durante `slab_spread_ticks`, y queda un montículo de como mucho `max_height`
-  (`collapse_blocks` es la mezcla, dentro de `collapse_radius`). Polvo, temblor (el más fuerte con la primera losa) y la cinemática (`Ch2L2GuardScenes.MAW_DEATH`, saltable) siguen el reloj de `MawDeathScene`;
-  `walk_speed`, `walk_seconds`, `crouch_seconds`, `collapse_seconds` y `after_seconds` marcan el resto de tiempos. `Ch2L2Maw.finishDeath` es el final único e idempotente
-  (fin de la escena, su salto, `skip maw`): el montículo del plan en su sitio (el mismo que deja la caída en vivo), puerta del fondo abierta, `MAW_DEAD`.
+- **Los pilares** (fase 9; `maw.pillars`, anclas `maw_pillar_1..3` en la esquina que comparten las cuatro celdas de cada columna de 2 x 2, del suelo al techo, `catacomb_brick`, puestos por el
+  mapa): una embestida que acaba contra uno (`Ch2L2Maw.pillarNear`, a menos de `hit_radius`) lo daña; `hits` de ellas (2) lo rompen: primero agrietado (otros ladrillos en
+  su mitad, polvo y guijarros cayendo de la grieta) y luego roto (sus bloques de arriba caen como bloques que caen y se destruyen al llegar al suelo; queda un muñón de escombros de dos de alto).
+  Una pared o un muñón no dañan nada (`StoneMawFight`, con tests). Cada embestida contra un pilar sacude la cámara y suena `event.ch2l2.maw_pillar_ram`, más hondo que el de la pared.
+  Un pilar roto suelta `maw.debris`: `count` trozos de techo durante `spread_ticks` a menos de `radius`, cada uno anunciado en el suelo `warn_ticks` antes (polvo, `event.ch2l2.maw_debris_warn`) y
+  que hace daño (`damage_fraction` de la vida) donde cae.
+- **La muerte y la huida** (fase 9; la cinemática en tercera persona de la fase 6.2 ya no existe, ni `MawDeathScene`): al romperse el tercer pilar el techo cae
+  sobre Stone Maw donde está, en vivo y en primera persona (`core.MawCollapse`, `plan` con una semilla fija, centrado en ella: `death.bit_count` trocitos, una losa de 3 x 3 que la aplasta (`crushed`) y
+  `slab_count` - 1 más; un montículo de como mucho `max_height` a menos de `collapse_radius`; quien está cerca sale despedido y recibe un poco de daño), la música se corta en seco, el estado pasa a
+  `MAW_ESCAPE` y se toma el checkpoint `maw_escape` (el último pilar y la celda del montículo se guardan en contadores: CONTINUAR devuelve la arena a su sitio y la huida vuelve a empezar),
+  la puerta del fondo se abre y la arena se derrumba durante `escape.seconds` (8): `core.MawEscape` planea `debris_per_second` trozos por la arena (menos a menos de `door_clear_radius` de la puerta), anunciados como los otros,
+  con `event.ch2l2.maw_escape_rumble` y temblor. Quien sale por la puerta del fondo la oye cerrarse de golpe a su espalda (`MAW_DEAD`, `Ch2L2Maw.finishDeath`, el final único e idempotente, también `skip maw`);
+  quien sigue en la arena cuando se acaba el tiempo muere. Las animaciones `limp` y `dying` del modelo ya no se usan (siguen en `tools/entity/vibration_creature.py`).
 - **La música de la pelea** (fase 6.2): la música de caza del Guardia Observador, reciclada (`music.ch2l2.guard_chase`, 256 ticks, sin costuras), desde que se cierra la puerta de la arena, repetida cada 256 ticks por `Ch2L2Maw.music` (dos veces a la vez, la segunda a medio volumen, como la del Guardia);
-  el golpe mortal la corta en seco, así que la escena de la muerte solo tiene el sonido de la piedra.
+  al romperse el último pilar se corta en seco.
 - **El reencuentro** (`Ch2L2Reunion`, `reunion` en `level.json`, `ReunionScene` en `core`): en el centro de la sala (ahí está el checkpoint
   `reunion`) el estado pasa a `REUNION`, el compañero y el trabajador B (`FactoryNpcEntity`) están en sus anclas y una cinemática en primera
   persona gira los ojos del jugador hacia quien habla (`reunion.lines`: quién, clave de lang bajo `reunion.text`, sonido opcional, segundos). Los
-  NPC hablan con las manos, escuchan y miran la puerta de vez en cuando; después los tres miran la puerta del Nivel 3 y ellos caminan hacia ella.
-  El final de la escena (o su salto) es `Ch2L2Reunion.finish`: NPC fuera y luego el final. Las líneas son del usuario (voces de ElevenLabs, `tools/sounds/ch2_l2_voices.py`, `voice.reunion_*`): cuatro por ahora (compañero, compañero,
+  NPC hablan con las manos, escuchan y miran la puerta de vez en cuando; la escena acaba tras la última línea y el jugador recupera el control mientras los dos se ponen en marcha (fase 9, `reunion.lead`): el compañero abre la puerta del Nivel 3 (`l3_door`)
+  y los guían por el pasillo (`lead_1..3`, a `lead.speed`, el paso del jugador; el segundo trabajador sigue la línea del compañero unos pasos detrás, nunca a su lado, un giro y una escalera corta), parándose a mirar atrás si el jugador queda a más de `wait_distance`; entran en el
+  ascensor (`lift_room`, `lift_coworker`, `lift_worker_b`) y miran su reja. Con el jugador en `zone_lift` la reja se cierra (`event.ch2l2.lift_gate`), tras `gate_pause_seconds` arranca el motor
+  (`event.ch2l2.lift_motor`, con temblor) y empieza el final. El salto de la escena es `Ch2L2Reunion.finish`: el mismo paseo. Las líneas son del usuario (voces de ElevenLabs, `tools/sounds/ch2_l2_voices.py`, `voice.reunion_*`): cuatro por ahora (compañero, compañero,
   trabajador B, compañero), con sus subtítulos en `tools/lang/src/chapter2`; sin líneas la escena es una corta y muda.
 - **Arranques** (entrar, una muerte, CONTINUAR, `reset maw`): todo como el estado quiere: la pelea terminada, las compuertas, los trozos fuera de
-  los bolsillos, los escombros solo desde `MAW_DEAD`. Checkpoints `maw` (antes de la arena), `reunion` y `chapter_end`.
+  los bolsillos, los escombros solo desde `MAW_DEAD`. Checkpoints `maw` (antes de la arena), `maw_escape` (lo toma el derrumbe, sin zona), `reunion` y `chapter_end` (lo toma el final, sin zona).
 
 ## Fase 7: la revisión integral
 
@@ -334,7 +343,7 @@ luego tras cada etapa).
 | `upper_gallery` | Las escaleras que suben a la estación | M a H |
 | `pumping_station` | La estación, seca; un puente roto sobre el pozo, visto a través de barrotes | H |
 | `level_exit` | La sala de la salida, tras un pasillo tranquilo | H |
-| `maw_entry`, `maw_centre`, `reunion_player`, `chapter_end` | El pasillo de entrada de la arena, el centro de la arena, el centro de la sala del reencuentro y su rincón (fase 6.1) | H |
+| `maw_entry`, `maw_centre`, `reunion_player`, `chapter_end` | El pasillo de entrada de la arena, el centro de la arena, el centro de la sala del reencuentro y el ascensor (fase 6.1, 9) | H |
 | `survival_kit`, `hunters_post`, `loot_galleries`, `loot_catacombs`, `loot_station` | De la fase 3: el mostrador del kit, el puesto de los Hunters y los tres sitios de botín, en los espacios de arriba | H, M, L |
 | `note_old_drainage`, `note_maintenance`, `note_withdrawal` | La celda propia de un tablero de notas (`kind: wall`: no es un sitio donde estar) | H, M, L |
 
@@ -392,7 +401,7 @@ las anclas, y lo que está mal se avisa (`/et reload`).
 | `/et ch2 l2 guard` | El combate del Guard (fase, aturdimientos, cada trampa: S gastada, C cargando, A armada) en la barra de acción; otra vez para apagarlo. `skip guard` ejecuta su final al instante, `reset guard` vuelve a poner la pared entera |
 | `/et ch2 l2 flood <0\|1\|2\|3>` | El agua de la inundación al instante en esa etapa (0 la vacía), sea cual sea tu estado; `skip flood` la llena toda y cierra la puerta de la estación, `reset flood` la vacía y reabre la compuerta del vestíbulo |
 | `/et ch2 l2 ending` | Reproduce el final (fundido, "CONTINUARÁ", menú principal); el nivel solo se termina si estás en el reencuentro o más allá |
-| `/et ch2 l2 maw` / `maw hit` / `maw kill` | La pelea de Stone Maw en el chat (fase, golpes que faltan, modo) / cuenta un golpe / reproduce su muerte. `skip maw` ejecuta el final de la muerte, `reset maw` devuelve la pelea a su inicio |
+| `/et ch2 l2 maw` / `maw hit` / `maw kill` / `maw pillar <n>` | La pelea de Stone Maw en el chat (fase, pilares rotos, modo) / cuenta un golpe / rompe a la vez los pilares que quedan (el derrumbe y la huida) / daña una vez el pilar n. `skip maw` ejecuta el final de la huida, `reset maw` devuelve la pelea a su inicio |
 | `/et ch2 l2 reunion` | Te pone en el punto de la sala del reencuentro y suena el reencuentro |
 | `/et ch2 l2 perf` | Lo que cuesta el nivel en tu mundo (fase 7): sus entidades por tipo (un segundo Guardia, criatura, Maw o PNJ del reencuentro sale marcado `DUPLICATES`), las celdas de agua de la inundación, las lámparas por modo, y los ms medios y peores que un tick del servidor gasta en los manejadores del nivel en los últimos 100 ticks, por manejador |
 | `/et ch2 l2 anchors` | Cada ancla y zona con sus coordenadas, marcadas las provisionales |

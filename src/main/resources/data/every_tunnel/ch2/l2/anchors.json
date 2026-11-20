@@ -55,7 +55,18 @@
   {"id":"reunion_coworker","pos":[983.5,84,1335.5],"yaw":270},
   {"id":"reunion_worker_b","pos":[983.5,84,1339.5],"yaw":270},
   {"id":"reunion_leave","pos":[982.5,84,1337.5],"yaw":90},
-  {"id":"chapter_end","pos":[985.5,84,1341.5],"yaw":90},
+  {"id":"maw_pillar_1","pos":[1000.0,87,1332.0],"yaw":0},
+  {"id":"maw_pillar_2","pos":[1007.0,87,1332.0],"yaw":0},
+  {"id":"maw_pillar_3","pos":[1003.0,87,1343.0],"yaw":0},
+  {"id":"maw_escape","pos":[1007.5,84,1337.5],"yaw":90},
+  {"id":"lead_1","pos":[965.5,84,1337.5],"yaw":90},
+  {"id":"lead_2","pos":[965.5,84,1352.5],"yaw":180},
+  {"id":"lead_3","pos":[965.5,88,1358.5],"yaw":180},
+  {"id":"lift_coworker","pos":[964.5,88,1362.5],"yaw":180},
+  {"id":"lift_worker_b","pos":[967.5,88,1362.5],"yaw":180},
+  {"id":"lift_player","pos":[965.5,88,1361.5],"yaw":180},
+  {"id":"lift_gate","pos":[965.5,89,1359.0],"yaw":0},
+  {"id":"chapter_end","pos":[966.5,88,1361.5],"yaw":180},
   {"id":"pipe_burst","pos":[1087.5,63,1377.5],"yaw":0},
   {"id":"survival_kit","pos":[1031.5,84,1292.5],"yaw":180},
   {"id":"hunters_post","pos":[1102.5,74,1288.5],"yaw":0},
@@ -116,8 +127,11 @@
   {"id":"zone_maw_arena","from":[992,83,1327],"to":[1011,90,1346]},
   {"id":"zone_maw_middle","from":[998,83,1327],"to":[1004,90,1346]},
   {"id":"zone_reunion","from":[981,83,1332],"to":[990,89,1341]},
-  {"id":"zone_chapter_end","from":[985,83,1340],"to":[986,87,1341]},
-  {"id":"level_box","from":[980,55,1282],"to":[1174,100,1386]}
+  {"id":"zone_maw_escape","from":[992,83,1327],"to":[1011,90,1346]},
+  {"id":"zone_lift","from":[964,87,1360],"to":[967,91,1363]},
+  {"id":"zone_chapter_end","from":[964,87,1360],"to":[967,91,1363]},
+  {"id":"room_lift_corridor","from":[964,83,1335],"to":[979,88,1352]},
+  {"id":"level_box","from":[963,55,1282],"to":[1174,100,1386]}
  ],
  "paths": [
 

@@ -93,7 +93,7 @@
   "reunion": "warm", "pump_room": "amber", "shaft": "amber", "vestibule": "cold", "maintenance": "cold",
   "flood_collector": "red", "pasarelas": "red", "upper_gallery": "red",
   "entrance": "white", "manhole_shaft": "white", "station": "white", "bridge_window": "white", "exit_corridor": "white", "salida": "white",
-  "maw_corridor": "white", "maw_arena": "white"
+  "maw_corridor": "white", "maw_arena": "white", "lift_corridor": "warm", "lift_stairs": "warm", "lift_room": "white"
  },
  "lamp_extras": {
   "_doc": "Phase 8: the mod's own lamps among the cage lamps, as extra lamp specs of a space (wall kind; `share` thins them by cell_hash, `offset` shifts which cells along a wall take one). emergency: lit all the time (light 5); alarm: red, off as built, the flood switches them on (map.json `alarms`); sconce: a dead wall sconce.",
@@ -177,12 +177,22 @@
    "_doc": "Phase 6.1: beyond the exit's heavy door, the way into Stone Maw's arena (4 wide like the doors).",
    "lamps": {"kind": "ceiling", "block": "tinted", "spacing": 5, "gaps": {"dark": 0, "flicker": 0, "dead": 0}}},
   {"id": "maw_arena", "decor": false, "name": "", "style": "drain", "boxes": [[-32, 47, -12, 67]], "floor": "H", "height": 7,
-   "_doc": "Stone Maw's last stand (phase 6.1): 20 x 20, bare, flat, nothing to stand on; the lamps are the only blocks in it, all under the ceiling.",
+   "_doc": "Stone Maw's last stand (phase 6.1): 20 x 20, bare, flat, nothing to stand on but the floor; the lamps are the only blocks in the air, all under the ceiling, besides the three pillars of phase 9 (2 x 2, floor to ceiling: nothing to climb).",
    "lamps": {"kind": "ceiling", "block": "tinted", "spacing": 6, "gaps": {"dark": 0, "flicker": 0, "dead": 0}}},
   {"id": "maw_pipe", "decor": false, "name": "", "style": "drain", "boxes": [[-30, 40, -26, 46]], "floor": "H", "height": 4,
    "_doc": "The pipe Stone Maw crawls out of (phase 6.1): a stub north of the arena, grated until it bursts."},
   {"id": "reunion", "decor": false, "name": "", "style": "drain", "boxes": [[-43, 52, -33, 62]], "floor": "H", "height": 6,
    "_doc": "The room where the coworker and worker B wait (phase 6.1): small and well lit, a heavy door on the far wall towards Level 3.",
+   "lamps": {"kind": "ceiling", "block": "tinted", "spacing": 4, "gaps": {"dark": 0, "flicker": 0, "dead": 0}}},
+  {"id": "lift_corridor", "decor": false, "name": "", "style": "drain", "boxes": [[-60, 55, -44, 59], [-60, 59, -56, 73]], "floor": "H", "height": 5,
+   "_doc": "Phase 9: beyond Level 3's door, the way the player follows the two workers to the service lift: 16 blocks west, a turn, 14 south (the lift is not seen from the reunion); 4 wide like the doors.",
+   "lamps": {"kind": "ceiling", "block": "tinted", "spacing": 5, "gaps": {"dark": 0, "flicker": 0.3, "dead": 0, "safe_radius": 2}}},
+  {"id": "lift_stairs", "decor": false, "name": "", "style": "drain", "boxes": [[-60, 73, -56, 79]], "floor": "H", "height": 5,
+   "ramp": {"axis": "z", "start": 73, "step": 1, "from": 20, "to": 24},
+   "_doc": "Phase 9: a short flight up (4 blocks) to the lift's landing.",
+   "lamps": {"kind": "ceiling", "block": "tinted", "spacing": 5, "gaps": {"dark": 0, "flicker": 0, "dead": 0}}},
+  {"id": "lift_room", "decor": false, "name": "", "style": "machine", "boxes": [[-60, 80, -56, 84]], "floor": 24, "height": 4,
+   "_doc": "Phase 9: the service lift's cab, 4 x 4 in steel; its gate (lift_gate) shuts when the player is in.",
    "lamps": {"kind": "ceiling", "block": "tinted", "spacing": 4, "gaps": {"dark": 0, "flicker": 0, "dead": 0}}}
  ],
 
@@ -241,7 +251,13 @@
    "states": {"grate": "minecraft:iron_bars[east=true,west=true,north=false,south=false,waterlogged=false]", "open": "minecraft:air"}, "built": "grate"},
   {"id": "maw_far", "wall": "x", "line": -33, "span": [55, 58], "y": [20, 23], "kind": "gate",
    "_doc": "The arena's far door: shut until Stone Maw dies, then it opens on the reunion room",
-   "states": {"shut": "every_tunnel:sluice_gate[facing=east]", "open": "minecraft:air"}, "built": "shut"}
+   "states": {"shut": "every_tunnel:sluice_gate[facing=east]", "open": "minecraft:air"}, "built": "shut"},
+  {"id": "l3_door", "wall": "x", "line": -44, "span": [55, 58], "y": [20, 23], "kind": "gate",
+   "_doc": "Level 3's door (phase 9), on the reunion room's west wall: shut as built; the coworker opens it when the three set off for the lift",
+   "states": {"shut": "every_tunnel:sluice_gate[facing=east]", "open": "minecraft:air"}, "built": "shut"},
+  {"id": "lift_gate", "wall": "z", "line": 79, "span": [-60, -57], "y": [24, 27], "kind": "gate",
+   "_doc": "The lift's gate (phase 9): open as built; it shuts when the player is in the cab",
+   "states": {"open": "minecraft:air", "shut": "minecraft:iron_bars[east=true,west=true,north=false,south=false,waterlogged=false]"}, "built": "open"}
  ],
 
  "features": [
@@ -285,8 +301,10 @@
   {"type": "prop", "space": "maintenance", "at": [111, 96], "dy": 1, "block": "every_tunnel:trap_breaker[facing=north,state=spent]"},
   {"type": "prop", "space": "maintenance", "at": [135, 96], "dy": 1, "block": "every_tunnel:trap_breaker[facing=north,state=spent]"},
 
-  {"type": "fill", "space": "reunion", "box": [-43, 55, -42, 59], "y": [20, 23], "block": "every_tunnel:sluice_gate[facing=east]",
-   "_doc": "Level 3's door (phase 6.1), on the reunion room's far wall: always shut; the three walk towards it and the level ends"},
+  {"type": "fill", "space": "maw_arena", "box": [-25, 51, -23, 53], "y": [20, 26], "block": "every_tunnel:catacomb_brick",
+   "_doc": "Phase 9: pillar 1 of 3 (2 x 2, floor to ceiling): the fight's targets. The platform cracks and breaks them (Ch2L2Maw); their centres are the anchors maw_pillar_1..3"},
+  {"type": "fill", "space": "maw_arena", "box": [-18, 51, -16, 53], "y": [20, 26], "block": "every_tunnel:catacomb_brick"},
+  {"type": "fill", "space": "maw_arena", "box": [-22, 62, -20, 64], "y": [20, 26], "block": "every_tunnel:catacomb_brick"},
 
   {"type": "water", "space": "shaft", "below": -6},
   {"type": "water", "space": "flood_collector", "below": -6},
@@ -451,7 +469,18 @@
   {"id": "reunion_coworker", "pos": [-40.5, 20, 55.5], "yaw": 270, "_doc": "The coworker's place"},
   {"id": "reunion_worker_b", "pos": [-40.5, 20, 59.5], "yaw": 270, "_doc": "Worker B's place"},
   {"id": "reunion_leave", "pos": [-41.5, 20, 57.5], "yaw": 90, "_doc": "Where the three walk, towards Level 3's door"},
-  {"id": "chapter_end", "pos": [-38.5, 20, 61.5], "yaw": 90, "_doc": "CONTINUE puts the player here, in the reunion room, after the credits card (off the way from the door to the player's spot: nobody takes this checkpoint by walking)"},
+  {"id": "maw_pillar_1", "pos": [-24.0, 23, 52.0], "kind": "wall", "_doc": "Phase 9: the centre of pillar 1 (the corner shared by its four cells)"},
+  {"id": "maw_pillar_2", "pos": [-17.0, 23, 52.0], "kind": "wall"},
+  {"id": "maw_pillar_3", "pos": [-21.0, 23, 63.0], "kind": "wall"},
+  {"id": "maw_escape", "pos": [-16.5, 20, 57.5], "yaw": 90, "_doc": "Phase 9: the checkpoint of the escape (CONTINUE: the ceiling already falling); yaw 90 faces the far door"},
+  {"id": "lead_1", "pos": [-58.5, 20, 57.5], "yaw": 90, "_doc": "Phase 9: the workers' waypoints to the lift, one at each turn (the corridor's corner, the foot of the flight, its top)"},
+  {"id": "lead_2", "pos": [-58.5, 20, 72.5], "yaw": 180},
+  {"id": "lead_3", "pos": [-58.5, 24, 78.5], "yaw": 180},
+  {"id": "lift_coworker", "pos": [-59.5, 24, 82.5], "yaw": 180, "_doc": "The coworker's place in the cab (facing the gate)"},
+  {"id": "lift_worker_b", "pos": [-56.5, 24, 82.5], "yaw": 180, "_doc": "Worker B's place in the cab"},
+  {"id": "lift_player", "pos": [-58.5, 24, 81.5], "yaw": 180, "_doc": "Where the player stands in the cab"},
+  {"id": "lift_gate", "pos": [-58.5, 25, 79.0], "kind": "wall", "_doc": "The lift's gate (its sound plays here)"},
+  {"id": "chapter_end", "pos": [-57.5, 24, 81.5], "yaw": 180, "_doc": "CONTINUE puts the player here, in the lift, after the credits card (phase 9: it was in the reunion room)"},
   {"id": "pipe_burst", "pos": [63.5, -1, 97.5], "yaw": 0, "kind": "wall", "_doc": "The cell of the pipe that bursts (its open end faces north)"},
   {"id": "survival_kit", "pos": [7.5, 20, 12.5], "yaw": 180, "_doc": "In front of the kit's counter; level.json's loot is laid out from its block"},
   {"id": "hunters_post", "pos": [78.5, 10, 8.5], "yaw": 0, "_doc": "Where the galleries' group of Hunters wanders"},
@@ -513,13 +542,16 @@
   {"id": "zone_maw_arena", "spaces": ["maw_arena"], "_doc": "Stone Maw's arena; the jump is blocked while the player is in it"},
   {"id": "zone_maw_middle", "box": [-26, 47, -19, 67], "y": [20, 26], "_doc": "The middle third of the arena (inside zone_maw_arena): reaching it shuts the door and lets Stone Maw out"},
   {"id": "zone_reunion", "spaces": ["reunion"]},
-  {"id": "zone_chapter_end", "box": [-39, 60, -37, 62], "y": [20, 23], "_doc": "The corner of the reunion room the saved game of the finished chapter stands in (inside zone_reunion)"},
+  {"id": "zone_maw_escape", "spaces": ["maw_arena"], "_doc": "Phase 9: the arena while it caves in (whoever is in it when the time is up dies)"},
+  {"id": "zone_lift", "spaces": ["lift_room"], "_doc": "Phase 9: inside the lift's cab: the gate shuts when the player is in"},
+  {"id": "zone_chapter_end", "spaces": ["lift_room"], "_doc": "The lift: where the saved game of the finished chapter stands (phase 9: it was the reunion room's corner)"},
+  {"id": "room_lift_corridor", "spaces": ["lift_corridor"]},
   {"id": "level_box", "all": true}
  ],
 
  "route": ["sealed_entry", "collector_junction", "hunter_galleries", "pump_overlook", "vibration_chamber", "lower_catacombs",
            "observer_wall", "observer_chamber", "return_gallery", "observer_wall", "flood_collector", "rising_walkways",
-           "upper_gallery", "pumping_station", "level_exit", "maw_entry", "maw_centre", "reunion_player", "chapter_end"],
+           "upper_gallery", "pumping_station", "level_exit", "maw_entry", "maw_centre", "maw_escape", "reunion_player", "lead_1", "lead_2", "lead_3", "lift_player", "chapter_end"],
 
  "checks": {
   "banned": ["minecraft:stone", "minecraft:cobblestone", "minecraft:mossy_", "minecraft:andesite", "minecraft:bricks", "minecraft:deepslate_bricks",
@@ -528,7 +560,7 @@
   "decor": {"door_clear": 2},
   "light": {"route_min": 9, "side_min": 5, "side": ["side_gallery_room", "side_service_crypt"], "no_fill": [], "scripted": ["vestibule"], "fill_level": 14,
             "_doc": "The floor light (flickering and dead lamps counted off) on every cell a player can stand on in a lit space: route_min, or side_min in the optional rooms. Invisible minecraft:light blocks fill what the lamps leave under target (the flood waterlogs them, they stay lit); no_fill lists spaces left alone, `scripted` the spaces whose lamps the level switches (the vestibule): their fill blocks are listed in map.json `dim` and the level dims them with the lamps."},
-  "route_gates": {"exit_hatch": "open", "maw_far": "open"},
+  "route_gates": {"exit_hatch": "open", "maw_far": "open", "l3_door": "open"},
   "no_climb": {"space": "maw_arena", "from": "maw_entry"},
   "_doc": "cuts: zones every way to the exit must cross (a way round one would skip an event). locked: with the gate down (grate), these anchors cannot be reached from the entry. pump: the shortest way across the pump room, in blocks, at least min. The zones of the route's places overlap none of each other (the mod tells where the player is by them), but the pairs in nested, one inside the other.",
   "nested": [["zone_pump_overlook", "zone_vibration_chamber"], ["zone_exit_door", "zone_level_exit"], ["zone_maw_arena", "zone_maw_middle"]],

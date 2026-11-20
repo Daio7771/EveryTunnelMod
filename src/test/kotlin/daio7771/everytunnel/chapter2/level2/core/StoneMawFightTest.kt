@@ -7,6 +7,7 @@ import kotlin.random.Random
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -22,11 +23,12 @@ class StoneMawFightTest {
     private var now = 100L
     private var position = home
     private var wall = false
+    private var pillar: Int? = null
 
     private fun player(x: Double, z: Double = 0.0) = StoneMawFight.Target(id, Position(x, 0.0, z), Math.hypot(x - position.x, z - position.z))
 
     private fun tick(player: StoneMawFight.Target? = null, vibrations: List<VibrationCreatureBrain.Vibration> = emptyList()): StoneMawFight.Decision {
-        val d = fight.tick(StoneMawFight.Senses(now, position, home, centre, vibrations, player, wall = wall), maw, creature)
+        val d = fight.tick(StoneMawFight.Senses(now, position, home, centre, vibrations, player, wall = wall, pillar = pillar), maw, creature)
         now++
         return d
     }
@@ -44,22 +46,39 @@ class StoneMawFightTest {
         return d
     }
 
+    /** One ram that ends against [index] (a pillar), from the hit to the stop; returns the decision of the stop. */
+    private fun ramInto(index: Int?, p: StoneMawFight.Target = player(-8.0)): StoneMawFight.Decision {
+        hitAndRam(p)
+        repeat(10) { tick(p) }
+        wall = true
+        pillar = index
+        val d = tick(p)
+        wall = false
+        pillar = null
+        return d
+    }
+
+    private fun waitOutStun() {
+        var guard = 0
+        while (fight.mode == Mode.STUNNED && guard++ < 400) tick()
+    }
+
     @Test
-    fun `at rest it does nothing, with five hits to go`() {
-        assertEquals(5, fight.hitsLeft)
+    fun `at rest it does nothing, with every pillar whole`() {
+        assertEquals(0, fight.broken)
         val d = tick()
         assertEquals(Mode.BRAIN, d.mode)
         assertEquals(VibrationCreatureBrain.State.REST, d.state)
     }
 
     @Test
-    fun `a hit makes it orient on the player then ram in a straight line at the ram speed`() {
+    fun `a hit makes it orient on the player then ram in a straight line at the first stage's speed`() {
         val d = hitAndRam(player(-8.0, 3.0))
-        assertEquals(4, fight.hitsLeft)
+        assertEquals(1, fight.hits)
         assertEquals(Mode.RAM, d.mode)
         assertTrue(d.oriented)
         assertTrue(d.straight)
-        assertEquals(maw.ramSpeed, d.speed)
+        assertEquals(maw.stage(0).ramSpeed, d.speed)
         val (hx, hz) = d.heading!!
         assertEquals(1.0, Math.hypot(hx, hz), 1e-9)
         assertTrue(hx < 0.0 && hz > 0.0, "it heads for where the player is: $hx, $hz")
@@ -73,26 +92,27 @@ class StoneMawFightTest {
         var heading = Pair(-1.0, 0.0)
         repeat(20) { heading = fight.tick(sample.copy(now = now++), maw, creature).heading ?: heading }
         val degrees = Math.toDegrees(Math.atan2(heading.second, heading.first)) - 180.0
-        assertTrue(Math.abs(degrees) <= maw.ramTurnDegreesPerSecond + 1.0, "turned $degrees")
+        assertTrue(Math.abs(degrees) <= maw.stage(0).turnDegreesPerSecond + 1.0, "turned $degrees")
         assertTrue(Math.abs(degrees) > 5.0, "it should turn some: $degrees")
     }
 
     @Test
-    fun `it rams on until a wall, then is stunned for the stun seconds and goes back to the brain searching`() {
+    fun `a wall stuns it for the stun seconds and damages nothing, then it goes back to the brain searching`() {
         hitAndRam(player(-8.0))
         repeat(30) { assertEquals(Mode.RAM, tick(player(-8.0)).mode) }
         wall = true
         val d = tick(player(-8.0))
         assertEquals(Mode.STUNNED, d.mode)
         assertTrue(d.rammed)
+        assertNull(d.pillarHit)
+        assertEquals(0, (0..2).sumOf { fight.pillarDamage(it) })
         wall = false
-        repeat(ticks(maw.stunSeconds) - 2) { assertEquals(Mode.STUNNED, tick().mode) }
+        repeat(ticks(maw.stage(0).stunSeconds) - 2) { assertEquals(Mode.STUNNED, tick().mode) }
         var after = tick()
         var guard = 0
         while (after.mode == Mode.STUNNED && guard++ < 10) after = tick()
         assertEquals(Mode.BRAIN, after.mode)
         assertEquals(VibrationCreatureBrain.State.SEARCH, fight.brainState)
-        assertEquals(4, fight.hitsLeft)
     }
 
     @Test
@@ -126,47 +146,91 @@ class StoneMawFightTest {
     }
 
     @Test
-    fun `a hit while stunned counts and has it come for the player again`() {
-        hitAndRam(player(-8.0))
-        repeat(10) { tick(player(-8.0)) }
-        wall = true
-        tick(player(-8.0))
-        wall = false
+    fun `a hit while stunned has it come for the player again, and a hit never kills it`() {
+        ramInto(null)
         assertEquals(Mode.STUNNED, fight.mode)
         assertTrue(fight.hit())
-        assertEquals(3, fight.hitsLeft)
         assertEquals(Mode.RAM_ORIENT, tick(player(-8.0)).mode)
+        repeat(40) {
+            assertTrue(fight.hit())
+            tick(player(-8.0))
+        }
+        assertNotEquals(Mode.DEAD, fight.mode)
+        assertEquals(0, fight.broken)
     }
 
     @Test
-    fun `the last hit has it walk to the centre, crouch, and bring the ceiling down once, and no more hits count`() {
-        repeat(4) { assertTrue(fight.hit()); tick(); tick() }
-        assertTrue(fight.hit())
-        assertEquals(0, fight.hitsLeft)
-        var d = tick()
-        assertEquals(Mode.WALK_TO_CENTRE, d.mode)
-        assertEquals(centre, d.target)
-        assertEquals(maw.deathWalkSpeed, d.speed)
-        assertFalse(fight.hit())
-        position = Position(9.5, 0.0, 0.0)
-        d = tick()
-        assertEquals(Mode.CROUCH, d.mode)
+    fun `a ram into a pillar cracks it, the second breaks it, and the stage goes up`() {
+        val first = ramInto(1)
+        assertEquals(Mode.STUNNED, first.mode)
+        assertEquals(1, first.pillarHit)
+        assertFalse(first.pillarBroken)
+        assertFalse(first.collapse)
+        assertEquals(1, fight.pillarDamage(1))
+        assertEquals(0, fight.broken)
+        waitOutStun()
+        val second = ramInto(1)
+        assertEquals(1, second.pillarHit)
+        assertTrue(second.pillarBroken)
+        assertFalse(second.collapse)
+        assertTrue(fight.isBroken(1))
+        assertEquals(1, fight.broken)
+        // Stage 1: faster and sharper, and a shorter stun.
+        waitOutStun()
+        val ram = hitAndRam(player(-8.0))
+        assertEquals(maw.stage(1).ramSpeed, ram.speed)
+        assertTrue(maw.stage(1).ramSpeed > maw.stage(0).ramSpeed)
+        assertTrue(maw.stage(1).stunSeconds < maw.stage(0).stunSeconds)
+    }
+
+    @Test
+    fun `a ram into the stump of a broken pillar damages nothing, like a wall`() {
+        repeat(maw.pillarHits) { ramInto(0); waitOutStun() }
+        assertTrue(fight.isBroken(0))
+        val d = ramInto(0)
+        assertTrue(d.rammed)
+        assertNull(d.pillarHit)
+        assertEquals(maw.pillarHits, fight.pillarDamage(0))
+        assertEquals(1, fight.broken)
+    }
+
+    @Test
+    fun `only the third pillar to break brings the ceiling down, once, and then it is dead and nothing counts`() {
         var collapses = 0
-        repeat(ticks(maw.crouchSeconds) + 5) { if (tick().collapse) collapses++ }
+        for (pillarIndex in listOf(2, 0, 1)) {
+            repeat(maw.pillarHits) {
+                val d = ramInto(pillarIndex)
+                if (d.collapse) collapses++
+                waitOutStun()
+            }
+        }
         assertEquals(1, collapses)
+        assertEquals(3, fight.broken)
         assertEquals(Mode.DEAD, fight.mode)
         assertFalse(fight.hit())
-        assertFalse(tick().collapse)
+        assertFalse(tick(player(-8.0)).collapse)
+        assertNull(fight.damagePillar(0))
     }
 
     @Test
-    fun `it gives up walking to the centre after the walk's longest time`() {
-        fight.kill()
-        var d = tick()
-        var n = 0
-        while (d.mode == Mode.WALK_TO_CENTRE && n++ < 1000) d = tick()
-        assertEquals(Mode.CROUCH, d.mode)
-        assertTrue(Math.abs(n - ticks(maw.deathWalkSeconds)) <= 2, "walked $n ticks")
+    fun `a ram that ends against nothing known damages no pillar even if it was told one`() {
+        hitAndRam(player(-8.0))
+        repeat(10) { tick(player(-8.0)) }
+        pillar = 2
+        val d = tick(player(-8.0))
+        assertEquals(Mode.RAM, d.mode)
+        assertEquals(0, fight.pillarDamage(2))
+    }
+
+    @Test
+    fun `breakAll breaks what stands at once and ends in the collapse's outcome`() {
+        assertTrue(fight.damagePillar(1) != null)
+        val last = fight.breakAll()
+        assertNotNull(last)
+        assertTrue(last.collapse)
+        assertEquals(3, fight.broken)
+        assertEquals(Mode.DEAD, fight.mode)
+        assertNull(fight.breakAll())
     }
 
     @Test
@@ -176,14 +240,48 @@ class StoneMawFightTest {
         val d = tick(vibrations = listOf(clang.copy(tick = now - 1)))
         assertEquals(VibrationCreatureBrain.State.ORIENT, d.state)
         assertEquals(Position(5.0, 0.0, 5.0), d.target)
-        assertEquals(5, fight.hitsLeft)
+        assertEquals(0, fight.hits)
     }
 
     @Test
-    fun `reset puts it back at five hits and at rest`() {
-        hitAndRam(player(-8.0))
+    fun `it charges on its own at a noise when a player is in the arena, counts no hit, and waits its cooldown after a stun`() {
         fight.reset(maw)
-        assertEquals(5, fight.hitsLeft)
+        run(maw.autoRamCooldownSeconds)
+        val clang = VibrationCreatureBrain.Vibration(Position(5.0, 0.0, 5.0), now, VibrationCreatureBrain.Source.PIPE, VibrationCreatureBrain.Kind.LOUD)
+        tick(player(-8.0), listOf(clang))
+        var d = tick(player(-8.0), listOf(clang.copy(tick = now - 1)))
+        var guard = 0
+        while (d.mode == Mode.BRAIN && guard++ < 20) d = tick(player(-8.0), listOf(clang.copy(tick = now - 1)))
+        assertEquals(Mode.RAM_ORIENT, d.mode)
+        assertEquals(0, fight.hits)
+        // Ram into a wall, stun, and the next noise within the cooldown does not send it again.
+        var n = 0
+        while (fight.mode != Mode.RAM && n++ < 200) tick(player(-8.0))
+        repeat(10) { tick(player(-8.0)) }
+        wall = true
+        tick(player(-8.0))
+        wall = false
+        waitOutStun()
+        val again = clang.copy(tick = now)
+        val after = tick(player(-8.0), listOf(again))
+        assertEquals(Mode.BRAIN, after.mode)
+    }
+
+    @Test
+    fun `without a player it never charges on its own`() {
+        fight.reset(maw)
+        run(maw.autoRamCooldownSeconds)
+        val clang = VibrationCreatureBrain.Vibration(Position(5.0, 0.0, 5.0), now, VibrationCreatureBrain.Source.PIPE, VibrationCreatureBrain.Kind.LOUD)
+        tick()
+        repeat(30) { assertEquals(Mode.BRAIN, tick(vibrations = listOf(clang.copy(tick = now - 1))).mode) }
+    }
+
+    @Test
+    fun `reset puts every pillar whole and it at rest`() {
+        ramInto(0)
+        fight.reset(maw)
+        assertEquals(0, fight.broken)
+        assertEquals(0, fight.pillarDamage(0))
         assertEquals(Mode.BRAIN, fight.mode)
         assertNotNull(tick())
         assertEquals(VibrationCreatureBrain.State.REST, fight.brainState)

@@ -3,7 +3,6 @@ package daio7771.everytunnel.chapter2.level2.platform
 import daio7771.everytunnel.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Event
 import daio7771.everytunnel.chapter2.level2.core.GuardIntro
-import daio7771.everytunnel.chapter2.level2.core.MawDeathScene
 import daio7771.everytunnel.core.cutscene.Cutscene
 import daio7771.everytunnel.core.cutscene.Local
 import daio7771.everytunnel.core.cutscene.Look
@@ -185,20 +184,9 @@ object Ch2L2GuardScenes {
 
     val DEATH = Ch2L2GuardScene("death", ::deathTimeline, onLeave = { server, player -> Ch2L2Guard.finish(server, player) }) { server, player -> Ch2L2Guard.finish(server, player) }
 
-    /** Stone Maw's death (phase 6.1): third person, on the clock of [MawDeathScene]; its end, played or skipped, is [Ch2L2Maw.finishDeath]. */
-    val MAW_DEATH = Ch2L2GuardScene(
-        "maw_death", { MawDeathScene.timeline(Ch2L2DataLoader.data.level.maw) },
-        // Leaving in the middle of it: Stone Maw is dead all the same, and CONTINUE stands in the reunion room, not at the arena's door.
-        onLeave = { server, player ->
-            Ch2L2Maw.finishDeath(server)
-            Ch2L2.takeCheckpointBefore(player, Ch2L2Event.REUNION)
-        },
-    ) { server, _ -> Ch2L2Maw.finishDeath(server) }
-
     fun register() {
         INTRO.register()
         DEATH.register()
-        MAW_DEATH.register()
     }
 
     private fun ticks(seconds: Double) = Math.round(seconds * 20.0).toInt()

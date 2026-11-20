@@ -45,12 +45,13 @@ player on to its state, never back:
 | `FLOOD_1` to `FLOOD_3` | The collector, the walkways, the gallery up: the flood's stages (phase 6) | `zone_flood_collector`, `zone_rising_walkways`, `zone_upper_gallery` |
 | `STATION` | The pumping station, dry | `zone_pumping_station` |
 | `MAW` | Stone Maw's arena beyond the exit door (phase 6.1) | `zone_maw_middle` |
-| `MAW_DEAD` | Stone Maw is dead, the far door open | its death (or `skip maw`) |
-| `REUNION` | The reunion with the coworker and worker B is playing | the middle of the reunion room |
-| `DONE` | The reunion is over: the card, then the menu | the reunion's end |
+| `MAW_ESCAPE` | The last pillar is down and Stone Maw crushed: the arena caves in (phase 9) | the third pillar breaking |
+| `MAW_DEAD` | The far door slammed behind the player: the way to the reunion room | leaving the arena by the far door (or `skip maw`) |
+| `REUNION` | The reunion with the coworker and worker B is playing, then the walk to the lift | the middle of the reunion room |
+| `DONE` | The gate shut and the motor ran: the card, then the menu | the lift's end |
 
 The six **encounters** (`Ch2L2Event`) are runs of states: `hunters` (`GALLERIES`), `creature` (`PUMP_ROOM`), `guard` (`GUARD_APPEARS` to
-`GUARD_FIGHT`), `flood` (`FLOOD_1` to `FLOOD_3`), `maw` (`MAW`) and `reunion` (`REUNION`). The flood's stage is the state's (0 before it, 3 from the third on). Each later phase
+`GUARD_FIGHT`), `flood` (`FLOOD_1` to `FLOOD_3`), `maw` (`MAW` to `MAW_ESCAPE`) and `reunion` (`REUNION`). The flood's stage is the state's (0 before it, 3 from the third on). Each later phase
 hangs its encounter on the states: `Ch2L2.onStateChange` (a state left for another, by playing or by command) and `Ch2L2.onStart` (the
 level started at a state, by arriving, a death, CONTINUE or `reset`: the world as that state wants it, whatever was there).
 
@@ -152,10 +153,10 @@ nothing lethal but vanilla drowning; the route always stays over each stage (the
   gates as they go. `/et ch2 l2 flood <0|1|2|3>` sets the water at once for testing.
 - **The exit door** is the gate `exit_hatch` (shut as built, on the exit room's west wall): from `STATION` on, walking into `zone_exit_door`
   (nested in `zone_level_exit`) plays `event.ch2l2.exit_door` and opens it for good (`Ch2L2Maw`, `maw.exit_door`); the corridor beyond leads to the arena.
-- **The ending** (`Ch2L2Ending`, `ending` in `level.json`) is no longer at the door: it starts when the reunion's scene ends (below). The client
+- **The ending** (`Ch2L2Ending`, `ending` in `level.json`) is no longer at the door: it starts in the lift (below). The client
   (`Ch2L2EndingOverlay`) fades to black over `fade_seconds`, shows "TO BE CONTINUED" (`every_tunnel.ch2.l2.ending.continued`) for
   `card_seconds` and leaves for the main menu. The first time it also sets `DONE` and saves the `chapter_end` checkpoint (anchor `chapter_end`,
-  in the reunion room): CONTINUE stands there with the whole flood in place. `/et ch2 l2 ending` plays it for testing.
+  in the lift, phase 9): CONTINUE stands there with the whole flood in place. `/et ch2 l2 ending` plays it for testing.
 
 The generator reports the quiet walk from just inside the station's door (`station_door_in`) to the exit's door: 52 blocks, about 12 s (phase 7: the
 exit corridor is a dog-leg, west, south, west, north, west; both doors stayed where they were), and `checks.py` fails under 50.
@@ -168,34 +169,43 @@ stub Stone Maw comes out of, grated by the gate `maw_pipe_mouth`) and `reunion` 
 `maw_entry` (open as built, shuts behind the player) and `maw_far` (shut until the death) join them. `checks.route_gates` opens `exit_hatch` and
 `maw_far` for the route's walk.
 
-- **The fight** (`Ch2L2Maw` in `platform`, `maw` in `level.json`; the rules are `StoneMawFight`, `PipeSupply`, `MawDeathScene` in `core`). Reaching
+- **The fight** (`Ch2L2Maw` in `platform`, `maw` in `level.json`; the rules are `StoneMawFight`, `PipeSupply`, `MawCollapse`, `MawEscape` in `core`). Reaching
   `zone_maw_middle` sets `MAW`: the door shuts, the grate is torn off, Stone Maw (the phase 4 `VibrationCreatureEntity` in fight mode,
   `inFight`; the pump's code leaves it alone) crawls out to `maw_home`, the first piece of pipe falls in front of the player. In its rest, stalk,
   charge and blow it is phase 4's brain (fed by the player's steps in the arena and by pipes landing, loud). A piece (`pipe_piece`, picked up by
-  walking over it) is thrown with a right click (`ThrownPipeEntity`, `maw.throw`): on Stone Maw it is a **hit** (5 in all), on anything else it
-  breaks and clangs where it lands (it goes to the noise). A hit makes it orient on the player (`ram.orient_seconds`) and **ram in a straight line**
-  (`ram.speed`, turning at most `ram.turn_degrees_per_second`) until a wall (the body's `horizontalCollision`) or `ram.max_seconds`: then it is
-  **stunned** `stun_seconds` (a hit then counts and ends it), and goes back to the brain searching. A player on its way is struck as in phase 4.
+  walking over it) is thrown with a right click (`ThrownPipeEntity`, `maw.throw`): on Stone Maw it is a **hit** (it never kills), on anything else it
+  breaks and clangs where it lands (it goes to the noise). A hit makes it orient on the player and **ram in a straight line**
+  until something solid (the body's `horizontalCollision`) or `ram.max_seconds`: then it is **stunned** (a hit then ends it), and goes back to the
+  brain searching. It also charges **on its own** when it hears something and a player is in the arena (`ram.auto_cooldown_seconds` after each stun): the pipes only annoy it, hiding behind a pillar is the game. How fast, how sharp, how long it orients and how long it is stunned are the `stages` of `maw` (one per pillar broken: 6.0, 6.8, 7.6
+  blocks a second; the stage 3 is the death, so there are three). A player on its way is struck as in phase 4.
   One piece at a time (`pipes.at_once`): `pipes.respawn_seconds` after one is gone another falls from one of `pipes.points` (never the one nearest the
   creature or the player, nor twice the same). The jump is blocked in the arena while the fight lasts: `platform.MovementRules` (a base hook) read by
   `LivingEntityJumpMixin`, a rule of `Ch2L2Maw` on the server and `JUMP_PACKET` for the client.
-- **The death** (phase 6.2): the last hit has it limp to `maw_centre` (animation `limp`: a dragged leg, an arm hanging with its knuckles near the floor),
-  kneel facing the far wall with both hands flat on the floor and its head bowed (`dying`), and the ceiling comes down: first `death.bit_count` small bits, then big slabs
-  (`core.MawCollapse`, `plan` from a fixed seed): the first, 3 x 3, falls `first_slab_delay_ticks` later at `slab_start_speed` blocks a tick, lands on it at `crush_height`
-  and slams it flat (`crushed`; the burst of dust hides it and it is gone), then `slab_count` - 1 more over `slab_spread_ticks`, leaving a mound of at most `max_height`
-  (`collapse_blocks` is the mix, within `collapse_radius`). Dust, shake (hardest at the first slab) and the cinematic (`Ch2L2GuardScenes.MAW_DEATH`, skippable) follow `MawDeathScene`'s clock;
-  `walk_speed`, `walk_seconds`, `crouch_seconds`, `collapse_seconds` and `after_seconds` time the rest. `Ch2L2Maw.finishDeath` is the one
-  idempotent end (the scene's end, its skip, `skip maw`): the plan's mound in place (the same a live fall leaves), far door open, `MAW_DEAD`.
+- **The pillars** (phase 9; `maw.pillars`, anchors `maw_pillar_1..3` at the corner shared by each 2 x 2 column, floor to ceiling, `catacomb_brick`, built by the
+  map): a ram that ends against one (`Ch2L2Maw.pillarNear`, within `hit_radius`) damages it; `hits` of them (2) break it: first cracked (other bricks over its middle,
+  dust and pebbles falling at the crack), then broken (its upper blocks fall as `destroyedOnLanding` falling blocks, a stump of rubble two high stays). A wall or a
+  stump damages nothing (`StoneMawFight`, tested). Each ram into a pillar shakes the camera and plays `event.ch2l2.maw_pillar_ram`, deeper than the wall's.
+  A broken pillar drops `maw.debris`: `count` pieces of the ceiling over `spread_ticks` within `radius`, each announced on the floor `warn_ticks` before (dust, `event.ch2l2.maw_debris_warn`) and
+  hurting for `damage_fraction` of the player's health where it lands.
+- **The death and the escape** (phase 9; the third-person cinematic of phase 6.2 is gone, and with it `MawDeathScene`): when the third pillar breaks the ceiling comes
+  down on Stone Maw where it stands, live and in first person (`core.MawCollapse`, `plan` from a fixed seed, centred on it: `death.bit_count` small bits, then a 3 x 3 slab that crushes it (`crushed`) and
+  `slab_count` - 1 more; a mound of at most `max_height` within `collapse_radius`; players near it are thrown clear and hurt a little), the music is cut dry, the state goes to
+  `MAW_ESCAPE` and the `maw_escape` checkpoint is taken (the last pillar and the mound's cell are saved in counters: CONTINUE puts the arena back and the escape begins again),
+  the far door opens and the arena caves in for `escape.seconds` (8): `core.MawEscape` plans `debris_per_second` pieces over the arena (fewer within `door_clear_radius` of the door), announced as the others,
+  with `event.ch2l2.maw_escape_rumble` and shaking. Out through the far door and it slams behind the player (`MAW_DEAD`, `Ch2L2Maw.finishDeath`, the one idempotent end, also `skip maw`);
+  still in the arena when the time is up and they die. The animations `limp` and `dying` of the model are no longer used (they stay in `tools/entity/vibration_creature.py`).
 - **The fight's music** (phase 6.2): the Observant Guard's hunt music, recycled (`music.ch2l2.guard_chase`, 256 ticks, seamless), played from the arena's door shutting, again every 256 ticks by `Ch2L2Maw.music` (twice at once, the second at half volume, like the Guard's);
-  the killing hit cuts it dry, so the death scene has only the stone's sound.
+  the last pillar breaking cuts it dry.
 - **The reunion** (`Ch2L2Reunion`, `reunion` in `level.json`, `ReunionScene` in `core`): at the middle of the room (the `reunion` checkpoint stands
   there) the state goes to `REUNION`, the coworker and worker B (`FactoryNpcEntity`) stand at their anchors and a first-person cinematic turns the
   player's eyes to whoever speaks (`reunion.lines`: who, lang key under `reunion.text`, optional sound, seconds). The NPCs talk with their hands,
-  listen, glance at the door now and then; afterwards the three look at Level 3's door and they walk towards it. The scene's end (or skip) is
-  `Ch2L2Reunion.finish`: NPCs gone, then the ending. The lines are the user's (ElevenLabs voices, `tools/sounds/ch2_l2_voices.py`, `voice.reunion_*`): four so far (coworker, coworker, worker B,
+  listen, glance at the door now and then; the scene ends after the last line and the player has control again while the two set off (phase 9, `reunion.lead`): the coworker opens Level 3's door (`l3_door`)
+  and they lead along the corridor (`lead_1..3`, at `lead.speed`, the player's own walking pace; the second worker walks the coworker's line a few steps behind, never beside them, a turn and a short flight up), stopping to look back when the player is more than `wait_distance` behind; they go into the
+  lift (`lift_room`, `lift_coworker`, `lift_worker_b`) and face its gate. When the player is in `zone_lift` the gate shuts (`event.ch2l2.lift_gate`), after `gate_pause_seconds` the motor runs
+  (`event.ch2l2.lift_motor`, shaking) and the ending begins. The scene's skip is `Ch2L2Reunion.finish`: the same lead. The lines are the user's (ElevenLabs voices, `tools/sounds/ch2_l2_voices.py`, `voice.reunion_*`): four so far (coworker, coworker, worker B,
   coworker), their subtitles in `tools/lang/src/chapter2`; with no lines the scene is a short silent one.
 - **Starts** (entering, a death, CONTINUE, `reset maw`): everything as the state wants it: the fight over, the gates, the pieces out of the pockets,
-  the rubble only from `MAW_DEAD`. Checkpoints `maw` (before the arena), `reunion` and `chapter_end`.
+  the rubble only from `MAW_DEAD`. Checkpoints `maw` (before the arena), `maw_escape` (taken by the collapse, no zone), `reunion` and `chapter_end` (taken by the ending, no zone).
 
 ## Phase 7: the integral review
 
@@ -320,7 +330,7 @@ after each stage).
 | `upper_gallery` | The stairs up to the station | M to H |
 | `pumping_station` | The station, dry; a broken bridge seen through bars over the shaft | H |
 | `level_exit` | The exit room, past a quiet corridor | H |
-| `maw_entry`, `maw_centre`, `reunion_player`, `chapter_end` | The arena's entry corridor, the arena's middle, the reunion room's middle and its corner (phase 6.1) | H |
+| `maw_entry`, `maw_centre`, `reunion_player`, `chapter_end` | The arena's entry corridor, the arena's middle, the reunion room's middle and the lift (phase 6.1, 9) | H |
 | `survival_kit`, `hunters_post`, `loot_galleries`, `loot_catacombs`, `loot_station` | Phase 3's: the kit's counter, the Hunters' post and the three loot spots, in the spaces above | H, M, L |
 | `note_old_drainage`, `note_maintenance`, `note_withdrawal` | A note board's own cell (`kind: wall`: not a place to stand) | H, M, L |
 
@@ -376,7 +386,7 @@ anchors, and what is wrong is reported (`/et reload`).
 | `/et ch2 l2 guard` | The Guard's fight (phase, stuns, each trap: S spent, C charging, A armed) in the action bar; again to turn it off. `skip guard` runs its finish at once, `reset guard` puts the wall whole again |
 | `/et ch2 l2 flood <0\|1\|2\|3>` | The flood's water at once to that stage (0 drains it), whatever your state; `skip flood` fills all of it and shuts the station's door, `reset flood` drains it and opens the vestibule's gate again |
 | `/et ch2 l2 ending` | Plays the ending (fade, "TO BE CONTINUED", main menu); the level finishes only if you are in the reunion or past it |
-| `/et ch2 l2 maw` / `maw hit` / `maw kill` | Stone Maw's fight in the chat (phase, hits left, mode) / counts a hit / plays its death. `skip maw` runs the death's end, `reset maw` puts the fight back at its start |
+| `/et ch2 l2 maw` / `maw hit` / `maw kill` / `maw pillar <n>` | Stone Maw's fight in the chat (phase, pillars broken, mode) / counts a hit / breaks the remaining pillars at once (the collapse and the escape) / damages pillar n once. `skip maw` runs the end of the escape, `reset maw` puts the fight back at its start |
 | `/et ch2 l2 reunion` | You are put at the reunion room's spot and the reunion plays |
 | `/et ch2 l2 perf` | What the level costs in your world (phase 7): its entities by type (a second Guard, creature, Maw or reunion NPC is flagged `DUPLICATES`), the flood's water cells, the lamps by mode, and the mean and worst ms a server tick spends on the level's own handlers over the last 100 ticks, by handler |
 | `/et ch2 l2 anchors` | Every anchor and zone with its coordinates, the provisional ones marked |

@@ -104,6 +104,11 @@ class Ch2L2MapPlanTest {
                 assertTrue(Cell(x, y, z) in cells, "${point.id}: no breaker at ${point.position}")      // the breaker's own cell, on the maintenance wall
                 continue
             }
+            if (point.id.startsWith("maw_pillar_")) {
+                assertTrue(Cell(x - 1, y, z - 1) in cells && Cell(x, y, z) in cells, "${point.id}: not the corner of four cells of a pillar at ${point.position}")      // the centre of a 2 x 2 column
+                continue
+            }
+            if (point.id == "lift_gate") continue      // the lift gate's sound, in its own cells
             if (point.id.startsWith("maw_pipe_") || point.id in setOf("maw_entry_door", "maw_mouth", "maw_far_door")) continue      // a ceiling point, or a gate's sound: not places to stand
             if (point.id == "pipe_burst" || point.id == "exit_hatch") {
                 assertTrue(Cell(x, y, z) in cells, "${point.id}: no pipe or door at ${point.position}")      // the burst pipe's own cell, and the exit door's plates

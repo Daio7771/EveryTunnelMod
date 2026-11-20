@@ -5,10 +5,11 @@ import daio7771.everytunnel.util.JsonFields
 
 /**
  * A place the level saves at ([Ch2L2Level.checkpoints]): walking into [zone] takes it, once, if it lies ahead of the last one taken; a
- * death, or the menu's CONTINUE, brings the player back to [anchor]. [before]: the encounter it comes before, where `/et ch2 l2 reset
+ * death, or the menu's CONTINUE, brings the player back to [anchor]. No [zone]: it is taken only when the level says so (the escape's, the
+ * end's), never by walking. [before]: the encounter it comes before, where `/et ch2 l2 reset
  * <event>` puts the player.
  */
-data class Ch2L2Checkpoint(val id: String, val anchor: String, val zone: String, val before: Ch2L2Event?)
+data class Ch2L2Checkpoint(val id: String, val anchor: String, val zone: String?, val before: Ch2L2Event?)
 
 /** Walking into [zone] moves the player on to [state], if it lies ahead of theirs ([Ch2L2Level.reaches]). */
 data class Ch2L2Reach(val zone: String, val state: Ch2L2State)
@@ -54,7 +55,7 @@ data class Ch2L2Level(
     /** The checkpoint ahead of [current] (null: none taken) whose zone the player is in ([inZone]), the furthest one; null if none. */
     fun checkpointAhead(current: String?, inZone: (String) -> Boolean): Ch2L2Checkpoint? {
         val taken = checkpoints.indexOfFirst { it.id == current }
-        return checkpoints.withIndex().lastOrNull { (i, c) -> i > taken && inZone(c.zone) }?.value
+        return checkpoints.withIndex().lastOrNull { (i, c) -> i > taken && c.zone != null && inZone(c.zone) }?.value
     }
 
     /** The furthest state ahead of [state] whose zone the player is in ([inZone]); null if none. */
@@ -66,7 +67,7 @@ data class Ch2L2Level(
 
     /** Every anchor and zone the file names, to check against the anchors. */
     fun anchorNames(): List<String> = checkpoints.map { it.anchor } + hunters.map { it.anchor } + loot.map { it.anchor } + notes.map { it.anchor } + creature.anchorNames() + guard.anchorNames() + flood.anchorNames() + maw.anchorNames() + reunion.anchorNames()
-    fun zoneNames(): List<String> = (lights.keys + checkpoints.map { it.zone } + reaches.map { it.zone } + creature.zoneNames() + guard.zoneNames() + maw.zoneNames() + reunion.zoneNames() + explore).distinct()
+    fun zoneNames(): List<String> = (lights.keys + checkpoints.mapNotNull { it.zone } + reaches.map { it.zone } + creature.zoneNames() + guard.zoneNames() + maw.zoneNames() + reunion.zoneNames() + explore).distinct()
 
     class Result(val level: Ch2L2Level, val problems: List<String>)
 
@@ -110,14 +111,14 @@ data class Ch2L2Level(
                 val c = JsonFields(e.asJsonObject, "checkpoints[$i]", f.problems)
                 val id = c.requiredString("id")
                 val anchor = c.requiredString("anchor")
-                val zone = c.requiredString("zone")
+                val zone = if (c.has("zone")) c.string("zone", "") else null
                 val beforeText = if (c.has("before")) c.string("before", "") else null
                 val before = beforeText?.let(Ch2L2Event::parse)
                 if (beforeText != null && before == null) {
                     f.problems += "checkpoints[$i].before: no encounter \"$beforeText\" (${Ch2L2Event.entries.joinToString { it.id }})"
                 }
                 c.reportUnknownKeys()
-                if (id == null || anchor == null || zone == null) null else Ch2L2Checkpoint(id, anchor, zone, before)
+                if (id == null || anchor == null) null else Ch2L2Checkpoint(id, anchor, zone, before)
             }
 
             val reaches = (if (f.has("progress")) f.array("progress")?.toList() ?: emptyList() else emptyList()).mapIndexedNotNull { i, e ->

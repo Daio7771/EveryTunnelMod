@@ -17,8 +17,9 @@
     {"id": "station", "anchor": "pumping_station", "zone": "zone_pumping_station"},
     {"id": "exit", "anchor": "level_exit", "zone": "zone_level_exit"},
     {"id": "maw", "anchor": "maw_entry", "zone": "zone_maw_corridor", "before": "maw"},
+    {"id": "maw_escape", "anchor": "maw_escape"},
     {"id": "reunion", "anchor": "reunion_player", "zone": "zone_reunion", "before": "reunion"},
-    {"id": "chapter_end", "anchor": "chapter_end", "zone": "zone_chapter_end"}
+    {"id": "chapter_end", "anchor": "chapter_end"}
   ],
   "progress": [
     {"zone": "zone_hunter_galleries", "state": "galleries"},
@@ -128,8 +129,6 @@
     "text": "every_tunnel.ch2.l2.ending.continued"
   },
   "maw": {
-    "hits": 5,
-    "stun_seconds": 3.0,
     "burst_seconds": 2.6,
     "home": "maw_home",
     "centre": "maw_centre",
@@ -140,11 +139,18 @@
       "at_once": 1, "respawn_seconds": 2.0, "first_piece_offset": 4.0,
       "points": ["maw_pipe_1", "maw_pipe_2", "maw_pipe_3", "maw_pipe_4", "maw_pipe_5", "maw_pipe_6", "maw_pipe_7", "maw_pipe_8"]
     },
-    "ram": {"orient_seconds": 0.8, "speed": 6.0, "turn_degrees_per_second": 30, "max_seconds": 6.0},
+    "ram": {"max_seconds": 6.0, "auto_cooldown_seconds": 4.0},
+    "stages": [
+      {"ram_speed": 6.0, "turn_degrees_per_second": 30, "orient_seconds": 0.8, "stun_seconds": 3.0},
+      {"ram_speed": 6.8, "turn_degrees_per_second": 40, "orient_seconds": 0.7, "stun_seconds": 2.6},
+      {"ram_speed": 7.6, "turn_degrees_per_second": 50, "orient_seconds": 0.6, "stun_seconds": 2.2}
+    ],
+    "pillars": {"anchors": ["maw_pillar_1", "maw_pillar_2", "maw_pillar_3"], "hits": 2, "hit_radius": 1.6},
+    "debris": {"count": 6, "radius": 4.0, "spread_ticks": 40, "warn_ticks": 20, "damage_fraction": 0.25},
+    "escape": {"seconds": 8.0, "debris_per_second": 3.0, "door_clear_radius": 4.0, "anchor": "maw_escape", "zone": "zone_maw_escape"},
     "gates": {"entry": "maw_entry", "mouth": "maw_pipe_mouth", "far": "maw_far", "mouth_anchor": "maw_mouth", "entry_anchor": "maw_entry_door", "far_anchor": "maw_far_door"},
     "exit_door": {"gate": "exit_hatch", "zone": "zone_exit_door", "anchor": "exit_hatch"},
     "death": {
-      "walk_speed": 1.6, "walk_seconds": 6.0, "crouch_seconds": 3.5, "collapse_seconds": 3.6, "after_seconds": 2.0,
       "collapse_radius": 4, "bit_count": 6, "first_slab_delay_ticks": 12, "slab_count": 5, "slab_spread_ticks": 20,
       "slab_start_speed": 0.35, "crush_height": 2.0, "max_height": 3,
       "collapse_blocks": ["every_tunnel:catacomb_brick_cracked", "every_tunnel:catacomb_brick", "every_tunnel:catacomb_brick_damp"]
@@ -154,7 +160,12 @@
     "zone": "zone_reunion",
     "text": "every_tunnel.ch2.l2.reunion",
     "anchors": {"player": "reunion_player", "coworker": "reunion_coworker", "worker_b": "reunion_worker_b", "leave": "reunion_leave"},
-    "pace": {"fly_in_seconds": 1.5, "fly_out_seconds": 1.0, "turn_seconds": 0.7, "gap_seconds": 0.5, "silent_seconds": 3.0, "leave_seconds": 4.0, "walk_speed": 1.6},
+    "pace": {"fly_in_seconds": 1.5, "fly_out_seconds": 1.0, "turn_seconds": 0.7, "gap_seconds": 0.5, "silent_seconds": 3.0},
+    "lead": {
+      "speed": 4.3, "wait_distance": 6.0, "waypoints": ["lead_1", "lead_2", "lead_3"],
+      "door": {"gate": "l3_door", "anchor": "reunion_leave"},
+      "lift": {"coworker": "lift_coworker", "worker_b": "lift_worker_b", "zone": "zone_lift", "gate": "lift_gate", "gate_anchor": "lift_gate", "gate_pause_seconds": 1.5, "motor_seconds": 3.0}
+    },
     "lines": [
       {"who": "coworker", "key": "reunion_01", "sound": "every_tunnel:voice.reunion_01", "seconds": 3.2},
       {"who": "coworker", "key": "reunion_02", "sound": "every_tunnel:voice.reunion_02", "seconds": 4.3},

@@ -15,8 +15,8 @@ import kotlin.math.roundToInt
  * The reunion with the coworker and worker B (phase 6.1) as a scene, in the manner of Level 1's meeting (`Ch2L1MeetingScene`): the player
  * stands held at their anchor, the black bands come in and the camera is their own eyes, turning smoothly to whoever speaks
  * ([Ch2L2Reunion.lines] in order, each speaker's place read from the anchors). With no lines the eyes rest on the coworker for
- * `silent_seconds`. After the last line the eyes turn to the door of Level 3 while the two start walking to it for `leave_seconds`.
- * The server reads the same [Built] for what happens when ([beatAt], [leaveStart]); the client draws it with `CutsceneView`. Plain Kotlin.
+ * `silent_seconds`. The scene ends after the last line and its gap (phase 9): the eyes go back to the player's head and the two set off to
+ * lead them to the lift ([leaveStart]; `Ch2L2Reunion.lead`). The server reads the same [Built] for what happens when ([beatAt], [leaveStart]); the client draws it with `CutsceneView`. Plain Kotlin.
  */
 object ReunionScene {
 
@@ -33,7 +33,7 @@ object ReunionScene {
         val beats: List<Beat>,
         /** The first line begins here (after the fly-in). */
         val linesStart: Int,
-        /** The last line has ended: the three turn to the door and the NPCs begin to leave. */
+        /** The last line (and its gap) has ended: the NPCs set off and the eyes fly back to the player. */
         val leaveStart: Int,
         /** The eyes are back in the player's head from here: the end function runs. */
         val shotsEnd: Int,
@@ -80,10 +80,6 @@ object ReunionScene {
             tick += length + gap
         }
         val leaveStart = tick
-        turnTo(eyesOf(leave).let { Local(it.forward, it.right, it.up - 0.4) })
-        val leaving = ticks(reunion.leaveSeconds)
-        shots += Shot(leaving, eyes, eyes, Look.At(looking!!))
-        tick += leaving
         val flyOut = ticks(reunion.flyOutSeconds)
         val subtitles = beats.map { Subtitle("${reunion.textKey}.${it.line.key}", it.start, it.end + HOLD_TICKS) }
         val cutscene = Cutscene(shots, flyIn, flyOut)
