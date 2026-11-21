@@ -1,0 +1,599 @@
+# Chapter 2, Nivel 1
+
+*[English version](../../en/chapter2/level-1.md) · [Todas las páginas](../README.md)*
+
+El Nivel 1 del Chapter 2 es la fábrica, cuatro meses después del Chapter 1: un científico normal contratado en lugar del
+que "se puso enfermo", tres actos de tareas, una reunión y sigilo, hasta el despacho del supervisor. Se construye por
+fases (de la 0 a la 11), de una en una, en la rama **privada** `chapter-2/level-1` (solo se sube al remoto `private`,
+nunca a `origin`) hasta que se publiquen los Niveles 1 y 2 del capítulo. **Dónde está: fase 11, la pasada de QA, hecha: el nivel está
+terminado.** Se llega desde el menú principal (Capítulo 2, NUEVA PARTIDA: el prólogo y luego la fábrica) y se juega desde el reloj hasta
+su final, el sótano barrido, el encierro y la bajada por la alcantarilla de emergencia, con todas las salas amuebladas y con gente.
+Bajando por la alcantarilla, sin corte, está el [Nivel 2](level-2.md), las catacumbas; los dos se publican juntos como demo.
+
+**Cómo se llega.** NUEVA PARTIDA del Capítulo 2 en el menú principal: el prólogo (se puede saltar) y luego la fábrica. La
+pantalla está en negro desde la carga del mundo hasta que empieza el prólogo, y el negro de su final se mantiene hasta que el jugador
+está en la fábrica. El nivel no se guarda: abre el mismo mundo que la partida
+guardada del Capítulo 1, así que antes de entrar se guarda dónde estaba el jugador, lo que llevaba, su vida y sus recursos
+(`chapter2.platform.Ch2Return`), y al salir del mundo, en este nivel o en el Nivel 2, sale de los niveles del capítulo y se le devuelve
+todo; un mundo dejado sin salir (el juego se cerró) lo hace al entrar. La partida guardada del Capítulo 2 empieza en el primer checkpoint
+del Nivel 2: hasta entonces, cada NUEVA PARTIDA del Capítulo 2 empieza otra vez desde el prólogo. En desarrollo, `/et ch2 l1 enter` entra
+sin nada de esto.
+
+Su código está en `daio7771.everytunnel.chapter2` (el del cliente, en el mismo paquete dentro de `src/client`): `level1.core`
+(Kotlin puro, con tests), `level1.platform` (pegamento con Minecraft) y `level1.client`, aparte del juego base, que nunca lo
+nombra (véase [Arquitectura](../common/architecture.md#capítulos)). Sus textos están en `tools/lang/src/chapter2/`.
+
+## La máquina de estados
+
+`level1.core.Ch2L1State` tiene diez estados, en el orden en que se juegan. El estado actual de cada jugador va en su
+progreso del Chapter 2 (`Ch2PlayerProgress.l1State`, que `Ch2Progress`, el componente propio del capítulo, guarda como `l1_state`), así que sobrevive a salir del
+mundo, a una muerte y a una sesión nueva. Un jugador que nunca ha empezado el nivel está en `ACT1_CLOCKIN`; una partida
+nueva (`ProgressService.reset`) devuelve a todos ahí.
+
+| Estado | Significado |
+|---|---|
+| `ACT1_CLOCKIN` | Recién llegado a la fábrica: falta fichar en el reloj |
+| `ACT1_TASK1`, `ACT1_TASK2`, `ACT1_REAGENTS`, `ACT1_GAUGE`, `ACT1_TASK3` | Las cinco tareas del acto 1, en orden: registrar las muestras, calibrar el analizador, reponer los reactivos, anotar la velocidad de la centrifugadora, barrer el pasillo oeste |
+| `ACT2_FOLLOW` | El compañero se ha acercado para llevar al jugador a las taquillas |
+| `ACT2_MEETING` | La reunión en las taquillas (una cinemática) |
+| `ACT3_EXPLORE` | Sigilo por el laboratorio auxiliar, el pasillo del personal y el despacho |
+| `ACT3_CUTSCENE` | La cinemática del despacho, desde que se cierra el segundo papel |
+| `ACT3_OVERTIME` | Después del despacho, con el pase de horas extra sin cobrar: el camino a la zona sellada está abierto |
+| `ACT3_BASEMENT` | Tras la puerta sellada, que se cerró de golpe detrás: las horas extra, barriendo el sótano |
+| `ACT3_LOCKED_IN` | El sótano barrido: se apagaron sus luces y la puerta sellada se cerró por fuera; la salida es la alcantarilla |
+| `DONE` | Por la alcantarilla de emergencia abajo: sigue el Nivel 2, las catacumbas |
+
+`level1.platform.Ch2L1` es la única puerta al estado: `setState(player, state, reason)` lo guarda, escribe en el log `Chapter 2
+Level 1: <jugador> goes A -> B (<motivo>)` y avisa a los oyentes; `skip(player)` pasa al siguiente. Un sistema del nivel
+se registra una vez con `Ch2L1.onStateChange` y hace lo que significa entrar en un estado (un objetivo, una escena, una
+línea del altavoz); la máquina de estados no sabe nada de eso. Por eso un paso se alcanza jugando o por comando con el
+mismo resultado.
+
+## Los archivos de datos
+
+Todo lo ajustable es JSON, no código: cambiar un ritmo, una ruta o un texto es editar un archivo.
+
+| Archivo | Contiene | Quién lo lee |
+|---|---|---|
+| `anchors.json` | Los lugares con nombre: puntos (una posición y hacia dónde mira) y zonas (una caja) | `Ch2L1AnchorsParser`, con tipos |
+| `tasks.json` | Las tres tareas del Acto 1: qué anclas tienen los tubos, el terminal, el analizador, la escoba y la suciedad, y cuánto dura cada una | `Ch2L1TasksParser`, con tipos |
+| `speakers.json` | Los altavoces de Rowan: las zonas y sus altavoces de techo, las líneas fijas y el grupo, el enfriamiento, la cinemática del primer aviso | `Ch2L1SpeakersParser`, con tipos |
+| `npcs.json` | La gente de la fábrica: veintidós trabajadores con sus rutinas (la recepcionista entre ellos), los grupos (el de las taquillas) y cuán vivos parecen (`life`) | `Ch2L1NpcsParser`, con tipos |
+| `patrols.json` | Las patrullas: cómo vigilan los guardias (la vista, qué es sospechoso, el aviso, la carrera, adónde vuelve un jugador pillado) y la ronda de cada guardia | `Ch2L1PatrolsParser`, con tipos |
+| `cutscenes/meeting.json` | El Acto 2: seguir al compañero y la reunión | `Ch2L1Act2Parser`, con tipos |
+| `act3.json` | La exploración del Acto 3: el lector de tarjetas, el teclado y el código de Rowan, los ordenadores y sus archivos, las puertas que dicen que no, la cámara 02, la espera de la flecha | `Ch2L1Act3Parser`, con tipos |
+| `cutscenes/office.json` | La cinemática del despacho: el camino de Rowan al entrar, su sitio junto a la puerta y el frente del escritorio (anclas), sus líneas, las pausas, qué línea hace qué (los puños, las palmas, inclinarse, la mirada, la corbata, señalar, el pase, el aplauso), el zumbido | `Ch2L1OfficeParser`, con tipos |
+
+El jar lleva los valores por defecto, en `data/every_tunnel/ch2/l1/`. **Para ajustar sin reconstruir**, pon un archivo del
+mismo nombre en la carpeta de configuración del juego, `config/every_tunnel/ch2/l1/` (en una ejecución de desarrollo,
+`run/config/...`), y ejecuta `/et reload`. El archivo de `config` gana mientras sea utilizable (JSON válido, un objeto); si
+está roto se avisa, en el log y en la respuesta del comando, y se usa la copia del jar, así que una errata nunca deja el
+nivel sin datos. Un archivo sin copia utilizable da uno vacío y un aviso. Los archivos se leen al arrancar y con `/et
+reload`; no siguen al `/reload` de vanilla.
+
+`anchors.json` se parece al archivo de un nivel (véase [Niveles](../chapter1/levels.md)):
+
+```json
+{
+  "dimension": "minecraft:overworld",
+  "anchors": [
+    { "id": "spawn_clockin", "pos": [-48.5, 65, -135.5], "yaw": -90, "pitch": 0, "provisional": true }
+  ],
+  "zones": [
+    { "id": "speaker_lab", "from": [-40, 64, -146], "to": [3, 69, -127], "provisional": true }
+  ]
+}
+```
+
+Los sistemas piden un lugar por su nombre y nunca por coordenadas, así que mover el mapa es editar este único archivo.
+Un id (a-z, 0-9, `_`) es único entre puntos, zonas y caminos (un camino es una línea de puntos, la ruta de una patrulla). **`provisional`** marca un
+lugar cuyo mobiliario o rutina está aún por diseñar (el terminal, la gente de la columna, los papeles, las patrullas). El
+`anchors.json` del jar lo **escribe el generador del mapa** (véase [El mapa](#el-mapa)): no lo edites a mano; para ajustar un
+lugar, pon una copia editada en la carpeta de config.
+
+## El mapa
+
+El mapa del nivel lo **dibuja el autor** en papel, con tamaños relativos; `tools/map/chapter2/ch2l1/generate.py` convierte ese dibujo
+en bloques (`level.py` guarda qué hay dónde, `preview.py` el dibujo). Escribe `map.json`, el plan que construye el mod, y
+`anchors.json`, los lugares con nombre en coordenadas del mundo, y `generate.py --install` mete los dos en
+`data/every_tunnel/ch2/l1/` (en git); `tools/map/chapter2/ch2l1/output/level_preview.png` es el plano visto desde arriba (fuera de git).
+**Ninguno de los dos JSON se edita a mano**: se cambia `level.py` y se vuelve a ejecutar la herramienta. Sus comprobaciones la
+paran si una puerta no une dos espacios, si un ancla no tiene sitio para estar de pie o si a un espacio restringido se llega
+por una puerta libre.
+
+| Espacio | X × Z (bloques) | Aire de alto |
+|---|---|---|
+| Entrada (media elipse, con tres puertas) | 42 × 9 | 9 |
+| Pasillo principal | 11 × 36 | 5 |
+| LAB | 30 × 36 | 6 |
+| WC (oeste) · Taquillas (con una columna de 2 × 2) | 5 × 5 · 14 × 18 | 4 |
+| Anillo, de 4 de ancho, alrededor del comedor (46 × 25 con sus muros) · Comedor | 4 · 36 × 15 | 4 · 6 |
+| Laboratorio auxiliar (restringido) | 14 × 24 | 5 |
+| Pasillo autorizado · Seguridad · Despacho · WC (restringidos) | 46 × 4 · 13 × 6 · 12 × 7 · 6 × 3 | 4 |
+| Zona sellada, el rellano tras la puerta sellada · el paso enrejado al este ("En obras") | 11 × 6 · 5 × 6 | 4 · 3 |
+| Escaleras de bajada, al sur del rellano (8 escalones) · Sótano, 8 bloques bajo la fábrica | 3 × 8 · 26 × 24 | de 5 a 6 (el techo baja con ellas) · 6 |
+
+El aspecto es el del laboratorio del prólogo, limpio y moderno: hormigón blanco, suelo gris claro, primera hilada de muro en gris
+oscuro, cristal (la pared del laboratorio auxiliar hacia el tramo oeste del anillo: `factory_glass`, un bloque del mod sin marco
+dibujado en cada bloque y con un brillo que sigue de uno al siguiente, así que la pared se ve como una sola lámina) y las
+lámparas de techo del laboratorio (160). El LAB, los pasillos, las taquillas y el laboratorio auxiliar se agrandaron tras el primer recorrido del nivel (las medidas del dibujo eran
+relativas), y la fase 6 ensanchó el laboratorio auxiliar hacia el oeste: una sala propia tras un tabique (`aux_chamber`, 9 × 24), a la
+que se llega por un hueco en el extremo norte del tabique (un tipo de puerta del plan sin puerta, `opening`), guarda la cámara sellada 02,
+y el generador comprueba que ninguna línea desde un ojo en el anillo a través del cristal llega a su interior (`check_chamber_hidden`).
+La fase 9 enseñó al generador salas con el suelo más bajo (el `y0` de una sala: el del sótano es -8) y tramos de escalera (una sala cuyas
+celdas tienen cada una su propio suelo, uno más bajo en cada fila, con un bloque de escalera encima); las salas unidas sin puerta (el
+rellano, las escaleras, el sótano) son sus `LINKS`. Hay 21 puertas, todas propias del mod (ninguna es de vanilla): **libres**, la puerta de laboratorio
+(`factory_door`: blanca, con una ventana alta; las dos hojas de un par se abren y se cierran a la vez a mano, `LinkedDoorBlock`,
+con las bisagras en los bordes exteriores; la del anillo al pasillo autorizado también es libre, pero es
+la entrada a una zona prohibida: el círculo rojo del dibujo); **cerradas con llave**, la puerta gris de personal autorizado (`secure_door`, con su placa roja), que las manos no
+abren, para el laboratorio auxiliar, el despacho y la puerta sellada (las fases siguientes las abren con la credencial, el
+código y la tarjeta de Rowan); y una más igual en el extremo este del pasillo que no abre a nada. Las tres puertas de la entrada dan al
+pasillo principal y al LAB, y el reloj de fichar cuelga de la pared sur de la entrada.
+
+**Dónde y cómo.** El plan se levanta en (1024, 64, 1024) del mundo del mapa, libre de los niveles del Chapter 1 y de la sala del
+prólogo. `level1.platform.Ch2L1Build` lo pone ahí con el `platform.MapBuild` del capítulo (compartido con el Nivel 2 desde su fase 1;
+el formato del plan es `core.MapPlan`), 8.000 celdas escritas por tick, con los chunks cargados (un segundo o dos, sin
+tirones), vaciando antes su caja; recuerda la huella del plan que construyó (`data/every_tunnel_ch2_l1.dat`), así que
+`Ch2L1.enter` solo construye el nivel si falta o si el plan cambió. Cada bloque se busca antes de tocar el mundo; un plan con
+un bloque o un estado que el juego no conoce falla con un mensaje y deja el mundo como estaba. `/et ch2 l1 build` construye de
+nuevo sobre lo que hay, y **`/et ch2 l1 unbuild` vacía la zona: hazlo antes de empaquetar el mundo en un jar** (`packMapWorld`
+comprime también los archivos de región, y el mapa es del Chapter 2, no del mundo del Chapter 1).
+
+**Texto en las paredes.** Los `texts` del plan dicen qué pone cada uno de sus bloques `wall_text` (las placas del Nivel 3), una clave de
+idioma con un estilo; `Ch2L1Build` los escribe en las entidades de los bloques al acabar de construir (el rótulo de la cámara 02, la placa
+del retrato, los dos carteles del rellano). Sus `messages` hacen lo mismo con sus bloques `wall_message` (garabatos de tiza:
+una clave de idioma, la altura de una línea, un ángulo, el color de la tiza): el "???" sobre el terminal del sótano. Los garabatos siempre están en inglés
+(sus textos en español son los ingleses), y el generador elige la tiza según la pared de detrás: negra en una pared que se ve blanca, blanca en una
+que se ve oscura, como el hormigón blanco del sótano con su luz (`Level.chalk`; `wall_chalk`, la versión en tiza de la fuente **El mobiliario** llegó con las fases que lo necesitaban (el de las tareas con la 3; las taquillas, las primeras estaciones de trabajo del
+LAB y las cámaras con la 4; el del Acto 3 con la 6; el del sótano con la 9), y el resto con la **fase 10a**, que además dio a la fábrica la
+cara de la empresa reconstruida, NONAME INDUSTRIES: corporativa y limpia, blanca con su azul.
+
+- **Entrada:** el mostrador de recepción con dos monitores delante de la pared del logo ("NONAME INDUSTRIES" en letras grandes azules sobre un
+  recuadro blanco, el estilo `logo`), un rincón de espera al oeste (sofás y una mesa baja) y plantas. (El estilo `screen`, una pantalla
+  iluminada, queda para más adelante.)
+- **LAB:** campanas de gases en la pared norte, el almacén de muestras en la pared este (estanterías y, pasada la puerta sellada,
+  armarios), dos islas en el centro (puestos con monitores; instrumentos: microscopios, vasos, una gradilla de tubos) y carritos. En la pared
+  sur, al este del analizador, están las dos tareas de la fase 10b (más abajo, Acto 1).
+- **Comedor:** mesas de cuatro, la barra con dos cafeteras, una fuente de agua, tres máquinas expendedoras, plantas, apliques en las
+  paredes y **luces de techo cálidas** propias (`warm_ceiling_light`; los `SPACE_LIGHTS` del generador).
+- **Aseos**, **sin cámaras**: cubículos (un inodoro, mamparas de dos de alto y una puerta: `toilet`, `stall_wall`, `stall_door`) y lavabos
+  con un espejo encima (`wc_sink`, `wc_mirror`), bloques nuevos de `tools/blocks/common/generate.py`.
+- **Seguridad** (donde descansa el guardia B): un banco de monitores sobre una mesa y una silla, las taquillas de los guardias, una mesa,
+  una barra con cafetera y el armario de llaves; su centro queda libre para el guardia B.
+- Plantas y un banco en el pasillo principal, y plantas en el anillo y en el pasillo autorizado.
+- **Carteles:** una placa sobre cada puerta con el nombre de la sala, del lado por el que se llega (`DOOR_SIGNS`, centrada sobre una
+  puerta de dos bloques con el `offset` del plan), una flecha al comedor y los carteles de la empresa (estilo `poster`: líneas blancas
+  sobre su azul) por los pasillos, el LAB y el comedor.
+
+El generador comprueba ahora también que ninguna ruta de patrulla ni de persona choca con un mueble y que nada tapa una puerta. Tampoco está
+aún el paso del prólogo al nivel: `enter` se llama a mano.á el
+paso del prólogo al nivel: `enter` se llama a mano.
+
+
+## Voces y subtítulos
+
+El nivel tiene 32 líneas de voz (ElevenLabs, de los MP3 del usuario: la excepción con IA de [Audio](../common/audio.md)): el
+compañero (`follow_01` a `03`, y casi todas las `meeting_*`), los trabajadores A y B de la unión (las líneas `_a` y `_b` de
+la reunión) y Rowan, por los altavoces (`rowan_loyal_a1` a `a6`) y en su despacho (`rowan_office_c1` a `c8`).
+`tools/sounds/chapter2/ch2_l1_voices.py` las convierte (Ogg mono, una ganancia para cada uno de los dos grupos, el de la unión y el
+de Rowan, de modo que cada uno quede a -18 LUFS como las líneas del director), corta cada una en fragmentos de subtítulo
+por sus pausas y escribe `cutscene/ch2_l1_voices.json`; `export.py` hace de cada una un evento de
+sonido, `voice.<id>` (`/playsound every_tunnel:voice.follow_01 voice @s`). Las `rowan_loyal_*` ya suenan por los altavoces del Acto 1 (véase
+[Acto 1](#acto-1-las-tareas-y-los-altavoces)); las demás las reproducirán los sistemas de las fases siguientes.
+
+**Los subtítulos están siempre activos.** `client.hud.Ch2L1Subtitles` escucha al gestor de sonido, así que cuando empieza
+a sonar una voz del nivel, la haya iniciado quien sea, sus fragmentos salen sobre el HUD, cada uno desde su momento: el
+nombre del hablante en gris, luego el texto en blanco, sobre una franja oscura, y el último fragmento se queda un momento
+tras acabar la voz. No dependen del ajuste de subtítulos del juego (estos sonidos no llevan `subtitle` en `sounds.json`).
+En una cinemática el HUD está oculto y la cinemática dibuja los suyos.
+
+Todas las claves de lang están bajo `every_tunnel.ch2.l1.`. **El texto de una línea de voz es una sola clave para toda la
+línea**, el inglés y el español del propio autor: `<id>` (`follow_01`, `rowan_office_c8`; las líneas `_a` y `_b` de la reunión
+llevan solo el número, `meeting_03` para `meeting_03_a`). Los **fragmentos de subtítulo son rangos de frases** de ese texto,
+no textos propios: `ch2_l1_voices.json` dice que desde los 2,04 s el fragmento muestra la frase 1 en adelante, y el cliente
+divide la línea traducida en frases y muestra ese rango, así que el tiempo es el mismo en todos los idiomas y las palabras
+de una línea se editan solo en los archivos de lang. Una frase termina en `.`, `?` o `!` seguido de un espacio
+(`Ch2L1Sentences`, que es también la regla de la herramienta), y **el inglés y el español de una línea deben tener el mismo
+número de frases**: si no, `Ch2L1VoicesTest` falla. La herramienta lee el inglés de `en_us.json` y solo reescribe el tiempo de
+los fragmentos: una línea rápida (menos de un segundo por fragmento) se muestra entera.
+Las demás claves: `speaker.<quién>` (`coworker`, `worker_a`, `worker_b`, `rowan_loudspeaker`, `rowan`, `guard`), `objective.<paso>`
+(los textos del panel de objetivos), `restricted_door` y los documentos (`chamber_log`, `authorization`, `medical_file`, `contract_14`,
+`basement_note`, `painting_plaque`): los archivos de los ordenadores, con sus nombres en NonameOS (`doc.<archivo>.name`), y la placa del retrato.
+
+El terminal del sótano (fase 9) es un easter egg propio: `cipher` en `act3.json` muestra las palabras de su ventana como símbolos de
+cifrado que parpadean (`NonameOsLook.scramble`). Guarda `?????????.mp3` (`recordings`: un nombre, el mismo en todos los idiomas, y un evento
+de sonido), cuyo REPRODUCIR abre un reproductor (una onda que se mueve mientras suena, `[??]`, REPRODUCIR o DETENER) y hace sonar
+`voice.basement_recording` desde el terminal: una voz al revés (`ch2_l1_voices.py` la invierte, con el eco puesto del derecho), sin texto
+ni subtítulos a propósito, para que los jugadores la inviertan y la descifren. Y `basement_note`, un `.txt` cuyo mensaje oculto está en
+Base64 en cada idioma. Nada los cuenta y nada los espera.
+
+## Las personas
+
+`FactoryNpcEntity` es un solo tipo de entidad para todos: Rowan, el compañero, los trabajadores. Su `skin` (sincronizada con
+el cliente) dice quién es: `rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` a `generic_3` y los guardias `guard_1` y `guard_2`
+(`Ch2L1Skins`: seis caras en la unión, tres de las cuales hablan, Rowan y dos guardias con el uniforme del Chapter 1: `workers.py` pinta
+una cara propia sobre `guard.png`, la skin del jugador del Chapter 1). `FactoryNpcRenderer` dibuja el modelo del jugador con brazos clásicos de
+4 px y la capa base de la skin (`textures/entity/npc/<skin>.png`). La skin de Rowan es del autor, copiada tal como llegó;
+las de los seis trabajadores las dibuja `tools/entity/chapter2/workers.py` (bata blanca, una tarjeta de un color cada uno, una cara
+cada uno), que también escribe una hoja de previews con la de Rowan (`tools/entity/common/output/`, fuera de git).
+`Ch2L1SkinsTest` comprueba que cada skin sea de 64x64, tenga brazos clásicos y deje vacía su segunda capa. Una criatura
+**mantenida** (véase [Contribuir](../contributing.md#criaturas)).
+
+**La vida de la fábrica** (fase 4). **Dieciséis personas corrientes** trabajan en la fábrica, desde `npcs.json` (`Ch2L1NpcsParser`): diez en el LAB, tres en el pasillo principal y
+tres en el comedor (`group`: `lab`, `main`, `dining`). Cada una tiene una `skin`, un sitio donde empieza (`spawn`, un ancla de punto) y una **rutina**, una lista de pasos que se hacen en orden y
+luego otra vez: `stand` (segundos, un número o `[min, max]`), `walk` (un ancla de camino, con `reverse` opcional) y `type` (un ancla de punto: van allí, miran hacia donde mira y teclean, con los
+brazos al frente, durante `seconds`). Las posiciones son anclas, así que mover el mapa mueve a la gente; las seis estaciones de trabajo del LAB (un banco con un monitor, en `level.py`), las
+rutas (`route_*`) y el sitio de cada trabajador (`npc_*`) los escribe el generador del mapa y quedan como provisionales hasta que se amueble el LAB. Las rutas se escriben a mano, no las busca el
+pathfinding del juego: `Ch2L1RoutineRunner` (Kotlin puro, probado) dice qué hacer cada tick y `FactoryNpcEntity.tick` lo hace fijando la velocidad de la propia entidad (un paseo de 1,3 bloques por segundo, en línea recta al siguiente punto;
+a quien deja de acercarse durante 5 s, un tope, se le pone en el punto), así que una veintena de personas casi no cuesta nada. `walk_speed` del archivo escala su paseo, y el `pace` propio de un trabajador (opcional), el suyo.
+
+**Vivos, no robóticos** (fase 4B; `life` en `npcs.json`, `Ch2L1Life`, todas las claves opcionales; el código en `chapter2/level1/core/Ch2L1NpcLife.kt`, Kotlin puro, probado):
+- **Andar** (`Ch2L1Gait`): cada uno anda a su ritmo (`walk_speed` por 1 ± hasta `pace_spread`, sacado de su id), acelera poco a poco (`accel_seconds`) y frena antes del sitio donde
+  se para; el cuerpo gira como mucho `turn_degrees` por tick, y un giro brusco los frena antes. Siguen yendo en línea recta al punto, así que nunca se desvían hacia una pared. En los puntos
+  intermedios de un camino a veces se paran un momento (`linger_chance`, `linger_seconds`).
+- **Mirar** (`Ch2L1Gaze`): la cabeza se mueve sola, nunca más de 70° respecto al cuerpo. Andando, casi siempre al frente, con alguna mirada de reojo; de pie, a un sitio nuevo cada
+  `glance_seconds` (alrededor, a un compañero a menos de 8 bloques); tecleando, abajo al teclado, levantando la vista de vez en cuando. A un jugador que se pone a menos de `player_range`
+  delante de ellos lo siguen con la mirada `player_look_seconds`, y luego no otra vez hasta pasados `player_cooldown_seconds`. Para separar cabeza y cuerpo, la entidad apaga los controles de
+  mirada y de cuerpo de vanilla: el servidor fija el `yaw` del cuerpo y el `headYaw` y el pitch de la cabeza, que el juego sincroniza y suaviza.
+- **Charlar** (`Ch2L1Chat`, emparejados por `Ch2L1Npcs` cada 5 ticks): dos trabajadores a menos de `chat_range`, ninguno en una estación ni recién salido de una charla, se paran
+  `chat_chance` de las veces (los demás siguen andando y no se les vuelve a preguntar en 10 s), se miran y hablan sin voz durante `chat_seconds`: uno mueve las manos (`Ch2L1Pose.TALKING`),
+  el otro asiente (`LISTENING`), y se turnan cada 1,5 a 3,5 s. Mientras, sus rutinas esperan; después ninguno vuelve a charlar en `chat_cooldown_seconds`. La pose se sincroniza y la dibuja
+  `FactoryNpcRenderer` (cada persona un poco a destiempo de las demás); la fase 5 añade a la misma lista las poses de la reunión.
+
+`level1.platform.Ch2L1Npcs` las mantiene: mientras un jugador juega el nivel, dentro de él y antes de la cinemática, `ensureAmbient` (cada 5 s, y al entrar) pone a cada trabajador que falte; los del LAB
+desaparecen cuando el jugador llega a `ACT3_CUTSCENE` (la fase 8 cuenta con ello). Los **grupos** (`groups` del archivo) son personas de pie en anclas, que pone `Ch2L1Npcs.spawnGroup`: las
+seis del **grupo de las taquillas** (`taquillas`, alrededor de la columna central) son para la reunión y las pone su fase, no el principio.
+
+**Las taquillas.** La sala de las taquillas (14 × 18, el único espacio sin cámaras) tiene las `locker` del Nivel 3 en tres paredes, de dos bloques de alto, mirando hacia dentro. Aquí son solo mobiliario:
+esconderse en una está desactivado mientras se juega el nivel (`HidingHooks`). La **taquilla del predecesor** (`predecessor_locker`, un bloque propio: la misma taquilla con la puerta entreabierta y el
+nombre de su placa rascado; anclas `predecessor_locker` y `predecessor_locker_block`) es la de la pared oeste junto a la esquina.
+
+**Las cámaras de seguridad** son decorativas: una `factory_camera` cuelga de la capa de aire más alta de cada espacio salvo las taquillas (19 en total: una por sala, una cada 15 bloques más o menos en los pasillos).
+Es el bloque y la entidad de bloque de la cámara del Nivel 5 con otro comportamiento en `SecurityCameraRenderer`: nunca busca al jugador, barre 50 grados a cada lado de adonde mira una vez cada 10 s (cada
+una en su punto del barrido), su luz roja parpadea y zumba suave (`block.camera.servo`) cada pocos segundos si el jugador está a menos de 14 bloques. No detectan nada; las patrullas de la fase 7 sí. Al
+dibujarlas el cliente, no cuestan nada al servidor.
+
+## Las reglas del nivel, el reloj y los objetivos
+
+**Las reglas siguen al jugador, no al lugar.** Un jugador está *activo* en el nivel (`Ch2PlayerProgress.l1Active`, guardado
+con el estado y enviado al cliente por Cardinal; `Ch2L1.active`) desde `Ch2L1.enter` hasta `Ch2L1.leave`. Mientras lo está:
+
+Los hooks del juego base nunca preguntan por este nivel: `Chapter2` registra sus reglas en `PlayerRules` (sin linterna, sin
+esconderse, a salvo, en silencio, sin barras de estado, y la skin del nuevo empleado, un científico con la bata blanca de la fábrica,
+en lugar del uniforme del guardia nocturno) mientras `Ch2L1.active`, y los hooks de abajo preguntan a `PlayerRules`.
+
+| Regla | Dónde está |
+|---|---|
+| Nada le hace daño (solo cuentan `/kill` y el vacío), la sed y la batería no bajan, **correr es gratis** (sin resistencia) | `SafeLevelHooks.isSafe`, que consultan `ResourceHooks` y el evento de daño |
+| **Sin linterna** (hasta que Rowan la da tras su despacho, `ACT3_OVERTIME`): su tecla no hace nada | `FlashlightHooks.available` |
+| **Nada de lo que hace genera ruido** para la IA (correr incluido) | `NoiseHooks.makesNoise` |
+| **Sin barras de estado**: las de vanilla siguen ocultas y las del mod (resistencia, sed, batería) no se dibujan; la barra de objetos y la mira se quedan | `StatusHud.render` |
+
+Se aplican a jugadores en Supervivencia o Aventura de un mundo con niveles (`ResourceHooks.appliesTo`), no a Creativo. `enter`
+además vacía los bolsillos (el nuevo empleado no tiene nada del Chapter 1), apaga la linterna, pone el estado en
+`ACT1_CLOCKIN`, vuelve a poner en rojo los relojes y teletransporta al ancla `spawn_clockin`. Si el mapa no está construido, `enter` lo construye
+primero (un segundo o dos) y el jugador entra cuando termina; el nuevo juego del capítulo lo llamará más adelante.
+
+**El reloj de fichar** es `TimeClockBlock`, un lector de tarjetas en una pared sin arte propio (comparte los modelos y sonidos
+del lector): rojo hasta que alguien ficha, luego verde. Con clic derecho de un jugador activo en `ACT1_CLOCKIN` pita y le pasa
+a `ACT1_TASK1`; después zumba ("Ya has fichado"); para cualquier otro no hace nada. El mapa coloca uno (en la pared
+sur de la entrada). Vuelve a rojo cada vez que se pone a un jugador en `ACT1_CLOCKIN`.
+
+**El panel de objetivos** (`client.hud.ObjectivePanel`) es pequeño, arriba a la derecha: "OBJETIVO" en gris y debajo el texto
+del estado del jugador (`Ch2L1Objectives`: una clave de lang por estado, bajo `every_tunnel.ch2.l1.objective.`; ninguna en las
+cinemáticas ni al final), sobre una franja tenue. Aparece con un fundido cuando cambia el objetivo y no hace ruido. El cliente
+lee el estado del progreso del jugador, así que no hay paquete propio.
+
+## Acto 1: las tareas y los altavoces
+
+**Las tres tareas** (`level1.platform.Ch2L1TaskHooks`; los bloques de `Ch2L1TaskBlocks.kt` solo le pasan su uso; dónde está cada cosa y cuánto dura es
+`tasks.json`):
+
+1. **Muestras** (`ACT1_TASK1`): haz clic en los tres `sample_tube` del banco junto a la pared oeste del LAB (cada uno desaparece, con un pitido:
+   1/3, 2/3, 3/3) y luego en el `noname_terminal`. Abre **NonameOS** (`client.screen.NonameOsScreen`, fósforo verde en el marco de los monitores del
+   Nivel 5): la ventana SAMPLE REGISTRY, una fila por tubo con su código (`S-0412`...), su estado y un botón REGISTER; un clic llena una barra durante
+   `register_seconds` y pide al servidor que lo registre (`ch2l1_os_register`), que responde con el registro tal como queda (`ch2l1_os_open`); el
+   último cierra el lote, la pantalla cierra sesión sola y el estado pasa a `ACT1_TASK2`. El registro es una ventana de una pantalla hecha para
+   reutilizarse en los documentos de las fases siguientes.
+2. **Analizador** (`ACT1_TASK2`): un clic **mantenido** sobre el `analyzer` (un bloque nuevo, hecho por `tools/blocks/common/generate.py`) durante
+   `calibrate_seconds`. El juego repite un clic mantenido cada 4 ticks; `level1.core.HoldTracker` cuenta los ticks mientras los usos llegan con menos
+   de 8 de diferencia y sobre el mismo bloque, así que apartar la vista o soltar lo reinicia. Lo muestran una barra (`client.hud.HoldBar`, del paquete
+   `ch2l1_hold`) y un pitido que sube de tono. Luego, las dos tareas del LAB de la fase 10b (`level1.platform.Ch2L1LabTaskHooks`, `reagents`
+   y `gauge` de `tasks.json`), en el rincón de la pared sur del LAB al este del analizador:
+   - **Reactivos** (`ACT1_REAGENTS`): tres frascos (`reagent_bottle_blue`, `_yellow`, `_red`) están sobre el armario de reactivos; un clic coge
+     uno a la mano del jugador (el objeto `factory_reagent_<color>`), y un clic mantenido sobre el `mixing_tank` durante `pour_seconds` lo
+     vierte (la misma barra), en cualquier orden (`reagents_taken`, `reagents_poured`; el panel los cuenta). El tercero hace avanzar.
+   - **Indicador** (`ACT1_GAUGE`): la `centrifuge` sobre su banco marca una velocidad en RPM, sacada para cada jugador entre `min_rpm` y
+     `max_rpm` de diez en diez (`level1.core.Ch2L1Gauge`, el contador `gauge_rpm`; el cliente la dibuja en su pantallita,
+     `Ch2L1CentrifugeRenderer`). El terminal de al lado abre el registro de mantenimiento de NonameOS (`client.GaugeLogScreen`, paquetes
+     `ch2l1_gauge_open` / `_try` / `_result`): se comprueba la velocidad escrita; una mal pita y se puede volver a escribir, la buena pasa a
+     `ACT1_TASK3`.
+3. **Barrer** (`ACT1_TASK3`): la `leaning_broom` apoyada en la pared este del tramo oeste del anillo; un clic la coge (el objeto `broom` va a la
+   mano del jugador; solo existe para esta tarea y se retira al terminarla). Luego un clic mantenido durante `sweep_seconds` sobre cada una de las diez
+   `dirt_spot` del suelo frente al cristal del laboratorio auxiliar la barre (un siseo y una nubecilla). La última termina la tarea: `ACT2_FOLLOW`.
+
+Cuánto ha avanzado el jugador son unos contadores de su progreso (`ProgressService.ch2L1Counter`: los tubos cogidos, las muestras registradas y la
+suciedad barrida como bits, si cogió la escoba, y `heard_<línea>` para los avisos), así que sobrevive a salir del mundo; el cliente también los lee:
+el panel de objetivos muestra "(1/3)" mientras se cogen los tubos y luego mientras se registran, y "(4/10)" para la suciedad (`objective.count`). Cada
+cambio de estado (jugando, `state`, `skip`) lleva contadores y mundo a lo que el estado significa (`Ch2L1TaskHooks.onState`, `reconcile`): los
+tubos, la escoba y la suciedad están donde el jugador aún no ha llegado y no están donde ya ha pasado, así que una tarea se puede probar por
+comando con el nivel como estaría si se hubiera jugado. Los objetos del plano se vuelven a poner desde el propio plano (`Ch2L1Build.planState`).
+
+**La flecha guía** (`level1.client.TaskArrow`, destinos en `level1.core.Ch2L1Guide`, ajustes en el `guide` de `tasks.json`): una V rellena que apunta hacia abajo, azul con
+bordes blancos, que gira sobre sí misma y sube y baja un poco sobre el lugar del paso actual del jugador, para que el camino quede claro cuando el LAB esté lleno de mesas
+y máquinas. Se dibuja sin prueba de profundidad (los muebles no la tapan) y crece con la distancia para leerse a través de la sala. Apunta a lo más cercano de lo que queda: el
+reloj de fichar antes de fichar; los tubos aún sin coger y luego el terminal; el analizador; la escoba y luego las manchas sin barrer. Se oculta cuando el jugador se acerca a
+menos de `hide_within` (1,5 bloques a lo largo del suelo), en una cinemática y con el HUD oculto; `height` (1,1) es cuánto flota sobre el ancla y `enabled` la apaga.
+Las fases siguientes añaden a `Ch2L1Guide.targets` los pasos de los Actos 2 y 3.
+
+**Los altavoces** (`level1.platform.Ch2L1SpeakerHooks`, reglas en `level1.core.Ch2L1SpeakerSchedule`, datos en `speakers.json`): los avisos de Rowan
+`rowan_loyal_a1` a `a6`, desde los altavoces de techo (bloques `ceiling_speaker`) de cuatro zonas, `speaker_entrance`, `speaker_lab`, `speaker_main` y
+`speaker_west`, cada una con su ancla emisora (`speaker_<zona>_src`). Las reglas:
+
+- **Rowan no dice nada hasta que se acaba la primera tarea.** `a1`, la apertura, llega cuando se registra la última muestra **y el jugador ha salido de NonameOS** (el cliente
+  avisa al servidor al cerrarse la pantalla, `ch2l1_os_closed`), un momento después (`after_terminal_seconds`, 1 s); nada habla a un jugador que tiene NonameOS abierto. `a4` cinco segundos
+  después del analizador (`ACT1_TASK3`).
+- El grupo `a2`, `a3`, `a5` (se abre tras `a1`) una vez cada uno, en orden aleatorio, cada uno tras un enfriamiento de 75 a 120 s desde el final de la línea anterior; nunca dos a la vez.
+- Solo mientras el jugador está en una zona con altavoz (si no, la línea espera a que vuelva); ninguno desde `ACT2_FOLLOW`, que además corta lo que suena.
+- `a6` no está en ninguna lista: se reserva para la escena del despacho. A un jugador puesto más allá de `ACT1_TASK2` por un comando se le da por oído el `a1`.
+- Cada línea es el timbre (`event.ch2l1.ding`, dos notas suaves de campana; dura `ding_seconds`) y luego la voz, enviados solo a ese jugador desde el altavoz de la zona con `volume` 3, así que
+  llegan a toda la zona (`attenuation_distance` 48 en `sounds.json`); los subtítulos son los de siempre (`Ch2L1Subtitles`). `tools/sounds/chapter2/ch2_l1_voices.py` pasa los seis
+  `rowan_loyal_*` por un filtro de megafonía (banda estrecha, algo de saturación, un eco de pasillo) antes de escribirlos.
+
+**El primer aviso es una cinemática** (`a1`; `level1.core.Ch2L1IntroScene`, `level1.platform.Ch2L1IntroHooks`): cuando el jugador sale de NonameOS tras la primera tarea no puede moverse,
+las barras negras entran y la cámara se gira desde sus propios ojos, donde está, hacia un altavoz de techo fijo (`speakers.json`, `intro.shots`: `camera: "player"` mirando a
+`speaker_lab_src`, el altavoz del LAB, que cuelga cerca del terminal), el timbre suena desde él al empezar la toma, la voz le sigue y la cámara vuelve a sus ojos mientras las
+barras se van. Es la maquinaria de la escena del director y del prólogo (`Cutscene`, `Timeline`, `CutsceneView.Kind`, here `Ch2L1IntroView.KIND`); la cámara de una toma es un ancla (o `player`) y lo que
+mira otra ancla, en coordenadas del mundo, así que mover el mapa mueve la toma, y se pueden añadir más tomas en el archivo; se salta con la tecla de saltar pulsada dos veces, como las
+demás. Los otros avisos no tienen barras: el timbre, la voz y su subtítulo, y el jugador sigue caminando.
+
+`/et ch2 l1 tasks` muestra cuánto ha avanzado el jugador y todo lo que `tasks.json` o `speakers.json` nombran y `anchors.json` no tiene
+(`level1.core.Ch2L1Wiring`, que `/et reload` también informa).
+
+## Acto 2: el compañero y la reunión
+
+Lo lleva `chapter2.level1.platform.Ch2L1Act2Hooks`, desde `cutscenes/meeting.json` (`Ch2L1Act2`, que lee `Ch2L1Act2Parser`; todas las
+claves opcionales; `Ch2L1Wiring` comprueba las anclas y caminos que nombra):
+
+- **La espera** (`ACT1_TASK3`): el compañero (skin `coworker`) aparece en `coworker_wait`, la esquina del anillo junto a la escoba, mientras
+  el jugador sigue en el LAB, y espera allí quieto, con los brazos colgando y la mirada puesta en el jugador mientras barre.
+- **Seguirle** (`ACT2_FOLLOW`, al barrer la última mancha): dice `follow_01` desde donde está (una voz del nivel como cualquier otra: salen
+  sus subtítulos; nada más se escribe encima, así que barrer las manchas no da mensaje, el panel las cuenta) y, al acabar, recorre a
+  paso ligero (`pace`, por el paseo de los trabajadores) `coworker_route` (el anillo, el pasillo principal, la segunda puerta de las taquillas) hasta
+  `meeting_coworker`, abriendo las puertas que encuentra (`Ch2L1Doors`). `Ch2L1Follow` (Kotlin puro, con tests) decide cada tick: un jugador
+  a más de `lag_blocks` y que no va por delante se queda atrás, así que se para, se gira y le espera; tras `remind_after_seconds` así dice
+  `follow_02` o `follow_03`, por turnos, y no otra vez hasta pasados `remind_cooldown_seconds`. La flecha guía flota sobre su cabeza solo si
+  el jugador está a más de `arrow_beyond_blocks` o no le ve (`Ch2L1Guide.follow`). Mientras, el grupo de la reunión (`taquillas` de
+  `npcs.json`) espera en las taquillas, y los dobles ambientales de worker_a y worker_b salen del LAB en cuanto nadie los ve (`until` de
+  `npcs.json`, `Ch2L1Npcs.retire`).
+- **La reunión** (`ACT2_MEETING`, cuando el jugador está en `taquillas_trigger` con él dentro o justo detrás): el jugador pasa a
+  `meeting_player` y se le sujeta allí, en un círculo cerrado de ocho en el centro de la sala (el compañero enfrente, de espaldas a la
+  taquilla del predecesor; en un círculo nadie se interpone entre el jugador y una cara), y la escena se juega en su cliente (`ch2l1_meeting_start`: el marco y la puerta por la que entró;
+  `Ch2L1MeetingView`). Se construye desde los datos en los dos lados (`Ch2L1MeetingScene`, Kotlin puro, con tests): la cámara son los ojos
+  del propio jugador, que giran suave (`turn_seconds`) hacia quien habla (`meeting_01` a `15` en orden, separadas `gap_seconds`; el sitio
+  de un hablante es el del compañero o el del miembro del grupo con su skin), y hacia la puerta durante `door_seconds` tras `door_after`.
+  Sus subtítulos van frase a frase tras el nombre de quien habla (`CutsceneView.Kind.subtitleText` y `speakerAt`). En los mismos ticks el
+  servidor dirige a la gente (`FactoryNpcEntity.direction`): todos miran a quien habla (el compañero se gira hacia él con todo el cuerpo, y vuelve al jugador en sus propias líneas), y cada uno mira a la puerta de vez en cuando
+  (`Ch2L1Glances`); quien habla gesticula (`TALKING`), worker_a tiembla en `tremble_lines`, worker_b se sacude de risa en `laugh_lines`; los
+  demás escuchan con los brazos quietos, colgando, cambiando el peso de pie; el miembro más cercano a la puerta va a `<puerta>_inside` y la
+  cierra; y cuando el compañero llega a "Take this" (`card_line`, `card_sentence`) alarga el brazo (`OFFERING`) y el jugador recibe la
+  **copia de tarjeta del laboratorio** (`lab_badge_copy`, la tarjeta del Chapter 1 recoloreada por `tools/blocks/common/generate.py`; solo abre la
+  puerta del laboratorio auxiliar, fase 6).
+- **El final**: cuando acaba la última línea todos se van por `meeting_leave`, el compañero primero y los demás de uno en uno
+  (`leave_gap_seconds`, a `leave_pace`), abriéndose la puerta ante ellos, y cada uno desaparece en cuanto el jugador no le ve; las barras se van y el
+  estado es `ACT3_EXPLORE`. **Saltarla** (`ch2l1_meeting_skip`) la acaba en el acto con el mismo estado: la tarjeta dada, el jugador en
+  `taquillas_exit`, el compañero y el grupo fuera, la puerta abierta.
+
+Llegar a un estado por comando hace lo que significa: `ACT1_TASK3` le pone junto a la escoba, `ACT2_FOLLOW` empieza el camino desde allí,
+`ACT2_MEETING` empieza la reunión al momento, un estado posterior da la tarjeta y se lleva a todos, uno anterior se le lleva a él y la
+tarjeta. El camino y la reunión se guardan en memoria y se retoman desde el estado tras salir del mundo.
+
+## Acto 3: el laboratorio auxiliar, el teclado y el despacho
+
+Fase 6 (`ACT3_EXPLORE`, sin las patrullas de la fase 7): `level1.core.Ch2L1Act3` lee `act3.json` y dice cuál es el objetivo y adónde
+apunta la flecha según los contadores del jugador (`a3_lab_open`, `a3_read`, `a3_office_open`, `a3_in_office`, `a3_triggered`);
+`level1.platform.Ch2L1Act3Hooks` hace el resto en el servidor.
+
+- **El laboratorio auxiliar.** El lector de tarjetas (`badge_reader`, los modelos del lector de tarjetas) en el lado del anillo de su
+  puerta: con la tarjeta del compañero en el Acto 3 se pone verde, suena el aceptado del lector y las puertas grises se abren y se quedan
+  abiertas (`Ch2L1Doors.set` con `locked`); sin la tarjeta zumba, "Acceso denegado: se necesita una tarjeta del laboratorio." Su
+  ordenador (un `noname_terminal` en una mesa contra el tabique) guarda `chamber_log` y `authorization`; la autorización lleva el código
+  de Rowan, **4719** (`code`).
+- **La cámara 02.** En la sala tras el tabique, una celda de cristal hasta el techo con un rótulo sobre su frente ("CÁMARA SELLADA 02"), y
+  dentro el científico del prólogo convertido en el Pale man, de pie, de espaldas al frente, totalmente quieto: el `ScientistEntity` del
+  prólogo en un estado propio, `CONTAINED` (sin animación, sin alzarse desde agachado). Aparece mientras alguien juega el nivel, nunca se
+  guarda y se repone si se pierde (`ensureContained`); desde el anillo no se ve nada de él.
+- **El plató.** Una cuarta parte del laboratorio auxiliar es donde se rodó el prólogo: su mesa (la de `tools/prologue/chapter2/room.py`, el tramo
+  que veía la cámara, con lo mismo encima y en la pared) contra la pared sur, y mirándola dos focos y una cámara de cine con trípode
+  (`film_light`, `film_camera`).
+- **Los ordenadores.** NonameOS muestra los archivos de un ordenador (`NonameOsFilesScreen`, con el aspecto del registro, `NonameOsLook`):
+  una fila por archivo con NUEVO o LEÍDO y ABRIR; un archivo abierto llena la ventana, escrito rápido (un clic o una tecla muestran el
+  resto), y la rueda lo desplaza. Al cerrarlo (Escape o CERRAR) se avisa al servidor (`ch2l1_file_closed`), que solo entonces lo cuenta
+  como leído. Leer la autorización pasa el objetivo de "Laboratorio auxiliar" a "Encontrar la forma de entrar al despacho".
+- **El teclado.** En el lado del pasillo autorizado de la puerta del despacho (`keypad`, un modelo de `tools/blocks/common/generate.py`): su
+  pantalla (`KeypadScreen`) tiene un visor pequeño y doce teclas (1-9, C, 0, OK), con clic o tecleando (cifras, Retroceso, Intro); cada
+  una pita (`block.ch2l1.keypad_key`). El servidor comprueba el código (`ch2l1_keypad_try`): uno erróneo zumba y muestra DENEGADO, sin
+  límite de intentos; el de Rowan muestra ABIERTO, pone el teclado en verde y abre para siempre las puertas grises del despacho (Rowan
+  las cierra en la fase 8).
+- **El despacho.** Amueblado (un escritorio en el centro con la silla y el ordenador de Rowan, su retrato en la pared este, una
+  estantería tras él, un sofá, plantas, una alfombra). Al entrar, el objetivo pasa a "Registrar el despacho". Su ordenador guarda
+  `medical_file` y `contract_14`; **cerrar el segundo es el momento de la cinemática del despacho** (`a3_triggered`,
+  `Ch2L1Act3Hooks.onOfficeTrigger`, para la fase 8; hasta entonces, una línea en el registro y, en una ejecución de desarrollo, otra en
+  el chat). El retrato (`rowan_portrait`, pixel art en Python a partir de su skin) muestra al hacer clic el texto de su placa en la barra
+  de acción; la placa de debajo es un `wall_text`.
+- **Puertas que dicen que no.** Un clic en la puerta restringida del extremo este del pasillo dice "Acceso restringido"; en la puerta
+  sellada, antes de las horas extra, "Sellada. Se necesita la tarjeta del supervisor." (en las horas extra, cerrada, "Cerrada."); en la del laboratorio o la del despacho mientras
+  sigan cerradas, "Cerrada."
+- **La flecha** (`Ch2L1Guide`): en el Acto 3 solo aparece cuando el jugador lleva `guide_after_seconds` (60) con el mismo objetivo: el
+  lector, el ordenador del laboratorio, el teclado, la puerta del despacho, el ordenador de Rowan.
+
+Volver a antes del Acto 3 (un nuevo empleado, `/et ch2 l1 state`) cierra otra vez las dos puertas, pone en rojo el lector y el teclado y
+olvida los contadores del acto; llegar a él por comando da la tarjeta (el hook del Acto 2).
+
+## Acto 3: las patrullas
+
+Fase 7 (`patrols.json`, `level1.core.Ch2L1Patrols`, `level1.platform.Ch2L1PatrolHooks`): los guardias (`guard_1`, `guard_2`) hacen su ronda
+**desde el inicio del nivel hasta su final**: la patrulla A recorre el anillo en sentido horario y se para 5 s junto a la puerta que baja al
+pasillo autorizado (`patrol_a_pause`); la B sale de Seguridad (`patrol_b_spawn`, donde descansa 6 s), recorre el pasillo autorizado hasta su
+extremo este y vuelve; y, **desde las horas extra** (el `from` de una patrulla), la C recorre el LAB a oscuras y se para 4 s junto a la puerta
+sellada (`patrol_c_pause`). Son gente de la fábrica dirigida tick a tick (`FactoryNpcEntity.direction`, `Ch2L1PatrolRunner`); la rutina de
+nadie más los mueve. Nunca se guardan: uno que falte, perdido con su chunk o caído fuera del nivel (una reconstrucción vacía la zona bajo
+sus pies), se repone en 5 s, y uno atascado 8 s en su ronda salta a su siguiente punto; cada guardia que se pone o se quita queda en el
+registro.
+
+No le hacen nada a un jugador que se porta bien. Un guardia **ve** a 8 bloques (4 si el jugador va agachado) y 70° de donde mira su cabeza,
+sin nada en medio, o a 2 bloques mire adonde mire (`Ch2L1Watch.inView`). Un jugador al que ve es **sospechoso**:
+- dentro de una zona prohibida (`forbidden`: el laboratorio auxiliar y la sala de la cámara 02, el pasillo autorizado, el despacho,
+  Seguridad, el WC del este; y desde las horas extra el LAB, `from`: si te pillan ahí, vuelves a `return_lab` en el pasillo principal);
+- agachado a 3 bloques o menos de él;
+- tras mirar el laboratorio auxiliar más de 10 s (`stare_seconds`): con el punto de mira en él, un rayo desde los ojos que llega a su
+  zona a través del cristal (`Ch2L1Stare`); de reojo no cuenta.
+
+Entonces se para y se gira hacia él mientras se llena un «?» amarillo sobre su cabeza (con una barra debajo, `notice_seconds` 1,5;
+`FactoryNpcEntity.alert`, que dibuja `FactoryNpcRenderer`) con un sonido de pregunta (`event.ch2l1.guard_suspect`). Lleno, un «!» rojo y le
+llama la atención (`guard_warn`, un subtítulo aún sin voz: `Ch2L1Subtitles.showText`); tiene `grace_seconds` (3) para parar. Si no para, corre
+hacia él (`run_pace`, `event.ch2l1.guard_alert`) y lo pilla al alcanzarlo o tras `chase_seconds` (2,5) a la vista: la pantalla funde a negro
+con "Te han pillado." (`CaughtOverlay`, `event.ch2l1.guard_caught`), el jugador vuelve a la entrada de la zona (`return_aux_lab`,
+`return_authorized`; si le pillan en otro sitio, `return_ring`) con lo que abrió aún abierto, sigue su línea `guard_caught` y el guardia vuelve a
+su ronda. Si lo pierde de vista `give_up_seconds`, se rinde. Nadie vigila durante una cinemática, en el Acto 2, en Creativo o Espectador, ni
+5 s después de pillar a alguien. **En el LAB a oscuras** (`dark_zones`, desde `dark_from`, las horas extra) un guardia solo ve a
+`dark_range` (3) bloques, salvo que el jugador lleve la linterna encendida: entonces a `flashlight_range` (12). **Las líneas de los guardias
+son provisionales** (solo texto) hasta que el autor dé las suyas, con voz.
+
+## Acto 3: la cinemática del despacho
+
+Fase 8 (`cutscenes/office.json`, `level1.core.Ch2L1OfficeScene`, `level1.platform.Ch2L1OfficeHooks`, en el cliente `Ch2L1OfficeView`):
+cerrar el segundo archivo de Rowan (`Ch2L1Act3Hooks.onOfficeTrigger`) lleva al jugador a `ACT3_CUTSCENE`, y Rowan le pilla en su escritorio.
+
+- **Antes de las barras**, un jugador que esté en otro punto del despacho se desliza hasta `office_player_mark`, detrás del escritorio y
+  mirando a la puerta (`glide_seconds`); si está más lejos (un comando), se le pone allí.
+- **La cámara son los ojos del propio jugador**, quieto y fijo en Rowan (sin temblor ni acercamiento): primero la puerta, que se abre; entra
+  por `rowan_doorway` hasta su sitio justo dentro, junto a la puerta (`rowan_threshold`), se gira, la cierra y habla desde ahí: c1 con los
+  brazos sueltos; c2 ajustándose los puños (`CUFFS`); c3 con las palmas abiertas desde "Or am I special?" (`PALMS`) y entrando el zumbido
+  grave (`ambient.ch2l1.office_hum`); una pausa; c4 inclinándose hacia delante (`LEAN_FORWARD`); c5 una mirada a la puerta; una pausa
+  larga; c6 la corbata (`TIE`); c7 señalando la puerta (`POINTING`); c8 se acerca al frente del escritorio (`rowan_desk_front`) y en
+  "Unpaid, naturally" desliza el **pase de horas extra sin pagar** por él (`OFFERING`; un item display que va de `card_slide_start` a
+  `card_slide_end` y luego pasa al inventario) mientras se va el zumbido: **también te da la linterna** (las reglas del nivel la permiten
+  desde las horas extra, con la batería llena; aquí no se gasta). Aplaude despacio (`CLAPPING`), vuelve junto a la puerta y la abre. Todo
+  lo que hace Rowan está fijado tick a tick en la escena (su `track` de segmentos), así que el servidor le mueve en los mismos ticks en que
+  la cámara del cliente le sigue. Se puede saltar como las demás.
+- **Después**, Rowan espera junto a la puerta abierta, mirando al jugador, hasta que sale del despacho; entonces cierra la puerta tras él y
+  desaparece.
+- **Acabe como acabe** (entera, saltada o con `ACT3_OVERTIME` por comando): el pase (`overtime_pass`, la tarjeta del Chapter 1 con los
+  colores de Rowan), la linterna, el objetivo "Horas extra: zona sellada", el LAB casi a oscuras (sus lámparas apagadas,
+  `factory_light_off`, una de cada cuatro como luz de emergencia roja y tenue, `factory_light_emergency`) y sin trabajadores, con una
+  tercera patrulla dentro, y `rowan_loyal_a6` una vez, de 3 a 5 s después de que el jugador recupere el control en la zona de un altavoz. Volver a antes quita
+  el pase y la linterna y vuelve a encender las luces.
+
+El LAB tendrá dos tareas más cuando el Nivel 1 esté decorado.
+
+## La zona sellada y el final (fase 9)
+
+El `overtime` de `act3.json` (`level1.core.Ch2L1Overtime`), la tarea de las horas extra en `tasks.json`, `level1.platform.Ch2L1Act3Hooks`
+(la puerta), `Ch2L1TaskHooks` (el barrido) y `Ch2L1EndingHooks` (el encierro, la alcantarilla, el final).
+
+- **La puerta sellada** se abre en su lector de tarjetas del lado del LAB (`sealed_reader`) con el pase de Rowan, solo en `ACT3_OVERTIME`.
+  Aún no es el Nivel 2: detrás hay un rellano (`sealed_corridor`) con dos salidas. Al este, el paso a la otra parte de la fábrica,
+  enrejado y en obras ("EN OBRAS": barrotes, ladrillos); al sur, las escaleras que bajan al sótano ("SÓTANO · ALMACÉN").
+- **Se cierra de golpe detrás** (`block.big_door.slam`) en cuanto el jugador está a `slam_after` (2,5) bloques de ella en el rellano, y ya
+  no se abre: el estado pasa a `ACT3_BASEMENT` y el objetivo a "Horas extra: barre el sótano (0/8)". Desde aquí los guardias ya no vigilan.
+- **El sótano**, donde se guarda todo, es un almacén ordenado y bien iluminado (una lámpara cada 4 bloques; la escalera, una cada dos
+  escalones): dos bloques de estanterías metálicas de tres alturas, cuatro filas de seis cada uno, un pasillo ancho entre ellos desde la
+  escalera hasta la pared sur, cosas traídas del complejo Noname del Chapter 1 encima de las estanterías y en las paredes (la máscara del
+  director, un trofeo, un cuadro del lounge, un diploma...), el cartel de suelo mojado y, al fondo del pasillo del
+  medio, exento contra la pared sur, un terminal de NonameOS bajo un "???" de tiza (ver los ordenadores del Acto 3: la grabación rara y una
+  nota cifrada). La escoba está apoyada al pie de las escaleras; sus ocho manchas se barren como las de la tarea 3 (`basement_broom_block`,
+  `basement_dirt_spots`, los contadores `basement_broom` y `basement_swept`, la flecha sobre la siguiente).
+- **La última mancha deja al jugador encerrado** (`ACT3_LOCKED_IN`): las luces del sótano se apagan con un golpe sordo
+  (`Ch2L1Build.zoneLights`, como las del LAB tras el despacho) y, un momento después, la puerta sellada de arriba se cierra con cerrojo
+  por fuera (`block.ch2l1.lock_shut`, un clac seco que se oye desde abajo). Nadie volvió a por el nuevo; solo queda la luz de la linterna.
+  El objetivo es "Vete a casa".
+- **Probar la puerta sellada** desde el rellano dice "Cerrada por fuera." y pone el contador `a3_tried_door`: el objetivo pasa a "Busca
+  otra salida" y la flecha guía señala enseguida la **alcantarilla de emergencia** del suelo, en la esquina sureste del sótano, pasadas
+  las estanterías (`manhole`, un bloque del suelo: una tapa redonda de hierro fundido en un marco cuadrado, con EMERGENCY EXIT estarcido en
+  un amarillo gastado; su ancla `manhole` está sobre la tapa).
+- **La tapa** se levanta manteniendo el clic sobre ella `lift_seconds` (3): una barra ("Levantando la tapa..."), hierro arrastrándose
+  sobre hormigón (`block.ch2l1.manhole_scrape`) y un golpe metálico cuando cae a un lado (`block.ch2l1.manhole_open`; contador
+  `a3_manhole_open`). Abierta, el bloque es un agujero con borde, un pozo oscuro con peldaños y la tapa apartada en el suelo; también se
+  puede abrir antes de probar la puerta.
+- **Bajar por ella acaba el nivel** (`DONE`): un clic en el agujero abierto, o meterse en él. El jugador queda dentro mirando abajo, se
+  pone el contador `completed` (el `ch2.l1.completed` del plan), se oyen los peldaños (`block.ch2l1.ladder`) mientras la pantalla funde a
+  negro en `fade_seconds` (1,5), y `dark_seconds` (1) después, a oscuras, el nivel termina (`Ch2L1EndingHooks.onFinished`): el jugador
+  está al pie de la escalera en el [Nivel 2](level-2.md#cómo-se-llega) y la pantalla vuelve. Sin texto de cierre ni menú: el
+  camino sigue.
+  Volver a antes de `ACT3_LOCKED_IN` (un comando) vuelve a encender el sótano y cierra la alcantarilla; volver a las horas extra o a antes
+  cierra la puerta sellada y pone su lector en rojo.
+
+## Redes de seguridad (fase 11)
+
+Lo que añadió la pasada de QA para que el jugador no se quede atascado:
+
+- **Objetos clave** (`Ch2L1KeyItems`): la escoba, los frascos de reactivo, la copia de la tarjeta y el pase de Rowan no se pueden perder.
+  Cada segundo se retira el que esté tirado en el suelo del nivel, y quien debería llevar uno según su estado y sus contadores y no lo
+  lleva lo recupera.
+- **Salir del mundo a mitad de escena**: al volver en mitad de la cinemática del despacho, esta empieza de nuevo (`Ch2L1OfficeHooks`,
+  tras 2 s); al volver encerrado, el sótano vuelve a estar a oscuras y la alcantarilla como estaba; al volver en el final, el final se
+  repite (`Ch2L1EndingHooks`).
+- **Trabajadores perdidos** (`Ch2L1Npcs`): el que se ha caído fuera de la caja del nivel se retira y se vuelve a poner en la siguiente
+  comprobación.
+- **La vuelta al Capítulo 1** (`chapter2.platform.Ch2Return`, del capítulo, compartida con el Nivel 2): véase «Cómo se llega» al principio.
+
+## Logros del Capítulo 2
+
+Diez logros son la pestaña del Capítulo 2 de la pantalla ACHIEVEMENTS (`chapter2.core.Ch2Achievement`, registrados por `platform.Ch2Achievements`, que
+también los consigue; textos en `tools/lang/src/chapter2/`, iconos dibujados por `tools/gui/common/achievement_icons.py`). Los ocultos (con *) muestran "Logro
+oculto" hasta conseguirlos. Nivel 1: *¡No llegues tarde!* (el reloj de fichar), *A escondidas...* (salir de la reunión de la unión), *Pésimo sigilo*
+(te pilla un guardia), *???\** (PLAY en la grabación del sótano: la ventana manda `ch2l1_recording_played`), *Una cara familiar\** (mirar al ocupante de la
+Cámara 02, quieto, 5 s dentro de la zona `aux_chamber`: `StillGaze`) y *¡Vaya pérdida de tiempo!\** (oír `follow_02` y `follow_03`). El Nivel 2 está en
+[su página](level-2.md#logros-del-capítulo-2).
+
+## Comandos de depuración
+
+`level1.platform.Ch2L1Commands`, nivel de operador 2, **solo en ejecuciones de desarrollo** (como explica
+[Depuración](../common/debugging.md) para `/everytunnel`):
+
+| Comando | Qué hace |
+|---|---|
+| `/et reload` | Vuelve a leer los archivos JSON del nivel y dice qué falla en ellos |
+| `/et ch2 l1 enter` | Te conviertes en nuevo empleado: se te aplican las reglas del nivel (en Supervivencia o Aventura), se vacían tus bolsillos, el estado es el inicial y estás en `spawn_clockin` |
+| `/et ch2 l1 leave` | Vuelven a aplicarte las reglas del resto del juego |
+| `/et ch2 l1 build` | Construye el nivel de nuevo sobre lo que hay (un plan nuevo se construye solo cuando alguien entra) |
+| `/et ch2 l1 unbuild` | Vacía toda la zona (antes de empaquetar el mundo en un jar); quien esté dentro cae |
+| `/et ch2 l1 anchors` | Todas las anclas (puntos, zonas, caminos) con sus coordenadas, las provisionales marcadas |
+| `/et ch2 l1 goto <ancla>` | Te lleva a un punto, o al centro de una zona, un bloque por encima de su suelo |
+| `/et ch2 l1 state` | Muestra tu estado y el siguiente |
+| `/et ch2 l1 state <estado>` | Te pone en ese estado (sin importar mayúsculas, `-` por `_`), como si hubieras llegado jugando |
+| `/et ch2 l1 skip` | Te pasa al siguiente estado |
+| `/et ch2 l1 npc <skin>` | Pone delante de ti a una persona de la fábrica, para ver su skin (`rowan`, `coworker`, `worker_a`, `worker_b`, `generic_1` a `generic_3`, `guard_1`, `guard_2`) |
+| `/et ch2 l1 npc clear` | Las quita todas |
+| `/et ch2 l1 npc ambient` | Pone a los trabajadores de la fábrica que falten (debes estar jugando el nivel y dentro de él) |
+| `/et ch2 l1 npc group <nombre>` | Pone un grupo de `npcs.json` en sus anclas (`taquillas`) |
+| `/et ch2 l1 npc remove <grupo>` | Quita un grupo (`lab`, `main`, `dining`, `taquillas`) |
+| `/et ch2 l1 tasks` | Cuánto has avanzado en las tres tareas, y lo que los datos nombran y falta |
+| `/et ch2 l1 tasks reset` | Las tres tareas empiezan de nuevo: los tubos, la escoba y la suciedad vuelven adonde dice el estado |
+| `/et ch2 l1 patrols` | Dónde está cada guardia, adónde va y qué piensa de ti (tranquilo, sospechando y cuánto, avisando, corriendo) |
+| `/et ch2 l1 act3` | Lo que has hecho en el Acto 3: el objetivo, el laboratorio y el despacho abiertos o cerrados, los archivos leídos |
+| `/et ch2 l1 act3 reset` | Cierra otra vez el laboratorio auxiliar y el despacho, pone en rojo el lector y el teclado y olvida el Acto 3 (el estado se queda) |
+| `/et ch2 l1 intro` | La cinemática del primer aviso, ahora |
+| `/et ch2 l1 say <rowan_loyal_a1..a6>` | Un aviso ahora (el timbre y luego la voz), desde el altavoz de la zona donde estás |
+
+`state` y `skip` cambian el estado y, con él, el objetivo del panel; el resto de los efectos de un estado (un objeto, un
+personaje) llegan con la fase que se los dé, y también se ejecutarán con el comando, que es lo que permite probar cada fase sin jugar las anteriores.
+
+## Añadir el sistema de una fase
+
+1. Kotlin puro en `chapter2.level1.core` para sus reglas y su lector de JSON, con tests unitarios (`Ch2L1DataTest` comprueba que
+   cada archivo del jar se lee bien).
+2. Darle forma y un lector con tipos a su archivo de `data/every_tunnel/ch2/l1/`; leer el documento con
+   `Ch2L1DataLoader.data.document("<nombre>")` y no guardarlo nunca, para que `/et reload` lo alcance.
+3. Un hook en `chapter2.level1.platform` (que registra `Chapter2`) que se registre con `Ch2L1.onStateChange` y, si tiene momentos propios, escuche el tick del
+   servidor; solo actúa en mundos con niveles (`WorldRules`).
+4. Textos en `tools/lang/src/chapter2/en_us.json` y `es_es.json` bajo `every_tunnel.ch2.l1.<id>` (luego `tools/lang/common/build.py`); esta página y el [mapa del código](../common/code-map.md),
+   en los dos idiomas.
+
+## Tests
+
+`Ch2L1StateTest` (el orden, `next`, `parse`), `Ch2L1AnchorsParserTest` (el formato, cada tipo de problema) y `Ch2L1DataTest`
+(los archivos del jar, qué copia gana, los respaldos), `Ch2L1VoicesTest` (las 32 líneas, sus eventos de sonido, Ogg y
+fragmentos, los textos en los dos idiomas) `Ch2L1SkinsTest` (el formato de las skins) y `Ch2L1ObjectivesTest` (un objetivo por paso, en los dos idiomas) y `Ch2L1MapPlanTest` (los bloques y puertas del plan, las anclas
+sobre sus suelos), todos en `chapter2/level1/core`; `Ch2L1NpcsTest` (el archivo de la gente, las rutinas y cada tick de quien teclea, de quien camina y de quien se atasca), `Ch2L1Act2Test` (el archivo de la reunión y sus anclas, el compañero guiando y esperando y sus recordatorios, las líneas de la reunión, la puerta y la tarjeta, las miradas, la flecha sobre él), `Ch2L1NpcLifeTest` (las claves de `life` y el ritmo de un trabajador, acelerar y frenar, frenar para girar, las paradas en el camino, adónde miran y la mirada al jugador con su enfriamiento, las parejas para charlar y sus turnos), `Ch2L1TasksTest` (el archivo de tareas, los bits, el clic mantenido), `Ch2L1GuideTest` (adónde apunta la flecha en cada paso, también en el Acto 3, y su espera), `Ch2L1Act3Test` (el archivo act3, el código, el objetivo que avanza, los archivos de Rowan leídos), `Ch2L1OfficeTest` (el archivo del despacho y sus anclas, la puerta antes y después de las líneas, las líneas y las pausas en orden, el pase y el zumbido en sus ticks, Rowan junto a la puerta, en el escritorio y de vuelta, sus gestos), `Ch2L1PatrolsTest` (el archivo de las patrullas y sus anclas, una ronda con sus paradas y otra de ida y vuelta, qué ve un guardia, el «?» que se llena, el aviso, la carrera, la captura y la rendición, una mirada fija), `ModelRotationTest` (los ángulos de giro de todos los modelos son de los que el juego acepta), `Ch2L1SpeakersTest` (el archivo y cada regla del planificador, y que un planificador hecho para una partida vieja se sustituye cuando el progreso retrocede: en silencio antes de la primera tarea, el momento tras la terminal, la zona, nunca dos a la vez, el enfriamiento, el grupo una vez cada uno, el acto dos lo cancela), `Ch2L1IntroSceneTest` (las tomas de la cinemática, su tiempo y las anclas que faltan), `Ch2L1WiringTest` (todo lo que los archivos nombran está en `anchors.json`, también lo de `act3.json`) y `Ch2L1TaskTextsTest` (los textos en los dos idiomas); `Ch2L1MapPlanTest` también comprueba que los objetos de las tareas y los altavoces están donde dicen sus anclas, que la sala de las taquillas tiene sus taquillas y ninguna cámara, que cada otro espacio tiene una y que cada trabajador y cada ruta pisan el suelo. `Ch2PlayerProgressTest` cubre el estado, la marca y los contadores en el progreso del capítulo, y `ChapterBoundaryTest` que ningún código fuera de `chapter2` lo nombra.

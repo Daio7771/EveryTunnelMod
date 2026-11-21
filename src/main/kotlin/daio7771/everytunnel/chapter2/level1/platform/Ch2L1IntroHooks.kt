@@ -1,15 +1,15 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1IntroScene
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Voices
-import daio7771.everytunnel.core.cutscene.Cutscene
-import daio7771.everytunnel.core.cutscene.Local
-import daio7771.everytunnel.core.cutscene.Look
-import daio7771.everytunnel.core.cutscene.SceneFrame
-import daio7771.everytunnel.core.cutscene.Shot
-import daio7771.everytunnel.core.cutscene.Timeline
+import daio7771.everytunnel.common.core.cutscene.Cutscene
+import daio7771.everytunnel.common.core.cutscene.Local
+import daio7771.everytunnel.common.core.cutscene.Look
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.core.cutscene.Shot
+import daio7771.everytunnel.common.core.cutscene.Timeline
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
@@ -21,11 +21,10 @@ import net.minecraft.sound.SoundCategory
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.Vec3d
 import java.util.UUID
-import daio7771.everytunnel.platform.TickProfiler
-
+import daio7771.everytunnel.common.platform.TickProfiler
 /**
  * The cinematic of Rowan's first announcement ([Ch2L1IntroScene]), as the server sees it: [start] holds the player where they stand for
- * the scene's length, tells the client to begin ([START_PACKET_ID], which carries where they stand; `client.cutscene.CutsceneView`
+ * the scene's length, tells the client to begin ([START_PACKET_ID], which carries where they stand; `common.client.cutscene.CutsceneView`
  * draws it from the anchors of `speakers.json`, building the same [Timeline] with [build]), sounds the chime from the speaker as
  * the first shot begins, and gives the player back at the end ([END_PACKET_ID]). A skip from the client ([SKIP_PACKET_ID]) ends it at once,
  * the chime cut: [finish] is the one way out, so both leave the same level. Leaving the world during it drops it. Server thread, but

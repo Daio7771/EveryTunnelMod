@@ -1,8 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.core
 
-import daio7771.everytunnel.core.level.BlockBox
-import daio7771.everytunnel.core.level.Position
-
+import daio7771.everytunnel.common.core.level.BlockBox
+import daio7771.everytunnel.common.core.level.Position
 /**
  * The named places of Chapter 2's Level 1, from `anchors.json` (see [Ch2L1AnchorsParser]): every system of the
  * level asks for a place by name (`spawn_clockin`, `door_anchor`, `speaker_lab`...) and never by coordinates, so

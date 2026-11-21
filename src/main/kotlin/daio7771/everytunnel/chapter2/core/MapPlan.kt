@@ -3,10 +3,9 @@ package daio7771.everytunnel.chapter2.core
 import com.google.gson.JsonElement
 import com.google.gson.JsonParser
 import daio7771.everytunnel.chapter2.prologue.core.Cell
-
 /**
  * One of Chapter 2's levels as a thing to build: what a map generator under `tools/map/` writes into the level's `map.json`
- * (`tools/map/ch2l1/generate.py` for Level 1, `tools/map/ch2l2/generate.py` for Level 2) and `platform.MapBuild` puts in the
+ * (`tools/map/chapter2/ch2l1/generate.py` for Level 1, `tools/map/chapter2/ch2l2/generate.py` for Level 2) and `platform.MapBuild` puts in the
  * world when the level is needed. Plain Kotlin.
  *
  * The plan's cells are its own (x east, z south, y up from the floor of the air; the floor's blocks are at y = -1);
@@ -86,7 +85,7 @@ class MapPlan(
 
     companion object {
         /**
-         * A well-mixed 32-bit number (as a non-negative Long) for a cell and a seed. `tools/map/ch2l2/level.py`'s `cell_hash` is the
+         * A well-mixed 32-bit number (as a non-negative Long) for a cell and a seed. `tools/map/chapter2/ch2l2/level.py`'s `cell_hash` is the
          * same function, bit for bit: change one, change both (`MapPlanTest` holds the two to the same values).
          */
         fun cellHash(x: Int, y: Int, z: Int, seed: Int): Long {

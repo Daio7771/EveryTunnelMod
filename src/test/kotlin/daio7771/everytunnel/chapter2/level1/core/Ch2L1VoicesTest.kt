@@ -102,7 +102,7 @@ class Ch2L1VoicesTest {
     fun `every line has its sound event and its Ogg`() {
         val events = JsonParser.parseString(File(assets, "sounds.json").readText()).asJsonObject
         for (id in ids) {
-            assertTrue(events.has("voice.$id"), "no sound event voice.$id (run tools/sounds/export.py)")
+            assertTrue(events.has("voice.$id"), "no sound event voice.$id (run tools/sounds/common/export.py)")
             assertTrue(File(assets, "sounds/voice/ch2l1/$id.ogg").isFile, "no Ogg for $id")
         }
     }

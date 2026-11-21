@@ -1,0 +1,256 @@
+# Arquitectura
+
+*[English version](../../en/common/architecture.md) · [Todas las páginas](../README.md)*
+
+## Visión general
+
+Every Tunnel es un mod de Fabric con dos mitades:
+
+- **Código común** (`src/main/`): se ejecuta en el servidor lógico. En un jugador es el
+  servidor integrado dentro del juego. Es dueño de las reglas: niveles, recursos, ruido,
+  el Pale man, el flujo de la partida.
+- **Código de cliente** (`src/client/`): solo se ejecuta en el cliente del juego. Es dueño
+  de lo que el jugador ve y oye: HUD, menús, pantalla de carga, música, ambiente, la luz de
+  la linterna.
+
+`splitEnvironmentSourceSets()` de Loom las mantiene separadas: el código común no puede
+usar clases del cliente por accidente. Las dos se comunican con unos pocos paquetes
+propios (ver abajo).
+
+Nada ocurre fuera de los **mundos con niveles**. Un mundo tiene niveles cuando uno de sus
+datapacks contiene `data/every_tunnel/levels/*.json`. Cualquier otro mundo sigue siendo
+vanilla: sin reglas del mundo, sin HUD, sin linterna, sin pantalla de carga.
+
+## Capas
+
+El código de `common` se divide según cuánto depende de Minecraft (un capítulo tiene la misma división dentro de cada nivel):
+
+```
+config/   core/   systems/   entities/   util/      Kotlin puro, sin tipos de Minecraft, con tests
+world/                                              reglas finas sobre core (tampoco usa tipos de MC)
+platform/                                           todo lo que toca Minecraft o Fabric
+```
+
+| Paquete | Qué contiene |
+|---|---|
+| `config` | `GameplayConfig` (cada número ajustable), su parser y el archivo en disco |
+| `core` | `LevelManager` (niveles cargados), `PlayerLocationTracker` (quién está en qué zona) |
+| `core.level` | `LevelDefinition` y el parser del JSON de niveles |
+| `core.guide` | `GuideMarkdown`, el lector de las páginas de la guía del jugador |
+| `core.puzzle` | El código de las válvulas del nivel 3 y el texto de las notas |
+| `core.progress` | `PlayerProgress`, lo que ha hecho un jugador (piezas, notas, escenas, checkpoint) |
+| `core.achievement` | `Achievement`, los once logros |
+| `core.hiding` | `LookLimit`, cuánto gira la cabeza en una taquilla |
+| `systems` | `ResourceSystem` (stamina, sed, batería), `NoiseSystem`, `FlashlightBeam` (matemática del haz) |
+| `entities` | `PaleManBrain`, `ObserverBrain` y `HunterBrain`, las decisiones del Pale man, del Observer y de los Hunters; `Gaze` y los relojes de las Distortions |
+| `util` | `JsonFields`, un lector de JSON tolerante que usan ambos parsers |
+| `world` | `WorldRules` (cuándo se aplican las reglas), `LevelTriggers` (oyentes de entrada y salida de zonas) |
+| `platform` | Bloques, objetos, la entidad, sonidos, cada objeto `*Hooks`, paquetes, comandos |
+
+La regla: **la lógica va en las capas de Kotlin puro, el pegamento va en `platform`.** Las
+capas puras reciben números, posiciones y UUIDs y devuelven decisiones; `platform` las
+alimenta desde Minecraft y aplica el resultado. Por eso el cerebro, los recursos, las
+reglas del ruido y los parsers tienen tests unitarios, y por eso portar el mod a otra
+versión de Minecraft debería consistir sobre todo en reescribir `platform` y el cliente.
+
+El cliente (`src/client/kotlin/daio7771/everytunnel/client/`) se organiza por lo que dibuja
+o reproduce:
+
+| Paquete | Qué contiene |
+|---|---|
+| `client` | El entrypoint del cliente, la tecla de la linterna, los recursos sincronizados, la detección y ajustes de shaders, el instalador del mundo del mapa, los logros conseguidos |
+| `client.compat` | Integración con LambDynamicLights (la luz de la linterna) |
+| `client.effects` | Todo lo que se oye (ambiente, zumbido, latido, respiración, música) y el fundido de pantalla |
+| `client.hud` | Barras de estado, viñeta de agotamiento, el foco de la linterna sin shaders, la vista desde la taquilla, el aviso de logro |
+| `client.render` | El renderizador del Pale man, el botín en el suelo, el uniforme del vigilante, las cámaras de seguridad |
+| `client.screen` | Menú principal, guía del jugador, logros, pantalla de carga y consejos, los créditos finales, la figura del menú |
+
+Las mixins están en Java: `src/main/java/.../mixin/` (comunes) y
+`src/client/java/.../mixin/client/` (cliente). Ver [Mixins](#mixins).
+
+## Capítulos
+
+Las fuentes están en tres partes bajo `daio7771.everytunnel`: **`common`** (el motor y lo que comparten todos los capítulos: la configuración, el modelo de nivel, el menú, el HUD, la vista de cinemáticas, el progreso, los sistemas del jugador, las criaturas y bloques compartidos, los mixins), **`chapter1`** (los niveles del juego base, una carpeta cada uno) y **`chapter2`**. Un capítulo vive aparte, en un paquete propio con las mismas capas dentro, una carpeta por nivel (las capas descritas arriba son las de `common`):
+
+```
+daio7771.everytunnel.common              EveryTunnel (entrypoint), config/ core/ systems/ entities/ util/ world/ audio/ platform/
+                                         (cliente: common.client; mixins: common.mixin, common.mixin.client)
+daio7771.everytunnel.chapter1            Chapter1 (entrypoint), core/ platform/ (lo que comparten varios niveles), client/ (cliente: Chapter1Client)
+                        .level2 .. .level5   core/  platform/  client/     (el Nivel 1, el aparcamiento, no tiene código propio)
+daio7771.everytunnel.chapter2            Chapter2 (entrypoint), core/ (su progreso, los planos de mapa de sus niveles), platform/ (sus registros,
+                                         su componente de progreso, la construcción del mapa de un nivel)
+                        .prologue        core/  platform/            (cliente: chapter2.prologue.client)
+                        .level1          core/  platform/            (cliente: chapter2.level1.client)
+                        .level2          core/  platform/
+```
+
+La regla: **`common` nunca nombra a un capítulo, un capítulo solo llega a `common` por sus puntos de extensión, y un capítulo nunca nombra a otro.** `ChapterBoundaryTest` revisa cada
+archivo fuente (y que el código del Capítulo 1 no vuelva a `common`: las pocas piezas del Capítulo 1 que se quedan allí, porque las usa el Capítulo 2 o el motor, están en su lista `sharedByName` con el motivo). Un capítulo tiene sus propios entrypoints en `fabric.mod.json` (tras los de `common`) y solo llega a `common`
+por sus puntos de extensión (los nombres son relativos a `common`):
+
+| Punto de extensión | Qué hace un capítulo con él |
+|---|---|
+| `platform.PlayerRules` | Dice qué reglas del juego base cambian para quien lo juega (linterna, esconderse, daño, ruido, barras de estado, la skin del jugador) |
+| `platform.ChapterRequest` | Registra lo que se ejecuta cuando el menú abrió el mundo para él (`onLoaded`: NUEVA PARTIDA, o CONTINUAR, `continuing`), y escribe la marca que dice al menú que tiene partida guardada (`setSaved`, `markerName`) |
+| `platform.ChapterRestarts` | Dice adónde vuelve un jugador de sus niveles al morir, y qué repone entonces; la muerte en sí es de `DeathHooks` |
+| `ProgressService.onReset` | Borra su propio progreso (su propio componente de Cardinal) con una partida nueva del Chapter 1 |
+| `client.cutscene.CutsceneView.Kind` | Sus escenas: un `Kind` con su línea de tiempo y lo demás que haga, que arranca con `CutsceneView.start` |
+| `platform.DistortionHooks.putIn` / `discard` | Pone grupos propios de Hunters bajo un id de nivel propio, y se los lleva |
+| `platform.NoteHooks.addSource` | Nombra la nota de un tablero que no tiene ningún nivel base, y recuerda que se leyó |
+| `platform.LootSpawner.addTakenListener` | Oye cada recogida de un bloque de botín; un capítulo coloca sus propios bloques de botín con `LootSpawner.LOOT` |
+| `ModBlocks.TAB` y los ajustes de bloque | Sus bloques van a la misma pestaña creativa y comparten los ajustes y formas del juego base |
+| `platform.NewGame.addResetStep` / `addRebuiltStep` | Mete sus propios pasos entre los que devuelven el mundo a su sitio con una partida nueva (o tras reconstruir los niveles); los números de fase mantienen su orden |
+| `platform.DeathHooks.Listener` | Lo que añade a una muerte: en el golpe mortal, adónde va una muerte con `back_to_key`, y qué se repone tras el reinicio |
+| `platform.ContinueGame.BuiltInPlay` | CONTINUAR para sus niveles construidos en juego (`wait` / `finishWaiting` mientras se construyen de nuevo tras la pantalla de carga) |
+| `platform.LootBlock.takenListeners`, `LootSpawner.waitingForBuild` | Qué pasa al coger uno de sus objetos de botín; los niveles que no se abastecen antes de existir |
+| `platform.NoteHooks.addValues` / `addShownRule` | Los números que cuentan sus notas y qué texto muestra una nota |
+| `platform.AchievementHooks.addDeathRule`, `PlaytestLog.describers` / `causeRules` / `levelNotes`, `DebugCommands.levelBuilders` | Sus criaturas en los logros, el registro de playtest y `setlevel`; sus subcomandos de `/everytunnel` son otro registro de la misma raíz |
+| `platform.PairedDoorBlock.locked` / `onOpened`, `MixerBlock.onPress`, el marcador `PipeValve` | Bloques compartidos que le llaman de vuelta, sin nombrarlo |
+
+Sus textos y sonidos también van aparte: los archivos de idioma se unen desde `tools/lang/src/<parte>/` (una parte por capítulo,
+`tools/lang/common/build.py`), y sus sonidos generados tienen su propio catálogo (`tools/sounds/chapter2/catalog_ch2.py`). Los ids siguen siendo los
+del mod (`every_tunnel:`), así que los mundos y las partidas no cambian cuando el código se mueve de paquete.
+
+## Entrypoints
+
+Declarados en `src/main/resources/fabric.mod.json`:
+
+| Entrypoint | Clase | Función |
+|---|---|---|
+| `main` | `common.EveryTunnel`, luego `chapter1.Chapter1`, luego `chapter2.Chapter2` | `common`: carga la configuración y llama a `register()` de cada registro y hook compartido; luego cada capítulo registra lo suyo y se conecta a los puntos de extensión |
+| `client` | `common.client.EveryTunnelClient`, luego `chapter1.client.Chapter1Client`, luego `chapter2.Chapter2Client` | Registra los efectos, HUD, pantallas, tecla y paquetes del cliente; luego los de cada capítulo |
+| `fabric-datagen` | `common.client.EveryTunnelDataGenerator` | Vacío: los recursos los hacen las herramientas Python |
+| `lambdynlights:initializer` | `common.client.compat.LambDynamicLightsCompat` | Añade el haz de la linterna como luz dinámica |
+| `cardinal-components-entity` | `common.platform.CardinalProgress`, `chapter2.platform.Ch2Progress` | Da a cada jugador el componente de progreso, y el propio del Chapter 2 |
+
+`EveryTunnel.onInitialize()` es el índice del lado del servidor. El orden solo importa en
+que los registros (objetos, bloques, entidades, sonidos) van primero.
+
+## Cómo fluye un tick del servidor
+
+Casi todo el juego lo mueven los `ServerTickEvents` de Fabric, un objeto hook por tema:
+
+```
+LevelTrackingHooks  posición -> PlayerLocationTracker -> LevelTriggers (cambios de zona)
+                                   |-> AmbienceHooks, RespawnHooks, LevelEntryHooks,
+                                   |   PaleManSpawner, LootSpawner, EndingHooks, IntroHooks
+ResourceHooks       sprint/saltos -> ResourceSystem.step -> daño, paquete de sincronización
+NoiseHooks          pasos, saltos, aterrizajes, jadeo, game events -> NoiseSystem.emit
+PaleManEntity.tick  NoiseSystem.audibleAt -> volumen (muros) -> PaleManBrain.tick -> moverse/golpear
+LoadingHooks, IntroHooks, DeathHooks, KeycardHooks, LevelEntryHooks   escenas con tiempos
+PlaytestLog         escucha todo y escribe líneas [playtest]
+```
+
+`LevelTriggers` es el principal punto de extensión: un sistema al que le importa que los
+jugadores entren o salgan de zonas registra un `LevelTriggers.Listener` una vez, y se le
+llama en el hilo del servidor con un `LocationChange` (cambio de nivel, zonas en las que
+entró, zonas de las que salió). Un oyente que lanza una excepción queda en el log y no
+detiene a los demás.
+
+## Hilos
+
+- Todo lo de `platform` y las capas puras corre en el **hilo del servidor**.
+  `NoiseSystem` y `ResourceSystem` lo dan por hecho y no están sincronizados.
+- `LevelManager` y `PlayerLocationTracker` son seguros desde cualquier hilo: el conjunto de
+  niveles se cambia como una sola instantánea inmutable, y las posiciones viven en un
+  `ConcurrentHashMap`.
+- `ConfigManager.gameplay` es `@Volatile` y se reemplaza entero.
+- El código del cliente corre en el **hilo de render**. Los paquetes del servidor se le
+  pasan con `client.execute { ... }`.
+
+## Paquetes
+
+Todos los ids son `every_tunnel:<nombre>`. API de red de Fabric (estilo 1.20.1,
+`ServerPlayNetworking` / `ClientPlayNetworking` con `PacketByteBuf`).
+
+| Id | Dirección | Lo envía | Qué lleva |
+|---|---|---|---|
+| `resources` | servidor → cliente | `ResourceSyncPacket` | Stamina, sed, batería, linterna encendida, agotado, activo, seguro, con energía (la de una comida), detector (nivel 5, desde la esclusa); redondeado a 0,1 y enviado solo si cambia |
+| `toggle_flashlight` | cliente → servidor | `FlashlightControls` | Se pulsó la tecla de la linterna |
+| `ambience` | servidor → cliente | `AmbienceHooks` | El ambiente del nivel actual del jugador |
+| `intro_music` | servidor → cliente | `IntroHooks` | Empezar o terminar (distorsionar y apagar) la canción de la intro |
+| `screen_fade` | servidor → cliente | `DeathHooks` | Oscuridad objetivo (0 a 1) y segundos para llegar |
+| `loading` | servidor → cliente | `LoadingHooks` | Estado de carga: `0` cargando, `1` listo |
+| `loading_done` | cliente → servidor | `LoadingCover` | El cliente ha dibujado el mundo y ha hecho el fundido de entrada |
+| `ending` | servidor → cliente | `EndingHooks` | Pasar los créditos finales; lleva el tiempo jugado (long, ticks) y las muertes (var int) |
+| `congrats` | servidor → cliente | `EndingHooks` | Desarrollo (`/everytunnel congrats`): abrir la ventana de felicitación, mismo contenido |
+| `false_exit_fall` | servidor → cliente | `FalseExitHooks` | Poner la música de la caída, en la cabeza del jugador |
+| `director_scene_start` | servidor → cliente | `DirectorSceneHooks` | Empezar la escena del director; lleva dónde se sienta (x, y, z como double, orientación como float) |
+| `director_scene_end` | servidor → cliente | `DirectorSceneHooks` | La escena ha terminado; lleva si se saltó (booleano) |
+| `director_scene_skip` | cliente → servidor | `CutsceneView` | El jugador pulsó saltar por segunda vez: acabar la escena ya (sin contenido) |
+| `prologue_scene_start` | servidor → cliente | `PrologueSceneHooks` | Empezar el prólogo del Chapter 2; lleva dónde está el científico (x, y, z como double, orientación como float) |
+| `prologue_scene_end` | servidor → cliente | `PrologueSceneHooks` | El prólogo ha terminado; lleva si se saltó (booleano) |
+| `prologue_scene_skip` | cliente → servidor | `CutsceneView` (`PrologueView.KIND`) | El jugador pulsó saltar por segunda vez: acabar el prólogo ya (sin contenido) |
+| `director_phrase` | servidor → cliente | `DirectorLoopHooks` | Poner una de sus frases tras la escena; lleva su id (cadena) |
+
+El estado del Pale man llega a los clientes como dato sincronizado de la entidad
+(`PaleManEntity.brainState`), no como paquete.
+
+## Datos guardados
+
+Lo que el mod recuerda se guarda con el mundo, en `<mundo>/data/`, como archivos
+`PersistentState` de vanilla:
+
+| Archivo | Dueño | Qué recuerda |
+|---|---|---|
+| `every_tunnel_resources.dat` | `ResourceHooks` | La stamina, sed, batería y linterna de cada jugador |
+| `every_tunnel_intro.dat` | `IntroHooks` | Quién ha tenido ya la intro del ascensor |
+| `every_tunnel_loot.dat` | `LootSpawner` | Qué puntos de botín se llenaron |
+| `every_tunnel_pale_men.dat` | `PaleManSpawner` | Qué puntos de aparición del Pale man ya lo generaron |
+| `every_tunnel_lights.dat` | `KeycardHooks` | Las luces que apagó la tarjeta, para restaurarlas |
+| `every_tunnel_ch2_l1.dat` | `Ch2L1Build` | De qué plan de mapa se construyó el Nivel 1 del Chapter 2 (su huella), para reconstruirlo si el plan cambia |
+| `every_tunnel_ch2_l2.dat` | `Ch2L2Build` | Lo mismo para el Nivel 2 del Chapter 2, las catacumbas |
+
+`packMapWorld` deja todos estos fuera del jar de release, así que una instalación nueva
+empieza limpia.
+
+El progreso del jugador va aparte, con los datos propios del jugador: `platform.ProgressService`,
+sobre Cardinal Components (`platform.CardinalProgress`; el Chapter 2 guarda su propio componente, `chapter2.platform.Ch2Progress`: las
+únicas clases que tocan la librería). Sobrevive a la muerte y llega al cliente de ese jugador; una partida nueva borra los dos. La partida
+guardada del Chapter 2 (el último checkpoint del Nivel 2: su estado, contadores e inventario) está en ese componente; solo un archivo
+vacío en la carpeta del mundo, `every_tunnel_chapter2_continue` (`ChapterRequest.setSaved`), se lo dice al menú principal, como
+`every_tunnel_continue` para el Chapter 1.
+
+Fuera del mundo, en la carpeta `config/` del juego: `every_tunnel/gameplay.json` (la
+configuración de juego) y `every_tunnel/shader_settings_applied.txt` (qué packs de shaders
+ya ha configurado `ShaderSettings`) y, solo si el desarrollador los pone ahí, `every_tunnel/ch2/l1/*.json` y `every_tunnel/ch2/l2/*.json` (copias
+editadas de los datos de los Niveles 1 y 2 del Chapter 2, que se leen con `/et reload`).
+
+## Mixins
+
+Las mínimas: una mixin solo donde Fabric API no tiene evento.
+
+| Mixin | Objetivo | Por qué |
+|---|---|---|
+| `ServerWorldMixin` | `ServerWorld.emitGameEvent` | Permite al sistema de ruido oír puertas, palancas, cofres (las "vibraciones" de vanilla); no cambia nada |
+| `FlowableFluidMixin` | `FlowableFluid.canFill` | El agua que fluye ya no se lleva los bloques propios del mod (lámparas, objetos) ni los suelta como ítems en un nivel inundado |
+| `LivingEntityMixin` | `LivingEntity.shouldSpawnConsumptionEffects` | Sin el sorbo de vanilla para la botella de agua; tiene sus propios tragos |
+| `ClientPlayerEntityMixin` | `canSprint` | No se puede esprintar agotado (el sprint lo decide el cliente) |
+| `GameRendererMixin` | `tiltViewWhenHurt` (final) | Hace temblar la cámara en el derrumbe del túnel del nivel 3 (`CameraShake`) |
+| `InGameHudMixin` | `render`, `renderStatusBars`, `renderExperienceBar` | Oculta todo el HUD mientras suena una cinemática, y las barras de vanilla mientras el HUD del mod las sustituye |
+| `AbstractClientPlayerEntityMixin` | `getSkinTexture`, `getModel`, `getCapeTexture` | Todos los jugadores llevan el uniforme del vigilante en los mundos con niveles |
+| `LightmapTextureManagerMixin` | `update` (gamma) | El brillo cuenta como Moody en los niveles (algo subido sin shaders en el juego del pasillo de entrada de Level 5) |
+| `MinecraftClientMixin` | `setScreen` | Sustituye la pantalla de título de vanilla por el menú principal |
+| `MusicTrackerMixin` | `tick` | Sin música de vanilla en ningún sitio |
+| `ScreenMixin` | `renderWithTooltip` | Dibuja la pantalla de carga encima de las de vanilla |
+| `SplashOverlayMixin` | `render` | Dibuja la pantalla de carga encima del splash de recarga de recursos |
+| `WorldListEntryMixin` | `openReadingWorldScreen` | Detecta que se abre un mundo con niveles desde la lista de mundos |
+| `QuickPlayMixin` | `startSingleplayer` | Lo mismo para quick play (ejecuciones de desarrollo, launchers) |
+| `SoundSystemMixin` | `getAdjustedVolume`, `reloadSounds` | Silencio tras la pantalla de carga, con fundido junto a la imagen; la música del menú vuelve tras recargar el sonido |
+
+## Principios de diseño
+
+- **Los niveles son datos, no código.** Un nivel es un archivo JSON de áreas y puntos en el
+  datapack del mundo; los bloques los construye una función. Ver [Niveles](../chapter1/levels.md).
+- **Entrada tolerante.** Los archivos de configuración y de niveles nunca cuelgan el juego:
+  cada valor erróneo se informa con su ruta JSON y se sustituye por su valor por defecto, o
+  la entrada rota se salta.
+- **Vanilla sigue siendo vanilla.** Cada función comprueba `WorldRules.active` o
+  `WorldRules.appliesTo(...)`. Creativo y Espectador están exentos de las reglas, así que el
+  mapa se puede construir a mano.
+- **Contenido generado.** Sonidos, texturas, modelos y el mapa salen de scripts Python con
+  semilla, así que se pueden rehacer desde parámetros. Ver
+  [Herramientas Python](tools.md).
+- **Los comentarios dicen el porqué.** Cada archivo empieza con un KDoc que explica qué
+  hace y cómo encaja. Esta documentación resume esas cabeceras; en caso de duda, manda el
+  código.

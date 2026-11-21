@@ -1,12 +1,12 @@
 package daio7771.everytunnel.chapter2.prologue.platform
 
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.prologue.core.BlockSpec
 import daio7771.everytunnel.chapter2.prologue.core.Cell
 import daio7771.everytunnel.chapter2.prologue.core.PrologueScene
 import daio7771.everytunnel.chapter2.prologue.core.RoomPlan
-import daio7771.everytunnel.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
 import daio7771.everytunnel.chapter2.prologue.core.Spot
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
@@ -29,14 +29,13 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Vec3d
 import net.minecraft.world.World
 import java.util.UUID
-import daio7771.everytunnel.platform.ChapterRequest
-import daio7771.everytunnel.platform.ResourceHooks
-import daio7771.everytunnel.platform.TickProfiler
-
+import daio7771.everytunnel.common.platform.ChapterRequest
+import daio7771.everytunnel.common.platform.ResourceHooks
+import daio7771.everytunnel.common.platform.TickProfiler
 /**
  * The prologue of Chapter 2 (the opening cinematic, [PrologueScene]).
  *
- * It does not happen in a level: when it starts, this builds its room ([RoomPlan], from `tools/prologue/room.py`)
+ * It does not happen in a level: when it starts, this builds its room ([RoomPlan], from `tools/prologue/chapter2/room.py`)
  * at [ORIGIN] (high over the world, far from every level) in the player's world, puts the scientist in it
  * ([ScientistEntity]), moves the player into the room (held there unharmed, not drawn: the client's camera is
  * the view) and tells the client to begin ([START_PACKET_ID], which carries where he stands). When it ends,

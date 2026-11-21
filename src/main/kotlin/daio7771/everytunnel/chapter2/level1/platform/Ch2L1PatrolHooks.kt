@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
 import daio7771.everytunnel.chapter2.platform.Ch2Achievements
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Angles
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1PatrolRunner
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Pose
@@ -12,10 +12,10 @@ import daio7771.everytunnel.chapter2.level1.core.Ch2L1Watch
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.core.level.Position
-import daio7771.everytunnel.config.ConfigManager
-import daio7771.everytunnel.systems.ResourceSystem
-import daio7771.everytunnel.platform.TickProfiler
+import daio7771.everytunnel.common.core.level.Position
+import daio7771.everytunnel.common.config.ConfigManager
+import daio7771.everytunnel.common.systems.ResourceSystem
+import daio7771.everytunnel.common.platform.TickProfiler
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking

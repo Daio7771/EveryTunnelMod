@@ -11,7 +11,7 @@ import net.minecraft.world.BlockView
 
 /**
  * The amber warning beacon on the pump's housing in Chapter 2's Level 2 ([Ch2L2Pump] switches it): [LIT] while the pump runs, blinking
- * slowly in its last, slowing second, dark in the silence. The models are in tools/blocks/generate.py.
+ * slowly in its last, slowing second, dark in the silence. The models are in tools/blocks/common/generate.py.
  */
 class PumpBeaconBlock(settings: Settings) : Block(settings) {
 

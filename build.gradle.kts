@@ -44,7 +44,7 @@ loom {
         }
 
         // Development shortcut: launches the client straight into the singleplayer
-        // world saved as "dev_flat" in run/saves/ (a vanilla superflat world, see docs/en/building-and-release.md).
+        // world saved as "dev_flat" in run/saves/ (a vanilla superflat world, see docs/en/common/building-and-release.md).
         // Gradle task: ./gradlew runClientDevWorld
         register("clientDevWorld") {
             client()
@@ -54,7 +54,7 @@ loom {
             programArgs("--username", "Dev", "--quickPlaySingleplayer", "dev_flat")
         }
 
-        // Same shortcut for "noname_complex": the map world, which tools/map/map_generator.py
+        // Same shortcut for "noname_complex": the map world, which tools/map/common/map_generator.py
         // fills with the generated levels. Gradle task: ./gradlew runClientMapWorld
         register("clientMapWorld") {
             client()
@@ -84,10 +84,10 @@ tasks.named("runClientMapWorld") {
     doFirst {
         val world = file("run/saves/noname_complex")
         if (!world.resolve("level.dat").isFile) {
-            throw GradleException("No world at $world: create it first (docs/en/building-and-release.md, \"Dev worlds\").")
+            throw GradleException("No world at $world: create it first (docs/en/common/building-and-release.md, \"Dev worlds\").")
         }
         if (!world.resolve("datapacks/every_tunnel_level1_mod").isDirectory) {
-            throw GradleException("$world has no level datapack: run python3 tools/map/map_generator.py")
+            throw GradleException("$world has no level datapack: run python3 tools/map/common/map_generator.py")
         }
     }
 }

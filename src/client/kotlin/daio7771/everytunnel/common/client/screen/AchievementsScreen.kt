@@ -1,0 +1,247 @@
+package daio7771.everytunnel.common.client.screen
+
+import daio7771.everytunnel.common.client.AchievementIcons
+import daio7771.everytunnel.common.client.AchievementStore
+import daio7771.everytunnel.common.client.hud.AchievementToast
+import daio7771.everytunnel.common.core.achievement.AchievementDef
+import daio7771.everytunnel.common.core.achievement.AchievementRegistry
+import net.minecraft.client.gui.DrawContext
+import net.minecraft.client.gui.screen.Screen
+import net.minecraft.text.OrderedText
+import net.minecraft.text.StringVisitable
+import net.minecraft.text.Text
+import net.minecraft.util.Language
+import net.minecraft.util.Util
+import org.lwjgl.glfw.GLFW
+import kotlin.math.abs
+import kotlin.math.exp
+import kotlin.math.roundToInt
+
+/**
+ * The ACHIEVEMENTS screen, opened from the main menu ([MainMenuScreen]): one sheet of worn paper
+ * like the player guide's ([Paper]) with the title, a tab for each chapter that has achievements
+ * (CHAPTER 1, CHAPTER 2...: click, Left/Right or Tab), how many of that chapter's are earned ("3 / 11") and
+ * every achievement of the tab in list order ([AchievementRegistry]). An earned one shows its icon, its title and the
+ * line on how it was earned; one not earned yet a "?" and "Not yet unlocked" ("Hidden achievement" for a hidden one)
+ * ([AchievementIcons], [AchievementStore]).
+ *
+ * The sheet scrolls (wheel, up/down, page keys) when the window is too short for it; Esc or
+ * BACK at the top left goes back to the menu, whose music keeps playing.
+ */
+class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable("screen.every_tunnel.achievements.title")) {
+
+    private var unlocked: Set<AchievementDef> = emptySet()
+    private val chapters = AchievementRegistry.chapters()
+    private var tab = 0
+    private var tabBoxes: List<IntRange> = emptyList()
+    private var tabsTop = 0
+    private val entries: List<AchievementDef> get() = AchievementRegistry.inChapter(chapters[tab])
+    private var sheetLeft = 0
+    private var sheetWidth = 0
+    private var scrollTarget = 0.0
+    private var scroll = 0.0
+    private var lastFrameMs = Util.getMeasuringTimeMs()
+    private val openedAtMs = Util.getMeasuringTimeMs()
+
+    private val viewTop get() = MARGIN
+    private val viewBottom get() = height - MARGIN
+    private val sheetHeight get() = maxOf(PAD_TOP + HEADER_HEIGHT + entries.sumOf { rowHeight(it) } + PAD_BOTTOM, viewBottom - viewTop - SHEET_GAP * 2)
+
+    /** The width the title and the line of an achievement have, beside its icon. */
+    private val lineWidth get() = sheetWidth - PAD_X * 2 - ICON_SIZE - ICON_GAP
+
+    /** An earned achievement's line, wrapped to [lineWidth]: a longer translation takes more lines, never cut short. */
+    private fun lineOf(achievement: AchievementDef): List<OrderedText> =
+        textRenderer.wrapLines(AchievementToast.description(achievement), lineWidth.coerceAtLeast(40))
+
+    private fun rowHeight(achievement: AchievementDef): Int =
+        if (achievement in unlocked) ROW_HEIGHT + (lineOf(achievement).size - 1).coerceAtLeast(0) * LINE_STEP else ROW_HEIGHT
+
+    override fun init() {
+        unlocked = AchievementStore.unlocked
+        val backWidth = textRenderer.getWidth(backText) + MARGIN * 2
+        sheetWidth = minOf(SHEET_MAX, width - backWidth * 2).coerceAtLeast(minOf(SHEET_MIN, width - MARGIN * 2))
+        sheetLeft = (width - sheetWidth) / 2
+        scrollTarget = scrollTarget.coerceIn(0.0, maxScroll())
+        scroll = scroll.coerceIn(0.0, maxScroll())
+    }
+
+    override fun shouldPause(): Boolean = false
+
+    override fun close() {
+        client?.setScreen(parent)
+    }
+
+    private fun maxScroll(): Double = maxOf(0, sheetHeight + SHEET_GAP * 2 - (viewBottom - viewTop)).toDouble()
+
+    override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
+        val now = Util.getMeasuringTimeMs()
+        val seconds = ((now - lastFrameMs) / 1000.0).coerceIn(0.0, 0.1)
+        lastFrameMs = now
+        scroll += (scrollTarget - scroll) * (1.0 - exp(-seconds * SCROLL_EASE))
+        if (abs(scrollTarget - scroll) < 0.5) scroll = scrollTarget
+
+        context.fill(0, 0, width, height, 0xFF000000.toInt())
+        context.drawText(textRenderer, backText, MARGIN, MARGIN + 2, if (overBack(mouseX, mouseY)) BACK_HOVER else BACK_COLOR, false)
+        drawSheet(context)
+
+        val fade = ((now - openedAtMs) / FADE_IN_MS.toFloat()).coerceIn(0f, 1f)
+        if (fade < 1f) context.fill(0, 0, width, height, ((1f - fade) * 255f).toInt() shl 24)
+    }
+
+    private fun drawSheet(context: DrawContext) {
+        val top = viewTop + SHEET_GAP - scroll.roundToInt()
+        val h = sheetHeight
+        val textLeft = sheetLeft + PAD_X
+        val textWidth = sheetWidth - PAD_X * 2
+        context.enableScissor(0, viewTop, width, viewBottom)
+        context.fill(sheetLeft + SHADOW, top + SHADOW, sheetLeft + sheetWidth + SHADOW, top + h + SHADOW, Paper.SHADOW_COLOR)
+        Paper.tile(context, sheetLeft, top, sheetWidth, h, 0, 0)
+        Paper.stains(context, STAIN_SEED, sheetLeft, top, sheetWidth, h)
+        Paper.edges(context, sheetLeft, top, sheetWidth, h)
+
+        // The title, twice the size, and the count under it.
+        var y = top + PAD_TOP
+        context.matrices.push()
+        context.matrices.translate(textLeft.toFloat(), y.toFloat(), 0f)
+        context.matrices.scale(TITLE_SCALE, TITLE_SCALE, 1f)
+        context.drawText(textRenderer, title, 0, 0, Paper.INK_DARK, false)
+        context.matrices.pop()
+        val boxes = ArrayList<IntRange>()
+        var tabX = textLeft
+        for ((i, chapter) in chapters.withIndex()) {
+            val label = Text.translatable("screen.every_tunnel.achievements.chapter", chapter).string.uppercase()
+            val labelWidth = textRenderer.getWidth(label)
+            val selected = i == tab
+            context.drawText(textRenderer, label, tabX, y + TABS_Y, if (selected) Paper.INK_DARK else Paper.INK_SOFT, false)
+            if (selected) context.fill(tabX, y + TABS_Y + 10, tabX + labelWidth, y + TABS_Y + 11, Paper.INK_DARK)
+            boxes += tabX..(tabX + labelWidth)
+            tabX += labelWidth + TAB_GAP
+        }
+        tabBoxes = boxes
+        tabsTop = y + TABS_Y
+        val chapterList = entries
+        val count = Text.translatable("screen.every_tunnel.achievements.count", chapterList.count { it in unlocked }, chapterList.size)
+        context.drawText(textRenderer, count, textLeft, y + COUNT_Y, Paper.INK_SOFT, false)
+        y += HEADER_HEIGHT
+
+        for (achievement in chapterList) {
+            context.fill(textLeft, y, textLeft + textWidth, y + 1, Paper.RULE_COLOR)
+            val earned = achievement in unlocked
+            AchievementIcons.draw(context, achievement, textLeft, y + ICON_Y, locked = !earned)
+            val textX = textLeft + ICON_SIZE + ICON_GAP
+            val available = textLeft + textWidth - textX
+            if (earned) {
+                val name = AchievementToast.title(achievement).copy().styled { it.withBold(true) }
+                context.drawText(textRenderer, reorder(textRenderer.trimToWidth(name, available)), textX, y + TITLE_Y, Paper.INK_DARK, false)
+                for ((k, line) in lineOf(achievement).withIndex()) {
+                    context.drawText(textRenderer, line, textX, y + LINE_Y + k * LINE_STEP, Paper.INK_SOFT, false)
+                }
+            } else {
+                context.drawText(textRenderer, if (achievement.hidden) hiddenText else lockedText, textX, y + LOCKED_Y, Paper.INK_SOFT, false)
+            }
+            y += rowHeight(achievement)
+        }
+        context.disableScissor()
+    }
+
+    private fun reorder(text: StringVisitable): OrderedText = Language.getInstance().reorder(text)
+
+    private fun overBack(mouseX: Int, mouseY: Int): Boolean =
+        mouseX in (MARGIN - 4)..(MARGIN + textRenderer.getWidth(backText) + 4) && mouseY in MARGIN..(MARGIN + 13)
+
+    override fun mouseClicked(mouseX: Double, mouseY: Double, button: Int): Boolean {
+        if (overBack(mouseX.toInt(), mouseY.toInt())) {
+            close()
+            return true
+        }
+        if (chapters.size > 1 && mouseY.toInt() in (tabsTop - 2)..(tabsTop + 12)) {
+            val hit = tabBoxes.indexOfFirst { mouseX.toInt() in (it.first - 4)..(it.last + 4) }
+            if (hit >= 0) {
+                showTab(hit)
+                return true
+            }
+        }
+        return super.mouseClicked(mouseX, mouseY, button)
+    }
+
+    override fun mouseScrolled(mouseX: Double, mouseY: Double, amount: Double): Boolean {
+        scrollBy(-amount * WHEEL_STEP)
+        return true
+    }
+
+    override fun keyPressed(keyCode: Int, scanCode: Int, modifiers: Int): Boolean {
+        if (keyCode == GLFW.GLFW_KEY_D && hasShiftDown() && hasControlDown() && unlocked.isNotEmpty()) {
+            client?.setScreen(EraseSaveScreen(this, "screen.every_tunnel.achievements.erase") { AchievementStore.reset() })
+            return true
+        }
+        val page = (viewBottom - viewTop - PAGE_KEEP).toDouble()
+        when (keyCode) {
+            GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_A -> showTab(tab - 1)
+            GLFW.GLFW_KEY_RIGHT, GLFW.GLFW_KEY_D, GLFW.GLFW_KEY_TAB -> showTab(if (tab + 1 < chapters.size) tab + 1 else 0)
+            GLFW.GLFW_KEY_UP, GLFW.GLFW_KEY_W -> scrollBy(-KEY_STEP)
+            GLFW.GLFW_KEY_DOWN, GLFW.GLFW_KEY_S -> scrollBy(KEY_STEP)
+            GLFW.GLFW_KEY_PAGE_UP -> scrollBy(-page)
+            GLFW.GLFW_KEY_PAGE_DOWN, GLFW.GLFW_KEY_SPACE -> scrollBy(page)
+            GLFW.GLFW_KEY_HOME -> scrollBy(-maxScroll())
+            GLFW.GLFW_KEY_END -> scrollBy(maxScroll())
+            else -> return super.keyPressed(keyCode, scanCode, modifiers)
+        }
+        return true
+    }
+
+    /** The tab [index] (not past the first and last), at the top of its list. */
+    private fun showTab(index: Int) {
+        val next = index.coerceIn(0, chapters.size - 1)
+        if (next == tab) return
+        tab = next
+        scrollTarget = 0.0
+        scroll = 0.0
+    }
+
+    private fun scrollBy(amount: Double) {
+        scrollTarget = (scrollTarget + amount).coerceIn(0.0, maxScroll())
+    }
+
+    companion object {
+        private val backText: Text get() = Text.translatable("screen.every_tunnel.guide.back").let { Text.literal("< ").append(it) }
+        private val lockedText: Text get() = Text.translatable("screen.every_tunnel.achievements.locked")
+        private val hiddenText: Text get() = Text.translatable("screen.every_tunnel.achievements.hidden")
+
+        // The same sizes as the guide's sheet.
+        private const val MARGIN = 8
+        private const val SHEET_MAX = 300
+        private const val SHEET_MIN = 160
+        private const val SHEET_GAP = 6
+        private const val SHADOW = 3
+        private const val PAD_X = 18
+        private const val PAD_TOP = 18
+        private const val PAD_BOTTOM = 18
+        private const val STAIN_SEED = 0xAC41L
+
+        private const val TITLE_SCALE = 2f
+        private const val TABS_Y = 22
+        private const val TAB_GAP = 14
+        private const val COUNT_Y = 36
+        private const val HEADER_HEIGHT = 54
+
+        /** One achievement: a rule on top, the icon, the title and its line beside it. */
+        private const val ROW_HEIGHT = 28
+        private const val ICON_SIZE = 16
+        private const val ICON_GAP = 8
+        private const val ICON_Y = 6
+        private const val TITLE_Y = 5
+        private const val LINE_Y = 16
+        /** Each further line of a long achievement line. */
+        private const val LINE_STEP = 10
+        private const val LOCKED_Y = 10
+
+        private const val WHEEL_STEP = 24.0
+        private const val KEY_STEP = 20.0
+        private const val PAGE_KEEP = 30
+        private const val SCROLL_EASE = 18.0
+        private const val FADE_IN_MS = 400L
+        private const val BACK_COLOR = 0xFF6E737A.toInt()
+        private const val BACK_HOVER = 0xFFE8ECF0.toInt()
+    }
+}

@@ -1,13 +1,13 @@
 package daio7771.everytunnel.chapter2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.core.Ch2PlayerProgress
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Snapshot
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
 import daio7771.everytunnel.chapter2.prologue.platform.PrologueSceneHooks
-import daio7771.everytunnel.platform.ChapterRequest
-import daio7771.everytunnel.platform.ProgressService
+import daio7771.everytunnel.common.platform.ChapterRequest
+import daio7771.everytunnel.common.platform.ProgressService
 import dev.onyxstudios.cca.api.v3.component.ComponentKey
 import dev.onyxstudios.cca.api.v3.component.ComponentRegistry
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent
@@ -23,7 +23,7 @@ import net.minecraft.util.Identifier
 
 /**
  * Chapter 2's progress of each player ([Ch2PlayerProgress]) on Cardinal Components, a component of its own (`every_tunnel:ch2_progress`),
- * apart from Chapter 1's (`platform.CardinalProgress`): saved with the player, copied onto them when they respawn, and sent to their
+ * apart from Chapter 1's (`common.platform.CardinalProgress`): saved with the player, copied onto them when they respawn, and sent to their
  * client on every change. A Chapter 1 new game ([ProgressService.reset]) clears it too ([register]).
  *
  * Declared in `fabric.mod.json` (`custom`, "cardinal-components"); this object is a `cardinal-components-entity` entrypoint.

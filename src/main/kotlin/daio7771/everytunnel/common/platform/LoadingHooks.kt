@@ -1,0 +1,260 @@
+package daio7771.everytunnel.common.platform
+
+import daio7771.everytunnel.common.EveryTunnel
+import daio7771.everytunnel.common.core.LevelManager
+import daio7771.everytunnel.common.world.WorldRules
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
+import net.minecraft.entity.attribute.EntityAttributeModifier
+import net.minecraft.entity.attribute.EntityAttributes
+import net.minecraft.network.packet.s2c.play.LightUpdateS2CPacket
+import net.minecraft.server.MinecraftServer
+import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.util.Identifier
+import net.minecraft.util.math.ChunkPos
+import java.util.Locale
+import java.util.UUID
+
+/**
+ * Opening a world with levels: the map is rebuilt and the player starts a new game, behind
+ * the loading screen (`common.client.screen.LoadingScreen`).
+ *
+ * - When the server starts, every level's `build` function runs once (the map's
+ *   `garage:build`; levels built together name the same one). It force-loads the map,
+ *   waits for its chunks, builds, and ends with `/everytunnel rebuilt` ([levelsRebuilt]).
+ *   Until then the world is building.
+ * - A player who joins a world with levels is loading: the client shows the loading screen
+ *   ([STATE_LOADING]), and the player cannot move, be hurt or make a noise, their
+ *   resources do not drain, and no intro starts.
+ * - Once the world is built, a Survival or Adventure player starts a new game
+ *   ([NewGame.start]): every level is reset and they wait in the closed elevator; or goes on
+ *   with the saved one, if the menu asked for it ([ContinueGame]). Creative and Spectator players
+ *   stay where they are.
+ * - Then the light: the build runs while the player joins, so the chunks they were sent
+ *   can carry light from before the build (the elevator with sky light and no lamp). Once
+ *   the light engine has settled ([LIGHT_SETTLE_TICKS], at most [LIGHT_TIMEOUT_TICKS]),
+ *   the light of every loaded chunk in their view is sent again ([resendLight]).
+ * - The client is told ([STATE_READY]); it waits
+ *   until the terrain around the player is drawn, fades the screen out and answers
+ *   ([DONE_PACKET_ID]). Then the player is free and the intro starts ([IntroHooks]).
+ * - Safety nets: a build that never reports back is given up after [BUILD_TIMEOUT_TICKS],
+ *   and a client that never answers is let go after [READY_TIMEOUT_TICKS].
+ */
+object LoadingHooks {
+
+    /** To the client, one byte: [STATE_LOADING] or [STATE_READY]. */
+    val STATE_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "loading")
+
+    /** From the client, no payload: the loading screen has faded out. */
+    val DONE_PACKET_ID = Identifier(EveryTunnel.MOD_ID, "loading_done")
+
+    /** Show the loading screen: the world is being prepared. */
+    const val STATE_LOADING: Byte = 0
+
+    /** The world is ready: fade the loading screen out once the terrain is drawn. */
+    const val STATE_READY: Byte = 1
+
+    private const val BUILD_TIMEOUT_TICKS = 20L * 120
+    private const val READY_TIMEOUT_TICKS = 20L * 30
+    /** How long to wait for the client to register the loading channel before going on without it. */
+    private const val CHANNEL_WAIT_TICKS = 20L * 5
+    /** Ticks after the new game before the light is sent again, and the most to wait for the light engine. */
+    private const val LIGHT_SETTLE_TICKS = 20L
+    private const val LIGHT_TIMEOUT_TICKS = 20L * 10
+
+    private val FREEZE_ID: UUID = UUID.fromString("0f6c2d4a-7b1e-4f39-8c55-2a9e61d3b7c4")
+
+    private class Loading(val joinedTick: Long) {
+        var sentLoading = false
+        var prepared = false
+        /** Server tick the new game started (or was skipped), or -1. */
+        var preparedTick = -1L
+        var lightSent = false
+
+        /** The menu asked only for a later chapter's opening ([ChapterRequest]): it plays once the loading screen is gone. */
+        var chapterStart = false
+        /** Server tick [STATE_READY] was sent, or -1. */
+        var readyTick = -1L
+        var done = false
+    }
+
+    // Server thread only.
+    private val loading = HashMap<UUID, Loading>()
+    private var building = false
+    private var buildStartTick = 0L
+    private var buildStartNanos = 0L
+
+    fun register() {
+        ServerLifecycleEvents.SERVER_STARTED.register(::startBuilds)
+        ServerLifecycleEvents.SERVER_STOPPED.register {
+            loading.clear()
+            building = false
+        }
+        ServerPlayConnectionEvents.JOIN.register { handler, _, server -> join(handler.player, server) }
+        ServerPlayConnectionEvents.DISCONNECT.register { handler, _ ->
+            if (loading.remove(handler.player.uuid) != null) unfreeze(handler.player)
+        }
+        ServerPlayNetworking.registerGlobalReceiver(DONE_PACKET_ID) { server, player, _, _, _ ->
+            server.execute { loading[player.uuid]?.done = true }
+        }
+        ServerLivingEntityEvents.ALLOW_DAMAGE.register { entity, _, _ -> entity.uuid !in loading }
+        TickProfiler.endServerTick.register(::tick)
+    }
+
+    /** True from joining until the loading screen is gone. */
+    fun isLoading(player: ServerPlayerEntity): Boolean = player.uuid in loading
+
+    /** The map's build finished (`/everytunnel rebuilt`, its last command). */
+    fun levelsRebuilt(server: MinecraftServer) {
+        if (!building) return
+        building = false
+        EveryTunnel.LOGGER.info(
+            "Map built in {} s ({} ms of the server's own time)", "%.1f".format(Locale.ROOT, (server.ticks - buildStartTick) / 20.0),
+            (System.nanoTime() - buildStartNanos) / 1_000_000,
+        )
+    }
+
+    private fun startBuilds(server: MinecraftServer) {
+        building = false
+        if (ChapterRequest.chapterOnly) {
+            // A chapter's opening has its own place: no level is needed, so none is built.
+            EveryTunnel.LOGGER.info("Only Chapter {}'s opening was asked for: the map is not rebuilt", ChapterRequest.chapter)
+            return
+        }
+        val ids = LevelManager.all().sortedBy { it.order }.mapNotNull { it.build }.distinct()
+        if (ids.isEmpty()) return
+        val functions = server.commandFunctionManager
+        // Silent: the build's own messages and the commands' feedback are not for the player.
+        val source = server.commandSource.withSilent()
+        buildStartTick = server.ticks.toLong()
+        buildStartNanos = System.nanoTime()
+        for (id in ids) {
+            val function = Identifier.tryParse(id)?.let { functions.getFunction(it).orElse(null) }
+            if (function == null) {
+                EveryTunnel.LOGGER.warn("Level build function {} not found: that part of the map is not rebuilt", id)
+                continue
+            }
+            functions.execute(function, source)
+            building = true
+        }
+        if (building) EveryTunnel.LOGGER.info("Building the map: {}", ids.joinToString())
+    }
+
+    private fun join(player: ServerPlayerEntity, server: MinecraftServer) {
+        if (!WorldRules.active) return
+        loading[player.uuid] = Loading(server.ticks.toLong())
+        freeze(player)
+    }
+
+    private fun tick(server: MinecraftServer) {
+        val now = server.ticks.toLong()
+        if (building && now - buildStartTick > BUILD_TIMEOUT_TICKS) {
+            EveryTunnel.LOGGER.warn(
+                "The map build did not finish (no /everytunnel rebuilt) in {} s: going on without it",
+                BUILD_TIMEOUT_TICKS / 20,
+            )
+            building = false
+        }
+        val iterator = loading.entries.iterator()
+        while (iterator.hasNext()) {
+            val (id, state) = iterator.next()
+            val player = server.playerManager.getPlayer(id)
+            if (player == null) {
+                iterator.remove()
+                continue
+            }
+            val canSend = ServerPlayNetworking.canSend(player, STATE_PACKET_ID)
+            if (!state.sentLoading && canSend) {
+                send(player, STATE_LOADING)
+                state.sentLoading = true
+            }
+            if (building) continue
+
+            if (!state.prepared) {
+                state.prepared = true
+                state.preparedTick = now
+                if (ChapterRequest.chapterOnly) {
+                    state.chapterStart = true
+                } else if (WorldRules.appliesTo(player.isCreative, player.isSpectator)) {
+                    val continuing = ContinueGame.requested && ContinueGame.start(player)
+                    ContinueGame.requested = false
+                    if (!continuing) NewGame.start(player)
+                }
+            }
+            if (ContinueGame.waitingForBuild) {
+                // The light settles from when the player arrives, not before.
+                state.preparedTick = now
+                continue
+            }
+            if (!state.lightSent) {
+                val waited = now - state.preparedTick
+                val settling = player.serverWorld.chunkManager.lightingProvider.hasUpdates()
+                if (waited < LIGHT_SETTLE_TICKS || (settling && waited < LIGHT_TIMEOUT_TICKS)) continue
+                if (settling) EveryTunnel.LOGGER.warn("{}: the light was still updating after {} s, sending it anyway", player.name.string, waited / 20)
+                state.lightSent = true
+                resendLight(player, server)
+            }
+            if (state.readyTick < 0) {
+                if (canSend) {
+                    send(player, STATE_READY)
+                    state.readyTick = now
+                } else if (now - state.joinedTick > CHANNEL_WAIT_TICKS) {
+                    // A client without the loading screen: nothing to wait for.
+                    iterator.remove()
+                    unfreeze(player)
+                }
+                continue
+            }
+            val timedOut = now - state.readyTick > READY_TIMEOUT_TICKS
+            if (state.done || timedOut) {
+                if (timedOut) EveryTunnel.LOGGER.warn("{}: the loading screen did not report back, going on", player.name.string)
+                iterator.remove()
+                unfreeze(player)
+                EveryTunnel.LOGGER.info("{}: loaded", player.name.string)
+                if (state.chapterStart) ChapterRequest.loaded(player)
+            }
+        }
+    }
+
+    /** Sends the light of every loaded chunk within the view distance around [player] again. */
+    private fun resendLight(player: ServerPlayerEntity, server: MinecraftServer) {
+        val world = player.serverWorld
+        val lighting = world.chunkManager.lightingProvider
+        val centre = player.chunkPos
+        val radius = server.playerManager.viewDistance
+        var sent = 0
+        for (cx in centre.x - radius..centre.x + radius) {
+            for (cz in centre.z - radius..centre.z + radius) {
+                if (!world.chunkManager.isChunkLoaded(cx, cz)) continue
+                // Null bit sets: every section, sky and block light.
+                player.networkHandler.sendPacket(LightUpdateS2CPacket(ChunkPos(cx, cz), lighting, null, null))
+                sent++
+            }
+        }
+        EveryTunnel.LOGGER.info("{}: light of {} chunks sent again", player.name.string, sent)
+    }
+
+    private fun send(player: ServerPlayerEntity, state: Byte) {
+        val buf = PacketByteBufs.create()
+        buf.writeByte(state.toInt())
+        ServerPlayNetworking.send(player, STATE_PACKET_ID, buf)
+    }
+
+    private fun freeze(player: ServerPlayerEntity) {
+        player.isSprinting = false
+        player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)?.let { speed ->
+            if (speed.getModifier(FREEZE_ID) == null) {
+                speed.addTemporaryModifier(
+                    EntityAttributeModifier(FREEZE_ID, "Every Tunnel: loading", -1.0, EntityAttributeModifier.Operation.MULTIPLY_TOTAL),
+                )
+            }
+        }
+    }
+
+    private fun unfreeze(player: ServerPlayerEntity) {
+        player.getAttributeInstance(EntityAttributes.GENERIC_MOVEMENT_SPEED)?.removeModifier(FREEZE_ID)
+    }
+}

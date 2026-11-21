@@ -1,7 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.core
 
-import daio7771.everytunnel.util.JsonFields
-
+import daio7771.everytunnel.common.util.JsonFields
 /**
  * A group of three Hunters (Level 5's) put at [anchor] when the level starts at a state no later than [until]; they face [yaw]
  * (the anchor's own if null). Several entries give several groups.
@@ -9,7 +8,7 @@ import daio7771.everytunnel.util.JsonFields
 data class Ch2L2HunterGroup(val id: String, val anchor: String, val yaw: Float?, val until: Ch2L2State)
 
 /**
- * A piece of loot lying at the block [dx], [dy], [dz] from the block of [anchor] (a key of `platform.LootSpawner.LOOT`: `battery`,
+ * A piece of loot lying at the block [dx], [dy], [dz] from the block of [anchor] (a key of `common.platform.LootSpawner.LOOT`: `battery`,
  * `water`, `food_snack`, `wrench`...), turned [yaw] degrees. Once taken it stays taken (the player's Level 2 counter [takenKey]), and what
  * a saved game comes back to is what had been taken at its checkpoint.
  */
@@ -23,7 +22,7 @@ data class Ch2L2Loot(val id: String, val item: String, val anchor: String, val d
 
 /**
  * The note pinned on the board at [anchor] (the board's own block): `assets/every_tunnel/notes/<lang>/[noteId].txt`, which
- * `tools/lang/langfiles.py` writes from the lang keys. Reading one is optional, and remembered ([readKey]).
+ * `tools/lang/common/langfiles.py` writes from the lang keys. Reading one is optional, and remembered ([readKey]).
  */
 data class Ch2L2Note(val id: String, val anchor: String) {
     val noteId: String get() = "ch2_l2_$id"

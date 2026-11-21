@@ -1,23 +1,23 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 import daio7771.everytunnel.chapter2.core.toLocal as sharedToLocal
-import daio7771.everytunnel.core.cutscene.Cutscene
-import daio7771.everytunnel.core.cutscene.Local
-import daio7771.everytunnel.core.cutscene.Look
-import daio7771.everytunnel.core.cutscene.SceneFrame
-import daio7771.everytunnel.core.cutscene.Shot
-import daio7771.everytunnel.core.cutscene.Subtitle
-import daio7771.everytunnel.core.cutscene.TimedLine
-import daio7771.everytunnel.core.cutscene.Timeline
-import daio7771.everytunnel.core.cutscene.VoiceLine
-import daio7771.everytunnel.core.level.Position
+import daio7771.everytunnel.common.core.cutscene.Cutscene
+import daio7771.everytunnel.common.core.cutscene.Local
+import daio7771.everytunnel.common.core.cutscene.Look
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.core.cutscene.Shot
+import daio7771.everytunnel.common.core.cutscene.Subtitle
+import daio7771.everytunnel.common.core.cutscene.TimedLine
+import daio7771.everytunnel.common.core.cutscene.Timeline
+import daio7771.everytunnel.common.core.cutscene.VoiceLine
+import daio7771.everytunnel.common.core.level.Position
 import kotlin.math.ceil
 
 /**
  * The cinematic of the first announcement (Rowan's `a1`, when the first task is done and the player has left the terminal): the
  * player cannot move, the black bands come in, the camera turns out of their eyes to the shots of `speakers.json` (one: from where
  * they stand, at a fixed ceiling speaker) and flies back into their eyes while the bands go. It is the cutscene machinery of the other
- * scenes ([Cutscene], [Timeline]; `client.cutscene.CutsceneView` draws it) with the shots' places read from anchors, in world
+ * scenes ([Cutscene], [Timeline]; `common.client.cutscene.CutsceneView` draws it) with the shots' places read from anchors, in world
  * coordinates, so moving the map moves the shots. Plain Kotlin, unit tested.
  *
  * The chime ([Built.dingTick]) sounds as the first shot begins, the voice [Built.lineStart] after it, and the whole line's text

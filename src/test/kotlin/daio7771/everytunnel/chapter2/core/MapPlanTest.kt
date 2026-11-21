@@ -11,7 +11,7 @@ class MapPlanTest {
 
     @Test
     fun `the cell hash is the generator's, bit for bit`() {
-        // From tools/map/ch2l2/level.py: cell_hash(x, y, z, seed).
+        // From tools/map/chapter2/ch2l2/level.py: cell_hash(x, y, z, seed).
         assertEquals(4080543237L, MapPlan.cellHash(0, 0, 0, 7))
         assertEquals(639632296L, MapPlan.cellHash(1, 2, 3, 7))
         assertEquals(1428284698L, MapPlan.cellHash(-5, -9, 13, 226))

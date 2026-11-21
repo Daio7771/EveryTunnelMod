@@ -13,7 +13,7 @@ class Ch2L2LevelTest {
     private val data = Ch2L2Data.parse(emptyMap(), Ch2L2Files.readAllBundled())
     private val level = data.level
 
-    /** The route of `tools/map/ch2l2/layout.json`, in order. */
+    /** The route of `tools/map/chapter2/ch2l2/layout.json`, in order. */
     private val route = listOf(
         "sealed_entry", "collector_junction", "hunter_galleries", "pump_overlook", "vibration_chamber", "lower_catacombs", "observer_wall",
         "observer_chamber", "return_gallery", "observer_wall", "flood_collector", "rising_walkways", "upper_gallery", "pumping_station",

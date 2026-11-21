@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.core
 
-import daio7771.everytunnel.core.level.Position
+import daio7771.everytunnel.common.core.level.Position
 import java.util.UUID
 import kotlin.math.PI
 import kotlin.math.cos

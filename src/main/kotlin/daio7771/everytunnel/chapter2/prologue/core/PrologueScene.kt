@@ -7,18 +7,17 @@ import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.roundToInt
-import daio7771.everytunnel.core.cutscene.CameraPose
-import daio7771.everytunnel.core.cutscene.Cutscene
-import daio7771.everytunnel.core.cutscene.DirectorScene
-import daio7771.everytunnel.core.cutscene.Local
-import daio7771.everytunnel.core.cutscene.Look
-import daio7771.everytunnel.core.cutscene.SceneFrame
-import daio7771.everytunnel.core.cutscene.Shot
-import daio7771.everytunnel.core.cutscene.Subtitle
-import daio7771.everytunnel.core.cutscene.TimedLine
-import daio7771.everytunnel.core.cutscene.Timeline
-import daio7771.everytunnel.core.cutscene.TitleCue
-
+import daio7771.everytunnel.common.core.cutscene.CameraPose
+import daio7771.everytunnel.common.core.cutscene.Cutscene
+import daio7771.everytunnel.common.core.cutscene.DirectorScene
+import daio7771.everytunnel.common.core.cutscene.Local
+import daio7771.everytunnel.common.core.cutscene.Look
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.core.cutscene.Shot
+import daio7771.everytunnel.common.core.cutscene.Subtitle
+import daio7771.everytunnel.common.core.cutscene.TimedLine
+import daio7771.everytunnel.common.core.cutscene.Timeline
+import daio7771.everytunnel.common.core.cutscene.TitleCue
 /** The stages of the scientist's change, in order (`platform.ScientistEntity` is drawn from them). */
 object PrologueStages {
     const val WORKING = 0

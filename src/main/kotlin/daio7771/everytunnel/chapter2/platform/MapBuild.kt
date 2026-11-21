@@ -1,11 +1,11 @@
 package daio7771.everytunnel.chapter2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.core.MapPlan
 import daio7771.everytunnel.chapter2.prologue.core.BlockSpec
-import daio7771.everytunnel.platform.TickProfiler
-import daio7771.everytunnel.platform.WallMessageBlockEntity
-import daio7771.everytunnel.platform.WallTextBlockEntity
+import daio7771.everytunnel.common.platform.TickProfiler
+import daio7771.everytunnel.common.platform.WallMessageBlockEntity
+import daio7771.everytunnel.common.platform.WallTextBlockEntity
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState

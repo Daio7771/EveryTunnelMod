@@ -2,11 +2,11 @@ package daio7771.everytunnel.chapter2.prologue.client
 
 import daio7771.everytunnel.chapter2.prologue.core.PrologueScene
 import daio7771.everytunnel.chapter2.prologue.platform.PrologueSceneHooks
-import daio7771.everytunnel.client.cutscene.CutsceneView
-import daio7771.everytunnel.client.effects.ScreenFade
+import daio7771.everytunnel.common.client.cutscene.CutsceneView
+import daio7771.everytunnel.common.client.effects.ScreenFade
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
-import daio7771.everytunnel.core.cutscene.SceneFrame
-import daio7771.everytunnel.platform.ChapterRequest
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.platform.ChapterRequest
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking

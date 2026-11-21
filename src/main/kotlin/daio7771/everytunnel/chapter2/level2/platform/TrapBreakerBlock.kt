@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
-import daio7771.everytunnel.platform.BlockShapes
+import daio7771.everytunnel.common.platform.BlockShapes
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.ShapeContext
@@ -31,7 +31,7 @@ enum class TrapBreakerState(private val id: String) : StringIdentifiable {
 /**
  * The breaker of one of the Observant Guard's four traps (Chapter 2 Level 2, phase 5): a lever and a lamp on the maintenance wall beside
  * its plate. Right-clicking pulls it ([Ch2L2Guard.pull]); what it then shows follows the trap's phase ([Ch2L2Guard] sets [STATE] every
- * tick). Models: `tools/blocks/generate.py`.
+ * tick). Models: `tools/blocks/common/generate.py`.
  */
 class TrapBreakerBlock(settings: Settings) : Block(settings) {
 

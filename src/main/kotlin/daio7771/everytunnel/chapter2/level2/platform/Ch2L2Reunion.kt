@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Life
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Pose
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Skins
@@ -10,9 +10,9 @@ import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
 import daio7771.everytunnel.chapter2.level2.core.ReunionScene
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.core.cutscene.SceneFrame
-import daio7771.everytunnel.core.cutscene.Timeline
-import daio7771.everytunnel.core.level.Position
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.core.cutscene.Timeline
+import daio7771.everytunnel.common.core.level.Position
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.registry.RegistryKey

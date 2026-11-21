@@ -7,7 +7,7 @@ import daio7771.everytunnel.chapter2.level1.client.NonameOsLook.HOVER
 import daio7771.everytunnel.chapter2.level1.client.NonameOsLook.SCREEN
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Bits
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1TaskHooks
-import daio7771.everytunnel.platform.ModSounds
+import daio7771.everytunnel.common.platform.ModSounds
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.minecraft.client.MinecraftClient

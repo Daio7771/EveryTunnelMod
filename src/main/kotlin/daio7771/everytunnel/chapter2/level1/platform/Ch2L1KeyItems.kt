@@ -1,13 +1,13 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Act3
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Bits
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Tasks
 import daio7771.everytunnel.chapter2.platform.Ch2Items
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
-import daio7771.everytunnel.platform.TickProfiler
+import daio7771.everytunnel.common.platform.TickProfiler
 import net.minecraft.entity.EntityType
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack

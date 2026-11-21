@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.client
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1VoiceLine
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Voices
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents
@@ -11,8 +11,7 @@ import net.minecraft.client.resource.language.I18n
 import net.minecraft.client.sound.SoundInstance
 import net.minecraft.client.sound.SoundInstanceListener
 import net.minecraft.util.Util
-import daio7771.everytunnel.client.hud.SubtitleStrip
-
+import daio7771.everytunnel.common.client.hud.SubtitleStrip
 /**
  * The subtitles of Chapter 2's Level 1 voices ([Ch2L1Voices]): whenever one of them starts playing, however it was
  * started (the level's systems, a command, `/playsound`), its subtitles are shown over the HUD, a cue at a time, each

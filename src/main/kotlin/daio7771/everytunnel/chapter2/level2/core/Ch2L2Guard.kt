@@ -1,7 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.core
 
-import daio7771.everytunnel.util.JsonFields
-
+import daio7771.everytunnel.common.util.JsonFields
 /** One of the Guard's four traps (`guard.plates`): the plate is the box of [zone] (its feet inside it is "on the plate"), [breaker] the anchor of its breaker's block. */
 data class Ch2L2Plate(val id: String, val zone: String, val breaker: String)
 

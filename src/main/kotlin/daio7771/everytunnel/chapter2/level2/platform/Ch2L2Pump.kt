@@ -1,14 +1,14 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
 import daio7771.everytunnel.chapter2.level2.core.PumpCycle
 import daio7771.everytunnel.chapter2.level2.core.PumpPhase
 import daio7771.everytunnel.chapter2.level2.core.VibrationCreatureBrain
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.core.level.Position
-import daio7771.everytunnel.platform.ModBlocks
+import daio7771.everytunnel.common.core.level.Position
+import daio7771.everytunnel.common.platform.ModBlocks
 import net.minecraft.block.Block
 import net.minecraft.block.Blocks
 import net.minecraft.block.ConnectingBlock

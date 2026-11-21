@@ -1,8 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 import com.google.gson.JsonObject
-import daio7771.everytunnel.util.JsonFields
-
+import daio7771.everytunnel.common.util.JsonFields
 /** A sound file on a NonameOS computer: the name it shows (the same in every language) and the sound event it plays from the computer. */
 data class Ch2L1Recording(val name: String, val sound: String)
 

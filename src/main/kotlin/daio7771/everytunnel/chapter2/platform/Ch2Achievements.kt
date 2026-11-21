@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.core.Ch2Achievement
 import daio7771.everytunnel.chapter2.core.StillGaze
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
@@ -11,8 +11,8 @@ import daio7771.everytunnel.chapter2.level2.platform.Ch2L2
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2DataLoader
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Perf
 import daio7771.everytunnel.chapter2.prologue.platform.ScientistEntity
-import daio7771.everytunnel.core.achievement.AchievementRegistry
-import daio7771.everytunnel.platform.AchievementHooks
+import daio7771.everytunnel.common.core.achievement.AchievementRegistry
+import daio7771.everytunnel.common.platform.AchievementHooks
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking
 import net.minecraft.server.MinecraftServer

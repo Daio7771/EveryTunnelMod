@@ -24,7 +24,7 @@ import software.bernie.geckolib.util.GeckoLibUtil
  * The scientist of Chapter 2's prologue ([PrologueSceneHooks]), at his bench in the room built for the scene:
  * a man in a white coat, seen from behind, working with tubes. Life cycle: **passing** (see Contributing,
  * Creatures): [PrologueSceneHooks] spawns him when the scene begins and discards him when it ends; nothing is
- * recorded and he is never saved. Nothing touches him. Model, texture and animations: `tools/entity/scientist.py`
+ * recorded and he is never saved. Nothing touches him. Model, texture and animations: `tools/entity/chapter2/scientist.py`
  * (GeckoLib). His [stage] is the scene's to set (it is synced to the client, which draws him accordingly), one of
  * [PrologueStages]: [WORKING] (`animation.scientist.work`), [TREMBLING] (his hands, `animation.scientist.tremble`),
  * [SICK] (his skin pale, bent over his hands: `scientist_pale.png`, `animation.scientist.sick`), [STRETCHED] (his

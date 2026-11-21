@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2
 
 import daio7771.everytunnel.chapter2.platform.Ch2Achievements
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Act2Hooks
@@ -39,9 +39,9 @@ import daio7771.everytunnel.chapter2.platform.Ch2Return
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
 import daio7771.everytunnel.chapter2.prologue.platform.PrologueCommand
 import daio7771.everytunnel.chapter2.prologue.platform.PrologueSceneHooks
-import daio7771.everytunnel.platform.ChapterRequest
-import daio7771.everytunnel.platform.DeathHooks
-import daio7771.everytunnel.platform.PlayerRules
+import daio7771.everytunnel.common.platform.ChapterRequest
+import daio7771.everytunnel.common.platform.DeathHooks
+import daio7771.everytunnel.common.platform.PlayerRules
 import net.minecraft.server.network.ServerPlayerEntity
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
@@ -62,7 +62,7 @@ object Chapter2 : ModInitializer {
 
     /**
      * While playing Chapter 2's Level 1: no flashlight, no hiding, nothing hurts, silent steps, no status bars, and the player is the new
-     * hire, a scientist in the factory's white coat (`textures/entity/new_hire.png`, by `tools/entity/workers.py`), not the night guard.
+     * hire, a scientist in the factory's white coat (`textures/entity/new_hire.png`, by `tools/entity/chapter2/workers.py`), not the night guard.
      */
     private val LEVEL1_RULES = PlayerRules.Rules(
         flashlight = false, hiding = false, safe = true, noise = false, statusBars = false,

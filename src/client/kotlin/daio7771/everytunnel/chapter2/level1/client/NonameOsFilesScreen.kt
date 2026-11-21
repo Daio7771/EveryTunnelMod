@@ -4,7 +4,7 @@ import daio7771.everytunnel.chapter2.platform.Ch2Achievements
 import daio7771.everytunnel.chapter2.level1.client.NonameOsLook.DIM_GREEN
 import daio7771.everytunnel.chapter2.level1.client.NonameOsLook.GREEN
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Act3Hooks
-import daio7771.everytunnel.platform.ModSounds
+import daio7771.everytunnel.common.platform.ModSounds
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.minecraft.client.MinecraftClient

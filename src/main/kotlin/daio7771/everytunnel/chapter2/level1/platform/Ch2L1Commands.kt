@@ -17,8 +17,7 @@ import net.minecraft.server.command.CommandManager
 import net.minecraft.server.command.ServerCommandSource
 import net.minecraft.text.Text
 import net.minecraft.util.Identifier
-import daio7771.everytunnel.platform.DevWorlds
-
+import daio7771.everytunnel.common.platform.DevWorlds
 /**
  * Developer commands for Chapter 2's Level 1 (operator level 2), so that every step of the level can be tried
  * without playing the ones before it. **Only in the development environment**, like [DebugCommands]: a release

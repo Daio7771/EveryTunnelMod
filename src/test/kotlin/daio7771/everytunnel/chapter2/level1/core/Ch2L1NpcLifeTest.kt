@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 import com.google.gson.JsonParser
-import daio7771.everytunnel.core.level.Position
+import daio7771.everytunnel.common.core.level.Position
 import java.util.Random
 import kotlin.math.abs
 import kotlin.math.sqrt

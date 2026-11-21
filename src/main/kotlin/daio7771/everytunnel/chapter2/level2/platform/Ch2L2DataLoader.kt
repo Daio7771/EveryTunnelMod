@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Data
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Files
 import daio7771.everytunnel.chapter2.platform.Ch2DataReload

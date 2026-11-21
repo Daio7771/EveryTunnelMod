@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.prologue.client
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.prologue.core.GeigerClicks
 import daio7771.everytunnel.chapter2.prologue.core.PrologueScene
 import net.minecraft.client.MinecraftClient
@@ -13,7 +13,7 @@ import net.minecraft.util.Identifier
 import net.minecraft.util.math.Vec3d
 
 /**
- * What the prologue's laboratory sounds like (`client.cutscene.CutsceneView` starts, ticks and stops it), all on the
+ * What the prologue's laboratory sounds like (`common.client.cutscene.CutsceneView` starts, ticks and stops it), all on the
  * scene's ticks ([PrologueScene.PLAN]): the lights' hum, flat under the Ambient slider, and a drone under it, in the
  * Music slider, whose volume follows the scene ([PrologueScene.humLevel], [PrologueScene.droneLevel]); the radiation
  * counter's Geiger clicks, from the counter on the bench (positional, so they cross from one ear to the other as the

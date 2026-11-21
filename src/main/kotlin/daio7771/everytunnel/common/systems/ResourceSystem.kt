@@ -1,0 +1,217 @@
+package daio7771.everytunnel.common.systems
+
+import daio7771.everytunnel.common.config.GameplayConfig
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
+
+/** A player's stamina, thirst and flashlight battery. */
+data class ResourceState(
+    val stamina: Double,
+    val thirst: Double,
+    /** Seconds of flashlight light left in the battery. */
+    val battery: Double,
+    /** True while the flashlight is switched on. */
+    val flashlightOn: Boolean = false,
+    /** Out of stamina: no sprinting until stamina recovers (see `StaminaConfig.exhaustedRecoverPercent`). */
+    val exhausted: Boolean = false,
+    /** Seconds left before stamina starts regenerating. */
+    val regenCooldown: Double = 0.0,
+    /** Seconds spent with empty thirst since the last thirst damage. */
+    val thirstDamageTimer: Double = 0.0,
+    /** Seconds left of the energy a food gives: sprinting and jumping cost no stamina, which stays full. */
+    val energySeconds: Double = 0.0,
+) {
+    companion object {
+        fun full(config: GameplayConfig) =
+            ResourceState(config.stamina.max, config.thirst.max, config.flashlight.batteryMaxSeconds)
+    }
+}
+
+/** What the player did during one tick. [safe]: in a level without risk (`LevelDefinition.safe`). */
+data class ResourceInput(val sprinting: Boolean, val jumps: Int, val safe: Boolean = false)
+
+/**
+ * The state after one tick, the health damage to deal (0 if none), and whether the
+ * flashlight switched itself off this tick because the battery ran out.
+ */
+data class ResourceStep(val state: ResourceState, val damage: Double, val batteryDied: Boolean = false)
+
+/** Result of pressing the flashlight key. */
+enum class FlashlightToggle { TURNED_ON, TURNED_OFF, BATTERY_EMPTY }
+
+/** Result of using a battery item. */
+enum class BatteryInsert { REFILLED, ALREADY_FULL }
+
+/** Result of eating a food: its energy starts, or it was eaten while the last one's still lasts and is wasted. */
+enum class FoodEnergy { STARTED, WASTED }
+
+/**
+ * Stamina, thirst and flashlight battery simulation.
+ *
+ * - Stamina drains while sprinting and per jump, and regenerates after a short
+ *   delay without use. At 0 the player is exhausted and cannot sprint until it
+ *   recovers to a configured percentage.
+ * - Thirst drains slowly all the time (faster while sprinting). When empty, the
+ *   player takes damage at a fixed interval.
+ * - In a safe level nothing runs down: sprinting and jumping cost no stamina, which keeps
+ *   recovering; thirst and the battery stay as they are; there is no thirst damage.
+ * - A food eaten ([eat]) gives `food.energy_seconds` of energy: sprinting and jumping cost no stamina,
+ *   which is kept full (an exhausted player is not any more). Another food eaten before it ends has no
+ *   effect and is wasted: the time is not extended.
+ * - The flashlight is built-in equipment (no item, nothing in the hand). Its battery
+ *   drains one second per second while it is on; at 0 it switches off, and a
+ *   battery item refills it.
+ *
+ * [step], [toggleFlashlight], [insertBattery] and [switchOff] are pure functions
+ * of the state, input and config; the per-player states live here too. Plain Kotlin
+ * types only, so it is unit tested without Minecraft. Driven every server tick by
+ * `common.platform.ResourceHooks`, which also saves the states with the world.
+ */
+object ResourceSystem {
+
+    private val states = ConcurrentHashMap<UUID, ResourceState>()
+
+    /** The player's state; full resources if the player has none yet. */
+    fun stateOf(playerId: UUID, config: GameplayConfig): ResourceState =
+        states[playerId] ?: ResourceState.full(config)
+
+    fun set(playerId: UUID, state: ResourceState) {
+        states[playerId] = state
+    }
+
+    /** Back to full resources (on respawn after death). */
+    fun reset(playerId: UUID) {
+        states.remove(playerId)
+    }
+
+    /** Advances the player's state by one tick and stores the result. */
+    fun tick(playerId: UUID, input: ResourceInput, dtSeconds: Double, config: GameplayConfig): ResourceStep {
+        val step = step(stateOf(playerId, config), input, dtSeconds, config)
+        states[playerId] = step.state
+        return step
+    }
+
+    /** All stored states, for saving. */
+    fun all(): Map<UUID, ResourceState> = HashMap(states)
+
+    /** Replaces all stored states (on world load). */
+    fun replaceAll(loaded: Map<UUID, ResourceState>) {
+        states.clear()
+        states.putAll(loaded)
+    }
+
+    /** Forgets all players (on server stop). */
+    fun clear() {
+        states.clear()
+    }
+
+    fun step(state: ResourceState, input: ResourceInput, dtSeconds: Double, config: GameplayConfig): ResourceStep {
+        val s = config.stamina
+        val t = config.thirst
+        val f = config.flashlight
+
+        // Stamina
+        var stamina = state.stamina.coerceAtMost(s.max)
+        var cooldown = state.regenCooldown
+        val energised = state.energySeconds > 0.0
+        val energySeconds = (state.energySeconds - dtSeconds).coerceAtLeast(0.0)
+        val used = !input.safe && !energised && (input.sprinting || input.jumps > 0)
+        if (used) {
+            if (input.sprinting) stamina -= s.sprintDrainPerSecond * dtSeconds
+            stamina -= s.jumpCost * input.jumps
+        }
+        if (used) {
+            cooldown = s.regenDelaySeconds
+        } else if (cooldown > 0.0) {
+            cooldown = (cooldown - dtSeconds).coerceAtLeast(0.0)
+        } else {
+            stamina += s.regenPerSecond * dtSeconds
+        }
+        if (energised) {
+            stamina = s.max
+            cooldown = 0.0
+        }
+        stamina = stamina.coerceIn(0.0, s.max)
+
+        val exhausted = when {
+            stamina <= 0.0 -> true
+            state.exhausted -> stamina < s.max * s.exhaustedRecoverPercent / 100.0
+            else -> false
+        }
+
+        // Thirst
+        val drainMultiplier = if (input.sprinting) t.sprintDrainMultiplier else 1.0
+        val thirstDrain = if (input.safe) 0.0 else t.drainPerMinute / 60.0 * dtSeconds * drainMultiplier
+        val thirst = (state.thirst.coerceAtMost(t.max) - thirstDrain).coerceAtLeast(0.0)
+        var damageTimer = 0.0
+        var damage = 0.0
+        if (thirst <= 0.0 && !input.safe) {
+            damageTimer = state.thirstDamageTimer + dtSeconds
+            if (damageTimer >= t.damageIntervalSeconds) {
+                damageTimer -= t.damageIntervalSeconds
+                damage = t.damageWhenEmpty
+            }
+        }
+
+        // Flashlight battery
+        var battery = state.battery.coerceIn(0.0, f.batteryMaxSeconds)
+        var flashlightOn = state.flashlightOn
+        var batteryDied = false
+        if (flashlightOn && !input.safe) {
+            battery = (battery - dtSeconds).coerceAtLeast(0.0)
+            if (battery <= 0.0) {
+                flashlightOn = false
+                batteryDied = true
+            }
+        }
+
+        val next = ResourceState(stamina, thirst, battery, flashlightOn, exhausted, cooldown, damageTimer, energySeconds)
+        return ResourceStep(next, damage, batteryDied)
+    }
+
+    /** A food eaten: `food.energy_seconds` of energy, unless the last food's still lasts (then it is wasted). */
+    fun eat(state: ResourceState, config: GameplayConfig): Pair<ResourceState, FoodEnergy> =
+        if (state.energySeconds > 0.0) state to FoodEnergy.WASTED
+        else state.copy(energySeconds = config.food.energySeconds) to FoodEnergy.STARTED
+
+    /** Rested in a bed: stamina full and no longer exhausted. */
+    fun rested(state: ResourceState, config: GameplayConfig): ResourceState =
+        state.copy(stamina = config.stamina.max, exhausted = false, regenCooldown = 0.0)
+
+    /** Flashlight switched off from outside (e.g. the player became a spectator); no-op if already off. */
+    fun switchOff(state: ResourceState): ResourceState =
+        if (state.flashlightOn) state.copy(flashlightOn = false) else state
+
+    /** Flashlight key pressed: switches the flashlight on or off if possible. */
+    fun toggleFlashlight(state: ResourceState): Pair<ResourceState, FlashlightToggle> = when {
+        state.flashlightOn -> state.copy(flashlightOn = false) to FlashlightToggle.TURNED_OFF
+        state.battery <= 0.0 -> state to FlashlightToggle.BATTERY_EMPTY
+        else -> state.copy(flashlightOn = true) to FlashlightToggle.TURNED_ON
+    }
+
+    /** True if a water bottle would help (thirst is not full). */
+    fun canDrink(state: ResourceState, config: GameplayConfig): Boolean = state.thirst < config.thirst.max
+
+    /** A water bottle drunk: thirst up by `ThirstConfig.drinkRestore`, up to full. */
+    fun drink(state: ResourceState, config: GameplayConfig): ResourceState = state.copy(
+        thirst = (state.thirst + config.thirst.drinkRestore).coerceAtMost(config.thirst.max),
+        thirstDamageTimer = 0.0,
+    )
+
+    /** True if a battery item would add charge (the battery is not full). */
+    fun canInsertBattery(state: ResourceState, config: GameplayConfig): Boolean =
+        state.battery < config.flashlight.batteryMaxSeconds
+
+    /** Battery item used: refills the battery by `FlashlightConfig.batteryRefillPercent`. */
+    fun insertBattery(state: ResourceState, config: GameplayConfig): Pair<ResourceState, BatteryInsert> {
+        val f = config.flashlight
+        return when {
+            state.battery >= f.batteryMaxSeconds -> state to BatteryInsert.ALREADY_FULL
+            else -> {
+                val battery = (state.battery + f.batteryMaxSeconds * f.batteryRefillPercent / 100.0)
+                    .coerceAtMost(f.batteryMaxSeconds)
+                state.copy(battery = battery) to BatteryInsert.REFILLED
+            }
+        }
+    }
+}

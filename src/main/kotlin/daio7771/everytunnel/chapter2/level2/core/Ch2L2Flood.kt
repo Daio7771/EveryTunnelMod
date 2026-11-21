@@ -12,7 +12,7 @@ data class FloodCell(val x: Int, val y: Int, val z: Int)
 class FloodLayer(val y: Int, val cells: List<FloodCell>)
 
 /**
- * One stage of the flood (`flood.json`, written by `tools/map/ch2l2/generate.py`): it starts once, when [trigger]'s zone is reached,
+ * One stage of the flood (`flood.json`, written by `tools/map/chapter2/ch2l2/generate.py`): it starts once, when [trigger]'s zone is reached,
  * waits [delaySeconds], then fills the air of its spaces under [level] over [seconds]. [layers] are only the cells this stage adds to
  * the one before's, bottom up; [gates] are the gates' states while it holds water.
  */

@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
 import daio7771.everytunnel.chapter2.platform.Ch2Achievements
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Flood
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Maw as MawRules
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
@@ -14,10 +14,10 @@ import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.platform.Ch2Items
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.core.level.Position
-import daio7771.everytunnel.platform.CollapseHooks
-import daio7771.everytunnel.platform.DeathHooks
-import daio7771.everytunnel.platform.MovementRules
+import daio7771.everytunnel.common.core.level.Position
+import daio7771.everytunnel.common.platform.CollapseHooks
+import daio7771.everytunnel.common.platform.DeathHooks
+import daio7771.everytunnel.common.platform.MovementRules
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents

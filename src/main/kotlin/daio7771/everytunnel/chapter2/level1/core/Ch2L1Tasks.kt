@@ -1,8 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 import com.google.gson.JsonObject
-import daio7771.everytunnel.util.JsonFields
-
+import daio7771.everytunnel.common.util.JsonFields
 /** One sample tube of task 1: the anchor of its block and the code the terminal's registry shows for it. */
 data class Ch2L1TubeSpec(val anchor: String, val code: String)
 

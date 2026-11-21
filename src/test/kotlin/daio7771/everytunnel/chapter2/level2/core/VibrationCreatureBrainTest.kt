@@ -7,7 +7,7 @@ import daio7771.everytunnel.chapter2.level2.core.VibrationCreatureBrain.Senses
 import daio7771.everytunnel.chapter2.level2.core.VibrationCreatureBrain.Source
 import daio7771.everytunnel.chapter2.level2.core.VibrationCreatureBrain.State
 import daio7771.everytunnel.chapter2.level2.core.VibrationCreatureBrain.Vibration
-import daio7771.everytunnel.core.level.Position
+import daio7771.everytunnel.common.core.level.Position
 import java.util.UUID
 import kotlin.random.Random
 import kotlin.test.Test

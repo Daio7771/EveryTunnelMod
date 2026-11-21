@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Flood
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents

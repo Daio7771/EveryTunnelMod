@@ -14,7 +14,7 @@ the director's scene, a fall and the credits. Sound design is the core of the mo
 
 - **Modders** who want to understand, change or extend the mod.
 - **AI assistants** working on the code: start with [Contributing](contributing.md), which
-  lists the rules of the project, then [Architecture](architecture.md).
+  lists the rules of the project, then [Architecture](common/architecture.md).
 - **Players** who want to know more than the [player guide](guide/01-how-to-play.md) says.
 
 ## Pages
@@ -23,21 +23,21 @@ Read them in this order the first time:
 
 | Page | What it covers |
 |---|---|
-| [Architecture](architecture.md) | Layers, source sets, entrypoints, threads, packets, saved data, mixins |
-| [Game flow](game-flow.md) | From the main menu to the end credits, step by step |
-| [Levels](levels.md) | The level JSON format, zone and spawn point tags, how levels are built |
-| [Player systems](player.md) | Stamina, thirst, flashlight, HUD, loot, world rules, the config file |
-| [Noise and the Pale man](noise-and-pale-man.md) | The noise system, his hearing AI, his entity and music |
-| [Audio](audio.md) | Every sound event, the client players, how sounds are made |
-| [Graphics](graphics.md) | With and without shaders, lights, brightness, textures, art direction |
-| [Cinematic system](cinematic-system.md) | The director's scene (guided camera, voice, subtitles, skipping), the fall, the final credits and Chapter 2's prologue |
-| [Chapter 2, Level 1](chapter-2-level-1.md) | The factory level, built in phases on a private branch: its state machine, its JSON data files (and how to tune them with `/et reload`) and its debug commands |
-| [Chapter 2, Level 2](chapter-2-level-2.md) | The catacombs under the factory, built in phases on a private branch: the way in down Level 1's manhole, its states, checkpoints and Chapter 2's saved game, the map made from `layout.json` by its generator and checks, its data files and its debug commands |
-| [Python tools](tools.md) | The generators for map, sounds, blocks, entity art and GUI |
-| [Building and release](building-and-release.md) | Gradle tasks, dev worlds, the release jar |
-| [Debugging](debugging.md) | Debug commands and the `[playtest]` log |
-| [How-to recipes](how-to.md) | Adding a level, a sound, a block, a tip, a config value... |
-| [Code map](code-map.md) | Every source file and what it does |
+| [Architecture](common/architecture.md) | Layers, source sets, entrypoints, threads, packets, saved data, mixins |
+| [Game flow](common/game-flow.md) | From the main menu to the end credits, step by step |
+| [Levels](chapter1/levels.md) | The level JSON format, zone and spawn point tags, how levels are built |
+| [Player systems](common/player.md) | Stamina, thirst, flashlight, HUD, loot, world rules, the config file |
+| [Noise and the Pale man](chapter1/noise-and-pale-man.md) | The noise system, his hearing AI, his entity and music |
+| [Audio](common/audio.md) | Every sound event, the client players, how sounds are made |
+| [Graphics](common/graphics.md) | With and without shaders, lights, brightness, textures, art direction |
+| [Cinematic system](common/cinematic-system.md) | The director's scene (guided camera, voice, subtitles, skipping), the fall, the final credits and Chapter 2's prologue |
+| [Chapter 2, Level 1](chapter2/level-1.md) | The factory level, built in phases on a private branch: its state machine, its JSON data files (and how to tune them with `/et reload`) and its debug commands |
+| [Chapter 2, Level 2](chapter2/level-2.md) | The catacombs under the factory, built in phases on a private branch: the way in down Level 1's manhole, its states, checkpoints and Chapter 2's saved game, the map made from `layout.json` by its generator and checks, its data files and its debug commands |
+| [Python tools](common/tools.md) | The generators for map, sounds, blocks, entity art and GUI |
+| [Building and release](common/building-and-release.md) | Gradle tasks, dev worlds, the release jar |
+| [Debugging](common/debugging.md) | Debug commands and the `[playtest]` log |
+| [How-to recipes](common/how-to.md) | Adding a level, a sound, a block, a tip, a config value... |
+| [Code map](common/code-map.md) | Every source file and what it does |
 | [Contributing](contributing.md) | Conventions, creature life cycles, testing, commits, rules for AI assistants |
 
 ## Player guide

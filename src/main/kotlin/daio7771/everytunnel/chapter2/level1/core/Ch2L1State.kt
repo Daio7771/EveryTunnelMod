@@ -3,7 +3,7 @@ package daio7771.everytunnel.chapter2.level1.core
 /**
  * Where a player is in Chapter 2's Level 1 (the factory): the level's state machine, one value per
  * step of its three acts, in the order they are played. Plain Kotlin, no Minecraft types:
- * `platform.Ch2L1` keeps the current one in the player's progress ([daio7771.everytunnel.core.progress.PlayerProgress]),
+ * `platform.Ch2L1` keeps the current one in the player's progress ([daio7771.everytunnel.common.common.core.progress.PlayerProgress]),
  * so it survives leaving the world, a death and a new session.
  *
  * The order is the declaration order, so a later state compares greater (`state >= ACT2_FOLLOW`).

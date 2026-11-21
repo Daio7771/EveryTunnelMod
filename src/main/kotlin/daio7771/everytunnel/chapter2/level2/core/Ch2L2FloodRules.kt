@@ -1,7 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.core
 
-import daio7771.everytunnel.util.JsonFields
-
+import daio7771.everytunnel.common.util.JsonFields
 /**
  * The flood's tunables (`flood` in `level.json`; the stages' geometry and timing are `flood.json`'s): the pipe that bursts, its jet,
  * the camera's shake at the gate and at the burst, how loud the rumble is at each stage and through the station's door, and the door.

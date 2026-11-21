@@ -11,7 +11,7 @@ import net.minecraft.client.MinecraftClient
 
 /**
  * What the client knows of Chapter 2's Level 1 for the local player: whether they are playing it and in which state. Read
- * from the player's progress (`platform.CardinalProgress`), which the server sends to that player alone on every change,
+ * from the player's progress (`common.platform.CardinalProgress`), which the server sends to that player alone on every change,
  * so there is no packet of its own.
  */
 object Ch2L1Client {

@@ -12,7 +12,7 @@ data class Ch2L1Cue(val atMs: Int, val firstSentence: Int, val endSentence: Int?
 /**
  * One voice line of Chapter 2's Level 1: its sound is `voice.<id>`; its text is the lang key [textKey] (the author's
  * English and Spanish, one key for the whole line); [speakerKey] is the lang key of the name that shows in grey before
- * it; [ms] is its length and [cues] are its subtitles, as `tools/sounds/ch2_l1_voices.py` writes them. Plain Kotlin.
+ * it; [ms] is its length and [cues] are its subtitles, as `tools/sounds/chapter2/ch2_l1_voices.py` writes them. Plain Kotlin.
  *
  * The cues are ranges of sentences, not texts, so that their timing is the same in every language and a line's words
  * are edited in the lang files alone: the client translates [textKey], splits it into sentences ([Ch2L1Sentences]) and
@@ -37,7 +37,7 @@ data class Ch2L1VoiceLine(val id: String, val textKey: String, val speakerKey: S
 }
 
 /**
- * Where a text's sentences end: at a `.`, `?` or `!` followed by a space. The same rule as `tools/sounds/ch2_l1_voices.py`
+ * Where a text's sentences end: at a `.`, `?` or `!` followed by a space. The same rule as `tools/sounds/chapter2/ch2_l1_voices.py`
  * (`voices.sentences`), which cuts the cues in the first place; the English and the Spanish text of a line must have the
  * same number of them (`Ch2L1VoicesTest`).
  */
@@ -73,7 +73,7 @@ data class Ch2L1Voices(val lines: List<Ch2L1VoiceLine>) {
         /** The file from the classpath (the mod's own resources). */
         fun load(): Ch2L1Voices {
             val stream = Ch2L1Voices::class.java.classLoader.getResourceAsStream(RESOURCE)
-                ?: error("$RESOURCE is missing: run tools/sounds/ch2_l1_voices.py")
+                ?: error("$RESOURCE is missing: run tools/sounds/chapter2/ch2_l1_voices.py")
             return stream.use { parse(it.reader().readText()) }
         }
 
@@ -92,7 +92,7 @@ data class Ch2L1Voices(val lines: List<Ch2L1VoiceLine>) {
 
 /**
  * The look of the factory's people ([daio7771.everytunnel.chapter2.level1.platform.FactoryNpcEntity]): one skin each, a PNG in
- * `textures/entity/npc/` named by its id. `rowan` is the author's own; the rest are made by `tools/entity/workers.py`:
+ * `textures/entity/npc/` named by its id. `rowan` is the author's own; the rest are made by `tools/entity/chapter2/workers.py`:
  * the three who speak in the level (`coworker`, `worker_a`, `worker_b`), three faces for the rest (`generic_*`) and the two patrolling
  * guards (`guard_1`, `guard_2`, in Chapter 1's guard uniform).
  */

@@ -1,7 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.core
 
-import daio7771.everytunnel.util.JsonFields
-
+import daio7771.everytunnel.common.util.JsonFields
 /**
  * The pump's cycle (`creature.pump` in `level.json`): [runSeconds] running, the last [slowSeconds] of it slowing down, then [silentSeconds]
  * of silence. The pump sounds at [anchor]; every cell of [beacons] holds an amber beacon, all lit together.

@@ -1,0 +1,138 @@
+package daio7771.everytunnel.common.platform
+
+import net.minecraft.block.Block
+import net.minecraft.block.BlockRenderType
+import net.minecraft.block.BlockSetType
+import net.minecraft.block.BlockState
+import net.minecraft.block.BlockWithEntity
+import net.minecraft.block.DoorBlock
+import net.minecraft.block.ShapeContext
+import net.minecraft.block.entity.BlockEntity
+import net.minecraft.block.entity.BlockEntityType
+import net.minecraft.entity.player.PlayerEntity
+import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.sound.SoundCategory
+import net.minecraft.sound.SoundEvents
+import net.minecraft.state.StateManager
+import net.minecraft.state.property.DirectionProperty
+import net.minecraft.state.property.EnumProperty
+import net.minecraft.state.property.IntProperty
+import net.minecraft.state.property.Properties
+import net.minecraft.util.ActionResult
+import net.minecraft.util.Hand
+import net.minecraft.util.StringIdentifiable
+import net.minecraft.util.hit.BlockHitResult
+import net.minecraft.util.math.BlockPos
+import net.minecraft.util.math.Direction
+import net.minecraft.util.shape.VoxelShape
+import net.minecraft.world.BlockView
+import net.minecraft.world.World
+
+/**
+ * One leaf of a pair of doors that open together (Level 5's director's door): opening or shutting one by hand
+ * does the same to the leaf beside it, the same block facing the same way, hinged on the other side. Opening
+ * the director's starts his scene (`onOpened`, set by Chapter 1's `DirectorSceneHooks`); from then on it is locked (a locked latch rattles: `locked`).
+ */
+class PairedDoorBlock(settings: Settings, type: BlockSetType) : DoorBlock(settings, type) {
+
+    companion object {
+        /** Whether the doors are locked now (the director's scene is on). */
+        var locked: () -> Boolean = { false }
+
+        /** A player opened a door by hand. */
+        var onOpened: (ServerPlayerEntity) -> Unit = {}
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onUse(state: BlockState, world: World, pos: BlockPos, player: PlayerEntity, hand: Hand, hit: BlockHitResult): ActionResult {
+        if (locked()) {
+            if (!world.isClient) world.playSound(null, pos, SoundEvents.BLOCK_CHEST_LOCKED, SoundCategory.BLOCKS, 1f, 1f)
+            return ActionResult.success(world.isClient)
+        }
+        @Suppress("DEPRECATION")
+        val result = super.onUse(state, world, pos, player, hand, hit)
+        if (!result.isAccepted) return result
+        val now = world.getBlockState(pos)
+        if (!now.isOf(this)) return result
+        if (now.get(OPEN) && player is ServerPlayerEntity) onOpened(player)
+        val facing = now.get(FACING)
+        for (side in listOf(facing.rotateYClockwise(), facing.rotateYCounterclockwise())) {
+            val other = pos.offset(side)
+            val leaf = world.getBlockState(other)
+            if (!leaf.isOf(this) || leaf.get(FACING) != facing || leaf.get(HINGE) == now.get(HINGE) || leaf.get(HALF) != now.get(HALF)) continue
+            if (leaf.get(OPEN) != now.get(OPEN)) {
+                world.setBlockState(other, leaf.with(OPEN, now.get(OPEN)), Block.NOTIFY_LISTENERS or Block.REDRAW_ON_MAIN_THREAD)
+            }
+        }
+        return result
+    }
+}
+
+/**
+ * A security camera on the ceiling (Level 5's anteroom), [FACING] the way it rests. The world draws only its
+ * [Part.MOUNT]; the client turns the [Part.HEAD] to follow the player and blinks its [Part.LED]
+ * (`common.client.render.SecurityCameraRenderer`, through its [SecurityCameraBlockEntity]). Nothing to bump into.
+ *
+ * [entityType] is the block entity type it makes ([ModBlocks.SECURITY_CAMERA_ENTITY] unless given another): a later chapter's
+ * camera registers a type of its own, so that its renderer can behave its own way.
+ */
+class SecurityCameraBlock(
+    settings: Settings,
+    private val entityType: () -> BlockEntityType<SecurityCameraBlockEntity> = { ModBlocks.SECURITY_CAMERA_ENTITY },
+) : BlockWithEntity(settings) {
+
+    enum class Part(private val id: String) : StringIdentifiable {
+        MOUNT("mount"), HEAD("head"), LED("led");
+
+        override fun asString(): String = id
+    }
+
+    init {
+        defaultState = stateManager.defaultState.with(FACING, Direction.NORTH).with(PART, Part.MOUNT)
+    }
+
+    override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
+        builder.add(FACING, PART)
+    }
+
+    override fun createBlockEntity(pos: BlockPos, state: BlockState): BlockEntity = SecurityCameraBlockEntity(entityType(), pos, state)
+
+    @Deprecated("Deprecated in Java")
+    override fun getRenderType(state: BlockState): BlockRenderType = BlockRenderType.MODEL
+
+    @Deprecated("Deprecated in Java")
+    override fun getOutlineShape(state: BlockState, world: BlockView, pos: BlockPos, context: ShapeContext): VoxelShape = SHAPE
+
+    companion object {
+        val FACING: DirectionProperty = Properties.HORIZONTAL_FACING
+        val PART: EnumProperty<Part> = EnumProperty.of("part", Part::class.java)
+
+        private val SHAPE: VoxelShape = createCuboidShape(4.0, 7.0, 4.0, 12.0, 16.0, 12.0)
+    }
+}
+
+/** Marks a [SecurityCameraBlock] for its client renderer; holds nothing. Its [type] is its block's. */
+class SecurityCameraBlockEntity(type: BlockEntityType<SecurityCameraBlockEntity>, pos: BlockPos, state: BlockState) : BlockEntity(type, pos, state) {
+    constructor(pos: BlockPos, state: BlockState) : this(ModBlocks.SECURITY_CAMERA_ENTITY, pos, state)
+}
+
+/**
+ * One screen of the director's wall of CCTV monitors (Level 5's office): a CRT in its casing showing only snow
+ * under its camera's label ([CAM], one of fifteen; the labels and the snow are its textures, `tools/blocks/common/generate.py`'s
+ * CAMERAS), glowing faintly.
+ */
+class MonitorBankBlock(settings: Settings) : Block(settings) {
+
+    init {
+        defaultState = stateManager.defaultState.with(FACING, Direction.NORTH).with(CAM, 0)
+    }
+
+    override fun appendProperties(builder: StateManager.Builder<Block, BlockState>) {
+        builder.add(FACING, CAM)
+    }
+
+    companion object {
+        val FACING: DirectionProperty = Properties.HORIZONTAL_FACING
+        val CAM: IntProperty = IntProperty.of("cam", 0, 14)
+    }
+}

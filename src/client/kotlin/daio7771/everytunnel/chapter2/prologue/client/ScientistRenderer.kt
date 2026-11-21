@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2.prologue.client
 
-import daio7771.everytunnel.EveryTunnel
-import daio7771.everytunnel.core.cutscene.Cutscene
+import daio7771.everytunnel.common.EveryTunnel
+import daio7771.everytunnel.common.core.cutscene.Cutscene
 import daio7771.everytunnel.chapter2.prologue.platform.ScientistEntity
 import net.minecraft.client.render.RenderLayer
 import net.minecraft.client.render.VertexConsumer
@@ -15,11 +15,10 @@ import software.bernie.geckolib.model.GeoModel
 import software.bernie.geckolib.renderer.GeoEntityRenderer
 import software.bernie.geckolib.renderer.GeoRenderer
 import software.bernie.geckolib.renderer.layer.GeoRenderLayer
-import daio7771.everytunnel.client.render.EyesGlowLayer
-
+import daio7771.everytunnel.common.client.render.EyesGlowLayer
 /**
  * Draws the prologue's scientist with GeckoLib through [ScientistModel]: as the man (`geo/entity/scientist.geo.json`,
- * `textures/entity/scientist.png`, `animations/entity/scientist.animation.json`; from `tools/entity/scientist.py`),
+ * `textures/entity/scientist.png`, `animations/entity/scientist.animation.json`; from `tools/entity/chapter2/scientist.py`),
  * and, once he has changed ([ScientistEntity.PALE], and in the factory's chamber [ScientistEntity.CONTAINED]), as the Level 2 Pale man, eyes glowing. Not a living thing, so it
  * is turned to its yaw here.
  */

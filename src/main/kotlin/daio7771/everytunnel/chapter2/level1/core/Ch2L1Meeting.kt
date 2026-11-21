@@ -1,15 +1,15 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1IntroScene.toLocal
-import daio7771.everytunnel.core.cutscene.Cutscene
-import daio7771.everytunnel.core.cutscene.Local
-import daio7771.everytunnel.core.cutscene.Look
-import daio7771.everytunnel.core.cutscene.SceneFrame
-import daio7771.everytunnel.core.cutscene.Shot
-import daio7771.everytunnel.core.cutscene.TimedLine
-import daio7771.everytunnel.core.cutscene.Timeline
-import daio7771.everytunnel.core.cutscene.VoiceLine
-import daio7771.everytunnel.core.level.Position
+import daio7771.everytunnel.common.core.cutscene.Cutscene
+import daio7771.everytunnel.common.core.cutscene.Local
+import daio7771.everytunnel.common.core.cutscene.Look
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.core.cutscene.Shot
+import daio7771.everytunnel.common.core.cutscene.TimedLine
+import daio7771.everytunnel.common.core.cutscene.Timeline
+import daio7771.everytunnel.common.core.cutscene.VoiceLine
+import daio7771.everytunnel.common.core.level.Position
 import java.util.Random
 import kotlin.math.ceil
 

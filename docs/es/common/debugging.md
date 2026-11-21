@@ -1,0 +1,129 @@
+# Depuración
+
+*[English version](../../en/common/debugging.md) · [Todas las páginas](../README.md)*
+
+## Comandos de depuración
+
+`platform.DebugCommands`, nivel de operador 2 (en un jugador: "Permitir trucos"). **Solo al
+desarrollar** (`./gradlew runClient`): un jar de release no tiene ninguno salvo `rebuilt`, y su
+mundo se instala con los trucos desactivados (`client.MapWorldInstaller`), así que los
+jugadores no pueden saltarse niveles ni leer las soluciones. Los huevos de aparición solo están
+en la pestaña Every Tunnel al desarrollar.
+
+| Comando | Qué hace |
+|---|---|
+| `/everytunnel levels` | Niveles cargados con sus zonas y puntos de aparición |
+| `/everytunnel where` | El nivel y las zonas en las que estás, y si se aplican las reglas del mundo |
+| `/everytunnel resources` | Tu stamina, sed y batería |
+| `/everytunnel resources set stamina\|thirst\|battery <valor>` | Cambia uno (la batería en segundos de luz) |
+| `/everytunnel noise` | Los ruidos de los últimos 5 segundos cerca de ti |
+| `/everytunnel noise watch` | Activa o desactiva mostrar cada ruido tuyo en la barra de acción |
+| `/everytunnel congrats` | Abre la ventana de felicitación con el tiempo y las muertes de esta partida hasta ahora, sin conseguir nada |
+| `/everytunnel prologue` | Juega la cinemática inicial del Chapter 2: construye su sala aparte, te sujeta en ella y te devuelve adonde estabas al terminar (saltar con dos pulsaciones) |
+| `/everytunnel director` | Te pone ante la puerta del director en el nivel 5 (antes, `setlevel 5`), con su escena lista para repetirse y su máscara de nuevo puesta |
+| `/everytunnel profile on\|off\|report` | El perfilador de ticks (`TickProfiler`): una línea `[profile]` en el log cada 30 s con el tick del servidor y el coste de cada hook de tick del mod (media por tick / llamada más lenta, en ms); `report` imprime la ventana hasta ahora. `-Devery_tunnel.profile=true` lo enciende desde el arranque |
+| `/everytunnel paleman` | Los Pale men cercanos: estado y objetivo |
+| `/everytunnel spawn hunters\|junior\|cloud` | Los enemigos del nivel 5 delante de ti: un grupo de tres Hunters o un Distortion Junior (una sola vez: morir en su nivel los quita y no vuelven), o una Distortion Cloud, estés donde estés |
+| `/everytunnel intro` | Repite la intro del ascensor (Supervivencia o Aventura). En una ejecución de desarrollo, una partida nueva se salta la espera del ascensor; esto la reproduce entera |
+| `/everytunnel newgame` | Empieza la partida de nuevo en este mundo |
+| `/everytunnel setlevel <número>` | Te lleva al inicio del nivel 1, 2, 3... (su `order`), como si entraras andando (su título, sus enemigos); los puzles se quedan como estén. El nivel 4, hasta que esté en pie: el pasillo de diplomas, que lo construye. El nivel 5, hasta que esté en pie: se construye y luego vas a su inicio |
+| `/everytunnel valves` | Las cifras de las válvulas del nivel 3 en esta partida (A a E) |
+| `/everytunnel progress` | Lo que has conservado: piezas, notas leídas, escenas vistas, libros, checkpoint |
+| `/everytunnel progress addpiece <nivel> <pieza>` | Te da una pieza, para probar el progreso |
+| `/everytunnel film set` | Construye el escenario para rodar la película del Cinema, aparte de los niveles, y te lleva allí en Espectador |
+| `/everytunnel film walk` | Pone a la figura a andar |
+| `/everytunnel film back` | Devuelve la figura al inicio, para otra toma |
+| `/everytunnel boxes` | El puzle de las cajas del nivel 3: cuántas hay en la estantería y dónde están las demás |
+| `/everytunnel books` | El puzle de los libros del nivel 3: cuántos hay en el mostrador y dónde están los demás |
+| `/everytunnel books fill` | Completa las cajas y saca los libros con todos menos uno ya en la mesa (para probar el último) |
+| `/everytunnel boxes fill` | Llena la estantería menos un hueco y deja una caja por ahí (para probar la última) |
+| `/everytunnel rebuilt` | Lo ejecuta `garage:build` al terminar: vuelve a poner el botín. No es para usarlo a mano |
+| `/everytunnel devworld save\|forget` | Solo en desarrollo, ver [Compilación](building-and-release.md#mundos-de-desarrollo) |
+
+El Nivel 1 del Chapter 2 tiene comandos propios bajo `/et` (`reload`, `ch2 l1 enter|leave|build|unbuild|anchors|goto|state|skip|npc`), también solo en
+desarrollo (`/playsound every_tunnel:voice.<id> voice @s` reproduce cualquiera de sus voces, con sus subtítulos): véase [Chapter 2, Nivel 1](../chapter2/level-1.md#comandos-de-depuración).
+
+Comandos de vanilla útiles:
+
+- `/function garage:build`: reconstruir el mapa a mano.
+- `/playsound every_tunnel:<id> master @s`: probar cualquier sonido.
+- `/summon every_tunnel:pale_man`, o el huevo de aparición de la pestaña Every Tunnel (al desarrollar).
+- `/give @s every_tunnel:<bloque u objeto>`: cualquier bloque u objeto del mod (`wrench`, `detector`...).
+- `/gamemode creative`: libre de las reglas del mundo, para construir o mirar.
+
+## El registro de playtest
+
+`platform.PlaytestLog` escribe una línea que empieza por `[playtest]` para todo lo que
+importa al ajustar, así que se puede releer una partida entera:
+
+```bash
+grep '\[playtest\]' run/logs/latest.log
+```
+
+- **Al empezar una partida:** la configuración de juego en uso y lo que tiene cada nivel
+  (puntos de botín, Pale men).
+- **Cada 30 s de juego:** sed, stamina, batería, vida, inventario, posición.
+- **Cuando ocurre:** niveles en los que se entra, botín recogido, tragos, cambios de batería
+  y batería agotada, agotamiento y recuperación, sed baja y vacía, Pale men que oyen al
+  jugador y le golpean, muertes y su causa.
+- **Las rutas de los Pale men:** una ruta que no llega a su objetivo (una vez por estado),
+  con dónde termina y qué bloques estorban del suelo a la cabeza; por qué termina cada paseo
+  o persecución hacia un ruido.
+- **Un resumen por nivel** al final de la demo, o cuando el jugador sale o empieza una
+  partida nueva a medias: tiempo, muertes por causa, golpes, botín, tragos, baterías, tiempo
+  de linterna, agotamiento, lo que quedaba.
+
+Los tiempos son tiempo de juego en ticks del servidor, así que una partida en pausa no
+cuenta. Las partidas viven solo en memoria: reabrir el mundo empieza una nueva.
+
+## Otras líneas del log
+
+- Cada cambio de zona de cada jugador (`LevelTrackingHooks`), con los ids de zona.
+- Cada cambio de estado de un Pale man, con su posición, objetivo y el ruido más fuerte.
+- Cada cambio de estado del Observer (`Observer … PATROL -> CHASE`), a quién atrapó o vio
+  meterse en una taquilla, y a qué velocidad corrió de verdad en cada carrera: `[observer] ran
+  64.0 blocks in 9.8 s: 6.5 blocks/s (ALERT_RUN)`, para ajustar `ObserverSettings`.
+- `A Distortion Cloud appears 11 blocks in front of <jugador> at (x, y, z)` (`DistortionHooks`), cada vez que viene una;
+  `Three Hunters put in at (x, y, z), <nivel/punto>` y `A Distortion Junior put in at ...`, cada vez que se ponen
+  (al construirse el nivel, al morir, con `/everytunnel spawn`: entonces `debug/<n>`).
+- `The figure stands at lab_figure (...)` y `The figure was seen` (`LabFigureHooks`); `<jugador> completes the fuse box at ...`
+  (`FuseHolderBlock`).
+- `Chemical puzzle: R-a with R-b` al sortearse la pareja de la partida, `<jugador> mixes R-a with R-b: the solvent | the alarm`
+  (`ChemicalHooks`), `Level 5's first Cloud, for <jugador>` (`LabHallHooks`).
+- `Level 5: the drain's hatch slams shut over <jugador>` (`DrainHooks`), `Level 5: the guard before you, in the Hideout`
+  (`DeadGuardHooks`, cada vez que se construye el nivel), `<jugador>: checkpoint at level_5, checkpoint_junction` (`ContinueGame`).
+- `[sprint] held but not sprinting at (x, y, z): …` (`client.SprintCheck`): mientras se
+  mantiene la tecla de correr andando hacia delante y el jugador no corre, cada 2 s, qué lo
+  impide (agotado, llevando una caja o un libro, hambre, usando un objeto, agachado, chocando
+  con algo, en el aire, ciego, montado).
+- Problemas de los archivos de configuración y de nivel, con la ruta JSON.
+
+## Tests unitarios
+
+`./gradlew test` (también forma parte de `build`). 55 tests en `src/test/kotlin/`, que cubren
+las capas de Kotlin puro:
+
+| Test | Cubre |
+|---|---|
+| `GameplayConfigParserTest` | Valores por defecto, valores erróneos, claves desconocidas y ausentes |
+| `LevelParserTest` | Cada clave, entradas rotas saltadas, errores con rutas |
+| `PlayerLocationTrackerTest` | Niveles y zonas en los que se entra y de los que se sale |
+| `PaleManBrainTest` | Cada cambio de estado, volumen, muros, ataques |
+| `NoiseSystemTest` | Radios, memoria, audibilidad, pasos, aterrizajes |
+| `ResourceSystemTest` | Gasto, regeneración, agotamiento, daño por sed, batería |
+| `FlashlightBeamTest` | La luz del haz en puntos dentro y fuera del cono |
+| `GuideMarkdownTest` | El subconjunto de Markdown de la guía, y que cada página de `docs/*/guide/` lo cumple en los dos idiomas |
+
+Lo que toca Minecraft se prueba en el juego.
+
+## Problemas frecuentes
+
+| Síntoma | Causa probable |
+|---|---|
+| `runClientMapWorld` falla al momento | Falta `run/saves/noname_complex`, o no tiene datapack de niveles: ejecuta el generador de mapas |
+| Quick play se queda en el menú | No existe un mundo con ese nombre |
+| Sin HUD, sin linterna | El mundo no tiene archivos de nivel (mira `/everytunnel levels`), o estás en Creativo/Espectador |
+| La linterna no ilumina nada | Falta LambDynamicLights, o se volvió a activar colored lighting en Complementary |
+| No hay Pale man en el Nivel 2 | Aparece la primera vez que se entra en el nivel; si se le hizo `/kill`, vuelve en la siguiente entrada |
+| El Pale man se queda quieto en una persecución | Su ruta se queda corta (necesita 3 bloques libres de altura): busca las líneas de rutas en el registro `[playtest]` |
+| Se ignora un archivo de nivel | Busca sus problemas en el registro; `order` y una zona válida son obligatorios |

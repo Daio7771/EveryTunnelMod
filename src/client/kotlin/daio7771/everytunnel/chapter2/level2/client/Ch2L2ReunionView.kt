@@ -3,7 +3,7 @@ package daio7771.everytunnel.chapter2.level2.client
 import daio7771.everytunnel.chapter2.level2.core.ReunionScene
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Reunion
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2Scenes
-import daio7771.everytunnel.client.cutscene.CutsceneView
+import daio7771.everytunnel.common.client.cutscene.CutsceneView
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 
 /**

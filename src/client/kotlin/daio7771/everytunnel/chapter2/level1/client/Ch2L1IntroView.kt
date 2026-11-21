@@ -1,8 +1,8 @@
 package daio7771.everytunnel.chapter2.level1.client
 
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1IntroHooks
-import daio7771.everytunnel.client.cutscene.CutsceneView
-import daio7771.everytunnel.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.client.cutscene.CutsceneView
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.MinecraftClient
 

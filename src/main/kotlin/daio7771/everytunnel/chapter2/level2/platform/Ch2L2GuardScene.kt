@@ -1,14 +1,14 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Event
 import daio7771.everytunnel.chapter2.level2.core.GuardIntro
-import daio7771.everytunnel.core.cutscene.Cutscene
-import daio7771.everytunnel.core.cutscene.Local
-import daio7771.everytunnel.core.cutscene.Look
-import daio7771.everytunnel.core.cutscene.SceneFrame
-import daio7771.everytunnel.core.cutscene.Shot
-import daio7771.everytunnel.core.cutscene.Timeline
+import daio7771.everytunnel.common.core.cutscene.Cutscene
+import daio7771.everytunnel.common.core.cutscene.Local
+import daio7771.everytunnel.common.core.cutscene.Look
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.core.cutscene.Shot
+import daio7771.everytunnel.common.core.cutscene.Timeline
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking

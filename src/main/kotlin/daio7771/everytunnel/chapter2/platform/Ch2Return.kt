@@ -1,10 +1,10 @@
 package daio7771.everytunnel.chapter2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1
 import daio7771.everytunnel.chapter2.level2.platform.Ch2L2
-import daio7771.everytunnel.config.ConfigManager
-import daio7771.everytunnel.systems.ResourceSystem
+import daio7771.everytunnel.common.config.ConfigManager
+import daio7771.everytunnel.common.systems.ResourceSystem
 import net.fabricmc.fabric.api.event.Event
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.nbt.NbtCompound

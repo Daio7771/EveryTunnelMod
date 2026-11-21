@@ -1,7 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.core
 
-import daio7771.everytunnel.util.JsonFields
-
+import daio7771.everytunnel.common.util.JsonFields
 /** What Stone Maw's ram is like with [Ch2L2Maw.stage]'s number of pillars broken: faster and sharper with each, and the stun shorter. */
 data class MawStage(val ramSpeed: Double, val turnDegreesPerSecond: Double, val orientSeconds: Double, val stunSeconds: Double)
 

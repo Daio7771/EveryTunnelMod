@@ -17,10 +17,9 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.shape.VoxelShape
 import net.minecraft.world.BlockView
 import net.minecraft.world.World
-import daio7771.everytunnel.platform.BlockShapes
-import daio7771.everytunnel.platform.CardReaderBlock
-import daio7771.everytunnel.platform.ModSounds
-
+import daio7771.everytunnel.common.platform.BlockShapes
+import daio7771.everytunnel.common.platform.CardReaderBlock
+import daio7771.everytunnel.common.platform.ModSounds
 /**
  * The time clock of Chapter 2's Level 1, where the new hire clocks in. It is a card reader on a wall (the same box, the
  * same models and sounds: no art of its own), [CardReaderBlock.FACING] the way its front looks, red until someone clocks

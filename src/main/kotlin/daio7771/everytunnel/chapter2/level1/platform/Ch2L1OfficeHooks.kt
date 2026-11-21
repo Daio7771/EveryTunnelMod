@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Angles
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1OfficeScene
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Pose
@@ -10,17 +10,17 @@ import daio7771.everytunnel.chapter2.level1.core.Ch2L1Voices
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.platform.Ch2Items
-import daio7771.everytunnel.core.cutscene.Cutscene
-import daio7771.everytunnel.core.cutscene.Local
-import daio7771.everytunnel.core.cutscene.Look
-import daio7771.everytunnel.core.cutscene.SceneFrame
-import daio7771.everytunnel.core.cutscene.Shot
-import daio7771.everytunnel.core.cutscene.Timeline
-import daio7771.everytunnel.config.ConfigManager
-import daio7771.everytunnel.platform.KeptEntities
-import daio7771.everytunnel.systems.ResourceSystem
-import daio7771.everytunnel.platform.ModBlocks
-import daio7771.everytunnel.platform.TickProfiler
+import daio7771.everytunnel.common.core.cutscene.Cutscene
+import daio7771.everytunnel.common.core.cutscene.Local
+import daio7771.everytunnel.common.core.cutscene.Look
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.core.cutscene.Shot
+import daio7771.everytunnel.common.core.cutscene.Timeline
+import daio7771.everytunnel.common.config.ConfigManager
+import daio7771.everytunnel.common.platform.KeptEntities
+import daio7771.everytunnel.common.systems.ResourceSystem
+import daio7771.everytunnel.common.platform.ModBlocks
+import daio7771.everytunnel.common.platform.TickProfiler
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents

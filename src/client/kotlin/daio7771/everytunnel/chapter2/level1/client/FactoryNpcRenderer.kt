@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.client
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Pose
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Skins
 import daio7771.everytunnel.chapter2.level1.platform.FactoryNpcEntity
@@ -21,7 +21,7 @@ import kotlin.math.sin
 /**
  * The factory's people (Rowan, the coworker, the workers) on the player's model with classic 4 px arms, each with the
  * skin the entity says (`textures/entity/npc/<skin>.png`: Rowan's is the author's, the workers' are made by
- * `tools/entity/workers.py`). Only the skins' base layer is used. The arms follow the entity's [FactoryNpcEntity.npcPose]
+ * `tools/entity/chapter2/workers.py`). Only the skins' base layer is used. The arms follow the entity's [FactoryNpcEntity.npcPose]
  * ([FactoryNpcModel]): out in front at a keyboard, moving with the words when talking, hanging still when they do nothing with
  * them (a nod now and then and the weight shifting when listening); in the meeting, trembling, laughing, or held out handing
  * something over; Rowan in his office fixing his cuffs, leaning on the desk, palms open, bending forward, at his tie, pointing, clapping.

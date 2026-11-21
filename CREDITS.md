@@ -7,7 +7,7 @@ Level 4, and the direction of everything else (see "Voice and AI" below). All ri
 ## Voice and AI
 
 The Director's lines in Level 5 (the voice files in `tools/sounds/voice/`, their texts in
-`tools/sounds/voices.py`) are voices from ElevenLabs' library, generated with the author's own
+`tools/sounds/common/voices.py`) are voices from ElevenLabs' library, generated with the author's own
 plan. They are the only AI-made sound or music in the game: the rest is synthesized for it, the
 author's own, or listed below. The design, the story and the music are the author's. The code, the
 Python tools that generate the map, textures, models and sound effects, and part of the in-game text
@@ -24,13 +24,13 @@ Plays in the elevator at the start of a new game. The mod uses its first 30 seco
 faded out and converted to Ogg Vorbis (`assets/every_tunnel/sounds/music/elevator_1.ogg`);
 in game it slows down, wavers and fades out when the elevator doors open. This credit must
 stay wherever the mod is shared.
-Source: `tools/sounds/licensed/local_forecast_elevator.mp3`, see `tools/sounds/licensed/SOURCES.md`.
+Source: `tools/sounds/common/licensed/local_forecast_elevator.mp3`, see `tools/sounds/common/licensed/SOURCES.md`.
 
 ## Recordings
 
 Three of the mod's sounds are made from CC0 (public domain) recordings from Freesound: the
 player's exhausted breathing, the Pale man's breathing and drinking. No credit is required;
-their sources are listed in `tools/sounds/cc0/SOURCES.md`. The originals stay public domain; the mod's
+their sources are listed in `tools/sounds/common/cc0/SOURCES.md`. The originals stay public domain; the mod's
 sounds made from them are part of Every Tunnel.
 
 ## Libraries inside the jar

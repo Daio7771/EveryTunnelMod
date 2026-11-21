@@ -13,13 +13,17 @@ asistente necesita saber.
   Cambia las dos en el mismo commit.
 - El juego está en inglés (`en_us.json`, la referencia) y en español de España (`es_es.json`,
   copiado también a los demás `es_*`). Los dos se generan: los textos se escriben en las fuentes por capítulo,
-  `tools/lang/src/<parte>/<idioma>.json` (`base` para el Chapter 1 y lo compartido, `chapter2`...), y luego
-  `python3 tools/lang/build.py`. Los mensajes pintados en las paredes (`wall.every_tunnel.*`) se quedan en inglés a
+  `tools/lang/src/<parte>/<idioma>.json` (`common` para lo compartido, `chapter1`, `chapter2`...), y luego
+  `python3 tools/lang/common/build.py`. Los mensajes pintados en las paredes (`wall.every_tunnel.*`) se quedan en inglés a
   propósito. La guía del juego y las notas están en los dos.
-- **Los capítulos van aparte.** El Chapter 1 y lo que comparten todos los capítulos son el juego base; el código de un
-  capítulo posterior está en `daio7771.everytunnel.chapterN` (una carpeta por nivel), con sus propios entrypoints,
-  registros, progreso, parte de idioma y catálogo de sonidos. El juego base nunca nombra a un capítulo
-  (`ChapterBoundaryTest`); un capítulo usa los puntos de extensión del juego base (véase [Arquitectura](architecture.md#capítulos)).
+- **Los capítulos van aparte.** El código está en tres partes bajo `daio7771.everytunnel`: `common` (el motor y lo que comparten
+  todos los capítulos), `chapter1` (los niveles del juego base: `level2` a `level5`, cada uno con `core/`, `platform/` y `client/`; el
+  Nivel 1 no tiene código propio) y `chapter2` (la misma forma). Un capítulo tiene sus propios entrypoints, registros, progreso, parte
+  de idioma y catálogo de sonidos. `common` nunca nombra a un capítulo (`ChapterBoundaryTest`), y un capítulo usa los puntos de
+  extensión de `common` (véase [Arquitectura](common/architecture.md#capítulos)). **Dónde va un fichero nuevo:** lo usa un capítulo
+  posterior o el motor (menú, HUD, cinemáticas, progreso, configuración, sistemas, mixins, bloques y registros compartidos) -> `common`;
+  lo usan varios niveles del Capítulo 1 -> `chapter1/{core,platform,client}`; un solo nivel -> `chapter1/levelN/...`; un capítulo o nivel
+  nuevo -> su propia carpeta. En la duda, `common`, y un motivo en `ChapterBoundaryTest.sharedByName` si su nombre dice Capítulo 1.
 
 ## Páginas públicas
 
@@ -29,7 +33,7 @@ ven los jugadores. Están solo en inglés, con tono directo, y sin nada técnico
 URLs completas (allí no funcionan los enlaces relativos). Cuando cambie algo que ve el jugador
 (requisitos, características, mods recomendados, controles), actualiza las tres. No llevan
 notas para quien mantiene el mod (cómo publicar, listas de comprobación): eso va en `docs/`,
-como [Publicar en CurseForge](building-and-release.md#publicar-en-curseforge).
+como [Publicar en CurseForge](common/building-and-release.md#publicar-en-curseforge).
 
 ## Código
 
@@ -95,17 +99,17 @@ de escribir sus hooks, y di cuál en el KDoc de su archivo.
   0.2.0 era MIT.
 - Solo se mete una librería en el jar si su licencia permite compartirla (la de
   LambDynamicLights no); cada una que vaya dentro se lista en `CREDITS.md`.
-- Grabaciones: **solo CC0**, con su fuente en `tools/sounds/cc0/SOURCES.md`. Los SoundFonts y
-  juegos de muestras de la música muestreada igual: CC0, listados en `tools/sounds/soundfonts/SOURCES.md`, descargados
+- Grabaciones: **solo CC0**, con su fuente en `tools/sounds/common/cc0/SOURCES.md`. Los SoundFonts y
+  juegos de muestras de la música muestreada igual: CC0, listados en `tools/sounds/common/soundfonts/SOURCES.md`, descargados
   por `fetch.py` y nunca en git.
 - Lo que necesite crédito (hoy solo la canción del ascensor) va en
-  `tools/sounds/licensed/`, `CREDITS.md`, `fabric.mod.json` y los créditos finales.
+  `tools/sounds/common/licensed/`, `CREDITS.md`, `fabric.mod.json` y los créditos finales.
 - **Nada de audio ni recursos generados con IA en el juego** (nada de un servicio generador; la
   música y los sonidos escritos y sintetizados en código por las herramientas están bien). El concept art hecho con IA
-  solo se puede usar como referencia (`tools/entity/reference/`), nunca se distribuye. La
+  solo se puede usar como referencia (`tools/entity/chapter1/reference/`), nunca se distribuye. La
   única excepción son las **voces con IA**: voces de la biblioteca de ElevenLabs (no
   clonadas), generadas por el usuario y entregadas como archivos (la del director en el nivel 5,
-  la del científico en el prólogo del Chapter 2, las del compañero y Rowan en su Nivel 1; ver [Audio](audio.md)). La música y todos los
+  la del científico en el prólogo del Chapter 2, las del compañero y Rowan en su Nivel 1; ver [Audio](common/audio.md)). La música y todos los
   demás sonidos siguen fuera de los servicios de IA.
 
 ## Pruebas
@@ -113,7 +117,7 @@ de escribir sus hooks, y di cuál en el KDoc de su archivo.
 - `./gradlew build` debe pasar (ejecuta los tests unitarios).
 - Los cambios que tocan Minecraft se comprueban **en el juego**. Escribe pasos de prueba
   claros: qué hacer y qué debería pasar.
-- Para ajustar, usa el [registro `[playtest]`](debugging.md#el-registro-de-playtest).
+- Para ajustar, usa el [registro `[playtest]`](common/debugging.md#el-registro-de-playtest).
 
 ## Commits
 
@@ -149,7 +153,7 @@ Reglas para el contenido:
 
 ## Notas para asistentes de IA
 
-- **Empieza aquí:** lee [Arquitectura](architecture.md) y la cabecera KDoc de cada archivo
+- **Empieza aquí:** lee [Arquitectura](common/architecture.md) y la cabecera KDoc de cada archivo
   que toques. Las cabeceras se mantienen exactas; fíate más de ellas que de la memoria.
 - **Pregunta antes de decidir.** Antes de cada paso, hazle al usuario una ronda agrupada de
   preguntas de diseño. Nunca decidas solo lo que el brief no fija (diseño, textos, ajustes,

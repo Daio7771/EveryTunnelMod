@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Guard as GuardConfig
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
 import daio7771.everytunnel.chapter2.level2.core.GuardFight
@@ -10,14 +10,14 @@ import daio7771.everytunnel.chapter2.level2.core.TrapBoard
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.core.cutscene.CameraPose
-import daio7771.everytunnel.core.cutscene.SceneFrame
-import daio7771.everytunnel.core.level.Position
-import daio7771.everytunnel.platform.DeathHooks
-import daio7771.everytunnel.platform.LightMode
-import daio7771.everytunnel.platform.ModBlocks
-import daio7771.everytunnel.platform.WallMessageBlock
-import daio7771.everytunnel.platform.WallMessageBlockEntity
+import daio7771.everytunnel.common.core.cutscene.CameraPose
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.core.level.Position
+import daio7771.everytunnel.common.platform.DeathHooks
+import daio7771.everytunnel.common.platform.LightMode
+import daio7771.everytunnel.common.platform.ModBlocks
+import daio7771.everytunnel.common.platform.WallMessageBlock
+import daio7771.everytunnel.common.platform.WallMessageBlockEntity
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.nbt.NbtCompound

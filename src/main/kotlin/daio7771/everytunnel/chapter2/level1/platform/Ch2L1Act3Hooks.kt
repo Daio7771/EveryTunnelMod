@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Act3
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Bits
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Overtime
@@ -10,10 +10,10 @@ import daio7771.everytunnel.chapter2.platform.Ch2Items
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
 import daio7771.everytunnel.chapter2.prologue.platform.ScientistEntity
-import daio7771.everytunnel.platform.CardReaderBlock
+import daio7771.everytunnel.common.platform.CardReaderBlock
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
-import daio7771.everytunnel.platform.ModSounds
-import daio7771.everytunnel.platform.TickProfiler
+import daio7771.everytunnel.common.platform.ModSounds
+import daio7771.everytunnel.common.platform.TickProfiler
 import net.fabricmc.fabric.api.event.player.UseBlockCallback
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking

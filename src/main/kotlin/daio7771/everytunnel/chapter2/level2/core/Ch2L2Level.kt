@@ -1,8 +1,7 @@
 package daio7771.everytunnel.chapter2.level2.core
 
 import com.google.gson.JsonObject
-import daio7771.everytunnel.util.JsonFields
-
+import daio7771.everytunnel.common.util.JsonFields
 /**
  * A place the level saves at ([Ch2L2Level.checkpoints]): walking into [zone] takes it, once, if it lies ahead of the last one taken; a
  * death, or the menu's CONTINUE, brings the player back to [anchor]. No [zone]: it is taken only when the level says so (the escape's, the

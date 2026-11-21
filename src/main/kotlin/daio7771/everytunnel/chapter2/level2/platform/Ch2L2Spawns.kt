@@ -1,15 +1,15 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Loot
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Note
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
-import daio7771.everytunnel.core.level.Position
-import daio7771.everytunnel.platform.DistortionHooks
-import daio7771.everytunnel.platform.LootBlock
-import daio7771.everytunnel.platform.LootSpawner
-import daio7771.everytunnel.platform.NoteHooks
+import daio7771.everytunnel.common.core.level.Position
+import daio7771.everytunnel.common.platform.DistortionHooks
+import daio7771.everytunnel.common.platform.LootBlock
+import daio7771.everytunnel.common.platform.LootSpawner
+import daio7771.everytunnel.common.platform.NoteHooks
 import net.minecraft.block.Blocks
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys

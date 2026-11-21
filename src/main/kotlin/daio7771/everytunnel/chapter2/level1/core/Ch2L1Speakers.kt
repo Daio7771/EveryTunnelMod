@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 import com.google.gson.JsonObject
-import daio7771.everytunnel.util.JsonFields
+import daio7771.everytunnel.common.util.JsonFields
 import java.util.Random
 
 /** A line the loudspeakers say at a fixed moment: [delayTicks] after the player reaches the state [after]. */

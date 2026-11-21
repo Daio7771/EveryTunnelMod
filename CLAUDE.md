@@ -10,7 +10,7 @@ is the core of the mod.
 1. `PROJECT_STATE.md` (repository root, not in git): where the project stands, what is next,
    open questions. If it is missing, ask the user.
 2. `docs/en/contributing.md`: conventions and the notes for AI assistants.
-3. `docs/en/architecture.md`, then the page of the area you work on (`docs/en/README.md` lists
+3. `docs/en/common/architecture.md`, then the page of the area you work on (`docs/en/README.md` lists
    them all). The KDoc header at the top of each source file is the most precise description
    of that file.
 
@@ -39,13 +39,13 @@ is the core of the mod.
 - Logic in plain Kotlin (`config`, `core`, `systems`, `entities`, unit tested); Minecraft glue
   in `platform` and the client. Mixins (Java) only where Fabric API has no event.
 - Every feature only acts in worlds with levels (`WorldRules`); vanilla worlds stay vanilla.
-- **Chapters stay apart.** Chapter 1 and the shared code are the base game; a later chapter lives in
-  `daio7771.everytunnel.chapterN` (one folder per level) with its own entrypoints, registries, progress,
-  lang part (`tools/lang/src/chapterN/`) and sound catalog. The base game never names a chapter
-  (`ChapterBoundaryTest`): use its extension points (`docs/en/architecture.md`, Chapters).
+- **Chapters stay apart.** The code is `daio7771.everytunnel.common` (the engine and what every chapter shares), `chapter1` (the base
+  game's levels, one folder per level) and `chapter2` (and any later chapter), each with its own entrypoints, registries, progress,
+  lang part (`tools/lang/src/<part>/`) and sound catalog. `common` never names a chapter and a chapter reaches `common` only through
+  its extension points (`ChapterBoundaryTest`; `docs/en/common/architecture.md`, Chapters; where a new file goes: `docs/en/contributing.md`).
 - Generated content (sounds, textures, models, the map) comes from the Python tools in
   `tools/`: change the tool and rerun it, never edit its output by hand.
-- Sounds: synthesized or CC0 only (CC0 SoundFonts too, fetched by `tools/sounds/soundfonts/fetch.py`), plus the one credited CC BY song. The one AI exception is AI
+- Sounds: synthesized or CC0 only (CC0 SoundFonts too, fetched by `tools/sounds/common/soundfonts/fetch.py`), plus the one credited CC BY song. The one AI exception is AI
   voices (ElevenLabs library voices, files from the user: the director's in Level 5, the scientist's
   in Chapter 2's prologue, and any further character voice). No other AI audio or assets (nothing from a generator service; music and sounds written and
   synthesized in code by the Python tools are fine).

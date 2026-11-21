@@ -10,7 +10,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 /**
- * Chapter 2's Level 2 as the jar has it: the plan `tools/map/ch2l2/generate.py` wrote and the anchors beside it. The generator's own
+ * Chapter 2's Level 2 as the jar has it: the plan `tools/map/chapter2/ch2l2/generate.py` wrote and the anchors beside it. The generator's own
  * checks (`checks.py`: the route walked, no shortcuts, the pump room's length, the water held) run before it writes anything; this
  * holds the written files to what the mod needs.
  */
@@ -63,7 +63,7 @@ class Ch2L2MapPlanTest {
             val (namespace, name) = BlockSpec.parse(block).id.split(":")
             when (namespace) {
                 "minecraft" -> assertTrue(name in drain || name !in reskinned, "$block: the world's pack re-skins it as Chapter 1's")
-                "every_tunnel" -> assertTrue(File(assets, "blockstates/$name.json").isFile, "$block: no blockstate (run tools/blocks/generate.py)")
+                "every_tunnel" -> assertTrue(File(assets, "blockstates/$name.json").isFile, "$block: no blockstate (run tools/blocks/common/generate.py)")
                 else -> error("$block: unknown namespace")
             }
         }

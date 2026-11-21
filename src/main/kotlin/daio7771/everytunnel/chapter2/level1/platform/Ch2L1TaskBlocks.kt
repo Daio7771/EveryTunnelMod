@@ -11,9 +11,8 @@ import net.minecraft.util.Hand
 import net.minecraft.util.hit.BlockHitResult
 import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
-import daio7771.everytunnel.platform.BlockShapes
-import daio7771.everytunnel.platform.PropBlock
-
+import daio7771.everytunnel.common.platform.BlockShapes
+import daio7771.everytunnel.common.platform.PropBlock
 /**
  * The blocks of Chapter 2 Level 1's tasks. Each does nothing but pass its use to [Ch2L1TaskHooks] (or, for the LAB's reagents and
  * centrifuge, [Ch2L1LabTaskHooks]), which knows the

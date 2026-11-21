@@ -3,7 +3,7 @@ package daio7771.everytunnel.chapter2.level1.client
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1OfficeScene
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1OfficeHooks
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.client.cutscene.CutsceneView
+import daio7771.everytunnel.common.client.cutscene.CutsceneView
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.resource.language.I18n

@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.core
 
-import daio7771.everytunnel.core.achievement.AchievementRegistry
+import daio7771.everytunnel.common.core.achievement.AchievementRegistry
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

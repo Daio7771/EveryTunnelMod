@@ -1,8 +1,8 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 import com.google.gson.JsonObject
-import daio7771.everytunnel.core.level.Position
-import daio7771.everytunnel.util.JsonFields
+import daio7771.everytunnel.common.core.level.Position
+import daio7771.everytunnel.common.util.JsonFields
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt

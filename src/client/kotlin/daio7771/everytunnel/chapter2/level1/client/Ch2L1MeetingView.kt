@@ -2,7 +2,7 @@ package daio7771.everytunnel.chapter2.level1.client
 
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1MeetingScene
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1Act2Hooks
-import daio7771.everytunnel.client.cutscene.CutsceneView
+import daio7771.everytunnel.common.client.cutscene.CutsceneView
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.resource.language.I18n

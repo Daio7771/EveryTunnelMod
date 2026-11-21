@@ -1,6 +1,5 @@
 package daio7771.everytunnel.chapter2.level1.client
 
-import daio7771.everytunnel.chapter2.level1.client.Ch2L1Client
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Objectives
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback
 import net.minecraft.client.MinecraftClient

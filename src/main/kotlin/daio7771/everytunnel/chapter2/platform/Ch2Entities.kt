@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.FactoryNpcEntity
 import daio7771.everytunnel.chapter2.level2.platform.ObservantGuardEntity
 import daio7771.everytunnel.chapter2.level2.platform.ThrownPipeEntity

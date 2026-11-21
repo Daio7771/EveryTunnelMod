@@ -13,7 +13,11 @@
     "main": [
       {
         "adapter": "kotlin",
-        "value": "daio7771.everytunnel.EveryTunnel"
+        "value": "daio7771.everytunnel.common.EveryTunnel"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "daio7771.everytunnel.chapter1.Chapter1"
       },
       {
         "adapter": "kotlin",
@@ -23,7 +27,11 @@
     "client": [
       {
         "adapter": "kotlin",
-        "value": "daio7771.everytunnel.client.EveryTunnelClient"
+        "value": "daio7771.everytunnel.common.client.EveryTunnelClient"
+      },
+      {
+        "adapter": "kotlin",
+        "value": "daio7771.everytunnel.chapter1.client.Chapter1Client"
       },
       {
         "adapter": "kotlin",
@@ -33,19 +41,19 @@
     "fabric-datagen": [
       {
         "adapter": "kotlin",
-        "value": "daio7771.everytunnel.client.EveryTunnelDataGenerator"
+        "value": "daio7771.everytunnel.common.client.EveryTunnelDataGenerator"
       }
     ],
     "lambdynlights:initializer": [
       {
         "adapter": "kotlin",
-        "value": "daio7771.everytunnel.client.compat.LambDynamicLightsCompat"
+        "value": "daio7771.everytunnel.common.client.compat.LambDynamicLightsCompat"
       }
     ],
     "cardinal-components-entity": [
       {
         "adapter": "kotlin",
-        "value": "daio7771.everytunnel.platform.CardinalProgress"
+        "value": "daio7771.everytunnel.common.platform.CardinalProgress"
       },
       {
         "adapter": "kotlin",

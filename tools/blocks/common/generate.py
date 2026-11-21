@@ -1,0 +1,4955 @@
+"""
+Assets of the mod's own blocks: block and item models, blockstates, 16x16 textures with
+their LabPBR maps (_n, _s), English names and loot tables.
+
+Run after changing a block here (from the repository root):   python3 tools/blocks/common/generate.py
+
+Writes into src/main/resources/ (committed with the mod):
+  assets/every_tunnel/blockstates/<block>.json
+  assets/every_tunnel/models/block/<model>.json, models/item/<block>.json
+  assets/every_tunnel/textures/block/<texture>.png  (+ _n.png, _s.png)
+  tools/lang/src/<part>/en_us.json                 (the block names, by chapter; then the lang files are rebuilt)
+  data/every_tunnel/loot_tables/blocks/<block>.json
+and a preview, tools/blocks/common/output/blocks_sheet.png (git-ignored): every texture as
+albedo | normal | specular | emission.
+
+The blocks themselves (properties, shapes, sounds) are registered in Kotlin
+(platform/ModBlocks.kt, and chapter2/platform/Ch2Blocks.kt for Chapter 2's); the ids in BLOCKS must match, which this tool checks. Model
+rotations must match the shapes there too (platform/BlockShapes.kt,
+FluorescentLightBlock.modelRotation). Textures reuse the level generator's painters and
+materials (tools/map/chapter1/garage/textures.py), so the props look like the level around them.
+"""
+
+import io
+import json
+import math
+import random
+import re
+import sys
+from pathlib import Path
+
+from PIL import Image, ImageDraw
+
+ROOT = Path(__file__).resolve().parents[3]
+
+import sys as _sys
+from pathlib import Path as _Path
+_sys.path.insert(0, str(_Path(__file__).resolve().parents[2]))
+import toolpaths  # noqa: E402  (where each area keeps its common/chapter folders)
+toolpaths.use('blocks', 'entity', 'lang', 'map')
+import map_generator as G                                              # noqa: E402
+from garage import pbr, preview                                         # noqa: E402
+from garage import textures as T                                        # noqa: E402
+from garage.pbr import Material                                         # noqa: E402
+from garage.textures import mix, new, noise, px, rect, speckle         # noqa: E402
+from offices import textures as OT                                     # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "lang" / "common"))
+import langfiles  # noqa: E402
+import briefing                                                         # noqa: E402
+
+NS = "every_tunnel"
+RESOURCES = ROOT / "src" / "main" / "resources"
+ASSETS = RESOURCES / "assets" / NS
+LOOT = RESOURCES / "data" / NS / "loot_tables" / "blocks"
+OUT = Path(__file__).resolve().parent / "output"
+_KT = ROOT / "src" / "main" / "kotlin" / "daio7771" / "everytunnel"
+# Every file that registers blocks: Chapter 1 and the base game's, and each later chapter's own.
+MOD_BLOCKS_KT = [_KT / "common" / "platform" / "ModBlocks.kt", _KT / "chapter1" / "platform" / "Ch1Blocks.kt", _KT / "chapter2" / "platform" / "Ch2Blocks.kt"]
+
+HORIZONTAL = {"north": 0, "east": 90, "south": 180, "west": 270}
+# FloorIndicatorBlock.LABELS, top floor first.
+FLOOR_LABELS = ["3", "2", "1", "G", "B1"]
+SIDES = ["north", "east", "south", "west", "up", "down"]
+
+
+def rng_for(name):
+    return random.Random(f"block-{name}")
+
+
+# =====================================================================================
+# Textures
+
+def wood_tex(rng, top):
+    """Pallet: planks with gaps (top), or the cut end grain of the runners (sides)."""
+    img = new((156, 120, 78))
+    noise(img, rng, 9)
+    for _ in range(14):                                          # grain
+        x, y = rng.randrange(16), rng.randrange(16)
+        for i in range(rng.randrange(2, 6)):
+            px(img, x + i, y, (120, 88, 54), 0.5)
+    if top:
+        for y in range(16):
+            if y % 4 == 3:
+                rect(img, 0, y, 15, y, (52, 40, 26))
+        speckle(img, rng, 4, (70, 64, 60), 0.8)                    # nail heads
+    else:
+        rect(img, 0, 0, 15, 2, (128, 96, 60))
+    T.gradient(img, (70, 62, 50), 0.0, 0.3)                      # grime
+    return img
+
+
+def drum_tex(rng, top):
+    """Oil drum: blue painted steel with rolling hoops (side), lid with two bungs (top)."""
+    base = (44, 72, 118)
+    img = new(base)
+    noise(img, rng, 5)
+    if top:
+        for y in range(16):
+            for x in range(16):
+                d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+                if 6.5 < d < 7.6:
+                    px(img, x, y, (70, 98, 140), 0.8)              # rim
+        for cx, cy in ((4, 5), (11, 10)):
+            rect(img, cx - 1, cy - 1, cx, cy, (34, 34, 36))
+    else:
+        for y in (4, 11):
+            rect(img, 0, y, 15, y, (70, 98, 140))
+            rect(img, 0, y + 1, 15, y + 1, (30, 48, 80))
+        for _ in range(6):
+            T.blob(img, rng, T.RUST, rng.uniform(1, 2.5), 0.6)
+        T.streaks(img, rng, 3, T.RUST, 0.4)
+    return img
+
+
+def bin_tex(rng, top):
+    """Plastic wheelie bin: dark green ribs (side), lid with a handle groove (top)."""
+    img = new((52, 70, 58))
+    noise(img, rng, 4)
+    if top:
+        rect(img, 0, 2, 15, 2, (36, 48, 40))
+        rect(img, 0, 13, 15, 13, (36, 48, 40))
+    else:
+        for x in (2, 6, 9, 13):
+            rect(img, x, 1, x, 14, (66, 86, 72))
+        rect(img, 0, 15, 15, 15, (30, 40, 34))
+    T.gradient(img, (60, 60, 56), 0.0, 0.3)
+    return img
+
+
+def wheel_stop_tex(rng):
+    img = T.floor_tex(rng, "worn")
+    for x in range(16):
+        if (x // 4) % 2 == 0:
+            for y in range(16):
+                if rng.random() > 0.15:
+                    px(img, x, y, T.PAINT_YELLOW, 0.85)
+    return img
+
+
+def pipe_tex(rng):
+    """Painted steel pipe, lengthwise along the texture: lit on top, shaded below (a cylinder)."""
+    img = new((116, 128, 116))
+    for y in range(16):
+        shade = 1.18 - abs(y - 5) / 12 if y < 5 else 1.18 - (y - 5) / 14
+        for x in range(16):
+            r, g, b, a = img.getpixel((x, y))
+            img.putpixel((x, y), (T.clamp(r * shade), T.clamp(g * shade), T.clamp(b * shade), a))
+    noise(img, rng, 4)
+    rect(img, 0, 0, 0, 15, (80, 88, 80), 0.6)                    # weld seam between pipe lengths
+    for _ in range(4):
+        T.blob(img, rng, T.RUST, rng.uniform(1, 2), 0.5)
+    return img
+
+
+def tray_tex(rng, part):
+    """Cable tray: perforated galvanized steel (bottom, see-through holes), side rail, cable bundle."""
+    if part == "cables":
+        img = new((24, 24, 26))
+        colours = [(24, 24, 26), (60, 62, 64), (24, 24, 26), (150, 72, 30), (24, 24, 26), (40, 60, 110)]
+        for y in range(16):
+            c = colours[(y // 2) % len(colours)]
+            for x in range(16):
+                img.putpixel((x, y), c + (255,))
+        noise(img, rng, 5)
+        for y in range(16):                                      # roundness of each cable
+            if y % 2 == 1:
+                rect(img, 0, y, 15, y, (0, 0, 0), 0.3)
+        return img
+    img = new((158, 162, 164))
+    noise(img, rng, 4)
+    if part == "bottom":
+        for y in range(1, 16, 4):
+            for x in range(1, 16, 4):
+                rect(img, x, y, x + 1, y + 1, (0, 0, 0, 0))
+    else:
+        rect(img, 0, 0, 15, 0, (190, 194, 196))
+        for x in range(2, 16, 5):
+            rect(img, x, 1, x + 1, 2, (0, 0, 0, 0))
+    speckle(img, rng, 3, (120, 110, 96), 0.5)
+    return img
+
+
+def cable_tex(rng):
+    img = new((28, 28, 30))
+    noise(img, rng, 3)
+    rect(img, 6, 0, 6, 15, (64, 64, 68))                         # highlight along the cable
+    return img
+
+
+def metal_panel_tex(rng):
+    """Brushed stainless panel of the service elevator, with a seam and rivets."""
+    img = new((150, 152, 154))
+    for y in range(16):
+        d = rng.uniform(-6, 6)
+        for x in range(16):
+            r, g, b, a = img.getpixel((x, y))
+            e = d + rng.uniform(-2, 2)
+            img.putpixel((x, y), (T.clamp(r + e), T.clamp(g + e), T.clamp(b + e), a))
+    rect(img, 0, 15, 15, 15, (100, 102, 104))
+    rect(img, 15, 0, 15, 15, (110, 112, 114))
+    for x, y in ((2, 2), (13, 2), (2, 13), (13, 13)):
+        px(img, x, y, (186, 188, 190))
+        px(img, x + 1, y + 1, (96, 98, 100))
+    T.blob(img, rng, (110, 106, 96), 5, 0.25)                    # handprints and grime
+    dents(img, rng, 4)
+    return img
+
+
+def dents(img, rng, count, scratches=3):
+    """Dents (a dark pixel with a lit one beside it) and fine light scratches on metal."""
+    for _ in range(count):
+        x, y = rng.randrange(1, 14), rng.randrange(1, 15)
+        px(img, x, y, (84, 86, 90), 0.55)
+        px(img, x + 1, y, (196, 198, 202), 0.45)
+        if rng.random() < 0.5:
+            px(img, x, y + 1, (96, 98, 102), 0.35)
+    for _ in range(scratches):
+        x, y = rng.randrange(0, 12), rng.randrange(0, 16)
+        for k in range(rng.randrange(3, 7)):
+            px(img, x + k, y + (k // 3) * (1 if rng.random() < 0.5 else -1), (206, 208, 212), 0.35)
+
+
+def elevator_door_tex(rng):
+    """Sliding elevator door: brushed stainless steel with a vertical grain, worn darker
+    where hands push it, a thin rubber strip along both edges."""
+    img = new((156, 158, 160))
+    for x in range(16):
+        d = rng.uniform(-7, 7)
+        for y in range(16):
+            r, g, b, a = img.getpixel((x, y))
+            e = d + rng.uniform(-2, 2)
+            img.putpixel((x, y), (T.clamp(r + e), T.clamp(g + e), T.clamp(b + e), a))
+    rect(img, 0, 0, 0, 15, (58, 58, 60))
+    rect(img, 15, 0, 15, 15, (58, 58, 60))
+    T.blob(img, rng, (120, 118, 112), 4, 0.2)                    # smudges
+    for _ in range(2):                                            # handprints: a palm and finger smears
+        hx, hy = rng.randrange(3, 10), rng.randrange(2, 9)
+        for dx, dy in ((0, 0), (1, 0), (2, 0), (0, 1), (1, 1), (2, 1), (0, -1), (1, -2), (2, -1), (3, 1)):
+            px(img, hx + dx, hy + dy, (108, 110, 114), 0.35)
+    dents(img, rng, 5, scratches=4)
+    return img
+
+
+def battery_tex(rng):
+    """Item: a big flashlight battery lying diagonally, like vanilla's tools: a black
+    cylinder lit along its upper edge, a cold teal brand band, a steel cap and terminal at
+    the top end. Outlined in a darker shade of whatever each edge pixel is."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    ax, ay, bx, by = 3.0, 12.5, 12.0, 3.5                   # axis: bottom end to terminal end
+    dx, dy = bx - ax, by - ay
+    length = (dx * dx + dy * dy) ** 0.5
+    radius = 2.9
+    cells = {}
+    for y in range(16):
+        for x in range(16):
+            px_, py_ = x + 0.5, y + 0.5
+            t = ((px_ - ax) * dx + (py_ - ay) * dy) / (length * length)
+            across = ((px_ - ax) * dy - (py_ - ay) * dx) / length        # < 0: upper left side
+            if -0.04 <= t <= 1.04 and abs(across) <= radius:
+                cells[(x, y)] = (t, across)
+    for (x, y), (t, across) in cells.items():
+        light = 0 if across < -1.0 else 2 if across > 1.0 else 1
+        if t > 0.84:
+            c = ((196, 202, 210), (150, 156, 164), (104, 110, 118))[light]     # steel cap
+        elif 0.5 < t < 0.68:
+            c = ((96, 196, 194), (58, 150, 150), (36, 104, 108))[light]        # brand band
+        else:
+            c = ((70, 74, 82), (36, 38, 44), (22, 23, 27))[light]             # black body
+        outline = any((x + ox, y + oy) not in cells for ox, oy in ((1, 0), (-1, 0), (0, 1), (0, -1)))
+        if outline:
+            c = tuple(int(v * 0.5) for v in c)
+        img.putpixel((x, y), (*c, 255))
+    img.putpixel((13, 2), (176, 182, 190, 255))                 # the terminal nub
+    img.putpixel((14, 2), (96, 100, 108, 255))
+    img.putpixel((13, 1), (96, 100, 108, 255))
+    return img
+
+
+def food_plate_tex(rng):
+    """Item: a white plate seen from above, with something brown and something green on it."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            if d <= 7.5:
+                img.putpixel((x, y), (232, 230, 222, 255) if d > 5.5 else (244, 242, 236, 255))
+            if d <= 3.6 and x < 9:
+                img.putpixel((x, y), (120, 76, 44, 255))
+            if d <= 4.2 and x >= 9:
+                img.putpixel((x, y), (86, 140, 62, 255))
+    return img
+
+
+def food_popcorn_tex(rng):
+    """Item: a red and white striped box, full of popcorn."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(6, 16):
+        for x in range(4, 12):
+            img.putpixel((x, y), (196, 40, 44, 255) if (x - 4) // 2 % 2 == 0 else (238, 234, 226, 255))
+    for y in range(1, 7):
+        for x in range(3, 13):
+            if rng.random() < 0.8:
+                img.putpixel((x, y), rng.choice(((246, 226, 150, 255), (252, 244, 206, 255), (232, 200, 110, 255))))
+    return img
+
+
+def food_snack_tex(rng):
+    """Item: a small crinkled wrapped bar, in a plain gold foil."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(5, 11):
+        for x in range(1, 15):
+            shade = 18 if x in (1, 14) else 0
+            img.putpixel((x, y), (206 - shade + rng.randint(-10, 10), 164 - shade, 70, 255))
+    for y in range(6, 10):
+        for x in range(5, 11):
+            img.putpixel((x, y), (92, 26, 38, 255))
+    return img
+
+
+def lounge_painting_tex(rng):
+    """An oil painting in a gilt frame, gone dark: a dusk over low hills, a pale moon, a field almost black."""
+    img = new((22, 26, 24))
+    noise(img, rng, 3)
+    for y in range(1, 15):
+        for x in range(1, 15):
+            if y < 7:
+                c = (44 + y * 3, 54 + y * 2, 58)                  # the sky, lighter towards the hills
+            elif y < 10 - (1 if 4 <= x <= 9 else 0):
+                c = (30, 40, 30)                                   # the hills
+            else:
+                c = (20, 24, 18)                                   # the field
+            px(img, x, y, c, 0.85)
+    for x, y in ((10, 3), (11, 3), (10, 4), (11, 4)):
+        px(img, x, y, (196, 192, 160), 0.9)
+    for i in range(16):
+        for a, b in ((i, 0), (i, 15), (0, i), (15, i)):
+            px(img, a, b, (176, 138, 62))
+    for i in range(1, 15):
+        for a, b in ((i, 1), (i, 14), (1, i), (14, i)):
+            px(img, a, b, (110, 82, 36), 0.6)
+    return img
+
+
+def lounge_rug_tex(rng):
+    """A runner's tile: a deep green field with a small gold diamond, a burgundy and gold border down its west edge."""
+    img = new((38, 66, 54))
+    noise(img, rng, 3)
+    for y in range(16):
+        px(img, 0, y, (96, 30, 40))
+        px(img, 1, y, (186, 150, 74))
+        px(img, 2, y, (96, 30, 40))
+    for d in range(4):
+        for x, y in ((9 + d, 4 + d), (9 - d, 4 + d), (9 + d, 12 - d), (9 - d, 12 - d)):
+            px(img, x, y, (170, 138, 70), 0.8)
+    return img
+
+
+def office_rug_tex(rng):
+    """The director's runner: a deep burgundy field with a small gold lozenge, a dark border and a gold line down its
+    west edge."""
+    img = new((92, 22, 30))
+    noise(img, rng, 3)
+    for y in range(16):
+        px(img, 0, y, (40, 12, 16))
+        px(img, 1, y, (40, 12, 16))
+        px(img, 2, y, (186, 150, 74))
+    for d in range(3):
+        for x, y in ((9 + d, 5 + d), (9 - d, 5 + d), (9 + d, 11 - d), (9 - d, 11 - d)):
+            px(img, x, y, (186, 150, 74), 0.8)
+    return img
+
+
+# The director's wall of CCTV screens (MonitorBankBlock's `cam`): each camera's label, two lines.
+CAMERAS = [("CAM 01", "B1 GARAGE"), ("CAM 02", "B1 RAMP"), ("CAM 03", "B2 STAIRS"), ("CAM 04", "B3 LIBRARY"),
+           ("CAM 05", "B3 OFFICES"), ("CAM 06", "B3 BUNKER"), ("CAM 07", "B4 LOUNGE"), ("CAM 08", "B4 CINEMA"),
+           ("CAM 09", "B4 BAR"), ("CAM 10", "B5 LOBBY"), ("CAM 11", "B5 LAB HALL"), ("CAM 12", "B5 DRAIN"),
+           ("CAM 13", "B5 CISTERN"), ("CAM 14", "B5 ANTEROOM"), ("CAM 15", "B5 OFFICE")]
+SCREEN_PX = 64
+
+
+def screen_frames(rng, label, frames=4):
+    """One of the director's CCTV screens: only snow, grey and grainy, a brighter band rolling down it and faint
+    scanlines, its camera's label in white at the top left, each frame different."""
+    out = []
+    band0 = rng.randrange(SCREEN_PX)
+    for f in range(frames):
+        img = Image.new("RGBA", (SCREEN_PX, SCREEN_PX), (0, 0, 0, 255))
+        band = (band0 + f * SCREEN_PX // frames) % SCREEN_PX
+        for y in range(SCREEN_PX):
+            lift = 40 if abs(y - band) < 4 else 0
+            dim = 0.8 if y % 2 else 1.0
+            for x in range(SCREEN_PX):
+                v = int((rng.randint(30, 150) + lift) * dim)
+                v = max(0, min(255, v))
+                img.putpixel((x, y), (v, v, min(255, v + 6), 255))
+        for row, text in enumerate(label):
+            y = 4 + row * 8
+            for dx, dy, colour in ((1, 1, (0, 0, 0, 255)), (0, 0, (236, 236, 228, 255))):
+                dart_text(img, 4 + dx, y + dy, text, colour)
+        out.append(img)
+    return out
+
+
+def diploma_tex(rng):
+    """A framed diploma: cream paper, a heading, lines too small to read, a brass seal."""
+    img = new((226, 216, 190))
+    noise(img, rng, 2)
+    for x in range(16):
+        for y in (0, 15):
+            px(img, x, y, (58, 38, 26))
+            px(img, y, x, (58, 38, 26))
+    for x in range(5, 11):
+        px(img, x, 3, (70, 60, 50), 0.9)
+    for y in (6, 8, 10):
+        for x in range(3, 13):
+            if rng.random() < 0.8:
+                px(img, x, y, (110, 100, 88), 0.7)
+    for x, y in ((11, 12), (12, 12), (11, 13), (12, 13)):
+        px(img, x, y, (186, 146, 74))
+    return img
+
+
+# The plates' letters, 5 rows high and 3 wide (W, M and N, 5 wide: at 3 they read as H), row by row.
+DART_FONT = {
+    "0": "111101101101111", "1": "010110010010111", "2": "111001111100111", "3": "111001111001111",
+    "4": "101101111001001", "5": "111100111001111", "6": "111100111101111", "7": "111001001001001",
+    "8": "111101111101111", "9": "111101111001111", "-": "000000111000000", ":": "000010000010000",
+    " ": "000000000000000", "H": "101101111101101", "O": "111101101101111", "U": "101101101101111",
+    "S": "111100111001111", "E": "111100110100111", "G": "111100101101111", "A": "111101111101101",
+    "M": "1000111011101011000110001", "C": "111100100100111", "L": "100100100100111", "R": "110101110101101",
+    "W": "1000110001101011010101010", "T": "111010010010010", "F": "111100110100100", "D": "110101101101110",
+    "N": "1000111001101011001110001", "B": "110101110101110", "I": "111010010010111", "K": "101101110101101",
+    "P": "110101110100100", "Y": "101101010010010", "X": "101101010101101",
+}
+# As in core/puzzle/darts: DartboardGeometry.ORDER.
+DART_ORDER = (20, 1, 18, 4, 13, 6, 10, 15, 2, 17, 3, 19, 7, 16, 8, 11, 14, 9, 12, 5)
+DART_BOARD_PX = 96
+DART_SCORING_PX = 38                                                   # DartboardGeometry.SCORING_RADIUS_BLOCKS
+DART_RIM_PX = 47.5
+
+
+def dart_text_width(text, scale=1):
+    return (sum(len(DART_FONT[ch]) // 5 + 1 for ch in text) - 1) * scale
+
+
+def dart_text(img, x, y, text, colour, scale=1):
+    for ch in text:
+        glyph = DART_FONT[ch]
+        width = len(glyph) // 5
+        for i, bit in enumerate(glyph):
+            if bit == "1":
+                for dx in range(scale):
+                    for dy in range(scale):
+                        img.putpixel((x + (i % width) * scale + dx, y + (i // width) * scale + dy), colour)
+        x += (width + 1) * scale
+
+
+def dartboard_tex(rng, hint):
+    """The whole board, 96 pixels across: a walnut cabinet, the black band with the numbers, the
+    sectors. `hint` is a number whose sector and label are lit, or None."""
+    img = Image.new("RGB", (DART_BOARD_PX, DART_BOARD_PX))
+    c = DART_BOARD_PX / 2
+    for py in range(DART_BOARD_PX):
+        for ax in range(DART_BOARD_PX):
+            x, y = ax + 0.5 - c, c - (py + 0.5)
+            r = math.hypot(x, y)
+            if r > DART_RIM_PX:
+                col = (62, 40, 26) if min(ax, py, 95 - ax, 95 - py) > 1 else (44, 28, 18)
+            elif r > DART_SCORING_PX:
+                col = (20, 19, 18)
+            else:
+                u = r / DART_SCORING_PX
+                sector = int(((math.degrees(math.atan2(x, y)) % 360) + 9) / 18) % 20
+                odd = sector % 2 == 1
+                if u < 0.037:
+                    col = (178, 40, 36)
+                elif u < 0.094:
+                    col = (36, 112, 62)
+                elif 0.582 <= u <= 0.629 or u >= 0.953:
+                    col = (36, 112, 62) if odd else (178, 40, 36)
+                else:
+                    col = (222, 206, 170) if odd else (28, 26, 24)
+                if u >= 0.094 and DART_ORDER[sector] == hint:
+                    col = mix(col, (255, 196, 92), 0.72)
+            img.putpixel((ax, py), mix(col, (rng.randint(0, 255),) * 3, 0.03))
+    for k, number in enumerate(DART_ORDER):
+        text = str(number)
+        angle = math.radians(k * 18)
+        width = len(text) * 4 - 1
+        x = round(c + 42.8 * math.sin(angle) - width / 2)
+        y = round(c - 42.8 * math.cos(angle) - 2.5)
+        dart_text(img, x, y, text, (255, 214, 120) if number == hint else (214, 208, 190))
+    return img
+
+
+def counter_tex(rng, count):
+    """The breakers' counter: black glass, a red digit, green at 5. Blank with None."""
+    img = new((14, 12, 12))
+    noise(img, rng, 2)
+    if count is not None:
+        dart_text(img, 5, 3, str(count), (90, 220, 110) if count == 5 else (226, 62, 44), 2)
+    return img
+
+
+def calm_plate_tex(rng):
+    """The plate over the Calm room's door, two blocks wide: 96 x 16."""
+    img = Image.new("RGB", (96, 16), (178, 140, 72))
+    for x in range(96):
+        for y in range(16):
+            if min(x, y, 95 - x, 15 - y) == 0:
+                img.putpixel((x, y), (112, 84, 40))
+            elif rng.random() < 0.15:
+                img.putpixel((x, y), (168, 130, 66))
+    dart_text(img, (96 - dart_text_width("CALM ROOM", 2)) // 2, 3, "CALM ROOM", (38, 28, 18), 2)
+    return img
+
+
+def wet_floor_tex(rng):
+    """The yellow sign, 32 x 32 (a size that keeps the game's mipmaps): the only thing in the lounge that looks like a warning."""
+    img = Image.new("RGB", (32, 32), (232, 196, 40))
+    for x in range(32):
+        for y in range(32):
+            if rng.random() < 0.1:
+                img.putpixel((x, y), (222, 186, 36))
+            if min(x, y, 31 - x, 31 - y) == 0:
+                img.putpixel((x, y), (40, 36, 28))
+    ink = (28, 24, 18)
+    for k, line in enumerate(("WET", "FLOOR", "DO NOT", "ENTER")):
+        dart_text(img, (32 - dart_text_width(line)) // 2, 3 + k * 6 + (2 if k > 1 else 0), line, ink)
+    return img
+
+
+def big_door_tex(rng):
+    """The big door's front, 96 x 64 for its 6 x 4 blocks: steel, a seam down the middle, ribs with
+    rivets, the brass lock on the seam at eye height."""
+    img = Image.new("RGB", (96, 64), (84, 88, 94))
+    for x in range(96):
+        for y in range(64):
+            col = mix((84, 88, 94), (rng.randint(60, 110),) * 3, 0.14)
+            if min(x, y, 95 - x, 63 - y) < 2:
+                col = (52, 54, 58)
+            elif x in (47, 48):
+                col = (24, 24, 26)
+            elif y in (20, 21, 48, 49):
+                col = (62, 65, 70)
+            elif y in (22, 50):
+                col = (104, 108, 114)
+            img.putpixel((x, y), col)
+    for x in range(6, 92, 8):
+        if abs(x - 47.5) > 3:
+            for y in (17, 45):
+                img.putpixel((x, y), (132, 136, 142))
+    for x in range(41, 55):
+        for y in range(33, 47):
+            edge = x in (41, 54) or y in (33, 46)
+            img.putpixel((x, y), (112, 84, 40) if edge else (178, 140, 72))
+    for x, y in ((47, 37), (48, 37), (47, 38), (48, 38), (47, 39), (48, 39), (47, 40), (48, 40), (47, 41), (48, 41), (46, 38), (49, 38)):
+        img.putpixel((x, y), (20, 16, 12))
+    return img
+
+
+def fog_frames(rng, frames=8):
+    """A monitor's picture, no camera behind it: grey fog drifting, a bar of signal rolling up."""
+    grid = [[rng.randint(36, 92) for _ in range(8)] for _ in range(8)]
+    out = []
+    for f in range(frames):
+        img = new((34, 38, 40))
+        for y in range(16):
+            for x in range(16):
+                gx, gy = (x / 2 + f) % 8, y / 2
+                a, b = grid[int(gy) % 8][int(gx) % 8], grid[int(gy) % 8][(int(gx) + 1) % 8]
+                t = gx - int(gx)
+                v = a + (b - a) * t + rng.randint(-12, 12)
+                if y == 15 - (f * 2):
+                    v += 26
+                img.putpixel((x, y), (int(v), int(v + 4), int(v + 6)))
+        out.append(img)
+    return out
+
+
+def master_card_tex(rng):
+    """Item: the whole golden card, the corners' picture at half size."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(3, 13):
+        for x in range(1, 15):
+            c = (150, 112, 40) if x in (1, 14) or y in (3, 12) else (216, 176, 78)
+            if y in (5, 6):
+                c = (120, 88, 30)
+            if 3 <= x < 6 and 8 <= y < 11:
+                c = (58, 44, 30)
+            if c == (216, 176, 78) and rng.random() < 0.08:
+                c = (238, 206, 120)
+            img.putpixel((x, y), c + (255,))
+    return img
+
+
+def master_key_tex(rng):
+    """Item: the golden key, its bow at the top left, aimed down to the right."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    gold, dark = (226, 186, 84, 255), (150, 112, 40, 255)
+    for x, y in ((3, 1), (4, 1), (5, 1), (2, 2), (6, 2), (1, 3), (7, 3), (1, 4), (7, 4), (1, 5), (7, 5), (2, 6), (6, 6), (3, 7), (4, 7), (5, 7)):
+        img.putpixel((x, y), gold)
+    for x, y in ((3, 2), (4, 2), (5, 2), (2, 3), (2, 4), (2, 5), (3, 6), (4, 6)):
+        img.putpixel((x, y), dark)
+    for k in range(6, 14):
+        img.putpixel((k, k), gold)
+        img.putpixel((k + 1, k), dark)
+    for x, y in ((10, 12), (9, 13), (12, 14), (11, 15)):
+        img.putpixel((x, y), gold)
+    return img
+
+
+def item_from_mask(rows, colours):
+    """An item drawn pixel by pixel: one letter per pixel ('.' transparent), its colour from `colours`."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                img.putpixel((x, y), (*colours[ch], 255))
+    return img
+
+
+ITEM_OUTLINE = (22, 22, 26)
+
+# Level 5's wrench: an adjustable one, heavy. The fixed jaw on top, the movable one under the open mouth with its
+# worm screw ('k'), a red rubber grip; held at the grip, the head up to the right like vanilla's tools.
+WRENCH = [
+    "........####....",
+    ".......#hhhm#...",
+    "......#hmmml#...",
+    "......#hml##....",
+    "......#hml#..##.",
+    "......#hmh#.#hl#",
+    ".......#hmh#hml#",
+    "......#hmmmhmml#",
+    ".....#hmkkmmml#.",
+    "....#hml##lll#..",
+    "...#hml#.####...",
+    "..#Rrd#.........",
+    ".#Rrd#..........",
+    "#Rrd#...........",
+    "#Rd#............",
+    ".##.............",
+]
+WRENCH_COLOURS = {"#": ITEM_OUTLINE, "h": (218, 224, 232), "m": (160, 166, 176), "l": (102, 108, 118), "k": (64, 68, 76),
+                  "R": (236, 98, 84), "r": (186, 44, 40), "d": (118, 24, 26)}
+
+# Level 5's radiation detector: a yellow Geiger counter with its carrying handle, a meter (ticks, a red end, the
+# needle), a speaker's grille and a knob, and its probe on a lead at the side.
+DETECTOR = [
+    "................",
+    "......#######...",
+    ".....#hhhhhhh#..",
+    ".....#l#####l#..",
+    ".....#l.....l#..",
+    "...############.",
+    "####YYYYYYYYYY#.",
+    "#h##Y########s#.",
+    "#g##Y#CcCcnr#s#.",
+    "#g##Y#cccncr#s#.",
+    "#g##Y#ccnccc#s#.",
+    "#g##Y########s#.",
+    "####YykkkyKKys#.",
+    ".#.#Yysssykkys#.",
+    ".###Ysssssssss#.",
+    "...############.",
+]
+DETECTOR_COLOURS = {"#": ITEM_OUTLINE, "Y": (255, 222, 96), "y": (238, 186, 36), "s": (184, 128, 18),
+                    "h": (190, 194, 200), "l": (112, 116, 124), "g": (150, 154, 160),
+                    "c": (236, 232, 214), "C": (196, 190, 168), "n": (30, 30, 34), "r": (214, 50, 42),
+                    "k": (60, 62, 68), "K": (120, 124, 132)}
+
+
+def wrench_tex(rng):
+    """Item: Level 5's wrench (WRENCH)."""
+    return item_from_mask(WRENCH, WRENCH_COLOURS)
+
+
+def detector_tex(rng):
+    """Item: Level 5's radiation detector (DETECTOR)."""
+    return item_from_mask(DETECTOR, DETECTOR_COLOURS)
+
+
+def dart_tex(rng):
+    """Item: a dart aimed up and to the right, as vanilla's arrow is."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for k in range(5, 11):
+        px(img, k, 15 - k, (112, 114, 118))
+    for k in range(11, 14):
+        px(img, k, 15 - k, (200, 202, 206))
+    for x, y in ((2, 13), (3, 12), (4, 11), (3, 13), (2, 12), (4, 12), (3, 11), (5, 11), (4, 10)):
+        px(img, x, y, (150, 40, 36))
+    return img
+
+
+def dart_entity_tex(rng):
+    """In the layout of vanilla's arrow: 32 x 32, the side in (0, 0)-(16, 5), the tail end in
+    (0, 5)-(5, 10). The tail is to the left, the tip to the right."""
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    for x in range(4, 11):
+        img.putpixel((x, 2), (112, 114, 118, 255))
+    for x in range(11, 15):
+        img.putpixel((x, 2), (200, 202, 206, 255))
+    for x in range(0, 4):
+        for y in range(1, 4):
+            img.putpixel((x, y), (150, 40, 36, 255))
+    for x in range(1, 4):
+        for y in range(6, 9):
+            img.putpixel((x, y), (150, 40, 36, 255))
+    return img
+
+
+def record_tex(rng, label):
+    """Item: a black record seen from above, its label in the colour of its name."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            if d <= 7.5:
+                groove = 16 if int(d * 2) % 2 else 26
+                img.putpixel((x, y), (groove, groove, groove + 2, 255))
+            if d <= 3.2:
+                img.putpixel((x, y), (*label, 255))
+            if d <= 0.8:
+                img.putpixel((x, y), (10, 10, 10, 255))
+    return img
+
+
+def reel_tex(rng):
+    """Item: a film reel from the side, grey metal with its round holes and a white label."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            if d <= 7.5:
+                img.putpixel((x, y), (150, 152, 156, 255) if d > 6.2 else (112, 114, 118, 255))
+            if d <= 1.4:
+                img.putpixel((x, y), (40, 40, 44, 255))
+    for cx, cy in ((7, 3), (11, 7), (7, 11), (3, 7)):
+        for a, b in ((0, 0), (1, 0), (0, 1), (1, 1)):
+            img.putpixel((cx + a, cy + b), (40, 40, 44, 255))
+    return img
+
+
+def card_tex(rng, col, row):
+    """Item: one corner of the golden master card. All four are cut from one picture 32 x 32 (a card
+    with a brass stripe and a dark chip), so they fit each other edge to edge."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in range(16):
+            X, Y = x + col * 16, y + row * 16
+            if not (2 <= X < 30 and 6 <= Y < 26):
+                continue
+            edge = X in (2, 29) or Y in (6, 25)
+            c = (150, 112, 40) if edge else (216, 176, 78)
+            if 10 <= Y < 13:
+                c = (120, 88, 30)
+            if 6 <= X < 12 and 16 <= Y < 22:
+                c = (58, 44, 30)
+            if not edge and rng.random() < 0.08:
+                c = (238, 206, 120)
+            img.putpixel((x, y), (*c, 255))
+    return img
+
+
+def water_bottle_tex(rng):
+    """Item: a small clear plastic water bottle, three quarters full: a ridged blue cap and
+    neck ring, white label with a blue wave, cold reflections on the plastic."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    edge, plastic, glint = (118, 140, 156, 235), (196, 212, 222, 110), (236, 246, 252, 230)
+    water, deep, surface = (88, 150, 200, 215), (64, 118, 172, 225), (156, 204, 232, 235)
+    shape = {0: (6, 9), 1: (6, 9), 2: (7, 8), 3: (6, 9), 4: (5, 10), 5: (5, 10)}
+    shape.update({y: (5, 10) for y in range(6, 15)})
+    shape[15] = (6, 9)
+    for y, (x0, x1) in shape.items():
+        for x in range(x0, x1 + 1):
+            if y <= 1:                                          # cap, ridged
+                c = (40, 84, 186, 255) if (x + y) % 2 else (64, 112, 210, 255)
+                if x in (x0, x1):
+                    c = (26, 52, 128, 255)
+            elif y == 3:
+                c = (40, 84, 186, 255) if x in (x0, x1) else (60, 104, 200, 255)   # neck ring
+            elif x in (x0, x1) or y == 15:
+                c = edge
+            elif y == 6:
+                c = surface
+            elif y >= 7:
+                c = deep if x >= x1 - 1 else water
+            else:
+                c = plastic
+            if 9 <= y <= 11 and x0 < x < x1:                    # label with a blue stripe
+                c = (60, 110, 200, 255) if y == 10 else (228, 233, 238, 255)
+            img.putpixel((x, y), c)
+    for y in (4, 5, 7, 8, 12, 13):                              # reflections down the left side
+        img.putpixel((6, y), glint)
+    img.putpixel((9, 13), (236, 246, 252, 160))
+    return img
+
+
+def lab_badge_copy_tex(rng):
+    """Item (Chapter 2): the copy of a lab badge the coworker hands over: Chapter 1's keycard recoloured, its band lab green, the
+    card a little yellowed (a copy), the chip a dull silver."""
+    img = keycard_tex(rng)
+    swap = {
+        (66, 96, 140, 255): (58, 132, 104, 255),      # band
+        (44, 66, 100, 255): (38, 96, 74, 255),        # band edge
+        (230, 233, 236, 255): (226, 224, 210, 255),   # card
+        (204, 166, 72, 255): (168, 172, 176, 255),    # chip
+        (168, 132, 52, 255): (128, 132, 138, 255),
+    }
+    for y in range(16):
+        for x in range(16):
+            c = img.getpixel((x, y))
+            if c in swap:
+                img.putpixel((x, y), swap[c])
+    return img
+
+
+FACTORY_REAGENTS = {"blue": (58, 110, 210), "yellow": (232, 196, 52), "red": (200, 50, 50)}
+
+
+def factory_reagent_tex(rng, colour):
+    """Item (Chapter 2): a reagent bottle of the factory's LAB, Level 5's flask drawn again with the factory's colour and no code."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    glass, outline = (214, 230, 236), (40, 46, 52)
+    liquid = FACTORY_REAGENTS[colour]
+    for y in range(16):
+        for x in range(16):
+            neck = 6 <= x <= 9 and 1 <= y <= 6
+            body = (x - 7.5) ** 2 + (y - 10.5) ** 2 <= 20
+            if neck or body:
+                img.putpixel((x, y), (liquid if (body and y >= 9) else glass) + (255,))
+    for y in range(16):
+        for x in range(16):
+            if img.getpixel((x, y))[3] == 0 and any(
+                    0 <= x + dx < 16 and 0 <= y + dy < 16 and img.getpixel((x + dx, y + dy))[3] == 255 and img.getpixel((x + dx, y + dy))[:3] != outline
+                    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                img.putpixel((x, y), outline + (255,))
+    for x in range(5, 11):
+        img.putpixel((x, 11), (244, 244, 240, 255))
+    return img
+
+
+def centrifuge_front_tex(rng):
+    """The front of Chapter 2's benchtop centrifuge (its 12 x 8 face in x 2..13, y 8..15 of the picture): white casing, a dark
+    display (where the game draws its speed, `client.Ch2L1CentrifugeRenderer`) and two buttons."""
+    img = new((232, 234, 236))
+    for x in range(16):
+        for y in range(16):
+            if rng.random() < 0.08:
+                px(img, x, y, (222, 224, 226), 1.0)
+    for x in range(3, 12):
+        for y in range(9, 12):
+            px(img, x, y, (16, 22, 24), 1.0)
+    for x, c in ((5, (60, 160, 80)), (9, (190, 60, 50))):
+        px(img, x, 13, c, 1.0)
+        px(img, x + 1, 13, c, 1.0)
+    return img
+
+
+def overtime_pass_tex(rng):
+    """Item (Chapter 2): Rowan's "Unpaid Overtime Pass": Chapter 1's keycard recoloured in his colours, the card beige gold, the band
+    the green of his tie, the chip gold."""
+    img = keycard_tex(rng)
+    swap = {
+        (66, 96, 140, 255): (28, 96, 52, 255),        # band
+        (44, 66, 100, 255): (20, 70, 38, 255),        # band edge
+        (230, 233, 236, 255): (230, 212, 160, 255),   # card
+        (150, 156, 164, 255): (186, 160, 96, 255),    # card edge
+    }
+    for y in range(16):
+        for x in range(16):
+            c = img.getpixel((x, y))
+            if c in swap:
+                img.putpixel((x, y), swap[c])
+    return img
+
+
+def pipe_piece_tex(rng):
+    """Item (Chapter 2 Level 2, Stone Maw's arena): a short stub of rusty iron pipe lying on the diagonal, a dark hollow at its torn end, a flange
+    at the other, scabs of rust and a few bright scratches."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    body = [(116, 70, 44, 255), (136, 82, 50, 255), (98, 58, 38, 255), (150, 96, 58, 255)]
+    edge, dark, scratch = (66, 40, 30, 255), (22, 18, 18, 255), (176, 150, 128, 255)
+    # a thick diagonal from the lower left to the upper right
+    for k in range(11):
+        cx, cy = 3 + k, 12 - k
+        for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1), (-1, 0), (0, -1)):
+            x, y = cx + dx, cy + dy
+            if 0 <= x < 16 and 0 <= y < 16:
+                img.putpixel((x, y), body[rng.randrange(len(body))])
+    for k in range(11):
+        cx, cy = 3 + k, 12 - k
+        for dx, dy in ((-1, 1), (2, 0), (0, 2), (1, -1), (-2, 1), (1, -2)):
+            x, y = cx + dx, cy + dy
+            if 0 <= x < 16 and 0 <= y < 16 and img.getpixel((x, y))[3] == 0:
+                img.putpixel((x, y), edge)
+    for x, y in ((12, 3), (13, 3), (12, 4), (13, 4), (11, 4)):          # the hollow torn end
+        img.putpixel((x, y), dark)
+    for x, y in ((2, 12), (3, 13), (4, 13), (2, 13)):                    # the flange
+        img.putpixel((x, y), edge)
+    for x, y in ((6, 8), (8, 6), (9, 5), (5, 9)):
+        img.putpixel((x, y), scratch)
+    return img
+
+
+def keycard_tex(rng):
+    """Item: the guard's keycard on a black lanyard clip: a white plastic card with a
+    blue-grey band, a photo, name lines and a gold chip."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    white, edge = (230, 233, 236, 255), (150, 156, 164, 255)
+    for y in range(5, 14):
+        for x in range(2, 14):
+            if (x, y) in ((2, 5), (13, 5), (2, 13), (13, 13)):
+                continue                                        # rounded corners
+            c = white
+            if y in (5, 6):
+                c = (66, 96, 140, 255)                          # band
+            if x in (2, 13) or y == 13:
+                c = edge if y > 6 else (44, 66, 100, 255)
+            img.putpixel((x, y), c)
+    img.putpixel((7, 6), (24, 26, 30, 255))                     # slot for the clip
+    img.putpixel((8, 6), (24, 26, 30, 255))
+    for y in (1, 2, 3, 4, 5):                                   # lanyard clip and strap
+        img.putpixel((7, y), (34, 36, 40, 255))
+        img.putpixel((8, y), (52, 56, 62, 255) if y > 2 else (34, 36, 40, 255))
+    img.putpixel((6, 1), (34, 36, 40, 255))
+    img.putpixel((9, 1), (34, 36, 40, 255))
+    for y in range(8, 12):                                      # photo: hair, face, shirt
+        for x in range(3, 6):
+            img.putpixel((x, y), (40, 34, 32, 255) if y == 8 else (178, 148, 130, 255) if y < 10 else (30, 32, 37, 255))
+    for x in range(7, 13):
+        img.putpixel((x, 8), (110, 116, 124, 255))              # name
+        if x < 11:
+            img.putpixel((x, 10), (160, 166, 174, 255))         # number
+    for x, y in ((10, 11), (11, 11), (10, 12), (11, 12)):
+        img.putpixel((x, y), (204, 166, 72, 255))               # chip
+    img.putpixel((11, 12), (168, 132, 52, 255))
+    return img
+
+
+def card_reader_tex(rng, part):
+    """Card reader: dark plastic body (side), or its face: an LED (red locked, green open),
+    a card slot and a few keys, in the pixels the model's front shows (x 5-10, y 4-11)."""
+    img = new((40, 42, 46))
+    speckle(img, rng, 30, (52, 54, 58), 0.5)
+    if part == "side":
+        return img
+    rect(img, 5, 4, 10, 11, (30, 31, 34))
+    led = (226, 52, 44) if part == "locked" else (64, 220, 96)
+    rect(img, 7, 5, 8, 5, led)
+    rect(img, 6, 7, 9, 7, (12, 12, 14))                                           # card slot
+    for x, y in ((6, 9), (8, 9), (6, 10), (8, 10)):
+        px(img, x, y, (90, 92, 98))
+    return img
+
+
+# Painted letters of the valves' plates, 3 x 5 pixels.
+VALVE_LETTERS = {
+    "a": [".#.", "#.#", "###", "#.#", "#.#"],
+    "b": ["##.", "#.#", "##.", "#.#", "##."],
+    "c": [".##", "#..", "#..", "#..", ".##"],
+    "d": ["##.", "#.#", "#.#", "#.#", "##."],
+    "e": ["###", "#..", "##.", "#..", "###"],
+}
+
+
+def valve_wheel_tex(rng, turned):
+    """A round red handwheel, seen face on, on a clear background (drawn cutout): rim, four
+    spokes (straight, or an eighth round when `turned`) and the hub. The model shows texels
+    2-13; the wheel is centred between texels 7 and 8, as the model's stem is."""
+    img = new((0, 0, 0), alpha=0)
+    red = (158, 42, 38)
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x - 7.5, y - 7.5
+            d = (dx * dx + dy * dy) ** 0.5
+            rim = 4.4 <= d <= 5.9
+            spoke = d < 4.6 and (abs(dx + dy) < 1.0 or abs(dx - dy) < 1.0 if turned else abs(dx) < 1 or abs(dy) < 1)
+            if rim or spoke or d < 1.8:
+                shade = 1.15 if dy < -1 else 0.85 if dy > 1.5 else 1.0          # lit from above
+                if d < 1.8:
+                    shade *= 0.8
+                c = tuple(T.clamp(v * shade + rng.uniform(-6, 6)) for v in red)
+                img.putpixel((x, y), (*c, 255))
+    return img
+
+
+def valve_body_tex(rng):
+    """The valve's cast body: the pipe's paint, darker and duller."""
+    img = new((92, 104, 94))
+    noise(img, rng, 4)
+    speckle(img, rng, 14, (74, 84, 76), 0.6)
+    rect(img, 0, 0, 15, 0, (70, 80, 72), 0.5)                       # cast seams
+    rect(img, 0, 15, 15, 15, (70, 80, 72), 0.5)
+    return img
+
+
+def valve_stem_tex(rng):
+    """The threaded steel stem and hub: bright and dark rows."""
+    img = new((150, 154, 160))
+    for y in range(0, 16, 2):
+        rect(img, 0, y, 15, y, (104, 108, 114), 0.8)
+    noise(img, rng, 3)
+    return img
+
+
+# Painted digits of the valves' dial windows, 3 x 5 pixels.
+VALVE_DIGITS = [
+    ["###", "#.#", "#.#", "#.#", "###"], [".#.", "##.", ".#.", ".#.", "###"], ["###", "..#", "###", "#..", "###"],
+    ["###", "..#", ".##", "..#", "###"], ["#.#", "#.#", "###", "..#", "..#"], ["###", "#..", "###", "..#", "###"],
+    ["###", "#..", "###", "#.#", "###"], ["###", "..#", ".#.", ".#.", ".#."], ["###", "#.#", "###", "#.#", "###"],
+    ["###", "#.#", "###", "..#", "###"],
+]
+PLATE_EDGE = (120, 122, 118)
+
+
+def valve_plate_tex(rng, letter):
+    """The left half of a side plate: an enamel plate with the letter painted on, in the pixels
+    the model shows (x 4-7, y 4-10; the dial window takes x 8-11)."""
+    img = new((92, 104, 94))
+    rect(img, 4, 4, 7, 10, (214, 212, 200))
+    for x in range(4, 8):
+        px(img, x, 4, PLATE_EDGE, 0.8)
+        px(img, x, 10, PLATE_EDGE, 0.8)
+    for y in range(4, 11):
+        px(img, 4, y, PLATE_EDGE, 0.8)
+    for row, line in enumerate(VALVE_LETTERS[letter]):
+        for col, c in enumerate(line):
+            if c == "#":
+                px(img, 5 + col, 5 + row, (28, 28, 30))
+    noise(img, rng, 2)
+    return img
+
+
+def valve_digit_tex(rng, digit):
+    """The right half of a side plate: the dial's little dark window with its turns, 0 to 9
+    (x 8-11, y 4-10)."""
+    img = new((92, 104, 94))
+    rect(img, 8, 4, 11, 10, (30, 30, 32))
+    for x in range(8, 12):
+        px(img, x, 4, PLATE_EDGE, 0.8)
+        px(img, x, 10, PLATE_EDGE, 0.8)
+    for y in range(4, 11):
+        px(img, 11, y, PLATE_EDGE, 0.8)
+    for row, line in enumerate(VALVE_DIGITS[digit]):
+        for col, c in enumerate(line):
+            if c == "#":
+                px(img, 8 + col, 5 + row, (236, 214, 150))
+    return img
+
+
+def cork_tex(rng):
+    img = new((150, 110, 70))
+    noise(img, rng, 10)
+    speckle(img, rng, 30, (110, 78, 46), 0.7)
+    speckle(img, rng, 20, (178, 138, 92), 0.6)
+    for i in range(16):
+        px(img, i, 0, (96, 70, 44), 0.8)
+        px(img, i, 15, (96, 70, 44), 0.8)
+        px(img, 0, i, (96, 70, 44), 0.8)
+        px(img, 15, i, (96, 70, 44), 0.8)
+    return img
+
+
+def pinned_note_tex(rng):
+    """Typed sheets pinned to the board: rows of grey type, a heading line."""
+    img = new((232, 230, 220))
+    noise(img, rng, 2)
+    for x in range(2, 12):
+        px(img, x, 2, (60, 60, 66), 0.9)
+    for y in range(5, 15, 2):
+        for x in range(2, rng.randrange(9, 14)):
+            if rng.random() < 0.85:
+                px(img, x, y, (120, 120, 126), 0.7)
+    return img
+
+
+def note_paper_tex(rng):
+    """A loose typed sheet (NotePaperBlock), the whole texture mapped onto the sheet: a dark
+    heading, a rule under it, then rows of grey type with ragged ends."""
+    img = new((234, 232, 224))
+    noise(img, rng, 2)
+    for x in range(2, 10):
+        px(img, x, 2, (52, 52, 58), 0.9)
+    for x in range(2, 14):
+        px(img, x, 4, (150, 150, 156), 0.5)
+    for y in range(6, 15, 2):
+        for x in range(2, rng.randrange(9, 15)):
+            if rng.random() < 0.85:
+                px(img, x, y, (118, 118, 124), 0.7)
+    return img
+
+
+# --- Level 3 furniture ------------------------------------------------------------------
+# Offices: powder-coated light grey metal and a light beech laminate; the library: the dark
+# wood of its walls (offices/textures.py); staff rooms in plain plastics. Clean, no wear.
+
+LAMINATE = (196, 172, 132)
+OFFICE_METAL = (168, 172, 176)
+LIBRARY_WOOD = OT.WOOD_DARK
+BOOK_COLOURS = [(112, 42, 40), (52, 82, 62), (44, 54, 84), (102, 72, 46), (150, 120, 62), (88, 88, 92), (70, 40, 58)]
+
+
+def laminate_tex(rng, base=LAMINATE):
+    """Wood-look laminate: a faint grain running along the texture."""
+    img = new(base)
+    for y in range(16):
+        shade = rng.uniform(-5, 5)
+        for x in range(16):
+            px(img, x, y, tuple(T.clamp(c + shade) for c in base), 0.7)
+    noise(img, rng, 2)
+    for _ in range(3):
+        y = rng.randrange(16)
+        for x in range(rng.randrange(0, 6), rng.randrange(10, 16)):
+            px(img, x, y, tuple(c - 14 for c in base), 0.35)
+    return img
+
+
+def powder_metal_tex(rng, base=OFFICE_METAL):
+    img = new(base)
+    noise(img, rng, 2)
+    speckle(img, rng, 10, tuple(c - 10 for c in base), 0.4)
+    return img
+
+
+def dark_wood_tex(rng):
+    """The library's dark wood, plain (tops, chairs, legs)."""
+    return OT.wood_tex(rng, "plain")
+
+
+def filing_front_tex(rng):
+    """Four drawers, each with a handle and a white label slot."""
+    img = powder_metal_tex(rng)
+    for top in (0, 4, 8, 12):
+        rect(img, 1, top, 14, top, (130, 134, 138), 0.8)                 # gap between drawers
+        rect(img, 6, top + 2, 9, top + 2, (90, 94, 98))                   # handle
+        rect(img, 6, top + 1, 9, top + 1, (226, 226, 220))                # label
+    return img
+
+
+def whiteboard_tex(rng):
+    img = new((236, 238, 236))
+    noise(img, rng, 1)
+    T.blob(img, rng, (244, 246, 244), 6, 0.4)                              # a sheen, nothing written
+    return img
+
+
+def server_front_tex(rng):
+    """A rack's perforated door with a column of status LEDs."""
+    img = new((28, 30, 32))
+    for y in range(1, 15):
+        for x in range(2, 14):
+            if (x + y) % 2 == 0:
+                px(img, x, y, (12, 12, 14))
+    for y in range(2, 14, 2):
+        px(img, 14, y, (60, 220, 90) if rng.random() < 0.8 else (230, 170, 40))
+    rect(img, 0, 0, 15, 0, (50, 52, 56))
+    rect(img, 0, 15, 15, 15, (50, 52, 56))
+    return img
+
+
+def leds_glow(x, y, c):
+    if max(c) > 160 and min(c) < 120:
+        return T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["TUBE_GLOW"])
+    return T.PAINTED_METAL.but(smoothness=0.3)
+
+
+def electrical_front_tex(rng):
+    """A grey wall cabinet's door: seams, a lock and a yellow warning label."""
+    img = powder_metal_tex(rng, (178, 180, 176))
+    rect(img, 0, 0, 15, 0, (140, 142, 138))
+    rect(img, 8, 0, 8, 15, (140, 142, 138), 0.7)                            # two leaves
+    for x, y in ((6, 4), (7, 3), (8, 2), (9, 3), (10, 4), (6, 5), (7, 5), (8, 5), (9, 5), (10, 5)):
+        px(img, x - 4, y + 3, (226, 190, 40))                              # warning triangle
+    px(img, 4, 7, (30, 30, 30))
+    rect(img, 10, 8, 11, 9, (70, 72, 76))                                   # lock
+    return img
+
+
+def locker_tex(rng, part):
+    """A grey-blue locker door: vents at the top of the upper block, the handle on the lower."""
+    base = (120, 132, 148)
+    img = powder_metal_tex(rng, base)
+    rect(img, 0, 0, 0, 15, (90, 100, 114))
+    rect(img, 15, 0, 15, 15, (90, 100, 114))
+    if part == "upper":
+        for y in (2, 4, 6):
+            rect(img, 4, y, 11, y, (70, 78, 90))
+    else:
+        rect(img, 11, 2, 12, 5, (70, 74, 80))
+        rect(img, 0, 15, 15, 15, (90, 100, 114))
+    return img
+
+
+def locker_scratched_tex(rng):
+    """The upper door of the predecessor's locker (Chapter 2 Level 1): the locker's own, with a name plate whose name has been scratched out."""
+    img = locker_tex(rng, "upper")
+    rect(img, 3, 9, 12, 13, (226, 226, 220))
+    for k in range(10):
+        px(img, 3 + k, 9 + (k * 3) % 5, (74, 74, 78))
+        px(img, 12 - k, 9 + (k * 2) % 5, (96, 96, 100))
+    for k in range(7):
+        px(img, 2 + k * 2, 8 + k // 2, (170, 172, 178))
+        px(img, 3 + k * 2, 8 + k // 2, (170, 172, 178))
+    return img
+
+
+def vending_tex(rng, part):
+    """The drinks machine: the lit window of cans on the upper block, the slot and coin panel below."""
+    img = new((150, 40, 36))
+    noise(img, rng, 3)
+    if part == "upper":
+        rect(img, 1, 1, 10, 14, (214, 220, 222))                           # lit window
+        for row, y in enumerate((2, 6, 10)):
+            for x in range(2, 10, 2):
+                c = rng.choice([(200, 40, 40), (40, 90, 170), (230, 200, 60), (60, 150, 80), (240, 240, 240)])
+                rect(img, x, y, x, y + 2, c)
+        rect(img, 12, 3, 14, 12, (40, 40, 44))                             # button column
+        for y in range(4, 12, 2):
+            px(img, 13, y, (240, 230, 160))
+    else:
+        rect(img, 2, 9, 13, 13, (24, 24, 26))                               # delivery slot
+        rect(img, 11, 2, 13, 6, (60, 62, 66))                               # coin panel
+        px(img, 12, 3, (20, 20, 22))
+    return img
+
+
+def vending_glow(x, y, c):
+    if min(c) > 190:
+        return T.PLASTIC.but(smoothness=0.8, relief=0.0, emission=GLOW["DIFFUSER_GLOW"])
+    return T.PAINTED_METAL
+
+
+def leaves_tex(rng):
+    """Artificial leaves on a clear background (drawn cutout): too even, too green."""
+    img = new((0, 0, 0), alpha=0)
+    for _ in range(26):
+        x, y = rng.randrange(1, 15), rng.randrange(0, 14)
+        c = rng.choice([(58, 112, 58), (70, 128, 64), (48, 96, 52)])
+        for dx, dy in ((0, 0), (1, 0), (0, 1), (1, 1), (-1, 1)):
+            if 0 <= x + dx < 16 and 0 <= y + dy < 16:
+                img.putpixel((x + dx, y + dy), (*c, 255))
+    for y in range(8, 16):                                                  # the stems
+        img.putpixel((7, y), (60, 70, 40, 255))
+    return img
+
+
+def clock_tex(rng):
+    """A white clock face in a black rim on a clear background, its hands stopped at 3:47."""
+    img = new((0, 0, 0), alpha=0)
+    for y in range(16):
+        for x in range(16):
+            d = ((x - 7.5) ** 2 + (y - 7.5) ** 2) ** 0.5
+            if d <= 5.4:
+                img.putpixel((x, y), (30, 30, 32, 255) if d > 4.4 else (236, 236, 230, 255))
+    for x, y in ((8, 7), (9, 7), (10, 7)):                                   # hour hand towards 3-4
+        img.putpixel((x, y + (1 if x == 10 else 0)), (20, 20, 20, 255))
+    for x, y in ((7, 7), (6, 6), (5, 5), (5, 4)):                            # minute hand at 47
+        img.putpixel((x, y), (20, 20, 20, 255))
+    for x, y in ((7, 3), (11, 7), (7, 11), (3, 7)):
+        img.putpixel((x, y), (60, 60, 60, 255))
+    return img
+
+
+PURPLE = (168, 72, 220)
+
+
+def purple_box_tex(rng, face):
+    """Level 3's purple archive box (the box puzzle): bright purple cardboard. `side`: the lid's
+    band (rows 0-2), a hand hole and a blank white label; `top`: the lid, its rim darker."""
+    img = new(PURPLE)
+    noise(img, rng, 6)
+    if face == "top":
+        rect(img, 0, 0, 15, 15, (184, 92, 232))
+        noise(img, rng, 5)
+        for i in range(16):
+            for x, y in ((i, 0), (i, 15), (0, i), (15, i)):
+                px(img, x, y, (136, 52, 186))
+        rect(img, 1, 7, 14, 8, (150, 60, 200), 0.5)                       # the lid's fold
+    else:
+        rect(img, 0, 0, 15, 2, (146, 56, 194))                            # the lid's band
+        rect(img, 0, 2, 15, 2, (118, 40, 160), 0.7)
+        rect(img, 6, 5, 9, 6, (52, 18, 72))                               # hand hole
+        rect(img, 3, 9, 12, 12, (228, 222, 236))                          # label
+        rect(img, 4, 10, 10, 10, (150, 140, 160), 0.6)
+        for i in range(16):
+            px(img, i, 15, (110, 40, 150), 0.6)
+    return img
+
+
+def office_book_tex(rng, face):
+    """Level 3's office book (the book puzzle): a corporate blue-grey hardback. `cover`: cloth
+    with a darker spine band and a pale blank label; `pages`: the page edges between the boards."""
+    if face == "pages":
+        img = new((226, 222, 210))
+        noise(img, rng, 4)
+        for y in range(0, 16, 2):
+            rect(img, 0, y, 15, y, (204, 200, 188), 0.5)
+        rect(img, 0, 0, 15, 1, (92, 110, 132))                               # the boards
+        rect(img, 0, 14, 15, 15, (92, 110, 132))
+        return img
+    img = new((96, 116, 138))
+    noise(img, rng, 5)
+    rect(img, 0, 0, 2, 15, (70, 86, 106))                                     # the spine
+    rect(img, 6, 5, 12, 9, (214, 216, 220))                                   # the label
+    rect(img, 7, 7, 11, 7, (130, 138, 150), 0.6)
+    for i in range(16):
+        px(img, 15, i, (120, 138, 160), 0.5)
+    return img
+
+
+def books_tex(rng):
+    """Two shelves of book spines (rows 1-7 and 9-15) in muted colours and heights, the shelf
+    boards (rows 0 and 8) and the carcass (columns 0 and 15) in dark wood."""
+    img = dark_wood_tex(rng)
+    for top in (1, 9):
+        rect(img, 1, top, 14, top + 6, (26, 18, 12))                       # the dark inside
+        x = 1
+        while x < 15:
+            w = rng.choice([1, 1, 2, 2, 2])
+            h = rng.randrange(4, 8)
+            c = rng.choice(BOOK_COLOURS)
+            for i in range(w):
+                if x + i > 14:
+                    break
+                shade = 1.0 if i == 0 else 0.85
+                for yy in range(top + 7 - h, top + 7):
+                    px(img, x + i, yy, tuple(T.clamp(v * shade) for v in c))
+                if h >= 6:
+                    px(img, x + i, top + 7 - h + 1, tuple(T.clamp(v + 40) for v in c), 0.6)   # a band
+            x += w
+            if rng.random() < 0.1:
+                x += 1                                                     # a gap
+    return img
+
+
+def card_catalog_tex(rng):
+    """Rows of small drawers with brass pulls and white label cards."""
+    img = dark_wood_tex(rng)
+    for y0 in (1, 5, 9):
+        for x0 in (1, 5, 9, 12):
+            rect(img, x0, y0, x0 + 2, y0 + 2, (84, 62, 44))
+            px(img, x0 + 1, y0, (226, 224, 214))
+            px(img, x0 + 1, y0 + 2, (176, 146, 70))
+    return img
+
+
+def led_glow(x, y, c):
+
+    if max(c) > 200 and min(c) < 120:
+        return T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["TUBE_GLOW"])
+    return T.PLASTIC.but(smoothness=0.5, relief=0.3)
+
+
+def wood_door_tex(rng, half, colour):
+    """One half of the director's door: dark walnut veneer, its grain running up, a shallow inset panel, and on
+    the handle side (the right, like vanilla's) a slim brass pull. Spotless."""
+    img = new(colour)
+    dark = tuple(max(0, c - 18) for c in colour)
+    light = tuple(min(255, c + 14) for c in colour)
+    grain = [rng.uniform(-1, 1) for _ in range(16)]
+    for x in range(16):                                           # the grain: faint streaks, up the leaf
+        for y in range(16):
+            t = grain[x] * 0.5 + rng.uniform(-0.25, 0.25)
+            px(img, x, y, light if t > 0 else dark, abs(t) * 0.5)
+    for i in range(16):                                           # the leaf's edges
+        px(img, 0, i, dark, 0.8)
+        px(img, 15, i, dark, 0.5)
+    edge = 15 if half == "bottom" else 0
+    for x in range(16):
+        px(img, x, edge, dark, 0.8)
+    # The inset panel: a hairline of shadow above and left, of light below and right.
+    y0, y1 = (2, 15) if half == "top" else (0, 13)
+    for x in range(3, 11):
+        if half == "top":
+            px(img, x, y0, dark, 0.7)
+        if half == "bottom":
+            px(img, x, y1, light, 0.6)
+    for y in range(y0, y1 + 1):
+        px(img, 3, y, dark, 0.7)
+        px(img, 10, y, light, 0.6)
+    brass, shade = (196, 164, 92), (128, 100, 52)                 # the pull, waist to chest high (y = 0: a half's top)
+    for y in (range(0, 7) if half == "bottom" else range(10, 16)):
+        px(img, 12, y, brass, 0.95)
+        px(img, 13, y, shade, 0.7)
+    return img
+
+
+def steel_door_tex(rng, half, colour, kind):
+    """One half of a painted steel door (bottom or top), handle side on the right like vanilla's
+    doors (the models mirror it for the other hinge). kind: "storage" / "electrical" (service
+    doors: a wired-glass window and the room's plate on the top half, a lever handle) or
+    "emergency" (no window; a push bar across the bottom half's top)."""
+    img = new(colour)
+    noise(img, rng, 4)
+    dark = tuple(max(0, c - 34) for c in colour)
+    light = tuple(min(255, c + 22) for c in colour)
+    for i in range(16):                                           # frame edges
+        px(img, 0, i, dark, 0.7)
+        px(img, 15, i, dark, 0.7)
+    if half == "top":
+        for x in range(16):
+            px(img, x, 0, dark, 0.7)
+    else:
+        for x in range(16):
+            px(img, x, 15, dark, 0.8)
+    for _ in range(4):                                            # dents and scratches
+        x, y = rng.randrange(2, 14), rng.randrange(1, 15)
+        px(img, x, y, dark, 0.45)
+        px(img, x + 1, y, light, 0.35)
+    for _ in range(3):
+        y = rng.randrange(1, 15)
+        for x in range(rng.randrange(1, 6), rng.randrange(8, 15)):
+            px(img, x, y, light, 0.25)
+    if half == "bottom":
+        T.gradient(img, (40, 42, 46), 0.0, 0.35)                  # kicked and dirty at the bottom
+    if kind == "lab":                                             # white, a tall clean window, a lever handle
+        if half == "top":
+            rect(img, 4, 2, 11, 14, (146, 170, 182))
+            for k in range(5):
+                px(img, 5 + k, 3 + 2 * k, (200, 218, 226), 0.7)
+            rect(img, 3, 1, 12, 1, dark)
+            rect(img, 3, 15, 12, 15, dark)
+        else:
+            rect(img, 4, 0, 11, 3, (146, 170, 182))
+            rect(img, 3, 4, 12, 4, dark)
+            rect(img, 12, 7, 14, 7, (178, 184, 192))
+            px(img, 13, 8, (100, 104, 112), 1.0)
+        return img
+    if kind == "secure":                                          # no window: a red plate, a lever handle
+        if half == "top":
+            rect(img, 4, 5, 11, 10, (172, 38, 34))
+            rect(img, 4, 5, 11, 5, (120, 26, 24))
+            for y, (x0, x1) in ((7, (5, 10)), (9, (6, 9))):
+                rect(img, x0, y, x1, y, (236, 230, 226), 0.95)
+        else:
+            rect(img, 12, 1, 14, 1, (178, 184, 192))
+            px(img, 13, 2, (100, 104, 112), 1.0)
+            rect(img, 1, 11, 14, 14, (112, 118, 126), 0.8)    # kick plate
+        return img
+    if kind == "stall":                                           # laminate, hinges, the lock's vacant sign
+        for y in (2, 3, 12, 13):
+            px(img, 1, y, (130, 136, 144), 0.9)
+        if half == "top":
+            rect(img, 12, 12, 13, 13, (150, 154, 160))
+            px(img, 12, 12, (62, 160, 92), 1.0)
+            px(img, 13, 12, (62, 160, 92), 1.0)
+            rect(img, 12, 14, 13, 14, (96, 100, 108))
+        return img
+    if kind == "office":                                          # black, a long steel pull, nothing else
+        for y in range(16):
+            px(img, 12, y, (150, 154, 160), 0.9)
+            px(img, 13, y, (90, 94, 100), 0.6)
+        return img
+    if kind == "emergency":
+        if half == "bottom":
+            rect(img, 2, 1, 13, 2, (170, 176, 184))               # push bar
+            rect(img, 2, 3, 13, 3, (92, 96, 104))
+            rect(img, 2, 1, 2, 3, (60, 62, 68))
+            rect(img, 13, 1, 13, 3, (60, 62, 68))
+        else:
+            rect(img, 4, 6, 11, 9, (40, 150, 86))                 # green running-man plate
+            for x, y in ((7, 6), (6, 7), (7, 7), (8, 7), (7, 8), (6, 9), (8, 9)):
+                px(img, x, y, (236, 244, 238), 0.95)
+        return img
+    if half == "top":
+        rect(img, 4, 3, 11, 9, (54, 64, 74))                      # wired glass, dusty
+        for x in range(4, 12):
+            for y in range(3, 10):
+                if (x + y) % 3 == 0:
+                    px(img, x, y, (96, 104, 112), 0.7)
+        px(img, 4, 3, (120, 132, 144), 0.6)
+        rect(img, 3, 2, 12, 2, dark)
+        rect(img, 3, 10, 12, 10, light)
+        # The room's plate under the window.
+        rect(img, 5, 12, 10, 14, (214, 196, 60) if kind == "electrical" else (210, 214, 218))
+        if kind == "electrical":                                  # warning triangle with a bolt
+            for x, y in ((7, 12), (8, 12), (6, 13), (9, 13), (5, 14), (10, 14)):
+                px(img, x, y, (24, 24, 26), 0.9)
+            px(img, 8, 13, (24, 24, 26), 0.9)
+            px(img, 7, 14, (24, 24, 26), 0.9)
+        else:                                                     # a box: shelves
+            rect(img, 6, 12, 9, 14, (150, 116, 74))
+            rect(img, 6, 13, 9, 13, (110, 84, 52))
+    else:
+        rect(img, 12, 1, 14, 1, (178, 184, 192))                  # lever handle and its rose
+        px(img, 13, 2, (100, 104, 112), 1.0)
+        px(img, 13, 3, (60, 62, 68), 1.0)                         # keyhole
+    return img
+
+
+def door_item_tex(bottom, top):
+    """A door item: both halves shrunk into a 16x16 picture, like vanilla's door items."""
+    whole = Image.new("RGBA", (16, 32))
+    whole.paste(top, (0, 0))
+    whole.paste(bottom, (0, 16))
+    small = whole.resize((8, 16), Image.NEAREST)
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    img.paste(small, (4, 0))
+    return img
+
+
+def exit_sign_tex(rng):
+    """The lit EXIT box: its face (12x6 at the top left) green with white letters and a running
+    man's arrow; the rest is the grey casing for its sides."""
+    img = new((150, 154, 160))
+    noise(img, rng, 3)
+    rect(img, 0, 0, 11, 5, (34, 168, 88))
+    letters = {"E": ["##", "#.", "##", "#.", "##"], "X": ["#.#", "#.#", ".#.", "#.#", "#.#"],
+               "I": ["#", "#", "#", "#", "#"], "T": ["###", ".#.", ".#.", ".#.", ".#."]}
+    x = 1
+    for ch in "EXIT":
+        rows = letters[ch]
+        for ry, row in enumerate(rows):
+            for rx, bit in enumerate(row):
+                if bit == "#":
+                    img.putpixel((x + rx, 0 + ry), (240, 250, 244, 255))
+        x += len(rows[0]) + 1
+    return img
+
+
+def exit_sign_glow(x, y, c):
+    if x < 12 and y < 6:
+        return T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["TUBE_GLOW"])
+    return T.PAINTED_METAL
+
+
+def checker_plate_tex(rng):
+    """Steel checker plate (the elevator's floor): staggered raised lozenges, worn bright on top,
+    dirt in the low parts."""
+    img = new((112, 118, 124))
+    noise(img, rng, 4)
+    for gy in range(0, 16, 4):
+        for gx in range(0, 16, 4):
+            ox = gx + (2 if (gy // 4) % 2 else 0)
+            diagonal = (gx // 4 + gy // 4) % 2 == 0
+            cells = [(ox, gy + 1), (ox + 1, gy + 2)] if diagonal else [(ox + 1, gy + 1), (ox, gy + 2)]
+            for i, (x, y) in enumerate(cells):
+                px(img, x, y, (170, 176, 182) if i == 0 else (78, 82, 88), 0.85)
+    T.blob(img, rng, (70, 72, 76), 5, 0.3)
+    speckle(img, rng, 8, (60, 62, 66), 0.5)
+    return img
+
+
+def bunker_trapdoor_tex(rng):
+    """One block of a bunker hatch leaf (the hinge along the bottom rows, the south of a model
+    facing north): dark painted steel checker plate, a yellow and black band along the hinge,
+    a bolt head in each corner."""
+    img = checker_plate_tex(rng)
+    for y in range(16):
+        for x in range(16):
+            r, g, b, a = img.getpixel((x, y))
+            img.putpixel((x, y), (T.clamp(r * 0.62), T.clamp(g * 0.66), T.clamp(b * 0.6), a))
+    for y in range(13, 16):
+        for x in range(16):
+            px(img, x, y, (214, 168, 32) if (x + y) // 3 % 2 == 0 else (28, 28, 30), 0.95)
+    rect(img, 0, 12, 15, 12, (36, 38, 40), 0.8)
+    for x, y in ((1, 1), (14, 1), (1, 10), (14, 10)):
+        px(img, x, y, (150, 154, 158))
+    return img
+
+
+def airlock_leaf_tex(rng):
+    """A leaf of Level 5's airlock doors: pale painted steel, clean, with two grooves across. Nothing on it
+    changes along its width, so it looks the same however far it has slid."""
+    img = new((198, 202, 204))
+    noise(img, rng, 3)
+    for y, t in ((3, 0.8), (12, 0.8)):
+        for x in range(16):
+            px(img, x, y, (148, 152, 156), t)
+            px(img, x, y + 1, (228, 230, 232), 0.5)
+    for x in range(16):                                           # dirt gathered at the foot
+        for y in (14, 15):
+            px(img, x, y, (150, 152, 150), 0.25 + 0.1 * rng.random())
+    return img
+
+
+def airlock_edge_tex(rng):
+    """The leaves' edges: the black rubber seal they meet on."""
+    img = new((30, 32, 34))
+    noise(img, rng, 4)
+    return img
+
+
+def hazard_steel_tex(rng):
+    """Worn steel painted in yellow and black diagonal stripes, 4 pixels wide: the frame of
+    Level 3's blast doors. The stripes run on across neighbouring blocks."""
+    img = new((214, 168, 32))
+    for y in range(16):
+        for x in range(16):
+            if (x + y) // 4 % 2:
+                px(img, x, y, (30, 30, 32))
+    noise(img, rng, 6)
+    T.blob(img, rng, (120, 110, 90), 4, 0.25)                         # scuffs
+    speckle(img, rng, 10, (90, 92, 96), 0.6)
+    return img
+
+
+def blast_door_tex(rng):
+    """A blast door leaf's face: thick dark grey-green steel, a row of rivets along each edge
+    (so a leaf of several blocks reads as one plate with seams), worn bright here and there."""
+    img = new((74, 82, 78))
+    noise(img, rng, 4)
+    T.blob(img, rng, (96, 104, 100), 4, 0.3)
+    for i in range(1, 16, 3):
+        for x, y in ((i, 1), (i, 14), (1, i), (14, i)):
+            px(img, x, y, (128, 134, 130))
+            px(img, x, y + 1 if y < 15 else y, (44, 48, 46), 0.6)
+    rect(img, 0, 0, 15, 0, (40, 44, 42), 0.8)
+    rect(img, 0, 0, 0, 15, (40, 44, 42), 0.8)
+    return img
+
+
+def grating_tex(rng):
+    """Steel bar grating, painted dark and worn bright along the bars: a grid of square holes
+    (see-through) with rust in the corners. The treads of the spiral stairs down to B3."""
+    img = new((84, 88, 92))
+    noise(img, rng, 5)
+    for y in range(16):
+        for x in range(16):
+            if x % 4 == 0 or y % 4 == 0:
+                px(img, x, y, (128, 132, 136), 0.35)              # bar tops, rubbed by boots
+    for y in range(1, 16, 4):
+        for x in range(1, 16, 4):
+            rect(img, x, y, x + 2, y + 2, (0, 0, 0, 0))
+    speckle(img, rng, 10, (112, 72, 44), 0.6)                    # rust
+    T.blob(img, rng, (60, 62, 64), 4, 0.25)
+    return img
+
+
+def moving_pad_tex(rng):
+    """A quilted moving blanket, faded blue-grey, diamond stitching (it joins across blocks)."""
+    img = new((74, 88, 104))
+    noise(img, rng, 4)
+    for y in range(16):
+        for x in range(16):
+            if (x + y) % 8 == 0 or (x - y) % 8 == 0:
+                px(img, x, y, (52, 62, 74), 0.8)                  # stitches
+            elif (x + y) % 8 in (1, 2) and (x - y) % 8 in (1, 2):
+                px(img, x, y, (98, 112, 128), 0.5)                # the padding bulging between them
+    T.blob(img, rng, (66, 70, 74), 4, 0.25)
+    return img
+
+
+def handrail_tex(rng):
+    img = new((168, 172, 178))
+    noise(img, rng, 4)
+    for x in range(16):
+        px(img, x, 0, (210, 214, 218), 0.6)
+        px(img, x, 15, (110, 114, 120), 0.6)
+    return img
+
+
+def elevator_buttons_tex(rng, call):
+    """The cabin's panel (two columns of round buttons, B1 lit amber, a speaker grille and a
+    keyhole; its face is 8x14 at x 4-11, y 1-14) or the landing's call panel (one lit down button
+    under a dark up button; 6x10 at x 5-10, y 3-12)."""
+    img = new((150, 154, 160))
+    noise(img, rng, 3)
+    dents(img, rng, 1, scratches=1)
+    ring, lit, dark = (70, 72, 78), (236, 164, 52), (104, 108, 114)
+    if call:
+        rect(img, 5, 3, 10, 12, (138, 142, 148))
+        for x in range(6, 10):                                    # up: a dark triangle
+            px(img, x, 6, dark)
+        px(img, 7, 5, dark)
+        px(img, 8, 5, dark)
+        for x in range(6, 10):                                    # down: a lit one
+            px(img, x, 9, lit)
+        px(img, 7, 10, lit)
+        px(img, 8, 10, lit)
+        return img
+    rect(img, 4, 1, 11, 14, (138, 142, 148))
+    for x in range(6, 10):                                        # speaker grille
+        for y in (2, 4):
+            px(img, x, y, (60, 62, 66), 0.9)
+    buttons = [(6, 6), (9, 6), (6, 8), (9, 8), (6, 10), (9, 10)]
+    for i, (x, y) in enumerate(buttons):
+        px(img, x, y, ring)
+        px(img, x + 1, y, lit if i == 5 else dark)
+    px(img, 8, 13, (40, 40, 44))                                  # keyhole
+    return img
+
+
+def floor_indicator_tex(label, moving):
+    """The floor indicator's LED display (12x5 at the top left): a down arrow, lit while the
+    car moves, then the floor; unlit segments glow faintly."""
+    img = new((150, 154, 160))
+    off, on, bg = (70, 20, 16), (255, 76, 44), (16, 12, 12)
+    rect(img, 0, 0, 11, 4, bg)
+    arrow = [".#.", ".#.", ".#.", "###", ".#."]
+    for y, row in enumerate(arrow):
+        for x, bit in enumerate(row):
+            if bit == "#":
+                px(img, x, y, on if moving else off)
+    width = len(label) * 4 - 1
+    x0 = 4 + (8 - width) // 2
+    for i, ch in enumerate(label):
+        for y, row in enumerate(T.FONT[ch]):
+            for x, bit in enumerate(row):
+                if bit == "#":
+                    px(img, x0 + i * 4 + x, y, on)
+    return img
+
+
+def led_and_metal(x, y, c):
+    if c[0] > 200 and c[2] < 120:
+        return T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["DIFFUSER_GLOW"])
+    return T.STEEL.but(smoothness=0.55, metal=255, relief=0.2)
+
+
+def static_frames(rng, frames=8):
+    """The CCTV monitor's screen: grey static with a slow rolling bar, over the faint shapes
+    of a dark parking aisle (the camera still works). The picture is 10x7 at the top left."""
+    out = []
+    for f in range(frames):
+        img = new((20, 22, 24))
+        bar = (f * 7 // frames) % 7
+        for y in range(7):
+            for x in range(10):
+                v = rng.randint(40, 130)
+                if y == bar:
+                    v += 50
+                if y >= 4 and x in (2, 3, 6, 7):                   # pillars down the aisle
+                    v -= 25
+                if y == 6 and 3 < x < 6:                          # the aisle's line
+                    v += 20
+                v = max(0, min(255, v))
+                img.putpixel((x, y), (v, v + 4 if v < 250 else v, v + 8 if v < 246 else v, 255))
+        out.append(img)
+    return out
+
+
+def monitor_tex(rng):
+    """The monitor's dark plastic casing, vents on top, a dim green power light."""
+    img = new((38, 40, 44))
+    noise(img, rng, 3)
+    for x in range(3, 13, 2):
+        px(img, x, 1, (22, 22, 24), 0.9)                          # vents
+    rect(img, 4, 12, 9, 12, (70, 72, 78))                         # brand strip under the screen
+    px(img, 12, 12, (90, 200, 110))                               # power light
+    return img
+
+
+def mask_tex(rng):
+    """The film's mask (tools/entity/chapter1/film_walker.py) on its 8 x 8 face in the middle, its edge round it."""
+    from film_walker import MASK_SHADE, paint_mask                     # noqa: E402
+    img = new(MASK_SHADE)
+    noise(img, rng, 3)
+    paint_mask(img, random.Random(rng.random()), (4, 4, 8, 8))
+    return img
+
+
+def broom_wood_tex(rng):
+    """The broom's handle: varnished wood, its grain running along it (up the picture): each column its own tone, a few
+    dark grain lines that wander a pixel now and then, and one pale line of varnish catching the light."""
+    base = (126, 90, 56)
+    img = new(base)
+    for x in range(16):
+        tone = rng.choice((-14, -8, 0, 6, 10))
+        for y in range(16):
+            px(img, x, y, tuple(max(0, min(255, c + tone)) for c in base), 0.55)
+    for _ in range(3):
+        x = rng.randrange(16)
+        for y in range(16):
+            if rng.random() < 0.25:
+                x = (x + rng.choice((-1, 1))) % 16
+            px(img, x, y, (84, 58, 34), 0.6)
+    shine = rng.randrange(16)
+    for y in range(16):
+        px(img, shine, y, (172, 132, 90), 0.35)
+    noise(img, rng, 2)
+    return img
+
+
+def broom_straw_tex(rng):
+    """The broom's head: stiff straw strands side by side, each its own yellow, shadow showing between some, the tips (the
+    bottom row) frayed and darker, and a red binding thread across row 12 (the head is 3.5 high: its sides show rows 12-15)."""
+    base = (204, 176, 98)
+    img = new((116, 94, 50))
+    for x in range(16):
+        tone = rng.randint(-24, 18)
+        colour = tuple(max(0, min(255, c + tone)) for c in base)
+        gappy = rng.random() < 0.25
+        for y in range(16):
+            if gappy and rng.random() < 0.6:
+                continue
+            px(img, x, y, colour, 0.9)
+        if rng.random() < 0.5:
+            px(img, x, 15, (140, 116, 60), 0.8)
+    for x in range(16):
+        px(img, x, 12, (170, 52, 40), 0.85)
+    noise(img, rng, 3)
+    return img
+
+
+def porcelain_tex(rng):
+    """Glazed porcelain: white and smooth, a cool shade towards the bottom and a soft glint up the glaze."""
+    img = new((238, 240, 240))
+    noise(img, rng, 1)
+    T.gradient(img, (198, 208, 218), 0.0, 0.3)
+    for y in range(16):
+        px(img, 4, y, (255, 255, 255), 0.7)
+        px(img, 5, y, (255, 255, 255), 0.35)
+    return img
+
+
+def stall_panel_tex(rng):
+    """The stalls' partitions: a pale blue-grey laminate, finely flecked lighter and darker (no edges: it joins on every side)."""
+    base = (196, 206, 218)
+    img = new(base)
+    noise(img, rng, 2)
+    speckle(img, rng, 26, (176, 186, 198), 0.6)
+    speckle(img, rng, 18, (216, 224, 232), 0.6)
+    return img
+
+
+def wc_mirror_tex(rng):
+    """The WCs' mirror: cool grey glass, a little brighter at the top, and two pale streaks of reflection running down to the left.
+    The streaks wrap at the sides, so a mirror that joins along a wall shows them unbroken."""
+    img = new((170, 186, 196))
+    noise(img, rng, 1)
+    T.gradient(img, (214, 226, 234), 0.35, 0.0)
+    for start, strength in ((3, 0.45), (10, 0.25)):
+        for i in range(16):
+            for w in range(2 if strength > 0.3 else 1):
+                px(img, (start + i + w) % 16, i, (236, 242, 246), strength)
+    return img
+
+
+def plastic_tex(rng, colour, kind=None):
+    """Plain moulded plastic or fabric, for small props; kind adds detail."""
+    img = new(colour)
+    noise(img, rng, 4 if kind == "fabric" else 2)
+    if kind == "fabric":
+        for y in range(0, 16, 2):
+            for x in range(16):
+                px(img, x, y, tuple(max(0, c - 10) for c in colour), 0.4)
+    if kind == "keypad":
+        for x in (6, 8, 10):
+            for y in (2, 4, 6):
+                px(img, x, y, (150, 154, 160), 0.9)
+    return img
+
+
+# --- Level 5's laboratory: cold, clean, used until recently --------------------------------
+
+LAB_STEEL = (182, 188, 192)
+LAB_WHITE = (232, 234, 230)
+LAB_GREEN = (98, 160, 132)
+# Level 5's fuses (FuseHolderBlock), glass tubes with a band in the usual fuse colours: 5A tan, 10A red,
+# 15A blue, 20A yellow, 30A green.
+FUSE_AMPS = (5, 10, 15, 20, 30)
+FUSE_COLOURS = ((198, 170, 122), (200, 54, 46), (62, 106, 200), (230, 198, 52), (72, 164, 82))
+
+
+def brushed_steel_tex(rng, base=LAB_STEEL):
+    """Brushed stainless steel: fine streaks running along the texture."""
+    img = new(base)
+    for y in range(16):
+        shade = rng.uniform(-7, 7)
+        for x in range(16):
+            px(img, x, y, tuple(T.clamp(c + shade) for c in base), 0.6)
+    noise(img, rng, 2)
+    return img
+
+
+def melamine_tex(rng, base=LAB_WHITE):
+    """White melamine: smooth, a faint scuff or two."""
+    img = new(base)
+    noise(img, rng, 1)
+    for _ in range(2):
+        x, y = rng.randrange(2, 13), rng.randrange(2, 13)
+        for k in range(rng.randrange(2, 5)):
+            px(img, x + k, y, tuple(c - 18 for c in base), 0.35)
+    return img
+
+
+def lab_cabinet_tex(rng):
+    """A white base cabinet's front: two doors with a gap down the middle, a steel bar handle on each."""
+    img = melamine_tex(rng)
+    for y in range(16):
+        px(img, 7, y, (176, 180, 178), 0.9)
+        px(img, 8, y, (204, 206, 202), 0.6)
+    for i in range(16):
+        px(img, i, 15, (168, 172, 170), 0.8)
+    for y in range(3, 8):
+        px(img, 5, y, (150, 156, 160), 1.0)
+        px(img, 10, y, (150, 156, 160), 1.0)
+    return img
+
+
+def pegboard_tex(rng):
+    """The Workshop's pegboard: a grey-brown board, a grid of holes, the tools hung on it."""
+    img = new((156, 148, 132))
+    noise(img, rng, 3)
+    for x in range(1, 16, 2):
+        for y in range(1, 16, 2):
+            px(img, x, y, (110, 102, 90), 0.8)
+    steel, red, black = (196, 200, 204), (176, 52, 44), (40, 40, 44)
+    for k in range(6):                                  # a wrench, slanting
+        px(img, 2 + k, 12 - k, steel, 1.0)
+    for x, y in ((1, 13), (2, 13), (7, 6), (8, 6), (8, 7)):
+        px(img, x, y, steel, 1.0)
+    for y in range(4, 11):                              # a screwdriver
+        px(img, 11, y, steel if y < 8 else red, 1.0)
+    px(img, 11, 11, red, 1.0)
+    for x in range(12, 16):                             # a hammer's head and handle
+        px(img, x, 3, black, 1.0)
+    for y in range(4, 10):
+        px(img, 14, y, (130, 96, 60), 1.0)
+    return img
+
+
+def drawers_tex(rng):
+    """A steel tool chest's front: four drawers, a pull on each."""
+    base = (128, 134, 140)
+    img = powder_metal_tex(rng, base)
+    for y in (0, 4, 8, 12):
+        for x in range(16):
+            px(img, x, y, (84, 88, 94), 0.9)
+        for x in range(5, 11):
+            px(img, x, y + 2, (200, 204, 208), 0.9)
+    return img
+
+
+def jars_tex(rng):
+    """Glass jars and bottles in a row on a shelf: amber, green, clear, a white label each."""
+    img = new((52, 56, 60))
+    x = 0
+    while x < 15:
+        w = rng.choice((2, 3, 3))
+        h = rng.randrange(8, 14)
+        colour = rng.choice(((196, 132, 52), (120, 176, 120), (196, 214, 220), (150, 120, 190)))
+        for xx in range(x, min(16, x + w)):
+            for y in range(16 - h, 16):
+                px(img, xx, y, colour, 0.9)
+            px(img, xx, 16 - h, tuple(min(255, c + 40) for c in colour), 0.9)
+        for xx in range(x, min(16, x + w)):
+            px(img, xx, 16 - h // 2, (236, 236, 230), 0.9)
+        x += w + 1
+    return img
+
+
+def magazines_tex(rng):
+    """Magazines left on a low table, one over another."""
+    img = new(LAB_WHITE)
+    for _ in range(4):
+        x, y = rng.randrange(0, 8), rng.randrange(0, 8)
+        colour = rng.choice(((180, 60, 60), (60, 110, 170), (210, 180, 70), (90, 150, 110), (236, 236, 232)))
+        for xx in range(x, x + 7):
+            for yy in range(y, y + 9):
+                px(img, xx % 16, yy % 16, colour, 0.95)
+        for xx in range(x + 1, x + 6):
+            px(img, xx % 16, (y + 1) % 16, (250, 250, 248), 0.8)
+    return img
+
+
+def lab_poster_tex(rng):
+    """A safety poster: a red title bar of small white letters, a yellow warning sign with the radiation
+    trefoil, lines of small print."""
+    img = new((240, 240, 236))
+    for x in range(16):
+        for y in range(3):
+            px(img, x, y, (176, 40, 36), 1.0)
+    for x in range(2, 14, 2):
+        px(img, x, 1, (250, 250, 250), 0.9)
+    for y in range(4, 11):                              # the triangle
+        half = (y - 4) // 1
+        for x in range(8 - half // 2 - 1, 8 + half // 2 + 1):
+            px(img, x, y, (236, 196, 40), 1.0)
+    for x, y in ((7, 7), (8, 7), (6, 9), (9, 9), (7, 8), (8, 8)):
+        px(img, x, y, (24, 24, 24), 1.0)
+    for y in (12, 14):
+        for x in range(2, rng.randrange(10, 15)):
+            px(img, x, y, (90, 90, 90), 0.8)
+    return img
+
+
+def first_aid_tex(rng):
+    """A first aid box's front: white, a green cross (the usual sign for first aid)."""
+    img = new((236, 238, 234))
+    for i in range(4, 12):
+        for j in (7, 8):
+            px(img, i, j, (40, 150, 80), 1.0)
+            px(img, j, i, (40, 150, 80), 1.0)
+    return img
+
+
+def fuse_label_tex(rng, index):
+    """A fuse holder's plate: dark plastic, a white label at its foot with the amperage, a band of the
+    fuse's colour over it."""
+    img = new((44, 46, 50))
+    noise(img, rng, 2)
+    for x in range(2, 14):
+        for y in range(10, 15):
+            px(img, x, y, (236, 236, 230), 1.0)
+        px(img, x, 9, FUSE_COLOURS[index], 1.0)
+    text = f"{FUSE_AMPS[index]}A"
+    dart_text(img, (16 - dart_text_width(text)) // 2, 10, text, (20, 20, 22))
+    return img
+
+
+def fuse_item_tex(rng, index):
+    """A glass fuse: a clear tube with its filament, a metal cap at each end, a band of its colour round its middle,
+    and its amperage under it."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    colour = FUSE_COLOURS[index]
+    for x in range(2, 14):
+        for y in range(3, 8):
+            if x <= 3 or x >= 12:                                         # the caps
+                c = (214, 218, 222) if y in (3, 4) else (150, 156, 162)
+            else:                                                         # the glass, lit along its top
+                c = (214, 232, 238) if y == 4 else (166, 194, 206) if y < 7 else (132, 158, 170)
+            img.putpixel((x, y), c + (255,))
+    for x in range(4, 12):                                                # the filament
+        img.putpixel((x, 5), (72, 72, 76, 255))
+    for x in (7, 8):                                                      # the band
+        for y in range(3, 8):
+            img.putpixel((x, y), colour + (255,))
+    text = str(FUSE_AMPS[index])
+    dart_text(img, (16 - dart_text_width(text)) // 2, 10, text, (240, 240, 236, 255))
+    return img
+
+
+def fuse_glass_tex(rng):
+    """A glass fuse's tube in its holder: clear, a highlight down one side, the filament down the middle."""
+    img = new((168, 196, 208))
+    noise(img, rng, 2)
+    for y in range(16):
+        px(img, 7, y, (220, 236, 242), 0.8)
+        px(img, 8, y, (70, 70, 74), 0.9)
+    return img
+
+
+# --- Level 5's layer 1, its look: the ceiling's lights and vents, the doors' readers, safety signs, props ------
+
+def ceiling_light_tex(rng):
+    """A light set into the ceiling: a steel rim round a white prismatic diffuser, lit evenly (no tubes humming)."""
+    img = new((250, 250, 246))
+    for x in range(16):
+        for y in range(16):
+            if (x + y) % 4 == 0:
+                px(img, x, y, (236, 238, 236), 0.6)
+    for k in range(16):
+        for c in ((k, 0), (k, 15), (0, k), (15, k)):
+            px(img, *c, (196, 200, 204), 1.0)
+    return img
+
+
+def ceiling_light_material(x, y, c):
+    if x in (0, 15) or y in (0, 15):
+        return T.PAINTED_METAL.but(smoothness=0.5)
+    return T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"])
+
+
+def ceiling_vent_tex(rng):
+    """A square air vent in the ceiling: a white frame, slats with the dark of the duct between them."""
+    img = melamine_tex(rng)
+    rect(img, 2, 2, 13, 13, (70, 74, 80))
+    for y in range(3, 13, 2):
+        rect(img, 3, y, 12, y, (210, 212, 210))
+    return img
+
+
+def lab_reader_tex(rng):
+    """A card reader by a door: a dark plastic body, the card's slot, a small keypad and a green light: unlocked."""
+    img = new((52, 56, 60))
+    noise(img, rng, 2)
+    rect(img, 6, 5, 9, 5, (14, 14, 16))                                  # the slot
+    for x in (6, 8):
+        for y in (7, 9):
+            px(img, x, y, (150, 154, 160), 0.9)
+    rect(img, 9, 10, 10, 11, (90, 230, 130))                             # the light
+    return img
+
+
+def safety_sign_tex(kind):
+    """Level 5's safety signs, 32 px: the extinguisher's (red), the emergency exit's (green), and the yellow
+    triangles of biohazard and radiation."""
+    white, black, yellow = (250, 250, 248), (20, 20, 22), (244, 196, 36)
+    img = Image.new("RGB", (32, 32), (246, 246, 242))
+    d = ImageDraw.Draw(img)
+    if kind == "extinguisher":
+        d.rectangle((1, 1, 30, 30), fill=(196, 34, 30))
+        d.rounded_rectangle((12, 12, 19, 28), 2, fill=white)
+        d.rectangle((14, 8, 17, 12), fill=white)
+        d.line((17, 9, 24, 7), fill=white, width=2)
+        d.line((12, 14, 8, 22), fill=white, width=2)
+    elif kind == "exit":
+        d.rectangle((1, 1, 30, 30), fill=(30, 140, 76))
+        d.rectangle((4, 5, 12, 27), outline=white, width=2)
+        d.ellipse((18, 5, 22, 9), fill=white)
+        for a, b in (((20, 10), (18, 18)), ((19, 12), (24, 15)), ((19, 12), (15, 15)), ((18, 18), (23, 22)),
+                     ((23, 22), (22, 27)), ((18, 18), (15, 23)), ((15, 23), (12, 24))):
+            d.line((*a, *b), fill=white, width=2)
+    else:
+        d.polygon([(16, 2), (30, 28), (2, 28)], fill=yellow)
+        d.line([(16, 2), (30, 28), (2, 28), (16, 2)], fill=black, width=2)
+        if kind == "radiation":
+            for centre in (90, 210, 330):                             # one blade down, two up
+                d.pieslice((9, 12, 23, 26), centre - 30, centre + 30, fill=black)
+            d.ellipse((13, 16, 19, 22), fill=yellow)
+            d.ellipse((14, 17, 18, 21), fill=black)
+        else:
+            for angle in (-90, 30, 150):
+                cx, cy = 16 + 4 * math.cos(math.radians(angle)), 19 + 4 * math.sin(math.radians(angle))
+                d.ellipse((cx - 5, cy - 5, cx + 5, cy + 5), outline=black, width=2)
+            d.ellipse((13, 16, 19, 22), outline=black, width=1)
+    return img
+
+
+def glove_box_tex(rng):
+    """A box of nitrile gloves: white card with a blue band, the hole in its top."""
+    img = new((236, 236, 232))
+    noise(img, rng, 1)
+    rect(img, 0, 9, 15, 12, (60, 104, 186))
+    return img
+
+
+def keypad_tex(rng, part):
+    """The keypad by the office's door (Chapter 2): dark steel (side), or its face in the pixels the model's front shows (x 4-11,
+    y 2-13): a small green display, an LED (red locked, green open) and twelve keys in four rows of three."""
+    img = new((58, 60, 64))
+    speckle(img, rng, 30, (70, 72, 78), 0.5)
+    if part == "side":
+        return img
+    rect(img, 4, 2, 11, 13, (36, 37, 41))
+    rect(img, 5, 3, 10, 4, (22, 52, 32))                                          # the display
+    px(img, 6, 3, (76, 200, 110), 0.7)
+    px(img, 10, 6, (226, 52, 44) if part == "locked" else (64, 220, 96))          # the LED
+    for x in (5, 7, 9):
+        for y in (6, 8, 10, 12):
+            px(img, x, y, (168, 172, 178), 0.95)
+    return img
+
+
+def film_light_lens_tex(rng):
+    """The front of a studio light: a warm white lens in a black rim, behind a wire grid."""
+    img = new((24, 24, 26))
+    for y in range(3, 13):
+        for x in range(3, 13):
+            if (x - 7.5) ** 2 + (y - 7.5) ** 2 <= 22:
+                img.putpixel((x, y), (250, 240, 214))
+    for i in range(3, 13, 3):
+        rect(img, i, 2, i, 13, (90, 90, 92))
+    return img
+
+
+def rowan_portrait_tex(rng):
+    """Rowan's portrait in his office (Chapter 2), 64 x 64: an oil painting of head and shoulders in a bevelled gilt frame, in the
+    blocky look of his skin (its face grid, 4 pixels a cell; his parted dark hair, the beige suit, the green tie and the gold badge),
+    lit from the left on a dark ground. Painted by Codex GPT in code (Pillow shapes, no generative AI), brought in here as it was."""
+    size = 64
+    hair, part, skin, skin_shade = "#2e2120", "#543e38", "#e9ba96", "#d4a07c"
+    suit, suit_shade, shirt, tie, badge = "#e4d6b4", "#c6b28a", "#f6f6f2", "#1c6034", "#d8ac34"
+    image = Image.new("RGB", (size, size))
+    pixels = image.load()
+    # The ground: a warm glow towards the upper left, grain and short brush strokes.
+    for y in range(7, size - 7):
+        for x in range(7, size - 7):
+            glow = max(0.0, 1 - ((x - 17) / 37) ** 2 - ((y - 24) / 37) ** 2)
+            grain = rng.randrange(-3, 4)
+            pixels[x, y] = (24 + int(40 * glow) + grain, 25 + int(24 * glow) + grain, 22 + int(12 * glow) + grain)
+    draw = ImageDraw.Draw(image)
+    for _ in range(145):
+        x, y = rng.randrange(7, 56), rng.randrange(7, 57)
+        end_x = min(56, x + rng.randrange(1, 4))
+        grain = rng.choice((-6, -4, 4, 7))
+        draw.line((x, y, end_x, max(7, y - 1)), fill=tuple(max(0, c + grain) for c in pixels[x, y]))
+    polygon, rectangle, line = draw.polygon, draw.rectangle, draw.line
+    # The suit's shoulders and the sleeves' shadows.
+    polygon([(7, 57), (7, 51), (11, 51), (11, 48), (17, 48), (17, 46), (25, 46), (25, 45), (40, 45), (40, 46), (48, 46), (48, 48),
+             (53, 48), (53, 51), (56, 51), (56, 57)], "#d4c19c")
+    polygon([(7, 57), (7, 51), (11, 51), (11, 48), (17, 48), (17, 46), (25, 46), (25, 45), (31, 45), (28, 57)], suit)
+    line([(8, 51), (12, 51), (12, 49), (17, 49), (17, 47), (23, 47)], "#efe1bf")
+    line([(17, 56), (18, 56), (18, 54), (19, 53)], suit_shade)
+    line([(49, 51), (50, 52), (50, 55), (51, 56)], "#b39c77")
+    # A short neck, the beige placket and a straight tie.
+    rectangle((26, 42, 39, 46), "#af795b")
+    rectangle((26, 44, 34, 46), skin_shade)
+    polygon([(25, 46), (40, 46), (42, 49), (39, 51), (39, 57), (27, 57), (27, 51), (24, 49)], suit_shade)
+    line([(25, 48), (28, 51), (28, 55)], "#daccaa")
+    line([(40, 48), (38, 51), (38, 56)], "#ad9671")
+    rectangle((28, 46, 37, 48), shirt)
+    rectangle((29, 48, 35, 51), shirt)
+    rectangle((35, 48, 37, 51), "#e7e4d7")
+    rectangle((30, 48, 34, 54), tie)
+    rectangle((30, 54, 34, 55), "#144626")
+    rectangle((30, 56, 32, 57), badge)
+    # The square badge, with its light inset as on the skin.
+    rectangle((42, 51, 47, 55), "#a48138")
+    rectangle((42, 51, 46, 54), badge)
+    rectangle((42, 53, 44, 54), "#f4eed6")
+    # The head's side: the sideburn running back to the nape.
+    polygon([(14, 8), (45, 8), (49, 12), (18, 12)], "#44312b")
+    polygon([(14, 8), (18, 12), (18, 43), (14, 39)], "#ca9574")
+    polygon([(14, 8), (18, 12), (18, 23), (17, 23), (17, 28), (16, 28), (16, 32), (15, 32), (15, 35), (14, 35)], hair)
+    line([(15, 8), (33, 8)], "#60463c")
+    line([(14, 12), (14, 25)], "#543c32")
+    line([(14, 39), (17, 42)], "#b27e61")
+    # The face: his skin's front grid, each cell 4 x 4 pixels, the skin lighter on the left.
+    face = ("hhhhhhhh", "hhhhhrhh", "hssssssh", "seessees", "swissiws", "sssnnsms", "sssmmmss", "ssssssss")
+    palette = {"h": hair, "r": part, "e": "#42302a", "w": shirt, "i": "#261c22", "n": skin_shade, "m": "#966050"}
+    shades = ("#efc5a4", skin, skin, skin, "#e3b18d", "#e3b18d", "#dfaa85", skin_shade)
+    for row, cells in enumerate(face):
+        for column, cell in enumerate(cells):
+            x, y = 18 + column * 4, 12 + row * 4
+            rectangle((x, y, x + 3, y + 3), shades[column] if cell == "s" else palette[cell])
+    # Broad highlights on the left, a shadow by the right eye.
+    line([(18, 12), (32, 12), (33, 13), (36, 13)], "#5b4136")
+    rectangle((21, 16, 30, 17), "#49332c")
+    rectangle((22, 20, 29, 21), "#f4caaa")
+    rectangle((21, 33, 25, 34), "#e7ad8d")
+    rectangle((42, 28, 45, 31), "#eae1d2")
+    line([(18, 43), (33, 43)], "#cd9a79")
+    line([(34, 43), (49, 43)], "#ba8566")
+    # The bevelled frame, its top and left faces catching the light; broken glints and chased corners.
+    bevel = [("#634124", "#38291d"), ("#b68240", "#835427"), ("#e0b568", "#b17a37"), ("#ab7535", "#79502c"),
+             ("#744823", "#51331d"), ("#ddb16a", "#a7723a"), ("#49331e", "#35291d")]
+    for inset, (light, dark) in enumerate(bevel):
+        far = size - 1 - inset
+        line([(inset, far), (inset, inset), (far, inset)], fill=light)
+        line([(far, inset + 1), (far, far), (inset + 1, far)], fill=dark)
+    for _ in range(21):
+        start = rng.randrange(9, 52)
+        end = min(54, start + rng.randrange(1, 4))
+        colour = rng.choice(("#ebc77f", "#c89c50", "#f2cf89"))
+        if rng.randrange(2):
+            line((start, 2, end, 2), fill=colour)
+        else:
+            line((2, start, 2, end), fill=colour)
+    for corner_x, dx in ((0, 1), (size - 1, -1)):
+        for corner_y, dy in ((0, 1), (size - 1, -1)):
+            colour = "#f1cf85" if dx == dy == 1 else "#d5a65a"
+            for stroke in ([(2, 6), (3, 5), (3, 3), (5, 3), (6, 2)], [(4, 7), (5, 5), (7, 4)]):
+                line([(corner_x + x * dx, corner_y + y * dy) for x, y in stroke], fill=colour)
+    return image
+
+
+def analyzer_front_tex(rng):
+    """The front of Chapter 2's bench analyzer (a 12 x 9 face, drawn in x 2..13, y 2..10 of the picture): pale casing, a dark
+    screen with a green trace, three lights and the slot the samples go in."""
+    img = new((214, 218, 218))
+    noise(img, rng, 2)
+    rect(img, 3, 3, 12, 6, (18, 34, 36))
+    for x, y in ((3, 5), (4, 5), (5, 4), (6, 5), (7, 6), (8, 5), (9, 3), (10, 4), (11, 5), (12, 5)):
+        px(img, x, y, (96, 230, 140))
+    for x, colour in ((4, (200, 64, 56)), (8, (222, 170, 60)), (11, (90, 210, 120))):
+        rect(img, x, 8, x + 1, 8, colour)
+    rect(img, 3, 10, 12, 10, (40, 44, 48))
+    return img
+
+
+def dirt_spot_tex(rng):
+    """A patch of dirt on a floor for the broom: a few dark blots of grime, nothing around them (a cutout, 16 x 16)."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for _ in range(5):
+        cx, cy, radius = rng.randint(3, 12), rng.randint(3, 12), rng.randint(2, 4)
+        for y in range(16):
+            for x in range(16):
+                if (x - cx) ** 2 + (y - cy) ** 2 <= radius * radius + rng.randint(-2, 2):
+                    img.putpixel((x, y), rng.choice([(70, 62, 52), (88, 78, 64), (54, 48, 42)]) + (255,))
+    return img
+
+
+def manhole_lid_tex(rng):
+    """The emergency manhole's lid from above, 64 x 64: a round cast-iron lid with a raised grid in a square iron frame, rusted at the
+    seams, EMERGENCY EXIT stencilled in a worn yellow across a smooth band of it."""
+    img = Image.new("RGB", (64, 64), (58, 56, 54))
+    c, radius = 31.5, 28.5
+    for y in range(64):
+        for x in range(64):
+            d = ((x - c) ** 2 + (y - c) ** 2) ** 0.5
+            if d > radius + 1.5:                                   # the frame
+                v = 64 + rng.randint(-6, 6)
+                col = (v, v - 2, v - 4)
+                if min(x, y, 63 - x, 63 - y) == 0:
+                    col = (40, 38, 36)
+            elif d > radius:                                       # the seam round the lid
+                col = (34, 30, 28) if rng.random() < 0.7 else (92, 58, 36)
+            else:                                                  # the lid: a raised grid of squares
+                raised = (x // 4 + y // 4) % 2 == 0 and x % 4 and y % 4
+                v = (80 if raised else 52) + rng.randint(-5, 5)
+                if 21 <= y <= 40 and abs(x - c) < 24:              # the smooth cast band the words are stencilled on
+                    v = 46 + rng.randint(-3, 3)
+                col = (v, v - 3, v - 6)
+                if d > radius - 2:
+                    col = (70, 66, 62)
+                if rng.random() < 0.02:
+                    col = (104, 62, 38)                            # rust
+            img.putpixel((x, y), col)
+    paint = (196, 160, 52)
+    words = Image.new("RGB", (64, 64), (0, 0, 0))
+    for k, line in enumerate(("EMERGENCY", "EXIT")):
+        dart_text(words, (64 - dart_text_width(line)) // 2, 24 + k * 9, line, (255, 255, 255))
+    for y in range(64):
+        for x in range(64):
+            if words.getpixel((x, y))[0] and rng.random() > 0.08:  # worn: a little of the paint is gone
+                img.putpixel((x, y), tuple(max(0, v + rng.randint(-14, 8)) for v in paint))
+    return img
+
+
+def manhole_shaft_tex(rng, rungs):
+    """The inside of the manhole's shaft: dark damp concrete; with `rungs`, two iron rungs of the ladder going down."""
+    img = Image.new("RGB", (16, 16))
+    for y in range(16):
+        for x in range(16):
+            v = 34 + rng.randint(-6, 6) - y
+            img.putpixel((x, y), (v, v, v - 2))
+    if rungs:
+        for y in (4, 12):
+            for x in range(3, 13):
+                img.putpixel((x, y), (96, 70, 48) if rng.random() < 0.3 else (78, 76, 74))
+                img.putpixel((x, y + 1), (30, 28, 26))
+    return img
+
+
+def broom_tex(rng):
+    """Item: the broom of Chapter 2's third task, held like a tool: the handle from the lower left, the bristles at the far end."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for k in range(9):
+        px(img, 2 + k, 13 - k, (126, 90, 56, 255))
+        px(img, 3 + k, 13 - k, (96, 68, 42, 255))
+    straw = [(204, 176, 98, 255), (184, 152, 80, 255)]
+    for y in range(1, 7):
+        for x in range(10, 15):
+            if (x - 10) + (6 - y) <= 6:
+                px(img, x, y, straw[(x + y) % 2])
+    for x, y in ((9, 6), (10, 7), (9, 7), (10, 6)):
+        px(img, x, y, (70, 70, 74, 255))
+    return img
+
+
+def factory_glass_tex(rng):
+    """Chapter 2's window glass: almost clear with a cool tint, no frame at the edges, and a pale diagonal sheen. The sheen
+    runs along x - y = const, which wraps, so it goes on from one block to the next whichever way they are stacked."""
+    img = new((176, 206, 222), alpha=34)
+    for k in range(16):
+        px(img, k, k + 4, (240, 248, 252, 112))
+        px(img, k, k + 5, (232, 244, 250, 72))
+        px(img, k, k + 12, (226, 240, 248, 46))
+    return img
+
+
+def lab_glass_tex(rng):
+    """Laboratory glass: clear, a highlight, a tinted liquid in its lower part."""
+    img = new((196, 214, 220))
+    rect(img, 0, 9, 15, 15, (120, 182, 150))
+    for y in range(16):
+        px(img, 3, y, (236, 244, 246), 0.7)
+    return img
+
+
+def saline_bag_tex(rng):
+    """A drip's bag: clear plastic, the fluid in it, a printed label with blue lines."""
+    img = new((214, 226, 230))
+    noise(img, rng, 2)
+    rect(img, 0, 5, 15, 15, (196, 214, 222))
+    rect(img, 3, 7, 12, 12, (238, 240, 236))
+    for y in (8, 10):
+        for x in range(4, 12):
+            px(img, x, y, (70, 110, 170), 0.8)
+    for y in range(16):
+        px(img, 1, y, (244, 248, 250), 0.6)
+    return img
+
+
+def monitor_screen_tex(rng):
+    """A switched-off monitor: a black screen in a dark bezel, a grey sheen across it."""
+    img = new((28, 30, 34))
+    rect(img, 1, 1, 14, 14, (12, 13, 16))
+    for k in range(6):
+        px(img, 3 + k, 3 + k // 2, (60, 64, 72), 0.6)
+    return img
+
+
+def counter_screen_frames(rng, frames=16):
+    """The prologue's radiation counter: an amber readout on a dark screen, its digits and the bar under them
+    climbing frame after frame (3.4, 3.8 ... 9.4), the last third of the bar red. Only the top 16 x 8 of each frame is
+    shown, on the screen's face."""
+    amber, red, dim, ground = (255, 176, 48, 255), (232, 72, 40, 255), (62, 40, 18, 255), (24, 14, 8, 255)
+    out = []
+    for k in range(frames):
+        img = Image.new("RGBA", (16, 16), ground)
+        value = round(3.4 + 0.4 * k, 1)
+        whole, tenth = int(value), int(round(value * 10)) % 10
+        hundredth = (k * 7 + 3) % 10                        # the last digit flickers on its own
+        for x, ch in ((2, str(whole)), (8, str(tenth)), (12, str(hundredth))):
+            dart_text(img, x, 1, ch, amber)
+        img.putpixel((6, 5), amber)
+        lit = 1 + round(13 * k / (frames - 1))
+        for x in range(1, 15):
+            img.putpixel((x, 7), (red if x > 9 else amber) if x <= lit else dim)
+        out.append(img)
+    return out
+
+
+def recorder_top_frames(rng):
+    """The voice recorder from above, 9 x 16 of the frame (the box is 4 x 7 px): a silver grille at the top, a small
+    window, the red recording light (on in the first frame, off in the second) and two buttons."""
+    out = []
+    for on in (True, False):
+        img = Image.new("RGBA", (16, 16), (30, 32, 36, 255))
+        for y in range(1, 6):
+            for x in range(2, 7):
+                img.putpixel((x, y), (150, 154, 160, 255) if (x + y) % 2 else (96, 100, 108, 255))
+        for x in range(2, 7):
+            for y in (7, 8):
+                img.putpixel((x, y), (60, 90, 70, 255))
+        led = (255, 48, 36, 255) if on else (88, 22, 20, 255)
+        for x, y in ((4, 10), (4, 11)):
+            img.putpixel((x, y), led)
+        for x in (2, 3, 5, 6):
+            img.putpixel((x, 13), (120, 122, 128, 255))
+            img.putpixel((x, 14), (84, 86, 92, 255))
+        out.append(img)
+    return out
+
+
+def lab_coat_tex(rng):
+    """A white lab coat hung up: its collar, the line of its buttons, a pocket with a pen."""
+    img = melamine_tex(rng, (238, 240, 236))
+    for k in range(4):
+        px(img, 6 - k, k, (200, 204, 204), 0.9)
+        px(img, 9 + k, k, (200, 204, 204), 0.9)
+    for y in range(4, 16):
+        px(img, 8, y, (206, 208, 206), 0.8)
+    for y in (6, 9, 12):
+        px(img, 9, y, (180, 182, 184), 1.0)
+    rect(img, 2, 8, 5, 8, (200, 204, 204))
+    px(img, 3, 7, (40, 60, 150), 1.0)
+    return img
+
+
+
+
+# Level 5's chemical room: the four reagents, by code, and their colours.
+REAGENT_COLOURS = ((70, 130, 220), (222, 152, 40), (92, 190, 92), (164, 92, 214))
+
+
+def lab_screen_tex(rng):
+    """A lab computer's screen: green text on black, a cursor."""
+    img = new((8, 14, 10))
+    for y in range(2, 13, 2):
+        x = 2
+        while x < 13:
+            w = rng.randrange(1, 5)
+            if rng.random() < 0.8:
+                for xx in range(x, min(14, x + w)):
+                    px(img, xx, y, (90, 220, 120), 1.0)
+            x += w + 1
+    px(img, 2, 13, (150, 255, 170), 1.0)
+    return img
+
+
+def mixer_tank_tex(rng, reagent):
+    """A mixer tank's front: white steel round a window, the reagent's colour behind it (empty: dark)."""
+    img = new((214, 218, 216))
+    noise(img, rng, 2)
+    colour = REAGENT_COLOURS[reagent - 1] if reagent else (40, 44, 46)
+    for x in range(5, 11):
+        for y in range(2, 14):
+            px(img, x, y, colour if (reagent and y >= 5) else (40, 44, 46), 1.0)
+        px(img, x, 1, (150, 156, 160), 1.0)
+        px(img, x, 14, (150, 156, 160), 1.0)
+    for y in range(2, 14):
+        px(img, 4, y, (150, 156, 160), 1.0)
+        px(img, 11, y, (150, 156, 160), 1.0)
+    if reagent:
+        for y in range(5, 14, 3):
+            px(img, 6, y, tuple(min(255, c + 60) for c in colour), 0.8)
+    return img
+
+
+def mixer_front_tex(rng):
+    """The mixer's front: a round gauge, a red push button, a vent."""
+    img = powder_metal_tex(rng, (120, 126, 132))
+    for x in range(4, 12):
+        for y in range(2, 8):
+            if (x - 7.5) ** 2 + (y - 4.5) ** 2 <= 9:
+                px(img, x, y, (236, 236, 228), 1.0)
+    px(img, 8, 3, (20, 20, 20), 1.0)
+    px(img, 9, 4, (20, 20, 20), 1.0)
+    for x in range(6, 10):
+        for y in range(9, 13):
+            px(img, x, y, (200, 40, 36), 1.0)
+    px(img, 6, 9, (240, 110, 100), 1.0)
+    for x in range(2, 14, 2):
+        px(img, x, 14, (70, 74, 80), 1.0)
+    return img
+
+
+def alarm_frames(lit, frames=8):
+    """An alarm light's dome: dark red; lit, a bright band sweeping round it."""
+    out = []
+    for f in range(frames if lit else 1):
+        img = new((96, 20, 18) if not lit else (196, 30, 24))
+        if lit:
+            band = f * 16 // frames
+            for x in range(16):
+                d = min((x - band) % 16, (band - x) % 16)
+                if d < 4:
+                    for y in range(16):
+                        px(img, x, y, (255, 150, 120), 1.0 - d / 4)
+        out.append(img)
+    return out
+
+
+def hood_sash_tex(rng):
+    """A fume hood's sash: pale glass in a steel frame, a handle bar."""
+    img = new((176, 200, 206))
+    noise(img, rng, 2)
+    for i in range(16):
+        px(img, i, 0, (150, 156, 160), 1.0)
+        px(img, i, 15, (150, 156, 160), 1.0)
+        px(img, 0, i, (150, 156, 160), 1.0)
+        px(img, 15, i, (150, 156, 160), 1.0)
+        px(img, i, 12, (196, 200, 204), 1.0)
+    for k in range(4):
+        px(img, 3 + k, 3 + k, (220, 236, 240), 0.8)
+    return img
+
+
+def reagent_item_tex(rng, index):
+    """A reagent flask: a round-bottomed glass flask, its liquid the reagent's colour, a white code label."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    glass, outline = (214, 230, 236), (40, 46, 52)
+    colour = REAGENT_COLOURS[index]
+    for y in range(16):
+        for x in range(16):
+            neck = 6 <= x <= 9 and 1 <= y <= 6
+            body = (x - 7.5) ** 2 + (y - 10.5) ** 2 <= 20
+            if neck or body:
+                c = colour if (body and y >= 9) else glass
+                img.putpixel((x, y), c + (255,))
+    for y in range(16):
+        for x in range(16):
+            if img.getpixel((x, y))[3] == 0 and any(
+                    0 <= x + dx < 16 and 0 <= y + dy < 16 and img.getpixel((x + dx, y + dy))[3] == 255 and img.getpixel((x + dx, y + dy))[:3] != outline
+                    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1))):
+                img.putpixel((x, y), outline + (255,))
+    for x in range(5, 11):
+        img.putpixel((x, 11), (244, 244, 240, 255))
+    dart_text(img, (16 - dart_text_width(str(index + 1))) // 2 + 1, 10, str(index + 1), (30, 30, 34, 255))
+    return img
+
+
+
+def logbook_tex(rng, part):
+    """The logbook: ruled pages with handwriting (pages) or its dark red cloth cover."""
+    if part == "cover":
+        img = new((92, 30, 32))
+        noise(img, rng, 4)
+        return img
+    img = new((224, 222, 212))
+    noise(img, rng, 2)
+    for y in range(1, 16, 2):
+        for x in range(16):
+            px(img, x, y, (170, 182, 196), 0.5)                   # ruled lines
+        if y < 13:
+            for x in range(1, rng.randrange(6, 15)):
+                if rng.random() < 0.6:
+                    px(img, x, y - 1, (40, 46, 70), 0.7)          # entries, in ink
+    for y in range(16):
+        px(img, 8, y, (180, 176, 166), 0.7)                       # the spine's fold
+    return img
+
+
+def mug_tex(rng, part):
+    if part == "coffee":
+        img = new((48, 30, 20))
+        noise(img, rng, 3)
+        return img
+    img = new((222, 224, 226))
+    noise(img, rng, 2)
+    for x in range(16):
+        px(img, x, 5, (60, 100, 170), 0.9)                        # a blue stripe
+    return img
+
+
+def torch_tex(rng):
+    """The old flashlight: a yellow body, a black rubber head."""
+    img = new((206, 170, 52))
+    noise(img, rng, 3)
+    rect(img, 0, 0, 4, 15, (30, 30, 32))
+    return img
+
+
+def key_rack_tex(rng):
+    """A dark wooden board with small numbered tags; the hooks are separate."""
+    img = new((70, 50, 36))
+    noise(img, rng, 4)
+    for y in range(16):
+        if y % 4 == 0:
+            for x in range(16):
+                px(img, x, y, (56, 40, 28), 0.5)                  # grain
+    for x in (3, 5, 7, 9, 11):
+        px(img, x, 9, (214, 208, 190), 0.9)                       # the tags under the hooks
+    return img
+
+
+def shutter_tex(rng):
+    """Rolling shutter curtain: four galvanized steel slats, each lit on its rounded top and
+    shaded into the groove below, with rust creeping from the joints and grime."""
+    img = new((138, 142, 145))
+    for slat in range(4):
+        y0 = slat * 4
+        shades = (24, 10, -4, -34)                                  # top edge, face, lower face, groove
+        for dy, shade in enumerate(shades):
+            for x in range(16):
+                e = shade + rng.uniform(-4, 4)
+                r, g, b, a = img.getpixel((x, y0 + dy))
+                img.putpixel((x, y0 + dy), (T.clamp(r + e), T.clamp(g + e), T.clamp(b + e), a))
+        for _ in range(rng.randint(1, 3)):                           # rust bleeding out of the joint
+            x = rng.randint(0, 15)
+            px(img, x, y0 + 3, (112, 70, 44))
+            if rng.random() < 0.6:
+                px(img, x, (y0 + 4) % 16, (126, 86, 58))
+    T.blob(img, rng, (96, 92, 84), 4, 0.3)                           # grime
+    return img
+
+
+# --- Level 5's drain (layer 3) and the director's office ------------------------------------
+
+DRAIN_RUST = (122, 76, 44)
+
+
+def rusty_steel_tex(rng, base=(92, 94, 92)):
+    """Old steel, painted once: rust in blooms and runs, grime."""
+    img = new(base)
+    noise(img, rng, 5)
+    for _ in range(3):
+        T.blob(img, rng, DRAIN_RUST, rng.randrange(2, 4), 0.55)
+    for _ in range(3):
+        x = rng.randrange(16)
+        for y in range(rng.randrange(3, 12)):
+            px(img, x, y, (104, 66, 40), 0.4)
+    speckle(img, rng, 10, (60, 58, 54), 0.6)
+    return img
+
+
+def ladder_tex(rng):
+    """The drain's ladder: two rusty steel rails and five rungs, on nothing."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+    for y in range(16):
+        for x in (1, 2, 13, 14):
+            px(img, x, y, (96, 92, 86, 255))
+    for y0 in (1, 4, 7, 10, 13):
+        for x in range(3, 13):
+            px(img, x, y0, (112, 106, 98, 255))
+            px(img, x, y0 + 1, (70, 66, 60, 255))
+    for _ in range(14):                                              # rust where the hands go
+        x, y = rng.randrange(16), rng.randrange(16)
+        if img.getpixel((x, y))[3]:
+            px(img, x, y, DRAIN_RUST + (255,), 0.7)
+    return img
+
+
+def bulb_tex(rng, lit):
+    """A caged lamp's bulb behind its glass: warm and yellowed when lit."""
+    img = new((255, 214, 140) if lit else (108, 96, 78))
+    noise(img, rng, 3)
+    for x in range(16):
+        px(img, x, 0, (200, 150, 80) if lit else (70, 62, 50), 0.6)
+    return img
+
+
+def pump_paint_tex(rng):
+    """Industrial green paint on cast iron, chipped to the metal and rusting there."""
+    img = new((58, 92, 74))
+    noise(img, rng, 4)
+    for _ in range(5):
+        x, y = rng.randrange(16), rng.randrange(16)
+        px(img, x, y, (120, 122, 118), 0.9)
+        px(img, x + 1, y, DRAIN_RUST, 0.8)
+    T.blob(img, rng, (40, 60, 48), 4, 0.35)                          # oil and grime
+    return img
+
+
+def pump_fins_tex(rng):
+    """The motor's cooling fins: ribs along it, green paint gone dull."""
+    img = pump_paint_tex(rng)
+    for x in range(0, 16, 2):
+        for y in range(16):
+            px(img, x, y, (34, 52, 42), 0.6)
+    return img
+
+
+def sluice_tex(rng):
+    """A sluice gate's heavy plate: rusted steel, rows of rivets top and bottom, a seam down the middle."""
+    img = rusty_steel_tex(rng, (84, 86, 84))
+    for x in range(1, 16, 3):
+        for y in (1, 14):
+            px(img, x, y, (140, 136, 128), 0.9)
+            px(img, x, y + 1, (40, 38, 36), 0.6)
+    for y in range(16):
+        px(img, 8, y, (48, 46, 42), 0.7)
+    return img
+
+
+def gauge_tex(rng):
+    """A pressure gauge's face: white dial, black ticks, the red needle near the top of its range."""
+    img = new((30, 30, 32))
+    for x in range(16):
+        for y in range(16):
+            d = math.hypot(x - 7.5, y - 7.5)
+            if d < 6.5:
+                px(img, x, y, (226, 224, 214))
+            elif d < 7.5:
+                px(img, x, y, (150, 152, 156))
+    for a in range(0, 270, 30):                                      # ticks
+        t = math.radians(135 + a)
+        px(img, round(7.5 + 5 * math.cos(t)), round(7.5 + 5 * math.sin(t)), (20, 20, 20))
+    for k in range(5):                                               # the needle
+        t = math.radians(330)
+        px(img, round(7.5 + k * math.cos(t)), round(7.5 + k * math.sin(t)), (200, 40, 30))
+    return img
+
+
+def mattress_tex(rng):
+    """An old striped mattress, faded and stained, rags over it."""
+    img = new((198, 194, 178))
+    for x in range(0, 16, 3):
+        for y in range(16):
+            px(img, x, y, (96, 112, 140), 0.6)
+    noise(img, rng, 5)
+    for _ in range(3):
+        T.blob(img, rng, (122, 98, 66), rng.randrange(2, 5), 0.5)
+    return img
+
+
+def rags_tex(rng):
+    img = new((96, 88, 78))
+    noise(img, rng, 7)
+    T.blob(img, rng, (70, 64, 58), 4, 0.4)
+    return img
+
+
+def tin_tex(rng):
+    """A tin can's side: tinplate with a faded red label round its middle."""
+    img = new((168, 170, 172))
+    noise(img, rng, 4)
+    rect(img, 0, 4, 15, 11, (150, 60, 50))
+    noise(img, rng, 3)
+    for _ in range(4):
+        px(img, rng.randrange(16), rng.randrange(16), DRAIN_RUST, 0.7)
+    return img
+
+
+def leather_tex(rng):
+    """Black leather, a soft sheen on its creases."""
+    img = new((28, 28, 30))
+    noise(img, rng, 3)
+    for _ in range(5):
+        x, y = rng.randrange(16), rng.randrange(16)
+        for k in range(rng.randrange(2, 5)):
+            px(img, x + k, y, (62, 62, 66), 0.5)
+    return img
+
+
+def black_glass_tex(rng):
+    """Smoked black glass: dark, a pale streak of reflection across it."""
+    img = new((22, 24, 28))
+    noise(img, rng, 1)
+    for k in range(16):
+        px(img, k, (k + 5) % 16, (90, 96, 104), 0.35)
+        px(img, k, (k + 6) % 16, (70, 74, 80), 0.25)
+    return img
+
+
+def lacquer_tex(rng):
+    """Black lacquered doors, a thin steel pull along each."""
+    img = new((24, 24, 26))
+    noise(img, rng, 1)
+    for x in range(16):
+        px(img, x, 2, (150, 154, 160), 0.8)
+    for y in range(16):
+        px(img, 0, y, (12, 12, 14), 0.8)
+    return img
+
+
+def paper_edges_tex(rng):
+    """The side of a stack of paper: thin lines of sheets."""
+    img = new((226, 224, 214))
+    for y in range(0, 16, 2):
+        for x in range(16):
+            px(img, x, y, (180, 176, 164), 0.5)
+    noise(img, rng, 2)
+    return img
+
+
+def light_tex(rng, part):
+    if part == "housing":
+        img = new((196, 196, 190))
+        noise(img, rng, 4)
+        T.blob(img, rng, (150, 140, 110), 5, 0.35)                # nicotine-yellowed enamel
+        speckle(img, rng, 4, (90, 88, 84), 0.7)                   # dead insects
+        return img
+    lit = part == "tubes_on"
+    img = new((246, 248, 244) if lit else (146, 148, 146))
+    for x in range(16):
+        for y in range(16):
+            edge = abs(y - 7.5) / 8
+            c = mix((255, 255, 252), (222, 226, 224), edge) if lit else mix((156, 158, 156), (118, 120, 118), edge)
+            img.putpixel((x, y), c + (255,))
+    if not lit:
+        rect(img, 0, 0, 1, 15, (70, 66, 60))                      # blackened tube ends
+        rect(img, 14, 0, 15, 15, (70, 66, 60))
+    return img
+
+
+# =====================================================================================
+# Models
+
+def tex_ref(name):
+    return f"{NS}:block/{name}"
+
+
+def element(frm, to, texture, faces=SIDES, shade=True, uv_rotation=None):
+    """A box; each listed face shows `texture` (a key in the model's textures, without '#')."""
+    e = {"from": list(frm), "to": list(to), "faces": {}}
+    for f in faces:
+        face = {"texture": f"#{texture}"}
+        if uv_rotation and f in ("up", "down"):
+            face["rotation"] = uv_rotation
+        e["faces"][f] = face
+    if not shade:
+        e["shade"] = False
+    return e
+
+
+def model(textures, elements, parent="minecraft:block/block", ao=True):
+    m = {"parent": parent, "textures": {k: tex_ref(v) for k, v in textures.items()}, "elements": elements}
+    m["textures"].setdefault("particle", next(iter(m["textures"].values())))
+    if not ao:
+        m["ambientocclusion"] = False
+    return m
+
+
+def cube_all(texture):
+    return {"parent": "minecraft:block/cube_all", "textures": {"all": tex_ref(texture)}}
+
+
+def cube(up, down, side, north=None):
+    return {"parent": "minecraft:block/cube", "textures": {
+        "up": tex_ref(up), "down": tex_ref(down), "north": tex_ref(north or side), "south": tex_ref(side),
+        "east": tex_ref(side), "west": tex_ref(side), "particle": tex_ref(side)}}
+
+
+# The chalk arrow (layer 3): CHALK_COLS blocks wide, CHALK_PX pixels a block.
+CHALK_COLS, CHALK_PX = 3, 64
+
+
+def chalk_arrow_image(rng):
+    """A chalk arrow pointing left, about one and a half blocks long, drawn in a hurry: each stroke gone over twice,
+    the chalk grainy with gaps, thinner at its ends. Transparent round it."""
+    w, h = CHALK_COLS * CHALK_PX, CHALK_PX
+    img = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    chalk = (236, 233, 224)
+    grain = [rng.random() < 0.18 for _ in range(97)]                        # pits in the wall the chalk skips
+
+    def stroke(x0, y0, x1, y1, width):
+        length = math.hypot(x1 - x0, y1 - y0)
+        steps = int(length * 2)
+        bend = rng.uniform(-1.5, 1.5)
+        for i in range(steps + 1):
+            t = i / steps
+            # A hand's line: a slight bow, a little shake, thinner where the chalk lands and lifts.
+            nx, ny = -(y1 - y0) / length, (x1 - x0) / length
+            off = bend * math.sin(math.pi * t) + rng.uniform(-0.3, 0.3)
+            cx, cy = x0 + (x1 - x0) * t + nx * off, y0 + (y1 - y0) * t + ny * off
+            r = width * (0.55 + 0.45 * math.sin(math.pi * min(1.0, 0.15 + t * 0.85)))
+            for yy in range(int(cy - r) - 1, int(cy + r) + 2):
+                for xx in range(int(cx - r) - 1, int(cx + r) + 2):
+                    if not (0 <= xx < w and 0 <= yy < h) or math.hypot(xx - cx, yy - cy) > r:
+                        continue
+                    if rng.random() < 0.42 or grain[(xx * 7 + yy * 3) % len(grain)]:
+                        continue                                            # the wall's grain shows through
+                    alpha = rng.randint(110, 225)
+                    old = img.getpixel((xx, yy))
+                    if old[3] < alpha:
+                        shade = rng.randint(-14, 6)
+                        img.putpixel((xx, yy), tuple(max(0, min(255, c + shade)) for c in chalk) + (alpha,))
+
+    tip_x, mid_y = w // 2 - 48, h // 2
+    tail_x = w // 2 + 48
+    for _ in range(2):
+        j = lambda: rng.uniform(-1.5, 1.5)                                  # noqa: E731
+        stroke(tail_x + j(), mid_y + j(), tip_x + j(), mid_y + j(), 3.2)
+        stroke(tip_x + j(), mid_y + j(), tip_x + 26 + j(), mid_y - 20 + j(), 3.0)
+        stroke(tip_x + j(), mid_y + j(), tip_x + 26 + j(), mid_y + 20 + j(), 3.0)
+    return img
+
+
+def plane(texture):
+    """A flat picture lying on the floor (y = 0.1), seen from above. Turned onto walls and
+    ceilings by the blockstate (same rotations as StainBlock's shapes)."""
+    return {"parent": "minecraft:block/block", "ambientocclusion": False,
+            "textures": {"t": tex_ref(texture), "particle": tex_ref(texture)},
+            "elements": [{"from": [0, 0.1, 0], "to": [16, 0.1, 16], "faces": {"up": {"texture": "#t"}}}]}
+
+
+# Rotations that turn the floor picture to face each way (the mark faces away from its surface).
+PLANE_ROTATION = {"up": {}, "down": {"x": 180}, "north": {"x": 90}, "south": {"x": 90, "y": 180},
+                  "east": {"x": 90, "y": 90}, "west": {"x": 90, "y": 270}}
+
+
+def door_variants(prefix):
+    """A door's blockstate variants, laid out like vanilla's (checked against iron_door.json)."""
+    base = {"east": 0, "south": 90, "west": 180, "north": 270}
+    out = {}
+    for facing, y in base.items():
+        for half, part in (("lower", "bottom"), ("upper", "top")):
+            for hinge in ("left", "right"):
+                for opened in ("false", "true"):
+                    rot = y + ((90 if hinge == "left" else 270) if opened == "true" else 0)
+                    v = {"model": f"{prefix}_{part}_{hinge}{'_open' if opened == 'true' else ''}"}
+                    if rot % 360:
+                        v["y"] = rot % 360
+                    out[f"facing={facing},half={half},hinge={hinge},open={opened}"] = v
+    return out
+
+
+def horizontal_blockstate(model_name):
+    variants = {}
+    for facing, y in HORIZONTAL.items():
+        v = {"model": f"{NS}:block/{model_name}"}
+        if y:
+            v["y"] = y
+        variants[f"facing={facing}"] = v
+    return {"variants": variants}
+
+
+def connecting_blockstate(name, sides, extra_parts=()):
+    parts = [{"apply": {"model": f"{NS}:block/{name}_core"}}]
+    for side in sides:
+        parts.append({"when": {side: "true"}, "apply": {"model": f"{NS}:block/{name}_{side}"}})
+    parts += list(extra_parts)
+    return {"multipart": parts}
+
+
+# =====================================================================================
+# Blocks
+
+GLOW = G.PBR
+
+BLOCK_ITEM_DISPLAY_LIGHT = {
+    "gui": {"rotation": [-60, 30, 0], "translation": [0, -3, 0], "scale": [0.7, 0.7, 0.7]},
+    "ground": {"rotation": [0, 0, 0], "translation": [0, 3, 0], "scale": [0.4, 0.4, 0.4]},
+    "fixed": {"rotation": [-90, 0, 0], "translation": [0, 0, -6], "scale": [0.6, 0.6, 0.6]},
+    "thirdperson_righthand": {"rotation": [75, 45, 0], "translation": [0, 2.5, 0], "scale": [0.375, 0.375, 0.375]},
+    "firstperson_righthand": {"rotation": [0, 45, 0], "translation": [0, 0, 0], "scale": [0.4, 0.4, 0.4]},
+}
+
+
+# --- Chapter 2 Level 2's catacombs: dark damp brick, flagstones, the vault, the later bricking-up -------------
+
+BRICK = (88, 76, 66)
+BRICK_MORTAR = (40, 36, 32)
+BRICKED = (118, 70, 54)
+BRICKED_MORTAR = (128, 118, 104)
+FLAG = (82, 78, 72)
+FLAG_JOINT = (30, 28, 26)
+SALTPETRE = (196, 200, 188)
+SLIME = (46, 62, 44)
+
+
+def shade(c, f):
+    return (T.clamp(c[0] * f), T.clamp(c[1] * f), T.clamp(c[2] * f))
+
+
+def brick_course(img, rng, base, mortar, brick_w=8, row_h=4, jitter=0.16, lean=1.0):
+    """Courses of bricks: each brick its own tone, a lit top edge, the mortar recessed, every other course shifted by half a brick."""
+    tones = {}
+    for y in range(16):
+        row, in_row = divmod(y, row_h)
+        shift = (brick_w // 2) if row % 2 else 0
+        for x in range(16):
+            col, in_col = divmod((x - shift) % 16, brick_w)
+            if in_row == row_h - 1 or in_col == brick_w - 1:
+                px(img, x, y, mortar)
+                continue
+            tone = tones.setdefault((row, col), 1 + rng.uniform(-jitter, jitter))
+            edge = 1.10 if in_row == 0 else 0.94 if in_row == row_h - 2 else 1.0
+            px(img, x, y, shade(base, tone * edge * lean))
+    noise(img, rng, 5)
+
+
+def catacomb_brick_tex(rng, kind):
+    img = new(BRICK)
+    brick_course(img, rng, BRICK, BRICK_MORTAR)
+    if kind == "cracked":
+        T.crack(img, rng, (22, 20, 18), 9, 0.9, start=(rng.randint(2, 6), 0))
+        T.crack(img, rng, (22, 20, 18), 6, 0.9, start=(rng.randint(9, 13), rng.randint(6, 9)))
+        px(img, rng.randint(1, 13), rng.randint(0, 2), BRICK_MORTAR)
+    elif kind == "damp":
+        brick_course(img, rng, shade(BRICK, 0.78), shade(BRICK_MORTAR, 0.9), jitter=0.12)
+        T.streaks(img, rng, 4, (28, 38, 34), 0.45)
+        speckle(img, rng, 16, SALTPETRE, 0.55)
+    elif kind == "tide":
+        for y in range(16):
+            for x in range(16):
+                r, g, b, a = img.getpixel((x, y))
+                if y >= 8:
+                    f = 0.55 - (y - 8) * 0.02
+                    img.putpixel((x, y), (T.clamp(r * f), T.clamp(g * f * 1.04), T.clamp(b * f * 0.96), a))
+        rect(img, 0, 7, 15, 7, (28, 30, 24), 0.8)
+        for _ in range(3):
+            T.blob(img, rng, SLIME, rng.uniform(1.5, 2.5), 0.55, cy=rng.randint(10, 15))
+        T.streaks(img, rng, 3, (26, 36, 28), 0.5, top_to_bottom=False)
+    return img
+
+
+def catacomb_flagstone_tex(rng, cracked):
+    img = new(FLAG)
+    for sy in range(2):
+        for sx in range(2):
+            tone = 1 + rng.uniform(-0.14, 0.14)
+            for y in range(8):
+                for x in range(8):
+                    px(img, sx * 8 + x, sy * 8 + y, shade(FLAG, tone * (1.08 if x == 0 or y == 0 else 1.0)))
+    for i in range(16):
+        for j in (7, 15):
+            px(img, i, j, FLAG_JOINT)
+            px(img, j, i, FLAG_JOINT)
+    noise(img, rng, 7)
+    speckle(img, rng, 14, (38, 36, 32), 0.6)
+    for _ in range(2):
+        T.blob(img, rng, (30, 36, 30), rng.uniform(1.5, 2.5), 0.4)
+    if cracked:
+        T.crack(img, rng, (20, 19, 18), 10, 0.95, start=(rng.randint(1, 5), rng.randint(1, 5)))
+    return img
+
+
+def catacomb_vault_tex(rng):
+    """The vault's soffit: the brick laid end-on in short courses, darker, soot over it and a damp ring."""
+    img = new(BRICK)
+    brick_course(img, rng, shade(BRICK, 0.68), shade(BRICK_MORTAR, 0.9), brick_w=4, row_h=4, jitter=0.14)
+    for _ in range(3):
+        T.blob(img, rng, (18, 16, 14), rng.uniform(2, 3.5), 0.4)
+    T.blob(img, rng, (44, 56, 48), 2.5, 0.35)
+    speckle(img, rng, 8, SALTPETRE, 0.35)
+    return img
+
+
+def catacomb_bricked_tex(rng):
+    """A later fill in an old arch: redder, rougher brick under smeared pale mortar."""
+    img = new(BRICKED)
+    brick_course(img, rng, BRICKED, BRICKED_MORTAR, jitter=0.2)
+    for _ in range(5):
+        T.blob(img, rng, BRICKED_MORTAR, rng.uniform(1, 2), 0.5)
+    T.streaks(img, rng, 3, (30, 24, 22), 0.4)
+    noise(img, rng, 8)
+    return img
+
+
+def cable_run_tex(rng):
+    img = new((24, 24, 26))
+    for x in range(16):
+        if x % 5 == 2:
+            for y in range(16):
+                px(img, x, y, (70, 70, 74), 0.7)
+    noise(img, rng, 3)
+    return img
+
+
+# Chapter 2 Level 2's lamps and decoration (phase 8).
+LAMP_TINTS = {"warm": (255, 196, 122), "amber": (255, 154, 46), "cold": (191, 224, 255), "red": (255, 64, 48), "white": (244, 244, 238)}
+
+
+def tint_bulb_tex(rng, color, lit):
+    """A caged lamp's bulb in a tinted glass: bright and saturated lit, a dull darker glass off."""
+    base = color if lit else tuple(int(c * 0.34 + 22) for c in color)
+    img = new(base)
+    noise(img, rng, 3)
+    for x in range(16):
+        px(img, x, 0, shade(base, 0.78), 0.6)
+    if lit:                                              # a hot core
+        rect(img, 5, 5, 10, 10, mix(color, (255, 255, 255), 0.35), 0.55)
+    return img
+
+
+def rubble_tex(rng, pieces):
+    """Broken brick and mortar crumbs: the catacomb brick's colours in chunks."""
+    img = new(shade(BRICK_MORTAR, 1.15))
+    noise(img, rng, 6)
+    for _ in range(pieces):
+        w, h = rng.randint(2, 5), rng.randint(2, 4)
+        x0, y0 = rng.randint(0, 16 - w), rng.randint(0, 16 - h)
+        tone = 1 + rng.uniform(-0.2, 0.2)
+        for y in range(y0, y0 + h):
+            for x in range(x0, x0 + w):
+                px(img, x, y, shade(BRICK, tone * (1.12 if y == y0 else 0.9 if y == y0 + h - 1 else 1.0)))
+    speckle(img, rng, 10, SALTPETRE, 0.4)
+    return img
+
+
+def rust_stain_tex(rng, i):
+    """A rust stain on a wall: an orange-brown patch with runs down from it, fading out (4 pictures)."""
+    img = Image.new("RGBA", (16, 16), (0, 0, 0, 0))
+
+    def put(x, y, c, a):
+        if 0 <= x < 16 and 0 <= y < 16:
+            old = img.getpixel((x, y))
+            img.putpixel((x, y), tuple(c) + (max(old[3], a),))
+
+    cx, cy = rng.uniform(5, 11), rng.uniform(3, 8)
+    rx, ry = rng.uniform(2, 4.5), rng.uniform(1.5, 3.5)
+    for y in range(16):
+        for x in range(16):
+            d = math.hypot((x - cx) / rx, (y - cy) / ry)
+            if d < 1.0:
+                tone = rng.uniform(0.8, 1.15)
+                put(x, y, (T.clamp(128 * tone), T.clamp(70 * tone), T.clamp(34 * tone)), int(210 * (1 - d * 0.5)))
+    for _ in range(2 + i % 3):                           # the runs
+        x = int(cx + rng.uniform(-rx, rx))
+        for y in range(int(cy), 16):
+            fade = 1 - (y - cy) / 14
+            if rng.random() < 0.9 and fade > 0:
+                put(x, y, (112, 62, 30), int(170 * fade))
+            if rng.random() < 0.15:
+                x = max(0, min(15, x + rng.choice([-1, 1])))
+    return img
+
+
+class Assets:
+    """Everything one run writes, collected first so it can be checked and then written at once."""
+
+    def __init__(self):
+        self.textures = {}       # name -> (image, material or rule, tiles)
+        self.models = {}         # block model name -> json
+        self.items = {}          # block id -> item model json
+        self.blockstates = {}    # block id -> json
+        self.names = {}          # block id -> English name
+        self.item_textures = {}  # item texture name -> image (textures/item/)
+        self.animated = {}       # block texture name -> ([square frames], ticks per frame); no PBR maps
+        self.loot_doors = set()  # door block ids: they drop from their lower half only
+
+    def texture(self, name, img, material, tiles=True):
+        self.textures[name] = (img, material, tiles)
+
+    def block(self, block_id, name, blockstate, item):
+        self.names[block_id] = name
+        self.blockstates[block_id] = blockstate
+        self.items[block_id] = item
+
+
+def lit_tubes(x, y, c):
+    if pbr.luminance(c) > 0.93:
+        return T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["TUBE_GLOW"])
+    return T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"])
+
+
+def build():
+    a = Assets()
+    r = rng_for
+
+    # --- Fluorescent light: a shallow housing, a lip each side, two tubes -----------------
+    a.texture("fluorescent_light_housing", light_tex(r("housing"), "housing"), T.PAINTED_METAL)
+    a.texture("fluorescent_light_tubes_on", light_tex(r("on"), "tubes_on"), lit_tubes)
+    a.texture("fluorescent_light_tubes_off", light_tex(r("off"), "tubes_off"), T.PLASTIC.but(smoothness=0.6, relief=0.2))
+    for state in ("on", "off"):
+        a.models[f"fluorescent_light_{state}"] = model(
+            {"housing": "fluorescent_light_housing", "tubes": f"fluorescent_light_tubes_{state}"},
+            [element((0, 13, 3), (16, 16, 13), "housing"),
+             element((0, 12, 3), (16, 13, 4), "housing"),
+             element((0, 12, 12), (16, 13, 13), "housing"),
+             element((0, 12, 5), (16, 13, 7), "tubes", shade=state == "off"),
+             element((0, 12, 9), (16, 13, 11), "tubes", shade=state == "off")])
+    variants = {}
+    for facing, (x_rot, y_by_axis) in {
+            "down": (0, {"x": 0, "z": 90}), "up": (180, {"x": 0, "z": 90}),
+            "north": (270, {"x": 0, "z": 0}), "east": (270, {"x": 90, "z": 90}),
+            "south": (270, {"x": 180, "z": 180}), "west": (270, {"x": 270, "z": 270})}.items():
+        for axis, y_rot in y_by_axis.items():
+            for lit in ("true", "false"):
+                v = {"model": f"{NS}:block/fluorescent_light_{'on' if lit == 'true' else 'off'}"}
+                if x_rot:
+                    v["x"] = x_rot
+                if y_rot:
+                    v["y"] = y_rot
+                variants[f"facing={facing},axis={axis},lit={lit}"] = v
+    a.block("fluorescent_light", "Fluorescent Light", {"variants": variants},
+            {"parent": f"{NS}:block/fluorescent_light_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+
+    # --- Warm lamp: Level 4's brass ceiling light, a frosted glass under a round of brass ---
+    a.texture("warm_lamp_frame", plastic_tex(r("lamp_frame"), (172, 134, 68)), T.STEEL.but(smoothness=0.7, metal=231, relief=0.1))
+    a.texture("warm_lamp_on", plastic_tex(r("lamp_on"), (255, 226, 170)),
+              T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    a.texture("warm_lamp_off", plastic_tex(r("lamp_off"), (104, 92, 72)), T.PLASTIC.but(smoothness=0.6, relief=0.2))
+    for state in ("on", "off"):
+        a.models[f"warm_lamp_{state}"] = model(
+            {"frame": "warm_lamp_frame", "glass": f"warm_lamp_{state}"},
+            [element((4, 15, 4), (12, 16, 12), "frame"),
+             element((5, 13, 5), (11, 15, 11), "glass", shade=state == "off")])
+    a.block("warm_lamp", "Warm Lamp",
+            {"variants": {f"lit={lit}": {"model": f"{NS}:block/warm_lamp_{'on' if lit == 'true' else 'off'}"} for lit in ("true", "false")}},
+            {"parent": f"{NS}:block/warm_lamp_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+
+    # --- Pump beacon: Chapter 2 Level 2's amber warning light, a big caged dome (on the housing and two posts) ---------
+    a.texture("pump_beacon_frame", plastic_tex(r("beacon_frame"), (62, 62, 66)), T.STEEL.but(smoothness=0.5, metal=200, relief=0.2))
+    a.texture("pump_beacon_on", plastic_tex(r("beacon_on"), (255, 176, 40)),
+              T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    a.texture("pump_beacon_off", plastic_tex(r("beacon_off"), (112, 70, 22)), T.PLASTIC.but(smoothness=0.6, relief=0.2))
+    for state in ("on", "off"):
+        a.models[f"pump_beacon_{state}"] = model(
+            {"frame": "pump_beacon_frame", "glass": f"pump_beacon_{state}"},
+            [element((1, 0, 1), (15, 2, 15), "frame"),
+             element((3, 2, 3), (13, 11, 13), "glass", shade=state == "off"),
+             element((2, 2, 2), (3, 12, 3), "frame"), element((13, 2, 2), (14, 12, 3), "frame"),
+             element((2, 2, 13), (3, 12, 14), "frame"), element((13, 2, 13), (14, 12, 14), "frame"),
+             element((2, 11, 2), (14, 12, 3), "frame"), element((2, 11, 13), (14, 12, 14), "frame"),
+             element((2, 11, 3), (3, 12, 13), "frame"), element((13, 11, 3), (14, 12, 13), "frame"),
+             element((5, 12, 5), (11, 13, 11), "frame")])
+    a.block("pump_beacon", "Pump Beacon",
+            {"variants": {f"lit={lit}": {"model": f"{NS}:block/pump_beacon_{'on' if lit == 'true' else 'off'}"} for lit in ("true", "false")}},
+            {"parent": f"{NS}:block/pump_beacon_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+
+    # --- Trap breaker: Chapter 2 Level 2's wall box with a lever and a lamp, one per Guard trap (phase 5) -------------
+    a.texture("trap_breaker_plate", plastic_tex(r("trap_plate"), (46, 48, 50)), T.PAINTED_METAL)
+    a.texture("trap_breaker_metal", plastic_tex(r("trap_metal"), (126, 128, 132)), T.STEEL.but(smoothness=0.5, metal=255, relief=0.2))
+    a.texture("trap_breaker_handle", plastic_tex(r("trap_handle"), (196, 36, 28)), T.PLASTIC.but(smoothness=0.6, relief=0.2))
+    a.texture("trap_lamp_off", plastic_tex(r("trap_lamp_off"), (58, 50, 38)), T.PLASTIC.but(smoothness=0.6, relief=0.2))
+    a.texture("trap_lamp_amber", plastic_tex(r("trap_lamp_amber"), (255, 176, 40)),
+              T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    a.texture("trap_lamp_green", plastic_tex(r("trap_lamp_green"), (70, 255, 110)),
+              T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    box_textures = {"p": "trap_breaker_plate", "m": "trap_breaker_metal", "h": "trap_breaker_handle"}
+    for state, lever_up, lamp in (("spent", True, "off"), ("dim", False, "off"), ("charging", False, "amber"), ("armed", False, "green")):
+        lever = ([element((7, 6, 11), (9, 12, 15), "m"), element((6, 11, 10), (10, 13, 12), "h")] if lever_up
+                 else [element((7, 2, 11), (9, 6, 15), "m"), element((6, 1, 10), (10, 3, 12), "h")])
+        a.models[f"trap_breaker_{state}"] = model(
+            {**box_textures, "l": f"trap_lamp_{lamp}"},
+            [element((3, 0, 15), (13, 16, 16), "p"), element((5, 12.8, 14), (11, 15.2, 15), "l", shade=lamp == "off")] + lever)
+    a.block("trap_breaker", "Trap Breaker", {"variants": {
+        f"facing={f},state={s}": {"model": f"{NS}:block/trap_breaker_{s}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for s in ("spent", "dim", "charging", "armed")}},
+        {"parent": f"{NS}:block/trap_breaker_armed"})
+
+    # --- Suite bed: Level 4's, walnut frame and burgundy cover, in two blocks ---------------
+    a.texture("suite_bed_frame", plastic_tex(r("bed_frame"), (58, 38, 26)), T.PLASTIC.but(smoothness=0.5, relief=0.3))
+    a.texture("suite_bed_cover", plastic_tex(r("bed_cover"), (92, 26, 38), "fabric"), T.PLASTIC.but(smoothness=0.08, relief=0.3))
+    a.texture("suite_bed_pillow", plastic_tex(r("bed_pillow"), (232, 222, 200), "fabric"), T.PLASTIC.but(smoothness=0.08, relief=0.3))
+    bed = {"f": "suite_bed_frame", "c": "suite_bed_cover", "p": "suite_bed_pillow"}
+    a.models["suite_bed_head"] = model(bed, [
+        element((0, 2, 2), (16, 5, 16), "f"), element((0, 5, 2), (16, 9, 16), "p"),
+        element((0, 9, 10), (16, 10, 16), "c"), element((2, 9, 3), (14, 11, 9), "p"),
+        element((0, 0, 0), (16, 15, 2), "f")])
+    a.models["suite_bed_foot"] = model(bed, [
+        element((0, 2, 0), (16, 5, 14), "f"), element((0, 5, 0), (16, 10, 14), "c"),
+        element((0, 0, 14), (16, 8, 16), "f")])
+    variants = {}
+    for facing, y_rot in {"north": 0, "east": 90, "south": 180, "west": 270}.items():
+        for head, part in (("true", "head"), ("false", "foot")):
+            variants[f"facing={facing},head={head}"] = {"model": f"{NS}:block/suite_bed_{part}", **({"y": y_rot} if y_rot else {})}
+    a.block("suite_bed", "Bed", {"variants": variants}, {"parent": f"{NS}:block/suite_bed_foot"})
+
+    # --- Floor props ------------------------------------------------------------------
+    a.texture("cardboard_box_top", T.cardboard_tex(r("box_top"), "top"), T.CARDBOARD)
+    a.texture("cardboard_box_side", T.cardboard_tex(r("box_side"), "side"),
+              lambda x, y, c: T.PAPER if T.near(c, (220, 216, 204), 20) else T.CARDBOARD)
+    a.models["cardboard_box"] = cube("cardboard_box_top", "cardboard_box_top", "cardboard_box_side")
+    a.block("cardboard_box", "Cardboard Box", horizontal_blockstate("cardboard_box"), {"parent": f"{NS}:block/cardboard_box"})
+
+    a.texture("traffic_cone", T.cone_tex(r("cone")),
+              lambda x, y, c: T.PLASTIC.but(smoothness=0.8) if T.near(c, (236, 236, 228), 24) else T.PLASTIC)
+    a.models["traffic_cone"] = model({"t": "traffic_cone"}, [
+        element((3, 0, 3), (13, 1, 13), "t"), element((5, 1, 5), (11, 5, 11), "t"),
+        element((6, 5, 6), (10, 9, 10), "t"), element((7, 9, 7), (9, 13, 9), "t")])
+    a.block("traffic_cone", "Traffic Cone", horizontal_blockstate("traffic_cone"), {"parent": f"{NS}:block/traffic_cone"})
+
+    def extinguisher_material(x, y, c):
+        if y <= 1:
+            return T.STEEL
+        return T.PAPER if T.near(c, (230, 226, 210), 24) else T.PAINTED_METAL.but(smoothness=0.75, relief=0.1)
+    a.texture("fire_extinguisher", T.extinguisher_tex(r("ext")), extinguisher_material)
+    a.texture("fire_extinguisher_hose", new((24, 24, 26)), T.PLASTIC.but(smoothness=0.3, relief=0.0))
+    a.models["fire_extinguisher"] = model({"t": "fire_extinguisher", "h": "fire_extinguisher_hose"}, [
+        element((5, 0, 5), (11, 10, 11), "t"), element((7, 10, 7), (9, 12, 9), "h"),
+        element((6, 12, 7.5), (10, 12.5, 8.5), "h"), element((5, 4, 7.5), (5.5, 11, 8.5), "h")])
+    a.block("fire_extinguisher", "Fire Extinguisher", horizontal_blockstate("fire_extinguisher"),
+            {"parent": f"{NS}:block/fire_extinguisher"})
+
+    a.texture("shopping_cart_mesh", T.mesh_tex(r("mesh")), T.CHROME, tiles=False)
+    a.texture("shopping_cart_plastic", new((50, 50, 54)), T.PLASTIC.but(smoothness=0.35, relief=0.0))
+    a.models["shopping_cart"] = model({"m": "shopping_cart_mesh", "d": "shopping_cart_plastic"}, [
+        element((1, 4, 2), (15, 12, 14), "m"),
+        element((1, 11, 14), (15, 12, 16), "d"),                    # handle, at the back (south)
+        element((2, 2, 3), (14, 4, 13), "m", faces=["up", "down"]),  # bottom shelf
+        element((3, 0, 3), (5, 2, 5), "d"), element((11, 0, 3), (13, 2, 5), "d"),
+        element((3, 0, 11), (5, 2, 13), "d"), element((11, 0, 11), (13, 2, 13), "d")], ao=False)
+    a.block("shopping_cart", "Shopping Cart", horizontal_blockstate("shopping_cart"), {"parent": f"{NS}:block/shopping_cart"})
+
+    a.texture("pallet_top", wood_tex(r("pallet_top"), True), T.Material(0.12, porosity=0.8, relief=0.8))
+    a.texture("pallet_side", wood_tex(r("pallet_side"), False), T.Material(0.10, porosity=0.8, relief=0.8))
+    a.models["pallet"] = model({"top": "pallet_top", "side": "pallet_side"}, [
+        element((0, 2, 0), (16, 3, 16), "top"),
+        element((0, 0, 0), (16, 2, 3), "side"), element((0, 0, 6.5), (16, 2, 9.5), "side"),
+        element((0, 0, 13), (16, 2, 16), "side")])
+    a.block("pallet", "Pallet", horizontal_blockstate("pallet"), {"parent": f"{NS}:block/pallet"})
+
+    a.texture("oil_drum_side", drum_tex(r("drum_side"), False),
+              lambda x, y, c: T.RUST_FLAKE if c[0] > c[2] else T.PAINTED_METAL.but(smoothness=0.4))
+    a.texture("oil_drum_top", drum_tex(r("drum_top"), True), T.PAINTED_METAL.but(smoothness=0.4))
+    a.models["oil_drum"] = model({"side": "oil_drum_side", "top": "oil_drum_top"}, [
+        element((2, 0, 2), (14, 16, 14), "side", faces=["north", "east", "south", "west"]),
+        element((2, 0, 2), (14, 16, 14), "top", faces=["up", "down"]),
+        element((1.5, 4, 1.5), (14.5, 5, 14.5), "side", faces=["north", "east", "south", "west"]),
+        element((1.5, 11, 1.5), (14.5, 12, 14.5), "side", faces=["north", "east", "south", "west"])])
+    a.block("oil_drum", "Oil Drum", horizontal_blockstate("oil_drum"), {"parent": f"{NS}:block/oil_drum"})
+
+    a.texture("trash_bin_side", bin_tex(r("bin_side"), False), T.PLASTIC.but(smoothness=0.3))
+    a.texture("trash_bin_top", bin_tex(r("bin_top"), True), T.PLASTIC.but(smoothness=0.3))
+    a.models["trash_bin"] = model({"side": "trash_bin_side", "top": "trash_bin_top"}, [
+        element((3, 0, 3), (13, 13, 13), "side", faces=["north", "east", "south", "west", "down"]),
+        element((2.5, 13, 2.5), (13.5, 14, 13.5), "top")])
+    a.block("trash_bin", "Trash Bin", horizontal_blockstate("trash_bin"), {"parent": f"{NS}:block/trash_bin"})
+
+    a.texture("wheel_stop", wheel_stop_tex(r("wheel_stop")),
+              lambda x, y, c: T.FLOOR_PAINT if T.near(c, T.PAINT_YELLOW, 50) else T.CONCRETE_FLOOR)
+    a.models["wheel_stop"] = model({"t": "wheel_stop"}, [element((0, 0, 5), (16, 3, 11), "t")])
+    a.block("wheel_stop", "Wheel Stop", horizontal_blockstate("wheel_stop"), {"parent": f"{NS}:block/wheel_stop"})
+
+    # --- Ceiling services: connecting runs ---------------------------------------------------
+    a.texture("pipe", pipe_tex(r("pipe")), lambda x, y, c: T.RUST_FLAKE if T.near(c, T.RUST, 30) else T.PAINTED_METAL)
+    a.texture("duct", T.duct_tex(r("duct")), lambda x, y, c: T.RUST_FLAKE if T.near(c, (120, 110, 96), 16) else T.STEEL)
+    for name, core, arms in (
+            ("pipe", ((5, 5, 5), (11, 11, 11)), {
+                "north": ((5, 5, 0), (11, 11, 5)), "south": ((5, 5, 11), (11, 11, 16)),
+                "west": ((0, 5, 5), (5, 11, 11)), "east": ((11, 5, 5), (16, 11, 11)),
+                "up": ((5, 11, 5), (11, 16, 11)), "down": ((5, 0, 5), (11, 5, 11))}),
+            ("duct", ((2, 3, 2), (14, 13, 14)), {
+                "north": ((2, 3, 0), (14, 13, 2)), "south": ((2, 3, 14), (14, 13, 16)),
+                "west": ((0, 3, 2), (2, 13, 14)), "east": ((14, 3, 2), (16, 13, 14)),
+                "up": ((2, 13, 2), (14, 16, 14)), "down": ((2, 0, 2), (14, 3, 14))})):
+        a.models[f"{name}_core"] = model({"t": name}, [element(*core, "t")])
+        for side, box in arms.items():
+            a.models[f"{name}_{side}"] = model({"t": name}, [element(*box, "t")])
+        a.models[f"{name}_inventory"] = model({"t": name}, [element(*core, "t"), element(*arms["east"], "t"),
+                                                            element(*arms["west"], "t")])
+        a.block(name, {"pipe": "Pipe", "duct": "Air Duct"}[name], connecting_blockstate(name, SIDES),
+                {"parent": f"{NS}:block/{name}_inventory"})
+
+    # Cable tray: a perforated bottom with cables in it; a rail closes every side that does
+    # not connect, so straight runs, corners and junctions all get the right edges.
+    a.texture("cable_tray_bottom", tray_tex(r("tray_bottom"), "bottom"), T.STEEL.but(relief=0.3), tiles=False)
+    a.texture("cable_tray_rail", tray_tex(r("tray_rail"), "rail"), T.STEEL.but(relief=0.3), tiles=False)
+    a.texture("cable_tray_cables", tray_tex(r("tray_cables"), "cables"), T.PLASTIC.but(smoothness=0.35, relief=0.6))
+    tray = {"b": "cable_tray_bottom", "r": "cable_tray_rail", "c": "cable_tray_cables"}
+    a.models["cable_tray_core"] = model(tray, [element((2, 9, 2), (14, 10, 14), "b"),
+                                              element((3, 10, 3), (13, 11.5, 13), "c")], ao=False)
+    arm_boxes = {"north": ((2, 9, 0), (14, 10, 2), (3, 10, 0), (13, 11.5, 3)),
+                 "south": ((2, 9, 14), (14, 10, 16), (3, 10, 13), (13, 11.5, 16)),
+                 "west": ((0, 9, 2), (2, 10, 14), (0, 10, 3), (3, 11.5, 13)),
+                 "east": ((14, 9, 2), (16, 10, 14), (13, 10, 3), (16, 11.5, 13))}
+    rail_boxes = {"north": ((2, 9, 1), (14, 13, 2)), "south": ((2, 9, 14), (14, 13, 15)),
+                  "west": ((1, 9, 2), (2, 13, 14)), "east": ((14, 9, 2), (15, 13, 14))}
+    for side, (b0, b1, c0, c1) in arm_boxes.items():
+        rot = 90 if side in ("north", "south") else None
+        a.models[f"cable_tray_{side}"] = model(tray, [element(b0, b1, "b"), element(c0, c1, "c", uv_rotation=rot)], ao=False)
+        a.models[f"cable_tray_rail_{side}"] = model(tray, [element(*rail_boxes[side], "r")], ao=False)
+    rails = [{"when": {side: "false"}, "apply": {"model": f"{NS}:block/cable_tray_rail_{side}"}} for side in rail_boxes]
+    a.models["cable_tray_inventory"] = model(tray, [
+        element((0, 9, 2), (16, 10, 14), "b"), element((0, 10, 3), (16, 11.5, 13), "c"),
+        element(*rail_boxes["north"], "r"), element(*rail_boxes["south"], "r")], ao=False)
+    a.block("cable_tray", "Cable Tray", connecting_blockstate("cable_tray", ["north", "east", "south", "west"], rails),
+            {"parent": f"{NS}:block/cable_tray_inventory"})
+
+    a.texture("hanging_cable", cable_tex(r("cable")), T.PLASTIC.but(smoothness=0.3, relief=0.2))
+    a.models["hanging_cable"] = model({"t": "hanging_cable"}, [
+        element((7, 8, 7), (8.5, 16, 8.5), "t"), element((7.5, 0, 7.5), (9, 8, 9), "t")], ao=False)
+    a.block("hanging_cable", "Hanging Cable", horizontal_blockstate("hanging_cable"),
+            {"parent": "minecraft:item/generated", "textures": {"layer0": tex_ref("hanging_cable")}})
+
+    # --- Surfaces -------------------------------------------------------------------------
+    a.texture("metal_panel", metal_panel_tex(r("panel")), T.STEEL.but(smoothness=0.6, metal=255, relief=0.3))
+    a.models["metal_panel"] = cube_all("metal_panel")
+    a.block("metal_panel", "Metal Panel", {"variants": {"": {"model": f"{NS}:block/metal_panel"}}},
+            {"parent": f"{NS}:block/metal_panel"})
+
+    # Elevator door: a 2-pixel sheet that slides 5 pixels per stage into the wall beside it
+    # (ElevatorDoorBlock.SLIDE_PIXELS); open is air. axis = the way it runs, positive = opens to +x/+z.
+    a.texture("elevator_door", elevator_door_tex(r("elevator_door")), T.STEEL.but(smoothness=0.65, metal=255, relief=0.2))
+    variants = {}
+    for positive, sign in (("true", 1), ("false", -1)):
+        for stage in range(3):
+            name = f"elevator_door_{'pos' if sign > 0 else 'neg'}_{stage}"
+            dx = sign * stage * 5
+            # Explicit UVs: the sheet reaches outside the block, where automatic UVs would leave the texture.
+            uvs = {"north": [0, 0, 16, 16], "south": [0, 0, 16, 16], "east": [7, 0, 9, 16], "west": [7, 0, 9, 16],
+                   "up": [0, 7, 16, 9], "down": [0, 7, 16, 9]}
+            a.models[name] = model({"t": "elevator_door"}, [{
+                "from": [dx, 0, 7], "to": [16 + dx, 16, 9],
+                "faces": {f: {"texture": "#t", "uv": uv} for f, uv in uvs.items()}}])
+            for axis, y in (("x", 0), ("z", 90)):
+                v = {"model": f"{NS}:block/{name}"}
+                if y:
+                    v["y"] = y
+                variants[f"axis={axis},positive={positive},stage={stage}"] = v
+    a.block("elevator_door", "Elevator Door", {"variants": variants}, {"parent": f"{NS}:block/elevator_door_pos_0"})
+
+    # Loot lying around: the client draws the item itself (LootRenderer), so the model is empty
+    # (only a particle texture); the block item looks like the item.
+    for block_id, name, item in (("loot_battery", "Battery (Loot)", "battery"),
+                                 ("loot_water_bottle", "Water Bottle (Loot)", "water_bottle"),
+                                 ("loot_keycard", "Keycard (Loot)", "keycard"),
+                                 ("loot_food_plate", "Plate of Food (Loot)", "food_plate"),
+                                 ("loot_food_popcorn", "Popcorn (Loot)", "food_popcorn"),
+                                 ("loot_food_snack", "Snack (Loot)", "food_snack"),
+                                 ("loot_master_card_nw", "Master Card (Loot)", "master_card_nw"),
+                                 ("loot_master_card_ne", "Master Card (Loot)", "master_card_ne"),
+                                 ("loot_master_card_sw", "Master Card (Loot)", "master_card_sw"),
+                                 ("loot_master_card_se", "Master Card (Loot)", "master_card_se"),
+                                 ("loot_master_key", "Master Key (Loot)", "master_key"),
+                                 ("loot_wrench", "Wrench (Loot)", "wrench"),
+                                 ("loot_detector", "Radiation Detector (Loot)", "detector"),
+                                 *((f"loot_fuse_{amps}a", f"Fuse {amps}A (Loot)", f"fuse_{amps}a") for amps in FUSE_AMPS),
+                                 *((f"loot_reagent_{i}", f"Reagent R-{i} (Loot)", f"reagent_{i}") for i in range(1, 5))):
+        a.models[block_id] = {"textures": {"particle": f"{NS}:item/{item}"}}
+        a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:item/{item}"})
+
+    # Card reader: a small box on the wall (CardReaderBlock's shape), red light locked, green open.
+    a.texture("card_reader_side", card_reader_tex(r("reader_side"), "side"), T.PLASTIC.but(smoothness=0.5, relief=0.3))
+    variants = {}
+    for unlocked, part in (("false", "locked"), ("true", "open")):
+        a.texture(f"card_reader_{part}", card_reader_tex(r("reader"), part), led_glow)
+        a.models[f"card_reader_{part}"] = model(
+            {"front": f"card_reader_{part}", "side": "card_reader_side"},
+            [{"from": [5, 4, 14.5], "to": [11, 12, 16], "faces": {
+                "north": {"texture": "#front"}, "south": {"texture": "#side"}, "east": {"texture": "#side"},
+                "west": {"texture": "#side"}, "up": {"texture": "#side"}, "down": {"texture": "#side"}}}])
+        for facing, y in HORIZONTAL.items():
+            v = {"model": f"{NS}:block/card_reader_{part}"}
+            if y:
+                v["y"] = y
+            variants[f"facing={facing},unlocked={unlocked}"] = v
+    a.block("card_reader", "Card Reader", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
+    # The time clock of Chapter 2's Level 1 (TimeClockBlock) is the same box with the same models: red, then green once clocked in.
+    a.block("time_clock", "Time Clock", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
+    # So is the badge reader by the auxiliary lab's door (BadgeReaderBlock): red, then green once the coworker's badge opened it.
+    a.block("badge_reader", "Badge Reader", {"variants": variants}, {"parent": f"{NS}:block/card_reader_locked"})
+    # The keypad by the office's door (KeypadBlock): a taller box on the wall, red until Rowan's code opened it, then green.
+    a.texture("keypad_side", keypad_tex(r("keypad_side"), "side"), T.STEEL.but(smoothness=0.5, metal=200, relief=0.3))
+    keypad_variants = {}
+    for unlocked, part in (("false", "locked"), ("true", "open")):
+        a.texture(f"keypad_{part}", keypad_tex(r("keypad"), part), led_glow)
+        a.models[f"keypad_{part}"] = model(
+            {"front": f"keypad_{part}", "side": "keypad_side"},
+            [{"from": [4, 2, 14.5], "to": [12, 14, 16], "faces": {
+                "north": {"texture": "#front"}, "south": {"texture": "#side"}, "east": {"texture": "#side"},
+                "west": {"texture": "#side"}, "up": {"texture": "#side"}, "down": {"texture": "#side"}}}])
+        for facing, y in HORIZONTAL.items():
+            v = {"model": f"{NS}:block/keypad_{part}"}
+            if y:
+                v["y"] = y
+            keypad_variants[f"facing={facing},unlocked={unlocked}"] = v
+    a.block("keypad", "Keypad", {"variants": keypad_variants}, {"parent": f"{NS}:block/keypad_locked"})
+
+    def facing_parts(models, when=None):
+        """Multipart parts turning `models` (one name, or several picked at random) to each facing."""
+        out = []
+        for facing, y in HORIZONTAL.items():
+            apply = [{"model": f"{NS}:block/{m}", **({"y": y} if y else {})} for m in ([models] if isinstance(models, str) else models)]
+            out.append({"when": {"facing": facing, **(when or {})}, "apply": apply if len(apply) > 1 else apply[0]})
+        return out
+
+    # Valve: a gate valve inline in a wall pipe (ValveBlock's shapes), facing north: the pipe
+    # through it, a stub back into the wall, the body, the red handwheel on its hub; open, the
+    # rising stem stands out through the wheel. On each side a plate: the letter on the left,
+    # the dial's window with its turns on the right, as seen from that side. A multipart: the
+    # body by open, the letter halves by letter, the windows by turns.
+    a.texture("valve_body", valve_body_tex(r("valve_body")), T.PAINTED_METAL.but(smoothness=0.35))
+    a.texture("valve_stem", valve_stem_tex(r("valve_stem")), T.STEEL.but(smoothness=0.6, metal=255))
+    for turned in (False, True):
+        a.texture(f"valve_wheel{'_turned' if turned else ''}", valve_wheel_tex(r("valve_wheel"), turned),
+                  T.PAINTED_METAL.but(smoothness=0.5, relief=0.4), tiles=False)
+    parts = []
+    for opened in ("false", "true"):
+        name = f"valve_{'open' if opened == 'true' else 'closed'}"
+        elements = [
+            element((5, 0, 5), (11, 16, 11), "pipe"),
+            element((5, 5, 11), (11, 11, 16), "pipe"),
+            element((4, 4, 4), (12, 12, 12), "body"),
+            element((7, 7, 1), (9, 9, 4), "stem"),
+            {"from": [2, 2, 2], "to": [14, 14, 3], "faces": {
+                "north": {"uv": [2, 2, 14, 14], "texture": "#wheel"},
+                "south": {"uv": [2, 2, 14, 14], "texture": "#wheel"}}},
+        ]
+        if opened == "true":
+            elements.append(element((7.5, 7.5, -2), (8.5, 8.5, 1), "stem"))
+        a.models[name] = model({"pipe": "pipe", "body": "valve_body", "stem": "valve_stem",
+                                "wheel": "valve_wheel_turned" if opened == "true" else "valve_wheel"}, elements)
+        parts.append((name, {"open": opened}))
+
+    def plate_halves(key, east_z, west_z, uv):
+        return [{"from": [12, 5, east_z[0]], "to": [12.25, 12, east_z[1]], "faces": {"east": {"uv": uv, "texture": f"#{key}"}}},
+                {"from": [3.75, 5, west_z[0]], "to": [4, 12, west_z[1]], "faces": {"west": {"uv": uv, "texture": f"#{key}"}}}]
+
+    for letter in VALVE_LETTERS:
+        a.texture(f"valve_plate_{letter}", valve_plate_tex(r("valve_plate"), letter), T.PAINTED_METAL.but(smoothness=0.6, relief=0.2))
+        a.models[f"valve_letter_{letter}"] = model({"p": f"valve_plate_{letter}"}, plate_halves("p", (8, 12), (4, 8), [4, 4, 8, 11]))
+        parts.append((f"valve_letter_{letter}", {"letter": letter}))
+    for digit in range(10):
+        a.texture(f"valve_digit_{digit}", valve_digit_tex(r("valve_digit"), digit), T.PAINTED_METAL.but(smoothness=0.7, relief=0.1))
+        a.models[f"valve_digit_{digit}"] = model({"d": f"valve_digit_{digit}"}, plate_halves("d", (4, 8), (8, 12), [8, 4, 12, 11]))
+        parts.append((f"valve_digit_{digit}", {"turns": str(digit)}))
+    multipart = []
+    for name, when in parts:
+        multipart += facing_parts(name, when)
+    inventory = a.models["valve_closed"]["elements"] + a.models["valve_letter_a"]["elements"] + a.models["valve_digit_0"]["elements"]
+    a.models["valve_inventory"] = model({"pipe": "pipe", "body": "valve_body", "stem": "valve_stem", "wheel": "valve_wheel",
+                                         "p": "valve_plate_a", "d": "valve_digit_0"}, inventory)
+    a.block("valve", "Valve", {"multipart": multipart}, {"parent": f"{NS}:block/valve_inventory"})
+
+    # Note board: cork on a wall (NoteBoardBlock's shape), typed sheets pinned to it.
+    a.texture("cork", cork_tex(r("cork")), T.Material(0.05, porosity=0.9, relief=0.7))
+    a.texture("pinned_note", pinned_note_tex(r("pinned_note")), T.PAPER)
+    a.texture("pin_red", plastic_tex(r("pin_red"), (180, 40, 36)), T.PLASTIC.but(smoothness=0.7))
+    a.models["note_board"] = model({"c": "cork", "n": "pinned_note", "r": "pin_red"}, [
+        element((1, 2, 15), (15, 14, 16), "c"),
+        element((3, 4, 14.8), (9, 13, 15), "n"), element((8, 3, 14.6), (13, 10, 14.8), "n"),
+        element((5.5, 12, 14.4), (6.5, 13, 14.8), "r"), element((10, 9, 14.2), (11, 10, 14.6), "r")])
+    a.block("note_board", "Note Board", horizontal_blockstate("note_board"), {"parent": f"{NS}:block/note_board"})
+
+    # --- Level 3 furniture (FurnitureBlocks.kt): models facing north, the front at z = 0. Row
+    # pieces put their end pieces where they do not join (left = east, as seen from the front),
+    # stacks their base where nothing is below, tiles a leg at each corner that is an outside one.
+    a.texture("laminate", laminate_tex(r("laminate")), T.Material(0.5, porosity=0.1, relief=0.2))
+    a.texture("office_metal", powder_metal_tex(r("office_metal")), T.PAINTED_METAL.but(smoothness=0.4))
+    a.texture("dark_metal", powder_metal_tex(r("dark_metal"), (60, 62, 66)), T.PAINTED_METAL.but(smoothness=0.35))
+    a.texture("library_wood", dark_wood_tex(r("library_wood")), T.Material(0.4, porosity=0.2, relief=0.5))
+    a.texture("filing_front", filing_front_tex(r("filing_front")), T.PAINTED_METAL.but(smoothness=0.4))
+    a.texture("whiteboard", whiteboard_tex(r("whiteboard")), T.Material(0.85, relief=0.0))
+    a.texture("aluminium", powder_metal_tex(r("aluminium"), (192, 196, 200)), T.STEEL.but(smoothness=0.6, metal=232))
+    a.texture("sofa_fabric", plastic_tex(r("sofa_fabric"), (72, 80, 94), "fabric"), T.Material(0.05, porosity=0.9, relief=0.5))
+    a.texture("rack_black", powder_metal_tex(r("rack_black"), (30, 32, 34)), T.PAINTED_METAL.but(smoothness=0.3))
+    a.texture("server_front", server_front_tex(r("server_front")), leds_glow)
+    a.texture("electrical_front", electrical_front_tex(r("electrical_front")), T.PAINTED_METAL.but(smoothness=0.4))
+    for part in ("upper", "lower"):
+        a.texture(f"locker_{part}", locker_tex(r("locker"), part), T.PAINTED_METAL.but(smoothness=0.4))
+        a.texture(f"vending_{part}", vending_tex(r("vending"), part), vending_glow)
+    a.texture("vending_side", plastic_tex(r("vending_side"), (150, 40, 36)), T.PAINTED_METAL)
+    a.texture("white_plastic", plastic_tex(r("white_plastic"), (226, 226, 222)), T.PLASTIC.but(smoothness=0.55))
+    a.texture("grey_plastic", plastic_tex(r("grey_plastic"), (150, 160, 168)), T.PLASTIC)
+    a.texture("black_plastic", plastic_tex(r("black_plastic"), (28, 28, 30)), T.PLASTIC.but(smoothness=0.55))
+    a.texture("counter_front", laminate_tex(r("counter_front"), (150, 152, 154)), T.Material(0.5, porosity=0.1, relief=0.2))
+    a.texture("bottle_blue", plastic_tex(r("bottle_blue"), (110, 160, 200)), T.Material(0.85, relief=0.0))
+    a.texture("plant_leaves", leaves_tex(r("plant_leaves")), T.PLASTIC.but(smoothness=0.5), tiles=False)
+    a.texture("wall_clock", clock_tex(r("wall_clock")), T.PLASTIC.but(smoothness=0.6), tiles=False)
+    a.texture("card_catalog_front", card_catalog_tex(r("card_catalog")), T.Material(0.4, porosity=0.2, relief=0.5))
+    a.texture("library_panel", OT.wood_tex(r("library_panel"), "panel"), T.Material(0.4, porosity=0.2, relief=0.5))
+    books = [f"books_{i}" for i in range(4)]
+    for name in books:
+        a.texture(name, books_tex(r(name)), T.Material(0.2, porosity=0.4, relief=0.6))
+
+    def el(frm, to, tex, **faces):
+        """A box showing `tex` on every face, but where `faces` say: key, (key, uv), or None (no face)."""
+        e = element(frm, to, tex)
+        for f, v in faces.items():
+            if v is None:
+                del e["faces"][f]
+                continue
+            key, uv = (v, None) if isinstance(v, str) else v
+            e["faces"][f] = {"texture": f"#{key}", **({"uv": list(uv)} if uv else {})}
+        return e
+
+    def row(block_id, name, textures, core, left=(), right=(), ao=True):
+        """A row piece: `core` always, `left` / `right` (the end pieces) where it does not join."""
+        parts = []
+        for key, els in (("core", core), ("left", left), ("right", right)):
+            if els:
+                a.models[f"{block_id}_{key}"] = model(textures, list(els), ao=ao)
+                parts += facing_parts(f"{block_id}_{key}", None if key == "core" else {key: "false"})
+        a.models[f"{block_id}_inventory"] = model(textures, list(core) + list(left) + list(right), ao=ao)
+        a.block(block_id, name, {"multipart": parts}, {"parent": f"{NS}:block/{block_id}_inventory"})
+
+    def stack(block_id, name, textures, core, base=(), upper=None):
+        """A stack piece: `core` (several = picked at random, as names of models already made, or
+        one list of elements), `base` where nothing is below, and with `upper` a different body
+        for the blocks that stand on another (core is then the lowest one's)."""
+        parts = []
+        if isinstance(core, list) and core and isinstance(core[0], str):
+            parts += facing_parts(core)
+            inventory = a.models[core[0]]["elements"]
+        else:
+            a.models[f"{block_id}_core"] = model(textures, list(core))
+            parts += facing_parts(f"{block_id}_core", {"down": "false"} if upper else None)
+            inventory = list(core)
+        if upper:
+            a.models[f"{block_id}_upper"] = model(textures, list(upper))
+            parts += facing_parts(f"{block_id}_upper", {"down": "true"})
+        if base:
+            a.models[f"{block_id}_base"] = model(textures, list(base))
+            parts += facing_parts(f"{block_id}_base", {"down": "false"})
+        a.models[f"{block_id}_inventory"] = model(textures, list(inventory) + list(base))
+        a.block(block_id, name, {"multipart": parts}, {"parent": f"{NS}:block/{block_id}_inventory"})
+
+    def tile(block_id, name, textures, top, leg):
+        """A table tile: the top always, a leg (x0, x1) x (z0, z1) at each outside corner."""
+        corners = {"nw": ((1, 3), (1, 3), "north", "west"), "ne": ((13, 15), (1, 3), "north", "east"),
+                   "sw": ((1, 3), (13, 15), "south", "west"), "se": ((13, 15), (13, 15), "south", "east")}
+        a.models[f"{block_id}_top"] = model(textures, list(top))
+        parts = [{"apply": {"model": f"{NS}:block/{block_id}_top"}}]
+        legs = []
+        for key, ((x0, x1), (z0, z1), s1, s2) in corners.items():
+            e = el((x0, 0, z0), (x1, leg[0], z1), leg[1])
+            a.models[f"{block_id}_leg_{key}"] = model(textures, [e])
+            parts.append({"when": {s1: "false", s2: "false"}, "apply": {"model": f"{NS}:block/{block_id}_leg_{key}"}})
+            legs.append(e)
+        a.models[f"{block_id}_inventory"] = model(textures, list(top) + legs)
+        a.block(block_id, name, {"multipart": parts}, {"parent": f"{NS}:block/{block_id}_inventory"})
+
+    def prop(block_id, name, textures, els, ao=True):
+        a.models[block_id] = model(textures, list(els), ao=ao)
+        a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:block/{block_id}"})
+
+    # Offices.
+    row("office_desk", "Office Desk", {"l": "laminate", "m": "office_metal"},
+        [el((0, 15, 0), (16, 16, 16), "l"), el((0, 2, 13), (16, 15, 14), "m")],
+        left=[el((15, 0, 1), (16, 15, 15), "m")], right=[el((0, 0, 1), (1, 15, 15), "m")])
+    prop("filing_cabinet", "Filing Cabinet", {"m": "office_metal", "f": "filing_front"},
+         [el((1, 0, 2), (15, 16, 16), "m", north="f")])
+    tile("meeting_table", "Meeting Table", {"l": "laminate", "m": "office_metal"},
+         [el((0, 11, 0), (16, 12, 16), "l")], (11, "m"))
+    row("whiteboard", "Whiteboard", {"w": "whiteboard", "a": "aluminium"},
+        [el((0, 4, 15), (16, 13, 16), "w", east=None, west=None), el((0, 13, 14.5), (16, 14, 16), "a"),
+         el((0, 3, 14), (16, 4, 16), "a")],
+        left=[el((15, 4, 14.5), (16, 13, 16), "a")], right=[el((0, 4, 14.5), (1, 13, 16), "a")])
+    row("sofa", "Sofa", {"f": "sofa_fabric", "d": "dark_metal"},
+        [el((0, 0, 2), (16, 2, 14), "d"), el((0, 2, 1), (16, 6, 13), "f"), el((0, 2, 12), (16, 14, 16), "f")],
+        left=[el((13, 2, 1), (16, 10, 16), "f")], right=[el((0, 2, 1), (3, 10, 16), "f")])
+
+    # Services.
+    stack("server_rack", "Server Rack", {"b": "rack_black", "f": "server_front"},
+          [el((1, 0, 1), (15, 16, 15), "b", north="f")], base=[el((1, 0, 1), (15, 1, 15), "b")])
+    box_side = "cardboard_box_side"
+    stack("metal_shelf", "Metal Shelf", {"m": "office_metal", "c": box_side},
+          [el((0, 0, 2), (1, 16, 3), "m"), el((15, 0, 2), (16, 16, 3), "m"), el((0, 0, 15), (1, 16, 16), "m"),
+           el((15, 0, 15), (16, 16, 16), "m"), el((0, 7, 2), (16, 8, 16), "m"),
+           el((1, 8, 4), (7, 13, 14), "c"), el((8, 8, 6), (15, 12, 15), "c"), el((2, 0, 5), (9, 5, 15), "c")],
+          base=[el((0, 0, 2), (16, 1, 16), "m")])
+    prop("electrical_panel", "Electrical Panel", {"m": "office_metal", "f": "electrical_front"},
+         [el((2, 2, 12), (14, 15, 16), "m", north="f")])
+
+    # Staff rooms.
+    stack("locker", "Locker", {"m": "office_metal", "l": "locker_lower", "u": "locker_upper"},
+          [el((1, 0, 1), (15, 16, 16), "m", north="l")], upper=[el((1, 0, 1), (15, 16, 16), "m", north="u")])
+    # The predecessor's locker (Chapter 2 Level 1): the same locker with its door ajar (22.5 degrees from the left hinge, both blocks alike) and
+    # the plate of its upper door scratched out.
+    a.texture("locker_scratched", locker_scratched_tex(r("locker_scratched")), T.PAINTED_METAL.but(smoothness=0.4))
+    a.texture("locker_inside", powder_metal_tex(r("locker_inside"), (44, 48, 56)), T.PAINTED_METAL.but(smoothness=0.2))
+    door_low, door_up = el((1, 0, 1), (15, 16, 2), "m", north="l"), el((1, 0, 1), (15, 16, 2), "m", north="u")
+    for door in (door_low, door_up):
+        door["rotation"] = {"angle": 22.5, "axis": "y", "origin": [1, 8, 1]}
+    sides = [el((1, 0, 14), (15, 16, 15), "i"), el((1, 0, 2), (2, 16, 15), "m"), el((14, 0, 2), (15, 16, 15), "m")]
+    stack("predecessor_locker", "Predecessor's Locker", {"m": "office_metal", "i": "locker_inside", "l": "locker_lower", "u": "locker_scratched"},
+          sides + [el((2, 0, 2), (14, 1, 14), "i"), door_low], upper=sides + [el((2, 15, 2), (14, 16, 14), "i"), door_up])
+    row("bench", "Bench", {"l": "laminate", "m": "office_metal"},
+        [el((0, 6, 4), (16, 7.5, 12), "l")],
+        left=[el((13, 0, 5), (15, 6, 11), "m")], right=[el((1, 0, 5), (3, 6, 11), "m")])
+    prop("cafe_table", "Cafe Table", {"w": "white_plastic", "m": "office_metal"},
+         [el((1, 11, 1), (15, 12, 15), "w"), el((7, 1, 7), (9, 11, 9), "m"), el((4, 0, 4), (12, 1, 12), "m")])
+    prop("cafe_chair", "Cafe Chair", {"p": "grey_plastic", "m": "office_metal"},
+         [el((3, 6, 3), (13, 7, 13), "p"), el((3, 7, 12), (13, 15, 13), "p")]
+         + [el((x, 0, z), (x + 1, 6, z + 1), "m") for x in (3, 12) for z in (3, 12)])
+    row("counter", "Counter", {"l": "laminate", "f": "counter_front"},
+        [el((0, 0, 1), (16, 15, 16), "f"), el((0, 15, 0), (16, 16, 16), "l")])
+    stack("vending_machine", "Vending Machine", {"s": "vending_side", "l": "vending_lower", "u": "vending_upper"},
+          [el((1, 0, 1), (15, 16, 16), "s", north="l")], upper=[el((1, 0, 1), (15, 16, 16), "s", north="u")])
+    prop("coffee_machine", "Coffee Machine", {"b": "black_plastic", "s": "aluminium"},
+         [el((4, 0, 6), (12, 10, 13), "b"), el((6, 5, 5), (10, 7, 6), "s"), el((5, 0, 4), (11, 1, 6), "s")])
+    prop("water_dispenser", "Water Dispenser", {"w": "white_plastic", "b": "bottle_blue", "s": "aluminium"},
+         [el((4, 0, 4), (12, 11, 12), "w"), el((5, 11, 5), (11, 16, 11), "b"), el((6, 7, 3), (10, 8, 4), "s")])
+
+    # Details.
+    leaves = [{"from": [0.8, 4, 8], "to": [15.2, 16, 8], "rotation": {"origin": [8, 8, 8], "axis": "y", "angle": angle, "rescale": True},
+               "shade": False, "faces": {"north": {"texture": "#v"}, "south": {"texture": "#v"}}} for angle in (45, -45)]
+    prop("potted_plant", "Potted Plant", {"d": "dark_metal", "v": "plant_leaves"},
+         [el((5, 0, 5), (11, 5, 11), "d")] + leaves, ao=False)
+    prop("wall_clock", "Wall Clock", {"c": "wall_clock"},
+         [{"from": [3, 3, 15], "to": [13, 13, 16], "faces": {"north": {"uv": [2.5, 2.5, 12.5, 12.5], "texture": "#c"}}}], ao=False)
+
+    # The library.
+    for i, name in enumerate(books):
+        textures = {"w": "library_wood", "b": name}
+        a.models[f"bookshelf_core_{i}"] = model(textures, [
+            el((1, 0, 2), (15, 16, 14), "w", north=("b", (1, 0, 15, 16)), south=("b", (1, 0, 15, 16))),
+            el((0, 0, 1), (1, 16, 15), "w"), el((15, 0, 1), (16, 16, 15), "w"),
+            el((1, 7.5, 1), (15, 8.5, 15), "w"), el((1, 15, 1), (15, 16, 15), "w")])
+    stack("bookshelf", "Bookshelf", {"w": "library_wood"}, [f"bookshelf_core_{i}" for i in range(len(books))],
+          base=[el((0, 0, 1), (16, 1, 15), "w")])
+    tile("reading_table", "Reading Table", {"w": "library_wood"}, [el((0, 11, 0), (16, 12, 16), "w")], (11, "w"))
+    prop("wooden_chair", "Wooden Chair", {"w": "library_wood"},
+         [el((3, 6, 3), (13, 7, 13), "w"), el((3, 7, 12), (13, 16, 13), "w")]
+         + [el((x, 0, z), (x + 1, 6, z + 1), "w") for x in (3, 12) for z in (3, 12)])
+    row("library_counter", "Library Counter", {"w": "library_wood", "p": "library_panel"},
+        [el((0, 0, 1), (16, 15, 16), "w", north="p", south="p"), el((0, 15, 0), (16, 16, 16), "w")])
+    # The bunker hatch's leaves (a TrapdoorBlock of steel, opened only by BookHooks): models facing
+    # north with the hinge on the south, closed flush at the top or bottom of the block or open
+    # standing at the hinge; hinge knuckles and a grab handle stand out of the plate.
+    a.texture("bunker_trapdoor", bunker_trapdoor_tex(r("bunker_trapdoor")), T.PAINTED_METAL.but(relief=0.8))
+    hatch_tex = {"p": "bunker_trapdoor", "e": "dark_metal"}
+
+    def leaf(y0):
+        y1 = y0 + 3
+        return [el((0, y0, 0), (16, y1, 16), "e", up="p"),
+                el((2, y1, 13.5), (5, y1 + 1, 16), "e"), el((11, y1, 13.5), (14, y1 + 1, 16), "e"),
+                el((6, y1, 2), (10, y1 + 0.75, 3), "e")]
+    a.models["bunker_trapdoor_bottom"] = model(hatch_tex, leaf(0))
+    a.models["bunker_trapdoor_top"] = model(hatch_tex, leaf(13))
+    a.models["bunker_trapdoor_open"] = model(hatch_tex, [
+        el((0, 0, 13), (16, 16, 16), "e", north="p"),
+        el((2, 0, 12), (5, 3, 13), "e"), el((11, 0, 12), (14, 3, 13), "e"),
+        el((6, 13, 12.25), (10, 14, 13), "e")])
+    variants = {}
+    for facing, y in HORIZONTAL.items():
+        for half in ("bottom", "top"):
+            for opened in ("false", "true"):
+                name = "bunker_trapdoor_open" if opened == "true" else f"bunker_trapdoor_{half}"
+                variants[f"facing={facing},half={half},open={opened}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("bunker_trapdoor", "Bunker Hatch", {"variants": variants}, {"parent": f"{NS}:block/bunker_trapdoor_bottom"})
+
+    # Text on a wall (WallTextBlock): nothing of its own to draw, its block entity writes the text.
+    a.models["wall_text"] = model({"particle": "dark_metal"}, [])
+    a.block("wall_text", "Wall Text", horizontal_blockstate("wall_text"), {"parent": f"{NS}:block/wall_text"})
+    a.models["wall_message"] = model({"particle": "dark_metal"}, [])
+    a.block("wall_message", "Wall Message", horizontal_blockstate("wall_message"), {"parent": f"{NS}:block/wall_message"})
+    # A brass desk lamp with a green glass shade, on the librarian's desk (lit, ModBlocks).
+    a.texture("brass", plastic_tex(r("brass"), (176, 140, 70)), T.STEEL.but(smoothness=0.6))
+    a.texture("lamp_shade", plastic_tex(r("lamp_shade"), (40, 104, 60)), T.PLASTIC.but(smoothness=0.8, emission=GLOW["DIFFUSER_GLOW"]))
+    prop("desk_lamp", "Desk Lamp", {"b": "brass", "g": "lamp_shade"},
+         [el((5, 0, 6), (11, 1, 10), "b"), el((7.5, 1, 7.5), (8.5, 6, 8.5), "b"), el((4, 6, 6), (12, 8.5, 10), "g")])
+    # A full block high, so a book can lie on top (the book puzzle).
+    prop("card_catalog", "Card Catalog", {"w": "library_wood", "f": "card_catalog_front"},
+         [el((1, 0, 2), (15, 16, 16), "w", north="f")])
+    # A library book cart (the book puzzle: a book may lie on top): dark wood, two shelves of
+    # books, four small wheels; its top a full block high.
+    cart_books = (1, 1, 13, 6)
+    prop("book_cart", "Book Cart", {"w": "library_wood", "b": books[1], "m": "dark_metal"},
+         [el((x, 0, z), (x + 2, 2, z + 2), "m") for x in (2, 12) for z in (4, 10)]
+         + [el((1, 2, 3), (15, 3, 13), "w"), el((1, 8, 3), (15, 9, 13), "w"), el((1, 15, 3), (15, 16, 13), "w")]
+         + [el((x, 3, z), (x + 1, 15, z + 1), "w") for x in (1, 14) for z in (3, 12)]
+         + [el((2, y, 4), (14, y + 5, 12), "b", up=None, down=None, north=("b", cart_books), south=("b", cart_books),
+               east=("b", (1, 1, 9, 6)), west=("b", (1, 1, 9, 6))) for y in (3, 9)])
+
+    # The box puzzle (BoxHooks): the purple archive box, drawn full bright in game
+    # (PurpleBoxBlock; it glows a little with shaders too), and the empty shelf in Storage.
+    box_glow = T.CARDBOARD.but(emission=GLOW["DIFFUSER_GLOW"])
+    a.texture("purple_box_side", purple_box_tex(r("purple_box_side"), "side"),
+              lambda x, y, c: T.PAPER.but(emission=GLOW["DIFFUSER_GLOW"]) if T.near(c, (228, 222, 236), 20) else box_glow)
+    a.texture("purple_box_top", purple_box_tex(r("purple_box_top"), "top"), box_glow)
+    lid_band = (0, 0, 16, 3)
+    prop("purple_box", "Purple Box", {"s": "purple_box_side", "t": "purple_box_top"},
+         [el((2, 0, 2), (14, 8.5, 14), "s", up=None, down="t",
+             north=("s", (2, 4.5, 14, 13)), south=("s", (2, 4.5, 14, 13)), east=("s", (2, 4.5, 14, 13)), west=("s", (2, 4.5, 14, 13))),
+          el((1.5, 8.5, 1.5), (14.5, 11, 14.5), "s", up="t", down="t",
+             north=("s", lid_band), south=("s", lid_band), east=("s", lid_band), west=("s", lid_band))])
+    # The office book (OfficeBookBlock), lying flat: boards top and bottom, page edges round
+    # three sides, the spine on the west; drawn full bright, glowing a little with shaders.
+    book_glow = T.PAPER.but(emission=GLOW["DIFFUSER_GLOW"])
+    a.texture("office_book_cover", office_book_tex(r("office_book_cover"), "cover"), book_glow)
+    a.texture("office_book_pages", office_book_tex(r("office_book_pages"), "pages"), book_glow)
+    pages_uv = (0, 0, 16, 16)
+    prop("office_book", "Office Book", {"c": "office_book_cover", "p": "office_book_pages"},
+         [el((4, 0, 3), (12, 2.5, 13), "c", north=("p", pages_uv), south=("p", pages_uv), east=("p", pages_uv),
+             west=("c", (0, 0, 3, 16)))])
+    # A loose typed sheet on a desk (NotePaperBlock, Level 3's documents): the texture covers its top.
+    a.texture("note_paper", note_paper_tex(r("note_paper")), T.PAPER)
+    sheet_uv = (0, 0, 16, 16)
+    prop("note_paper", "Note Paper", {"p": "note_paper"},
+         [el((3, 0, 1.5), (13, 0.25, 14.5), "p", up=("p", sheet_uv), down=("p", sheet_uv))])
+    # Level 4's furniture.
+    a.texture("lounge_brass", plastic_tex(r("lounge_brass"), (172, 134, 68)), T.STEEL.but(smoothness=0.7, metal=231, relief=0.1))
+    a.texture("lounge_towel", plastic_tex(r("lounge_towel"), (226, 222, 210), "fabric"), T.PLASTIC.but(smoothness=0.08, relief=0.3))
+    a.texture("pool_felt", plastic_tex(r("pool_felt"), (34, 92, 60), "fabric"), T.PLASTIC.but(smoothness=0.08, relief=0.2))
+    a.texture("served_glass", plastic_tex(r("served_glass"), (196, 150, 90)), T.PLASTIC.but(smoothness=0.8, relief=0.0))
+    a.texture("diploma", diploma_tex(r("diploma")), T.PAPER, tiles=False)
+    w4 = {"w": "suite_bed_frame", "c": "suite_bed_cover", "b": "lounge_brass"}
+    prop("cinema_seat", "Cinema Seat", w4,
+         [el((2, 0, 3), (14, 2, 13), "b"), el((2, 4, 2), (14, 8, 12), "c"), el((2, 2, 12), (14, 16, 15), "c"),
+          el((1, 0, 2), (2, 11, 15), "w"), el((14, 0, 2), (15, 11, 15), "w")])
+    prop("bar_stool", "Bar Stool", w4,
+         [el((7, 0, 7), (9, 9, 9), "b"), el((5, 0, 5), (11, 1, 11), "b"), el((4, 9, 4), (12, 11, 12), "c")])
+    prop("armchair", "Armchair", w4,
+         [el((1, 0, 1), (15, 2, 15), "w"), el((2, 2, 2), (14, 7, 12), "c"), el((1, 2, 12), (15, 15, 15), "c"),
+          el((1, 2, 2), (3, 10, 12), "c"), el((13, 2, 2), (15, 10, 12), "c")])
+    prop("nightstand", "Nightstand", w4,
+         [el((1, 0, 1), (15, 16, 15), "w"), el((7, 9, 0), (9, 10, 1), "b"), el((7, 3, 0), (9, 4, 1), "b")])
+    prop("lounger", "Lounger", {"t": "lounge_towel", "w": "suite_bed_frame"},
+         [el((0, 0, 2), (16, 3, 14), "w"), el((0, 3, 1), (16, 7, 15), "t")])
+    tile("pool_table", "Pool Table", {"f": "pool_felt", "w": "suite_bed_frame"},
+         [el((0, 10, 0), (16, 12, 16), "w"), el((0, 12, 0), (16, 13, 16), "f")], (10, "w"))
+    tile("lounge_desk", "Lounge Desk", {"w": "suite_bed_frame"}, [el((0, 14, 0), (16, 16, 16), "w")], (14, "w"))
+    # Level 4's puzzles.
+    a.texture("rack_metal", plastic_tex(r("rack_metal"), (112, 114, 118)), T.STEEL.but(smoothness=0.5, metal=255, relief=0.2))
+    a.texture("rack_dark", plastic_tex(r("rack_dark"), (22, 22, 24)), T.PLASTIC.but(smoothness=0.6, relief=0.1))
+    a.texture("screen_white", plastic_tex(r("screen_white"), (226, 224, 216), "fabric"), T.PLASTIC.but(smoothness=0.05, relief=0.1))
+    for i, colour in enumerate(((196, 120, 50), (120, 190, 220), (70, 110, 190), (150, 50, 60))):
+        a.texture(f"record_sleeve_{i}", plastic_tex(r(f"sleeve{i}"), colour), T.PLASTIC.but(smoothness=0.3, relief=0.1))
+    rack_states = lambda block: {"variants": {
+        f"facing={f},has={h},index={i}": {"model": f"{NS}:block/{block}_{i if h == 'true' else 'empty'}", **({"y": y} if y else {})}
+        for f, y in {"north": 0, "east": 90, "south": 180, "west": 270}.items() for h in ("true", "false") for i in range(4)}}
+    shelf = [el((1, 0, 1), (15, 2, 15), "w"), el((1, 2, 13), (15, 14, 15), "w"), el((1, 2, 1), (2, 14, 15), "w"), el((14, 2, 1), (15, 14, 15), "w")]
+    a.models["record_rack_empty"] = model({"w": "suite_bed_frame"}, shelf)
+    for i in range(4):
+        a.models[f"record_rack_{i}"] = model({"w": "suite_bed_frame", "s": f"record_sleeve_{i}"}, shelf + [el((3, 2, 6), (13, 13, 8), "s")])
+    a.block("record_rack", "Record Rack", rack_states("record_rack"), {"parent": f"{NS}:block/record_rack_0"})
+    # A length of metal shelf on a wall, and a film can standing on it; shelves side by side make one.
+    shelf_metal = [el((0, 0, 7), (16, 1, 16), "m"), el((2, 0, 15), (3, 8, 16), "m"), el((13, 0, 15), (14, 8, 16), "m")]
+    a.models["reel_rack_empty"] = model({"m": "rack_metal"}, shelf_metal)
+    for i in range(4):
+        a.models[f"reel_rack_{i}"] = model({"m": "rack_metal", "d": "rack_dark"}, shelf_metal + [
+            el((3, 1, 11), (13, 11, 14), "m"), el((6, 4, 10.5), (10, 8, 11), "d")])
+    a.block("reel_rack", "Film Can", rack_states("reel_rack"), {"parent": f"{NS}:block/reel_rack_0"})
+    prop("record_player", "Record Player", {"w": "suite_bed_frame", "d": "rack_dark", "b": "lounge_brass"},
+         [el((1, 0, 1), (15, 13, 15), "w"), el((2, 13, 2), (14, 14, 14), "d"), el((11, 14, 3), (12, 15, 12), "b")])
+    prop("projector", "Projector", {"m": "rack_metal", "d": "rack_dark"},
+         [el((7, 0, 7), (9, 8, 9), "m"), el((3, 8, 3), (13, 15, 13), "m"), el((6, 10, 0), (10, 14, 3), "d")])
+    prop("cinema_screen", "Cinema Screen", {"s": "screen_white"}, [el((0, 0, 15), (16, 16, 16), "s")])
+    prop("ceiling_speaker", "Ceiling Speaker", {"d": "rack_dark", "b": "lounge_brass"},
+         [el((3, 15, 3), (13, 16, 13), "b"), el((4, 14.5, 4), (12, 15, 12), "d")])
+    # Level 4's Maintenance room.
+    lever_textures = {"d": "rack_dark", "m": "rack_metal", "h": "record_sleeve_3"}
+    a.models["breaker_lever_off"] = model(lever_textures, [el((4, 1, 15), (12, 15, 16), "d"), el((7, 4, 12), (9, 6, 15), "m"), el((6, 2, 11), (10, 5, 13), "h")])
+    a.models["breaker_lever_on"] = model(lever_textures, [el((4, 1, 15), (12, 15, 16), "d"), el((7, 10, 12), (9, 12, 15), "m"), el((6, 11, 11), (10, 14, 13), "h")])
+    a.block("breaker_lever", "Breaker Lever", {"variants": {
+        f"facing={f},on={o}": {"model": f"{NS}:block/breaker_lever_{'on' if o == 'true' else 'off'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for o in ("true", "false")}}, {"parent": f"{NS}:block/breaker_lever_off"})
+    prop("breaker_button", "Breaker Button", {"d": "rack_dark", "h": "record_sleeve_3"},
+         [el((4, 4, 15), (12, 12, 16), "d"), el((6, 6, 13.5), (10, 10, 15), "h")])
+    variants = {}
+    a.texture("breaker_counter_blank", counter_tex(r("counter"), None), T.PLASTIC.but(smoothness=0.6, relief=0.0), tiles=False)
+    a.models["breaker_counter_blank"] = model({"f": "breaker_counter_blank", "d": "rack_dark"}, [el((3, 3, 14), (13, 13, 16), "d", north=("f", (0, 0, 16, 16)))])
+    for count in range(6):
+        a.texture(f"breaker_counter_{count}", counter_tex(r("counter"), count), T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]), tiles=False)
+        a.models[f"breaker_counter_{count}"] = model({"f": f"breaker_counter_{count}", "d": "rack_dark"}, [el((3, 3, 14), (13, 13, 16), "d", north=("f", (0, 0, 16, 16)))])
+    for facing, y in HORIZONTAL.items():
+        for count in range(6):
+            for lit in ("true", "false"):
+                name = f"breaker_counter_{count}" if lit == "true" else "breaker_counter_blank"
+                variants[f"count={count},facing={facing},lit={lit}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("breaker_counter", "Breaker Counter", {"variants": variants}, {"parent": f"{NS}:block/breaker_counter_blank"})
+    # The safes in the Suites: the dial on a dark door; open, the door swung aside and paper inside.
+    a.texture("safe_paper", plastic_tex(r("safe_paper"), (214, 204, 176)), T.PAPER, tiles=False)
+    a.models["suite_safe_shut"] = model({"m": "rack_dark", "b": "lounge_brass"}, [
+        el((1, 0, 3), (15, 14, 16), "m", north=None), el((1, 0, 2), (15, 14, 3), "m"), el((6, 5, 1), (10, 9, 2), "b"), el((11, 6, 1.5), (13, 8, 2), "b")])
+    a.models["suite_safe_open"] = model({"m": "rack_dark", "p": "safe_paper"}, [
+        el((1, 0, 15), (15, 14, 16), "m"), el((1, 0, 3), (2, 14, 15), "m"), el((14, 0, 3), (15, 14, 15), "m"),
+        el((2, 0, 3), (14, 2, 15), "m"), el((2, 12, 3), (14, 14, 15), "m"), el((1, 0, 0), (2, 14, 3), "m"),
+        el((4, 2, 6), (12, 3, 13), "p")])
+    a.block("suite_safe", "Safe", {"variants": {
+        f"facing={f},open={o}": {"model": f"{NS}:block/suite_safe_{'open' if o == 'true' else 'shut'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for o in ("true", "false")}}, {"parent": f"{NS}:block/suite_safe_shut"})
+    # Level 4's closing.
+    plate = calm_plate_tex(r("calm_plate"))
+    for side, x0 in (("left", 0), ("right", 48)):
+        a.texture(f"calm_plate_{side}", plate.crop((x0, 0, x0 + 48, 16)), T.STEEL.but(smoothness=0.7, metal=231, relief=0.1), tiles=False)
+        prop(f"calm_plate_{side}", "Calm Room Plate", {"p": f"calm_plate_{side}", "b": "lounge_brass"},
+             [el((0, 5.33, 15.5), (16, 10.67, 16), "b", north=("p", (0, 0, 16, 16)))])
+    a.texture("lamp_red_lit", plastic_tex(r("lamp_red_lit"), (214, 50, 40)), T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    a.texture("lamp_red_off", plastic_tex(r("lamp_red_off"), (70, 24, 22)), T.PLASTIC.but(smoothness=0.7, relief=0.0))
+    for state, tex in (("lit", "lamp_red_lit"), ("off", "lamp_red_off")):
+        a.models[f"emergency_lamp_{state}"] = model({"d": "rack_dark", "l": tex}, [el((6, 5, 15), (10, 11, 16), "d"), el((7, 6, 14), (9, 10, 15), "l")])
+    a.block("emergency_lamp", "Emergency Lamp", {"variants": {
+        f"facing={f},lit={l}": {"model": f"{NS}:block/emergency_lamp_{'lit' if l == 'true' else 'off'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for l in ("true", "false")}}, {"parent": f"{NS}:block/emergency_lamp_off"})
+    for state, tex in (("dead", "rack_dark"), ("locked", "lamp_red_lit"), ("open", "card_gold")):
+        a.models[f"calm_reader_{state}"] = model({"b": "lounge_brass", "l": tex}, [el((5, 4, 15), (11, 12, 16), "b"), el((6, 8, 14.5), (10, 11, 15), "l")])
+    a.block("calm_reader", "Master Card Reader", {"variants": {
+        f"facing={f},powered={p},unlocked={u}": {"model": f"{NS}:block/calm_reader_{'open' if u == 'true' else 'locked' if p == 'true' else 'dead'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for p in ("true", "false") for u in ("true", "false")}}, {"parent": f"{NS}:block/calm_reader_dead"})
+    a.texture("wet_floor_front", wet_floor_tex(r("wet_floor")), T.PLASTIC.but(smoothness=0.5, relief=0.0), tiles=False)
+    a.texture("wet_floor_side", plastic_tex(r("wet_floor_side"), (232, 196, 40)), T.PLASTIC.but(smoothness=0.5, relief=0.0))
+    full_uv = (0, 0, 16, 16)
+    prop("wet_floor_sign", "Wet Floor Sign", {"f": "wet_floor_front", "s": "wet_floor_side"},
+         [el((2, 1, 7), (14, 15, 9), "s", north=("f", full_uv), south=("f", full_uv)), el((2, 0, 5), (14, 1, 11), "s")])
+    a.animated["monitor_fog"] = (fog_frames(r("monitor_fog")), 3)
+    a.models["security_monitor"] = model({"b": "rack_dark", "s": "monitor_fog"}, [
+        el((0, 0, 3), (16, 16, 16), "b"), el((2, 2, 2.75), (14, 14, 3), "s", east=None, west=None, up=None, down=None, south=None, north=("s", (2, 2, 14, 14)))], ao=False)
+    a.block("security_monitor", "Security Monitor", horizontal_blockstate("security_monitor"), {"parent": f"{NS}:block/security_monitor"})
+    door_front = big_door_tex(r("big_door"))
+    a.texture("big_door_back", plastic_tex(r("big_door_back"), (52, 54, 58)), T.STEEL.but(smoothness=0.4, metal=255, relief=0.3))
+    variants = {}
+    for col in range(6):
+        for row_ in range(4):
+            name = f"big_door_{col}_{row_}"
+            a.texture(name, door_front.crop((col * 16, (3 - row_) * 16, (col + 1) * 16, (4 - row_) * 16)), T.STEEL.but(smoothness=0.5, metal=255, relief=0.3), tiles=False)
+            a.models[name] = model({"f": name, "b": "big_door_back"}, [el((0, 0, 0), (16, 16, 16), "b", north="f")])
+            for facing, y in HORIZONTAL.items():
+                variants[f"col={col},facing={facing},row={row_}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("big_door", "Big Door", {"variants": variants}, {"parent": f"{NS}:block/big_door_2_1"})
+    # Level 5's airlock doors: each block is one column of a leaf, `width` quarters of it still across the
+    # opening, the rest slid into the wall on its `facing` side (AirlockDoorBlock). The models lean west.
+    a.texture("airlock_leaf", airlock_leaf_tex(r("airlock_leaf")), T.PAINTED_METAL.but(relief=0.3))
+    a.texture("airlock_edge", airlock_edge_tex(r("airlock_edge")), T.PLASTIC.but(smoothness=0.3, relief=0.2))
+    for width in range(1, 5):
+        a.models[f"airlock_door_{width}"] = model({"l": "airlock_leaf", "e": "airlock_edge"}, [
+            el((0, 0, 5), (4 * width, 16, 11), "l", east="e", up="e", down="e",
+               north=("l", (0, 0, 4 * width, 16)), south=("l", (16 - 4 * width, 0, 16, 16)))])
+    a.block("airlock_door", "Airlock Door", {"variants": {
+        f"facing={f},width={w}": {"model": f"{NS}:block/airlock_door_{w}", **({"y": (y - 270) % 360} if (y - 270) % 360 else {})}
+        for f, y in HORIZONTAL.items() for w in range(1, 5)}}, {"parent": f"{NS}:block/airlock_door_4"})
+    # The darts. The board's picture is cut in nine; a part the hint does not touch keeps its texture.
+    board_material = T.PLASTIC.but(smoothness=0.2, relief=0.1)
+    board_images = {number: dartboard_tex(r("dartboard"), number or None) for number in range(21)}
+    variants = {}
+    for col in range(3):
+        for row_ in range(3):
+            cut = (col * 32, (2 - row_) * 32, (col + 1) * 32, (3 - row_) * 32)
+            base = board_images[0].crop(cut)
+            for hint, whole in board_images.items():
+                part = whole.crop(cut)
+                name = f"dartboard_{col}_{row_}"
+                if hint and part.tobytes() != base.tobytes():
+                    name += f"_h{hint}"
+                if name not in a.models:
+                    a.texture(name, part, board_material, tiles=False)
+                    a.models[name] = model({"f": name, "w": "suite_bed_frame"}, [el((0, 0, 14), (16, 16, 16), "w", north="f")])
+                for facing, y in HORIZONTAL.items():
+                    variants[f"col={col},facing={facing},hint={hint},row={row_}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("dartboard", "Dartboard", {"variants": variants}, {"parent": f"{NS}:block/dartboard_1_1"})
+    prop("throw_line", "Throwing Line", {"b": "lounge_brass"}, [el((0, 0, 7), (16, 0.25, 9), "b")])
+    a.texture("card_gold", plastic_tex(r("card_gold"), (232, 192, 84)), T.STEEL.but(smoothness=0.8, metal=231, relief=0.0))
+    tray = [el((2, 0, 4), (14, 1, 12), "w"), el((2, 1, 4), (14, 2, 5), "w"), el((2, 1, 11), (14, 2, 12), "w")]
+    a.models["dart_tray_empty"] = model({"w": "suite_bed_frame"}, tray)
+    a.models["dart_tray_full"] = model({"w": "suite_bed_frame", "m": "rack_metal", "f": "record_sleeve_3"}, tray + [
+        e for z in (6, 7.75, 9.5) for e in (el((6, 1, z), (13, 1.75, z + 0.75), "m"), el((3, 1, z - 0.25), (6, 2, z + 1), "f"))])
+    a.block("dart_tray", "Dart Tray", {"variants": {
+        f"facing={f},has={h}": {"model": f"{NS}:block/dart_tray_{'full' if h == 'true' else 'empty'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for h in ("true", "false")}}, {"parent": f"{NS}:block/dart_tray_full"})
+    hatch_frame = [el((3, 2, 15), (13, 3, 16), "b"), el((3, 11, 15), (13, 12, 16), "b"), el((3, 3, 15), (4, 11, 16), "b"),
+                   el((12, 3, 15), (13, 11, 16), "b"), el((4, 3, 15.75), (12, 11, 16), "d")]
+    hatch_open = hatch_frame + [el((12, 3, 9), (13, 11, 15), "b")]
+    hatch_textures = {"b": "lounge_brass", "d": "rack_dark", "g": "card_gold"}
+    a.models["dart_hatch_shut"] = model(hatch_textures, hatch_frame + [el((4, 3, 15), (12, 11, 15.75), "b"), el((5, 6, 14.5), (6, 8, 15), "d")])
+    a.models["dart_hatch_open"] = model(hatch_textures, hatch_open)
+    a.models["dart_hatch_piece"] = model(hatch_textures, hatch_open + [el((5, 5, 15.25), (11, 9, 15.75), "g")])
+    a.block("dart_hatch", "Dart Hatch", {"variants": {
+        f"facing={f},open={o},piece={p}": {"model": f"{NS}:block/dart_hatch_{'shut' if o == 'false' else 'piece' if p == 'true' else 'open'}", **({"y": y} if y else {})}
+        for f, y in HORIZONTAL.items() for o in ("true", "false") for p in ("true", "false")}}, {"parent": f"{NS}:block/dart_hatch_shut"})
+    prop("wall_sheet", "Score Sheet", {"p": "note_paper", "t": "screen_white"},
+         [el((3, 1, 15.75), (13, 15, 16), "p", north=("p", (0, 0, 16, 16))), el((6, 14, 15.5), (10, 15.5, 15.75), "t")])
+    prop("served_glass", "Served Glass", {"g": "served_glass"}, [el((6, 0, 6), (10, 6, 10), "g")])
+    # The dark stretch past the big door, left as it was: dead sconces and paintings on its walls, a runner down it, a
+    # chair knocked over on its back, books dropped on the floor where it turns into a library.
+    a.texture("sconce_shade", plastic_tex(r("sconce_shade"), (196, 182, 154), "fabric"), T.Material(0.2, porosity=0.5, relief=0.2))
+    a.texture("lounge_painting", lounge_painting_tex(r("lounge_painting")), T.Material(0.3, relief=0.25), tiles=False)
+    a.texture("lounge_rug", lounge_rug_tex(r("lounge_rug")), T.Material(0.1, porosity=0.6, relief=0.3), tiles=False)
+    for colour, rgb in (("red", (120, 36, 34)), ("green", (40, 76, 52)), ("navy", (36, 44, 80))):
+        a.texture(f"book_{colour}", plastic_tex(r(f"book_{colour}"), rgb), T.PAPER)
+    a.texture("book_pages", plastic_tex(r("book_pages"), (226, 218, 196)), T.PAPER)
+    prop("wall_sconce", "Wall Sconce", {"b": "lounge_brass", "s": "sconce_shade"},
+         [el((6.5, 4, 15), (9.5, 9, 16), "b"), el((7.5, 7, 11.5), (8.5, 8, 15), "b"), el((7, 7, 10), (9, 9, 12), "b"),
+          el((5.5, 9, 8.5), (10.5, 14, 13.5), "s")], ao=False)
+    prop("lounge_painting", "Painting", {"p": "lounge_painting", "w": "suite_bed_frame"},
+         [el((1, 3, 15.4), (15, 13, 16), "w", north=("p", (0, 0, 16, 16)))], ao=False)
+    prop("lounge_rug", "Runner", {"r": "lounge_rug"},
+         [el((0, 0, 0), (16, 0.5, 16), "r", up=("r", (0, 0, 16, 16)), down=("r", (0, 0, 16, 16)))], ao=False)
+    prop("fallen_chair", "Chair, Knocked Over", {"w": "library_wood"},
+         [el((3, 0, 7), (13, 1, 16), "w"), el((3, 0, 6), (13, 10, 7), "w")]
+         + [el((x, 0, 0), (x + 1, 1, 6), "w") for x in (3, 12)] + [el((x, 9, 0), (x + 1, 10, 6), "w") for x in (3, 12)])
+    open_book = el((3, 0, 11), (8, 0.6, 15), "p", up=("p", (0, 0, 16, 16)))
+    open_book["rotation"] = {"origin": [5.5, 0, 13], "axis": "y", "angle": -22.5}
+    lying = el((2, 0, 2.5), (7, 1.5, 10), "r", north=("p", (0, 0, 16, 4)), south=("p", (0, 0, 16, 4)), east=("p", (0, 0, 16, 4)))
+    lying["rotation"] = {"origin": [4.5, 0, 6], "axis": "y", "angle": 22.5}
+    prop("fallen_books", "Dropped Books", {"r": "book_red", "g": "book_green", "n": "book_navy", "p": "book_pages"},
+         [lying, el((8.5, 0, 5), (14, 1.2, 12.5), "g", north=("p", (0, 0, 16, 4)), south=("p", (0, 0, 16, 4)), west=("p", (0, 0, 16, 4))),
+          el((9.5, 1.2, 6), (13.5, 2.4, 11.5), "n", north=("p", (0, 0, 16, 4)), south=("p", (0, 0, 16, 4)), west=("p", (0, 0, 16, 4))),
+          open_book])
+    prop("diploma", "Diploma", {"d": "diploma", "w": "suite_bed_frame"},
+         [el((2, 2, 15.5), (14, 14, 16), "w", north="d")])
+    # The shelf: 2 blocks wide, 3 high (BoxShelfBlock: col 0 on the left as seen from the front,
+    # the east of a model facing north; row 0 at the bottom). Five boards 8 pixels apart from the
+    # floor, a top, a back and the two outer sides; the boxes stand on the boards (drawn by
+    # BoxShelfRenderer), board k's top at 1 + 8k pixels over the shelf's foot.
+    variants = {}
+    for col in (0, 1):
+        outer = (15.5, 16) if col == 0 else (0, 0.5)
+        post = (15, 16) if col == 0 else (0, 1)
+        for row_ in (0, 1, 2):
+            boards = [(0, 1), (8, 9)] if row_ < 2 else [(0, 1), (15, 16)]
+            els = [el((0, y0, 2), (16, y1, 16), "m") for y0, y1 in boards]
+            els += [el((0, 0, 15.5), (16, 16, 16), "m"),                                    # the back
+                    el((outer[0], 0, 2), (outer[1], 16, 16), "m"),                           # the outer side
+                    el((post[0], 0, 2), (post[1], 16, 3), "m")]                              # the front post
+            name = f"box_shelf_{col}_{row_}"
+            a.models[name] = model({"m": "office_metal"}, els)
+            for facing, y in HORIZONTAL.items():
+                variants[f"col={col},facing={facing},row={row_}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("box_shelf", "Box Shelf", {"variants": variants}, {"parent": f"{NS}:block/box_shelf_0_0"})
+
+    # --- The service elevator ------------------------------------------------------------
+    a.texture("checker_plate", checker_plate_tex(r("checker_plate")), T.STEEL.but(smoothness=0.5, metal=255, relief=0.9))
+    a.models["checker_plate"] = cube_all("checker_plate")
+    a.block("checker_plate", "Checker Plate", {"variants": {"": {"model": f"{NS}:block/checker_plate"}}},
+            {"parent": f"{NS}:block/checker_plate"})
+
+    # Level 3's blast doors (offices/level.py, bunker_fittings): the hazard-striped frame, a
+    # full block; and a leaf's piece, a thick plate against the back of its block (facing north,
+    # the plate's face to the north), two ribs across it.
+    a.texture("hazard_steel", hazard_steel_tex(r("hazard_steel")), T.PAINTED_METAL.but(relief=0.6))
+    a.models["hazard_steel"] = cube_all("hazard_steel")
+    a.block("hazard_steel", "Hazard Steel", {"variants": {"": {"model": f"{NS}:block/hazard_steel"}}},
+            {"parent": f"{NS}:block/hazard_steel"})
+    a.texture("blast_door", blast_door_tex(r("blast_door")), T.PAINTED_METAL.but(smoothness=0.35, relief=0.7))
+    a.models["blast_door"] = model({"b": "blast_door"}, [
+        element((0, 0, 12), (16, 16, 16), "b"), element((0, 4, 11), (16, 6, 12), "b"), element((0, 10, 11), (16, 12, 12), "b")])
+    a.block("blast_door", "Blast Door", horizontal_blockstate("blast_door"), {"parent": f"{NS}:block/blast_door"})
+
+    # --- Metal grating: a slab drawn as a thin see-through plate at its top -------------------
+    a.texture("metal_grating", grating_tex(r("grating")), T.STEEL.but(smoothness=0.35, metal=255, relief=0.7))
+    plates = {"bottom": [6], "top": [14], "double": [6, 14]}
+    for kind, tops in plates.items():
+        a.models[f"metal_grating_{kind}"] = model({"t": "metal_grating"}, [
+            element((0, top, 0), (16, top + 2, 16), "t") for top in tops], ao=False)
+    a.block("metal_grating", "Metal Grating",
+            {"variants": {f"type={kind}": {"model": f"{NS}:block/metal_grating_{kind}"} for kind in plates}},
+            {"parent": f"{NS}:block/metal_grating_bottom"})
+
+    a.texture("moving_pad", moving_pad_tex(r("moving_pad")), T.Material(0.05, porosity=0.9, relief=0.7))
+    a.models["moving_pad"] = model({"t": "moving_pad"}, [element((0, 0, 14), (16, 16, 16), "t")])
+    a.block("moving_pad", "Moving Blanket", horizontal_blockstate("moving_pad"), {"parent": f"{NS}:block/moving_pad"})
+
+    a.texture("handrail", handrail_tex(r("handrail")), T.STEEL.but(smoothness=0.7, metal=255, relief=0.2))
+    a.models["handrail"] = model({"t": "handrail"}, [
+        element((0, 8.5, 13.5), (16, 10.5, 15.5), "t"), element((7, 9, 15.5), (9, 10, 16), "t")], ao=False)
+    a.block("handrail", "Handrail", horizontal_blockstate("handrail"), {"parent": f"{NS}:block/handrail"})
+
+    for block_id, name, call, box in (("elevator_buttons", "Elevator Buttons", False, ((4, 1, 15), (12, 15, 16))),
+                                      ("call_buttons", "Call Buttons", True, ((5, 3, 15), (11, 13, 16)))):
+        a.texture(block_id, elevator_buttons_tex(r(block_id), call), led_and_metal)
+        a.models[block_id] = model({"t": block_id}, [element(*box, "t")], ao=False)
+        a.block(block_id, name, horizontal_blockstate(block_id), {"parent": f"{NS}:block/{block_id}"})
+
+    # Floor indicator: a 12x5 display (FloorIndicatorBlock's shape); one model per floor and arrow.
+    variants = {}
+    for floor, label in enumerate(FLOOR_LABELS):
+        for moving in ("false", "true"):
+            name = f"floor_indicator_{label.lower()}_{'moving' if moving == 'true' else 'still'}"
+            a.texture(name, floor_indicator_tex(label, moving == "true"), led_and_metal, tiles=False)
+            a.models[name] = model({"t": name}, [{
+                "from": [2, 8, 14.5], "to": [14, 13, 16], "faces": {
+                    "north": {"texture": "#t", "uv": [0, 0, 12, 5]},
+                    "east": {"texture": "#t", "uv": [12, 8, 14, 13]}, "west": {"texture": "#t", "uv": [12, 8, 14, 13]},
+                    "up": {"texture": "#t", "uv": [0, 8, 12, 10]}, "down": {"texture": "#t", "uv": [0, 8, 12, 10]},
+                    "south": {"texture": "#t", "uv": [0, 8, 12, 13]}}}], ao=False)
+            for facing, y in HORIZONTAL.items():
+                v = {"model": f"{NS}:block/{name}"}
+                if y:
+                    v["y"] = y
+                variants[f"facing={facing},floor={floor},moving={moving}"] = v
+    a.block("floor_indicator", "Floor Indicator", {"variants": variants}, {"parent": f"{NS}:block/floor_indicator_b1_still"})
+
+    # --- The parking booth -----------------------------------------------------------------
+    a.texture("monitor_body", monitor_tex(r("monitor")), T.PLASTIC.but(smoothness=0.4, relief=0.3))
+    a.animated["monitor_static"] = (static_frames(r("monitor_static")), 2)
+    a.models["cctv_monitor"] = model({"b": "monitor_body", "s": "monitor_static"}, [
+        element((2, 0, 3), (14, 10, 13), "b"),
+        {"from": [3, 2, 2.9], "to": [13, 9, 3], "shade": False, "faces": {"north": {"texture": "#s", "uv": [0, 0, 10, 7]}}}])
+    a.block("cctv_monitor", "CCTV Monitor", horizontal_blockstate("cctv_monitor"), {"parent": f"{NS}:block/cctv_monitor"})
+
+    a.texture("phone", plastic_tex(r("phone"), (34, 34, 38), "keypad"), T.PLASTIC.but(smoothness=0.55, relief=0.3))
+    a.models["desk_phone"] = model({"t": "phone"}, [
+        element((4, 0, 5), (12, 2, 11), "t"), element((4, 2, 5), (12, 3.5, 7.5), "t")])
+    a.block("desk_phone", "Desk Phone", horizontal_blockstate("desk_phone"), {"parent": f"{NS}:block/desk_phone"})
+
+    a.texture("logbook_pages", logbook_tex(r("logbook_pages"), "pages"), T.PAPER)
+    a.texture("logbook_cover", logbook_tex(r("logbook_cover"), "cover"), T.Material(0.1, porosity=0.6, relief=0.4))
+    a.texture("mug", mug_tex(r("mug"), "mug"), T.Material(0.7, relief=0.1))
+    a.texture("coffee", mug_tex(r("coffee"), "coffee"), T.Material(0.9, relief=0.0))
+    a.texture("old_flashlight", torch_tex(r("torch")), T.PLASTIC)
+    book = element((2, 0, 5), (10, 1, 12), "c")
+    book["faces"]["up"]["texture"] = "#p"
+    mug = element((11, 0, 6), (14, 4, 9), "m")
+    mug["faces"]["up"]["texture"] = "#k"
+    a.models["logbook"] = model({"p": "logbook_pages", "c": "logbook_cover", "m": "mug", "k": "coffee", "f": "old_flashlight"}, [
+        book, mug, element((3, 0, 2), (9, 1.5, 3.5), "f")])
+    a.block("logbook", "Logbook", horizontal_blockstate("logbook"), {"parent": f"{NS}:block/logbook"})
+
+    a.texture("chair_fabric", plastic_tex(r("chair_fabric"), (46, 48, 54), "fabric"), T.Material(0.05, porosity=0.9, relief=0.5))
+    a.texture("chair_plastic", plastic_tex(r("chair_plastic"), (22, 22, 24)), T.PLASTIC)
+    a.models["office_chair"] = model({"f": "chair_fabric", "p": "chair_plastic"}, [
+        element((3, 6, 3), (13, 8, 13), "f"), element((3, 8, 12), (13, 16, 14), "f"),
+        element((7, 2, 7), (9, 6, 9), "p"), element((2, 0, 7), (14, 1.5, 9), "p"), element((7, 0, 2), (9, 1.5, 14), "p")])
+    a.block("office_chair", "Office Chair", horizontal_blockstate("office_chair"), {"parent": f"{NS}:block/office_chair"})
+
+    a.texture("key_rack", key_rack_tex(r("key_rack")), T.Material(0.2, porosity=0.4, relief=0.5))
+    a.texture("brass", plastic_tex(r("brass"), (176, 146, 70)), T.STEEL.but(smoothness=0.6, metal=255))
+    a.models["key_rack"] = model({"w": "key_rack", "h": "brass"}, [element((2, 4, 15), (14, 11, 16), "w")] + [
+        element((x, 7, 14), (x + 1, 8, 15), "h") for x in (3, 5, 7, 9, 11)], ao=False)
+    a.block("key_rack", "Key Rack", horizontal_blockstate("key_rack"), {"parent": f"{NS}:block/key_rack"})
+
+    # Doors: painted steel (the director's: walnut), the models are vanilla's door shapes (door_bottom_left ...).
+    for door_id, name, colour, kind in (("storage_door", "Storage Door", (92, 100, 108), "storage"),
+                                        ("electrical_door", "Electrical Room Door", (92, 100, 108), "electrical"),
+                                        ("emergency_door", "Emergency Exit Door", (70, 82, 90), "emergency"),
+                                        ("calm_door", "Calm Room Door", (86, 58, 38), "emergency"),
+                                        ("office_door", "Office Door", (34, 34, 38), "office"),
+                                        ("lab_door", "Lab Door", (226, 228, 224), "lab"),
+                                        ("stall_door", "Toilet Stall Door", (196, 206, 218), "stall"),
+                                        ("secure_door", "Authorized Personnel Door", (82, 90, 98), "secure"),
+                                        ("director_door", "Director's Door", (62, 40, 28), "wood")):
+        halves = {}
+        for half in ("bottom", "top"):
+            if kind == "wood":
+                halves[half] = wood_door_tex(r(f"{door_id}_{half}"), half, colour)
+                a.texture(f"{door_id}_{half}", halves[half], T.Material(0.45, porosity=0.2, relief=0.3))
+            else:
+                halves[half] = steel_door_tex(r(f"{door_id}_{half}"), half, colour, kind)
+                a.texture(f"{door_id}_{half}", halves[half], T.PAINTED_METAL.but(smoothness=0.4, relief=0.4))
+        for part in ("bottom", "top"):
+            for hinge in ("left", "right"):
+                for opened in ("", "_open"):
+                    a.models[f"{door_id}_{part}_{hinge}{opened}"] = {
+                        "parent": f"minecraft:block/door_{part}_{hinge}{opened}",
+                        "textures": {"bottom": tex_ref(f"{door_id}_bottom"), "top": tex_ref(f"{door_id}_top")}}
+        a.block(door_id, name, {"variants": door_variants(f"{NS}:block/{door_id}")},
+                {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/{door_id}"}})
+        a.item_textures[door_id] = door_item_tex(halves["bottom"], halves["top"])
+        a.loot_doors.add(door_id)
+
+    # Chapter 2's windows: a block of glass that draws no frame, so a wall of it reads as one sheet.
+    a.texture("factory_glass", factory_glass_tex(r("factory_glass")), T.Material(0.95, relief=0.0))
+    a.models["factory_glass"] = cube_all("factory_glass")
+    a.block("factory_glass", "Factory Glass", {"variants": {"": {"model": f"{NS}:block/factory_glass"}}},
+            {"parent": f"{NS}:block/factory_glass"})
+
+    # Chapter 2 Level 1's tasks (platform.Ch2L1Tasks): a sample tube on the bench, the terminal that registers them (the lab computer's
+    # look), the analyzer, the broom against a wall and the dirt on the floor.
+    prop("sample_tube", "Sample Tube", {"g": "tube_amber", "d": "lab_steel_dark"},
+         [el((6.5, 0, 6.5), (9.5, 8, 9.5), "g"), el((6, 8, 6), (10, 9.5, 10), "d")])
+    a.block("noname_terminal", "NonameOS Terminal", horizontal_blockstate("lab_terminal"), {"parent": f"{NS}:block/lab_terminal"})
+    a.texture("analyzer_front", analyzer_front_tex(r("analyzer_front")), T.PLASTIC.but(smoothness=0.7), tiles=False)
+    prop("analyzer", "Analyzer", {"w": "lab_white", "f": "analyzer_front", "d": "lab_steel_dark"},
+         [el((2, 0, 3), (14, 9, 13), "w", north=("f", (2, 2, 14, 11))), el((5, 9, 6), (11, 10, 10), "d")])
+    a.texture("broom_wood", broom_wood_tex(r("broom_wood")), T.Material(0.4, relief=0.3))
+    a.texture("broom_straw", broom_straw_tex(r("broom_straw")), T.Material(0.3, relief=0.4))
+    handle = el((7.5, 0, 8.5), (8.5, 15, 9.5), "w")
+    # Its top leans back, to the wall behind it. The game takes only 0, 22.5 and 45 degrees (+ or -) for an element: any other
+    # angle makes the whole model fail to load and the block shows as the purple and black of a missing one.
+    handle["rotation"] = {"angle": 22.5, "axis": "x", "origin": [8, 0, 9]}
+    prop("leaning_broom", "Leaning Broom", {"w": "broom_wood", "s": "broom_straw"},
+         [handle, el((6, 0, 7), (10, 3.5, 11), "s")])
+    a.texture("dirt_spot", dirt_spot_tex(r("dirt_spot")), T.Material(0.1, relief=0.2), tiles=False)
+    prop("dirt_spot", "Dirt", {"d": "dirt_spot"},
+         [el((0, 0, 0), (16, 0.5, 16), "d", north=None, south=None, east=None, west=None, down=None)])
+
+    # The emergency manhole in the basement's floor (the way out when the player is locked in after the overtime): the lid flush with the
+    # floor; open, a hole with a rim, a dark shaft with rungs going down and the lid slid aside on the floor.
+    a.texture("manhole_lid", manhole_lid_tex(r("manhole_lid")), T.STEEL.but(smoothness=0.3, relief=0.6), tiles=False)
+    a.texture("manhole_shaft", manhole_shaft_tex(r("manhole_shaft"), False), T.Material(0.1, relief=0.5))
+    a.texture("manhole_rungs", manhole_shaft_tex(r("manhole_rungs"), True), T.Material(0.1, relief=0.5))
+    a.texture("manhole_dark", plastic_tex(r("manhole_dark"), (8, 8, 9)), T.Material(0.0, relief=0.0))
+    m_tex = {"l": "manhole_lid", "s": "manhole_shaft", "g": "manhole_rungs", "d": "manhole_dark"}
+    a.models["manhole"] = model(m_tex, [el((0, 0, 0), (16, 16, 16), "s", up="l")])
+    lid_up = ("l", (0, 0, 16, 16))
+    rim = ("l", (0, 0, 2, 16))
+    a.models["manhole_open"] = model(m_tex, [
+        el((0, 0, 0), (16, 16, 2), "s", up=rim, south="g"),
+        el((0, 0, 14), (16, 16, 16), "s", up=rim),
+        el((0, 0, 2), (2, 16, 14), "s", up=rim),
+        el((14, 0, 2), (16, 16, 14), "s", up=rim),
+        el((2, 0, 2), (14, 1, 14), "d"),
+        el((9, 16, 1), (23, 16.5, 15), "l", up=lid_up, down=None, north=("s", (0, 0, 14, 1)), south=("s", (0, 0, 14, 1)),
+           east=("s", (0, 0, 14, 1)), west=("s", (0, 0, 14, 1))),
+    ], ao=False)
+    a.block("manhole", "Emergency Manhole", {"variants": {"open=false": {"model": f"{NS}:block/manhole"},
+                                                          "open=true": {"model": f"{NS}:block/manhole_open"}}},
+            {"parent": f"{NS}:block/manhole"})
+
+    # Chapter 2 Level 1's Act 3: the film set in the auxiliary lab (where the prologue was shot), a studio light and a cine camera on
+    # tripods, both looking the way they face (north in the model), taller than a block; and Rowan's portrait in his office, two
+    # blocks by two over the wall behind it (its block is the lower middle), the plaque under it being a wall_text.
+    def tripod(top):
+        """Three legs splayed from `top` (the game takes only 22.5 degree steps) and a pole up to it."""
+        legs = []
+        for axis, angle in (("z", 22.5), ("z", -22.5), ("x", 22.5)):
+            leg = el((7.5, 0, 7.5), (8.5, top, 8.5), "d")
+            leg["rotation"] = {"angle": angle, "axis": axis, "origin": [8, top, 8]}
+            legs.append(leg)
+        return legs + [el((7.5, top, 7.5), (8.5, top + 4, 8.5), "d")]
+
+    a.texture("film_light_lens", film_light_lens_tex(r("film_light_lens")), led_glow, tiles=False)
+    a.texture("film_black", plastic_tex(r("film_black"), (30, 30, 34)), T.PLASTIC.but(smoothness=0.5, relief=0.2))
+    head = el((4, 22, 5), (12, 30, 12), "b", north=("l", (0, 0, 16, 16)))
+    head["rotation"] = {"angle": -22.5, "axis": "x", "origin": [8, 26, 8]}
+    flap = el((4, 30, 3), (12, 30.5, 6), "b")
+    flap["rotation"] = {"angle": -22.5, "axis": "x", "origin": [8, 26, 8]}
+    prop("film_light", "Studio Light", {"d": "lab_steel_dark", "b": "film_black", "l": "film_light_lens"},
+         tripod(18) + [head, flap], ao=False)
+    prop("film_camera", "Cine Camera", {"d": "lab_steel_dark", "b": "film_black"},
+         tripod(14) + [el((5, 18, 4), (11, 24, 14), "b"), el((6.5, 19.5, 0.5), (9.5, 22.5, 4), "d"),
+                       el((7.5, 24, 3), (8.5, 30, 9), "b"), el((7.5, 24, 9), (8.5, 29, 14), "b"), el((11, 19, 8), (13, 21, 12), "d")],
+         ao=False)
+    a.texture("rowan_portrait", rowan_portrait_tex(r("rowan_portrait")), T.Material(0.35, relief=0.25), tiles=False)
+    prop("rowan_portrait", "Portrait", {"p": "rowan_portrait", "w": "suite_bed_frame"},
+         [el((-8, -4, 15.4), (24, 28, 16), "w", north=("p", (0, 0, 16, 16)))], ao=False)
+
+    # Chapter 2's factory door: the lab door's models and textures, a block of its own because its leaves open in pairs.
+    a.block("factory_door", "Factory Door", {"variants": door_variants(f"{NS}:block/lab_door")},
+            {"parent": "minecraft:item/generated", "textures": {"layer0": f"{NS}:item/lab_door"}})
+    a.loot_doors.add("factory_door")
+
+    # Chapter 2 Level 1's two LAB tasks of phase 10b: the reagent bottles on their cabinet (blue, yellow, red), the mixing tank they are
+    # poured into (not Level 5's mixer tank, which has a puzzle of its own) and the benchtop centrifuge whose speed is read off its display.
+    for colour, rgb in FACTORY_REAGENTS.items():
+        a.texture(f"reagent_liquid_{colour}", plastic_tex(r(f"reagent_liquid_{colour}"), rgb), T.Material(0.9, relief=0.0))
+        prop(f"reagent_bottle_{colour}", f"Reagent Bottle ({colour.capitalize()})", {"g": "factory_glass", "l": f"reagent_liquid_{colour}",
+                                                                                      "d": "lab_steel_dark"},
+             [el((6, 0, 6), (10, 5, 10), "l"), el((6, 5, 6), (10, 6, 10), "g"), el((7, 6, 7), (9, 9, 9), "g"), el((6.75, 9, 6.75), (9.25, 10, 9.25), "d")])
+    prop("mixing_tank", "Mixing Tank", {"s": "lab_steel", "d": "lab_steel_dark"},
+         [el((2, 0, 2), (14, 13, 14), "s"), el((1.5, 13, 1.5), (14.5, 14, 14.5), "d"), el((5, 14, 5), (11, 16, 11), "d")])
+    a.texture("centrifuge_front", centrifuge_front_tex(r("centrifuge_front")), T.PLASTIC.but(smoothness=0.6), tiles=False)
+    prop("centrifuge", "Centrifuge", {"w": "lab_white", "f": "centrifuge_front", "d": "lab_steel_dark"},
+         [el((2, 0, 2), (14, 8, 14), "w", north=("f", (2, 8, 14, 16))), el((4, 8, 4), (12, 9, 12), "d")])
+
+    # Chapter 2 Level 1's furnishing (phase 10): the WCs' porcelain (a toilet, a sink on its counter), the stalls' partitions (two
+    # blocks high, a gap under them; the stall door is with the doors above), a mirror that joins along a wall, and the dining room's warm
+    # ceiling light (the lab's, its diffuser a warm white).
+    a.texture("porcelain", porcelain_tex(r("porcelain")), T.PLASTIC.but(smoothness=0.85, relief=0.05))
+    a.texture("stall_panel", stall_panel_tex(r("stall_panel")), T.PLASTIC.but(smoothness=0.5, relief=0.1))
+    a.texture("countertop", plastic_tex(r("countertop"), (92, 98, 106)), T.Material(0.7, relief=0.1))
+    a.texture("wc_mirror", wc_mirror_tex(r("wc_mirror")), T.Material(0.98, metal=200, relief=0.0))
+    prop("toilet", "Toilet", {"p": "porcelain", "d": "lab_steel_dark"},
+         [el((5, 0, 4), (11, 6, 12), "p"), el((4, 6, 2), (12, 7.5, 12), "p"), el((4.5, 7.5, 2.5), (11.5, 8, 11), "d"),
+          el((3, 6, 12), (13, 15, 16), "p"), el((7, 15, 13), (9, 15.5, 15), "d")])
+    prop("wc_sink", "Sink", {"p": "porcelain", "c": "countertop", "d": "lab_steel_dark"},
+         [el((0, 13, 2), (16, 14, 16), "c"), el((3, 14, 4), (13, 15, 12), "p"), el((7.5, 14, 13), (8.5, 17.5, 14), "d"),
+          el((7.5, 16.5, 10.5), (8.5, 17.5, 13), "d"), el((7, 0, 12), (9, 13, 14), "d")])
+    row("wc_mirror", "Mirror", {"m": "wc_mirror", "d": "lab_steel_dark"},
+        [el((0, 5, 15.5), (16, 15, 16), "m", east=None, west=None), el((0, 4.5, 15.3), (16, 5, 16), "d"),
+         el((0, 15, 15.3), (16, 15.5, 16), "d")],
+        left=[el((15.5, 4.5, 15.3), (16, 15.5, 16), "d")], right=[el((0, 4.5, 15.3), (0.5, 15.5, 16), "d")], ao=False)
+    stack("stall_wall", "Stall Partition", {"l": "stall_panel", "d": "lab_steel_dark"},
+          [el((7, 0, 0), (9, 16, 16), "l")], base=[el((7, 2, 0), (9, 16, 16), "l"), el((7.5, 0, 7), (8.5, 2, 9), "d")],
+          upper=[el((7, 0, 0), (9, 12, 16), "l")])
+    warm = ceiling_light_tex(r("warm_ceiling_light"))
+    warm = Image.merge("RGB", (warm.getchannel("R"), warm.getchannel("G").point(lambda v: int(v * 0.9)),
+                               warm.getchannel("B").point(lambda v: int(v * 0.72))))
+    a.texture("warm_ceiling_light", warm, ceiling_light_material, tiles=False)
+    a.models["warm_ceiling_light"] = model({"w": "lab_white", "f": "warm_ceiling_light"}, [el((0, 0, 0), (16, 16, 16), "w", down="f")])
+    a.block("warm_ceiling_light", "Warm Ceiling Light", {"variants": {"": {"model": f"{NS}:block/warm_ceiling_light"}}},
+            {"parent": f"{NS}:block/warm_ceiling_light"})
+
+    # The exit sign: a lit box against the wall (PropBlock's shape: 2..14 x 2..8, 2 deep).
+    a.texture("exit_sign", exit_sign_tex(r("exit_sign")), exit_sign_glow, tiles=False)
+    a.models["exit_sign"] = model({"t": "exit_sign"}, [{
+        "from": [2, 2, 14], "to": [14, 8, 16], "shade": False, "faces": {
+            "north": {"texture": "#t", "uv": [0, 0, 12, 6]},
+            "east": {"texture": "#t", "uv": [12, 8, 14, 14]}, "west": {"texture": "#t", "uv": [12, 8, 14, 14]},
+            "up": {"texture": "#t", "uv": [0, 8, 12, 10]}, "down": {"texture": "#t", "uv": [0, 8, 12, 10]},
+            "south": {"texture": "#t", "uv": [0, 8, 12, 14]}}}], ao=False)
+    a.block("exit_sign", "Exit Sign", horizontal_blockstate("exit_sign"), {"parent": f"{NS}:block/exit_sign"})
+
+    # Rolling shutter: a 2-pixel steel sheet through the middle of the block; axis = the way it runs.
+    a.texture("shutter", shutter_tex(r("shutter")), T.STEEL.but(smoothness=0.45, metal=255, relief=0.7))
+    a.models["shutter"] = model({"t": "shutter"}, [element((0, 0, 7), (16, 16, 9), "t")])
+    a.block("shutter", "Rolling Shutter", {"variants": {
+        "axis=x": {"model": f"{NS}:block/shutter"},
+        "axis=z": {"model": f"{NS}:block/shutter", "y": 90}}},
+        {"parent": f"{NS}:block/shutter"})
+
+    a.texture("sign_tile", T.wall_tex(r("sign_tile"), "plain"), T.CONCRETE_WALL)
+    a.models["sign_tile"] = cube_all("sign_tile")
+    a.block("sign_tile", "Sign Tile", {"variants": {"": {"model": f"{NS}:block/sign_tile"}}},
+            {"parent": f"{NS}:block/sign_tile"})
+
+    # Stains: the level generator's decal pictures; the pattern's meaning depends on the surface.
+    variants = {}
+    stain_kinds = {"up": ("floor", [k for k in T.FLOOR_DECALS if k != "puddle"]),
+                   "down": ("ceiling", T.CEILING_DECALS)}
+    for side in ("north", "east", "south", "west"):
+        stain_kinds[side] = ("wall", T.WALL_DECALS)
+    first_texture = None
+    for facing, (surface, kinds) in stain_kinds.items():
+        pictures = [f"stain_{surface}_{kind}_{i}" for kind in kinds for i in range(2)]
+        for picture in pictures:
+            if picture not in a.textures:
+                kind = picture.split("_")[2]
+                a.texture(picture, T.decal(r(picture), kind), T.DECAL_MATERIALS[kind], tiles=False)
+                a.models[picture] = plane(picture)
+                first_texture = first_texture or picture
+        for pattern in range(16):
+            variants[f"facing={facing},pattern={pattern}"] = dict(
+                {"model": f"{NS}:block/{pictures[pattern % len(pictures)]}"}, **PLANE_ROTATION[facing])
+    a.block("stain", "Stain", {"variants": variants},
+            {"parent": "minecraft:item/generated", "textures": {"layer0": tex_ref(first_texture)}})
+
+    variants = {}
+    for pattern in range(4):
+        picture = f"puddle_{pattern}"
+        a.texture(picture, T.decal(r(picture), "puddle"), T.WATER, tiles=False)
+        a.models[picture] = plane(picture)
+        variants[f"pattern={pattern}"] = {"model": f"{NS}:block/{picture}"}
+    a.block("puddle", "Puddle", {"variants": variants},
+            {"parent": "minecraft:item/generated", "textures": {"layer0": tex_ref("puddle_0")}})
+
+    # --- Level 5's laboratory furniture: stainless steel, white melamine, surgical green plastic -----
+    a.texture("lab_steel", brushed_steel_tex(r("lab_steel")), T.STEEL.but(smoothness=0.7, metal=230, relief=0.15))
+    a.texture("lab_steel_dark", brushed_steel_tex(r("lab_steel_dark"), (120, 126, 132)), T.STEEL.but(smoothness=0.6, metal=230, relief=0.2))
+    a.texture("lab_white", melamine_tex(r("lab_white")), T.PLASTIC.but(smoothness=0.6, relief=0.05))
+    a.texture("lab_green", plastic_tex(r("lab_green"), LAB_GREEN), T.PLASTIC.but(smoothness=0.55))
+    a.texture("lab_cabinet_front", lab_cabinet_tex(r("lab_cabinet_front")), T.PLASTIC.but(smoothness=0.6, relief=0.1))
+    a.texture("lab_pegboard", pegboard_tex(r("lab_pegboard")), T.Material(0.2, porosity=0.4, relief=0.5))
+    a.texture("lab_drawers", drawers_tex(r("lab_drawers")), T.PAINTED_METAL.but(smoothness=0.5))
+    a.texture("lab_jars", jars_tex(r("lab_jars")), T.Material(0.85, relief=0.0))
+    a.texture("lab_magazines", magazines_tex(r("lab_magazines")), T.PAPER)
+    a.texture("lab_poster", lab_poster_tex(r("lab_poster")), T.PAPER, tiles=False)
+    a.texture("first_aid_front", first_aid_tex(r("first_aid_front")), T.PLASTIC.but(smoothness=0.55), tiles=False)
+    lab = {"s": "lab_steel", "w": "lab_white", "g": "lab_green", "d": "lab_steel_dark"}
+    # A workbench: a white top a full block high (things lie on it), a steel shelf low down, steel legs at the ends.
+    row("lab_bench", "Lab Bench", lab,
+        [el((0, 14, 0), (16, 16, 16), "w"), el((0, 12, 0), (16, 14, 1), "s"), el((0, 3, 1), (16, 4, 15), "s")],
+        left=[el((14, 0, 1), (16, 14, 3), "s"), el((14, 0, 13), (16, 14, 15), "s")],
+        right=[el((0, 0, 1), (2, 14, 3), "s"), el((0, 0, 13), (2, 14, 15), "s")])
+    # Base cabinets under a steel worktop, for walls and the Lobby's desk.
+    row("lab_cabinet", "Lab Cabinet", {**lab, "f": "lab_cabinet_front"},
+        [el((0, 0, 1), (16, 15, 16), "w", north="f"), el((0, 15, 0), (16, 16, 16), "s")])
+    prop("lab_chair", "Lab Chair", lab,
+         [el((3, 7, 3), (13, 8, 13), "g"), el((3, 8, 12), (13, 16, 13), "g")]
+         + [el((x, 0, z), (x + 1, 7, z + 1), "s") for x in (3, 12) for z in (3, 12)])
+    # The Waiting room's seats: green shells on a steel beam, side by side.
+    row("lab_seats", "Waiting Seats", lab,
+        [el((0, 4, 6), (16, 5, 10), "s"), el((1, 6, 2), (15, 7, 13), "g"), el((1, 7, 12), (15, 15, 13), "g"),
+         el((7, 5, 7), (9, 6, 9), "s")],
+        left=[el((14, 0, 5), (15, 4, 11), "s")], right=[el((1, 0, 5), (2, 4, 11), "s")])
+    # A steel trolley, two shelves, a white box and a few bottles on the lower one; its top a full block high.
+    prop("lab_cart", "Lab Cart", {**lab, "j": "lab_jars"},
+         [el((x, 0, z), (x + 1, 15, z + 1), "s") for x in (1, 14) for z in (2, 13)]
+         + [el((1, 15, 2), (15, 16, 14), "s"), el((1, 4, 2), (15, 5, 14), "s"),
+            el((2, 5, 3), (8, 10, 9), "w"), el((9, 5, 6), (14, 11, 9), "d", north=("j", (0, 5, 16, 16)), south=("j", (0, 5, 16, 16)))])
+    row("tool_board", "Pegboard", {"p": "lab_pegboard", "s": "lab_steel_dark"},
+        [el((0, 1, 15), (16, 15, 16), "p", south="s", east=None, west=None)])
+    prop("tool_chest", "Tool Chest", {**lab, "f": "lab_drawers"},
+         [el((1, 0, 2), (15, 16, 15), "d", north="f")])
+    stack("lab_shelf", "Lab Shelf", {**lab, "j": "lab_jars"},
+          [el((0, 0, 2), (1, 16, 3), "s"), el((15, 0, 2), (16, 16, 3), "s"), el((0, 0, 15), (1, 16, 16), "s"),
+           el((15, 0, 15), (16, 16, 16), "s"), el((0, 7, 2), (16, 8, 16), "s"), el((0, 15, 2), (16, 16, 16), "s"),
+           el((1, 8, 5), (15, 14, 12), "d", north="j", south="j"), el((1, 1, 5), (15, 7, 12), "d", north="j", south="j")],
+          base=[el((0, 0, 2), (16, 1, 16), "s")])
+    prop("low_table", "Low Table", {**lab, "m": "lab_magazines"},
+         [el((1, 6, 1), (15, 7, 15), "w", up="m")] + [el((x, 0, z), (x + 1, 6, z + 1), "s") for x in (2, 13) for z in (2, 13)])
+    prop("lab_poster", "Safety Poster", {"p": "lab_poster", "w": "lab_white"},
+         [el((2, 1, 15.5), (14, 15, 16), "w", north=("p", (0, 0, 16, 16)))], ao=False)
+    prop("first_aid_box", "First Aid Box", {"f": "first_aid_front", "w": "lab_white"},
+         [el((4, 5, 14), (12, 12, 16), "w", north=("f", (0, 0, 16, 16)))])
+    # The Waiting room's safety briefing (briefing.py): the cork board's picture cut in parts, each a panel flat on
+    # the wall with wood round its edges; the printed plate over it the same way, only its band of the picture used.
+    board_img, plate_img, bpx = briefing.board_image(), briefing.sign_image(), briefing.PX
+    variants = {}
+    for col in range(briefing.COLS):
+        for row_ in range(briefing.ROWS):
+            name = f"briefing_board_{col}_{row_}"
+            top = (briefing.ROWS - 1 - row_) * bpx
+            a.texture(name, board_img.crop((col * bpx, top, (col + 1) * bpx, top + bpx)), T.PAPER, tiles=False)
+            a.models[name] = model({"f": name, "w": "suite_bed_frame"}, [el((0, 0, 14), (16, 16, 16), "w", north="f")])
+            for facing, y in HORIZONTAL.items():
+                variants[f"col={col},facing={facing},row={row_}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("briefing_board", "Briefing Board", {"variants": variants}, {"parent": f"{NS}:block/briefing_board_0_1"})
+    band_top, band_bottom = (v * 16 / bpx for v in briefing.plate_band())
+    variants = {}
+    for col in range(briefing.SIGN_COLS):
+        name = f"briefing_sign_{col}"
+        a.texture(name, plate_img.crop((col * bpx, 0, (col + 1) * bpx, bpx)), T.PLASTIC.but(smoothness=0.5, relief=0.0), tiles=False)
+        a.models[name] = model({"f": name, "w": "lab_white"},
+                               [el((0, 16 - band_bottom, 15), (16, 16 - band_top, 16), "w", north=("f", (0, band_top, 16, band_bottom)))], ao=False)
+        for facing, y in HORIZONTAL.items():
+            variants[f"col={col},facing={facing}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("briefing_sign", "Briefing Sign", {"variants": variants}, {"parent": f"{NS}:block/briefing_sign_1"})
+    # The director's office: his runner from the door to the desk, his trophies, his wall of CCTV screens.
+    a.texture("office_rug", office_rug_tex(r("office_rug")), T.Material(0.1, porosity=0.6, relief=0.3), tiles=False)
+    prop("office_rug", "Director's Runner", {"r": "office_rug"},
+         [el((0, 0, 0), (16, 0.5, 16), "r", up=("r", (0, 0, 16, 16)), down=("r", (0, 0, 16, 16)))], ao=False)
+    a.texture("trophy_gold", plastic_tex(r("trophy_gold"), (212, 172, 72)), T.STEEL.but(smoothness=0.8, metal=231))
+    a.texture("trophy_base", plastic_tex(r("trophy_base"), (34, 26, 22)), T.Material(0.6, relief=0.2))
+    a.texture("trophy_crystal", plastic_tex(r("trophy_crystal"), (196, 222, 230)), T.Material(0.95, relief=0.0))
+    a.texture("trophy_plaque", plastic_tex(r("trophy_plaque"), (88, 56, 36)), T.Material(0.45, porosity=0.2, relief=0.3))
+    trophy = {"g": "trophy_gold", "b": "trophy_base", "c": "trophy_crystal", "p": "trophy_plaque"}
+    prop("trophy_cup", "Trophy Cup", trophy,
+         [el((5, 0, 5), (11, 2, 11), "b"), el((6.5, 2, 6.5), (9.5, 3, 9.5), "g"), el((7.5, 3, 7.5), (8.5, 6, 8.5), "g"),
+          el((5.5, 6, 5.5), (10.5, 11, 10.5), "g"), el((4, 7, 7.5), (5.5, 10, 8.5), "g"), el((10.5, 7, 7.5), (12, 10, 8.5), "g")])
+    prop("crystal_award", "Crystal Award", trophy,
+         [el((5, 0, 6), (11, 1.5, 10), "b"), el((6, 1.5, 7), (10, 11, 9), "c")])
+    prop("month_plaque", "Employee of the Month Plaque", trophy,
+         [el((4, 0, 8), (12, 11, 9.5), "p", north=("g", (2, 2, 14, 14))), el((4, 0, 9.5), (12, 1, 11), "p")])
+    variants = {}
+    for cam, label in enumerate(CAMERAS):
+        name = f"monitor_bank_{cam}"
+        a.animated[name] = (screen_frames(r(name), label), 2)
+        a.models[name] = model({"b": "monitor_body", "s": name}, [
+            element((0, 0, 4), (16, 16, 16), "b"),
+            {"from": [1, 1, 3.9], "to": [15, 15, 4], "shade": False, "faces": {"north": {"texture": "#s", "uv": [0, 0, 16, 16]}}}])
+        for facing, y in HORIZONTAL.items():
+            variants[f"cam={cam},facing={facing}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("monitor_bank", "CCTV Screen", {"variants": variants}, {"parent": f"{NS}:block/monitor_bank_0"})
+    # The anteroom's security camera, in three parts (SecurityCameraBlock's `part`): the mount on the ceiling, drawn
+    # in the world; the head and its red light, drawn turned by the client (SecurityCameraRenderer) round the mount's
+    # pivot (8, 11, 8), the lens to the north.
+    a.texture("camera_body", plastic_tex(r("camera_body"), (204, 206, 202)), T.PLASTIC.but(smoothness=0.55, relief=0.2))
+    a.texture("camera_dark", plastic_tex(r("camera_dark"), (36, 38, 42)), T.PLASTIC.but(smoothness=0.7, relief=0.1))
+    a.texture("camera_led", new((255, 36, 28)), T.PLASTIC.but(smoothness=0.8, relief=0.0, emission=1.0), tiles=False)
+    camera_parts = {
+        "mount": [el((4, 15, 4), (12, 16, 12), "b"), el((7, 11, 7), (9, 15, 9), "d")],
+        "head": [el((6, 7, 2), (10, 10.5, 13), "b", north="d"), el((5.5, 10.5, 1), (10.5, 11, 12), "b"),
+                 el((7, 8, 1.5), (9, 9.5, 2), "d")],
+        "led": [el((8.6, 9.8, 1.6), (9.4, 10.3, 2), "l")],
+    }
+    variants = {}
+    for part, els in camera_parts.items():
+        a.models[f"security_camera_{part}"] = model({"b": "camera_body", "d": "camera_dark", "l": "camera_led"}, els, ao=False)
+        for facing, y in HORIZONTAL.items():
+            variants[f"facing={facing},part={part}"] = {"model": f"{NS}:block/security_camera_{part}", **({"y": y} if y else {})}
+    a.models["security_camera_inventory"] = model({"b": "camera_body", "d": "camera_dark", "l": "camera_led"},
+                                                  camera_parts["mount"] + camera_parts["head"], ao=False)
+    a.block("security_camera", "Security Camera", {"variants": variants}, {"parent": f"{NS}:block/security_camera_inventory"})
+    # Chapter 2 Level 1's decorative cameras: the same models, a block of its own because the client sweeps these slowly instead of following the player.
+    a.block("factory_camera", "Sweeping Security Camera", {"variants": variants}, {"parent": f"{NS}:block/security_camera_inventory"})
+    # Layer 3: a chalk arrow on the tunnel's wall at the foot of the ladder, pointing the way to the Hideout. The
+    # picture cut in CHALK_COLS parts, each flat on the wall, only its face drawn (the chalk's gaps show the wall).
+    chalk_img = chalk_arrow_image(r("chalk_arrow"))
+    variants = {}
+    for col in range(CHALK_COLS):
+        name = f"chalk_arrow_{col}"
+        a.texture(name, chalk_img.crop((col * CHALK_PX, 0, (col + 1) * CHALK_PX, CHALK_PX)),
+                  Material(0.05, porosity=0.6, relief=0.0), tiles=False)
+        a.models[name] = model({"f": name}, [el((0, 0, 15.95), (16, 16, 16), "f", east=None, west=None, up=None, down=None,
+                                                south=None)], ao=False)
+        for facing, y in HORIZONTAL.items():
+            variants[f"col={col},facing={facing}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("chalk_arrow", "Chalk Arrow", {"variants": variants}, {"parent": f"{NS}:block/chalk_arrow_1"})
+    # Layer 1's ceiling: lights and vents set into it, whole blocks of the ceiling whose underside is all one sees.
+    a.texture("lab_ceiling_light", ceiling_light_tex(r("lab_ceiling_light")), ceiling_light_material, tiles=False)
+    a.texture("lab_ceiling_vent", ceiling_vent_tex(r("lab_ceiling_vent")), T.PAINTED_METAL.but(smoothness=0.4), tiles=False)
+    for block_id, name in (("lab_ceiling_light", "Ceiling Light"), ("lab_ceiling_vent", "Ceiling Vent")):
+        a.models[block_id] = model({"w": "lab_white", "f": block_id}, [el((0, 0, 0), (16, 16, 16), "w", down="f")])
+        a.block(block_id, name, {"variants": {"": {"model": f"{NS}:block/{block_id}"}}}, {"parent": f"{NS}:block/{block_id}"})
+    # Chapter 2's factory after Rowan's office: the LAB's ceiling lights switched off (FACTORY_LIGHT_OFF, the diffuser a dead grey), and
+    # here and there a faint red emergency light (FACTORY_LIGHT_EMERGENCY).
+    off = Image.eval(ceiling_light_tex(r("factory_light_off")), lambda v: int(v * 0.32))
+    a.texture("factory_light_off", off, T.PLASTIC.but(smoothness=0.6, relief=0.0), tiles=False)
+    red = ceiling_light_tex(r("factory_light_emergency"))
+    red = Image.merge("RGB", (red.getchannel("R").point(lambda v: int(v * 0.85)), red.getchannel("G").point(lambda v: int(v * 0.18)),
+                              red.getchannel("B").point(lambda v: int(v * 0.16))))
+    a.texture("factory_light_emergency", red, ceiling_light_material, tiles=False)
+    for block_id, name in (("factory_light_off", "Ceiling Light (Off)"), ("factory_light_emergency", "Emergency Ceiling Light")):
+        a.models[block_id] = model({"w": "lab_white", "f": block_id}, [el((0, 0, 0), (16, 16, 16), "w", down="f")])
+        a.block(block_id, name, {"variants": {"": {"model": f"{NS}:block/{block_id}"}}}, {"parent": f"{NS}:block/{block_id}"})
+    # By each door, a card reader, its light green.
+    a.texture("lab_reader", lab_reader_tex(r("lab_reader")), T.PLASTIC.but(smoothness=0.5), tiles=False)
+    prop("lab_reader", "Card Reader", {"d": "lab_steel_dark", "f": "lab_reader"},
+         [el((5, 4, 15), (11, 12, 16), "d", north=("f", (5, 4, 11, 12)))], ao=False)
+    # Safety signs on the walls.
+    for kind, name in (("extinguisher", "Fire Extinguisher Sign"), ("exit", "Emergency Exit Sign"),
+                       ("biohazard", "Biohazard Sign"), ("radiation", "Radiation Sign")):
+        a.texture(f"sign_{kind}", safety_sign_tex(kind), T.PLASTIC.but(smoothness=0.5, relief=0.0), tiles=False)
+        prop(f"sign_{kind}", name, {"w": "lab_white", "s": f"sign_{kind}"},
+             [el((3, 3, 15.5), (13, 13, 16), "w", north=("s", (0, 0, 16, 16)))], ao=False)
+    # The green line on the floor from the Lobby to the stairs' door.
+    a.texture("floor_line", plastic_tex(r("floor_line"), (64, 150, 98)), T.PLASTIC.but(smoothness=0.4, relief=0.0))
+    prop("floor_line", "Floor Line", {"g": "floor_line"}, [el((6, 0, 0), (10, 0.15, 16), "g")], ao=False)
+    # Small things of the lab and of the people who worked there.
+    a.texture("lab_black", plastic_tex(r("lab_black"), (40, 42, 46)), T.PLASTIC.but(smoothness=0.5))
+    a.texture("glove_box", glove_box_tex(r("glove_box")), T.PAPER)
+    a.texture("glove_purple", plastic_tex(r("glove_purple"), (124, 96, 200)), T.Material(0.3, relief=0.1))
+    a.texture("lab_glass", lab_glass_tex(r("lab_glass")), T.Material(0.9, relief=0.0))
+    a.texture("monitor_screen", monitor_screen_tex(r("monitor_screen")), T.PLASTIC.but(smoothness=0.9), tiles=False)
+    a.texture("lab_coat", lab_coat_tex(r("lab_coat")), T.Material(0.2, porosity=0.5, relief=0.3), tiles=False)
+    a.texture("jacket", plastic_tex(r("jacket"), (44, 54, 82), "fabric"), T.Material(0.2, porosity=0.5, relief=0.3))
+    prop("microscope", "Microscope", {**lab, "k": "lab_black"},
+         [el((5, 0, 4), (11, 1, 12), "k"), el((9, 1, 8.5), (10.5, 9, 10), "w"), el((5.5, 4, 5), (10.5, 4.6, 9.5), "k"),
+          el((6.8, 6, 6.2), (8.4, 11, 7.8), "w"), el((7, 11, 6.4), (8.2, 13, 7.6), "k"), el((7.2, 4.6, 6.6), (8, 6, 7.4), "s"),
+          el((8.4, 8, 6.5), (9.2, 9, 9), "w")])
+    prop("glove_box", "Box of Gloves", {"b": "glove_box", "p": "glove_purple"},
+         [el((4, 0, 5), (12, 4, 11), "b"), el((7, 4, 7), (9, 5, 9), "p")])
+    prop("lab_beakers", "Beakers", {"g": "lab_glass"},
+         [el((3, 0, 4), (6, 5, 7), "g"), el((7, 0, 6), (10, 4, 9), "g"), el((10.5, 0, 3), (13.5, 3, 6), "g"), el((11.5, 3, 4), (12.5, 6, 5), "g")])
+    prop("lab_monitor", "Monitor", {"k": "lab_black", "s": "monitor_screen"},
+         [el((2, 3, 7), (14, 12, 8.5), "k", north=("s", (0, 0, 16, 16))), el((7, 0.5, 8.5), (9, 3, 9.5), "k"), el((5, 0, 7), (11, 0.5, 11), "k")])
+    # Chapter 2's prologue, on the scientist's bench: a radiation counter whose amber screen keeps climbing (animated),
+    # a voice recorder with its red light blinking (animated), and racks of test tubes with a faint glow.
+    a.animated["counter_screen"] = (counter_screen_frames(r("counter_screen")), 8)
+    a.animated["recorder_top"] = (recorder_top_frames(r("recorder_top")), 20)
+    a.texture("counter_yellow", plastic_tex(r("counter_yellow"), (206, 168, 40)), T.PLASTIC.but(smoothness=0.4))
+    prop("radiation_counter", "Radiation Counter", {"k": "lab_black", "s": "counter_screen", "y": "counter_yellow", "m": "lab_steel"},
+         [el((2, 0, 5), (14, 9, 11), "k", north=("k", (0, 0, 16, 16))), el((3, 3, 4.9), (13, 8, 5), "s", north=("s", (0, 0, 16, 8))),
+          el((2, 8, 5), (14, 9, 11), "y", up=("y", (0, 0, 16, 16))), el((11, 1, 4.4), (13, 2.8, 5), "m"),
+          el((3, 1, 4.4), (5, 2.8, 5), "m")])
+    prop("voice_recorder", "Voice Recorder", {"k": "lab_black", "t": "recorder_top"},
+         [el((6, 0, 4), (10, 1.6, 11), "k", up=("t", (0, 0, 9, 16)))])
+    for name, colour in (("blue", REAGENT_COLOURS[0]), ("amber", REAGENT_COLOURS[1]), ("green", REAGENT_COLOURS[2])):
+        a.texture(f"tube_{name}", plastic_tex(r(f"tube_{name}"), colour), T.Material(0.8, relief=0.0))
+    tubes = [el((2, 0, 5.5), (14, 1.5, 8.5), "m"), el((2, 7, 5.5), (14, 8, 8.5), "m")]
+    for i, liquid in enumerate(("tube_blue", "tube_amber", "tube_green", "tube_amber", "tube_blue", "tube_green")):
+        x = 3 + 2 * i
+        tubes += [el((x, 1.5, 6.5), (x + 1.2, 10, 7.7), "g"), el((x + 0.1, 1.6, 6.6), (x + 1.1, 1.6 + 4 + (i % 3), 7.6), liquid)]
+    prop("tube_rack", "Tube Rack", {"m": "lab_steel", "g": "lab_glass", "tube_blue": "tube_blue", "tube_amber": "tube_amber",
+                                    "tube_green": "tube_green"}, tubes)
+    prop("lab_coat", "Lab Coat", {"c": "lab_coat", "s": "lab_steel"},
+         [el((4, 1, 14), (12, 14, 15.5), "c", north=("c", (0, 0, 16, 16))), el((7.5, 14, 15), (8.5, 15.5, 16), "s")], ao=False)
+    # By each test subject: a drip stand, its tube hanging down and out to the front (towards the subject), and a
+    # steel tray of instruments on a stand, syringes, vials, a gauze pad.
+    a.texture("saline_bag", saline_bag_tex(r("saline_bag")), T.Material(0.85, relief=0.0))
+    a.texture("vial_amber", plastic_tex(r("vial_amber"), (150, 96, 44)), T.Material(0.9, relief=0.0))
+    a.texture("gauze", plastic_tex(r("gauze"), (236, 236, 230), "fabric"), T.Material(0.2, porosity=0.6, relief=0.2))
+    def high(frm, to, key, uv):
+        """A box reaching over the block, every face showing `uv` of `key` (the automatic uv would leave the texture)."""
+        return el(frm, to, key, **{f: (key, uv) for f in ("north", "south", "east", "west", "up", "down")})
+
+    prop("iv_drip", "Drip Stand", {"s": "lab_steel", "b": "saline_bag", "g": "lab_glass"},
+         [el((2, 0, 7.5), (14, 0.8, 8.5), "s"), el((7.5, 0, 2), (8.5, 0.8, 14), "s"), el((7, 0, 7), (9, 1.5, 9), "s"),
+          high((7.6, 1.5, 7.6), (8.4, 30, 8.4), "s", (7, 0, 8, 16)), high((3, 29, 7.6), (13, 29.6, 8.4), "s", (0, 7, 16, 8)),
+          high((3.5, 21.5, 7.3), (6.5, 28.6, 8.7), "b", (2, 1, 14, 15)), high((4.6, 19.5, 7.6), (5.4, 21.5, 8.4), "g", (4, 4, 8, 12)),
+          high((4.85, 11, 7.85), (5.15, 19.5, 8.15), "b", (1, 0, 2, 16)), el((4.85, 11, 0), (5.15, 11.3, 8), "b")], ao=False)
+    prop("instrument_tray", "Instrument Tray", {"s": "lab_steel", "w": "lab_white", "v": "vial_amber", "k": "lab_black", "z": "gauze"},
+         [el((2, 0, 7.5), (14, 0.8, 8.5), "s"), el((7.5, 0, 2), (8.5, 0.8, 14), "s"), el((7.5, 0.8, 7.5), (8.5, 12, 8.5), "s"),
+          el((2, 12, 3), (14, 12.6, 13), "s"), el((2, 12.6, 3), (14, 13.4, 3.5), "s"), el((2, 12.6, 12.5), (14, 13.4, 13), "s"),
+          el((2, 12.6, 3.5), (2.5, 13.4, 12.5), "s"), el((13.5, 12.6, 3.5), (14, 13.4, 12.5), "s"),
+          el((4, 12.6, 5), (9, 13.4, 5.8), "w"), el((9, 12.8, 5.2), (11, 13.2, 5.6), "w"), el((3, 12.9, 5.3), (4, 13.1, 5.5), "s"),
+          el((4.5, 12.6, 7), (9.5, 13.4, 7.8), "w"), el((9.5, 12.8, 7.2), (11.5, 13.2, 7.6), "w"),
+          el((10, 12.6, 9), (11.4, 15, 10.4), "v"), el((10, 15, 9), (11.4, 15.6, 10.4), "k"),
+          el((11.9, 12.6, 10.4), (13.2, 14.6, 11.7), "v"), el((11.9, 14.6, 10.4), (13.2, 15.2, 11.7), "k"),
+          el((4, 12.6, 9.5), (8.5, 12.9, 12), "z")])
+    prop("chair_jacket", "Lab Chair with a Jacket", {**lab, "j": "jacket"},
+         [el((3, 7, 3), (13, 8, 13), "g"), el((3, 8, 12), (13, 16, 13), "g")]
+         + [el((x, 0, z), (x + 1, 7, z + 1), "s") for x in (3, 12) for z in (3, 12)]
+         + [el((3.5, 7, 11.4), (12.5, 16.4, 13.6), "j"), el((2.4, 5, 10.5), (3.6, 12, 12.5), "j"), el((12.4, 5, 10.5), (13.6, 12, 12.5), "j")])
+
+    # Level 5's fuse box: one holder a slot (FuseHolderBlock), side by side on a wall; each takes the fuse
+    # of the amperage on its label, and a lamp over it lights once the whole box is full.
+    a.texture("fuse_lamp_on", plastic_tex(r("fuse_lamp_on"), (120, 240, 140)), T.PLASTIC.but(smoothness=0.7, emission=GLOW["DIFFUSER_GLOW"]))
+    a.texture("fuse_lamp_off", plastic_tex(r("fuse_lamp_off"), (40, 56, 44)), T.PLASTIC.but(smoothness=0.7))
+    a.texture("fuse_glass", fuse_glass_tex(r("fuse_glass")), T.Material(0.9, relief=0.0))
+    variants = {}
+    for i in range(len(FUSE_AMPS)):
+        a.texture(f"fuse_label_{i}", fuse_label_tex(r(f"fuse_label_{i}"), i), T.PLASTIC.but(smoothness=0.5), tiles=False)
+        for filled in ("false", "true"):
+            for lit in ("false", "true"):
+                name = f"fuse_holder_{i}_{'full' if filled == 'true' else 'empty'}_{'on' if lit == 'true' else 'off'}"
+                textures = {"p": f"fuse_label_{i}", "m": "lab_steel", "g": "fuse_glass", "l": f"fuse_lamp_{'on' if lit == 'true' else 'off'}"}
+                els = [el((1, 1, 15), (15, 15, 16), "m", north=("p", (1, 1, 15, 15))),
+                       el((6, 8, 14), (10, 9, 15), "m"), el((6, 3, 14), (10, 4, 15), "m"),
+                       el((7, 12, 14.5), (9, 14, 15), "l")]
+                if filled == "true":
+                    els += [el((7, 4.6, 13), (9, 7.4, 14.6), "g"),
+                            el((6.5, 3.8, 12.8), (9.5, 4.6, 14.8), "m"), el((6.5, 7.4, 12.8), (9.5, 8.2, 14.8), "m")]
+                a.models[name] = model(textures, els)
+                for f, y in HORIZONTAL.items():
+                    variants[f"amps={i},facing={f},filled={filled},lit={lit}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("fuse_holder", "Fuse Holder", {"variants": variants}, {"parent": f"{NS}:block/fuse_holder_2_full_off"})
+
+    # Level 5's layer 2: computers, the chemical room's mixer and alarm, fume hoods.
+    a.texture("lab_screen", lab_screen_tex(r("lab_screen")), T.PLASTIC.but(smoothness=0.8, emission=GLOW["DIFFUSER_GLOW"]), tiles=False)
+    prop("lab_terminal", "Lab Computer", {"w": "lab_white", "s": "lab_screen", "d": "lab_steel_dark"},
+         [el((3, 3, 6), (13, 12, 11), "w", north=("s", (1, 1, 15, 15))), el((7, 0, 8), (9, 3, 10), "d"),
+          el((3, 0, 1), (13, 1, 5), "d")])
+    for reagent in range(5):
+        a.texture(f"mixer_tank_{reagent}", mixer_tank_tex(r(f"mixer_tank_{reagent}"), reagent), T.STEEL.but(smoothness=0.6, metal=200, relief=0.15), tiles=False)
+    a.texture("mixer_front", mixer_front_tex(r("mixer_front")), T.PAINTED_METAL.but(smoothness=0.5), tiles=False)
+    variants = {}
+    for reagent in range(5):
+        a.models[f"mixer_tank_{reagent}"] = model({"s": "lab_steel", "f": f"mixer_tank_{reagent}", "d": "lab_steel_dark"}, [
+            el((2, 0, 2), (14, 2, 14), "d"), el((3, 2, 3), (13, 14, 13), "s", north=("f", (0, 0, 16, 16))),
+            el((5, 14, 5), (11, 16, 11), "d")])
+        for f, y in HORIZONTAL.items():
+            variants[f"facing={f},reagent={reagent}"] = {"model": f"{NS}:block/mixer_tank_{reagent}", **({"y": y} if y else {})}
+    a.block("mixer_tank", "Mixer Tank", {"variants": variants}, {"parent": f"{NS}:block/mixer_tank_0"})
+    prop("mixer", "Mixer", {"d": "lab_steel_dark", "f": "mixer_front", "s": "lab_steel"},
+         [el((1, 0, 2), (15, 14, 15), "d", north=("f", (0, 0, 16, 16))), el((0, 14, 1), (16, 16, 16), "s")])
+    variants = {}
+    for lit in ("false", "true"):
+        name = f"alarm_light_{'on' if lit == 'true' else 'off'}"
+        frames = alarm_frames(lit == "true")
+        if lit == "true":
+            a.animated[name] = (frames, 2)
+        else:
+            a.texture(name, frames[0], T.PLASTIC.but(smoothness=0.7), tiles=False)
+        # Lit, the dome is drawn unshaded, so it reads as giving light.
+        a.models[name] = model({"d": "lab_steel_dark", "l": name},
+                               [element((5, 5, 14), (11, 11, 16), "d"), element((6, 6, 10), (10, 10, 14), "l", shade=lit != "true")], ao=False)
+        for f, y in HORIZONTAL.items():
+            variants[f"facing={f},on={lit}"] = {"model": f"{NS}:block/{name}", **({"y": y} if y else {})}
+    a.block("alarm_light", "Alarm Light", {"variants": variants}, {"parent": f"{NS}:block/alarm_light_off"})
+    a.texture("hood_sash", hood_sash_tex(r("hood_sash")), T.Material(0.85, relief=0.0))
+    stack("fume_hood", "Fume Hood", {**lab, "f": "lab_cabinet_front", "g": "hood_sash"},
+          [el((0, 0, 1), (16, 15, 16), "w", north="f"), el((0, 15, 0), (16, 16, 16), "s")],
+          upper=[el((0, 0, 3), (16, 13, 16), "s", north="g"), el((0, 13, 0), (16, 16, 16), "s")])
+
+    # --- Level 5's drain (layer 3): rusty steel, caged lamps, wet concrete ------------------------
+    a.texture("drain_ladder", ladder_tex(r("drain_ladder")), T.STEEL.but(smoothness=0.3, metal=230, relief=0.3), tiles=False)
+    a.models["drain_ladder"] = {"parent": "minecraft:block/ladder", "textures": {"texture": tex_ref("drain_ladder"), "particle": tex_ref("drain_ladder")}}
+    a.block("drain_ladder", "Drain Ladder", horizontal_blockstate("drain_ladder"),
+            {"parent": "minecraft:item/generated", "textures": {"layer0": tex_ref("drain_ladder")}})
+    a.texture("rusty_steel", rusty_steel_tex(r("rusty_steel")), T.STEEL.but(smoothness=0.25, metal=230, relief=0.45))
+    a.texture("rusty_steel_dark", rusty_steel_tex(r("rusty_steel_dark"), (58, 60, 60)), T.STEEL.but(smoothness=0.25, metal=230, relief=0.45))
+    for lit in (True, False):
+        a.texture(f"cage_bulb_{'on' if lit else 'off'}", bulb_tex(r("cage_bulb"), lit),
+                  T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]) if lit else T.PLASTIC.but(smoothness=0.6))
+    # The caged lamp hangs from a ceiling (facing down) in its base model: a plate, a short neck, the bulb in
+    # four bars and two rings. It is turned onto walls like the fluorescent lights.
+    for state in ("on", "off"):
+        bars = [element((x, 4, z), (x + 1, 12, z + 1), "cage") for x, z in ((5, 5), (10, 5), (5, 10), (10, 10))]
+        rings = [element((5, 4, 5), (11, 5, 11), "cage"), element((5, 11, 5), (11, 12, 11), "cage")]
+        a.models[f"cage_lamp_{state}"] = model({"cage": "rusty_steel_dark", "bulb": f"cage_bulb_{state}"},
+                                               [element((5, 15, 5), (11, 16, 11), "cage"), element((7, 12, 7), (9, 15, 9), "cage"),
+                                                element((6, 5, 6), (10, 11, 10), "bulb", shade=state == "off")] + bars + rings, ao=False)
+    variants = {}
+    for facing, (x_rot, y_by_axis) in {
+            "down": (0, {"x": 0, "z": 90}), "up": (180, {"x": 0, "z": 90}),
+            "north": (270, {"x": 0, "z": 0}), "east": (270, {"x": 90, "z": 90}),
+            "south": (270, {"x": 180, "z": 180}), "west": (270, {"x": 270, "z": 270})}.items():
+        for axis, y_rot in y_by_axis.items():
+            for lit in ("true", "false"):
+                for block_id in ("cage_lamp", "panel_light"):
+                    v = {"model": f"{NS}:block/{block_id}_{'on' if lit == 'true' else 'off'}"}
+                    if x_rot:
+                        v["x"] = x_rot
+                    if y_rot:
+                        v["y"] = y_rot
+                    variants.setdefault(block_id, {})[f"facing={facing},axis={axis},lit={lit}"] = v
+    a.block("cage_lamp", "Caged Lamp", {"variants": variants["cage_lamp"]},
+            {"parent": f"{NS}:block/cage_lamp_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+    # Steel railing along a catwalk's edges: a post at each end, a top rail, a middle one, a kick plate; one model
+    # for the north edge, turned for the others.
+    a.texture("rail_steel", rusty_steel_tex(r("rail_steel"), (124, 126, 122)), T.STEEL.but(smoothness=0.35, metal=230, relief=0.3))
+    a.models["catwalk_rail_north"] = model({"s": "rail_steel"}, [
+        element((0, 0, 0), (1.5, 16, 1.5), "s"), element((14.5, 0, 0), (16, 16, 1.5), "s"),
+        element((0, 14.5, 0), (16, 16, 1.5), "s"), element((0, 7.5, 0.25), (16, 8.5, 1.25), "s"),
+        element((0, 0, 0), (16, 2, 0.5), "s")], ao=False)
+    a.block("catwalk_rail", "Catwalk Railing", {"multipart": [
+        {"when": {side: "true"}, "apply": {"model": f"{NS}:block/catwalk_rail_north", **({"y": y} if y else {}), "uvlock": False}}
+        for side, y in HORIZONTAL.items()]}, {"parent": f"{NS}:block/catwalk_rail_north"})
+    drain = {"r": "rusty_steel", "d": "rusty_steel_dark"}
+    # A pump, two high: the casing with its flanges below, the motor with its fins on top.
+    a.texture("pump_paint", pump_paint_tex(r("pump_paint")), T.PAINTED_METAL.but(smoothness=0.35, relief=0.4))
+    a.texture("pump_fins", pump_fins_tex(r("pump_fins")), T.PAINTED_METAL.but(smoothness=0.35, relief=0.6))
+    stack("pump", "Pump", {**drain, "p": "pump_paint", "f": "pump_fins"},
+          [el((0, 0, 1), (16, 2, 15), "d"), el((2, 2, 2), (14, 13, 14), "p"), el((6, 4, 0), (10, 10, 2), "r"),
+           el((5, 13, 5), (11, 16, 11), "r")],
+          upper=[el((3, 0, 3), (13, 2, 13), "r"), el((2, 2, 2), (14, 12, 14), "p", north="f", south="f", east="f", west="f"),
+                 el((4, 12, 4), (12, 14, 12), "d"), el((6, 14, 6), (10, 16, 10), "r")])
+    a.texture("sluice_steel", sluice_tex(r("sluice_steel")), T.STEEL.but(smoothness=0.25, metal=230, relief=0.6))
+    row("sluice_gate", "Sluice Gate", {**drain, "s": "sluice_steel"}, [el((0, 0, 13), (16, 16, 16), "s")],
+        left=[el((15, 0, 11), (16, 16, 16), "d")], right=[el((0, 0, 11), (1, 16, 16), "d")])
+    prop("valve_wheel", "Valve Wheel", {**drain, "w": "valve_wheel", "s": "valve_stem"},
+         [el((7, 7, 13), (9, 9, 16), "s"), el((3, 3, 11.5), (13, 13, 12.5), "w", south="w", north="w")], ao=False)
+    a.texture("gauge_face", gauge_tex(r("gauge_face")), T.Material(0.8, relief=0.0), tiles=False)
+    prop("pressure_gauge", "Pressure Gauge", {**drain, "g": "gauge_face"},
+         [el((7, 2, 14), (9, 6, 16), "r"), el((5, 6, 13), (11, 12, 15), "d", north=("g", (0, 0, 16, 16)))], ao=False)
+    # The Hideout: his mattress of rags, empty tins, his dead flashlight.
+    a.texture("mattress", mattress_tex(r("mattress")), T.Material(0.05, porosity=0.9, relief=0.5))
+    a.texture("rags", rags_tex(r("rags")), T.Material(0.05, porosity=0.9, relief=0.6))
+    row("mattress", "Old Mattress", {"m": "mattress", "g": "rags"},
+        [el((0, 0, 1), (16, 3, 15), "m"), el((2, 3, 5), (14, 4, 13), "g")])
+    a.texture("tin", tin_tex(r("tin")), T.STEEL.but(smoothness=0.5, metal=230, relief=0.2))
+    prop("tin_cans", "Empty Tins", {"t": "tin"},
+         [el((3, 0, 3), (6, 5, 6), "t"), el((9, 0, 5), (12, 4, 8), "t"), el((5, 0, 10), (13, 3, 13), "t")], ao=False)
+    prop("dead_flashlight", "Dead Flashlight", {"f": "old_flashlight", "k": "black_plastic"},
+         [el((3, 0, 7), (11, 2, 9), "f"), el((11, 0, 6.5), (14, 3, 9.5), "k")], ao=False)
+
+    # --- The director's office: modern, black leather, steel and smoked glass -----------------------
+    a.texture("black_leather", leather_tex(r("black_leather")), T.Material(0.45, porosity=0.2, relief=0.3))
+    a.texture("black_glass", black_glass_tex(r("black_glass")), T.Material(0.95, relief=0.0))
+    a.texture("lacquer_black", lacquer_tex(r("lacquer_black")), T.Material(0.8, relief=0.1))
+    a.texture("paper_edges", paper_edges_tex(r("paper_edges")), T.PAPER)
+    office = {"s": "lab_steel", "d": "lab_steel_dark", "l": "black_leather", "g": "black_glass", "k": "lacquer_black"}
+    # His desk: a top of smoked glass on a steel frame, a modesty panel at the front (facing the door).
+    row("exec_desk", "Executive Desk", office,
+        [el((0, 14, 0), (16, 16, 16), "g"), el((0, 13, 0), (16, 14, 16), "d"), el((0, 2, 1), (16, 13, 2), "k")],
+        left=[el((14, 0, 0), (16, 13, 16), "s")], right=[el((0, 0, 0), (2, 13, 16), "s")])
+    row("credenza", "Credenza", office, [el((0, 0, 1), (16, 15, 16), "k", north="k"), el((0, 15, 0), (16, 16, 16), "s")])
+    row("leather_sofa", "Leather Sofa", office,
+        [el((0, 2, 1), (16, 7, 13), "l"), el((0, 7, 12), (16, 15, 16), "l"), el((0, 0, 2), (16, 2, 14), "d")],
+        left=[el((14, 2, 1), (16, 11, 16), "l")], right=[el((0, 2, 1), (2, 11, 16), "l")])
+    prop("leather_chair", "Leather Chair", office,
+         [el((3, 6, 3), (13, 9, 13), "l"), el((3, 9, 12), (13, 17, 14), "l")]
+         + [el((x, 0, z), (x + 1, 6, z + 1), "s") for x in (3, 12) for z in (3, 12)])
+    prop("exec_chair", "Executive Chair", office,
+         [el((1, 0, 7), (15, 1, 9), "d"), el((7, 0, 1), (9, 1, 15), "d"), el((7, 1, 7), (9, 6, 9), "s"),
+          el((2, 6, 2), (14, 9, 14), "l"), el((3, 9, 12), (13, 24, 15), "l"),
+          el((2, 10, 4), (3, 12, 11), "d"), el((13, 10, 4), (14, 12, 11), "d")])
+    prop("glass_table", "Glass Table", office,
+         [el((1, 6, 1), (15, 7, 15), "g")] + [el((x, 0, z), (x + 1, 6, z + 1), "s") for x in (2, 13) for z in (2, 13)])
+    # On his desk: the mini block of diorite (vanilla's own texture), papers, coffee, a slim lamp.
+    a.models["mini_diorite"] = model({"x": "lab_steel"}, [element((5, 0, 5), (11, 6, 11), "x")], ao=False)
+    a.models["mini_diorite"]["textures"].update({"x": "minecraft:block/diorite", "particle": "minecraft:block/diorite"})
+    a.block("mini_diorite", "Mini Diorite", horizontal_blockstate("mini_diorite"), {"parent": f"{NS}:block/mini_diorite"})
+    prop("paper_stack", "Papers", {"p": "note_paper", "e": "paper_edges"},
+         [el((2, 0, 3), (13, 2, 13), "e", up="p"), el((4, 2, 4), (14, 3, 14), "e", up="p")], ao=False)
+    prop("coffee_cup", "Coffee Cup", {"m": "mug", "k": "coffee"},
+         [el((6, 0, 6), (10, 4, 10), "m", up="k"), el((10, 1, 7.5), (11, 3, 8.5), "m")], ao=False)
+    a.texture("modern_lamp_glow", plastic_tex(r("modern_lamp_glow"), (255, 236, 200)),
+              T.PLASTIC.but(smoothness=0.6, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]))
+    prop("desk_lamp_modern", "Desk Lamp", {**office, "y": "modern_lamp_glow"},
+         [el((5, 0, 5), (11, 1, 11), "k"), el((7.5, 1, 7.5), (8.5, 11, 8.5), "s"),
+          el((4, 11, 4), (12, 12, 10), "k", down="y")], ao=False)
+    # The director's mask (the Cinema film's, tools/entity/chapter1/film_walker.py), laid face up on his desk once he has
+    # taken it off in his scene (platform.DirectorSceneHooks), its brow towards him; never in the map itself.
+    a.texture("director_mask", mask_tex(r("director_mask")), T.PLASTIC.but(smoothness=0.4, relief=0.1))
+    prop("director_mask", "Mask", {"k": "director_mask"}, [el((4, 0, 4), (12, 1, 12), "k")], ao=False)
+    # The ceiling's square panel lights.
+    a.texture("panel_light_on", plastic_tex(r("panel_light_on"), (250, 250, 246)), lit_tubes)
+    a.texture("panel_light_off", plastic_tex(r("panel_light_off"), (150, 150, 148)), T.PLASTIC.but(smoothness=0.6))
+    for state in ("on", "off"):
+        a.models[f"panel_light_{state}"] = model({"f": "white_plastic", "l": f"panel_light_{state}"},
+                                                 [element((2, 15, 2), (14, 16, 14), "f"),
+                                                  element((3, 14.5, 3), (13, 15, 13), "l", shade=state == "off")], ao=False)
+    a.block("panel_light", "Panel Light", {"variants": variants["panel_light"]},
+            {"parent": f"{NS}:block/panel_light_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+
+    # --- Chapter 2 Level 2's catacombs: dark damp brick, flagstones, the vault, the bricking-up -------
+    brick_mat = T.Material(0.12, porosity=0.85, relief=0.9)
+    a.texture("catacomb_brick", catacomb_brick_tex(r("catacomb_brick"), "plain"), brick_mat)
+    a.texture("catacomb_brick_cracked", catacomb_brick_tex(r("catacomb_brick_cracked"), "cracked"), brick_mat)
+    a.texture("catacomb_brick_damp", catacomb_brick_tex(r("catacomb_brick_damp"), "damp"), brick_mat.but(smoothness=0.42, porosity=0.4))
+    a.texture("catacomb_brick_tide", catacomb_brick_tex(r("catacomb_brick_tide"), "tide"),
+              lambda x, y, c: brick_mat.but(smoothness=0.5, porosity=0.3) if y >= 8 else brick_mat)
+    a.texture("catacomb_flagstone", catacomb_flagstone_tex(r("catacomb_flagstone"), False), T.Material(0.2, porosity=0.6, relief=0.8))
+    a.texture("catacomb_flagstone_cracked", catacomb_flagstone_tex(r("catacomb_flagstone_cracked"), True), T.Material(0.2, porosity=0.6, relief=0.8))
+    a.texture("catacomb_vault", catacomb_vault_tex(r("catacomb_vault")), brick_mat.but(smoothness=0.08))
+    a.texture("catacomb_bricked", catacomb_bricked_tex(r("catacomb_bricked")), brick_mat.but(smoothness=0.1))
+    for name, title in (("catacomb_brick", "Catacomb Brick"), ("catacomb_brick_cracked", "Cracked Catacomb Brick"),
+                        ("catacomb_brick_damp", "Damp Catacomb Brick"), ("catacomb_brick_tide", "Tide-Stained Catacomb Brick"),
+                        ("catacomb_flagstone", "Catacomb Flagstone"), ("catacomb_flagstone_cracked", "Cracked Catacomb Flagstone"),
+                        ("catacomb_vault", "Catacomb Vault"), ("catacomb_bricked", "Bricked-Up Arch")):
+        a.models[name] = cube_all(name)
+        a.block(name, title, {"variants": {"": {"model": f"{NS}:block/{name}"}}}, {"parent": f"{NS}:block/{name}"})
+
+    # The brick's stairs, slab and wall, drawn from vanilla's parents.
+    tx = {"bottom": "catacomb_brick", "top": "catacomb_brick", "side": "catacomb_brick"}
+    for suffix, parent in (("", "stairs"), ("_inner", "inner_stairs"), ("_outer", "outer_stairs")):
+        a.models[f"catacomb_brick_stairs{suffix}"] = {"parent": f"minecraft:block/{parent}", "textures": {k: f"{NS}:block/{v}" for k, v in tx.items()}}
+    bottom = {"east": 0, "south": 90, "west": 180, "north": 270}
+    left = {"east": 270, "south": 0, "west": 90, "north": 180}
+    top_right = {"east": 90, "south": 180, "west": 270, "north": 0}
+    top_left = {"east": 0, "south": 90, "west": 180, "north": 270}
+    stairs = {}
+    for facing in bottom:
+        for half, rotations in (("bottom", {"straight": bottom, "outer_right": bottom, "outer_left": left, "inner_right": bottom, "inner_left": left}),
+                                ("top", {"straight": bottom, "outer_right": top_right, "outer_left": top_left, "inner_right": top_right, "inner_left": top_left})):
+            for shape, rot in rotations.items():
+                kind = "" if shape == "straight" else "_inner" if shape.startswith("inner") else "_outer"
+                v = {"model": f"{NS}:block/catacomb_brick_stairs{kind}", "uvlock": True}
+                if half == "top":
+                    v["x"] = 180
+                if rot[facing]:
+                    v["y"] = rot[facing]
+                stairs[f"facing={facing},half={half},shape={shape}"] = v
+    a.block("catacomb_brick_stairs", "Catacomb Brick Stairs", {"variants": stairs}, {"parent": f"{NS}:block/catacomb_brick_stairs"})
+    tx_ns = {k: f"{NS}:block/{v}" for k, v in tx.items()}
+    a.models["catacomb_brick_slab"] = {"parent": "minecraft:block/slab", "textures": tx_ns}
+    a.models["catacomb_brick_slab_top"] = {"parent": "minecraft:block/slab_top", "textures": tx_ns}
+    a.block("catacomb_brick_slab", "Catacomb Brick Slab",
+            {"variants": {"type=bottom": {"model": f"{NS}:block/catacomb_brick_slab"}, "type=top": {"model": f"{NS}:block/catacomb_brick_slab_top"},
+                          "type=double": {"model": f"{NS}:block/catacomb_brick"}}},
+            {"parent": f"{NS}:block/catacomb_brick_slab"})
+    wall_tx = {"wall": f"{NS}:block/catacomb_brick"}
+    for part in ("post", "side", "side_tall"):
+        a.models[f"catacomb_brick_wall_{part}"] = {"parent": f"minecraft:block/template_wall_{part}", "textures": wall_tx}
+    a.models["catacomb_brick_wall_inventory"] = {"parent": "minecraft:block/wall_inventory", "textures": wall_tx}
+    parts = [{"when": {"up": "true"}, "apply": {"model": f"{NS}:block/catacomb_brick_wall_post"}}]
+    for side, y in (("north", 0), ("east", 90), ("south", 180), ("west", 270)):
+        for height, part in (("low", "side"), ("tall", "side_tall")):
+            apply = {"model": f"{NS}:block/catacomb_brick_wall_{part}", "uvlock": True}
+            if y:
+                apply["y"] = y
+            parts.append({"when": {side: height}, "apply": apply})
+    a.block("catacomb_brick_wall", "Catacomb Brick Wall", {"multipart": parts}, {"parent": f"{NS}:block/catacomb_brick_wall_inventory"})
+
+    # The cable along the vault: a thin dark bar at the top of the block, along its axis.
+    a.texture("ceiling_cable", cable_run_tex(r("ceiling_cable")), T.PLASTIC.but(smoothness=0.35, relief=0.2))
+    a.models["ceiling_cable_x"] = model({"t": "ceiling_cable"}, [element((0, 14, 7), (16, 16, 9), "t")], ao=False)
+    a.models["ceiling_cable_z"] = model({"t": "ceiling_cable"}, [element((7, 14, 0), (9, 16, 16), "t")], ao=False)
+    a.block("ceiling_cable", "Ceiling Cable",
+            {"variants": {"axis=x": {"model": f"{NS}:block/ceiling_cable_x"}, "axis=z": {"model": f"{NS}:block/ceiling_cable_z"}}},
+            {"parent": f"{NS}:block/ceiling_cable_x"})
+
+    # --- Phase 8: the catacombs' tinted lamp, rubble, loose bricks, rust stains ------------------------
+    for tint, color in LAMP_TINTS.items():
+        for lit in (True, False):
+            state = "on" if lit else "off"
+            a.texture(f"catacomb_bulb_{tint}_{state}", tint_bulb_tex(r(f"catacomb_bulb_{tint}_{state}"), color, lit),
+                      T.PLASTIC.but(smoothness=0.7, relief=0.0, emission=GLOW["DIFFUSER_GLOW"]) if lit else T.PLASTIC.but(smoothness=0.6))
+            bars = [element((x, 4, z), (x + 1, 12, z + 1), "cage") for x, z in ((5, 5), (10, 5), (5, 10), (10, 10))]
+            rings = [element((5, 4, 5), (11, 5, 11), "cage"), element((5, 11, 5), (11, 12, 11), "cage")]
+            a.models[f"catacomb_lamp_{tint}_{state}"] = model(
+                {"cage": "rusty_steel_dark", "bulb": f"catacomb_bulb_{tint}_{state}"},
+                [element((5, 15, 5), (11, 16, 11), "cage"), element((7, 12, 7), (9, 15, 9), "cage"),
+                 element((6, 5, 6), (10, 11, 10), "bulb", shade=not lit)] + bars + rings, ao=False)
+    variants = {}
+    for facing, (x_rot, y_by_axis) in {
+            "down": (0, {"x": 0, "z": 90}), "up": (180, {"x": 0, "z": 90}),
+            "north": (270, {"x": 0, "z": 0}), "east": (270, {"x": 90, "z": 90}),
+            "south": (270, {"x": 180, "z": 180}), "west": (270, {"x": 270, "z": 270})}.items():
+        for axis, y_rot in y_by_axis.items():
+            for lit in ("true", "false"):
+                for tint in LAMP_TINTS:
+                    v = {"model": f"{NS}:block/catacomb_lamp_{tint}_{'on' if lit == 'true' else 'off'}"}
+                    if x_rot:
+                        v["x"] = x_rot
+                    if y_rot:
+                        v["y"] = y_rot
+                    variants[f"facing={facing},axis={axis},lit={lit},tint={tint}"] = v
+    a.block("catacomb_lamp", "Catacomb Lamp", {"variants": variants},
+            {"parent": f"{NS}:block/catacomb_lamp_warm_on", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+
+    rubble_mat = T.Material(0.1, porosity=0.8, relief=1.2)
+    a.texture("rubble_pile", rubble_tex(r("rubble_pile"), 16), rubble_mat)
+    a.texture("loose_bricks", rubble_tex(r("loose_bricks"), 7), rubble_mat)
+    a.models["rubble_pile_0"] = model({"t": "rubble_pile"}, [
+        element((2, 0, 2), (14, 2, 14), "t"), element((4, 2, 3), (12, 3.5, 11), "t"), element((6, 3.5, 5), (10, 4, 9), "t"),
+        element((10, 0, 10), (14.5, 3, 14.5), "t")])
+    a.models["rubble_pile_1"] = model({"t": "rubble_pile"}, [
+        element((1, 0, 3), (13, 2, 15), "t"), element((3, 2, 5), (10, 3, 12), "t"), element((5, 3, 7), (8, 4, 10), "t"),
+        element((10.5, 0, 1.5), (14, 2.5, 5), "t")])
+    a.models["loose_bricks_0"] = model({"t": "loose_bricks"}, [
+        element((3, 0, 4), (9, 2, 7), "t"), element((6, 0, 9), (12, 2, 12), "t"), element((9.5, 2, 9.5), (13.5, 3, 11.5), "t")])
+    a.models["loose_bricks_1"] = model({"t": "loose_bricks"}, [
+        element((4, 0, 3), (10, 2, 6), "t"), element((4.5, 2, 3.5), (9.5, 3, 5.5), "t"), element((9, 0, 8), (12, 2, 14), "t")])
+    for name, title in (("rubble_pile", "Rubble Pile"), ("loose_bricks", "Loose Bricks")):
+        a.block(name, title, {"variants": {f"pattern={i}": {"model": f"{NS}:block/{name}_{i}"} for i in range(2)}},
+                {"parent": f"{NS}:block/{name}_0", "display": BLOCK_ITEM_DISPLAY_LIGHT})
+
+    variants = {}
+    for i in range(4):
+        picture = f"rust_stain_{i}"
+        a.texture(picture, rust_stain_tex(r(picture), i), T.DECAL_MATERIALS["rust"], tiles=False)
+        a.models[picture] = plane(picture)
+    for facing in HORIZONTAL:
+        for pattern in range(4):
+            variants[f"facing={facing},pattern={pattern}"] = dict({"model": f"{NS}:block/rust_stain_{pattern}"}, **PLANE_ROTATION[facing])
+    a.block("rust_stain", "Rust Stain", {"variants": variants},
+            {"parent": "minecraft:item/generated", "textures": {"layer0": tex_ref("rust_stain_0")}})
+    return a
+
+
+# =====================================================================================
+
+def block_part(block_id):
+    """The lang part of the chapter that registers [block_id]: common for ModBlocks.kt, chapter1 for Ch1Blocks.kt, chapter2 for Ch2Blocks.kt."""
+    for kt, part in zip(MOD_BLOCKS_KT, ("common", "chapter1", "chapter2")):
+        if block_id in re.findall(r'register\(\s*"([a-z0-9_]+)"', kt.read_text()):
+            return part
+    return "common"
+
+
+def registered_ids():
+    """Block ids registered in ModBlocks.kt and the later chapters' block files (register("id", ...))."""
+    return {i for kt in MOD_BLOCKS_KT for i in re.findall(r'register\(\s*"([a-z0-9_]+)"', kt.read_text())}
+
+
+def png(img):
+    buf = io.BytesIO()
+    img.save(buf, "PNG")
+    return buf.getvalue()
+
+
+def write_json(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+
+def main():
+    a = build()
+
+    kotlin = registered_ids()
+    if kotlin != set(a.blockstates):
+        missing_here = sorted(kotlin - set(a.blockstates))
+        missing_there = sorted(set(a.blockstates) - kotlin)
+        raise SystemExit(f"blocks differ from ModBlocks.kt and Ch2Blocks.kt: not here {missing_here}, not registered {missing_there}")
+
+    sheet = {}
+    tex_dir = ASSETS / "textures" / "block"
+    tex_dir.mkdir(parents=True, exist_ok=True)
+    for name, (img, material, tiles) in a.textures.items():
+        normal, specular = pbr.maps(img, material, G.PBR["RELIEF"], tiles=tiles)
+        for suffix, image in (("", img), ("_n", normal), ("_s", specular)):
+            data = png(image)
+            (tex_dir / f"{name}{suffix}.png").write_bytes(data)
+            sheet[name + suffix] = data
+    for name, (frames, frametime) in a.animated.items():
+        w, h = frames[0].size
+        strip = Image.new("RGBA", (w, h * len(frames)))
+        for i, frame in enumerate(frames):
+            strip.paste(frame, (0, h * i))
+        (tex_dir / f"{name}.png").write_bytes(png(strip))
+        write_json(tex_dir / f"{name}.png.mcmeta", {"animation": {"frametime": frametime}})
+    for name, data in a.models.items():
+        write_json(ASSETS / "models" / "block" / f"{name}.json", data)
+    for block_id, data in a.items.items():
+        write_json(ASSETS / "models" / "item" / f"{block_id}.json", data)
+    for block_id, data in a.blockstates.items():
+        write_json(ASSETS / "blockstates" / f"{block_id}.json", data)
+        conditions = [{"condition": "minecraft:survives_explosion"}]
+        if block_id in a.loot_doors:                     # like vanilla doors: only the lower half drops
+            conditions.insert(0, {"condition": "minecraft:block_state_property", "block": f"{NS}:{block_id}",
+                                  "properties": {"half": "lower"}})
+        write_json(LOOT / f"{block_id}.json", {"type": "minecraft:block", "pools": [{
+            "rolls": 1, "entries": [{"type": "minecraft:item", "name": f"{NS}:{block_id}"}],
+            "conditions": conditions}]})
+
+    # Item textures and models that belong to no block.
+    item_dir = ASSETS / "textures" / "item"
+    item_dir.mkdir(parents=True, exist_ok=True)
+    for name, img in a.item_textures.items():
+        (item_dir / f"{name}.png").write_bytes(png(img))
+    for item, painter in (("battery", battery_tex), ("water_bottle", water_bottle_tex), ("keycard", keycard_tex),
+                          ("food_plate", food_plate_tex), ("food_popcorn", food_popcorn_tex), ("food_snack", food_snack_tex),
+                          ("record_old_fashioned", lambda g: record_tex(g, (196, 120, 50))), ("record_sparkling_water", lambda g: record_tex(g, (120, 190, 220))),
+                          ("record_still_water", lambda g: record_tex(g, (70, 110, 190))), ("record_chefs_plate", lambda g: record_tex(g, (150, 50, 60))),
+                          ("reel_87", reel_tex), ("reel_94", reel_tex), ("reel_102", reel_tex), ("reel_120", reel_tex),
+                          ("dart", dart_tex), ("master_card", master_card_tex), ("master_key", master_key_tex),
+                          ("wrench", wrench_tex), ("detector", detector_tex), ("broom", broom_tex), ("lab_badge_copy", lab_badge_copy_tex), ("overtime_pass", overtime_pass_tex), ("pipe_piece", pipe_piece_tex),
+                          *((f"factory_reagent_{c}", lambda g, c=c: factory_reagent_tex(g, c)) for c in FACTORY_REAGENTS),
+                          *((f"fuse_{amps}a", lambda g, i=i: fuse_item_tex(g, i)) for i, amps in enumerate(FUSE_AMPS)),
+                          *((f"reagent_{i + 1}", lambda g, i=i: reagent_item_tex(g, i)) for i in range(4)),
+                          ("master_card_nw", lambda g: card_tex(g, 0, 0)), ("master_card_ne", lambda g: card_tex(g, 1, 0)),
+                          ("master_card_sw", lambda g: card_tex(g, 0, 1)), ("master_card_se", lambda g: card_tex(g, 1, 1))):
+        (item_dir / f"{item}.png").write_bytes(png(painter(rng_for(item))))
+        # The wrench is held like a tool, the rest like things.
+        write_json(ASSETS / "models" / "item" / f"{item}.json",
+                   {"parent": "minecraft:item/handheld" if item in ("wrench", "broom") else "minecraft:item/generated",
+                    "textures": {"layer0": f"{NS}:item/{item}"}})
+
+    entity_dir = ASSETS / "textures" / "entity"
+    entity_dir.mkdir(parents=True, exist_ok=True)
+    (entity_dir / "dart.png").write_bytes(png(dart_entity_tex(rng_for("dart_entity"))))
+
+    # Each block's name goes to the lang part of the chapter that registers it (tools/lang/src/<part>).
+    names = {"common": {"itemGroup.every_tunnel": "Every Tunnel"}}
+    for block_id, name in a.names.items():
+        names.setdefault(block_part(block_id), {})[f"block.{NS}.{block_id}"] = name
+    for part, entries in names.items():
+        langfiles.update(part, "en_us", entries)
+
+    # Files of blocks or textures that no longer exist here.
+    stale = [p for p in (ASSETS / "models" / "block").glob("*.json") if p.stem not in a.models]
+    stale += [p for p in tex_dir.glob("*.png")
+              if re.sub(r"_[ns]$", "", p.stem) not in a.textures and p.stem not in a.animated]
+    # A block gone leaves its blockstate, item model and loot table behind as well.
+    for p in (ASSETS / "blockstates").glob("*.json"):
+        if p.stem not in a.blockstates:
+            stale += [p, ASSETS / "models" / "item" / p.name, ASSETS.parent.parent / "data" / NS / "loot_tables" / "blocks" / p.name]
+    for p in stale:
+        p.unlink(missing_ok=True)
+
+    OUT.mkdir(exist_ok=True)
+    preview.write_pbr_sheet(OUT / "blocks_sheet.png", sheet)
+    print(f"{len(a.blockstates)} blocks, {len(a.models)} models, {len(a.textures)} textures (+ LabPBR maps)"
+          + (f"; removed {len(stale)} stale files" if stale else ""))
+
+
+if __name__ == "__main__":
+    main()

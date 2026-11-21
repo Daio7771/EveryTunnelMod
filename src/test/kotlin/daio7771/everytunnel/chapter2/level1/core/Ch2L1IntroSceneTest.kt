@@ -1,8 +1,8 @@
 package daio7771.everytunnel.chapter2.level1.core
 
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1IntroScene.toLocal
-import daio7771.everytunnel.core.cutscene.SceneFrame
-import daio7771.everytunnel.core.level.Position
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.core.level.Position
 import kotlin.math.abs
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -52,7 +52,7 @@ class Ch2L1IntroSceneTest {
         assertEquals("speaker_lab_src", spec.shots[0].look)
         val built = Ch2L1IntroScene.build(spec, anchors, frame, 4830, "k", 30).built!!
         val shot = built.timeline.cutscene.shots.single()
-        assertEquals(daio7771.everytunnel.core.cutscene.Local(0.0, 0.0, 1.62), shot.from, "the camera does not leave their eyes")
+        assertEquals(daio7771.everytunnel.common.core.cutscene.Local(0.0, 0.0, 1.62), shot.from, "the camera does not leave their eyes")
         assertEquals(shot.from, shot.to)
     }
 

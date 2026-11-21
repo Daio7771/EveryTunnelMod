@@ -3,10 +3,10 @@ package daio7771.everytunnel.chapter2.level2.platform
 import daio7771.everytunnel.chapter2.core.MapPlan
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Files
 import daio7771.everytunnel.chapter2.platform.MapBuild
-import daio7771.everytunnel.platform.AlarmLightBlock
-import daio7771.everytunnel.platform.FluorescentLightBlock
-import daio7771.everytunnel.platform.LightMode
-import daio7771.everytunnel.platform.ModBlocks
+import daio7771.everytunnel.common.platform.AlarmLightBlock
+import daio7771.everytunnel.common.platform.FluorescentLightBlock
+import daio7771.everytunnel.common.platform.LightMode
+import daio7771.everytunnel.common.platform.ModBlocks
 import net.minecraft.block.Block
 import net.minecraft.block.Blocks
 import net.minecraft.block.LightBlock
@@ -18,7 +18,7 @@ import net.minecraft.util.math.Vec3d
 
 /**
  * Puts Chapter 2's Level 2, the catacombs, in the world, and takes it out: the chapter's [MapBuild] for the plan
- * `tools/map/ch2l2/generate.py` writes ([MapPlan], at [Ch2L2Files.PLAN]), at its origin (1024, 64, 1280), south of Level 1's, in the
+ * `tools/map/chapter2/ch2l2/generate.py` writes ([MapPlan], at [Ch2L2Files.PLAN]), at its origin (1024, 64, 1280), south of Level 1's, in the
  * anchors' dimension. The world remembers the fingerprint of the plan it was built from (`data/every_tunnel_ch2_l2.dat`), so it is built
  * again only when the plan changes. Mostly empty, its box is about two million cells: a build takes a few seconds in batches.
  *

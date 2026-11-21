@@ -1,0 +1,74 @@
+package daio7771.everytunnel.common.client
+
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import daio7771.everytunnel.common.EveryTunnel
+import daio7771.everytunnel.common.core.achievement.AchievementDef
+import daio7771.everytunnel.common.core.achievement.AchievementRegistry
+import net.fabricmc.loader.api.FabricLoader
+import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
+
+/**
+ * The achievements this player has earned, for good: kept on this computer in
+ * `config/every_tunnel/achievements.json` (`{"unlocked": ["first_day", ...]}`), the same for
+ * every world and every new game. Read the first time it is needed, written on each new one.
+ * A missing or broken file counts as none earned (and is logged); ids this version does not know
+ * are kept in the file but not shown (a jar without a chapter does not erase what that chapter earned).
+ *
+ * Client thread only. The server says what was earned (`common.platform.AchievementHooks`); the ACHIEVEMENTS
+ * screen (`common.client.screen.AchievementsScreen`) reads [unlocked].
+ */
+object AchievementStore {
+
+    private val file: Path get() = FabricLoader.getInstance().configDir.resolve(EveryTunnel.MOD_ID).resolve("achievements.json")
+
+    private var ids: MutableSet<String>? = null
+
+    private fun ids(): MutableSet<String> = ids ?: load().also { ids = it }
+
+    /** The achievements earned, of every chapter, in list order. */
+    val unlocked: Set<AchievementDef> get() = AchievementRegistry.fromIds(ids())
+
+    fun isUnlocked(achievement: AchievementDef): Boolean = achievement.id in ids()
+
+    /** Remembers [achievement]; true if it is new. */
+    fun unlock(achievement: AchievementDef): Boolean {
+        if (!ids().add(achievement.id)) return false
+        save()
+        return true
+    }
+
+    /** Forgets them all (Ctrl+Shift+D in the ACHIEVEMENTS screen). */
+    fun reset() {
+        ids = linkedSetOf()
+        save()
+        EveryTunnel.LOGGER.info("The achievements were reset")
+    }
+
+    private fun load(): MutableSet<String> {
+        val path = file
+        if (!Files.exists(path)) return linkedSetOf()
+        return try {
+            val json = JsonParser.parseString(Files.readString(path)).asJsonObject
+            val list = json.getAsJsonArray("unlocked") ?: JsonArray()
+            list.mapNotNullTo(linkedSetOf()) { element -> element.takeIf { it.isJsonPrimitive }?.asString }
+        } catch (e: Exception) {
+            EveryTunnel.LOGGER.warn("Could not read {}: no achievements loaded ({})", path, e.message)
+            linkedSetOf()
+        }
+    }
+
+    private fun save() {
+        val path = file
+        try {
+            Files.createDirectories(path.parent)
+            val json = JsonObject().apply { add("unlocked", JsonArray().apply { ids().forEach(::add) }) }
+            Files.writeString(path, json.toString() + "\n")
+        } catch (e: IOException) {
+            EveryTunnel.LOGGER.warn("Could not save {}: {}", path, e.message)
+        }
+    }
+}

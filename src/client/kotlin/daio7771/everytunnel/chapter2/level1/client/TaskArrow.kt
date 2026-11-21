@@ -1,13 +1,12 @@
 package daio7771.everytunnel.chapter2.level1.client
 
 import com.mojang.blaze3d.systems.RenderSystem
-import daio7771.everytunnel.chapter2.level1.client.Ch2L1Client
-import daio7771.everytunnel.client.cutscene.CutsceneView
+import daio7771.everytunnel.common.client.cutscene.CutsceneView
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Guide
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Skins
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
 import daio7771.everytunnel.chapter2.level1.platform.FactoryNpcEntity
-import daio7771.everytunnel.core.level.Position
+import daio7771.everytunnel.common.core.level.Position
 import daio7771.everytunnel.chapter2.level1.platform.Ch2L1DataLoader
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext

@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Speakers
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1SpeakerSchedule
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
@@ -19,8 +19,7 @@ import net.minecraft.util.math.Vec3d
 import java.util.Random
 import java.util.UUID
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
-import daio7771.everytunnel.platform.TickProfiler
-
+import daio7771.everytunnel.common.platform.TickProfiler
 /**
  * Rowan's loudspeakers in Act 1 of Chapter 2's Level 1: the announcements `rowan_loyal_a*`. What plays and when is
  * [Ch2L1SpeakerSchedule] (the rules of `speakers.json`: a1 three seconds after clocking in, a4 five seconds after task 2, a

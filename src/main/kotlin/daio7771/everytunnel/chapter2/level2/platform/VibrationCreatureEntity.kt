@@ -1,15 +1,15 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
 import daio7771.everytunnel.chapter2.platform.Ch2Achievements
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Creature
 import daio7771.everytunnel.chapter2.level2.core.VibrationCreatureBrain
 import daio7771.everytunnel.chapter2.level2.core.VibrationCreatureBrain.Kind
 import daio7771.everytunnel.chapter2.level2.core.VibrationCreatureBrain.State
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.core.level.Position
-import daio7771.everytunnel.systems.NoiseSource
-import daio7771.everytunnel.systems.NoiseSystem
+import daio7771.everytunnel.common.core.level.Position
+import daio7771.everytunnel.common.systems.NoiseSource
+import daio7771.everytunnel.common.systems.NoiseSystem
 import net.minecraft.block.BlockState
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.ai.goal.SwimGoal
@@ -53,8 +53,8 @@ import kotlin.math.sqrt
  *
  * A blow hurts the player by exactly [Ch2L2Creature.damageFraction] of their maximum health (two kill): the health is lowered directly
  * (vanilla damage would be cut by difficulty and armor), a lethal one goes through vanilla damage so that the death sequence
- * ([daio7771.everytunnel.platform.DeathHooks]) takes it. It cannot be hurt (only `/kill` and the void remove it), is never saved and
- * never despawns. Model, animations and texture: `tools/entity/vibration_creature.py` (GeckoLib); the animation follows its brain's
+ * ([daio7771.everytunnel.common.common.platform.DeathHooks]) takes it. It cannot be hurt (only `/kill` and the void remove it), is never saved and
+ * never despawns. Model, animations and texture: `tools/entity/chapter2/vibration_creature.py` (GeckoLib); the animation follows its brain's
  * state, synced to clients ([brainState]).
  */
 class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: World) : PathAwareEntity(type, world), GeoEntity {
@@ -155,7 +155,7 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
     }
 
     /** The players' noises on the felt floors since the last tick (the arena's, for Stone Maw): the fight adds the clangs of the pipes. */
-    internal fun feltNoises(world: ServerWorld, floors: List<daio7771.everytunnel.core.level.BlockBox>): List<VibrationCreatureBrain.Vibration> {
+    internal fun feltNoises(world: ServerWorld, floors: List<daio7771.everytunnel.common.core.level.BlockBox>): List<VibrationCreatureBrain.Vibration> {
         val dimension = world.registryKey.value.toString()
         val out = ArrayList<VibrationCreatureBrain.Vibration>()
         for (noise in NoiseSystem.recent()) {
@@ -436,7 +436,7 @@ class VibrationCreatureEntity(type: EntityType<out PathAwareEntity>, world: Worl
         private const val TURN_PER_TICK = 12f
         private const val TRANSITION_TICKS = 3
 
-        /** Half a cycle of `tools/entity/vibration_creature.py`'s walk (1.2 s), stalk (1.6 s) and charge (0.7 s), in ticks. */
+        /** Half a cycle of `tools/entity/chapter2/vibration_creature.py`'s walk (1.2 s), stalk (1.6 s) and charge (0.7 s), in ticks. */
         private const val WALK_STEP_TICKS = 12.0
         private const val STALK_STEP_TICKS = 16.0
         private const val CHARGE_STEP_TICKS = 7.0

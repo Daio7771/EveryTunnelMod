@@ -30,7 +30,7 @@ class Ch2L1SkinsTest {
     fun `every skin is a 64 by 64 player skin with classic arms and nothing in its second layer`() {
         for (id in Ch2L1Skins.ALL) {
             val file = File(assets, Ch2L1Skins.texturePath(id))
-            assertTrue(file.isFile, "no texture for $id (run tools/entity/workers.py)")
+            assertTrue(file.isFile, "no texture for $id (run tools/entity/chapter2/workers.py)")
             val image = ImageIO.read(file)
             assertEquals(64, image.width, id)
             assertEquals(64, image.height, id)

@@ -1,13 +1,13 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Overtime
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.platform.DeathHooks
-import daio7771.everytunnel.platform.ModSounds
+import daio7771.everytunnel.common.platform.DeathHooks
+import daio7771.everytunnel.common.platform.ModSounds
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents
 import net.minecraft.block.Block

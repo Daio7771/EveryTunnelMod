@@ -3,11 +3,10 @@ package daio7771.everytunnel.chapter2.level1.core
 import com.google.gson.JsonArray
 import com.google.gson.JsonParseException
 import com.google.gson.JsonParser
-import daio7771.everytunnel.core.level.BlockBox
-import daio7771.everytunnel.core.level.Position
-import daio7771.everytunnel.util.JsonFields
-import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
-
+import daio7771.everytunnel.common.core.level.BlockBox
+import daio7771.everytunnel.common.core.level.Position
+import daio7771.everytunnel.common.util.JsonFields
+import daio7771.everytunnel.common.util.JsonFields.Companion.numberOrNull
 /**
  * Parses `anchors.json`. Example:
  *
@@ -26,7 +25,7 @@ import daio7771.everytunnel.util.JsonFields.Companion.numberOrNull
  * }
  * ```
  *
- * The shapes are those of a level's file ([daio7771.everytunnel.core.level.LevelParser]): `pos` has three numbers,
+ * The shapes are those of a level's file ([daio7771.everytunnel.common.common.core.level.LevelParser]): `pos` has three numbers,
  * `from` and `to` three whole numbers, the corners in any order (both included, as in `/fill`). `dimension` defaults
  * to the overworld; `yaw` (-360 to 360), `pitch` (-90 to 90) and `provisional` (marks a place not yet measured on
  * the final map) to 0, 0 and false. The three lists are optional. A path has `points` (at least two, each `[x, y, z]`) and

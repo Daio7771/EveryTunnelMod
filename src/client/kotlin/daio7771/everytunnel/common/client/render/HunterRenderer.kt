@@ -1,0 +1,22 @@
+package daio7771.everytunnel.common.client.render
+
+import daio7771.everytunnel.common.EveryTunnel
+import daio7771.everytunnel.common.platform.HunterEntity
+import net.minecraft.client.render.entity.EntityRendererFactory
+import net.minecraft.util.Identifier
+import software.bernie.geckolib.model.DefaultedEntityGeoModel
+import software.bernie.geckolib.renderer.GeoEntityRenderer
+
+/**
+ * Draws a Hunter with GeckoLib from `geo/entity/hunter.geo.json`, `animations/entity/hunter.animation.json`
+ * and `textures/entity/hunter.png` (all made by `tools/entity/common/hunter.py`). The model turns its `head`
+ * bone with the entity's head; its blank white eyes glow in the dark (`hunter_glowmask.png`) ([EyesGlowLayer]).
+ */
+class HunterRenderer(context: EntityRendererFactory.Context) :
+    GeoEntityRenderer<HunterEntity>(context, DefaultedEntityGeoModel(Identifier(EveryTunnel.MOD_ID, "hunter"), true)) {
+
+    init {
+        shadowRadius = 0.3f
+        addRenderLayer(EyesGlowLayer(this))
+    }
+}

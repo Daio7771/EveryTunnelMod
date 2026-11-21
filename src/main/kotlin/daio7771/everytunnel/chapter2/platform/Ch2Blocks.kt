@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.platform.AnalyzerBlock
 import daio7771.everytunnel.chapter2.level1.platform.BadgeReaderBlock
 import daio7771.everytunnel.chapter2.level1.platform.CentrifugeBlock
@@ -22,16 +22,16 @@ import daio7771.everytunnel.chapter2.level2.platform.ScatterBlock
 import daio7771.everytunnel.chapter2.level2.platform.CeilingCableBlock
 import daio7771.everytunnel.chapter2.level2.platform.PumpBeaconBlock
 import daio7771.everytunnel.chapter2.level2.platform.TrapBreakerBlock
-import daio7771.everytunnel.platform.BlockShapes.box
-import daio7771.everytunnel.platform.FluorescentLightBlock
-import daio7771.everytunnel.platform.LinkedDoorBlock
-import daio7771.everytunnel.platform.ModBlocks
-import daio7771.everytunnel.platform.ModSoundGroups
-import daio7771.everytunnel.platform.PropBlock
-import daio7771.everytunnel.platform.RowFurnitureBlock
-import daio7771.everytunnel.platform.SecurityCameraBlock
-import daio7771.everytunnel.platform.SecurityCameraBlockEntity
-import daio7771.everytunnel.platform.StackFurnitureBlock
+import daio7771.everytunnel.common.platform.BlockShapes.box
+import daio7771.everytunnel.common.platform.FluorescentLightBlock
+import daio7771.everytunnel.common.platform.LinkedDoorBlock
+import daio7771.everytunnel.common.platform.ModBlocks
+import daio7771.everytunnel.common.platform.ModSoundGroups
+import daio7771.everytunnel.common.platform.PropBlock
+import daio7771.everytunnel.common.platform.RowFurnitureBlock
+import daio7771.everytunnel.common.platform.SecurityCameraBlock
+import daio7771.everytunnel.common.platform.SecurityCameraBlockEntity
+import daio7771.everytunnel.common.platform.StackFurnitureBlock
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents
 import net.fabricmc.fabric.api.`object`.builder.v1.block.entity.FabricBlockEntityTypeBuilder
 import net.minecraft.block.Block
@@ -52,7 +52,7 @@ import net.minecraft.util.Identifier
 /**
  * Chapter 2's blocks, registered by [daio7771.everytunnel.chapter2.Chapter2] after Chapter 1's ([ModBlocks], whose settings and
  * shapes they share), and added to the end of the same "Every Tunnel" creative tab. Their ids are the mod's (`every_tunnel:`), as
- * before the chapters were split, so worlds keep them. Models and textures come from `tools/blocks/generate.py`, which reads
+ * before the chapters were split, so worlds keep them. Models and textures come from `tools/blocks/common/generate.py`, which reads
  * this file too.
  */
 object Ch2Blocks {
@@ -72,7 +72,7 @@ object Ch2Blocks {
     val FACTORY_CAMERA: Block = register("factory_camera", SecurityCameraBlock(ModBlocks.props(MapColor.WHITE, ModSoundGroups.PLASTIC).noCollision()) { FACTORY_CAMERA_ENTITY })
 
     /**
-     * Chapter 2's prologue, on the scientist's bench (`tools/prologue/room.py`): a radiation counter whose amber screen
+     * Chapter 2's prologue, on the scientist's bench (`tools/prologue/chapter2/room.py`): a radiation counter whose amber screen
      * keeps climbing, a voice recorder with its red light blinking, a rack of glowing test tubes. Only to look at.
      */
     val RADIATION_COUNTER: Block = register("radiation_counter", PropBlock(ModBlocks.props(MapColor.BLACK, ModSoundGroups.PLASTIC).noCollision().luminance { 6 }, listOf(box(2, 0, 5, 14, 9, 11))))
@@ -127,7 +127,7 @@ object Ch2Blocks {
     val WARM_CEILING_LIGHT: Block = register("warm_ceiling_light", Block(ModBlocks.props(MapColor.WHITE, ModSoundGroups.PLASTIC).luminance { 15 }))
 
     /**
-     * Chapter 2 Level 2's catacombs (`tools/map/ch2l2/layout.json`, style `masonry`): dark damp brick, its cracked, damp and tide-lined
+     * Chapter 2 Level 2's catacombs (`tools/map/chapter2/ch2l2/layout.json`, style `masonry`): dark damp brick, its cracked, damp and tide-lined
      * variants, worn flagstones, the brick vault, the later bricking-up, and the brick's stairs, slab and wall. Plain stone to the hand.
      */
     private fun stone(color: MapColor = MapColor.BROWN): net.minecraft.block.AbstractBlock.Settings =

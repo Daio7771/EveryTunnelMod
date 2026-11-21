@@ -1,8 +1,8 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
-import daio7771.everytunnel.platform.BlockShapes
-import daio7771.everytunnel.platform.CardReaderBlock
-import daio7771.everytunnel.platform.PropBlock
+import daio7771.everytunnel.common.platform.BlockShapes
+import daio7771.everytunnel.common.platform.CardReaderBlock
+import daio7771.everytunnel.common.platform.PropBlock
 import net.minecraft.block.Block
 import net.minecraft.block.BlockState
 import net.minecraft.block.ShapeContext

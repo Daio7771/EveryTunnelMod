@@ -2,8 +2,8 @@ package daio7771.everytunnel.chapter2.level1.core
 
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
-import daio7771.everytunnel.core.level.Position
-import daio7771.everytunnel.util.JsonFields
+import daio7771.everytunnel.common.core.level.Position
+import daio7771.everytunnel.common.util.JsonFields
 import kotlin.math.sqrt
 
 /** How the coworker takes the player to the lockers (`cutscenes/meeting.json`'s `follow`). */

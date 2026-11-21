@@ -2,7 +2,7 @@ package daio7771.everytunnel.chapter2.level1.platform
 
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
 import daio7771.everytunnel.chapter2.platform.Ch2Items
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Bits
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Tasks
@@ -22,9 +22,8 @@ import net.minecraft.util.Hand
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import java.util.UUID
-import daio7771.everytunnel.platform.ModSounds
+import daio7771.everytunnel.common.platform.ModSounds
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
-
 /**
  * Chapter 2 Level 1's three tasks of Act 1, which the blocks of [Ch2L1TaskBlocks] hand their uses to. What is where and how long
  * it takes is `tasks.json` ([Ch2L1Tasks]); how far each player has got is a few counters in their progress (the tubes taken and the

@@ -3,13 +3,12 @@ package daio7771.everytunnel.chapter2.level2.core
 import com.google.gson.JsonParser
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Anchors
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1AnchorsParser
-
 /**
  * The data of Chapter 2's Level 2, the catacombs under the factory, as last read: its named places ([anchors], `anchors.json`, the same
  * format as Level 1's: [Ch2L1AnchorsParser], points, zones and paths, in world coordinates) and how it is played ([level],
  * `level.json`: [Ch2L2Level]). Plain Kotlin.
  *
- * Every later phase adds its file to [Ch2L2Files.ALL] and its parsed shape here. The map itself (`map.json`) is written by `tools/map/ch2l2/generate.py`, with the anchors and the flood's stages (`flood.json`, read as [flood]).
+ * Every later phase adds its file to [Ch2L2Files.ALL] and its parsed shape here. The map itself (`map.json`) is written by `tools/map/chapter2/ch2l2/generate.py`, with the anchors and the flood's stages (`flood.json`, read as [flood]).
  */
 class Ch2L2Data(
     val anchors: Ch2L1Anchors,
@@ -47,7 +46,7 @@ class Ch2L2Data(
                 }
                 val text = bundled[name]
                 if (text == null) {
-                    problems += "$name.json: the jar has no copy (run tools/map/ch2l2/generate.py --install)"
+                    problems += "$name.json: the jar has no copy (run tools/map/chapter2/ch2l2/generate.py --install)"
                     return null
                 }
                 val (value, found) = read(text)

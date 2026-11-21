@@ -8,8 +8,8 @@ import daio7771.everytunnel.chapter2.level2.core.Ch2L2Event
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import daio7771.everytunnel.chapter2.platform.MapBuild
-import daio7771.everytunnel.platform.DevWorlds
-import daio7771.everytunnel.platform.LightMode
+import daio7771.everytunnel.common.platform.DevWorlds
+import daio7771.everytunnel.common.platform.LightMode
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.command.CommandSource
 import net.minecraft.registry.RegistryKey

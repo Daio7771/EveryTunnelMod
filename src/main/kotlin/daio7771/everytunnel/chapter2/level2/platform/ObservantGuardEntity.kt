@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.core.level.Position
+import daio7771.everytunnel.common.core.level.Position
 import net.minecraft.block.BlockState
 import net.minecraft.entity.EntityType
 import net.minecraft.entity.ai.goal.SwimGoal
@@ -30,7 +30,7 @@ import kotlin.math.sqrt
 
 /**
  * The Observant Guard of Chapter 2's Level 2 (phase 5): 2.5 blocks of a man in a dark suit and red bow tie whose cube head is split
- * open round one white point (the user's model, `tools/entity/observant_guard.py`). It breaks out of the vestibule's wall and hunts the
+ * open round one white point (the user's model, `tools/entity/chapter2/observant_guard.py`). It breaks out of the vestibule's wall and hunts the
  * player through the vestibule, the service corridor and the maintenance room until the four traps kill it. **Everything it decides is
  * [Ch2L2Guard]'s** ([Ch2L2Guard.drive], every tick): this class only moves (a path to where it is told, at a speed in blocks a second),
  * turns, plays the animation it is told ([anim], synced to clients) and its steps. It cannot be hurt (only `/kill` and the void remove
@@ -177,7 +177,7 @@ class ObservantGuardEntity(type: EntityType<out PathAwareEntity>, world: World) 
         private const val TRANSITION_TICKS = 3
         private const val MOVING_PER_TICK = 0.02
 
-        /** Half a stride of `tools/entity/observant_guard.py`'s walk (1.4 s a stride) and chase (0.9 s), in ticks. */
+        /** Half a stride of `tools/entity/chapter2/observant_guard.py`'s walk (1.4 s a stride) and chase (0.9 s), in ticks. */
         private const val WALK_STEP_TICKS = 14.0
         private const val CHASE_STEP_TICKS = 9.0
 

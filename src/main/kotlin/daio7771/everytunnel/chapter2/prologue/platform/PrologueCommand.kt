@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.prologue.platform
 
-import daio7771.everytunnel.platform.DevWorlds
+import daio7771.everytunnel.common.platform.DevWorlds
 import com.mojang.brigadier.context.CommandContext
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback
 import net.minecraft.server.command.CommandManager
@@ -10,7 +10,7 @@ import net.minecraft.text.Text
 /**
  * `/everytunnel prologue` (dev worlds only, operators): plays Chapter 2's opening cinematic from wherever you stand, building its room
  * out of the way and putting you back where you were when it ends ([PrologueSceneHooks]). It joins the base game's `/everytunnel`
- * (`platform.DebugCommands`), which Brigadier merges by name.
+ * (`common.platform.DebugCommands`), which Brigadier merges by name.
  */
 object PrologueCommand {
 

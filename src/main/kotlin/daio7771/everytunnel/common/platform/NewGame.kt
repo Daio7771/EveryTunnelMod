@@ -1,0 +1,115 @@
+package daio7771.everytunnel.common.platform
+
+import daio7771.everytunnel.common.EveryTunnel
+import daio7771.everytunnel.common.core.LevelManager
+import daio7771.everytunnel.common.core.level.LevelDefinition
+import daio7771.everytunnel.common.systems.ResourceSystem
+import net.minecraft.registry.RegistryKey
+import net.minecraft.registry.RegistryKeys
+import net.minecraft.server.MinecraftServer
+import net.minecraft.server.network.ServerPlayerEntity
+import net.minecraft.util.Identifier
+import net.minecraft.world.GameMode
+
+/**
+ * Starts the game over for a player, in the same world: every time the world opens
+ * ([LoadingHooks]) and with `/everytunnel newgame`.
+ *
+ * - The world: Level 3 back if Level 4 had replaced it ([LoungeHooks]), everyone out of the lockers ([HidingHooks]), nothing carried any more
+ *   ([CarryHooks]), Level 3's boxes put out at random and their shelf emptied ([BoxHooks]), its
+ *   books off the cabinets and the counter and its hatch shut ([BookHooks]), every shutter opens ([LevelEntryHooks.openAll]), all the loot is back
+ *   ([LootSpawner.restock]), the lights the keycard put out are back and the card readers
+ *   locked ([KeycardHooks]), Level 3's valves back on 0 with new digits and their door shut
+ *   ([ValveHooks]), and every Pale man goes back to his spawn point (also the ones in unloaded chunks, when they load:
+ *   [PaleManSpawner.startNewGame]).
+ * - The player: every achievement can be earned again ([AchievementHooks]), no progress ([ProgressService]), empty inventory, full health and resources, Survival, and back at the
+ *   start of the first level with an intro, which plays again ([IntroHooks.replay]); without
+ *   one, at the start of the first level.
+ */
+object NewGame {
+
+    /**
+     * One step of putting the world back, run in order of [phase] (steps of one phase in the order they were added): the shared ones are
+     * here, a chapter adds its own between them with [addResetStep] / [addRebuiltStep], so the order of the steps is the same as if they were all in one list.
+     */
+    private class Step(val phase: Int, val run: (MinecraftServer) -> Unit)
+
+    private val resetSteps = java.util.concurrent.CopyOnWriteArrayList<Step>()
+    private val rebuiltSteps = java.util.concurrent.CopyOnWriteArrayList<Step>()
+
+    /** A step of [resetWorld] (a game starting or continued). The shared ones are at phases 10 (everyone out of the lockers), 50, 80 and 90. */
+    fun addResetStep(phase: Int, run: (MinecraftServer) -> Unit) {
+        resetSteps += Step(phase, run)
+    }
+
+    /** A step of [levelsRebuilt]. The shared ones are at phases 10, 70, 80 and 110. */
+    fun addRebuiltStep(phase: Int, run: (MinecraftServer) -> Unit) {
+        rebuiltSteps += Step(phase, run)
+    }
+
+    private fun runSteps(steps: List<Step>, server: MinecraftServer) {
+        for (step in steps.sortedBy { it.phase }) step.run(server)
+    }
+
+    init {
+        addResetStep(10, HidingHooks::newGame)
+        addResetStep(50, CollapseHooks::resetAll)
+        addResetStep(80, LevelEntryHooks::openAll)
+        addResetStep(90, LootSpawner::restock)
+        addRebuiltStep(10, LevelEntryHooks::openAll)
+        addRebuiltStep(70, LootSpawner::restock)
+        addRebuiltStep(80, CollapseHooks::resetAll)
+        addRebuiltStep(110, LoadingHooks::levelsRebuilt)
+    }
+
+    /**
+     * The levels' blocks were just rebuilt (`/everytunnel rebuilt`, run by the map's
+     * `garage:build`): the rebuild wiped the loot and put the lights back, so the world's
+     * memory of them starts over. The loot is put back at once, the lights the keycard put
+     * out are forgotten (they are on again), and shutters closing or waiting are dropped.
+     * Players are not touched.
+     */
+    fun levelsRebuilt(server: MinecraftServer) {
+        runSteps(rebuiltSteps, server)
+        EveryTunnel.LOGGER.info("Levels rebuilt: loot back, keycard lights forgotten")
+    }
+
+    /** The level the new game starts in, or null if the world has no level with a start. */
+    fun start(player: ServerPlayerEntity): LevelDefinition? {
+        val server = player.server
+        AchievementHooks.newGame(player)
+        resetWorld(server)
+
+        player.inventory.clear()
+        player.clearStatusEffects()
+        player.extinguish()
+        player.fallDistance = 0f
+        player.health = player.maxHealth
+        player.hungerManager.foodLevel = 20
+        player.hungerManager.saturationLevel = 5f
+        ResourceSystem.reset(player.uuid)
+        ProgressService.get().reset(player)
+        player.changeGameMode(GameMode.SURVIVAL)
+
+        PlaytestLog.newGame(player)
+        val level = IntroHooks.replay(player) ?: firstLevelStart(player)
+        ContinueGame.newGame(player, level)
+        EveryTunnel.LOGGER.info("{}: new game in {}", player.name.string, level?.id)
+        return level
+    }
+
+    /** Everything in the world back as a game starts. A game continued starts from here too ([ContinueGame]). */
+    fun resetWorld(server: MinecraftServer) {
+        runSteps(resetSteps, server)
+    }
+
+    private fun firstLevelStart(player: ServerPlayerEntity): LevelDefinition? {
+        for (level in LevelManager.all().sortedBy { it.order }) {
+            val start = level.spawnPoints.firstOrNull { RespawnHooks.TAG in it.tags } ?: continue
+            val world = player.server.getWorld(RegistryKey.of(RegistryKeys.WORLD, Identifier(level.dimension))) ?: continue
+            player.teleport(world, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
+            return level
+        }
+        return null
+    }
+}

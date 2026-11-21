@@ -36,7 +36,7 @@ data class BlockSpec(val id: String, val states: Map<String, String>) {
 }
 
 /**
- * The prologue's room as `tools/prologue/room.py` writes it into `assets/every_tunnel/cutscene/prologue_room.json`:
+ * The prologue's room as `tools/prologue/chapter2/room.py` writes it into `assets/every_tunnel/cutscene/prologue_room.json`:
  * what to place, in order ([fills] then [puts], each over the one before), the [shell] it is built in (everything
  * in it is cleared when the scene is over) and the [interior] of air in it, the ceiling's [lights] (cells to turn
  * off and on), where the [scientist] stands, where the radiation [counter] sounds (the Geiger clicks) and where the [viewer] (the player, not drawn) is held. Plain Kotlin;
@@ -85,7 +85,7 @@ class RoomPlan(
         /** The file from the classpath (the mod's own resources). */
         fun load(): RoomPlan {
             val stream = RoomPlan::class.java.classLoader.getResourceAsStream(RESOURCE)
-                ?: error("$RESOURCE is missing: run tools/prologue/room.py")
+                ?: error("$RESOURCE is missing: run tools/prologue/chapter2/room.py")
             return stream.use { parse(it.reader().readText()) }
         }
     }

@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Data
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1DataParser
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Files

@@ -1,7 +1,6 @@
 package daio7771.everytunnel.chapter2.level1.core
 
-import daio7771.everytunnel.core.level.Position
-
+import daio7771.everytunnel.common.core.level.Position
 /**
  * Where the guide arrow of Chapter 2's Level 1 floats ([Ch2L1GuideSpec]; `client.render.TaskArrow` draws it): over the place of the
  * player's current step, so that the way is clear when the LAB is full of benches and machines. Plain Kotlin, unit tested.

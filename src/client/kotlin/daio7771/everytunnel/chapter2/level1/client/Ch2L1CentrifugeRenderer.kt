@@ -3,7 +3,7 @@ package daio7771.everytunnel.chapter2.level1.client
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Tasks
 import daio7771.everytunnel.chapter2.level1.platform.CentrifugeBlockEntity
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
-import daio7771.everytunnel.platform.PropBlock
+import daio7771.everytunnel.common.platform.PropBlock
 import net.minecraft.client.MinecraftClient
 import net.minecraft.client.font.TextRenderer
 import net.minecraft.client.render.VertexConsumerProvider

@@ -1,6 +1,6 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Anchor
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Checkpoint
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Event
@@ -10,12 +10,12 @@ import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import daio7771.everytunnel.chapter2.platform.Ch2Return
 import daio7771.everytunnel.chapter2.platform.MapBuild
 import daio7771.everytunnel.chapter2.prologue.platform.PrologueSceneHooks
-import daio7771.everytunnel.config.ConfigManager
-import daio7771.everytunnel.platform.ChapterRequest
-import daio7771.everytunnel.platform.ChapterRestarts
-import daio7771.everytunnel.platform.DeathHooks
-import daio7771.everytunnel.platform.LightMode
-import daio7771.everytunnel.systems.ResourceSystem
+import daio7771.everytunnel.common.config.ConfigManager
+import daio7771.everytunnel.common.platform.ChapterRequest
+import daio7771.everytunnel.common.platform.ChapterRestarts
+import daio7771.everytunnel.common.platform.DeathHooks
+import daio7771.everytunnel.common.platform.LightMode
+import daio7771.everytunnel.common.systems.ResourceSystem
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.nbt.NbtList
 import net.minecraft.registry.RegistryKey

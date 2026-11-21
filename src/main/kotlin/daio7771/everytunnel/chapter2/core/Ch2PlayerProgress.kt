@@ -3,10 +3,9 @@ package daio7771.everytunnel.chapter2.core
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Snapshot
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
-
 /**
  * What one player has done in Chapter 2, kept through deaths and between sessions, apart from Chapter 1's
- * (`core.progress.PlayerProgress`): where they are in its Levels 1 and 2, whether they are playing one, a few counters of each, and
+ * (`common.core.progress.PlayerProgress`): where they are in its Levels 1 and 2, whether they are playing one, a few counters of each, and
  * Level 2's saved game. Plain data, no Minecraft types: `chapter2.platform.Ch2Progress` keeps one per player, saves it and sends it to
  * the client.
  */

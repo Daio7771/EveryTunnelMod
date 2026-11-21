@@ -5,8 +5,8 @@ import net.minecraft.block.BlockState
 import net.minecraft.block.ShapeContext
 import net.minecraft.block.StairsBlock
 import net.minecraft.state.StateManager
-import daio7771.everytunnel.platform.BlockShapes
-import daio7771.everytunnel.platform.FluorescentLightBlock
+import daio7771.everytunnel.common.platform.BlockShapes
+import daio7771.everytunnel.common.platform.FluorescentLightBlock
 import net.minecraft.state.property.DirectionProperty
 import net.minecraft.state.property.EnumProperty
 import net.minecraft.state.property.IntProperty
@@ -127,7 +127,7 @@ class ScatterBlock(settings: Settings, private val shape: VoxelShape) : Block(se
     }
 }
 
-/** A rust stain flat against a wall ([FACING] is the way it looks, like a vertical [daio7771.everytunnel.platform.StainBlock]); [PATTERN] picks the picture. */
+/** A rust stain flat against a wall ([FACING] is the way it looks, like a vertical [daio7771.everytunnel.common.common.platform.StainBlock]); [PATTERN] picks the picture. */
 class RustStainBlock(settings: Settings) : Block(settings) {
 
     init {

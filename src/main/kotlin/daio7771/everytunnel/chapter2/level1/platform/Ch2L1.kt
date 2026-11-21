@@ -1,10 +1,10 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
 import daio7771.everytunnel.chapter2.platform.MapBuild
-import daio7771.everytunnel.EveryTunnel
-import daio7771.everytunnel.config.ConfigManager
+import daio7771.everytunnel.common.EveryTunnel
+import daio7771.everytunnel.common.config.ConfigManager
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1State
-import daio7771.everytunnel.systems.ResourceSystem
+import daio7771.everytunnel.common.systems.ResourceSystem
 import net.minecraft.entity.player.PlayerEntity
 import net.minecraft.registry.RegistryKey
 import net.minecraft.registry.RegistryKeys
@@ -13,7 +13,6 @@ import net.minecraft.text.Text
 import net.minecraft.util.Identifier
 import java.util.concurrent.CopyOnWriteArrayList
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
-
 /**
  * Chapter 2's Level 1 as the rest of the mod sees it: the state machine ([Ch2L1State]) of each player, kept in
  * their progress ([Ch2Progress]) so it survives leaving the world, dying and a new session.
@@ -28,7 +27,7 @@ import daio7771.everytunnel.chapter2.platform.Ch2Progress
  * tells the listeners, so a step can be reached by playing or by command and the same things happen either way. A
  * system of the level registers once with [onStateChange] and does what entering a state means (an objective, a
  * scene, a speaker line); this object knows none of that. A listener that throws is logged and does not stop the
- * others, as in [daio7771.everytunnel.world.LevelTriggers]. Server thread only.
+ * others, as in [daio7771.everytunnel.common.common.world.LevelTriggers]. Server thread only.
  */
 object Ch2L1 {
 

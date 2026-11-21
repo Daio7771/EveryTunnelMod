@@ -3,7 +3,7 @@ package daio7771.everytunnel.chapter2.level1.platform
 import daio7771.everytunnel.chapter2.core.MapPlan
 import daio7771.everytunnel.chapter2.platform.Ch2Blocks
 import daio7771.everytunnel.chapter2.platform.MapBuild
-import daio7771.everytunnel.platform.ModBlocks
+import daio7771.everytunnel.common.platform.ModBlocks
 import net.minecraft.block.BlockState
 import net.minecraft.server.MinecraftServer
 import net.minecraft.server.world.ServerWorld
@@ -11,7 +11,7 @@ import net.minecraft.util.math.BlockPos
 
 /**
  * Puts Chapter 2's Level 1 in the world, and takes it out: the chapter's [MapBuild] for this level's plan ([MapPlan], from
- * `tools/map/ch2l1/generate.py`, at [PLAN]), built where the plan's origin says, in the dimension of the anchors, when the level is first
+ * `tools/map/chapter2/ch2l1/generate.py`, at [PLAN]), built where the plan's origin says, in the dimension of the anchors, when the level is first
  * needed ([Ch2L1.enter] asks) and again whenever the plan changes (the world remembers the fingerprint, `data/every_tunnel_ch2_l1.dat`).
  * Its own on top: [zoneLights], the lamps of a zone turned down and up (the dark LAB of the overtime, the basement at the end).
  */

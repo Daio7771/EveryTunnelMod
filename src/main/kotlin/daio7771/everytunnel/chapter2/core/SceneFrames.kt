@@ -1,8 +1,8 @@
 package daio7771.everytunnel.chapter2.core
 
-import daio7771.everytunnel.core.cutscene.Local
-import daio7771.everytunnel.core.cutscene.SceneFrame
-import daio7771.everytunnel.core.level.Position
+import daio7771.everytunnel.common.core.cutscene.Local
+import daio7771.everytunnel.common.core.cutscene.SceneFrame
+import daio7771.everytunnel.common.core.level.Position
 import kotlin.math.cos
 import kotlin.math.sin
 

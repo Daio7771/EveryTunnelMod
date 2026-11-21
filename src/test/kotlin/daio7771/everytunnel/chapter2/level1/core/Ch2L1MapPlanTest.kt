@@ -11,7 +11,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-/** The map plan in the jar, as `tools/map/ch2l1/generate.py` wrote it, and how it fits the anchors beside it. */
+/** The map plan in the jar, as `tools/map/chapter2/ch2l1/generate.py` wrote it, and how it fits the anchors beside it. */
 class Ch2L1MapPlanTest {
 
     private val plan = MapPlan.load(Ch2L1Build.PLAN)
@@ -54,7 +54,7 @@ class Ch2L1MapPlanTest {
             val (namespace, name) = spec.id.split(":")
             when (namespace) {
                 "minecraft" -> assertTrue(name in vanilla, "$block: not one of the vanilla blocks the map uses")
-                "every_tunnel" -> assertTrue(File(assets, "blockstates/$name.json").isFile, "$block: no blockstate (run tools/blocks/generate.py)")
+                "every_tunnel" -> assertTrue(File(assets, "blockstates/$name.json").isFile, "$block: no blockstate (run tools/blocks/common/generate.py)")
                 else -> error("$block: unknown namespace")
             }
         }

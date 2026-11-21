@@ -1,7 +1,7 @@
 package daio7771.everytunnel.chapter2.level1.platform
 
 import daio7771.everytunnel.chapter2.platform.Ch2Entities
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Chat
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1Gaze
 import daio7771.everytunnel.chapter2.level1.core.Ch2L1GroupMember
@@ -21,9 +21,8 @@ import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Box
 import net.minecraft.util.math.Vec3d
 import java.util.Random
-import daio7771.everytunnel.platform.KeptEntities
-import daio7771.everytunnel.platform.TickProfiler
-
+import daio7771.everytunnel.common.platform.KeptEntities
+import daio7771.everytunnel.common.platform.TickProfiler
 /**
  * The factory's people ([FactoryNpcEntity]): putting them in and taking them out. Kept entities ([KeptEntities]): put in through its
  * `spawn`, so they come back where they were if their chunk unloads, and taken out with `forget` and `discard()`.

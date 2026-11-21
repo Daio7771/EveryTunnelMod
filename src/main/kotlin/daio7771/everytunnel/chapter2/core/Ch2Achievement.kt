@@ -1,12 +1,11 @@
 package daio7771.everytunnel.chapter2.core
 
-import daio7771.everytunnel.core.achievement.AchievementDef
-
+import daio7771.everytunnel.common.core.achievement.AchievementDef
 /**
  * Chapter 2's achievements, the second tab of the ACHIEVEMENTS screen, in the order it lists them (Level 1's, then Level 2's). Registered
  * with the base game's registry at start-up (`Chapter2`) and earned by `platform.Ch2Achievements`. The texts are the lang keys
  * `achievement.every_tunnel.<id>` and `.description` (`tools/lang/src/chapter2/`). [hidden]: the screen only says "Hidden achievement"
- * until it is earned. [icon]: `sprite:<n>`, the n-th column of `achievement_icons.png` (`tools/gui/achievement_icons.py`).
+ * until it is earned. [icon]: `sprite:<n>`, the n-th column of `achievement_icons.png` (`tools/gui/common/achievement_icons.py`).
  */
 enum class Ch2Achievement(override val id: String, sprite: Int, override val hidden: Boolean = false) : AchievementDef {
     /** Level 1: the time clock punched. */

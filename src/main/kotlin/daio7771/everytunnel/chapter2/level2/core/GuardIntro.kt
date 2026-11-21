@@ -1,17 +1,17 @@
 package daio7771.everytunnel.chapter2.level2.core
 
-import daio7771.everytunnel.core.cutscene.Cutscene
-import daio7771.everytunnel.core.cutscene.Local
-import daio7771.everytunnel.core.cutscene.Look
-import daio7771.everytunnel.core.cutscene.Shot
-import daio7771.everytunnel.core.cutscene.Timeline
+import daio7771.everytunnel.common.core.cutscene.Cutscene
+import daio7771.everytunnel.common.core.cutscene.Local
+import daio7771.everytunnel.common.core.cutscene.Look
+import daio7771.everytunnel.common.core.cutscene.Shot
+import daio7771.everytunnel.common.core.cutscene.Timeline
 import kotlin.math.exp
 import kotlin.math.max
 
 /**
  * The Observant Guard's entrance as a clock of ticks since the cinematic began (Chapter 2 Level 2, phase 5): the one list of moments that
  * the server's choreography (`platform.Ch2L2Guard`: when the animations start, when the wall breaks, when the chest is beaten) and the
- * client's camera effects ([shake], [flash]) both read, and that `tools/entity/observant_guard.py`'s `punch`, `point` and `chest`
+ * client's camera effects ([shake], [flash]) both read, and that `tools/entity/chapter2/observant_guard.py`'s `punch`, `point` and `chest`
  * animations are written to. It is seen in **first person**, through the player's own eyes, with the bands of a cinematic:
  *
  * ```

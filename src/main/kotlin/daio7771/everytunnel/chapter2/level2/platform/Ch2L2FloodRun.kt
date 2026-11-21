@@ -1,11 +1,11 @@
 package daio7771.everytunnel.chapter2.level2.platform
 
-import daio7771.everytunnel.EveryTunnel
+import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
 import daio7771.everytunnel.chapter2.level2.core.FloodCell
 import daio7771.everytunnel.chapter2.level2.core.FloodStage
 import daio7771.everytunnel.chapter2.platform.Ch2Sounds
-import daio7771.everytunnel.platform.CollapseHooks
+import daio7771.everytunnel.common.platform.CollapseHooks
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents

@@ -15,7 +15,7 @@ acaba con la escena del director, una caída y los créditos. El diseño de soni
 - **Modders** que quieren entender, cambiar o ampliar el mod.
 - **Asistentes de IA** que trabajan en el código: empezad por
   [Cómo contribuir](contributing.md), que recoge las reglas del proyecto, y luego
-  [Arquitectura](architecture.md).
+  [Arquitectura](common/architecture.md).
 - **Jugadores** que quieren saber más de lo que cuenta la
   [guía del jugador](guide/01-how-to-play.md).
 
@@ -25,21 +25,21 @@ La primera vez, léelas en este orden:
 
 | Página | Qué cubre |
 |---|---|
-| [Arquitectura](architecture.md) | Capas, source sets, entrypoints, hilos, paquetes, datos guardados, mixins |
-| [Flujo del juego](game-flow.md) | Del menú principal a los créditos finales, paso a paso |
-| [Niveles](levels.md) | El formato JSON de los niveles, las etiquetas de zonas y puntos, cómo se construyen |
-| [Sistemas del jugador](player.md) | Stamina, sed, linterna, HUD, botín, reglas del mundo, el archivo de configuración |
-| [El ruido y el Pale man](noise-and-pale-man.md) | El sistema de ruido, su IA de oído, su entidad y su música |
-| [Audio](audio.md) | Cada evento de sonido, los reproductores del cliente, cómo se hacen los sonidos |
-| [Gráficos](graphics.md) | Con y sin shaders, luces, brillo, texturas, dirección de arte |
-| [Sistema de cinemáticas](cinematic-system.md) | La escena del director (cámara guiada, voz, subtítulos, saltar), la caída, los créditos finales y el prólogo del Chapter 2 |
-| [Chapter 2, Nivel 1](chapter-2-level-1.md) | El nivel de la fábrica, construido por fases en una rama privada: su máquina de estados, sus archivos de datos JSON (y cómo ajustarlos con `/et reload`) y sus comandos de depuración |
-| [Capítulo 2, Nivel 2](chapter-2-level-2.md) | Las catacumbas bajo la fábrica, construidas por fases en una rama privada: la entrada por la alcantarilla del Nivel 1, sus estados, checkpoints y la partida guardada del Capítulo 2, el mapa que sale de `layout.json` con su generador y sus comprobaciones, sus archivos de datos y sus comandos de depuración |
-| [Herramientas Python](tools.md) | Los generadores del mapa, sonidos, bloques, arte de entidades y GUI |
-| [Compilación y release](building-and-release.md) | Tareas de Gradle, mundos de desarrollo, el jar de release |
-| [Depuración](debugging.md) | Comandos de depuración y el registro `[playtest]` |
-| [Recetas](how-to.md) | Añadir un nivel, un sonido, un bloque, un consejo, un valor de configuración... |
-| [Mapa del código](code-map.md) | Cada archivo fuente y lo que hace |
+| [Arquitectura](common/architecture.md) | Capas, source sets, entrypoints, hilos, paquetes, datos guardados, mixins |
+| [Flujo del juego](common/game-flow.md) | Del menú principal a los créditos finales, paso a paso |
+| [Niveles](chapter1/levels.md) | El formato JSON de los niveles, las etiquetas de zonas y puntos, cómo se construyen |
+| [Sistemas del jugador](common/player.md) | Stamina, sed, linterna, HUD, botín, reglas del mundo, el archivo de configuración |
+| [El ruido y el Pale man](chapter1/noise-and-pale-man.md) | El sistema de ruido, su IA de oído, su entidad y su música |
+| [Audio](common/audio.md) | Cada evento de sonido, los reproductores del cliente, cómo se hacen los sonidos |
+| [Gráficos](common/graphics.md) | Con y sin shaders, luces, brillo, texturas, dirección de arte |
+| [Sistema de cinemáticas](common/cinematic-system.md) | La escena del director (cámara guiada, voz, subtítulos, saltar), la caída, los créditos finales y el prólogo del Chapter 2 |
+| [Chapter 2, Nivel 1](chapter2/level-1.md) | El nivel de la fábrica, construido por fases en una rama privada: su máquina de estados, sus archivos de datos JSON (y cómo ajustarlos con `/et reload`) y sus comandos de depuración |
+| [Capítulo 2, Nivel 2](chapter2/level-2.md) | Las catacumbas bajo la fábrica, construidas por fases en una rama privada: la entrada por la alcantarilla del Nivel 1, sus estados, checkpoints y la partida guardada del Capítulo 2, el mapa que sale de `layout.json` con su generador y sus comprobaciones, sus archivos de datos y sus comandos de depuración |
+| [Herramientas Python](common/tools.md) | Los generadores del mapa, sonidos, bloques, arte de entidades y GUI |
+| [Compilación y release](common/building-and-release.md) | Tareas de Gradle, mundos de desarrollo, el jar de release |
+| [Depuración](common/debugging.md) | Comandos de depuración y el registro `[playtest]` |
+| [Recetas](common/how-to.md) | Añadir un nivel, un sonido, un bloque, un consejo, un valor de configuración... |
+| [Mapa del código](common/code-map.md) | Cada archivo fuente y lo que hace |
 | [Cómo contribuir](contributing.md) | Convenciones, ciclos de vida de las criaturas, tests, commits, reglas para asistentes de IA |
 
 ## Guía del jugador
