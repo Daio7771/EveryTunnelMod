@@ -3,10 +3,12 @@ package daio7771.everytunnel.common.client.screen
 import com.mojang.blaze3d.systems.RenderSystem
 import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.common.client.AchievementStore
+import daio7771.everytunnel.common.client.MenuLogoOverride
+import daio7771.everytunnel.common.client.hud.AchievementToast
 import daio7771.everytunnel.common.client.effects.MenuMusic
 import daio7771.everytunnel.common.client.menu.MenuScene
 import daio7771.everytunnel.common.core.achievement.Achievement
-import daio7771.everytunnel.common.core.menu.LogoRun
+import daio7771.everytunnel.common.core.menu.LogoEver
 import daio7771.everytunnel.common.platform.ChapterRequest
 import daio7771.everytunnel.common.platform.ContinueGame
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
@@ -53,9 +55,9 @@ import kotlin.random.Random
  * - Ctrl+Shift+V, not shown anywhere, swaps to vanilla's title screen (other worlds, mods,
  *   multiplayer) and back. Vanilla's stays until the player joins a world.
  *
- * The logo is chalk on a blackboard (`tools/gui/common/logo.py`), in two layers: `textures/gui/logo_rest.png`, the words and
- * the tunnel emblem, and `logo_run.png`, the R of EVERY and the U and N of TUNNEL. Now and then ([LogoRun]) the words
- * flicker out and those three letters, which read RUN, stay lit alone for a moment before the words come back. In
+ * The logo is chalk on a blackboard (`tools/gui/common/logo.py`), in layers: `textures/gui/logo_rest.png`, the Y of
+ * EVERY, `logo_tunnel.png`, TUNNEL (`logo_final.png`, FINAL, in its place once [MenuLogoOverride] is set: EVERY FINAL), and `logo_ever.png`, the E, V, E and R of EVERY and the tunnel emblem. Now and then ([LogoEver]) the
+ * words flicker out and those letters, which read EVER, stay lit alone with the emblem for a moment before the words come back. In
  * Chapter 2's menu `logo_chapter_2.png`, "CHAPTER 2", is drawn under the logo (and goes out with the words). Without
  * the textures, the name in big letters.
  */
@@ -80,7 +82,8 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     }
 
     private val openedAtMs = Util.getMeasuringTimeMs()
-    private val logoRun = LogoRun(Random.Default)
+    private val logoEver = LogoEver(Random.Default)
+    private var finalAwarded = false
     private var selected = 0
     private var notice: Text? = null
     private var noticeUntilMs = 0L
@@ -121,7 +124,11 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
     override fun shouldCloseOnEsc(): Boolean = false
 
     override fun tick() {
-        logoRun.tick()
+        logoEver.tick()
+        if (MenuLogoOverride.final && !finalAwarded) {
+            finalAwarded = true
+            if (AchievementStore.unlock(Achievement.EVERY_FINAL)) client?.toastManager?.add(AchievementToast(Achievement.EVERY_FINAL))
+        }
     }
 
     override fun render(context: DrawContext, mouseX: Int, mouseY: Int, delta: Float) {
@@ -226,15 +233,17 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
         val client = client ?: return
         val left = layout.left
         val top = layout.logoTop
-        if (client.resourceManager.getResource(LOGO_REST).isPresent && client.resourceManager.getResource(LOGO_RUN).isPresent) {
+        if (listOf(LOGO_REST, LOGO_EVER, LOGO_TUNNEL, LOGO_FINAL).all { client.resourceManager.getResource(it).isPresent }) {
             val h = layout.logoHeight
             val w = h * 2
-            val words = fade * logoRun.wordsLevel
+            val words = fade * logoEver.wordsLevel
             RenderSystem.enableBlend()
-            // The words and the emblem, which the run puts out; then RUN, always lit, drawn once more while it glows.
+            // The words, which the run puts out (TUNNEL, or FINAL once [MenuLogoOverride] says so); then EVER and the emblem, always lit,
+            // drawn once more while it glows.
             drawLayer(context, LOGO_REST, left, top, w, h, LOGO_TEXTURE_H, words)
-            drawLayer(context, LOGO_RUN, left, top, w, h, LOGO_TEXTURE_H, fade)
-            if (logoRun.glow > 0f) drawLayer(context, LOGO_RUN, left, top, w, h, LOGO_TEXTURE_H, fade * logoRun.glow * GLOW)
+            drawLayer(context, if (MenuLogoOverride.final) LOGO_FINAL else LOGO_TUNNEL, left, top, w, h, LOGO_TEXTURE_H, words)
+            drawLayer(context, LOGO_EVER, left, top, w, h, LOGO_TEXTURE_H, fade)
+            if (logoEver.glow > 0f) drawLayer(context, LOGO_EVER, left, top, w, h, LOGO_TEXTURE_H, fade * logoEver.glow * GLOW)
             if (layout.subtitleHeight > 0) drawLayer(context, LOGO_CHAPTER_2, left, top + h, w, layout.subtitleHeight, LOGO_SUBTITLE_H, words)
             RenderSystem.disableBlend()
             context.setShaderColor(1f, 1f, 1f, 1f)
@@ -348,13 +357,15 @@ class MainMenuScreen : Screen(Text.translatable("menu.every_tunnel.title")) {
 
     companion object {
         private val LOGO_REST = Identifier(EveryTunnel.MOD_ID, "textures/gui/logo_rest.png")
-        private val LOGO_RUN = Identifier(EveryTunnel.MOD_ID, "textures/gui/logo_run.png")
+        private val LOGO_EVER = Identifier(EveryTunnel.MOD_ID, "textures/gui/logo_ever.png")
+        private val LOGO_TUNNEL = Identifier(EveryTunnel.MOD_ID, "textures/gui/logo_tunnel.png")
+        private val LOGO_FINAL = Identifier(EveryTunnel.MOD_ID, "textures/gui/logo_final.png")
         private val LOGO_CHAPTER_2 = Identifier(EveryTunnel.MOD_ID, "textures/gui/logo_chapter_2.png")
         /** The textures' sizes: the two layers of the logo are 512 by 256, Chapter 2's line 512 by 64. */
         private const val LOGO_TEXTURE_W = 512
         private const val LOGO_TEXTURE_H = 256
         private const val LOGO_SUBTITLE_H = 64
-        /** How much brighter RUN shines at the most, as a share of the alpha of a second pass over itself. */
+        /** How much brighter EVER shines at the most, as a share of the alpha of a second pass over itself. */
         private const val GLOW = 0.55f
         /** The logo's height when there is room (it is twice as wide), and the least it shrinks to. */
         private const val LOGO_HEIGHT = 100

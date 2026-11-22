@@ -37,7 +37,7 @@ platform/                                           everything that touches Mine
 | `core.guide` | `GuideMarkdown`, the reader of the player guide pages |
 | `core.puzzle` | Level 3's valve code and the notes' text |
 | `core.progress` | `PlayerProgress`, what a player has done (pieces, notes, scenes, checkpoint) |
-| `core.achievement` | `Achievement`, the eleven achievements |
+| `core.achievement` | `Achievement`, the fourteen achievements |
 | `core.hiding` | `LookLimit`, how far the head turns in a locker |
 | `systems` | `ResourceSystem` (stamina, thirst, battery), `NoiseSystem`, `FlashlightBeam` (beam math) |
 | `entities` | `PaleManBrain`, `ObserverBrain` and `HunterBrain`, the Pale man's, the Observer's and the Hunters' decisions; `Gaze` and the Distortions' clocks |

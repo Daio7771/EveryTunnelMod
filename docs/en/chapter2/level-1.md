@@ -197,8 +197,8 @@ The other keys: `speaker.<who>` (`coworker`, `worker_a`, `worker_b`, `rowan_loud
 The basement's terminal (phase 9) is an easter egg of its own: `cipher` in `act3.json` shows its window's words as flickering cipher
 symbols (`NonameOsLook.scramble`). It holds `?????????.mp3` (`recordings`: a name, the same in every language, and a sound event), whose
 PLAY opens a player (a waveform that moves while it plays, `[??]`, PLAY or STOP) and plays `voice.basement_recording` from the terminal:
-a voice played backwards (`ch2_l1_voices.py` reverses it, the echo put on the right way round), with no text and no subtitles on purpose,
-for players to reverse and make out. And `basement_note`, a `.txt` whose hidden message is in Base64 in each language. Nothing counts
+a message spelled in the NATO alphabet, already reversed, low and under radio noise in the user's MP3 (`ch2_l1_voices.py` only brings it to the voices' loudness), with no text and no subtitles on purpose,
+for players to make out. And `basement_note`, a `.txt` whose hidden message is in Base64 in each language. Nothing counts
 them and nothing waits on them.
 
 ## The people
@@ -455,7 +455,7 @@ second of Rowan's files (`Ch2L1Act3Hooks.onOfficeTrigger`) moves the player to `
   one farther away (a command) is put there.
 - **The camera is the player's own eyes**, held there and fixed on Rowan (no shake, no push): first the door, which opens; he comes in by
   `rowan_doorway` to his place just inside beside the door (`rowan_threshold`), turns and shuts it, and talks from there: c1 arms loose;
-  c2 fixing his cuffs (`CUFFS`); c3 his palms open from "Or am I special?" (`PALMS`), the low hum coming in (`ambient.ch2l1.office_hum`); a
+  c2 fixing his cuffs (`CUFFS`); c3 ("Or am I special?") is left out of the scene (it was not heard in game; its audio stays, `palms_line` is empty), the low hum comes in with c4 (`ambient.ch2l1.office_hum`); a
   pause; c4 bending forward (`LEAN_FORWARD`); c5 a glance at the door; a long pause; c6 the tie (`TIE`); c7 pointing at the door
   (`POINTING`); c8 he comes to the front of the desk (`rowan_desk_front`) and at "Unpaid, naturally" slides the **Unpaid Overtime Pass**
   across it (`OFFERING`; an item display gliding from `card_slide_start` to `card_slide_end`, then in the player's pockets) as the hum goes:

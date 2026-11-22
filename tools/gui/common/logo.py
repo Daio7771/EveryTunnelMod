@@ -14,10 +14,13 @@ small wobble and tilt, then drawn with a chalk brush (a stroke mask, a grain tha
 font is needed. Seeded, so every run is the same.
 
 Textures (src/main/resources/assets/every_tunnel/textures/gui/), all 512 wide:
-- logo_rest.png (512x256): every letter but R, U and N, and the emblem.
-- logo_run.png  (512x256): the R of EVERY and the U and N of TUNNEL, where they stand in the logo.
-  Together they are the logo. The menu draws both; now and then it puts the rest out and leaves
-  these three lit, which read RUN.
+- logo_rest.png (512x256): the Y of EVERY.
+- logo_tunnel.png (512x256): all of TUNNEL, where it stands in the logo.
+- logo_ever.png (512x256): the E, V, E and R of EVERY and the tunnel emblem, where they stand in the logo.
+  Together they are the logo. The menu draws them all; now and then it puts the rest and TUNNEL out and leaves
+  EVER lit beside the emblem.
+- logo_final.png (512x256): FINAL, in TUNNEL's place: the menu draws it instead of logo_tunnel.png, reading EVERY FINAL, once
+  the player has quit to the menu before the Director's office (`common.client.MenuLogoOverride`).
 - logo_chapter_2.png (512x64): "CHAPTER 2", drawn under the logo in Chapter 2's menu.
 """
 
@@ -44,8 +47,8 @@ CHALK = (238, 235, 226)
 DUST = (200, 200, 194)
 SEED = 7771
 
-# The letters of RUN: the 4th letter of EVERY, the 2nd and 3rd of TUNNEL
-RUN = {(0, 3), (1, 1), (1, 2)}
+# The letters of EVER: the first four of EVERY (the emblem goes with them)
+EVER = {(0, 0), (0, 1), (0, 2), (0, 3)}
 
 
 # ===========================================================================
@@ -71,6 +74,8 @@ GLYPHS = {
     "H": (0.60, [[(0.05, 0.0), (0.05, 1.0)], [(0.55, 0.0), (0.55, 1.0)], [(0.05, 0.5), (0.55, 0.5)]]),
     "A": (0.62, [[(0.0, 1.0), (0.31, 0.0), (0.62, 1.0)], [(0.12, 0.66), (0.50, 0.66)]]),
     "P": (0.52, [[(0.05, 1.0), (0.05, 0.0), (0.28, 0.0)] + arc(0.28, 0.25, 0.22, 0.25, -90, 90) + [(0.05, 0.5)]]),
+    "F": (0.50, [[(0.05, 1.0), (0.05, 0.0), (0.48, 0.0)], [(0.05, 0.5), (0.40, 0.5)]]),
+    "I": (0.34, [[(0.17, 0.0), (0.17, 1.0)], [(0.03, 0.0), (0.31, 0.0)], [(0.03, 1.0), (0.31, 1.0)]]),
     "2": (0.56, [arc(0.28, 0.27, 0.23, 0.27, -180, 35, 16) + [(0.05, 1.0), (0.55, 1.0)]]),
 }
 
@@ -209,22 +214,22 @@ def emblem_strokes(left, top, size):
 
 
 def build(style, seed=SEED):
-    """The three layers for a style: (rest, run, chapter 2 line)."""
+    """The layers for a style: (rest, ever, tunnel, final, chapter 2 line)."""
     stroke_w, wobble, passes, serif = STYLES[style]
     rng = random.Random(seed)
     nprng = np.random.default_rng(seed)
-    rest, run = Chalk(WIDTH, HEIGHT, rng, nprng), Chalk(WIDTH, HEIGHT, rng, nprng)
+    rest, ever, tunnel = (Chalk(WIDTH, HEIGHT, rng, nprng) for _ in range(3))
     for line, (text, top) in enumerate(zip(("EVERY", "TUNNEL"), LINE_TOPS)):
         x = LEFT
         for i, ch in enumerate(text):
             strokes, advance = letter_strokes(ch, x, top, CAP, rng, serif)
-            layer = run if (line, i) in RUN else rest
+            layer = ever if (line, i) in EVER else (tunnel if line == 1 else rest)
             for stroke in strokes:
                 layer.stroke(stroke, stroke_w * CAP, wobble, passes)
             x += advance + SPACING * CAP
     size = 100
     for stroke in emblem_strokes(WIDTH - size - 6, 3, size):
-        rest.stroke(stroke, max(2.6, stroke_w * size * 0.7), 0.8, passes)
+        ever.stroke(stroke, max(2.6, stroke_w * size * 0.7), 0.8, passes)
     sub = Chalk(WIDTH, SUBTITLE_HEIGHT, rng, nprng)
     sub_cap, x = 38, LEFT + 4
     for ch in "CHAPTER 2":
@@ -235,21 +240,35 @@ def build(style, seed=SEED):
         for stroke in strokes:
             sub.stroke(stroke, max(2.2, stroke_w * sub_cap * 1.1), wobble * 0.6, passes)
         x += advance + 0.34 * sub_cap
-    return rest.render(), run.render(), sub.render()
+    # FINAL, with a generator of its own so that the other layers come out as they always did
+    final_rng, final_np = random.Random(seed + 1), np.random.default_rng(seed + 1)
+    final = Chalk(WIDTH, HEIGHT, final_rng, final_np)
+    x = LEFT
+    for ch in "FINAL":
+        strokes, advance = letter_strokes(ch, x, LINE_TOPS[1], CAP, final_rng, serif)
+        for stroke in strokes:
+            final.stroke(stroke, stroke_w * CAP, wobble, passes)
+        x += advance + SPACING * CAP
+    return rest.render(), ever.render(), tunnel.render(), final.render(), sub.render()
 
 
-def previews(style, rest, run, sub):
+def previews(style, rest, ever, tunnel, final, sub):
     OUT.mkdir(exist_ok=True)
     black = lambda size: Image.new("RGBA", size, (0, 0, 0, 255))
     both = black((WIDTH, HEIGHT + SUBTITLE_HEIGHT))
     both.alpha_composite(rest)
-    both.alpha_composite(run)
+    both.alpha_composite(tunnel)
+    both.alpha_composite(ever)
     both.alpha_composite(sub, (0, HEIGHT))
     egg = black((WIDTH, HEIGHT))
-    egg.alpha_composite(run)
-    sheet = black((WIDTH * 2 + 8, HEIGHT + SUBTITLE_HEIGHT))
+    egg.alpha_composite(ever)
+    every_final = black((WIDTH, HEIGHT + SUBTITLE_HEIGHT))
+    for layer in (rest, final, ever):
+        every_final.alpha_composite(layer)
+    sheet = black((WIDTH * 3 + 16, HEIGHT + SUBTITLE_HEIGHT))
     sheet.alpha_composite(both)
     sheet.alpha_composite(egg, (WIDTH + 8, 0))
+    sheet.alpha_composite(every_final, (WIDTH * 2 + 16, 0))
     sheet.save(OUT / f"logo_preview_{style}.png")
 
 
@@ -257,15 +276,17 @@ def main():
     write = "--write" in sys.argv
     styles = [a for a in sys.argv[1:] if a in STYLES] or ["fine"]
     for style in styles:
-        rest, run, sub = build(style)
-        previews(style, rest, run, sub)
+        rest, ever, tunnel, final, sub = build(style)
+        previews(style, rest, ever, tunnel, final, sub)
         print(f"preview: tools/gui/common/output/logo_preview_{style}.png")
         if write:
             TEXTURES.mkdir(parents=True, exist_ok=True)
             rest.save(TEXTURES / "logo_rest.png")
-            run.save(TEXTURES / "logo_run.png")
+            ever.save(TEXTURES / "logo_ever.png")
+            tunnel.save(TEXTURES / "logo_tunnel.png")
+            final.save(TEXTURES / "logo_final.png")
             sub.save(TEXTURES / "logo_chapter_2.png")
-            print("wrote logo_rest.png, logo_run.png, logo_chapter_2.png")
+            print("wrote logo_rest.png, logo_ever.png, logo_tunnel.png, logo_final.png, logo_chapter_2.png")
 
 
 if __name__ == "__main__":

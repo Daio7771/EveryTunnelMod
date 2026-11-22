@@ -3,6 +3,7 @@ package daio7771.everytunnel.chapter1.level4.platform
 import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.common.core.LevelManager
 import daio7771.everytunnel.common.core.level.LevelDefinition
+import daio7771.everytunnel.chapter1.level4.core.DartsEgg
 import daio7771.everytunnel.chapter1.level4.core.OrderPuzzle
 import daio7771.everytunnel.chapter1.level4.core.DartboardGeometry
 import daio7771.everytunnel.chapter1.level4.core.LoungeSave
@@ -47,6 +48,9 @@ import daio7771.everytunnel.common.platform.NoteHooks
  * with the piece inside ([DartHatchBlock]), leaves the darts on the board, and adds a line to the
  * score sheet ([noteShown]).
  *
+ * Easter egg ([DartsEgg]): once the other three pieces are taken and every safe is open, a game not yet won asks for
+ * 12 - 13 - 14 instead, the next time no dart is out ([sync]).
+ *
  * The state is kept in memory, like the other puzzles of the level: every opening of the world is a
  * new game. Places are the level's spawn points tagged `puzzle` (`dartboard`, its middle part;
  * `dart_tray`; `dart_hatch`; `dart_plate`).
@@ -62,6 +66,7 @@ object DartHooks {
     private const val SYNC_TICKS = 10
     private const val SEARCH_BLOCKS = 32.0
     private const val SCORE_SHEET = "ch1_l4_note_score_sheet"
+    private val OTHER_PIECES = listOf("ch1_l4_piece_bar", "ch1_l4_piece_cinema", "ch1_l4_piece_spa")
 
     private var puzzle = OrderPuzzle(drawSequence())
     private var server: MinecraftServer? = null
@@ -224,6 +229,11 @@ object DartHooks {
             thrown = emptyList()
         }
 
+        if (!puzzle.solved && puzzle.answer != DartsEgg.SEQUENCE && !carried && thrown.isEmpty() && clearIn < 0 && eggApplies(server, level)) {
+            puzzle = OrderPuzzle(DartsEgg.SEQUENCE)
+            EveryTunnel.LOGGER.info("Level 4's darts this game: {} (the guards' numbers)", puzzle.answer)
+        }
+
         val tray = pointOf(level, "dart_tray")
         if (tray != null) {
             val state = world.getBlockState(tray)
@@ -250,6 +260,16 @@ object DartHooks {
                 }
             }
         }
+    }
+
+    /** The other pieces are taken and every safe is open. */
+    private fun eggApplies(server: MinecraftServer, level: LevelDefinition): Boolean {
+        val safes = level.spawnPoints.count { it.id.startsWith("ch1_l4_note_diary_") }
+        val progress = ProgressService.get()
+        val pieces = server.playerManager.playerList.maxOfOrNull { player ->
+            OTHER_PIECES.count { progress.hasPiece(player, LoungePuzzleHooks.PIECE_LEVEL, it) }
+        } ?: 0
+        return DartsEgg.applies(pieces, SafeHooks.openCount, safes)
     }
 
     private fun plateText(): String = "HOUSE GAME: " + puzzle.answer.joinToString(" - ")

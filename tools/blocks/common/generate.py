@@ -4184,15 +4184,24 @@ def build():
 
     a.texture("film_light_lens", film_light_lens_tex(r("film_light_lens")), led_glow, tiles=False)
     a.texture("film_black", plastic_tex(r("film_black"), (30, 30, 34)), T.PLASTIC.but(smoothness=0.5, relief=0.2))
+    def whole(els):
+        """The boxes of a prop that rise over the block's top: the game works a face's default picture out from the coordinates, which
+        there fall outside the texture and show the atlas next to it (half a camera, a lamp in pieces); the whole texture instead."""
+        for e in els:
+            if any(c < 0 or c > 16 for c in list(e["from"]) + list(e["to"])):
+                for face in e["faces"].values():
+                    face.setdefault("uv", [0, 0, 16, 16])
+        return els
+
     head = el((4, 22, 5), (12, 30, 12), "b", north=("l", (0, 0, 16, 16)))
     head["rotation"] = {"angle": -22.5, "axis": "x", "origin": [8, 26, 8]}
     flap = el((4, 30, 3), (12, 30.5, 6), "b")
     flap["rotation"] = {"angle": -22.5, "axis": "x", "origin": [8, 26, 8]}
     prop("film_light", "Studio Light", {"d": "lab_steel_dark", "b": "film_black", "l": "film_light_lens"},
-         tripod(18) + [head, flap], ao=False)
+         whole(tripod(18) + [head, flap]), ao=False)
     prop("film_camera", "Cine Camera", {"d": "lab_steel_dark", "b": "film_black"},
-         tripod(14) + [el((5, 18, 4), (11, 24, 14), "b"), el((6.5, 19.5, 0.5), (9.5, 22.5, 4), "d"),
-                       el((7.5, 24, 3), (8.5, 30, 9), "b"), el((7.5, 24, 9), (8.5, 29, 14), "b"), el((11, 19, 8), (13, 21, 12), "d")],
+         whole(tripod(14) + [el((5, 18, 4), (11, 24, 14), "b"), el((6.5, 19.5, 0.5), (9.5, 22.5, 4), "d"),
+                             el((7.5, 24, 3), (8.5, 30, 9), "b"), el((7.5, 24, 9), (8.5, 29, 14), "b"), el((11, 19, 8), (13, 21, 12), "d")]),
          ao=False)
     a.texture("rowan_portrait", rowan_portrait_tex(r("rowan_portrait")), T.Material(0.35, relief=0.25), tiles=False)
     prop("rowan_portrait", "Portrait", {"p": "rowan_portrait", "w": "suite_bed_frame"},

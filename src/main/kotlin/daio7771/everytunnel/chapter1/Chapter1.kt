@@ -20,6 +20,7 @@ import daio7771.everytunnel.chapter1.level5.platform.DeepWaterHooks
 import daio7771.everytunnel.chapter1.level5.platform.DirectorLoopHooks
 import daio7771.everytunnel.chapter1.level5.platform.DirectorSceneHooks
 import daio7771.everytunnel.chapter1.level5.platform.DrainHooks
+import daio7771.everytunnel.chapter1.level5.platform.EveryFinalHooks
 import daio7771.everytunnel.chapter1.level5.platform.FalseExitHooks
 import daio7771.everytunnel.chapter1.level5.platform.LabDoorHooks
 import daio7771.everytunnel.chapter1.level5.platform.LabFigureHooks
@@ -34,6 +35,7 @@ import daio7771.everytunnel.chapter1.platform.EndingHooks
 import daio7771.everytunnel.common.platform.HidingHooks
 import daio7771.everytunnel.chapter1.platform.PathingRules
 import daio7771.everytunnel.chapter1.platform.RunStatsHooks
+import daio7771.everytunnel.chapter1.platform.WhisperHooks
 import daio7771.everytunnel.chapter1.level2.platform.PaleManEntity
 import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.common.core.achievement.Achievement
@@ -67,6 +69,7 @@ object Chapter1 : ModInitializer {
         ObserverHooks.register()
         KeycardHooks.register()
         ValveHooks.register()
+        WhisperHooks.register()
         HidingHooks.register()
         CarryHooks.register()
         BookHooks.register()
@@ -83,6 +86,7 @@ object Chapter1 : ModInitializer {
         DeepWaterHooks.register()
         DirectorSceneHooks.register()
         DirectorLoopHooks.register()
+        EveryFinalHooks.register()
         FalseExitHooks.register()
         LabHallHooks.register()
         LoungePuzzleHooks.register()

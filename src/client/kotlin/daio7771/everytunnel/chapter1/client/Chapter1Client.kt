@@ -35,6 +35,7 @@ object Chapter1Client : ClientModInitializer {
         HeartbeatEffect.register()
         TensionMusic.register()
         DirectorCutscene.register()
+        EveryFinalClient.register()
         FilmPlayer.register()
         LoungeMusic.register()
         DirectorVoice.register()

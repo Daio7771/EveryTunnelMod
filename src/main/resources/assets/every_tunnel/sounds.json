@@ -104,6 +104,22 @@
       }
     ]
   },
+  "ambient.l1_whisper": {
+    "sounds": [
+      {
+        "name": "every_tunnel:ambient/l1_whisper_1",
+        "attenuation_distance": 8
+      },
+      {
+        "name": "every_tunnel:ambient/l1_whisper_2",
+        "attenuation_distance": 8
+      },
+      {
+        "name": "every_tunnel:ambient/l1_whisper_3",
+        "attenuation_distance": 8
+      }
+    ]
+  },
   "ambient.lab.air": {
     "sounds": [
       {

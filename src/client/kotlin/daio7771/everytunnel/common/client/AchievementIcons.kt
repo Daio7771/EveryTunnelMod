@@ -13,14 +13,14 @@ import net.minecraft.util.Identifier
 
 /**
  * Each achievement's 16x16 icon, on its toast and on the ACHIEVEMENTS screen: mostly the thing it
- * is about, drawn as an item; the guard's badge, the skull, the Pale man's silhouette, the puzzle piece, the padlock and
+ * is about, drawn as an item; the guard's badge, the skull, the Pale man's silhouette, the puzzle piece, the padlock, the whisper's breath, the guard's note, the chalk F and
  * the locked "?" are drawn for the mod (`achievement_icons.png`, `tools/gui/common/achievement_icons.py`). A later chapter's achievement
  * names an item as its [AchievementDef.icon] (`item:<namespace>:<path>`) or a column of the sheet (`sprite:<n>`).
  */
 object AchievementIcons {
 
     private val SHEET = Identifier(EveryTunnel.MOD_ID, "textures/gui/achievement_icons.png")
-    private const val SHEET_WIDTH = 272
+    private const val SHEET_WIDTH = 320
     private const val LOCKED_U = 0
 
     /** The icons drawn for the mod (`tools/gui/common/achievement_icons.py`): where each is on the sheet. */
@@ -31,6 +31,9 @@ object AchievementIcons {
         Achievement.BIG_BRAIN -> 64       // a puzzle piece
         Achievement.PRIVACY_POLICY -> 80  // a padlock
         Achievement.NOTHING_THERE -> 96   // the Director's mask
+        Achievement.WHISPER -> 272        // a breath of three wavy lines
+        Achievement.GUARD_NOTE -> 288     // a folded note
+        Achievement.EVERY_FINAL -> 304    // a chalk F
         else -> null
     }
 
@@ -39,7 +42,8 @@ object AchievementIcons {
 
     /** The others are the thing itself, as an item. */
     private fun item(achievement: Achievement): ItemStack? = when (achievement) {
-        Achievement.FIRST_DAY, Achievement.OUCH, Achievement.TALL_MEN, Achievement.BIG_BRAIN, Achievement.PRIVACY_POLICY, Achievement.NOTHING_THERE -> null
+        Achievement.FIRST_DAY, Achievement.OUCH, Achievement.TALL_MEN, Achievement.BIG_BRAIN, Achievement.PRIVACY_POLICY, Achievement.NOTHING_THERE,
+        Achievement.WHISPER, Achievement.GUARD_NOTE, Achievement.EVERY_FINAL -> null
         Achievement.STAY_HYDRATED -> ItemStack(ModItems.WATER_BOTTLE)
         Achievement.KEYCARD -> ItemStack(ModItems.KEYCARD)
         Achievement.VALVES -> block("valve")

@@ -2,7 +2,9 @@ package daio7771.everytunnel.chapter2.level2.platform
 
 import daio7771.everytunnel.common.EveryTunnel
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Loot
+import daio7771.everytunnel.chapter2.level2.core.Ch2L2NoSupplies
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2Note
+import daio7771.everytunnel.chapter2.level2.core.Ch2L2SupplyWatch
 import daio7771.everytunnel.chapter2.level2.core.Ch2L2State
 import daio7771.everytunnel.chapter2.platform.Ch2Progress
 import daio7771.everytunnel.common.core.level.Position
@@ -19,6 +21,7 @@ import net.minecraft.server.world.ServerWorld
 import net.minecraft.util.Identifier
 import net.minecraft.util.math.BlockPos
 import net.minecraft.util.math.Direction
+import java.util.UUID
 
 /**
  * What lies about in Chapter 2's Level 2, as `level.json` lists it (`hunters`, `loot`, `notes`): the Hunters, the survival kit and the
@@ -29,6 +32,8 @@ import net.minecraft.util.math.Direction
  * - **Loot:** each piece not yet taken lies at its place (`LootSpawner.LOOT`'s blocks); one taken (the player's counter `loot.<id>`,
  *   set on picking it up) does not. A death keeps the pockets, so keeps the counters; CONTINUE gives back the pockets and counters of
  *   the checkpoint, so what was picked up since lies there again.
+ * - **No supplies (easter egg):** a player seen in the survival kit's room and then out of it with no bar, or no water, of the kit taken
+ *   has a group of Hunters put at each of `no_supplies`' spots near the entry, once per start ([Ch2L2SupplyWatch]); the next start takes them away like the rest.
  * - **Notes:** a board of the map at a note's anchor opens that note on paper ([NoteHooks.Source]); the counter `read.<id>` remembers it.
  *
  * Server thread only.
@@ -38,18 +43,23 @@ object Ch2L2Spawns {
     /** The id the level's Hunters carry (`HunterEntity.levelId`), apart from the base game's levels. */
     const val LEVEL_ID = "chapter2_level2"
 
+    /** How often (ticks) the players' places are looked at for the no-supplies egg. */
+    private const val WATCH_EVERY = 5
+
     private val data get() = Ch2L2DataLoader.data
 
     fun register() {
         Ch2L2.onStart { player, state -> started(player, state) }
         LootSpawner.addTakenListener { player, pos, _ -> taken(player, pos) }
         NoteHooks.addSource { player, pos -> noteAt(player, pos) }
+        Ch2L2Perf.register("supplies", ::watchSupplies)
     }
 
     private fun started(player: ServerPlayerEntity, state: Ch2L2State) {
         val world = levelWorld(player.server) ?: return
         putHunters(world, state)
         placeLoot(player, world)
+        data.level.noSupplies?.let { watchFor(it).reset(player.uuid) }
     }
 
     // --- Hunters -----------------------------------------------------------------------------------
@@ -68,6 +78,45 @@ object Ch2L2Spawns {
     /** The level's Hunters gone (the level is being taken out). */
     fun clearHunters(server: MinecraftServer) {
         levelWorld(server)?.let { DistortionHooks.discard(it, LEVEL_ID) }
+    }
+
+    // --- no supplies -------------------------------------------------------------------------------
+
+    private var watching: Ch2L2NoSupplies? = null
+    private var watch: Ch2L2SupplyWatch<UUID>? = null
+
+    /** The watch for the rules the data has now (a reload of the data makes a new one). */
+    private fun watchFor(rules: Ch2L2NoSupplies): Ch2L2SupplyWatch<UUID> {
+        if (watching !== rules || watch == null) {
+            watching = rules
+            watch = Ch2L2SupplyWatch(rules, data.level.loot.map { it.id })
+        }
+        return watch!!
+    }
+
+    private fun watchSupplies(server: MinecraftServer) {
+        val rules = data.level.noSupplies ?: return
+        if (server.ticks % WATCH_EVERY != 0) return
+        val world = levelWorld(server) ?: return
+        val box = data.anchors.zone(rules.zone)?.box ?: return
+        for (player in server.playerManager.playerList) {
+            if (!Ch2L2.active(player) || !player.isAlive || player.serverWorld != world) continue
+            val inKit = box.contains(player.x, player.y, player.z)
+            val fire = watchFor(rules).update(player.uuid, inKit) { id ->
+                val loot = data.level.loot.firstOrNull { it.id == id }
+                loot != null && Ch2Progress.ch2L2Counter(player, loot.takenKey) > 0
+            }
+            if (fire) putNoSupplies(world, rules)
+        }
+    }
+
+    private fun putNoSupplies(world: ServerWorld, rules: Ch2L2NoSupplies) {
+        val anchor = data.anchors.point(rules.anchor) ?: return
+        for (spot in rules.groups) {
+            val at = Position(anchor.position.x + spot.dx, anchor.position.y + spot.dy, anchor.position.z + spot.dz)
+            DistortionHooks.putIn(world, DistortionHooks.HUNTERS_TAG, at, spot.yaw, LEVEL_ID)
+        }
+        EveryTunnel.LOGGER.info("Chapter 2 Level 2: left the survival kit without supplies, {} groups of Hunters", rules.groups.size)
     }
 
     // --- loot --------------------------------------------------------------------------------------

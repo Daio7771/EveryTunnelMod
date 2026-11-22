@@ -20,7 +20,8 @@ class Ch2L1OfficeTest {
     @Test
     fun `the jar's office file reads without a problem and names what anchors has`() {
         assertEquals(emptyList(), result.problems)
-        assertEquals((1..8).map { "rowan_office_c$it" }, spec.lines)
+        // c3 ("Or am I special?") is left out of the scene: it was not heard in game
+        assertEquals((1..8).filter { it != 3 }.map { "rowan_office_c$it" }, spec.lines)
         assertEquals(50, spec.pauses["rowan_office_c5"])
         val tasks = Ch2L1TasksParser.parse(data.document("tasks")).tasks
         val speakers = Ch2L1SpeakersParser.parse(data.document("speakers")).speakers
@@ -38,7 +39,7 @@ class Ch2L1OfficeTest {
     }
 
     @Test
-    fun `the eight lines in order, the pauses between them, the timing of the pass and the hum`() {
+    fun `the seven lines in order, the pauses between them, the timing of the pass and the hum`() {
         assertEquals(spec.lines, built.beats.map { it.line.id })
         for ((a, b) in built.beats.zipWithNext()) {
             val pause = spec.gapTicks + (spec.pauses[a.line.id] ?: 0)
@@ -64,9 +65,6 @@ class Ch2L1OfficeTest {
     fun `his gestures come on their lines`() {
         fun at(line: String, offset: Double = 5.0) = built.beats.first { it.line.id == line }.start + offset
         assertEquals(Ch2L1Pose.CUFFS, built.poseAt(at(spec.cuffsLine)))
-        val c3 = built.beats.first { it.line.id == spec.palmsLine }
-        assertEquals(Ch2L1Pose.NONE, built.poseAt(c3.start + 2.0))
-        assertEquals(Ch2L1Pose.PALMS, built.poseAt(c3.end - 2.0))
         assertEquals(Ch2L1Pose.LEAN_FORWARD, built.poseAt(at(spec.leanLine)))
         assertTrue(built.segmentAt(at(spec.glanceLine, 2.0)).lookDoor)
         assertEquals(Ch2L1Pose.TIE, built.poseAt(at(spec.tieLine)))

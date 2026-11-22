@@ -679,9 +679,9 @@ Capítulo 2 lo devuelve a su último checkpoint), y la muerte no cuenta en la pa
 
 ## Logros
 
-Once logros (`core.achievement.Achievement`, en el orden de la lista). El servidor dice cuándo
+Catorce logros (`core.achievement.Achievement`, en el orden de la lista; los tres últimos son ocultos). El servidor dice cuándo
 se consigue uno (`platform.AchievementHooks`, solo en mundos con niveles), como mucho una vez por partida. El cliente muestra el aviso "Achievement Unlocked!" solo la primera
-vez, porque siguen desbloqueados hasta que Ctrl+Shift+D en la pantalla ACHIEVEMENTS los reinicia, dibujado como el de desafío de vanilla con su fanfarria
+vez, porque siguen desbloqueados hasta que Ctrl+Shift+D en la pantalla ACHIEVEMENTS los reinicia (Ctrl+Shift+R ahí los reinicia de golpe, sin preguntar), dibujado como el de desafío de vanilla con su fanfarria
 (`client.hud.AchievementToast`), y lo recuerda para siempre en
 `config/every_tunnel/achievements.json` (`client.AchievementStore`), entre partidas y mundos.
 Los logros de vanilla no se tocan.
@@ -705,10 +705,13 @@ jar sin un capítulo no borra lo que ese capítulo consiguió. La tabla de abajo
 | Big Brain | coger la primera pieza de la tarjeta maestra del nivel 4 | una pieza de puzle |
 | Privacy Policy | abrir una caja fuerte de las Suites del nivel 4 | un candado |
 | Nothing in There | terminar el juego: lo consigue el cliente al abrirse la ventana de felicitación (`CongratulationsScreen`) | la máscara del director |
+| Said Nothing (oculto) | quedarse quieto 5 s en el nivel 1 (`WhisperHooks`, `WhisperTimer`: un susurro sin palabras, a un minuto como mínimo uno de otro) | tres líneas onduladas |
+| Salary Review (oculto) | leer la nota de Marcus Guard en el cuarto que revelan las válvulas junto a las escaleras del nivel 3 (`ValveHooks`) | una nota doblada |
+| Every Final (oculto) | el menú muestra EVERY FINAL: el jugador salió del nivel 5 antes del despacho del Director (lo consigue `MainMenuScreen`) | una F de tiza |
 
 La pantalla ACHIEVEMENTS del menú principal (`client.screen.AchievementsScreen`) los muestra en
 el papel de la guía (`client.screen.Paper`) con cuántos se tienen; uno que aún no se tiene
 muestra un "?" y "Not yet unlocked". Los textos están en el archivo de idioma
 (`achievement.every_tunnel.<id>`, su `.description`, `toast.every_tunnel.achievement_unlocked`);
-los iconos de la placa, la calavera, la silueta, la pieza de puzle, el candado, la máscara y el "?" salen de
+los iconos de la placa, la calavera, la silueta, la pieza de puzle, el candado, la máscara, el susurro, la nota, la F y el "?" salen de
 `tools/gui/common/achievement_icons.py`, los demás son objetos del mod (`client.AchievementIcons`). Está previsto un sonido propio en lugar de la fanfarria.

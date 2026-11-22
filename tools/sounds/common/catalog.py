@@ -2137,6 +2137,17 @@ def cloud_whisper(rng, variant):
     return crossfade_loop(y, extra)
 
 
+def l1_whisper(rng, variant):
+    """Level 1's whisper (`chapter1.platform.WhisperHooks`), for a player who has stood still: one voice close behind, a few
+    unhurried syllables of breath with some hushed hisses, that never become a word. Nothing voiced, no pitch."""
+    length = 3.6 + 0.3 * variant
+    n = samples(length)
+    voice = whisper_voice(n, rng, rate=rng.uniform(2.2, 2.8), shift=rng.uniform(0.88, 1.0), density=0.8, hiss=0.55, start=0.35, end=length - 0.5)
+    voice *= envelope(n, [(0.0, 0.0), (0.5, 1.0), (length - 0.7, 0.9), (length, 0.0)])
+    air = bandpass(rng.normal(0.0, 1.0, n), 900.0, 6000.0, order=2) * 0.04 * envelope(n, [(0.0, 0.0), (0.3, 1.0), (length - 0.4, 1.0), (length, 0.0)])
+    return voice + air
+
+
 def cloud_appear(rng, variant):
     """A Distortion Cloud there all at once: a burst of static, a breath drawn in backwards that stops
     short, and a low thud."""
@@ -2396,6 +2407,8 @@ SOUNDS = [
     Sound("entity.hunter.attack", "Level 5 / Hunters", "A Hunter's swipe: a sleeve's swish and a scratch", "mono", False, 3, hunter_attack, -4.0),
     Sound("entity.hunter.death", "Level 5 / Hunters", "A Hunter struck down: a wet crunch, a choked squeal", "mono", False, 3, hunter_death, -3.0),
     Sound("entity.hunter.ambient", "Level 5 / Hunters", "A Hunter idling: tongue clicks and a thin wheeze", "mono", False, 3, hunter_ambient, -8.0, attenuation=12),
+    Sound("ambient.l1_whisper", "Garage ambience", "Level 1's easter egg: a wordless whisper close behind a player who has stood still for a while", "mono", False, 3, l1_whisper, -6.0,
+          attenuation=8),
     Sound("entity.distortion_cloud.whisper", "Level 5 / Distortions", "The Distortion Cloud while it is there: many whispers, glitching (loop)", "mono", True, 1, cloud_whisper, -4.0,
           stream=False, attenuation=24),
     Sound("entity.distortion_cloud.appear", "Level 5 / Distortions", "A Distortion Cloud there all at once: static, a breath drawn in backwards", "mono", False, 1, cloud_appear, -2.0, attenuation=32),

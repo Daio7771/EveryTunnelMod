@@ -49,6 +49,11 @@ object SafeHooks {
 
     private val combinations = HashMap<BlockPos, List<Int>>()
     private val failures = HashMap<BlockPos, Int>()
+    private val opened = HashSet<BlockPos>()
+
+    /** How many safes have been opened this game (for [DartHooks]'s easter egg). */
+    val openCount: Int
+        get() = opened.size
 
     fun register() {
         ServerPlayNetworking.registerGlobalReceiver(RESULT_PACKET_ID) { server, player, _, buf, _ ->
@@ -63,6 +68,7 @@ object SafeHooks {
     fun reset() {
         combinations.clear()
         failures.clear()
+        opened.clear()
     }
 
     /** For [ContinueGame]. */
@@ -80,7 +86,10 @@ object SafeHooks {
             combinations[pos] = safe.combination
             failures[pos] = safe.failures
             val state = world.getBlockState(pos)
-            if (safe.open && state.isOf(Ch1Blocks.SUITE_SAFE)) world.setBlockState(pos, state.with(SuiteSafeBlock.OPEN, true))
+            if (safe.open && state.isOf(Ch1Blocks.SUITE_SAFE)) {
+                world.setBlockState(pos, state.with(SuiteSafeBlock.OPEN, true))
+                opened.add(pos)
+            }
         }
     }
 
@@ -102,6 +111,7 @@ object SafeHooks {
         failures[pos.toImmutable()] = failed
         if (!solved) return
         world.setBlockState(pos, state.with(SuiteSafeBlock.OPEN, true))
+        opened.add(pos.toImmutable())
         world.playSound(null, pos, ModSounds.SAFE_OPEN, SoundCategory.BLOCKS, 1f, 1f)
         AchievementHooks.earned(player, Achievement.PRIVACY_POLICY)
         EveryTunnel.LOGGER.info("{} opened a safe at {}", player.name.string, pos.toShortString())

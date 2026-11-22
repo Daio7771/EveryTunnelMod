@@ -307,6 +307,7 @@ object CutsceneView {
         )
         voice = sound
         client.soundManager.play(sound)
+        EveryTunnel.LOGGER.info("Cutscene voice {}{} at tick {}", kind.voicePrefix, id, tick)
     }
 
     /** A camera nobody sees: never in the world, its eyes [EYE] over its feet. */

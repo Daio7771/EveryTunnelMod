@@ -613,6 +613,7 @@ def furnish(lv):
             raise SystemExit(f"LEVEL_3 WALL_MESSAGES: {message_id} at {(x, y, z)} is not free air")
         f.messages[(x, y, z)] = message_id
     note_papers(f)
+    hidden_room(f)
     lv.box_spots = box_spots(f)
     lv.loot = loot_spots(f)
     lv.water_sources = water_sources(f)
@@ -672,6 +673,18 @@ def note_papers(f):
                                                    min(abs(t[0] - dx) + abs(t[1] - dz) for dx, dz in doors), t[0], t[1]))
         f.put(x, 2, z, "note_paper", facing, force=True)
         lv.notes[note_id] = (x, 2, z)
+
+
+def hidden_room(f):
+    """The closet's desk and chair, a lamp, and the Observant Guard's note on the desk (into lv.notes)."""
+    lv = f.lv
+    room = lv.p.HIDDEN_ROOM
+    (dx, dz, dfacing), (cx, cz, cfacing), (lx, lz) = room["desk"], room["chair"], room["lamp"]
+    for ok, what in ((f.put(dx, 1, dz, "office_desk", dfacing, force=True), "desk"), (f.put(lx, 1, lz, "office_desk", dfacing, force=True), "desk"), (f.put(cx, 1, cz, "wooden_chair", cfacing, force=True), "chair"),
+                     (f.put(dx, 2, dz, "note_paper", dfacing, force=True), "note"), (f.put(lx, 2, lz, "desk_lamp", dfacing, force=True), "lamp")):
+        if not ok:
+            raise SystemExit(f"LEVEL_3 HIDDEN_ROOM: no room for the {what}")
+    lv.notes[room["note_id"]] = (dx, 2, dz)
 
 
 def loot_spots(f):

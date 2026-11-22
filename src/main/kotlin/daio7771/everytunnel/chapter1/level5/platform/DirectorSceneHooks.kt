@@ -81,6 +81,9 @@ object DirectorSceneHooks {
 
     private var running: Running? = null
     private var played = false
+
+    /** His scene has begun (or is past, continuing from after it): the player has gone into his office. */
+    val sceneStarted: Boolean get() = played
     private var maskDown = false
     private var doorShut = false
 

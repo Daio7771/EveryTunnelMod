@@ -7,8 +7,8 @@ import kotlin.test.assertNull
 class AchievementTest {
 
     @Test
-    fun `there are eight, each found by its unique id`() {
-        assertEquals(11, Achievement.entries.size)
+    fun `there are fourteen, each found by its unique id`() {
+        assertEquals(14, Achievement.entries.size)
         for (achievement in Achievement.entries) assertEquals(achievement, Achievement.byId(achievement.id))
         assertEquals(Achievement.entries.size, Achievement.entries.map { it.id }.toSet().size)
     }
@@ -29,6 +29,14 @@ class AchievementTest {
         assertEquals(
             setOf(Achievement.KEYCARD, Achievement.VALVES, Achievement.BOXES, Achievement.BOOKS),
             Achievement.entries.filter { it.puzzle }.toSet(),
+        )
+    }
+
+    @Test
+    fun `only the three easter eggs are hidden`() {
+        assertEquals(
+            listOf(Achievement.WHISPER, Achievement.GUARD_NOTE, Achievement.EVERY_FINAL),
+            Achievement.entries.filter { it.hidden },
         )
     }
 }

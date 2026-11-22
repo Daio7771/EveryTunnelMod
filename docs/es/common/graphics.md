@@ -144,5 +144,5 @@ una cámara fija (`client.menu.MenuScene`), sin ningún mundo cargado.
 - Créditos como de película sobre negro, al ritmo de su canción: los dibujos a línea del autor junto a títulos tecleados, una pantalla cada vez.
 - El menú principal: negro, un logo de tiza (letras dibujadas a mano, un emblema de túnel, como el
   icono del proyecto), minimalista. El logo tiene un easter egg: de vez en cuando las palabras se
-  apagan parpadeando y solo quedan encendidas la R de EVERY y la U y la N de TUNNEL, que dicen RUN
-  (`LogoRun`).
+  apagan parpadeando y solo quedan encendidas EVER y el emblema (`LogoEver`). Otro más: salir al menú desde el
+  nivel 5 antes del despacho del Director hace que el logo diga EVERY FINAL hasta cerrar el juego (`MenuLogoOverride`, `EveryFinalHooks`).

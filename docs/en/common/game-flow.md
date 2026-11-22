@@ -641,9 +641,9 @@ Level 2 brings them back to its last checkpoint), and the death is not counted i
 
 ## Achievements
 
-Eleven achievements (`core.achievement.Achievement`, in list order). The server says when one
+Fourteen achievements (`core.achievement.Achievement`, in list order; the last three are hidden). The server says when one
 is earned (`platform.AchievementHooks`, only in worlds with levels), once per game at most. The client shows the "Achievement Unlocked!" toast only the first time ever,
-as they stay unlocked until Ctrl+Shift+D on the ACHIEVEMENTS screen resets them, drawn like vanilla's
+as they stay unlocked until Ctrl+Shift+D on the ACHIEVEMENTS screen resets them (Ctrl+Shift+R there resets them at once, without asking), drawn like vanilla's
 challenge toast with its fanfare
 (`client.hud.AchievementToast`), and remembers it for good in
 `config/every_tunnel/achievements.json` (`client.AchievementStore`), across games and worlds.
@@ -668,11 +668,14 @@ what that chapter earned. The table below is Chapter 1's tab.
 | Big Brain | the first piece of Level 4's master card is picked up | a puzzle piece |
 | Privacy Policy | a safe in Level 4's Suites is opened | a padlock |
 | Nothing in There | the game is finished: earned by the client when the congratulations window opens (`CongratulationsScreen`) | the Director's mask |
+| Said Nothing (hidden) | standing still 5 s in Level 1 (`WhisperHooks`, `WhisperTimer`: a wordless whisper, at least a minute apart) | three wavy lines |
+| Salary Review (hidden) | reading Marcus Guard's note in the closet that the valves reveal beside Level 3's stairs (`ValveHooks`) | a folded note |
+| Every Final (hidden) | the menu shows EVERY FINAL: the player quit from Level 5 before the Director's office (earned by `MainMenuScreen`) | a chalk F |
 
 The ACHIEVEMENTS screen in the main menu (`client.screen.AchievementsScreen`) lists them on
 the guide's paper (`client.screen.Paper`) with how many are earned; one not earned yet shows a
 "?" and "Not yet unlocked". The texts are in the lang file (`achievement.every_tunnel.<id>`, its
 `.description`, `toast.every_tunnel.achievement_unlocked`); the badge, skull, silhouette and
-"?", puzzle piece, padlock and mask icons come from `tools/gui/common/achievement_icons.py`, the others are the mod's items
+"?", puzzle piece, padlock, mask, whisper, note and F icons come from `tools/gui/common/achievement_icons.py`, the others are the mod's items
 (`client.AchievementIcons`). An own sound
 in place of the fanfare is planned.

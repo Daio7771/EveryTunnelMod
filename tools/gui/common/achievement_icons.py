@@ -17,6 +17,7 @@ Icons at u (what AchievementIcons expects):
 - u=64: a puzzle piece (Big Brain), warm orange.
 - u=80: a brass padlock (Privacy Policy).
 - u=96: the Director's mask, an ivory face with slit eyes and a thin smile (Nothing in There).
+- u=272: a breath of three wavy lines (Whisper), u=288: a folded note (the Observant Guard's), u=304: a chalk F (Every Final).
 - u=112 on, Chapter 2's ten (`AchievementDef.icon` "sprite:<u / 16>", in `chapter2.core.Ch2Achievement`'s order): a time clock, a badge,
   an eye, a record, a pale face, an hourglass, a "?" with ripples, a tear, a compass and a target missed by a pipe.
 
@@ -383,6 +384,64 @@ CHAPTER_2 = [
 ]
 
 ICONS += CHAPTER_2
+
+# --- Chapter 1's hidden three (after Chapter 2's: the sheet only grows to the right) -----------------------------------
+
+def whisper_rows():
+    """Three wavy lines of breath, the shorter ones fading to the right."""
+    g = canvas()
+    wave = [0, 0, -1, -1, 0, 0, 1, 1, 0, 0, -1, -1]
+    for row, length in ((4, 12), (8, 12), (12, 8)):
+        for x in range(length):
+            put(g, 2 + x, row + wave[x], "y")
+    return outlined(g)
+
+
+WHISPER_ROWS = whisper_rows()
+
+NOTE_ROWS = [
+    "................",
+    "..############..",
+    "..#hhhhhhhhhs#..",
+    "..#hooooooooo#..",
+    "..#hokkkkkkoo#..",
+    "..#hooooooooo#..",
+    "..#hokkkkkkoo#..",
+    "..#hooooooooo#..",
+    "..#hokkkkoooo#..",
+    "..#hooooooooo#..",
+    "..#hokkkkkkos#..",
+    "..#ooooooooos#..",
+    "..#sssssssssss#.",
+    "..#############.",
+    "................",
+    "................",
+]
+
+FINAL_F_ROWS = [
+    "................",
+    ".##############.",
+    ".#kkkkkkkkkkkk#.",
+    ".#kyyyyyyyyykk#.",
+    ".#kyyyyyyyyykk#.",
+    ".#kyykkkkkkkkk#.",
+    ".#kyykkkkkkkkk#.",
+    ".#kyyyyyyykkkk#.",
+    ".#kyyyyyyykkkk#.",
+    ".#kyykkkkkkkkk#.",
+    ".#kyykkkkkkkkk#.",
+    ".#kyykkkkkkkkk#.",
+    ".#kkkkkkkkkkkk#.",
+    ".##############.",
+    "................",
+    "................",
+]
+
+ICONS += [
+    ("whisper", {"y": (196, 206, 222, 255)}, WHISPER_ROWS),
+    ("guard_note", {"o": (226, 218, 190, 255), "h": (246, 240, 216, 255), "s": (160, 150, 120, 255), "k": (70, 64, 52, 255)}, NOTE_ROWS),
+    ("every_final", {"k": (34, 36, 42, 255), "y": (238, 235, 226, 255)}, FINAL_F_ROWS),
+]
 
 
 def icon(palette, mask):

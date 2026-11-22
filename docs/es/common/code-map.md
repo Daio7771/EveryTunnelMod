@@ -29,9 +29,9 @@ con un comentario KDoc que cuenta más.
 | `level/LevelParser.kt` | Lee un archivo de nivel; documenta cada clave |
 | `guide/GuideMarkdown.kt` | Lee una página de la guía del jugador (el subconjunto de Markdown) en bloques |
 | `menu/LampFlicker.kt` | Cuándo parpadean las lámparas de la escena del menú |
-| `menu/LogoRun.kt` | El easter egg del logo del menú: cuándo se apagan las palabras dejando RUN encendido, y por cuánto tiempo |
+| `menu/LogoEver.kt` | El easter egg del logo del menú: cuándo se apagan las palabras dejando EVER y el emblema encendidos, y por cuánto tiempo |
 | `menu/BlockLight.kt` | Luz de bloque para una caja de bloques sin mundo (la escena del menú) |
-| `achievement/Achievement.kt` | Los once logros, en el orden de la lista, por id |
+| `achievement/Achievement.kt` | Los catorce logros (tres ocultos), en el orden de la lista, por id |
 | `camera/CameraAim.kt` | Hacia dónde apunta la cabeza de una cámara de seguridad, girando hacia un objetivo no más rápido que su servo |
 | `cutscene/Cutscene.kt` | Una cinemática como datos: poses de cámara, el marco de una escena, planos, el vuelo de entrada y de salida, las bandas negras |
 | `cutscene/DirectorScene.kt` | La escena del director medida con su voz: encuadres, subtítulos, sus gestos, cuándo aparta la vista, su máscara; `SkipPrompt` (saltar pulsando dos veces) |
@@ -249,8 +249,9 @@ con un comentario KDoc que cuenta más.
 
 | Archivo | Qué hace |
 |---|---|
-| `MainMenuScreen.kt` | El menú principal (el logo de tiza en capas, con su easter egg de RUN y la línea del Chapter 2 debajo); CONTINUE y Ctrl+Shift+D son del capítulo del menú |
+| `MainMenuScreen.kt` | El menú principal (el logo de tiza en capas, con su easter egg de EVER, EVERY FINAL y la línea del Chapter 2 debajo); CONTINUE y Ctrl+Shift+D son del capítulo del menú |
 | `AchievementsScreen.kt` | La pantalla ACHIEVEMENTS: la lista en papel |
+| `../MenuLogoOverride.kt` | La marca que hace que el logo del menú diga EVERY FINAL (la pone el cliente del Capítulo 1 al salir del nivel 5 antes del despacho del Director) |
 | `Paper.kt` | Papel gastado (mosaico, manchas, bordes, tintas) para la guía y los logros |
 | `GuideScreen.kt` | La guía del jugador: una hoja de papel con scroll y pestañas |
 | `NoteScreen.kt` | Una nota leída en el papel de la guía sobre el juego, con los huecos rellenos |
@@ -281,6 +282,8 @@ Los niveles del juego base, con la forma del Capítulo 2: una carpeta por nivel 
 | `platform/Ch1Commands.kt` | Los subcomandos de `/everytunnel` del Capítulo 1 (`loungeready`, `labready`, `filmready`, `paleman`, `director`, `valves`, `boxes`, `books`, `film`, `congrats`) y lo que hace `setlevel` para construir los Niveles 4 y 5 |
 | `level5/client/DirectorCutscene.kt` | La escena del director como `CutsceneView.Kind` (sus paquetes y la pose del director) |
 | `core/FinalCredits.kt` | La línea de tiempo de los créditos finales (los dibuja `FinalCreditsScreen`) |
+| `core/WhisperTimer.kt` | El easter egg del susurro del nivel 1: cinco segundos quieto, un minuto entre susurros (lo suena `platform/WhisperHooks.kt`) |
+| `client/EveryFinalClient.kt` | La mitad del cliente de EVERY FINAL: lo arma el paquete del servidor, pone `MenuLogoOverride` al salir (`level5/platform/EveryFinalHooks.kt` es la del servidor) |
 | `platform/CarryHooks.kt` | Llevar una caja o un libro: en la mano, sin soltarlo, sin correr, de vuelta al morir; en el puntero del ratón o en la cuadrícula de crafteo de la pantalla del inventario sigue contando como llevado |
 | `platform/EndingHooks.kt` | El final del juego: la partida guardada borrada, los créditos finales, los números de la partida enviados con ellos |
 | `platform/PathingRules.kt` | Mantiene a los mobs fuera y lejos de encima de los bloques sólidos del mod (muebles, props): los rodean, nunca los atraviesan ni se suben |
@@ -329,6 +332,7 @@ Los niveles del juego base, con la forma del Capítulo 2: una carpeta por nivel 
 | `core/FilmInfo.kt` | La película del Cinema: fotogramas, velocidad, qué fotograma en cada momento |
 | `core/LoungeSave.kt` | El nivel 4 como se dejó, en texto |
 | `core/OrderPuzzle.kt` | Un puzle de cosas en orden: intentos, fallos, la pista |
+| `core/DartsEgg.kt` | El easter egg de los dardos: con las otras tres piezas cogidas y todas las cajas fuertes abiertas, los números pedidos son 12 - 13 - 14 |
 | `core/SafeDial.kt` | El dial de una caja: tics, clics, fijar un número cambiando de sentido |
 | `platform/BreakerHooks.kt` | La sala de mantenimiento del nivel 4: palancas, botón, contador, corriente del lector |
 | `platform/DartBlocks.kt` | Las nueve partes del tablero, la bandeja y la portezuela |

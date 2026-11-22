@@ -8,6 +8,20 @@ import daio7771.everytunnel.common.util.JsonFields
 data class Ch2L2HunterGroup(val id: String, val anchor: String, val yaw: Float?, val until: Ch2L2State)
 
 /**
+ * Easter egg: a player who leaves [zone] (the survival kit's room) with none of one of the [needs] taken (the loot ids that start with
+ * one of them: the kit's bars, the kit's water) has a group of Hunters put at each of [groups], [Ch2L2HunterSpot]s round [anchor].
+ */
+data class Ch2L2NoSupplies(val zone: String, val anchor: String, val needs: List<String>, val groups: List<Ch2L2HunterSpot>) {
+
+    /** True if, for some need, there are loot pieces with its prefix and none of them is [taken]. */
+    fun missing(lootIds: List<String>, taken: (String) -> Boolean): Boolean =
+        needs.any { prefix -> lootIds.filter { it.startsWith(prefix) }.let { it.isNotEmpty() && it.none(taken) } }
+}
+
+/** A group of Hunters [dx], [dy], [dz] from an anchor's point, facing [yaw]. */
+data class Ch2L2HunterSpot(val dx: Double, val dy: Double, val dz: Double, val yaw: Float)
+
+/**
  * A piece of loot lying at the block [dx], [dy], [dz] from the block of [anchor] (a key of `common.platform.LootSpawner.LOOT`: `battery`,
  * `water`, `food_snack`, `wrench`...), turned [yaw] degrees. Once taken it stays taken (the player's Level 2 counter [takenKey]), and what
  * a saved game comes back to is what had been taken at its checkpoint.
@@ -76,6 +90,31 @@ object Ch2L2PlacementsParser {
         val anchor = e.requiredString("anchor")
         e.reportUnknownKeys()
         if (id == null || anchor == null) null else Ch2L2Note(id, anchor)
+    }
+
+    /** The `no_supplies` object, or null if the file has none (or it is unusable). */
+    fun noSupplies(f: JsonFields): Ch2L2NoSupplies? {
+        if (!f.has("no_supplies")) return null
+        val e = f.child("no_supplies")
+        val zone = e.requiredString("zone")
+        val anchor = e.requiredString("anchor")
+        val needs = e.stringList("needs")
+        val groups = (e.array("groups")?.toList() ?: emptyList()).mapIndexedNotNull { i, g ->
+            if (!g.isJsonObject) {
+                f.problems += "no_supplies.groups[$i]: expected an object"
+                return@mapIndexedNotNull null
+            }
+            val spot = JsonFields(g.asJsonObject, "no_supplies.groups[$i]", f.problems)
+            val offset = spot.array("offset")?.toList()?.map { runCatching { it.asDouble }.getOrNull() } ?: listOf(0.0, 0.0, 0.0)
+            val ok = offset.size == 3 && offset.none { it == null }
+            if (!ok) f.problems += "${spot.pathOf("offset")}: expected three numbers (dx, dy, dz)"
+            val yaw = spot.double("yaw", 0.0).toFloat()
+            spot.reportUnknownKeys()
+            if (ok) Ch2L2HunterSpot(offset[0]!!, offset[1]!!, offset[2]!!, yaw) else null
+        }
+        e.reportUnknownKeys()
+        if (zone == null || anchor == null) return null
+        return Ch2L2NoSupplies(zone, anchor, needs, groups)
     }
 
     /** Two entries of one list with the same id (a loot piece would count as taken for both). */

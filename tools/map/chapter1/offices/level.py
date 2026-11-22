@@ -76,6 +76,8 @@ class Offices:
         self.labels = []         # (x, z, text) for the preview
         self.lights = []         # (x, y, z) of every light
         self.valves = []         # (letter, (x, y, z)) of each valve
+        self.hidden = None       # HIDDEN_ROOM
+        self.hidden_door_cells = set()   # its doorway, sealed with wall here: the walk counts it as the door the valves bring
         self.passable = set()    # door, ladder and hatch cells a player gets through
         self.furniture = set()   # cells of solid furniture
         self.walk_through = set()  # cells of furniture a player walks through (chairs, plants...)
@@ -131,6 +133,7 @@ class Offices:
         self.antechamber = self.space("antechamber", "Antechamber", "corridor", p.ANTECHAMBER, H["antechamber"])
         self.stairs()
         self.checkpoint()
+        self.hidden_room()
         self.bunker()
         self.shell()
         self.fit_lights()
@@ -163,6 +166,21 @@ class Offices:
                     self.stair_steps.append((x, fy, z))
         self.top_landing_y = drop                        # floor block y at the top
         self.spaces.append(Space("stairs", "Stairs from Level 2", "corridor", p.STAIRS, 0, h))
+
+    def hidden_room(self):
+        """The closet beside the stairs' bottom landing (HIDDEN_ROOM): a room, and a doorway into the stairs' wall filled
+        with wall until the valves are set right (a spawn point tagged `hidden_door` marks it; the mod puts a door there)."""
+        p = self.p
+        room = p.HIDDEN_ROOM
+        self.hidden = room
+        self.space(room["id"], room["name"], "service", room["box"], p.HEIGHTS["room"])
+        axis, line, centre = room["door"]
+        self.door_gap(axis, line, centre, 1, p.DOOR_HEIGHTS["room"])
+        for y in range(1, p.DOOR_HEIGHTS["room"] + 1):
+            self.air.pop((line, y, centre), None)
+            self.solid[(line, y, centre)] = ("corridor", "wall")
+            self.passable.add((line, y, centre))
+            self.hidden_door_cells.add((line, y, centre))
 
     def checkpoint(self):
         """A wall across the valve corridor at CHECKPOINT_Z with a closed double emergency door in
@@ -464,6 +482,7 @@ class Offices:
         mid = (cx0 + cx1) // 2                            # the double door the valves open
         self.zone("checkpoint_door", (mid - 1, cz, mid + 1, cz + 1), 1, 2, ["valve_door"])
         self.zone("antechamber", p.ANTECHAMBER, 1, H["antechamber"])
+        self.zone(p.HIDDEN_ROOM["id"], p.HIDDEN_ROOM["box"], 1, H["room"])
         floor, bh = self.bunker_floor, p.BUNKER["height"]
         self.zone("bunker_shaft", p.HATCH["hole"], floor + bh + 1, 0, ["observer_never"])
         self.zone("bunker_corridor", self.bunker_box, floor + 1, floor + bh, ["observer_never"])
@@ -491,6 +510,8 @@ class Offices:
             self.spawn(f"valve_{letter.lower()}", x, y, z, "west", ["valve"])
         for note_id, (x, y, z) in self.notes.items():
             self.spawn(note_id, x, y, z, "north", ["note"])
+        _, line, centre = self.hidden["door"]
+        self.spawn("hidden_guard_door", line, 1, centre, "east", ["hidden_door"])      # facing the stairs, where the player comes from
         # The loot (LootSpawner reads the tag: the item) and the dispensers that give water.
         for i, (item, x, z, room) in enumerate(self.loot):
             self.spawn(f"{item}_{i + 1}", x, 1, z, "north", [item], room)

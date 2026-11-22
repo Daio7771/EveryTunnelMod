@@ -521,7 +521,7 @@ WALL_TEXTS = [
     (CHAMBER_LABEL[0], CHAMBER_LABEL[1], "every_tunnel.ch2.l1.sign.chamber_02", "lab", 0.0),
     ((40, 1, 82), "west", "every_tunnel.ch2.l1.sign.portrait", "plaque", 0.0),
     ((73, 2, 28), "west", "every_tunnel.ch2.l1.sign.under_construction", "plate", 0.0),
-    ((69, 2, 30), "north", "every_tunnel.ch2.l1.sign.basement", "lab", 0.0),
+    ((66, 2, 30), "north", "every_tunnel.ch2.l1.sign.basement", "lab", 0.0),   # over the wall left of the stairs' opening (x 70-72), not over the gap
 ] + door_signs() + [LOGO] + POSTERS
 
 # Scrawls on the basement's walls (wall_message blocks, in chalk; for now only the "???" over the terminal: cell, the way the text faces, its lang key, a line's height in blocks,

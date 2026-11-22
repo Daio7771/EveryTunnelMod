@@ -132,5 +132,6 @@ Behind the main menu, a parking hall seen down its aisle from a fixed camera
 - The player is the night guard: black uniform with yellow details.
 - Film-like credits on black, timed to their song: the author's line drawings beside typed titles, a screen at a time.
 - The main menu: black, a chalk logo (hand-drawn letters, a tunnel emblem, like the project icon), minimal.
-  The logo has an easter egg: now and then the words flicker out and only the R of EVERY and the U and N
-  of TUNNEL stay lit, reading RUN (`LogoRun`).
+  The logo has an easter egg: now and then the words flicker out and only EVER and the emblem stay lit (`LogoEver`).
+  A second one: quitting to the menu from Level 5 before the Director's office makes the logo read EVERY FINAL until the
+  game is closed (`MenuLogoOverride`, `EveryFinalHooks`).

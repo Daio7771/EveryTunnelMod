@@ -29,9 +29,9 @@ KDoc comment that says more.
 | `level/LevelParser.kt` | Parses one level file; documents every key |
 | `guide/GuideMarkdown.kt` | Reads a player guide page (the Markdown subset) into blocks |
 | `menu/LampFlicker.kt` | When the menu scene's lamps flicker |
-| `menu/LogoRun.kt` | The menu logo's easter egg: when the words flicker out and leave RUN lit, and for how long |
+| `menu/LogoEver.kt` | The menu logo's easter egg: when the words flicker out and leave EVER and the emblem lit, and for how long |
 | `menu/BlockLight.kt` | Block light for a box of blocks with no world (the menu scene) |
-| `achievement/Achievement.kt` | The eleven achievements, in list order, by id |
+| `achievement/Achievement.kt` | The fourteen achievements (three hidden), in list order, by id |
 | `camera/CameraAim.kt` | Where a security camera's head points, turning towards a target no faster than its servo |
 | `cutscene/Cutscene.kt` | A cinematic as plain data: camera poses, a scene's frame, shots, the fly-in and fly-out, the black bands |
 | `cutscene/DirectorScene.kt` | The director's scene timed from his voice: framings, subtitles, his gestures, where he looks away, his mask; `SkipPrompt` (skipping by pressing twice) |
@@ -249,8 +249,9 @@ KDoc comment that says more.
 
 | File | What it does |
 |---|---|
-| `MainMenuScreen.kt` | The main menu (the chalk logo in layers, its RUN easter egg and Chapter 2's line under it included); CONTINUE and Ctrl+Shift+D are the menu's chapter's |
+| `MainMenuScreen.kt` | The main menu (the chalk logo in layers, its EVER easter egg, EVERY FINAL and Chapter 2's line under it included); CONTINUE and Ctrl+Shift+D are the menu's chapter's |
 | `AchievementsScreen.kt` | The ACHIEVEMENTS screen: the list on paper |
+| `../MenuLogoOverride.kt` | The flag that makes the menu logo read EVERY FINAL (set by Chapter 1's client when quitting from Level 5 before the Director's office) |
 | `Paper.kt` | Worn paper (tile, stains, edges, inks) for the guide and the achievements |
 | `GuideScreen.kt` | The player guide: a scrolling paper sheet with tabs |
 | `NoteScreen.kt` | A note read on the guide's paper over the game, placeholders filled |
@@ -281,6 +282,8 @@ The base game's levels, shaped like Chapter 2: one folder per level (`level2` to
 | `platform/Ch1Commands.kt` | Chapter 1's `/everytunnel` subcommands (`loungeready`, `labready`, `filmready`, `paleman`, `director`, `valves`, `boxes`, `books`, `film`, `congrats`) and what `setlevel` does to build Levels 4 and 5 |
 | `level5/client/DirectorCutscene.kt` | The director's scene as a `CutsceneView.Kind` (its packets and the director's pose) |
 | `core/FinalCredits.kt` | The final credits' timeline (drawn by `FinalCreditsScreen`) |
+| `core/WhisperTimer.kt` | Level 1's whisper easter egg: five seconds still, a minute between whispers (played by `platform/WhisperHooks.kt`) |
+| `client/EveryFinalClient.kt` | The client's half of EVERY FINAL: armed by the server's packet, sets `MenuLogoOverride` on quitting (`level5/platform/EveryFinalHooks.kt` is the server's) |
 | `platform/CarryHooks.kt` | Carrying a box or a book: in the hand, never dropped, no sprint, back on death; on the mouse pointer or in the crafting grid of the inventory screen it still counts as carried |
 | `platform/EndingHooks.kt` | The end of the game: the saved game erased, the final credits, the game's numbers sent with them |
 | `platform/PathingRules.kt` | Keeps mobs out of and off the mod's solid blocks (furniture, props): they path round them, never through or over |
@@ -329,6 +332,7 @@ The base game's levels, shaped like Chapter 2: one folder per level (`level2` to
 | `core/FilmInfo.kt` | The Cinema's film: frames, speed, which frame at what time |
 | `core/LoungeSave.kt` | Level 4 as it was left, as text |
 | `core/OrderPuzzle.kt` | A puzzle of things in order: attempts, failures, the hint |
+| `core/DartsEgg.kt` | The darts easter egg: the other three pieces taken and every safe open, the numbers asked are 12 - 13 - 14 |
 | `core/SafeDial.kt` | A safe's dial: ticks, clicks, fixing a number by changing direction |
 | `platform/BreakerHooks.kt` | Level 4's Maintenance room: levers, button, counter, power for the reader |
 | `platform/DartBlocks.kt` | The dartboard's nine parts, the tray and the hatch |
@@ -473,6 +477,7 @@ It has its own entrypoints (`Chapter2`, `Chapter2Client`) and reaches the base g
 |---|---|
 | `level2/core/Ch2L2Data.kt` | The level's data as last read (its anchors, Level 1's format, and `level.json`, with what it names looked for in the anchors) and how each file's copy is chosen (the config folder's while usable, else the jar's); `Ch2L2Files`, the files and where they live |
 | `level2/core/Ch2L2State.kt` | The level's states in play order (`ARRIVED` to `DONE`, the flood's stage of each) and its four encounters (`Ch2L2Event`: `hunters`, `creature`, `guard`, `flood`) as runs of them |
+| `level2/core/Ch2L2SupplyWatch.kt` | The no-supplies easter egg: who left the kit's room short of a bar or a bottle (`Ch2L2NoSupplies` in `level.json`'s `no_supplies`) |
 | `level2/core/Ch2L2Level.kt` | `level.json` and its parser: the rules, the resources on arriving, the lamps, the checkpoints and the zones that move the state on; which checkpoint and state lie ahead |
 | `level2/core/Ch2L2Snapshot.kt` | Chapter 2's saved game: the last checkpoint, the state and counters then |
 | `level2/platform/Ch2L2.kt` | Chapter 2's Level 2: each player's state (listeners of a change and of a start), whether they play it, entering down Level 1's manhole, the checkpoints and the saved game, a death's restart, CONTINUE |

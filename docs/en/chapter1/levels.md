@@ -151,6 +151,7 @@ the server starts (levels built together name the same one). The function must e
 | `lights_stay` | `KeycardHooks` | Its lights stay on when the keycard is taken (the stair shaft down to B3) |
 | `exit` | (none yet) | Marks a level's way out; kept for later systems |
 | `valve_door` | `ValveHooks` | The doors the valves open when all are right; a new game shuts them |
+| `hidden_door` | `ValveHooks` | Level 3 easter egg: the doorway (the lower half's cell, facing the stairs) that is wall until the valves are right, then an open emergency door into Marcus Guard's closet (`guard_closet`, note `ch1_l3_note_guard`) |
 | `observer_home` | `ObserverEntity` | The zone the Observer patrols and goes back to (Level 3's library) |
 | `book_hatch` | `BookHooks` | The trapdoors the fifth book back opens (Level 3's bunker hatch); a new game shuts them |
 | `checkpoint` | (none yet) | Level 3: just past the checkpoint door, where a death will restart |

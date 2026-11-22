@@ -48,6 +48,8 @@ data class Ch2L2Level(
     val reunion: Ch2L2Reunion = Ch2L2Reunion.DEFAULT,
     /** The rooms (zones) to walk into, every one, for the Explorer achievement; none: it cannot be earned (phase 7). */
     val explore: List<String> = emptyList(),
+    /** The easter egg of leaving the survival kit without supplies (the final phase's). */
+    val noSupplies: Ch2L2NoSupplies? = null,
 ) {
     fun checkpoint(id: String?): Ch2L2Checkpoint? = checkpoints.firstOrNull { it.id == id }
 
@@ -65,8 +67,8 @@ data class Ch2L2Level(
     fun checkpointBefore(event: Ch2L2Event): Ch2L2Checkpoint? = checkpoints.firstOrNull { it.before == event }
 
     /** Every anchor and zone the file names, to check against the anchors. */
-    fun anchorNames(): List<String> = checkpoints.map { it.anchor } + hunters.map { it.anchor } + loot.map { it.anchor } + notes.map { it.anchor } + creature.anchorNames() + guard.anchorNames() + flood.anchorNames() + maw.anchorNames() + reunion.anchorNames()
-    fun zoneNames(): List<String> = (lights.keys + checkpoints.mapNotNull { it.zone } + reaches.map { it.zone } + creature.zoneNames() + guard.zoneNames() + maw.zoneNames() + reunion.zoneNames() + explore).distinct()
+    fun anchorNames(): List<String> = checkpoints.map { it.anchor } + hunters.map { it.anchor } + loot.map { it.anchor } + notes.map { it.anchor } + creature.anchorNames() + guard.anchorNames() + flood.anchorNames() + maw.anchorNames() + reunion.anchorNames() + listOfNotNull(noSupplies?.anchor)
+    fun zoneNames(): List<String> = (lights.keys + checkpoints.mapNotNull { it.zone } + reaches.map { it.zone } + creature.zoneNames() + guard.zoneNames() + maw.zoneNames() + reunion.zoneNames() + explore + listOfNotNull(noSupplies?.zone)).distinct()
 
     class Result(val level: Ch2L2Level, val problems: List<String>)
 
@@ -143,6 +145,7 @@ data class Ch2L2Level(
             val maw = Ch2L2MawParser.parse(f)
             val reunion = Ch2L2ReunionParser.parse(f)
             val explore = if (f.has("explore")) f.stringList("explore") else emptyList()
+            val noSupplies = Ch2L2PlacementsParser.noSupplies(f)
             f.reportUnknownKeys()
 
             val problems = f.problems.toMutableList()
@@ -155,7 +158,7 @@ data class Ch2L2Level(
             if (befores.toSet().size != befores.size) problems += "checkpoints: two come before the same encounter"
             val level = Ch2L2Level(
                 flashlight, noise, battery, thirst, stamina, lights,
-                checkpoints.ifEmpty { d.checkpoints }, reaches, hunters, loot, notes, creature, guard, flood, ending, maw, reunion, explore,
+                checkpoints.ifEmpty { d.checkpoints }, reaches, hunters, loot, notes, creature, guard, flood, ending, maw, reunion, explore, noSupplies,
             )
             return Result(level, problems)
         }

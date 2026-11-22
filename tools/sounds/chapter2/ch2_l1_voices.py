@@ -26,10 +26,9 @@ Run (from the repository root):   python3 tools/sounds/chapter2/ch2_l1_voices.py
 Without the MP3 folders it uses the Ogg files already in voice/ch2l1/, so the cues can be redone anywhere.
 
 One more file is no line: the recording on the basement's terminal (`voice.basement_recording`, `?????????.mp3`), an easter egg. Its
-MP3 (by default ~/Downloads/raro.mp3, the same voice rules) is played **backwards**: an old tape's echo is put on the
-voice the right way round, then the whole is reversed and grain laid over it, so a player who reverses it again hears
-the voice clean, the echo trailing as it should. It has no text and no subtitles (it is not in ch2_l1_voices.json), on
-purpose: working out what it says is the point.
+MP3 (by default ~/Downloads/voz_reversa_grave_ruido_radio(1).mp3, a message spelled in the NATO alphabet) is used as it comes:
+it is already reversed, low and under radio noise, so it is only brought to the voices' loudness, with a short fade at each
+end. It has no text and no subtitles (it is not in ch2_l1_voices.json), on purpose: working out what it says is the point.
 
 Writes into src/main/resources/assets/every_tunnel/ (committed with the mod):
   cutscene/ch2_l1_voices.json   each line's text key, speaker, length and cues (ms from the line's start, sentence range)
@@ -115,7 +114,7 @@ ROWAN = [
 GROUPS = {"union": UNION, "rowan": ROWAN}
 
 RECORDING = "basement_recording"
-RECORDING_SOURCE = Path.home() / "Downloads" / "raro.mp3"
+RECORDING_SOURCE = Path.home() / "Downloads" / "voz_reversa_grave_ruido_radio(1).mp3"
 LINES = UNION + ROWAN
 
 
@@ -138,31 +137,9 @@ def pa_filter(x, sr=44100):
 
 
 def recording(x, sr=44100):
-    """The basement's recording from the voice the right way round: a small speaker's band, the slap and the long
-    repeats of an old tape, reversed; then the tape's hiss, crackle and mains hum over it. Same loudness as before."""
-    from scipy import signal
-    rng = np.random.default_rng(4719)
-    band = signal.butter(3, [160.0, 5200.0], btype="band", fs=sr, output="sos")
-    y = signal.sosfilt(band, x)
-    tail = int(sr * 2.5)
-    y = np.concatenate([np.zeros(tail), y, np.zeros(tail)])    # room for the echo, both ways round
-    wet = np.zeros_like(y)
-    for delay_ms, gain in ((63, 0.30), (310, 0.34), (620, 0.20), (930, 0.12), (1240, 0.07), (1550, 0.04)):
-        d = int(sr * delay_ms / 1000)
-        wet[d:] += y[:-d] * gain
-    wet = signal.sosfilt(signal.butter(2, 2200.0, btype="low", fs=sr, output="sos"), wet)
-    y = (y + wet)[::-1]
-    t = np.arange(len(y)) / sr
-    hiss = signal.sosfilt(signal.butter(2, [900.0, 7000.0], btype="band", fs=sr, output="sos"), rng.standard_normal(len(y)))
-    crackle = np.zeros(len(y))
-    clicks = rng.integers(0, len(y), size=int(len(y) / sr * 9))
-    crackle[clicks] = rng.uniform(-1.0, 1.0, size=len(clicks))
-    crackle = signal.sosfilt(signal.butter(2, 3000.0, btype="high", fs=sr, output="sos"), crackle)
-    hum = np.sin(2 * np.pi * 50 * t) + 0.4 * np.sin(2 * np.pi * 150 * t)
-    rms = np.sqrt(np.mean(x ** 2))
-    y = y * rms / max(np.sqrt(np.mean(y ** 2)), 1e-9)
-    y += rms * (0.10 * hiss / np.std(hiss) + 0.9 * crackle + 0.035 * hum)
-    fade = int(sr * 0.4)
+    """The basement's recording as the user's file has it (already processed), a short fade at each end, held under the peak ceiling."""
+    y = x.copy()
+    fade = int(sr * 0.1)
     y[:fade] *= np.linspace(0.0, 1.0, fade)
     y[-fade:] *= np.linspace(1.0, 0.0, fade)
     ceiling = 0.97
@@ -176,7 +153,7 @@ def convert_recording():
     x = recording(prologue_voices.decode(RECORDING_SOURCE) * factor)
     VOICE.mkdir(parents=True, exist_ok=True)
     audio_io.write_ogg(VOICE / f"{RECORDING}.ogg", x, 44100, OGG_QUALITY)
-    print(f"{RECORDING}: {len(x) / 44100:5.2f} s, backwards")
+    print(f"{RECORDING}: {len(x) / 44100:5.2f} s, as it comes")
 
 
 def md5(path):

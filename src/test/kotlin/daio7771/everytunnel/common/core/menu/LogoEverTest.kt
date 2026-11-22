@@ -6,12 +6,12 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class LogoRunTest {
+class LogoEverTest {
 
-    private val whole = LogoRun.OUT_TICKS + LogoRun.HOLD_TICKS + LogoRun.BACK_TICKS
+    private val whole = LogoEver.OUT_TICKS + LogoEver.HOLD_TICKS + LogoEver.BACK_TICKS
 
     /** Runs [ticks] ticks; the tick at which each run began (the words started going out). */
-    private fun starts(run: LogoRun, ticks: Int): List<Int> {
+    private fun starts(run: LogoEver, ticks: Int): List<Int> {
         val out = mutableListOf<Int>()
         var was = false
         for (t in 1..ticks) {
@@ -23,8 +23,8 @@ class LogoRunTest {
     }
 
     @Test
-    fun `the words are lit and RUN is not glowing until the first run`() {
-        val run = LogoRun(Random(1))
+    fun `the words are lit and EVER is not glowing until the first run`() {
+        val run = LogoEver(Random(1))
         repeat(25 * 20 - 1) {
             run.tick()
             assertFalse(run.running)
@@ -36,14 +36,14 @@ class LogoRunTest {
     @Test
     fun `the first run comes 25 to 60 seconds in`() {
         for (seed in 1..20) {
-            val first = starts(LogoRun(Random(seed)), 70 * 20).first()
+            val first = starts(LogoEver(Random(seed)), 70 * 20).first()
             assertTrue(first in 25 * 20..60 * 20 + 1, "seed $seed: first run at tick $first")
         }
     }
 
     @Test
-    fun `a run puts the words out, leaves RUN alone and brings them back`() {
-        val run = LogoRun(Random(3))
+    fun `a run puts the words out, leaves EVER alone and brings them back`() {
+        val run = LogoEver(Random(3))
         while (!run.running) run.tick()
         val levels = mutableListOf(run.wordsLevel)
         val glows = mutableListOf(run.glow)
@@ -52,13 +52,13 @@ class LogoRunTest {
             levels += run.wordsLevel
             glows += run.glow
         }
-        val hold = levels.subList(LogoRun.OUT_TICKS, LogoRun.OUT_TICKS + LogoRun.HOLD_TICKS)
+        val hold = levels.subList(LogoEver.OUT_TICKS, LogoEver.OUT_TICKS + LogoEver.HOLD_TICKS)
         assertTrue(hold.all { it == 0f }, "alone: the words are out the whole hold")
-        assertEquals(0f, levels[LogoRun.OUT_TICKS - 1], "the last tick of going out is out")
+        assertEquals(0f, levels[LogoEver.OUT_TICKS - 1], "the last tick of going out is out")
         assertEquals(1f, levels.last(), "the last tick of coming back is lit")
-        assertTrue(levels.take(LogoRun.OUT_TICKS).any { it == 1f } && levels.take(LogoRun.OUT_TICKS).any { it < 0.5f }, "going out stutters")
-        assertTrue(glows.max() > 0.9f, "RUN swells to nearly full")
-        assertTrue(glows.take(LogoRun.OUT_TICKS).all { it == 0f }, "no glow while the words still flicker")
+        assertTrue(levels.take(LogoEver.OUT_TICKS).any { it == 1f } && levels.take(LogoEver.OUT_TICKS).any { it < 0.5f }, "going out stutters")
+        assertTrue(glows.max() > 0.9f, "EVER swells to nearly full")
+        assertTrue(glows.take(LogoEver.OUT_TICKS).all { it == 0f }, "no glow while the words still flicker")
         run.tick()
         assertFalse(run.running)
         assertEquals(1f, run.wordsLevel)
@@ -67,7 +67,7 @@ class LogoRunTest {
 
     @Test
     fun `runs are 45 to 120 seconds apart, counted from the end of the last`() {
-        val begins = starts(LogoRun(Random(7)), 20 * 60 * 20)
+        val begins = starts(LogoEver(Random(7)), 20 * 60 * 20)
         assertTrue(begins.size in 8..25, "runs in twenty minutes: ${begins.size}")
         for ((a, b) in begins.zipWithNext()) {
             val gap = b - (a + whole)
@@ -77,7 +77,7 @@ class LogoRunTest {
 
     @Test
     fun `levels stay between 0 and 1`() {
-        val run = LogoRun(Random(11), LogoRun.Timing(firstMinTicks = 5, firstMaxTicks = 10, minGapTicks = 5, maxGapTicks = 10))
+        val run = LogoEver(Random(11), LogoEver.Timing(firstMinTicks = 5, firstMaxTicks = 10, minGapTicks = 5, maxGapTicks = 10))
         repeat(2000) {
             run.tick()
             assertTrue(run.wordsLevel in 0f..1f)

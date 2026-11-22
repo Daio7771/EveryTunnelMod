@@ -33,8 +33,8 @@ def walk(lv):
 
     def support(c):
         b = w.get(c)
-        if c in lv.furniture or c in lv.walk_through:
-            return False                     # nobody needs to climb the furniture to get anywhere
+        if c in lv.furniture or c in lv.walk_through or c in lv.hidden_door_cells:
+            return False                     # nobody needs to climb the furniture (or the sealed doorway's wall: a door by then)
         return b is not None and not b.split("[")[0] in NOT_SUPPORT and "_door" not in b
 
     def stand(c):

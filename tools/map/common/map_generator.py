@@ -107,7 +107,7 @@ CONNECTORS = [
 ]
 # Rooms off the halls: storage, electrical, stairwell (a locked door marked EXIT), dead_end.
 SIDE_ROOMS = [
-    dict(hall=1, type="storage", width=7, depth=5),
+    dict(hall=1, type="storage", width=7, depth=5, wall_message="code_4719"),   # mod version: painted over the boxes at the far wall
     dict(hall=2, type="electrical", width=5, depth=4),
     dict(hall=3, type="stairwell", width=3, depth=5),
     dict(hall=4, type="dead_end", depth=8),
@@ -251,6 +251,10 @@ LEVEL_3 = dict(
     STAIRS=(76, 200, 84, 212),
     STAIRS_DROP=8,
     STAIRS_LANDING=2,
+    # The easter egg: a closet west of the stairs' bottom landing, sealed by the wall until the valves are right
+    # (ValveHooks puts a door in the `hidden_door` spawn point's cells); Marcus Guard's note lies on its desk.
+    HIDDEN_ROOM=dict(id="guard_closet", name="Closet", box=(69, 201, 75, 206), door=("x", 75, 201),
+                     desk=(69, 203, "east"), chair=(70, 203, "west"), lamp=(69, 204), note_id="ch1_l3_note_guard"),
     PLAYER_START=(80, 196, "north"),                     # (x, z, facing), in the antechamber
     # The hatch in the library's centre: a 4 x 4 frame round a 2 x 2 hole down to the bunker.
     HATCH=dict(frame=(78, 96, 82, 100), hole=(79, 97, 81, 99)),

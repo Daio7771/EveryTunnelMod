@@ -203,8 +203,8 @@ Las demás claves: `speaker.<quién>` (`coworker`, `worker_a`, `worker_b`, `rowa
 El terminal del sótano (fase 9) es un easter egg propio: `cipher` en `act3.json` muestra las palabras de su ventana como símbolos de
 cifrado que parpadean (`NonameOsLook.scramble`). Guarda `?????????.mp3` (`recordings`: un nombre, el mismo en todos los idiomas, y un evento
 de sonido), cuyo REPRODUCIR abre un reproductor (una onda que se mueve mientras suena, `[??]`, REPRODUCIR o DETENER) y hace sonar
-`voice.basement_recording` desde el terminal: una voz al revés (`ch2_l1_voices.py` la invierte, con el eco puesto del derecho), sin texto
-ni subtítulos a propósito, para que los jugadores la inviertan y la descifren. Y `basement_note`, un `.txt` cuyo mensaje oculto está en
+`voice.basement_recording` desde el terminal: un mensaje deletreado en el alfabeto NATO, ya invertido, grave y con ruido de radio en el MP3 del usuario (`ch2_l1_voices.py` solo lo lleva al volumen de las voces), sin texto
+ni subtítulos a propósito, para que los jugadores lo descifren. Y `basement_note`, un `.txt` cuyo mensaje oculto está en
 Base64 en cada idioma. Nada los cuenta y nada los espera.
 
 ## Las personas
@@ -469,7 +469,7 @@ cerrar el segundo archivo de Rowan (`Ch2L1Act3Hooks.onOfficeTrigger`) lleva al j
   mirando a la puerta (`glide_seconds`); si está más lejos (un comando), se le pone allí.
 - **La cámara son los ojos del propio jugador**, quieto y fijo en Rowan (sin temblor ni acercamiento): primero la puerta, que se abre; entra
   por `rowan_doorway` hasta su sitio justo dentro, junto a la puerta (`rowan_threshold`), se gira, la cierra y habla desde ahí: c1 con los
-  brazos sueltos; c2 ajustándose los puños (`CUFFS`); c3 con las palmas abiertas desde "Or am I special?" (`PALMS`) y entrando el zumbido
+  brazos sueltos; c2 ajustándose los puños (`CUFFS`); c3 ("Or am I special?") queda fuera de la escena (no se oía en el juego; su audio se conserva, `palms_line` va vacío) y el zumbido entra con c4
   grave (`ambient.ch2l1.office_hum`); una pausa; c4 inclinándose hacia delante (`LEAN_FORWARD`); c5 una mirada a la puerta; una pausa
   larga; c6 la corbata (`TIE`); c7 señalando la puerta (`POINTING`); c8 se acerca al frente del escritorio (`rowan_desk_front`) y en
   "Unpaid, naturally" desliza el **pase de horas extra sin pagar** por él (`OFFERING`; un item display que va de `card_slide_start` a

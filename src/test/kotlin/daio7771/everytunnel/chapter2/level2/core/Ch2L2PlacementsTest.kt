@@ -61,4 +61,17 @@ class Ch2L2PlacementsTest {
         assertTrue(result.problems.any { "notes[0].anchor" in it }, result.problems.toString())
         assertEquals(setOf("x", "y"), result.level.anchorNames().toSet() - "sealed_entry" - Ch2L2Creature.DEFAULT.anchorNames().toSet() - Ch2L2Guard.DEFAULT.anchorNames().toSet() - Ch2L2FloodRules.DEFAULT.anchorNames().toSet() - Ch2L2Maw.DEFAULT.anchorNames().toSet() - Ch2L2Reunion.DEFAULT.anchorNames().toSet())
     }
+
+    @Test
+    fun `the jar's file sets three groups of Hunters to leave the kit without a bar or a bottle`() {
+        val rules = level.noSupplies!!
+        assertEquals("sealed_entry", rules.anchor)
+        assertEquals(3, rules.groups.size)
+        assertEquals(listOf("kit_bar_", "kit_water_"), rules.needs)
+        val ids = level.loot.map { it.id }
+        assertTrue(rules.missing(ids) { false })
+        assertTrue(rules.missing(ids) { it.startsWith("kit_bar_") }, "no water taken")
+        assertTrue(rules.missing(ids) { it.startsWith("kit_water_") }, "no bar taken")
+        assertTrue(!rules.missing(ids) { it == "kit_bar_2" || it == "kit_water_1" })
+    }
 }

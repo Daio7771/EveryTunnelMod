@@ -99,6 +99,8 @@ object ModSounds {
     val HUNTER_DEATH = event("entity.hunter.death")
     val HUNTER_AMBIENT = event("entity.hunter.ambient")
     val CLOUD_WHISPER = event("entity.distortion_cloud.whisper")
+    /** Level 1's easter egg: a wordless whisper close behind a player who stood still (`chapter1.platform.WhisperHooks`). */
+    val L1_WHISPER = event("ambient.l1_whisper")
     val CLOUD_APPEAR = event("entity.distortion_cloud.appear")
     val CLOUD_KILL = event("entity.distortion_cloud.kill")
     val CLOUD_LEAVE = event("entity.distortion_cloud.leave")

@@ -54,6 +54,15 @@ object Ch2L1Build {
         }
     }
 
+    /** Every ceiling lamp of the plan back on: what a game left dark (the LAB of the overtime, the basement) must not outlive it, as the build is skipped when the plan stands. */
+    fun allLightsOn(world: ServerWorld) {
+        for (it in plan.lights) {
+            val pos = BlockPos(plan.worldX(it.x), plan.worldY(it.y), plan.worldZ(it.z))
+            val state = world.getBlockState(pos)
+            if (state.isOf(Ch2Blocks.FACTORY_LIGHT_OFF) || state.isOf(Ch2Blocks.FACTORY_LIGHT_EMERGENCY)) world.setBlockState(pos, ModBlocks.LAB_CEILING_LIGHT.defaultState)
+        }
+    }
+
     /** The block the plan puts at the world cell [pos], or null where no fill of the plan reaches (or its block is unknown). */
     fun planState(pos: BlockPos): BlockState? = build.planState(pos)
 

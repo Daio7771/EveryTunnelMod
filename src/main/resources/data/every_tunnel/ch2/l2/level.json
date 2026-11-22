@@ -173,5 +173,9 @@
       {"who": "coworker", "key": "reunion_04", "sound": "every_tunnel:voice.reunion_04", "seconds": 3.8}
     ]
   },
+  "no_supplies": {
+    "zone": "zone_sealed_entry", "anchor": "sealed_entry", "needs": ["kit_bar_", "kit_water_"],
+    "groups": [{"offset": [-4, 0, 0], "yaw": -90}, {"offset": [4, 0, 0], "yaw": 90}, {"offset": [0, 0, 3], "yaw": 180}]
+  },
   "explore": ["room_entrance", "room_entry_corridor", "room_top_stairs", "room_top_corridor", "room_hunter_galleries", "room_junction_balcony", "room_side_gallery_room", "room_pump_corridor", "room_pump_room", "room_catacombs", "room_lower_galleries", "room_service_corridor", "room_side_service_crypt", "room_vestibule", "room_maintenance", "zone_return_gallery", "room_flood_collector", "room_pasarelas", "room_upper_gallery", "room_station", "room_exit_corridor", "room_salida", "room_maw_corridor", "room_maw_arena", "room_reunion"]
 }

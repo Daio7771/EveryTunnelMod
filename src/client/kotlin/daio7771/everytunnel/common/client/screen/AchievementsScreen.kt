@@ -175,6 +175,12 @@ class AchievementsScreen(private val parent: Screen?) : Screen(Text.translatable
             client?.setScreen(EraseSaveScreen(this, "screen.every_tunnel.achievements.erase") { AchievementStore.reset() })
             return true
         }
+        // Ctrl+Shift+R: every achievement forgotten at once, without the question Ctrl+Shift+D asks (to earn them all again).
+        if (keyCode == GLFW.GLFW_KEY_R && hasShiftDown() && hasControlDown()) {
+            AchievementStore.reset()
+            client?.setScreen(AchievementsScreen(parent))
+            return true
+        }
         val page = (viewBottom - viewTop - PAGE_KEEP).toDouble()
         when (keyCode) {
             GLFW.GLFW_KEY_LEFT, GLFW.GLFW_KEY_A -> showTab(tab - 1)

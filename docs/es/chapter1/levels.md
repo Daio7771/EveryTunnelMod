@@ -153,6 +153,7 @@ debe terminar con `/everytunnel rebuilt` para que el mod sepa que el mundo está
 | `restart_point` | `ContinueGame` | Entrar hace checkpoint el punto de aparición del nivel con la misma etiqueta (el Lab hall del nivel 5) |
 | `exit` | (nadie aún) | Marca la salida de un nivel; reservada para sistemas futuros |
 | `valve_door` | `ValveHooks` | Las puertas que abren las válvulas cuando todas están bien; una partida nueva las cierra |
+| `hidden_door` | `ValveHooks` | Easter egg del nivel 3: el hueco (la celda de la mitad baja, mirando a las escaleras) que es pared hasta que las válvulas están bien, y luego una puerta de emergencia abierta al cuarto de Marcus Guard (`guard_closet`, nota `ch1_l3_note_guard`) |
 | `observer_home` | `ObserverEntity` | La zona que patrulla el Observer y a la que vuelve (la biblioteca del nivel 3) |
 | `book_hatch` | `BookHooks` | Las trampillas que abre el quinto libro devuelto (la del búnker del nivel 3); una partida nueva las cierra |
 | `checkpoint` | (nadie aún) | Nivel 3: justo pasada la puerta del checkpoint, donde reiniciará una muerte |

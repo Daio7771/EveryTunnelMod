@@ -10,7 +10,6 @@
   "lines": [
     "rowan_office_c1",
     "rowan_office_c2",
-    "rowan_office_c3",
     "rowan_office_c4",
     "rowan_office_c5",
     "rowan_office_c6",
@@ -25,11 +24,10 @@
   "close_seconds": 1,
   "gap_seconds": 0.5,
   "pause_seconds": {
-    "rowan_office_c3": 1,
     "rowan_office_c5": 2.5
   },
   "cuffs_line": "rowan_office_c2",
-  "palms_line": "rowan_office_c3",
+  "palms_line": "",
   "palms_sentence": 1,
   "lean_line": "rowan_office_c4",
   "glance_line": "rowan_office_c5",
@@ -41,6 +39,6 @@
   "slide_seconds": 0.8,
   "clap_sentence": 2,
   "clap_seconds": 2,
-  "hum_from": "rowan_office_c3",
+  "hum_from": "rowan_office_c4",
   "hum_until": "rowan_office_c8"
 }

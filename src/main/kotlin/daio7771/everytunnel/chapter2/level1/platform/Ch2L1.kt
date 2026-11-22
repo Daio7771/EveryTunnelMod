@@ -123,8 +123,10 @@ object Ch2L1 {
         val resources = ResourceSystem.stateOf(player.uuid, ConfigManager.gameplay)
         if (resources.flashlightOn) ResourceSystem.set(player.uuid, ResourceSystem.switchOff(resources))
         player.stopRiding()
+        Ch2L1Build.allLightsOn(world)
         player.teleport(world, start.position.x, start.position.y, start.position.z, start.yaw, start.pitch)
         TimeClockBlock.relockNear(player)
+        Ch2L1Act3Hooks.shutAll(player)
         Ch2L1Npcs.ensureAmbient(player.server)
         EveryTunnel.LOGGER.info("Chapter 2 Level 1: {} enters at {}{}", player.gameProfile.name, SPAWN_ANCHOR, if (start.provisional) " (provisional)" else "")
     }

@@ -37,7 +37,7 @@ también se registran en `platform.ModSounds`. Cualquiera se puede probar con
 
 | Grupo | Eventos | Origen |
 |---|---|---|
-| Ambiente | `ambient.garage.drone` (bucle), `ambient.drip`, `ambient.relay`, `ambient.rumble`, `ambient.sparks`, `ambient.vent` | síntesis |
+| Ambiente | `ambient.garage.drone` (bucle), `ambient.drip`, `ambient.relay`, `ambient.rumble`, `ambient.sparks`, `ambient.vent`, `ambient.l1_whisper` (easter egg del nivel 1: un susurro sin palabras tras un jugador quieto, 3 variaciones) | síntesis |
 | Ambiente del nivel 3 | `ambient.offices.room_tone` (bucle), `ambient.library.clock` (bucle), `ambient.offices.phone` (2-4 timbrazos) | síntesis |
 | Fluorescentes | `block.fluorescent.hum` (bucle), `.flicker`, `.start`, `.off` | síntesis |
 | Materiales (pasos e impactos de los props) | `block.cardboard`, `block.hollow_metal`, `block.metal_pipe`, `block.plastic`, `block.puddle`, `block.sheet_metal`, `block.wire_mesh`, `block.wood`, cada uno `.step` e `.impact` | síntesis |

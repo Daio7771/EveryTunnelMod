@@ -23,6 +23,7 @@ import math
 import random
 from types import SimpleNamespace
 
+import wall_messages
 from garage import build as B
 from garage import mod_blocks
 from garage.glyphs import Glyphs
@@ -392,6 +393,8 @@ class Level:
                     self.set(x, y + 1, z, S["drum"] if (x + z) % 2 else S["box"])
                     if self.rng.random() < 0.5:
                         self.set(x, y + 2, z, S["box"])
+            if spec.get("wall_message") and self.variant == "mod":    # painted on the far wall, over the boxes the player cannot get past
+                self.set(dx, y + 3, z_far, wall_messages.state(spec["wall_message"], "south" if north else "north"))
             self.set(xa, y + 1, z_near + step, S["pallet"])
             self.fixture(dx, z_near + step * 2, y + 4, "dead")
             label = "storage room"

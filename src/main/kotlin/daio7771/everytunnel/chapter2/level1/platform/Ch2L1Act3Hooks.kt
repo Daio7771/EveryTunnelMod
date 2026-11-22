@@ -190,6 +190,12 @@ object Ch2L1Act3Hooks {
         Ch2L1.setState(player, Ch2L1State.ACT3_BASEMENT, "through the sealed door")
     }
 
+    /** Act 3's doors and readers as at the start of the level (entering again: a game's open doors stay in the world when the level is not built again). */
+    fun shutAll(player: ServerPlayerEntity) {
+        shutSealed(player)
+        relock(player)
+    }
+
     /** The sealed door shut and its reader red, as before the overtime pass was used. */
     private fun shutSealed(player: ServerPlayerEntity) {
         val world = player.serverWorld

@@ -36,7 +36,7 @@ registered in `platform.ModSounds`. Any of them can be tried with
 
 | Group | Events | Source |
 |---|---|---|
-| Ambience | `ambient.garage.drone` (loop), `ambient.drip`, `ambient.relay`, `ambient.rumble`, `ambient.sparks`, `ambient.vent` | synth |
+| Ambience | `ambient.garage.drone` (loop), `ambient.drip`, `ambient.relay`, `ambient.rumble`, `ambient.sparks`, `ambient.vent`, `ambient.l1_whisper` (Level 1's easter egg: a wordless whisper behind a player standing still, 3 variations) | synth |
 | Level 3 ambience | `ambient.offices.room_tone` (loop), `ambient.library.clock` (loop), `ambient.offices.phone` (2-4 rings) | synth |
 | Fluorescent lights | `block.fluorescent.hum` (loop), `.flicker`, `.start`, `.off` | synth |
 | Materials (prop steps and impacts) | `block.cardboard`, `block.hollow_metal`, `block.metal_pipe`, `block.plastic`, `block.puddle`, `block.sheet_metal`, `block.wire_mesh`, `block.wood`, each `.step` and `.impact` | synth |

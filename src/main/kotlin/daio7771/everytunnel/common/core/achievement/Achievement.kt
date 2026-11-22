@@ -11,10 +11,10 @@ package daio7771.everytunnel.common.core.achievement
  * `achievement.every_tunnel.<id>.description` (one line on how it was earned, shown once it is).
  * [puzzle] marks the ones a puzzle ends with; every player in the world gets those.
  *
- * These eleven are Chapter 1's, the first tab of the screen ([chapter] 1). A later chapter adds its own as [AchievementDef]s to the
+ * These fourteen are Chapter 1's, the first tab of the screen ([chapter] 1). A later chapter adds its own as [AchievementDef]s to the
  * [AchievementRegistry]; everything that earns, stores or lists an achievement works with the interface.
  */
-enum class Achievement(override val id: String, override val puzzle: Boolean = false) : AchievementDef {
+enum class Achievement(override val id: String, override val puzzle: Boolean = false, override val hidden: Boolean = false) : AchievementDef {
     /** Level 1: stepping out of the service elevator after the intro. */
     FIRST_DAY("first_day"),
 
@@ -46,7 +46,16 @@ enum class Achievement(override val id: String, override val puzzle: Boolean = f
     PRIVACY_POLICY("privacy_policy"),
 
     /** Level 5: the game finished, down the Director's corridor that had "nothing in there". Earned by the client when the congratulations window opens. */
-    NOTHING_THERE("nothing_there");
+    NOTHING_THERE("nothing_there"),
+
+    /** Level 1: stood still until something whispered, a whisper that says nothing (hidden). */
+    WHISPER("whisper", hidden = true),
+
+    /** Level 3: read the note of the room behind the spiral stairs that was not there before the valves (hidden). */
+    GUARD_NOTE("guard_note", hidden = true),
+
+    /** Level 5: quit to the menu before the Director's office, and the logo read EVERY FINAL (hidden). Earned by the client when the menu shows it. */
+    EVERY_FINAL("every_final", hidden = true);
 
     override val chapter: Int get() = 1
 

@@ -51,6 +51,13 @@ object NoteHooks {
         values += source
     }
 
+    /** Told when a player reads a note of a level's own (its spawn point's id), to a chapter's own ends: an achievement for a hidden one. */
+    private val readListeners = java.util.concurrent.CopyOnWriteArrayList<(ServerPlayerEntity, String) -> Unit>()
+
+    fun addReadListener(listener: (ServerPlayerEntity, String) -> Unit) {
+        readListeners += listener
+    }
+
     fun read(player: ServerPlayerEntity, pos: BlockPos) {
         val level = LevelManager.levelAt(player.serverWorld.registryKey.value.toString(), pos.x + 0.5, pos.y + 0.5, pos.z + 0.5)
         val note = level?.spawnPoints?.firstOrNull {
@@ -62,6 +69,7 @@ object NoteHooks {
             return
         }
         ProgressService.get().markNoteRead(player, note.id)
+        readListeners.forEach { it(player, note.id) }
         send(player, shown.fold(note.id) { id, rule -> rule(id) }, values.fold(emptyMap()) { all, source -> all + source(level) })
     }
 
