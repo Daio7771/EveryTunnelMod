@@ -55,6 +55,7 @@ Run every tool **from the repository root**. Each writes its real output into `s
 | `tools/entity/chapter1/director.py` | The director's geometry (sitting, the Cinema film's mask on its own plate), animations (breathing, gestures, mask off, standing, pointing) and texture | Level 5's director |
 | `tools/gui/common/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png`, `turn_icon.png` | HUD icons, Level 5's detector, the entry corridor's turn round sign |
 | `tools/gui/common/logo.py` | `logo_rest.png`, `logo_ever.png`, `logo_tunnel.png`, `logo_final.png`, `logo_chapter_2.png` (the logo in chalk, in layers, FINAL in TUNNEL's place, and Chapter 2's line; `--write` writes them, otherwise only a preview) | the logo |
+| `tools/gui/common/curseforge_banners.py` | `docs/media/curseforge_*.png` (the header and the section strips of `CURSEFORGE.md`, in chalk on a board, with `logo.py`'s brush; `--write` writes them into `docs/media/`, otherwise only a preview) | the CurseForge page's look or a section's title |
 | `tools/gui/common/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | the no-shader spot |
 | `tools/gui/common/locker_view.py` | `locker_view.png` | the view from inside a locker |
 | `tools/gui/chapter1/safe_dial.py` | `safe_dial.png` | the dial of the safes in the Suites |

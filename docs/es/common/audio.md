@@ -19,7 +19,7 @@ y la respiración del Pale man, su propio latido, cuánto ruido hacen sus propio
 - **Una excepción con IA: las voces con IA.** Las voces de los personajes son de la biblioteca
   de ElevenLabs (plan de pago, no clonadas), generadas por el usuario y entregadas como
   archivos mono: hasta ahora la del director (sus líneas en la cinemática del nivel 5 y las
-  frases que repite después) la del científico (el prólogo del Chapter 2) y las del Nivel 1 del Chapter 2: el compañero y los trabajadores de la unión, y Rowan.
+  frases que repite después) la del científico (el prólogo del Chapter 2) y las del Nivel 1 del Chapter 2: el compañero y los trabajadores de la unión, y Rowan; y la reunión del Nivel 2.
   Ningún otro audio viene de un servicio de IA.
 - **Archivos secos.** Los sonidos no llevan reverberación: Sound Physics Remastered añade la
   reverberación y el sonido amortiguado tras los muros dentro del juego. Las ejecuciones de

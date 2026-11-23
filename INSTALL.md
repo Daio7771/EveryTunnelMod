@@ -56,11 +56,13 @@ Every Tunnel. If you already have newer copies of them, that is fine too.
 ## 3. Play
 
 1. Start the `fabric-loader-1.20.1` profile (or your Fabric 1.20.1 profile).
-2. The Every Tunnel main menu replaces Minecraft's title screen. Press **NEW GAME**.
+2. The Every Tunnel main menu replaces Minecraft's title screen. Press **NEW GAME** to start Chapter 1.
+3. **Chapter 2** (a demo) is under **SELECT CHAPTER**. It is locked, with a spoiler warning, until you
+   finish Chapter 1.
 
 The first start puts the map in your worlds as **Noname Complex**. The map is rebuilt behind the
 loading screen each time, which takes a moment. The game saves at the start of each level:
-**CONTINUE** takes you back to the last one. To start over, press **Ctrl+Shift+D** in the main menu.
+**CONTINUE** takes you back to the last one (Chapter 2 keeps its own saved game). To start over, press **Ctrl+Shift+D** in the main menu.
 
 New to the game? Open **GUIDE** in the main menu first.
 
@@ -104,7 +106,7 @@ light nothing.
 
 ## Updating and uninstalling
 
-- **Updating:** replace the old `.jar` with the new one. The map is updated on the next start.
+- **Updating:** replace the old `.jar` with the new one (from 1.0.1 too). The map is updated on the next start.
 - **Uninstalling:** remove the `.jar`. The map stays in your worlds as `noname_complex`;
   delete it from the world list if you don't want it.
 
@@ -135,6 +137,8 @@ Press **Ctrl+Shift+V** in the main menu. Press it again to come back.
 `logs/latest.log` (in the `logs` folder, next to `mods`).
 
 **Is it made with AI?**
-The Director's voice is generated with AI (ElevenLabs). The design, story and music are the
-author's own; AI tools helped with the code, the tools that generate the game's assets, and
-parts of the text.
+The character voices (the Director's in Level 5; the scientist's, the supervisor's, the coworkers'
+and the workers' in Chapter 2) are generated with AI (ElevenLabs library voices). The design and
+story are the author's own, and so is Chapter 1's music; Chapter 2's menu theme was composed in code
+by Claude from CC0 samples, directed and approved by the author. AI tools also helped with the code,
+the tools that generate the game's assets, and parts of the text.

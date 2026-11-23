@@ -58,6 +58,7 @@ git).
 | `tools/entity/chapter1/director.py` | La geometría del director (sentado, con la máscara de la película del Cinema en su propia placa), sus animaciones (respirar, gestos, quitarse la máscara, levantarse, señalar) y su textura | el director del nivel 5 |
 | `tools/gui/common/hud_icons.py` | `hud_icons.png`, `vignette.png`, `detector_icons.png`, `turn_icon.png` | los iconos del HUD, el detector del nivel 5, el símbolo de girar del pasillo de entrada |
 | `tools/gui/common/logo.py` | `logo_rest.png`, `logo_ever.png`, `logo_tunnel.png`, `logo_final.png`, `logo_chapter_2.png` (el logo en tiza, en capas, FINAL en el lugar de TUNNEL, y la línea del Chapter 2; `--write` los escribe, si no solo hace una vista previa) | el logo |
+| `tools/gui/common/curseforge_banners.py` | `docs/media/curseforge_*.png` (la cabecera y las franjas de sección de `CURSEFORGE.md`, en tiza sobre una pizarra, con el pincel de `logo.py`; `--write` los escribe en `docs/media/`, si no solo hace una vista previa) | el aspecto de la página de CurseForge o el título de una sección |
 | `tools/gui/common/flashlight_spot.py` | `flashlight_spot.png`, `flashlight_glow.png` | el foco sin shaders |
 | `tools/gui/common/locker_view.py` | `locker_view.png` | la vista desde dentro de una taquilla |
 | `tools/gui/chapter1/safe_dial.py` | `safe_dial.png` | el dial de las cajas fuertes de las Suites |

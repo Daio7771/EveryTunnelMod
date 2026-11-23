@@ -6,7 +6,7 @@
 
 <p align="center">
   <b>A singleplayer psychological horror mod for Minecraft 1.20.1 (Fabric)</b><br>
-  Chapter 1 · Levels 1 to 5 · version 1.0.1
+  Chapter 1 complete · Chapter 2 demo (Levels 1 and 2) · version 2.0.0-demo
 </p>
 
 ---
@@ -27,6 +27,11 @@ is soft jazz, a bed if you need one, and everything is very glad you came.
 **Level 5** is the laboratory, cold, bright and long abandoned. Whatever was kept down here did
 not stay where it was put.
 
+**Chapter 2** (a demo, with its prologue and two levels) leaves the complex behind. In **Level 1**
+you are the new hire in a factory, under a supervisor. **Level 2** is the
+catacombs under it, and the **Stone Maw** that lives there. Chapter 2 unlocks when you finish
+Chapter 1.
+
 ## Features
 
 - **Sound-driven horror.** Footsteps, jumps, landings, doors, your flashlight's click, even
@@ -45,8 +50,10 @@ not stay where it was put.
   music follows what he is doing.
 - **Survival on a budget.** Stamina, thirst and a flashlight battery, with a few batteries
   and water bottles left lying around by previous guards.
-- **A complete chapter.** Its own main menu, an elevator intro, five levels, 11 achievements,
-  an ending and credits. The game saves as you go, and CONTINUE takes you back.
+- **A complete chapter and a demo of the next.** Chapter 1 has its own main menu, an elevator intro,
+  five levels, 11 achievements, an ending and credits. Chapter 2's demo adds a prologue, two levels
+  and 10 more achievements, and SELECT CHAPTER in the menu switches between them. The game saves as
+  you go, and CONTINUE takes you back.
 - **An in-game guide** (main menu, GUIDE), and the whole game in English and Spanish (Spain).
 - **Looks right with or without shaders.** Tuned for Complementary Reimagined, and tested with
   Bliss Shaders and Photon Shaders. Any shader pack works, and so does plain Minecraft.
@@ -69,7 +76,7 @@ not stay where it was put.
    folder.
 3. Download [LambDynamicLights](https://modrinth.com/mod/lambdynamiclights/versions?g=1.20.1)
    and [Cardinal Components API](https://modrinth.com/mod/cardinal-components-api/versions?g=1.20.1) for 1.20.1, and put them in the same folder.
-4. Start the game and press **NEW GAME**.
+4. Start the game and press **NEW GAME**. (Chapter 2 is under **SELECT CHAPTER**, and unlocks when you finish Chapter 1.)
 
 Step-by-step instructions, recommended mods, shader setup and troubleshooting:
 **[INSTALL.md](INSTALL.md)**.
@@ -91,7 +98,8 @@ Play with headphones.
 ## Good to know
 
 - **Singleplayer**, Fabric only, Minecraft 1.20.1 only.
-- **This is Chapter 1** (Levels 1 to 5). More of the Noname Complex is planned.
+- **Chapter 1 is complete** (Levels 1 to 5) and **Chapter 2 is a demo** (its prologue and Levels 1
+  and 2). It unlocks when you finish Chapter 1. More of the Noname Complex is planned.
 - The mod replaces the title screen with its own menu. **Ctrl+Shift+V** switches to
   Minecraft's title screen and back (other worlds, multiplayer).
 - The mod only changes worlds that contain its levels. Your other worlds stay vanilla.
@@ -102,15 +110,19 @@ Made by **Daio7771**. **All rights reserved**
 ([LICENSE.txt](LICENSE.txt)): you may make and monetize videos and streams of the game and
 include it in modpacks that download it from CurseForge or GitHub, but not re-upload it or
 reuse its code, art or story. Versions 0.1.0 and 0.2.0 were released under MIT. The sounds
-are synthesized for the game or come from CC0 recordings, except the Director's voice.
+are synthesized for the game or come from CC0 recordings, except the character voices.
 
-**About AI.** The Director's voice is generated with AI (ElevenLabs). The design, story and
-music are the author's own; AI tools helped with the code, the tools that generate the
-game's assets, and parts of the text.
+**About AI.** The character voices (the Director's, and Chapter 2's characters) are ElevenLabs
+library voices. The design, story and music are the author's, except Chapter 2's menu theme,
+composed in code by Claude from CC0 samples and directed by the author. AI tools also helped with
+the code, the asset tools and parts of the text.
 
 Music: "Local Forecast - Elevator" Kevin MacLeod (incompetech.com)
 Licensed under Creative Commons: By Attribution 4.0 License
 http://creativecommons.org/licenses/by/4.0/
+
+Chapter 2's menu theme is rendered from CC0 samples: "Old Piano FB" (FreePats) and "VSCO 2 CE
+Solo Violin" (Versilian Studios, Sam Gossner).
 
 Full credits: [CREDITS.md](CREDITS.md).
 

@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.0.0-demo: Chapter 2 demo
+
+Chapter 1 is unchanged and complete. This version adds a demo of Chapter 2. The requirements are the
+same (Minecraft 1.20.1, Fabric Loader, LambDynamicLights and Cardinal Components API).
+
+### What is new
+
+- **Chapter 2 (demo).** A prologue; **Level 1**, a factory where you are the new hire; and
+  **Level 2**, the catacombs below it, with the Stone Maw.
+- **SELECT CHAPTER** in the main menu. Each chapter has its own menu, scene and music. Chapter 2 unlocks
+  when you finish Chapter 1 (the achievement "Nothing in There"); until then it only warns you about spoilers.
+- **10 new achievements** in a Chapter 2 tab, some of them hidden.
+- **Chapter 2's progress.** Level 1 is not saved: leaving the game gives you back your Chapter 1 place.
+  Level 2 has checkpoints, and CONTINUE takes you back to the last one. Each chapter keeps its own saved game.
+- New music, voices and sounds, and a few secrets.
+
+### Known issues
+
+- The guards' lines in Level 1 are text only: their voices are not recorded yet.
+
+Updating from 1.0.1: replace the old jar in mods/. The map updates itself on the next launch.
+
 ## 1.0.1
 
 Fixes and small changes since 1.0. The requirements are the same (Minecraft 1.20.1, Fabric Loader,

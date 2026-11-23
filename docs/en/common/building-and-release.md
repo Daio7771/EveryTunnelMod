@@ -62,7 +62,7 @@ with everything except Fabric Loader, LambDynamicLights and Cardinal Components:
 (`data/every_tunnel_*`), `data/chunks.dat` (force-loaded chunks), the saved mobs and items
 (`entities/`: without the mod's record of having spawned him, a packed Observer would come
 as a second one) and stray archives in `datapacks/`. It packs the world as
-it is **at that moment**, so build the map first (and empty Chapter 2's with `/et ch2 l1 unbuild`: its region files would travel in the zip). Without that world (a fresh clone), the
+it is **at that moment**, so build the map first (and empty Chapter 2's two levels with `/et ch2 l1 unbuild` and `/et ch2 l2 unbuild`: their region files would travel in the zip). Without that world (a fresh clone), the
 jar simply has no map.
 
 Not bundled, for licence reasons:
@@ -82,7 +82,7 @@ Not bundled, for licence reasons:
 2. Put `everytunnel-<version>.jar`, LambDynamicLights (4.4.0 or newer) and Cardinal Components (5.2.3 or newer) in `mods/`.
 3. Optionally: Sodium + Iris + Indium and a Complementary shader pack, and Sound Physics
    Remastered.
-4. Start the game and press NEW GAME.
+4. Start the game: the menu opens on Chapter 1, so press NEW GAME. SELECT CHAPTER switches to Chapter 2, which is locked until Chapter 1 is finished.
 
 On first launch `client.MapWorldInstaller` unpacks the world into `saves/noname_complex`,
 removes the stored player and makes it Survival. A later mod version only replaces the
@@ -93,13 +93,14 @@ world's datapacks and `resources.zip`.
 [`CURSEFORGE.md`](../../../CURSEFORGE.md) at the repository root is the project's description,
 exactly as players see it. To update it on CurseForge, open the file on GitHub, use **Copy
 raw file**, and paste it into the description editor in **Markdown** mode. It links to GitHub
-with full URLs, because relative links do not work there.
+with full URLs, because relative links do not work there; its header and section titles are images
+(`docs/media/curseforge_*.png`, from `tools/gui/common/curseforge_banners.py`) that show once they are on `main`.
 
 When uploading:
 
 | Field | Value |
 |---|---|
-| Summary (the line under the name) | `You are the new night-shift security guard of the Noname Complex, an abandoned underground facility. Your shift starts in the service elevator and goes down through its parking garage.` |
+| Summary (the line under the name) | `You are the new night-shift security guard of the Noname Complex, an abandoned underground facility. Chapter 1 is complete; the Chapter 2 demo adds a factory and the catacombs below.` |
 | Project icon | `docs/media/logo.png` (512×512) |
 | Game version | 1.20.1 |
 | Mod loader | Fabric |
@@ -110,7 +111,7 @@ When uploading:
 | License | All Rights Reserved. The CC BY 4.0 music credit must stay in the description |
 | Source | https://github.com/Daio7771/EveryTunnelMod |
 | Issues | https://github.com/Daio7771/EveryTunnelMod/issues |
-| File | The release jar (`everytunnerBuild`), display name `Every Tunnel <version>` (e.g. `Every Tunnel 1.0`), release type **Beta** or **Release**: decided when it is published (see below) |
+| File | The release jar (`everytunnerBuild`), display name `Every Tunnel <version>` (e.g. `Every Tunnel 2.0.0-demo`), release type **Beta** or **Release**: decided when it is published (see below) |
 | File changelog | What changed in this version, for players |
 
 The same jar goes to the repository's
@@ -132,7 +133,7 @@ All in `gradle.properties`:
 | Cardinal Components | 5.2.3 |
 | Sound Physics Remastered (dev) | fabric-1.20.1-1.5.1 |
 | Sodium / Iris / Indium (dev) | 0.5.13 / 1.7.6 / 1.0.36 |
-| Mod version | `mod_version` (1.0.1, shown in the main menu as "v1.0.1": the line is `menu.every_tunnel.version`, which takes the version) |
+| Mod version | `mod_version` (2.0.0-demo, shown in the main menu as "v2.0.0-demo": the line is `menu.every_tunnel.version`, which takes the version) |
 
 ## Open release questions
 
@@ -140,8 +141,8 @@ Decided: the `[playtest]` log stays on (it helps with GitHub issues), and the sh
 recommended are Complementary Reimagined, Bliss Shaders and Photon Shaders (tested), though any
 shader pack works.
 
-Still to decide: the release type on CurseForge. Publish **Beta** first, and move to **Release**
-once the 1.0 jar has passed a clean-instance test (a new launcher instance with only
+Still to decide: the release type on CurseForge. 2.0.0-demo (Chapter 1 complete plus the Chapter 2
+demo) is the first **Beta**; move to **Release** once a jar has passed a clean-instance test (a new launcher instance with only
 LambDynamicLights and Cardinal Components) and a few players' logs have come back without
 mod errors. Also open: the world resource pack prompt, and whether the jar still needs the
 pre-built regions (the map rebuilds on every open anyway).
